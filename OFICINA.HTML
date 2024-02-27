@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Aeronaves de Fuerza Aérea Hondureña</title>
+  <style>
+    body {
+      cursor: url('ruta/de/la/imagen-del-helicoptero.png'), auto;
+      margin: 0; /* Aseguramos que no haya margen exterior */
+      padding: 0; /* Aseguramos que no haya relleno interior */
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-top: 20px;
+      background-color: rgba(255, 255, 255, 0.7); /* Fondo semitransparente */
+      padding: 20px;
+      border-radius: 10px; /* Bordes redondeados */
+    }
+
+    .button {
+      padding: 10px 20px;
+      text-decoration: none;
+      color: black;
+      border: 1px solid black;
+      transition: transform 0.3s, box-shadow 0.3s, color 0.3s;
+      /* Efecto 3D */
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+
+    .button:hover {
+      transform: rotateY(20deg);
+      box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.3);
+      color: red; /* Cambio de color al pasar el cursor */
+    }
+
+    h1 {
+      text-align: center;
+      color: white; /* Color del texto del título */
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Sombra del texto del título */
+    }
+
+    .background-image {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("https://actualidadaeroespacial.com/wp-content/uploads/2019/11/H145-251119-750x375.jpg");
+      z-index: -1; /* Asegura que la imagen de fondo esté detrás de todo */
+    }
+  </style>
+</head>
+<body>
+
+<div class="background-image"></div>
+
+<h1>OFICINA </h1>
+<div class="container">
+  <a href="pagina1.html" class="button">REPOTES DE TRABAJO</a>
+  <a href="pagina2.html" class="button">SOLICITUDES</a>
+  <a href="pagina3.html" class="button">INFORMES</a>
+  <a href="pagina4.html" class="button">ORDEN DE TRABAJO</a>
+  <a href="pagina5.html" class="button">LISTADO DE MATERIALES</a>
+  <a href="pagina6.html" class="button">REPUESTOS UTILIZADOS</a>
+
+  <!-- Agrega los otros botones de manera similar -->
+</div>
+
+</body>
+</html>
