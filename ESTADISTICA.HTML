@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Estadísticas de Helicópteros</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-gap: 20px;
+      padding: 20px;
+    }
+
+    .dashboard-item {
+      text-align: center;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.7);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden; /* Oculta el contenido que se desborda */
+      transition: max-height 0.3s; /* Agrega transición suave a la altura máxima */
+      max-height: 40px; /* Altura inicial */
+    }
+
+    .dashboard-item.expanded {
+      max-height: 1000px; /* Altura máxima expandida */
+    }
+
+    .button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      text-decoration: none;
+      color: black;
+      border: 1px solid black;
+      border-radius: 5px;
+      transition: transform 0.3s, box-shadow 0.3s, color 0.3s;
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      color: red;
+    }
+
+    h1 {
+      text-align: center;
+      color: rgb(102, 2, 2);
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .background-image {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("https://actualidadaeroespacial.com/wp-content/uploads/2019/11/H145-251119-750x375.jpg");
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="background-image"></div>
+
+<h1>ESTADISTICA DE HELICOPTEROS</h1>
+
+<div class="dashboard" id="dashboard">
+  <div class="dashboard-item">
+    <a href="https://mega.nz/fm/MARDQZIa" class="button">CONTROL DE HORAS</a>
+  </div>
+  <div class="dashboard-item">
+    <a href="https://mega.nz/fm/MYQzCJ5Y" class="button">COMPONENTES MAYORES</a>
+  </div>
+  <div class="dashboard-item">
+    <a href="https://mega.nz/fm/5dIW3RrR" class="button">TODOS LOS COMPONENTES</a>
+  </div>
+  <div class="dashboard-item">
+    <a href="https://mega.nz/fm/EVpmySbA" class="button">STATUS FAH 906</a>
+    <a href="https://mega.nz/fm/ZAoAlYxA" class="button">STATUS FAH 971</a>
+    <a href="https://mega.nz/fm/hZ50UAjQ" class="button">STATUS FAH 973</a>
+    <a href="https://mega.nz/fm/lR4mCKJA" class="button">STATUS FAH 976</a>
+    <a href="https://mega.nz/fm/sNgiSIAZ" class="button">STATUS FAH 979</a>
+    <a href="https://mega.nz/fm/UV52kY6I" class="button">STATUS FAH 980</a>
+    <a href="pagina4.html" class="button">STATUS FAH OTROS</a>
+    <a href="pagina4.html" class="button">STATUS FAH OTROS</a>
+  </div>
+  <div class="dashboard-item">
+    <a href="FORMA_2408-13.xls" download class="button">FORMA 13</a>
+    <a href="FORMA_2408-12.xls" download class="button">FORMA 12</a>
+    <a href="HSREnglishHistoricalServiceRecord.pdf" download class="button">FORMA PARA ENVIAR COMPONENTES AL EXTRANJERO</a>
+  </div>
+  <div class="dashboard-item">
+    <a href="pagina4.html" class="button">ESTADO DIARIO</a>
+    <a href="https://mega.nz/fm/JIRilDhT" class="button">ACTIVIDADES SEMANALES</a>
+    <a href="https://mega.nz/fm/QYJw0T4b" class="button">FALLAS COMUNES</a>
+  </div>
+</div>
+
+<script>
+  const dashboardItems = document.querySelectorAll('.dashboard-item');
+
+  dashboardItems.forEach(item => {
+    item.addEventListener('mouseenter', () => {
+      item.classList.add('expanded'); // Agrega la clase 'expanded' cuando el cursor entra
+    });
+
+    item.addEventListener('mouseleave', () => {
+      item.classList.remove('expanded'); // Quita la clase 'expanded' cuando el cursor sale
+    });
+  });
+
+  const dashboard = document.getElementById('dashboard');
+
+  dashboard.addEventListener('mousemove', (event) => {
+    const dashboardRect = dashboard.getBoundingClientRect();
+    const y = event.clientY;
+    const bottomEdge = dashboardRect.bottom;
+    const threshold = 50; // Threshold para activar el desplazamiento hacia abajo
+
+    if (y >= bottomEdge - threshold) {
+      window.scrollBy(0, 10); // Desplaza la página hacia abajo
+    }
+  });
+</script>
+
+</body>
+</html>
