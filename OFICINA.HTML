@@ -2,73 +2,135 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Aeronaves de Fuerza Aérea Hondureña</title>
+  <title>OFICINA</title>
   <style>
     body {
-      cursor: url('ruta/de/la/imagen-del-helicoptero.png'), auto;
-      margin: 0; /* Aseguramos que no haya margen exterior */
-      padding: 0; /* Aseguramos que no haya relleno interior */
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
     }
 
-    .container {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      margin-top: 20px;
-      background-color: rgba(255, 255, 255, 0.7); /* Fondo semitransparente */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-gap: 20px;
       padding: 20px;
-      border-radius: 10px; /* Bordes redondeados */
+    }
+
+    .dashboard-item {
+      text-align: center;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.7);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden; /* Oculta el contenido que se desborda */
+      transition: max-height 0.3s; /* Agrega transición suave a la altura máxima */
+      max-height: 40px; /* Altura inicial */
+    }
+
+    .dashboard-item.expanded {
+      max-height: 1000px; /* Altura máxima expandida */
     }
 
     .button {
+      display: block;
+      margin: 10px auto;
       padding: 10px 20px;
       text-decoration: none;
       color: black;
       border: 1px solid black;
+      border-radius: 5px;
       transition: transform 0.3s, box-shadow 0.3s, color 0.3s;
-      /* Efecto 3D */
-      transform-style: preserve-3d;
-      perspective: 1000px;
     }
 
     .button:hover {
-      transform: rotateY(20deg);
-      box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.3);
-      color: red; /* Cambio de color al pasar el cursor */
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      color: red;
     }
 
     h1 {
       text-align: center;
-      color: white; /* Color del texto del título */
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Sombra del texto del título */
+      color: rgb(102, 2, 2);
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
 
-    .background-image {
+    video {
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url("https://actualidadaeroespacial.com/wp-content/uploads/2019/11/H145-251119-750x375.jpg");
-      z-index: -1; /* Asegura que la imagen de fondo esté detrás de todo */
+      min-width: 100%;
+      min-height: 100%;
+      z-index: -1;
     }
   </style>
 </head>
 <body>
 
-<div class="background-image"></div>
+<h1>OFICINA</h1>
 
-<h1>OFICINA </h1>
-<div class="container">
-  <a href="REPORTES DE TRABAJO.HTML" class="button">REPOTES DE TRABAJO</a>
-  <a href="SOLICITUDES.HTML" class="button">SOLICITUDES</a>
-  <a href="INFORMES.HTML" class="button">INFORMES</a>
-  <a href="ORDEN DE TRABAJO.HTML" class="button">ORDEN DE TRABAJO</a>
-  <a href="LISTADO DE MATERIALES.HTML" class="button">LISTADO DE MATERIALES</a>
-  <a href="REPUESTOS.HTML" class="button">REPUESTOS UTILIZADOS</a>
+<video autoplay loop muted>
+  <source src="video.mp4" type="video/mp4">
+  Tu navegador no soporta la etiqueta de video.
+</video>
 
-  <!-- Agrega los otros botones de manera similar -->
-</div>
+<div class="dashboard" id="dashboard">
+  <div class="dashboard-item">
+    <a href="https://mega.nz/fm/wMJyxJAQ" class="button">REPORTES DE TRABAJO "ESTADISTA"</a>
+    <a href="reporte de trabajo.pdf" download class="button">REPORTES DE TRABAJO "EMERGENCIA"</a>
+  </div>
+  <div class="dashboard-item">
+    <a href="https://mega.nz/fm/wVRSRTxR" class="button">SOLICITUDES "ESTADISTA"</a>
+    <a href="FORMA 2408-13.x" download class="button">DESCARGAR SOLICITUD "EMERGENCIA"</a>
+    <a href="solicitud de materiales abastos.pdf" download class="button">DESCARGAR SOLICITUD  "ABASTOS"</a>
+  </div>
+  <div class="dashboard-item">
+    <a href="https://mega.nz/fm/9YYChbTQ" class="button">ORDEN DE TRABAJO "ESTADISTA"</a>
+    <a href="orden.xlsx" download class="button">DESCARGAR ORDEN DE TRABAJO "EMERGENCIA"</a>
+  </div>
+  <div class="dashboard-item">
+    <a href="https://mega.nz/fm/tFpi1J6C" class="button">INFORMES "ESTADISTA"</a>
+    <a href="ejemplo de informe.docx" download class="button">DESCARGAR INFORME "EMERGENCIA"</a>
+  </div>
+  <div class="dashboard-item">
+    <a href="https://mega.nz/fm/oIp12DbZ" class="button">REPUESTOS UTILIZADOS "ESTADISTA"</a>
+  </div>
+  <div class="dashboard-item">
+    <a href="https://mega.nz/fm/hZB01Zbb" class="button">LISTADO DE MATERIALES "ESTADISTA"</a>
+    <a href="FORMA 2408dsd13.xls" download class="button">DESCARGAR LISTADO DE MATERIALES "EMERGENCIA"</a>
+  </div>
+  
+<script>
+  const dashboardItems = document.querySelectorAll('.dashboard-item');
+
+  dashboardItems.forEach(item => {
+    item.addEventListener('mouseenter', () => {
+      item.classList.add('expanded'); // Agrega la clase 'expanded' cuando el cursor entra
+    });
+
+    item.addEventListener('mouseleave', () => {
+      item.classList.remove('expanded'); // Quita la clase 'expanded' cuando el cursor sale
+    });
+  });
+
+  const dashboard = document.getElementById('dashboard');
+
+  dashboard.addEventListener('mousemove', (event) => {
+    const dashboardRect = dashboard.getBoundingClientRect();
+    const y = event.clientY;
+    const bottomEdge = dashboardRect.bottom;
+    const threshold = 50; // Threshold para activar el desplazamiento hacia abajo
+
+    if (y >= bottomEdge - threshold) {
+      window.scrollBy(0, 10); // Desplaza la página hacia abajo
+    }
+  });
+</script>
 
 </body>
 </html>
+
+  
+  
+
+    
