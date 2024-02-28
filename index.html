@@ -4,16 +4,74 @@
   <meta charset="UTF-8">
   <title>TODO SOBRE HELICOPTEROS</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      overflow: hidden; /* Oculta las barras de desplazamiento */
+    }
+
+    .contenedor {
+      position: relative;
+      width: 100%;
+      height: 100vh; /* Altura total de la ventana */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white; /* Color del texto */
+      text-align: center;
+    }
+
+    .fondo-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    .titulo {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+
+    .botones-principales {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .boton-principal {
+      margin: 0 10px;
+      padding: 10px 20px;
+      background-color: rgba(0, 0, 0, 0.5); /* Color de fondo semitransparente */
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .boton-principal:hover {
+      background-color: rgba(0, 0, 0, 0.7); /* Cambia el color de fondo al pasar el mouse */
+    }
+  </style>
 </head>
 <body>
+  <video class="fondo-video" autoplay loop muted>
+    <source src="VIDEO2.mp4" type="video/mp4">
+    Tu navegador no soporta la etiqueta de video.
+  </video>
+
   <div class="contenedor">
     <h1 class="titulo">PLATAFORMA DE TRABAJO ESCUADRON DE HELICOPTEROS</h1>
     <div class="botones-principales">
       <a href="OFICINA.HTML" class="boton-principal">OFICINA</a>
       <a href="ESTADISTICA.HTML" class="boton-principal">ESTADISTICA</a>
-       <a href="https://www.bellhelicopter.net/tp/" class="boton-principal">MANUALES BELL</a>
-       <a href="https://www.prattwhitney.com/" class="boton-principal">MANUALES MOTORES </a>
-   
+      <a href="https://www.bellhelicopter.net/tp/" class="boton-principal">MANUALES BELL</a>
+      <a href="https://www.prattwhitney.com/" class="boton-principal">MANUALES MOTORES</a>
       <!-- Agrega más botones principales con sus respectivas URLs -->
     </div>
   </div>
