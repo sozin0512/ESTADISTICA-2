@@ -46,23 +46,46 @@
     }
 
     .boton-principal {
-      margin: 0 10px;
+      margin: 40px 10px;
+      font-size: 2em;
       padding: 10px 20px;
       background-color: rgba(255, 2, 2, 0.5); /* Color de fondo semitransparente */
       color: rgb(10, 0, 0);
       text-decoration: none;
       border-radius: 5px;
       transition: background-color 0.3s;
+      font-weight: bold; /* Texto en negrita */
     }
 
     .boton-principal:hover {
       background-color: rgba(100, 253, 11, 0.7); /* Cambia el color de fondo al pasar el mouse */
     }
+
+    .dias-sin-accidentes {
+      margin-top: 40px;
+      font-size: 2em;
+      color: rgb(255, 255, 255);
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px 40px;
+      border-radius: 10px;
+      animation: pulsar 2s infinite alternate; /* Agregamos una animación al contador */
+      text-transform: uppercase; /* Convierte el texto a mayúsculas */
+      font-weight: bold; /* Texto en negrita */
+    }
+
+    @keyframes pulsar {
+      0% {
+        transform: scale(1);
+      }
+      100% {
+        transform: scale(1.1);
+      }
+    }
   </style>
 </head>
 <body>
   <video class="fondo-video" autoplay loop muted>
-    <source src="video.mp4" type="video/mp4">
+    <source src="tu_video.mp4" type="video/mp4">
     Tu navegador no soporta la etiqueta de video.
   </video>
 
@@ -73,8 +96,43 @@
       <a href="ESTADISTICA.HTML" class="boton-principal">ESTADISTICA</a>
       <a href="https://www.bellhelicopter.net/tp/" class="boton-principal">MANUALES BELL</a>
       <a href="https://www.prattwhitney.com/" class="boton-principal">MANUALES MOTORES</a>
+      <a href="MODIFICACION.HTML" class="boton-principal">ACTUALIZAR ESTADO DIARIO</a>
       <!-- Agrega más botones principales con sus respectivas URLs -->
     </div>
+    <div class="dias-sin-accidentes" id="dias-sin-accidentes">DÍAS SIN ACCIDENTES: <span id="contador-dias">719</span></div>
   </div>
+
+  <script>
+    // Función para calcular la cantidad de días desde una fecha hasta ahora
+    function calcularDias() {
+      var fechaInicio = new Date('2024-03-04T06:00:00'); // Fecha de inicio a las 6 AM
+      var fechaActual = new Date();
+      var diferenciaTiempo = fechaActual.getTime() - fechaInicio.getTime();
+      var dias = Math.floor(diferenciaTiempo / (1000 * 3600 * 24));
+      return dias + 719; // Sumamos 719 días iniciales
+    }
+
+    // Función para actualizar el contador de días sin accidentes
+    function actualizarContador() {
+      var contador = document.getElementById('contador-dias');
+      contador.innerText = calcularDias();
+    }
+
+    // Llamamos a la función para actualizar el contador al cargar la página
+    actualizarContador();
+
+    // Configuramos un temporizador para actualizar el contador automáticamente a las 6 AM cada día
+    function actualizarDiariamente() {
+      var ahora = new Date();
+      var tiempoHastaManana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1, 6) - ahora;
+      setTimeout(function() {
+        actualizarContador();
+        actualizarDiariamente(); // Llamar de nuevo para configurar la actualización diaria
+      }, tiempoHastaManana);
+    }
+
+    // Llamamos a la función para configurar la actualización diaria
+    actualizarDiariamente();
+  </script>
 </body>
 </html>
