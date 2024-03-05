@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tabla con 6 columnas</title>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: center;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    .estado-rojo {
+        color: red;
+    }
+
+    .estado-guion {
+        font-weight: bold;
+    }
+
+    .estado-guion strong {
+        font-size: larger;
+        letter-spacing: 4px;
+        font-weight: 500; /* Reducción del grosor */
+        padding-top: 10px; /* Aumento de la altura */
+        padding-bottom: 10px; /* Aumento de la altura */
+    }
+
+    input[type="text"] {
+        border: none;
+        background-color: transparent;
+        width: 100%;
+        text-align: center;
+    }
+
+    #fecha-reloj {
+        text-align: right;
+        margin-bottom: 40px; /* Aumentar el margen inferior */
+        font-weight: bold; /* Texto en negrita */
+    }
+    
+    .boton-descargar {
+        background-color: #4CAF50; /* Color de fondo */
+        border: none; /* Sin borde */
+        color: white; /* Color del texto */
+        padding: 15px 32px; /* Espacio alrededor del texto */
+        text-align: center; /* Alineación del texto */
+        text-decoration: none; /* Sin subrayado */
+        display: inline-block; /* Mostrar como bloque */
+        font-size: 16px; /* Tamaño del texto */
+        margin: 4px 2px; /* Margen externo */
+        cursor: pointer; /* Cursor de puntero */
+    }
+
+    .boton-descargar:hover {
+        background-color: #45a049; /* Cambio de color de fondo al pasar el mouse */
+    }
+
+</style>
+</head>
+<body>
+
+<div id="fecha-reloj"></div>
+
+<h2>Tabla con 6 columnas</h2>
+
+<button id="btnDescargarExcel" class="boton-descargar">Descargar Excel</button>
+<button id="btnDescargarPDF" class="boton-descargar">Descargar PDF</button>
+
+<table id="miTabla">
+    <tr>
+        <th>MODELO</th>
+        <th>MATRICULA</th>
+        <th>ESTADO</th>
+        <th>HORAS INSPECCION DE 25 REMANENTES</th>
+        <th>HORAS DE INSPECCION DE FASE REMANENTES</th>
+        <th>UBICACION</th>
+        <th>OBSERVACIONES</th>
+    </tr>
+    <tr>
+        <td>BO 105</td>
+        <td>FAH-906</td>
+        <td>X</td>
+        <td>50.0</td>
+        <td>100.0</td>
+        <td></td>
+        <td></td>
+    </tr>
+    <!-- Otras filas aquí -->
+    <tr>
+        <td>BELL-412</td>
+        <td>FAH-973</td>
+        <td>-</td>
+        <td>18.0</td>
+        <td>18.0</td>
+        <td>HAM</td>
+        <td></td>
+    </tr>
+</table>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.3/jspdf.umd.min.js"></script>
+<script>
+    function actualizarFechaHora() {
+        var fechaHora = new Date();
+        var dia = fechaHora.getDate().toString().padStart(2, '0').toUpperCase(); // Día en mayúsculas y con dos dígitos
+        var mes = fechaHora.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase(); // Mes abreviado en mayúsculas
+        var ano = fechaHora.getFullYear(); // Año
+        var hora = fechaHora.toLocaleTimeString('es-ES');
+        var fechaHoraStr = dia + ' ' + mes + ' ' + ano + ' - ' + hora;
+        document.getElementById('fecha-reloj').textContent = fechaHoraStr;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        actualizarFechaHora();
+        setInterval(actualizarFechaHora, 500); // Velocidad de actualización de 500 milisegundos
+
+        var cells = document.querySelectorAll('#miTabla td');
+        
+        cells.forEach(function(cell) {
+            cell.addEventListener('click', function() {
+                if (!cell.querySelector('input') && cell.cellIndex !== 0 && cell.cellIndex !== 1) {
+                    var input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = cell.textContent.trim();
+                    cell.innerHTML = '';
+                    cell.appendChild(input);
+                    input.focus();
+                    input.addEventListener('blur', function() {
+                        cell.textContent = input.value;
+                        if (cell.cellIndex === 2) {
+                            if (input.value.trim() === 'X') {
+                                cell.classList.add('estado-rojo');
+                            } else {
+                                cell.classList.remove('estado-rojo');
+                            }
+                            if (input.value.trim() === '-') {
+                                cell.innerHTML = '<strong>——</strong>';
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        document.getElementById('btnDescargarExcel').addEventListener('click', function() {
+            /* Seleccionamos la tabla */
+            var tabla = document.getElementById('miTabla');
+            
+            /* Creamos un nuevo objeto de la clase Workbook */
+            var wb = XLSX.utils.book_new();
+            
+            /* Agregamos la tabla a la hoja de trabajo */
+            var ws = XLSX.utils.table_to_sheet(tabla);
+            XLSX.utils.book_append_sheet(wb, ws, "Tabla");
+            
+            /* Generamos el archivo Excel */
+            XLSX.writeFile(wb, "tabla.xlsx");
+        });
+
+        document.getElementById('btnDescargarPDF').addEventListener('click', function() {
+            var doc = new jsPDF();
+            doc.autoTable({html: '#miTabla'});
+            doc.save('tabla.pdf');
+        });
+    });
+</script>
+
+</body>
+</html>
+
+
+
