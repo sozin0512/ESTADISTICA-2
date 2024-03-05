@@ -43,10 +43,11 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-wrap: wrap; /* Permite que los botones se envuelvan en líneas */
     }
 
     .boton-principal {
-      margin: 40px 10px;
+      margin: 10px; /* Espaciado entre los botones */
       font-size: 2em;
       padding: 10px 20px;
       background-color: rgba(255, 2, 2, 0.5); /* Color de fondo semitransparente */
@@ -92,11 +93,11 @@
   <div class="contenedor">
     <h1 class="titulo">PLATAFORMA DE TRABAJO ESCUADRON DE HELICOPTEROS</h1>
     <div class="botones-principales">
-      <a href="OFICINA.HTML" class="boton-principal">OFICINA</a>
       <a href="ESTADISTICA.HTML" class="boton-principal">ESTADISTICA</a>
       <a href="https://www.bellhelicopter.net/tp/" class="boton-principal">MANUALES BELL</a>
       <a href="https://www.prattwhitney.com/" class="boton-principal">MANUALES MOTORES</a>
       <a href="MODIFICACION.HTML" class="boton-principal">ACTUALIZAR ESTADO DIARIO</a>
+      <a href="OFICINA.HTML" class="boton-principal">OFICINA</a> <!-- Movido al final -->
       <!-- Agrega más botones principales con sus respectivas URLs -->
     </div>
     <div class="dias-sin-accidentes" id="dias-sin-accidentes">DÍAS SIN ACCIDENTES: <span id="contador-dias">719</span></div>
