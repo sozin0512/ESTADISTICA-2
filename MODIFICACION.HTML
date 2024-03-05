@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tabla con 6 columnas</title>
+<title>ESTADO DIARIO MODIFICABLE</title>
 <style>
     table {
         width: 100%;
@@ -72,10 +72,11 @@
 
 <div id="fecha-reloj"></div>
 
-<h2>Tabla con 6 columnas</h2>
+<h2 style="text-align: center; font-weight: bold;">ESTADO DIARIO DE LAS AERONAVES</h2>
 
+<button id="btnGuardarCambios" class="boton-descargar">Guardar Cambios</button>
 <button id="btnDescargarExcel" class="boton-descargar">Descargar Excel</button>
-<button id="btnDescargarPDF" class="boton-descargar">Descargar PDF</button>
+<button id="btnGenerarPDF" class="boton-descargar">Generar PDF</button>
 
 <table id="miTabla">
     <tr>
@@ -99,12 +100,73 @@
     <!-- Otras filas aquí -->
     <tr>
         <td>BELL-412</td>
-        <td>FAH-973</td>
+        <td>FAH-971</td>
         <td>-</td>
         <td>18.0</td>
         <td>18.0</td>
         <td>HAM</td>
         <td></td>
+        
+    </tr>
+    <tr>
+        <td>BELL-412</td>
+        <td>FAH-9713</td>
+        <td>-</td>
+        <td>18.0</td>
+        <td>18.0</td>
+        <td>HAM</td>
+        <td></td>
+        
+    </tr>
+    <tr>
+        <td>BELL-412</td>
+        <td>FAH-974</td>
+        <td>-</td>
+        <td>18.0</td>
+        <td>18.0</td>
+        <td>HAM</td>
+        <td></td>
+        
+    </tr>
+    <tr>
+        <td>BELL-412</td>
+        <td>FAH-976</td>
+        <td>-</td>
+        <td>18.0</td>
+        <td>18.0</td>
+        <td>HAM</td>
+        <td></td>
+        
+    </tr>
+    <tr>
+        <td>BELL-412</td>
+        <td>FAH-979</td>
+        <td>-</td>
+        <td>18.0</td>
+        <td>18.0</td>
+        <td>HAM</td>
+        <td></td>
+        
+    </tr>
+    <tr>
+        <td>BELL-412 EP</td>
+        <td>FAH-980</td>
+        <td>-</td>
+        <td>18.0</td>
+        <td>18.0</td>
+        <td>HAM</td>
+        <td></td>
+        
+    </tr>
+    <tr>
+        <td>BELL-412</td>
+        <td>FAH-971</td>
+        <td>-</td>
+        <td>18.0</td>
+        <td>18.0</td>
+        <td>HAM</td>
+        <td></td>
+        
     </tr>
 </table>
 
@@ -168,16 +230,21 @@
             XLSX.writeFile(wb, "tabla.xlsx");
         });
 
-        document.getElementById('btnDescargarPDF').addEventListener('click', function() {
-            var doc = new jsPDF();
-            doc.autoTable({html: '#miTabla'});
-            doc.save('tabla.pdf');
+        document.getElementById('btnGenerarPDF').addEventListener('click', function() {
+            window.print();
+        });
+
+        document.getElementById('btnGuardarCambios').addEventListener('click', function() {
+            alert("Los cambios se han guardado correctamente.");
+            // Aquí puedes agregar el código para guardar los cambios en tu sistema.
         });
     });
 </script>
 
 </body>
 </html>
+
+
 
 
 
