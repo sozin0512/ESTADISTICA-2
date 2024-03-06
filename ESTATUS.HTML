@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estatus</title>
+    <style>
+        table {
+            width: 70%;
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: center;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .add-button, .delete-button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        }
+        .add-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .delete-button {
+            background-color: #f44336;
+            color: white;
+            margin-left: 10px;
+        }
+        #clock {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<h2 style="text-align: center;">Tabla de Estatus</h2>
+
+<div id="clock"></div>
+
+<table id="estatus-table">
+    <tr>
+        <th>Componente</th>
+        <th>Número de Serie</th>
+        <th>Número de Parte</th>
+        <th>Fecha de Instalación</th>
+        <th>Horas que tiene</th>
+        <th>Vida de Componente</th>
+        <th>Tiempo Restante</th>
+        <th>Observaciones</th>
+    </tr>
+    <!-- Aquí cargaremos los datos guardados -->
+</table>
+
+<button class="add-button" onclick="agregarFila()">Agregar Fila</button>
+<button class="add-button" onclick="agregarColumna()">Agregar Columna</button>
+<button class="delete-button" onclick="borrarFila()">Borrar Fila</button>
+<button class="delete-button" onclick="borrarColumna()">Borrar Columna</button>
+
+<script>
+    // Cargar los datos guardados al cargar la página
+    window.onload = function() {
+        cargarDatos();
+        mostrarHora();
+        setInterval(mostrarHora, 1000); // Actualizar el reloj cada segundo
+    };
+
+    function agregarFila() {
+        var table = document.getElementById("estatus-table");
+        var newRow = table.insertRow(table.rows.length);
+        var cell1 = newRow.insertCell(0);
+        var cell2 = newRow.insertCell(1);
+        var cell3 = newRow.insertCell(2);
+        var cell4 = newRow.insertCell(3);
+        var cell5 = newRow.insertCell(4);
+        var cell6 = newRow.insertCell(5);
+        var cell7 = newRow.insertCell(6);
+        var cell8 = newRow.insertCell(7);
+        cell1.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        cell2.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        cell3.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        cell4.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        cell5.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        cell6.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        cell7.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        cell8.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        guardarDatos();
+    }
+
+    function agregarColumna() {
+        var table = document.getElementById("estatus-table");
+        var nombreColumna = prompt("Ingrese el nombre de la nueva columna:", "Nombre de Columna");
+        if (nombreColumna !== null) {
+            var headerRow = table.rows[0];
+            var newCell = document.createElement("th");
+            newCell.textContent = nombreColumna;
+            headerRow.appendChild(newCell);
+
+            for (var i = 1; i < table.rows.length; i++) {
+                var newRow = table.rows[i];
+                var newCell = newRow.insertCell(-1);
+                newCell.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+            }
+            guardarDatos();
+        }
+    }
+
+    function borrarFila() {
+        var table = document.getElementById("estatus-table");
+        if (table.rows.length > 1) {
+            table.deleteRow(table.rows.length - 1);
+            guardarDatos();
+        } else {
+            alert("No se pueden borrar más filas.");
+        }
+    }
+
+    function borrarColumna() {
+        var table = document.getElementById("estatus-table");
+        if (table.rows[0].cells.length > 1) {
+            for (var i = 0; i < table.rows.length; i++) {
+                table.rows[i].deleteCell(-1);
+            }
+            guardarDatos();
+        } else {
+            alert("No se pueden borrar más columnas.");
+        }
+    }
+
+    function calcularTiempoRestante() {
+        var table = document.getElementById("estatus-table");
+        for (var i = 1; i < table.rows.length; i++) {
+            var vidaComponente = parseInt(table.rows[i].cells[5].textContent);
+            var horasTiene = parseInt(table.rows[i].cells[4].textContent);
+            var tiempoRestante = vidaComponente - horasTiene;
+            table.rows[i].cells[6].textContent = tiempoRestante;
+        }
+    }
+
+    function mostrarHora() {
+        var now = new Date();
+        var options = { year: '2-digit', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', weekday: 'numeric' };
+        var formattedDate = now.toLocaleDateString('en-US', options).replace(',', '').replace(/ /g, '/');
+        document.getElementById("clock").textContent = formattedDate;
+    }
+
+    // Guardar los datos en el almacenamiento local del navegador
+    function guardarDatos() {
+        var table = document.getElementById("estatus-table");
+        var data = [];
+        for (var i = 1; i < table.rows.length; i++) {
+            var rowData = [];
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                rowData.push(table.rows[i].cells[j].textContent);
+            }
+            data.push(rowData);
+        }
+        localStorage.setItem("estatus_data", JSON.stringify(data));
+    }
+
+    // Cargar los datos desde el almacenamiento local del navegador
+    function cargarDatos() {
+        var savedData = localStorage.getItem("estatus_data");
+        if (savedData) {
+            var table = document.getElementById("estatus-table");
+            var data = JSON.parse(savedData);
+            for (var i = 0; i < data.length; i++) {
+                var newRow = table.insertRow(table.rows.length);
+                for (var j = 0; j < data[i].length; j++) {
+                    var newCell = newRow.insertCell(j);
+                    newCell.innerHTML = data[i][j];
+                    newCell.addEventListener("input", guardarDatos); // Agregar evento de escucha para guardar datos cuando se modifique la celda
+                }
+            }
+        }
+        calcularTiempoRestante();
+    }
+</script>
+
+</body>
+</html>
