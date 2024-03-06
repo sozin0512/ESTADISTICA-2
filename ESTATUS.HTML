@@ -18,7 +18,7 @@
         th {
             background-color: #f2f2f2;
         }
-        .add-button, .delete-button {
+        .add-button, .delete-button, .save-button {
             margin-top: 10px;
             padding: 5px 10px;
             cursor: pointer;
@@ -31,6 +31,11 @@
         }
         .delete-button {
             background-color: #f44336;
+            color: white;
+            margin-left: 10px;
+        }
+        .save-button {
+            background-color: #008CBA;
             color: white;
             margin-left: 10px;
         }
@@ -66,6 +71,7 @@
 <button class="add-button" onclick="agregarColumna()">Agregar Columna</button>
 <button class="delete-button" onclick="borrarFila()">Borrar Fila</button>
 <button class="delete-button" onclick="borrarColumna()">Borrar Columna</button>
+<button class="save-button" onclick="guardarCambios()">Guardar Cambios</button>
 
 <script>
     // Cargar los datos guardados al cargar la página
@@ -94,7 +100,6 @@
         cell6.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
         cell7.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
         cell8.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
-        guardarDatos();
     }
 
     function agregarColumna() {
@@ -111,7 +116,6 @@
                 var newCell = newRow.insertCell(-1);
                 newCell.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
             }
-            guardarDatos();
         }
     }
 
@@ -119,7 +123,6 @@
         var table = document.getElementById("estatus-table");
         if (table.rows.length > 1) {
             table.deleteRow(table.rows.length - 1);
-            guardarDatos();
         } else {
             alert("No se pueden borrar más filas.");
         }
@@ -131,7 +134,6 @@
             for (var i = 0; i < table.rows.length; i++) {
                 table.rows[i].deleteCell(-1);
             }
-            guardarDatos();
         } else {
             alert("No se pueden borrar más columnas.");
         }
@@ -152,6 +154,11 @@
         var options = { year: '2-digit', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', weekday: 'numeric' };
         var formattedDate = now.toLocaleDateString('en-US', options).replace(',', '').replace(/ /g, '/');
         document.getElementById("clock").textContent = formattedDate;
+    }
+
+    function guardarCambios() {
+        guardarDatos();
+        alert("¡Los cambios han sido guardados!");
     }
 
     // Guardar los datos en el almacenamiento local del navegador
@@ -179,7 +186,6 @@
                 for (var j = 0; j < data[i].length; j++) {
                     var newCell = newRow.insertCell(j);
                     newCell.innerHTML = data[i][j];
-                    newCell.addEventListener("input", guardarDatos); // Agregar evento de escucha para guardar datos cuando se modifique la celda
                 }
             }
         }
