@@ -1,242 +1,210 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tabla con 6 columnas</title>
-<style>
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th, td {
-        border: 1px solid black;
-        padding: 8px;
-        text-align: center;
-    }
-
-    th {
-        background-color: #f2f2f2;
-    }
-
-    .estado-rojo {
-        color: red;
-    }
-
-    .estado-guion {
-        font-weight: bold;
-    }
-
-    .estado-guion strong {
-        font-size: larger;
-        letter-spacing: 4px;
-        font-weight: 500; /* Reducción del grosor */
-        padding-top: 10px; /* Aumento de la altura */
-        padding-bottom: 10px; /* Aumento de la altura */
-    }
-
-    input[type="text"] {
-        border: none;
-        background-color: transparent;
-        width: 100%;
-        text-align: center;
-    }
-
-    #fecha-reloj {
-        text-align: right;
-        margin-bottom: 40px; /* Aumentar el margen inferior */
-        font-weight: bold; /* Texto en negrita */
-    }
-    
-    .boton-descargar {
-        background-color: #4CAF50; /* Color de fondo */
-        border: none; /* Sin borde */
-        color: white; /* Color del texto */
-        padding: 15px 32px; /* Espacio alrededor del texto */
-        text-align: center; /* Alineación del texto */
-        text-decoration: none; /* Sin subrayado */
-        display: inline-block; /* Mostrar como bloque */
-        font-size: 16px; /* Tamaño del texto */
-        margin: 4px 2px; /* Margen externo */
-        cursor: pointer; /* Cursor de puntero */
-    }
-
-    .boton-descargar:hover {
-        background-color: #45a049; /* Cambio de color de fondo al pasar el mouse */
-    }
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estatus</title>
+    <style>
+        table {
+            width: 70%;
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: center;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .add-button, .delete-button, .save-button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        }
+        .add-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .delete-button {
+            background-color: #f44336;
+            color: white;
+            margin-left: 10px;
+        }
+        .save-button {
+            background-color: #008CBA;
+            color: white;
+            margin-left: 10px;
+        }
+        #clock {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 18px;
+        }
+    </style>
 </head>
 <body>
 
-<div id="fecha-reloj"></div>
+<h2 style="text-align: center;">Tabla de Estatus</h2>
 
-<h2 style="text-align: center; font-weight: bold;">TABLA CON 6 COLUMNAS</h2>
+<div id="clock"></div>
 
-<button id="btnGuardarCambios" class="boton-descargar">Guardar Cambios</button>
-<button id="btnDescargarExcel" class="boton-descargar">Descargar Excel</button>
-<button id="btnGenerarPDF" class="boton-descargar">Generar PDF</button>
-
-<table id="miTabla">
+<table id="estatus-table">
     <tr>
-        <th>MODELO</th>
-        <th>MATRICULA</th>
-        <th>ESTADO</th>
-        <th>HORAS INSPECCION DE 25 REMANENTES</th>
-        <th>HORAS DE INSPECCION DE FASE REMANENTES</th>
-        <th>UBICACION</th>
-        <th>OBSERVACIONES</th>
+        <th>Componente</th>
+        <th>Número de Serie</th>
+        <th>Número de Parte</th>
+        <th>Fecha de Instalación</th>
+        <th>Horas que tiene</th>
+        <th>Vida de Componente</th>
+        <th>Tiempo Restante</th>
+        <th>Observaciones</th>
     </tr>
-    <tr>
-        <td>BO 105</td>
-        <td>FAH-906</td>
-        <td>X</td>
-        <td>50.0</td>
-        <td>100.0</td>
-        <td>HAM</td>
-        <td>ALTO "TOT" DE MOTOR #1</td>
-    </tr>
-    <!-- Otras filas aquí -->
-    <tr>
-        <td>BELL-412</td>
-        <td>FAH-971</td>
-        <td>-</td>
-        <td>18.0</td>
-        <td>18.0</td>
-        <td>HAM</td>
-        <td>REMOCION DE VARIOS COMPONENTES MAYORES</td>
-        
-    </tr>
-    <tr>
-        <td>BELL-412</td>
-        <td>FAH-9713</td>
-        <td>-</td>
-        <td>18.0</td>
-        <td>18.0</td>
-        <td>HAM</td>
-        <td></td>
-        
-    </tr>
-    <tr>
-        <td>BELL-412</td>
-        <td>FAH-974</td>
-        <td>-</td>
-        <td>18.0</td>
-        <td>18.0</td>
-        <td>HAM</td>
-        <td>REMOCION DE VARIOS COMPONENTES MAYORES </td>/td>
-        
-    </tr>
-    <tr>
-        <td>BELL-412</td>
-        <td>FAH-976</td>
-        <td>-</td>
-        <td>18.0</td>
-        <td>18.0</td>
-        <td>HAM</td>
-        <td></td>
-        
-    </tr>
-    <tr>
-        <td>BELL-412</td>
-        <td>FAH-979</td>
-        <td>-</td>
-        <td>18.0</td>
-        <td>18.0</td>
-        <td>HAM</td>
-        <td>INSPECCION DE FASE #6</td>
-        
-    </tr>
-    <tr>
-        <td>BELL-412 EP</td>
-        <td>FAH-980</td>
-        <td>-</td>
-        <td>18.0</td>
-        <td>18.0</td>
-        <td>HAM</td>
-        <td></td>
-        
-    </tr>
-        
-        
-    </tr>
+    <!-- Aquí cargaremos los datos guardados -->
 </table>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.3/jspdf.umd.min.js"></script>
+<button class="add-button" onclick="agregarFila()">Agregar Fila</button>
+<button class="add-button" onclick="agregarColumna()">Agregar Columna</button>
+<button class="delete-button" onclick="borrarFila()">Borrar Fila</button>
+<button class="delete-button" onclick="borrarColumna()">Borrar Columna</button>
+<button class="save-button" onclick="guardarCambios()">Guardar Cambios</button>
+
 <script>
-    function actualizarFechaHora() {
-        var fechaHora = new Date();
-        var dia = fechaHora.getDate().toString().padStart(2, '0').toUpperCase(); // Día en mayúsculas y con dos dígitos
-        var mes = fechaHora.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase(); // Mes abreviado en mayúsculas
-        var ano = fechaHora.getFullYear(); // Año
-        var hora = fechaHora.toLocaleTimeString('es-ES');
-        var fechaHoraStr = dia + ' ' + mes + ' ' + ano + ' - ' + hora;
-        document.getElementById('fecha-reloj').textContent = fechaHoraStr;
+    // Cargar los datos guardados al cargar la página
+    window.onload = function() {
+        cargarDatos();
+        mostrarHora();
+        setInterval(mostrarHora, 1000); // Actualizar el reloj cada segundo
+    };
+
+    function agregarFila() {
+        var table = document.getElementById("estatus-table");
+        var newRow = table.insertRow(table.rows.length);
+        var cell1 = newRow.insertCell(0);
+        var cell2 = newRow.insertCell(1);
+        var cell3 = newRow.insertCell(2);
+        var cell4 = newRow.insertCell(3);
+        var cell5 = newRow.insertCell(4);
+        var cell6 = newRow.insertCell(5);
+        var cell7 = newRow.insertCell(6);
+        var cell8 = newRow.insertCell(7);
+        cell1.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        cell2.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        cell3.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        cell4.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        cell5.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        cell6.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        cell7.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+        cell8.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        actualizarFechaHora();
-        setInterval(actualizarFechaHora, 500); // Velocidad de actualización de 500 milisegundos
+    function agregarColumna() {
+        var table = document.getElementById("estatus-table");
+        var nombreColumna = prompt("Ingrese el nombre de la nueva columna:", "Nombre de Columna");
+        if (nombreColumna !== null) {
+            var headerRow = table.rows[0];
+            var newCell = document.createElement("th");
+            newCell.textContent = nombreColumna;
+            headerRow.appendChild(newCell);
 
-        var cells = document.querySelectorAll('#miTabla td');
-        
-        cells.forEach(function(cell) {
-            cell.addEventListener('click', function() {
-                if (!cell.querySelector('input') && cell.cellIndex !== 0 && cell.cellIndex !== 1) {
-                    var input = document.createElement('input');
-                    input.type = 'text';
-                    input.value = cell.textContent.trim();
-                    cell.innerHTML = '';
-                    cell.appendChild(input);
-                    input.focus();
-                    input.addEventListener('blur', function() {
-                        cell.textContent = input.value;
-                        if (cell.cellIndex === 2) {
-                            if (input.value.trim() === 'X') {
-                                cell.classList.add('estado-rojo');
-                            } else {
-                                cell.classList.remove('estado-rojo');
-                            }
-                            if (input.value.trim() === '-') {
-                                cell.innerHTML = '<strong>——</strong>';
-                            }
-                        }
-                    });
+            for (var i = 1; i < table.rows.length; i++) {
+                var newRow = table.rows[i];
+                var newCell = newRow.insertCell(-1);
+                newCell.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true'>";
+            }
+        }
+    }
+
+    function borrarFila() {
+        var table = document.getElementById("estatus-table");
+        if (table.rows.length > 1) {
+            table.deleteRow(table.rows.length - 1);
+        } else {
+            alert("No se pueden borrar más filas.");
+        }
+    }
+
+    function borrarColumna() {
+        var table = document.getElementById("estatus-table");
+        if (table.rows[0].cells.length > 1) {
+            for (var i = 0; i < table.rows.length; i++) {
+                table.rows[i].deleteCell(-1);
+            }
+        } else {
+            alert("No se pueden borrar más columnas.");
+        }
+    }
+
+    function calcularTiempoRestante() {
+        var table = document.getElementById("estatus-table");
+        for (var i = 1; i < table.rows.length; i++) {
+            var vidaComponente = parseInt(table.rows[i].cells[5].getElementsByTagName('input')[0].value);
+            var horasTiene = parseInt(table.rows[i].cells[4].getElementsByTagName('input')[0].value);
+            var tiempoRestante = vidaComponente - horasTiene;
+            table.rows[i].cells[6].textContent = tiempoRestante;
+        }
+    }
+
+    function mostrarHora() {
+        var now = new Date();
+        var options = { year: '2-digit', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', weekday: 'numeric' };
+        var formattedDate = now.toLocaleDateString('en-US', options).replace(',', '').replace(/ /g, '/');
+        document.getElementById("clock").textContent = formattedDate;
+    }
+
+    function guardarCambios() {
+        guardarCambiosCeldas(); // Guardar los cambios en las celdas
+        guardarDatos(); // Guardar los datos de la tabla
+        alert("¡Los cambios han sido guardados!");
+    }
+
+    function guardarCambiosCeldas() {
+        var table = document.getElementById("estatus-table");
+        for (var i = 1; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].getElementsByTagName('input')[0].setAttribute('value', table.rows[i].cells[j].getElementsByTagName('input')[0].innerText);
+            }
+        }
+    }
+
+    // Guardar los datos en el almacenamiento local del navegador
+    function guardarDatos() {
+        var table = document.getElementById("estatus-table");
+        var data = [];
+        for (var i = 1; i < table.rows.length; i++) {
+            var rowData = [];
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                rowData.push(table.rows[i].cells[j].getElementsByTagName('input')[0].value);
+            }
+            data.push(rowData);
+        }
+        localStorage.setItem("estatus_data", JSON.stringify(data));
+    }
+
+    // Cargar los datos desde el almacenamiento local del navegador
+    function cargarDatos() {
+        var savedData = localStorage.getItem("estatus_data");
+        if (savedData) {
+            var table = document.getElementById("estatus-table");
+            var data = JSON.parse(savedData);
+            for (var i = 0; i < data.length; i++) {
+                var newRow = table.insertRow(table.rows.length);
+                for (var j = 0; j < data[i].length; j++) {
+                    var newCell = newRow.insertCell(j);
+                    newCell.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true' value='" + data[i][j] + "'>";
                 }
-            });
-        });
-
-        document.getElementById('btnDescargarExcel').addEventListener('click', function() {
-            /* Seleccionamos la tabla */
-            var tabla = document.getElementById('miTabla');
-            
-            /* Creamos un nuevo objeto de la clase Workbook */
-            var wb = XLSX.utils.book_new();
-            
-            /* Agregamos la tabla a la hoja de trabajo */
-            var ws = XLSX.utils.table_to_sheet(tabla);
-            XLSX.utils.book_append_sheet(wb, ws, "Tabla");
-            
-            /* Generamos el archivo Excel */
-            XLSX.writeFile(wb, "tabla.xlsx");
-        });
-
-        document.getElementById('btnGenerarPDF').addEventListener('click', function() {
-            window.print();
-        });
-
-        document.getElementById('btnGuardarCambios').addEventListener('click', function() {
-            alert("Los cambios se han guardado correctamente.");
-            // Aquí puedes agregar el código para guardar los cambios en tu sistema.
-        });
-    });
+            }
+        }
+        calcularTiempoRestante();
+    }
 </script>
 
 </body>
 </html>
-
 
 
  
