@@ -49,7 +49,7 @@
 </head>
 <body>
 
-<h2 style="text-align: center;">Tabla de Estatus</h2>
+<h2 style="text-align: center;">ESTATUS AUN ES UNA PRUEBA </h2>
 
 <div id="clock"></div>
 
@@ -142,8 +142,8 @@
     function calcularTiempoRestante() {
         var table = document.getElementById("estatus-table");
         for (var i = 1; i < table.rows.length; i++) {
-            var vidaComponente = parseInt(table.rows[i].cells[5].textContent);
-            var horasTiene = parseInt(table.rows[i].cells[4].textContent);
+            var vidaComponente = parseInt(table.rows[i].cells[5].getElementsByTagName('input')[0].value);
+            var horasTiene = parseInt(table.rows[i].cells[4].getElementsByTagName('input')[0].value);
             var tiempoRestante = vidaComponente - horasTiene;
             table.rows[i].cells[6].textContent = tiempoRestante;
         }
@@ -157,8 +157,18 @@
     }
 
     function guardarCambios() {
-        guardarDatos();
+        guardarCambiosCeldas(); // Guardar los cambios en las celdas
+        guardarDatos(); // Guardar los datos de la tabla
         alert("¡Los cambios han sido guardados!");
+    }
+
+    function guardarCambiosCeldas() {
+        var table = document.getElementById("estatus-table");
+        for (var i = 1; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].getElementsByTagName('input')[0].setAttribute('value', table.rows[i].cells[j].getElementsByTagName('input')[0].innerText);
+            }
+        }
     }
 
     // Guardar los datos en el almacenamiento local del navegador
@@ -168,7 +178,7 @@
         for (var i = 1; i < table.rows.length; i++) {
             var rowData = [];
             for (var j = 0; j < table.rows[i].cells.length; j++) {
-                rowData.push(table.rows[i].cells[j].textContent);
+                rowData.push(table.rows[i].cells[j].getElementsByTagName('input')[0].value);
             }
             data.push(rowData);
         }
@@ -185,7 +195,7 @@
                 var newRow = table.insertRow(table.rows.length);
                 for (var j = 0; j < data[i].length; j++) {
                     var newCell = newRow.insertCell(j);
-                    newCell.innerHTML = data[i][j];
+                    newCell.innerHTML = "<input type='text' style='text-align: center;' contenteditable='true' value='" + data[i][j] + "'>";
                 }
             }
         }
