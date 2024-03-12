@@ -1,139 +1,89 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>TODO SOBRE HELICOPTEROS</title>
+    <style>
+        body {
+            background-image: url('https://cdn.jetphotos.com/full/5/51491_1648154840.jpg');
+            background-size: cover;
+            background-position: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
 
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      overflow: hidden; /* Oculta las barras de desplazamiento */
-    }
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-    .contenedor {
-      position: relative;
-      width: 100%;
-      height: 100vh; /* Altura total de la ventana */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: rgb(3, 3, 3); /* Color del texto */
-      text-align: center;
-    }
+        form {
+            width: 300px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+        }
 
-    .fondo-video {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -1;
-    }
+        table {
+            width: 100%;
+        }
 
-    .titulo {
-      font-size: 2.5em;
-      margin-bottom: 20px;
-    }
+        table, td {
+            border: none;
+            padding: 5px;
+        }
 
-    .botones-principales {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap; /* Permite que los botones se envuelvan en líneas */
-    }
+        input[type=text], input[type=password] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
 
-    .boton-principal {
-      margin: 10px; /* Espaciado entre los botones */
-      font-size: 2em;
-      padding: 10px 20px;
-      background-color: rgba(255, 2, 2, 0.5); /* Color de fondo semitransparente */
-      color: rgb(10, 0, 0);
-      text-decoration: none;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-      font-weight: bold; /* Texto en negrita */
-    }
-
-    .boton-principal:hover {
-      background-color: rgba(100, 253, 11, 0.7); /* Cambia el color de fondo al pasar el mouse */
-    }
-
-    .dias-sin-accidentes {
-      margin-top: 40px;
-      font-size: 2em;
-      color: rgb(255, 255, 255);
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 20px 40px;
-      border-radius: 10px;
-      animation: pulsar 2s infinite alternate; /* Agregamos una animación al contador */
-      text-transform: uppercase; /* Convierte el texto a mayúsculas */
-      font-weight: bold; /* Texto en negrita */
-    }
-
-    @keyframes pulsar {
-      0% {
-        transform: scale(1);
-      }
-      100% {
-        transform: scale(1.1);
-      }
-    }
-  </style>
+        input[type=submit] {
+            width: 100%;
+            background-color: #1C94C8;
+            color: white;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
-  <video class="fondo-video" autoplay loop muted>
-    <source src="video.mp4" type="video/mp4">
-    Tu navegador no soporta la etiqueta de video.
-  </video>
 
-  <div class="contenedor">
-    <h1 class="titulo">PLATAFORMA DE TRABAJO ESCUADRON DE HELICOPTEROS</h1>
-    <div class="botones-principales">
-      <a href="ESTADISTICA.HTML" class="boton-principal">ESTADISTICA</a>
-      <a href="https://www.bellhelicopter.net/tp/" class="boton-principal">MANUALES BELL</a>
-      <a href="https://www.prattwhitney.com/" class="boton-principal">MANUALES MOTORES</a>
-      <a href="MODIFICACION.HTML" class="boton-principal">ACTUALIZAR ESTADO DIARIO</a>
-      <a href="OFICINA.HTML" class="boton-principal">OFICINA</a> <!-- Movido al final -->
-      <!-- Agrega más botones principales con sus respectivas URLs -->
-    </div>
-    <div class="dias-sin-accidentes" id="dias-sin-accidentes">DÍAS SIN ACCIDENTES: <span id="contador-dias">719</span></div>
-  </div>
+<div class="container">
+    <form method="post" action="login.php">
+        <table>
+            <tr>
+                <td colspan="2" style="text-align: center;">
+                    <h2>INGRESA</h2>
+                </td>
+            </tr>
+            <tr>
+                <td><label>USUARIO</label></td>
+                <td><input type="text" name="txtusuario"/></td>
+            </tr>
+            <tr>
+                <td><label>CONTRASEÑA</label></td>
+                <td><input type="password" name="txtpassword" /></td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: center;">
+                    <input type="submit" value="Ingresar" />
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
 
-  <script>
-    // Función para calcular la cantidad de días desde una fecha hasta ahora
-    function calcularDias() {
-      var fechaInicio = new Date('2024-03-04T06:00:00'); // Fecha de inicio a las 6 AM
-      var fechaActual = new Date();
-      var diferenciaTiempo = fechaActual.getTime() - fechaInicio.getTime();
-      var dias = Math.floor(diferenciaTiempo / (1000 * 3600 * 24));
-      return dias + 719; // Sumamos 719 días iniciales
-    }
-
-    // Función para actualizar el contador de días sin accidentes
-    function actualizarContador() {
-      var contador = document.getElementById('contador-dias');
-      contador.innerText = calcularDias();
-    }
-
-    // Llamamos a la función para actualizar el contador al cargar la página
-    actualizarContador();
-
-    // Configuramos un temporizador para actualizar el contador automáticamente a las 6 AM cada día
-    function actualizarDiariamente() {
-      var ahora = new Date();
-      var tiempoHastaManana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1, 6) - ahora;
-      setTimeout(function() {
-        actualizarContador();
-        actualizarDiariamente(); // Llamar de nuevo para configurar la actualización diaria
-      }, tiempoHastaManana);
-    }
-
-    // Llamamos a la función para configurar la actualización diaria
-    actualizarDiariamente();
-  </script>
 </body>
 </html>
+
