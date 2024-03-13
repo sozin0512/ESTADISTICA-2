@@ -117,6 +117,15 @@
             font-size: 12px;
             text-shadow: 1px 1px 1px black;
         }
+
+        .lema {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            font-size: 16px;
+            text-shadow: 1px 1px 1px black;
+        }
     </style>
 </head>
 <body>
@@ -151,39 +160,40 @@
 </div>
 
 <div class="created-by">CREATED BY HACKER 01</div>
+<div class="lema">SEAMOS METODIOCOS, "MECANICOS YA SOMOS"</div>
 
 <script>
     // Base de datos de usuarios (simulada)
     const usuarios = [
-        { nombreUsuario: 'pavon', contraseña: '' },
-        { nombreUsuario: 'rodriguez', contraseña: '' },
-        { nombreUsuario: 'rendon', contraseña: '' },
-        { nombreUsuario: 'andino', contraseña: '' },
-        { nombreUsuario: 'mejia', contraseña: '' },
-        { nombreUsuario: 'vasquez', contraseña: '' },
-        { nombreUsuario: 'zeron', contraseña: '' },
-        { nombreUsuario: 'varela', contraseña: '12345' },
-        { nombreUsuario: 'duran', contraseña: '' },
-        { nombreUsuario: 'moss', contraseña: '' },
-        { nombreUsuario: 'gamez', contraseña: '' },
-        { nombreUsuario: 'lagos', contraseña: '' },
+        { nombreUsuario: 'pavon', contraseña: 'gruffi01' },
+        { nombreUsuario: 'rodriguez', contraseña: 'chinotin01' },
+        { nombreUsuario: 'rendon', contraseña: 'minero01' },
+        { nombreUsuario: 'andino', contraseña: 'viejo01' },
+        { nombreUsuario: 'mejia', contraseña: 'mole01' },
+        { nombreUsuario: 'vasquez', contraseña: 'villano01' },
+        { nombreUsuario: 'zeron', contraseña: 'invisible01' },
+        { nombreUsuario: 'varela', contraseña: 'neutron01' },
+        { nombreUsuario: 'duran', contraseña: 'fragmentado01' },
+        { nombreUsuario: 'moss', contraseña: 'kendo01' },
+        { nombreUsuario: 'gamez', contraseña: 'reno01' },
+        { nombreUsuario: 'lagos', contraseña: 'lingo01' },
         { nombreUsuario: 'soza', contraseña: 'hacker01' },
-        { nombreUsuario: 'cerritos', contraseña: '' },
-        { nombreUsuario: 'colindres', contraseña: '' },
-        { nombreUsuario: 'barahona', contraseña: '' },
-        { nombreUsuario: 'tomas', contraseña: '' },
-        { nombreUsuario: 'aguilera', contraseña: '' },
-        { nombreUsuario: 'zepeda', contraseña: '' },
-        { nombreUsuario: 'avila', contraseña: '' },
-        { nombreUsuario: 'sanchez', contraseña: '' },
-        { nombreUsuario: 'ruz', contraseña: '' },
-        { nombreUsuario: 'zuniga', contraseña: '' },
-        { nombreUsuario: 'ponce', contraseña: '' },
-        { nombreUsuario: 'chavez', contraseña: '' },
-        { nombreUsuario: 'zamora', contraseña: '' },
-        { nombreUsuario: 'padilla', contraseña: '' },
-        { nombreUsuario: 'vasquez.v', contraseña: '' },
-        { nombreUsuario: 'estudiante', contraseña: '' }
+        { nombreUsuario: 'cerritos', contraseña: 'borrego01' },
+        { nombreUsuario: 'colindres', contraseña: 'duende01' },
+        { nombreUsuario: 'barahona', contraseña: 'shaggy01' },
+        { nombreUsuario: 'tomas', contraseña: 'brujo01' },
+        { nombreUsuario: 'aguilera', contraseña: 'peter01' },
+        { nombreUsuario: 'zepeda', contraseña: 'zarigueya01' },
+        { nombreUsuario: 'avila', contraseña: 'dobby01' },
+        { nombreUsuario: 'sanchez', contraseña: 'tawaka01' },
+        { nombreUsuario: 'ruz', contraseña: 'ruzo01' },
+        { nombreUsuario: 'zuniga', contraseña: 'churro01' },
+        { nombreUsuario: 'ponce', contraseña: 'kratos01' },
+        { nombreUsuario: 'chavez', contraseña: 'barber01' },
+        { nombreUsuario: 'zamora', contraseña: 'hitman01' },
+        { nombreUsuario: 'padilla', contraseña: 'condorito01' },
+        { nombreUsuario: 'vasquez.v', contraseña: 'chaolin01' },
+        { nombreUsuario: 'estudiante', contraseña: '12345' }
     ];
 
     // Función para verificar las credenciales
@@ -230,21 +240,22 @@
                     // Redirige al usuario a otra página después de 3 segundos
                     setTimeout(() => {
                         window.location.href = 'todo.html';
-                    }, 3000);
+                    }, 3000); // 3 segundos
                 } else {
-                    document.getElementById('error-message').innerText = 'Credenciales incorrectas.';
+                    // Muestra un mensaje de error
+                    document.getElementById('error-message').innerText = 'Usuario o contraseña incorrectos.';
                     document.getElementById('error-message').style.display = 'block';
                 }
             });
     });
 
-    // Función para mostrar la contraseña
+    // Función para mostrar/ocultar la contraseña
     function mostrarContraseña() {
-        const contraseñaInput = document.getElementById('password');
-        if (contraseñaInput.type === 'password') {
-            contraseñaInput.type = 'text';
+        const passwordInput = document.getElementById('password');
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
         } else {
-            contraseñaInput.type = 'password';
+            passwordInput.type = "password";
         }
     }
 </script>
