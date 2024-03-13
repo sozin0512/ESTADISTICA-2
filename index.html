@@ -1,140 +1,266 @@
-<!DOCTYPE html>
+
+     
+   <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>TODO SOBRE HELICOPTEROS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden; /* Evitar el desplazamiento al hacer el cuadro de login transparente */
+        }
 
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      overflow: hidden; /* Oculta las barras de desplazamiento */
-    }
+        #video-background {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1000;
+        }
 
-    .contenedor {
-      position: relative;
-      width: 100%;
-      height: 100vh; /* Altura total de la ventana */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: rgb(3, 3, 3); /* Color del texto */
-      text-align: center;
-    }
+        .login-container {
+            position: relative;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.1); /* Transparencia inicial */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+            transition: background-color 0.3s ease; /* Transición suave */
+        }
 
-    .fondo-video {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -1;
-    }
+        .login-container:hover {
+            background-color: rgba(255, 255, 255, 0.8); /* Cambio de transparencia al pasar el mouse */
+        }
 
-    .titulo {
-      font-size: 2.5em;
-      margin-bottom: 20px;
-    }
+        .login-container h2 {
+            margin-top: 0;
+            text-align: center;
+        }
 
-    .botones-principales {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap; /* Permite que los botones se envuelvan en líneas */
-    }
+        .form-group {
+            margin-bottom: 20px;
+        }
 
-    .boton-principal {
-      margin: 10px; /* Espaciado entre los botones */
-      font-size: 2em;
-      padding: 10px 20px;
-      background-color: rgba(255, 2, 2, 0.5); /* Color de fondo semitransparente */
-      color: rgb(10, 0, 0);
-      text-decoration: none;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-      font-weight: bold; /* Texto en negrita */
-    }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+        }
 
-    .boton-principal:hover {
-      background-color: rgba(100, 253, 11, 0.7); /* Cambia el color de fondo al pasar el mouse */
-    }
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: calc(100% - 24px);
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            margin-bottom: 8px;
+        }
 
-    .dias-sin-accidentes {
-      margin-top: 40px;
-      font-size: 2em;
-      color: rgb(255, 255, 255);
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 20px 40px;
-      border-radius: 10px;
-      animation: pulsar 2s infinite alternate; /* Agregamos una animación al contador */
-      text-transform: uppercase; /* Convierte el texto a mayúsculas */
-      font-weight: bold; /* Texto en negrita */
-    }
+        .show-password {
+            cursor: pointer;
+        }
 
-    @keyframes pulsar {
-      0% {
-        transform: scale(1);
-      }
-      100% {
-        transform: scale(1.1);
-      }
-    }
-  </style>
+        .form-group input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-group input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading img {
+            width: 50px;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+        }
+
+        .welcome-message {
+            color: green;
+            font-size: 16px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .created-by {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: white;
+            font-size: 12px;
+            text-shadow: 1px 1px 1px black;
+        }
+
+        .lema {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            font-size: 16px;
+            text-shadow: 1px 1px 1px black;
+        }
+    </style>
 </head>
 <body>
-  <video class="fondo-video" autoplay loop muted>
-    <source src="video.mp4" type="video/mp4">
-    Tu navegador no soporta la etiqueta de video.
-  </video>
 
-  <div class="contenedor">
-    <h1 class="titulo">PLATAFORMA DE TRABAJO ESCUADRON DE HELICOPTEROS</h1>
-    <div class="botones-principales">
-      <a href="ESTADISTICA.HTML" class="boton-principal">ESTADISTICA</a>
-      <a href="https://www.bellhelicopter.net/tp/" class="boton-principal">MANUALES BELL</a>
-      <a href="https://www.prattwhitney.com/" class="boton-principal">MANUALES MOTORES</a>
-      <a href="MODIFICACION.HTML" class="boton-principal">ACTUALIZAR ESTADO DIARIO</a>
-      <a href="H.HTML" class="boton-principal">MANUALES UH-1H</a>
-      <a href="OFICINA.HTML" class="boton-principal">OFICINA</a> <!-- Movido al final -->
-      <!-- Agrega más botones principales con sus respectivas URLs -->
-    </div>
-    <div class="dias-sin-accidentes" id="dias-sin-accidentes">DÍAS SIN ACCIDENTES: <span id="contador-dias">719</span></div>
-  </div>
+<video id="video-background" autoplay muted loop>
+    <source src="videito.mp4" type="video/mp4">
+    <!-- Puedes agregar más formatos de video aquí para mejorar la compatibilidad -->
+    Tu navegador no admite la etiqueta de video.
+</video>
 
-  <script>
-    // Función para calcular la cantidad de días desde una fecha hasta ahora
-    function calcularDias() {
-      var fechaInicio = new Date('2024-03-04T06:00:00'); // Fecha de inicio a las 6 AM
-      var fechaActual = new Date();
-      var diferenciaTiempo = fechaActual.getTime() - fechaInicio.getTime();
-      var dias = Math.floor(diferenciaTiempo / (1000 * 3600 * 24));
-      return dias + 719; // Sumamos 719 días iniciales
+<div class="login-container">
+    <h2>Iniciar sesión</h2>
+    <form id="login-form">
+        <div class="form-group">
+            <label for="username">Nombre de usuario:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required>
+            <span class="show-password" onclick="mostrarContraseña()">Mostrar contraseña</span>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Iniciar sesión">
+        </div>
+        <div class="loading" id="loading">
+            <img src="imageng.gif" alt="Cargando...">
+        </div>
+        <div class="error-message" id="error-message" style="display: none;"></div>
+        <div class="welcome-message" id="welcome-message"></div>
+    </form>
+</div>
+
+<div class="created-by">CREATED BY HACKER 01</div>
+<div class="lema">SEAMOS METODIOCOS, "MECANICOS YA SOMOS"</div>
+
+<script>
+    // Base de datos de usuarios (simulada)
+    const usuarios = [
+        { nombreUsuario: 'pavon', contraseña: 'gruffi01' },
+        { nombreUsuario: 'rodriguez', contraseña: 'chinotin01' },
+        { nombreUsuario: 'rendon', contraseña: 'minero01' },
+        { nombreUsuario: 'andino', contraseña: 'viejo01' },
+        { nombreUsuario: 'mejia', contraseña: 'mole01' },
+        { nombreUsuario: 'vasquez', contraseña: 'villano01' },
+        { nombreUsuario: 'zeron', contraseña: 'invisible01' },
+        { nombreUsuario: 'varela', contraseña: 'neutron01' },
+        { nombreUsuario: 'duran', contraseña: 'fragmentado01' },
+        { nombreUsuario: 'moss', contraseña: 'kendo01' },
+        { nombreUsuario: 'gamez', contraseña: 'reno01' },
+        { nombreUsuario: 'lagos', contraseña: 'lingo01' },
+        { nombreUsuario: 'soza', contraseña: 'hacker01' },
+        { nombreUsuario: 'cerritos', contraseña: 'borrego01' },
+        { nombreUsuario: 'colindres', contraseña: 'duende01' },
+        { nombreUsuario: 'barahona', contraseña: 'shaggy01' },
+        { nombreUsuario: 'tomas', contraseña: 'brujo01' },
+        { nombreUsuario: 'aguilera', contraseña: 'peter01' },
+        { nombreUsuario: 'zepeda', contraseña: 'zarigueya01' },
+        { nombreUsuario: 'avila', contraseña: 'dobby01' },
+        { nombreUsuario: 'sanchez', contraseña: 'tawaka01' },
+        { nombreUsuario: 'ruz', contraseña: 'ruzo01' },
+        { nombreUsuario: 'zuniga', contraseña: 'churro01' },
+        { nombreUsuario: 'ponce', contraseña: 'kratos01' },
+        { nombreUsuario: 'chavez', contraseña: 'barber01' },
+        { nombreUsuario: 'zamora', contraseña: 'hitman01' },
+        { nombreUsuario: 'padilla', contraseña: 'condorito01' },
+        { nombreUsuario: 'vasquez.v', contraseña: 'chaolin01' },
+        { nombreUsuario: 'estudiante', contraseña: '12345' }
+    ];
+
+    // Función para verificar las credenciales
+    function verificarCredenciales(nombreUsuario, contraseña) {
+        // Simulamos la verificación con un tiempo de espera
+        return new Promise(resolve => {
+            setTimeout(() => {
+                // Busca el usuario en la base de datos
+                const usuario = usuarios.find(u => u.nombreUsuario === nombreUsuario);
+
+                // Si el usuario no existe, retorna falso
+                if (!usuario) {
+                    resolve(false);
+                }
+
+                // Si la contraseña coincide, retorna verdadero
+                resolve(usuario.contraseña === contraseña);
+            }, 2000); // Tiempo de espera simulado de 2 segundos
+        });
     }
 
-    // Función para actualizar el contador de días sin accidentes
-    function actualizarContador() {
-      var contador = document.getElementById('contador-dias');
-      contador.innerText = calcularDias();
+    // Función para manejar el envío del formulario
+    document.getElementById('login-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Evita que el formulario se envíe
+
+        // Muestra el indicador de carga
+        document.getElementById('loading').style.display = 'block';
+
+        // Obtiene los valores del formulario
+        const nombreUsuario = document.getElementById('username').value;
+        const contraseña = document.getElementById('password').value;
+
+        // Verifica las credenciales
+        verificarCredenciales(nombreUsuario, contraseña)
+            .then(credencialesCorrectas => {
+                // Oculta el indicador de carga
+                document.getElementById('loading').style.display = 'none';
+
+                if (credencialesCorrectas) {
+                    // Muestra un mensaje de bienvenida
+                    document.getElementById('welcome-message').innerText = `¡Bienvenido, ${nombreUsuario}!`;
+                    document.getElementById('welcome-message').style.display = 'block';
+
+                    // Redirige al usuario a otra página después de 3 segundos
+                    setTimeout(() => {
+                        window.location.href = 'todo.html';
+                    }, 3000); // 3 segundos
+                } else {
+                    // Muestra un mensaje de error
+                    document.getElementById('error-message').innerText = 'Usuario o contraseña incorrectos.';
+                    document.getElementById('error-message').style.display = 'block';
+                }
+            });
+    });
+
+    // Función para mostrar/ocultar la contraseña
+    function mostrarContraseña() {
+        const passwordInput = document.getElementById('password');
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+        } else {
+            passwordInput.type = "password";
+        }
     }
+</script>
 
-    // Llamamos a la función para actualizar el contador al cargar la página
-    actualizarContador();
-
-    // Configuramos un temporizador para actualizar el contador automáticamente a las 6 AM cada día
-    function actualizarDiariamente() {
-      var ahora = new Date();
-      var tiempoHastaManana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1, 6) - ahora;
-      setTimeout(function() {
-        actualizarContador();
-        actualizarDiariamente(); // Llamar de nuevo para configurar la actualización diaria
-      }, tiempoHastaManana);
-    }
-
-    // Llamamos a la función para configurar la actualización diaria
-    actualizarDiariamente();
-  </script>
 </body>
 </html>
