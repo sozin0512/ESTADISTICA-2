@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Botones Estéticos</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .container {
+    text-align: center;
+  }
+
+  .button {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #3498db;
+    color: white;
+    cursor: pointer;
+    margin: 10px;
+    transition: background-color 0.3s ease;
+  }
+
+  .button:hover {
+    background-color: #2980b9;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <button class="button" onclick="openPDF('manto1.pdf')">MANTO 1</button>
+  <button class="button" onclick="openPDF('manto2.pdf')">MANTO 2</button>
+  <button class="button" onclick="openPDF('manto3.pdf')">MANTO 3</button>
+  <button class="button" onclick="openPDF('partes1.pdf')">PARTE 1</button>
+  <button class="button" onclick="openPDF('partes2.pdf')">PARTE 2</button>
+  <button class="button" onclick="openPDF('partes3.pdf')">PARTE 3</button>
+</div>
+
+<script>
+  function openPDF(pdfName) {
+    window.open(pdfName, '_blank');
+  }
+</script>
+
+</body>
+</html>
