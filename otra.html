@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Retiro de Componentes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #0e0d0d;
+        }
+
+        .container {
+            width: 60%;
+            margin: 0 auto;
+            background-color: rgba(179, 46, 46, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 2rem;
+        }
+
+        label {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            background-color: #fff;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        ::placeholder {
+            color: #777;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Formulario de Retiro de Componentes</h1>
+        <form id="formulario" action="https://formsubmit.co/josuesoza0513@gmail.com" method="POST">
+            <label for="nombre">Nombre del Mecánico:</label>
+            <input type="text" id="nombre" name="nombre" required>
+
+            <label for="numero_serie">Número de Serie:</label>
+            <input type="text" id="numero_serie" name="numero_serie" required>
+
+            <label for="numero_parte">Número de Parte:</label>
+            <input type="text" id="numero_parte" name="numero_parte" required>
+
+            <label for="razon">Razón por la cual se remueve:</label>
+            <input type="text" id="razon" name="razon" required>
+
+            <label for="nombre_componente">Nombre del Componente:</label>
+            <input type="text" id="nombre_componente" name="nombre_componente" required>
+
+            <label for="inspector_autoriza">Inspector que autoriza:</label>
+            <select id="inspector_autoriza" name="inspector_autoriza" required>
+                <option value="">Seleccione un inspector</option>
+                <option value="jeferodriguez">Jefe Rodríguez</option>
+                <option value="jefepavon">Jefe Pavón</option>
+                <option value="jeferendon">Jefe Rendón</option>
+                <option value="jefeandino">Jefe Andino</option>
+                <option value="jefemejia">Jefe Mejía</option>
+            </select>
+
+            <label for="fecha_desinstalacion">Fecha de Desinstalación:</label>
+            <input type="date" id="fecha_desinstalacion" name="fecha_desinstalacion" required>
+
+            <label for="hora_desinstalacion">Hora de Desinstalación:</label>
+            <input type="time" id="hora_desinstalacion" name="hora_desinstalacion" required>
+
+            <label for="tipo_helicoptero">Tipo de Helicóptero:</label>
+            <select id="tipo_helicoptero" name="tipo_helicoptero" required>
+                <option value="">Seleccione un tipo</option>
+                <option value="UH-1H">UH-1H</option>
+                <option value="BELL-412">BELL-412</option>
+                <option value="H-145">H-145</option>
+                <option value="BO-105">BO-105</option>
+            </select>
+
+            <label for="leyenda">Leyenda:</label>
+            <textarea id="leyenda" name="leyenda" rows="4" placeholder="Escriba la leyenda de la forma..."></textarea>
+
+            <!-- Campos ocultos para FormSubmit -->
+            <input type="hidden" name="_next" value="http://tusitio.com/gracias.html"> <!-- Redirige a una página de agradecimiento -->
+            <input type="hidden" name="_captcha" value="false"> <!-- Desactiva el captcha -->
+
+            <button type="submit">Retirar Componente</button>
+        </form>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Importar Firebase Modular SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        // Configuración de Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyCIzSu7zf54j48AqkSDBCTLvMq3CH89jk4",
+          authDomain: "database-80e6d.firebaseapp.com",
+          projectId: "database-80e6d",
+          storageBucket: "database-80e6d.firebasestorage.app",
+          messagingSenderId: "343574290642",
+          appId: "1:343574290642:web:cefa4cc16895fd405a4d0b"
+        }; 
+      
+        // Inicializa Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Referencia al formulario
+        const formulario = document.getElementById('formulario');
+
+        formulario.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Evitar el envío inmediato del formulario
+
+            // Obtener los valores del formulario
+            const nombre = document.getElementById('nombre').value;
+            const numeroSerie = document.getElementById('numero_serie').value;
+            const numeroParte = document.getElementById('numero_parte').value;
+            const razon = document.getElementById('razon').value;
+            const nombreComponente = document.getElementById('nombre_componente').value;
+            const inspectorAutoriza = document.getElementById('inspector_autoriza').value;
+            const fechaDesinstalacion = document.getElementById('fecha_desinstalacion').value;
+            const horaDesinstalacion = document.getElementById('hora_desinstalacion').value;
+            const tipoHelicoptero = document.getElementById('tipo_helicoptero').value;
+            const leyenda = document.getElementById('leyenda').value;
+
+            try {
+                // Guardar en Firestore
+                await addDoc(collection(db, 'retiros_componentes'), {
+                    nombre,
+                    numeroSerie,
+                    numeroParte,
+                    razon,
+                    nombreComponente,
+                    inspectorAutoriza,
+                    fechaDesinstalacion,
+                    horaDesinstalacion,
+                    tipoHelicoptero,
+                    leyenda
+                });
+                
+                // Al guardar exitosamente en Firebase, enviar el formulario a FormSubmit
+                formulario.submit(); // Este comando envía el formulario a FormSubmit
+            } catch (error) {
+                console.error('Error al guardar los datos:', error);
+                alert('Hubo un error al registrar el retiro.');
+            }
+        });
+    </script>
+</body>
+</html>
+
