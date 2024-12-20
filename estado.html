@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Horas</title>
+    <!-- Importar Firebase mediante módulos -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        // Tu configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9DsuXEUCPolSIaVxUV_f8JGCLAT-TKVo",
+            authDomain: "funcion-66a51.firebaseapp.com",
+            databaseURL: "https://funcion-66a51-default-rtdb.firebaseio.com",
+            projectId: "funcion-66a51",
+            storageBucket: "funcion-66a51.firebasestorage.app",
+            messagingSenderId: "944280958579",
+            appId: "1:944280958579:web:19be645b83184bf5935c06"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Referencia al cuerpo de la tabla
+        const hoursTableBody = document.getElementById('hours-table-body');
+        const saveButton = document.getElementById('save-button'); // Referencia al botón de guardar
+
+        // Función para guardar los datos en Firebase
+        function saveRowData() {
+            const rows = hoursTableBody.rows;
+            for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+                const row = rows[rowIndex];
+                const rowData = [];
+
+                // Recorrer todas las celdas de la fila para obtener los datos
+                for (let cell of row.cells) {
+                    const input = cell.querySelector('input') || cell.querySelector('select');
+                    rowData.push(input ? input.value : ''); // Si la celda contiene un input o select, guardar su valor
+                }
+
+                // Guardar en Firebase
+                const newRecordRef = push(ref(db, 'records'));
+                set(newRecordRef, rowData);
+            }
+        }
+
+        // Función para calcular las horas remanentes
+        function calculateRemainingHours() {
+            const rows = hoursTableBody.rows;
+            for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+                const row = rows[rowIndex];
+                const acCell = row.cells[5]; // HRS A/C
+                const nextIspCell = row.cells[4]; // PROXIMA ISP 25HRS
+                const remainingCell = row.cells[6]; // HORAS REMANENTE 25 HRS
+
+        function calculateRemainingHours() {
+            const rows = hoursTableBody.rows;
+            for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+                const row = rows[rowIndex];
+                const acCell = row.cells[7]; // HRS A/C
+                const nextIspCell = row.cells[4]; // PROXIMA ISP 25HRS
+                const remainingCell = row.cells[8]; // HORAS REMANENTE 25 HRS        
+            } 
+        }
+
+                const acValue = parseFloat(acCell.querySelector('input').value) || 0;
+                const nextIspValue = parseFloat(nextIspCell.querySelector('input').value) || 0;
+
+                // Si PROXIMA ISP 25HRS es 0, dejamos HORAS REMANENTE 25 HRS vacío
+                if (nextIspValue === 0) {
+                    remainingCell.querySelector('input').value = '';
+                } else {
+                    // Calcular el valor restante
+                    const remainingValue = acValue - nextIspValue;
+                    remainingCell.querySelector('input').value = remainingValue;
+                }
+            }
+        }
+
+        // Función para actualizar la fecha en la columna 10 cuando la columna 4 se modifique
+        function updateDateOnStatusChange(event) {
+            const cellIndex = event.target.closest('td').cellIndex;
+            if (cellIndex === 3) { // Si se modificó la columna 4 (Estado)
+                const row = event.target.closest('tr');
+                const dateCell = row.cells[9]; // Columna 10 (Inspección de fase siguiente)
+
+                // Establecer la fecha actual
+                const currentDate = new Date().toLocaleDateString('es-ES');
+                dateCell.querySelector('input').value = currentDate;
+            }
+        }
+
+        // Agregar 10 filas vacías al cargar la página
+        window.addEventListener('load', () => {
+            for (let i = 0; i < 10; i++) {
+                const row = document.createElement('tr');
+
+                // Crear la primera celda con el número de fila
+                const cellNumber = document.createElement('td');
+                cellNumber.textContent = i + 1; // Numeración de las filas de 1 a 10
+                row.appendChild(cellNumber);
+
+                // Crear celdas de entrada para las otras columnas
+                for (let j = 0; j < 12; j++) { // Ahora son 12 columnas (sin contar la de número)
+                    const cell = document.createElement('td');
+
+                    // Eliminar la creación de select para la columna 4 (índice 3)
+                    if (j === 2) {
+                        const select = document.createElement('select');
+                        select.style.width = '100px'; // Tamaño consistente con el input
+                        select.style.textAlign = 'center'; // Centrado
+                        
+                        const optionX = document.createElement('option');
+                        optionX.value = 'X';
+                        optionX.textContent = 'X';
+                        optionX.style.color = 'red'; // Color rojo para la X
+                        
+                        const optionDash = document.createElement('option');
+                        optionDash.value = '-';
+                        optionDash.textContent = '-';
+                        
+                        select.appendChild(optionX);
+                        select.appendChild(optionDash);
+                        cell.appendChild(select);
+                    } else if (j === 9) {
+                        // Para la columna 10 (Inspección de fase siguiente), agregar un campo de fecha
+                        const inputDate = document.createElement('input');
+                        inputDate.type = 'date';  // Tipo de campo de entrada para seleccionar fechas
+                        inputDate.style.width = '100px';  // Ancho consistente con los otros campos
+                        inputDate.style.textAlign = 'center'; // Centrado del texto
+                        const currentDate = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+                        inputDate.value = currentDate;  // Establecer la fecha actual por defecto
+                        cell.appendChild(inputDate);
+                    } else if (j === 11) {
+                        // Para la columna 12 (Inoperativo desde), agregar un campo de fecha
+                        const inputDate = document.createElement('input');
+                        inputDate.type = 'date';  // Tipo de campo de entrada para seleccionar fechas
+                        inputDate.style.width = '100px';  // Ancho consistente con los otros campos
+                        inputDate.style.textAlign = 'center'; // Centrado del texto
+                        const currentDate = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+                        inputDate.value = currentDate;  // Establecer la fecha actual por defecto
+                        cell.appendChild(inputDate);
+                    } else {
+                        // Para otras celdas, creamos un input normal
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.style.width = '100px';  // Ancho más grande para el espacio
+                        input.style.padding = '5px';  // Más espacio dentro del input
+                        input.style.textAlign = 'center'; // Centrado del texto
+                        cell.appendChild(input);
+                    }
+                    row.appendChild(cell);
+                }
+
+                // Agregar la fila a la tabla
+                hoursTableBody.appendChild(row);
+            }
+
+            // Agregar evento a las celdas de la columna 4
+            const cellsColumn4 = document.querySelectorAll('#hours-table-body td:nth-child(4) select');
+            cellsColumn4.forEach(cell => {
+                cell.addEventListener('change', updateDateOnStatusChange);
+            });
+        });
+
+        // Agregar evento al botón de guardar
+        saveButton.addEventListener('click', () => {
+            calculateRemainingHours(); // Calcular las horas remanentes
+            saveRowData(); // Guardar los datos de la tabla
+            alert('Los datos han sido guardados.');
+        });
+    </script>
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 10px;  /* Aumentamos el espacio dentro de las celdas */
+        }
+        input[type="text"], select, input[type="date"] {
+            width: 100%;  /* Para que ocupe todo el espacio disponible de la celda */
+            padding: 5px; /* Añadimos algo de espacio dentro del input */
+            text-align: center; /* Centrar el texto dentro del input */
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>ESTADO DIARIO</h1>
+    <p></p>
+
+    <button id="save-button">Guardar Datos</button> <!-- Botón para guardar los datos -->
+
+    <h2>Horas Registradas</h2>
+
+    <!-- Tabla para mostrar los registros -->
+    <table id="hours-table" border="1">
+        <thead>
+            <tr>
+                <th>N°</th>
+                <th>MODELO</th>
+                <th>REGISTRO</th>
+                <th>ESTADO</th>
+                <th>HRS A/C</th>
+                <th>PROXIMA ISP 25HRS</th>
+                <th>HORAS REMANENTE 25 HRS</th>
+                <th>HRS PROXIMAS ISP FASE</th>
+                <th>PROXIMA ISP FASE</th>
+                <th>INSPECCION DE FASE SIGUIENTE</th>
+                <th>ULTIMO VUELO</th>
+                <th>UBICACION</th>
+                <th>INOPERATIVO DESDE</th>
+            </tr>
+        </thead>
+        <tbody id="hours-table-body">
+            <!-- Aquí se agregarán las filas dinámicamente -->
+        </tbody>
+    </table>
+</body>
+</html>
