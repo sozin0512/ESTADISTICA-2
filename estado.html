@@ -59,12 +59,12 @@
         <th>MODELO</th>
         <th>REGISTRO</th>
         <th>ESTADO</th>
-        <th>HRS A/CPROXINSP.25 HRS</th>
+        <th>HRS A/CPROXINSP 25 HRS</th>
         <th>HRS A/C</th>
         <th>HRS.REMANENTESPROX INSP 25HRS</th>
         <th>HRS A/C PROX INSP FASE</th>
         <th>HRS REMAMANENTES PROX INSP DE FASE </th>
-        <th>°NUMERO DE INSP DE FASE</th>
+        <th>°NUMERO DEINSP DE FASE</th>
         <th>Fecha</th>
         <th>UBICACION</th>
         <th>INSPECCION ANUAL</th>
@@ -113,7 +113,7 @@
             cell.dataset.col = j;
 
             // Escuchar cambios en columnas relevantes para cálculos
-            if ([5, 7].includes(j)) {
+            if ([4, 5, 7].includes(j)) {
               cell.addEventListener("input", handleInputChange);
             }
 
@@ -128,7 +128,7 @@
       }
 
       // Ejecutar cálculos iniciales después de cargar la tabla
-      document.querySelectorAll('td[data-col="5"]').forEach(cell => cell.dispatchEvent(new Event('input')));
+      document.querySelectorAll('td[data-col="5"], td[data-col="7"]').forEach(cell => cell.dispatchEvent(new Event('input')));
     };
 
     const handleInputChange = (event) => {
@@ -138,6 +138,10 @@
       const validNumber = (value) => !isNaN(parseFloat(value)) && isFinite(value);
 
       // Obtener valores de las columnas necesarias
+      const col4 = validNumber(document.querySelector(`td[data-row="${row}"][data-col="4"]`).textContent.trim()) 
+        ? parseFloat(document.querySelector(`td[data-row="${row}"][data-col="4"]`).textContent.trim()) 
+        : 0;
+
       const col5 = validNumber(document.querySelector(`td[data-row="${row}"][data-col="5"]`).textContent.trim()) 
         ? parseFloat(document.querySelector(`td[data-row="${row}"][data-col="5"]`).textContent.trim()) 
         : 0;
@@ -146,12 +150,17 @@
         ? parseFloat(document.querySelector(`td[data-row="${row}"][data-col="7"]`).textContent.trim()) 
         : 0;
 
+      // Calcular el resultado para columna 6 (4 - 5)
+      const col6 = document.querySelector(`td[data-row="${row}"][data-col="6"]`);
+      const resultadoCol6 = col4 - col5; // Permitir números negativos
+      col6.textContent = resultadoCol6.toFixed(2);
+
       // Calcular el resultado para columna 8 (7 - 5)
       const col8 = document.querySelector(`td[data-row="${row}"][data-col="8"]`);
       const resultadoCol8 = col7 - col5; // Permitir números negativos
       col8.textContent = resultadoCol8.toFixed(2);
 
-      console.log(`Fila: ${row}, Columna 7: ${col7}, Columna 5: ${col5}, Resultado Columna 8: ${resultadoCol8}`);
+      console.log(`Fila: ${row}, Columna 4: ${col4}, Columna 5: ${col5}, Columna 7: ${col7}, Resultado Columna 6: ${resultadoCol6}, Resultado Columna 8: ${resultadoCol8}`);
     };
 
     const handleDateCellClick = (cell) => {
