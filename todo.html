@@ -34,32 +34,43 @@
       z-index: -1;
     }
 
+    .dashboard {
+      position: relative;
+      z-index: 1; /* Asegura que el contenido esté por encima del fondo de video */
+      padding-top: 20px; /* Espaciado para que no se superponga con el fondo */
+      text-align: center;
+    }
+
     .titulo {
       font-size: 2.5em;
       margin-bottom: 20px;
     }
 
     .botones-principales {
-      display: flex;
+      display: none; /* El menú está oculto inicialmente */
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       flex-wrap: wrap; /* Permite que los botones se envuelvan en líneas */
+      z-index: 1; /* Asegura que los botones estén por encima del fondo */
+      margin-top: 20px; /* Un poco de espacio desde el botón de menú */
     }
 
     .boton-principal {
       margin: 10px; /* Espaciado entre los botones */
       font-size: 2em;
       padding: 10px 20px;
-      background-color: rgba(255, 2, 2, 0.5); /* Color de fondo semitransparente */
+      background-color: rgba(255, 0, 0, 0.5); /* Color de fondo semitransparente */
       color: rgb(10, 0, 0);
       text-decoration: none;
       border-radius: 5px;
-      transition: background-color 0.3s;
+      transition: background-color 0.3s, transform 0.3s;
       font-weight: bold; /* Texto en negrita */
     }
 
     .boton-principal:hover {
       background-color: rgba(100, 253, 11, 0.7); /* Cambia el color de fondo al pasar el mouse */
+      transform: scale(1.1); /* Animación de escala */
     }
 
     .dias-sin-accidentes {
@@ -82,6 +93,36 @@
         transform: scale(1.1);
       }
     }
+
+    /* Estilo del botón de menú */
+    .menu-boton {
+      font-size: 2.5em;
+      padding: 15px 30px;
+      background-color: #f00b0b; /* Un color llamativo */
+      color: white;
+      text-decoration: none;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.3s;
+      font-weight: bold;
+      margin-bottom: 20px; /* Espacio inferior */
+    }
+
+    .menu-boton:hover {
+      background-color: #2ed81e; /* Color más oscuro cuando pasa el ratón */
+      transform: scale(1.1); /* Efecto de agrandar el botón */
+    }
+
+    .menu-boton:focus {
+      outline: none; /* Elimina el borde de enfoque por defecto */
+    }
+
+    .menu-boton:after {
+      content: "☰"; /* Ícono de menú (hamburguesa) */
+      font-size: 1.5em;
+      margin-left: 10px;
+    }
   </style>
 </head>
 <body>
@@ -91,18 +132,28 @@
   </video>
 
   <div class="contenedor">
-    <h1 class="titulo">PLATAFORMA DE TRABAJO ESCUADRON DE HELICOPTEROS</h1>
-    <div class="botones-principales">
-      <a href="ESTADISTICA.HTML" class="boton-principal">ESTADISTICA</a>
-      <a href="https://www.bellhelicopter.net/tp/" class="boton-principal">MANUALES BELL</a>
-      <a href="https://www.prattwhitney.com/" class="boton-principal">MANUALES MOTORES</a>
-      <a href="estado.html" class="boton-principal">ACTUALIZAR ESTADO DIARIO</a>
-      <a href="H.HTML" class="boton-principal">MANUALES UH-1H</a>
-      <a href="otra.html" class="boton-principal">RETIRO DE COMPONENTES</a>
-      <a href="OFICINA.HTML" class="boton-principal">OFICINA</a> <!-- Movido al final -->
-      <!-- Agrega más botones principales con sus respectivas URLs -->
+    <div class="dashboard">
+      <div class="contador"><span id="dias-contador"></span></div>
+      
+      <!-- Botón de menú mejorado -->
+      <button class="menu-boton" id="menu-toggle">Mostrar Menú</button>
+
+      <!-- Contenedor de los botones dentro del dashboard -->
+      <div class="botones-principales" id="menu">
+        <a href="ESTADISTICA.HTML" class="boton-principal">ESTADISTICA</a>
+        <a href="https://www.bellhelicopter.net/tp/" class="boton-principal">MANUALES BELL</a>
+        <a href="https://www.prattwhitney.com/" class="boton-principal">MANUALES MOTORES</a>
+        <a href="estado.html" class="boton-principal">ACTUALIZAR ESTADO DIARIO</a>
+        <a href="H.HTML" class="boton-principal">MANUALES UH-1H</a>
+        <a href="otra.html" class="boton-principal">RETIRO DE COMPONENTES</a>
+        <a href="OFICINA.HTML" class="boton-principal">OFICINA</a>
+        <a href="https://idp.airbushelicopters.com/idp/SSO.saml2" class="boton-principal">MANUALES AIRBUS</a>
+      </div>
+      
+      <div class="dias-sin-accidentes" id="dias-sin-accidentes">
+        DÍAS SIN ACCIDENTES: <span id="contador-dias">719</span>
+      </div>
     </div>
-    <div class="dias-sin-accidentes" id="dias-sin-accidentes">DÍAS SIN ACCIDENTES: <span id="contador-dias">719</span></div>
   </div>
 
   <script>
@@ -136,6 +187,21 @@
 
     // Llamamos a la función para configurar la actualización diaria
     actualizarDiariamente();
+
+    // Lógica para mostrar/ocultar el menú al hacer clic en el botón
+    const menuToggle = document.getElementById('menu-toggle');
+    const menu = document.getElementById('menu');
+
+    menuToggle.addEventListener('click', function() {
+      // Alternar la visibilidad del menú
+      if (menu.style.display === 'flex') {
+        menu.style.display = 'none';
+        menuToggle.textContent = 'Mostrar Menú'; // Cambiar el texto del botón
+      } else {
+        menu.style.display = 'flex';
+        menuToggle.textContent = 'Ocultar Menú'; // Cambiar el texto del botón
+      }
+    });
   </script>
 </body>
 </html>
