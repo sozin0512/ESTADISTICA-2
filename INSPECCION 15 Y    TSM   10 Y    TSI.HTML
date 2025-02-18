@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía de Inspección de Helicópteros Airbus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        header {
+            background-color: #003366;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+        }
+        .container {
+            padding: 20px;
+        }
+        .section {
+            background: white;
+            padding: 15px;
+            margin: 10px auto;
+            width: 80%;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #003366;
+            color: white;
+        }
+        footer {
+            background-color: #003366;
+            color: white;
+            padding: 10px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+        .print-button {
+            background-color: #003366;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .print-button:hover {
+            background-color: #00509e;
+        }
+
+        /* Estilos de impresión */
+        @media print {
+            body {
+                background-color: white;
+                margin: 0;
+                padding: 0;
+                color: black; /* Asegurarse que todo el texto sea negro */
+            }
+            header, footer {
+                display: none; /* Elimina el encabezado y pie de página en la impresión */
+            }
+            .container {
+                width: 100%;
+                padding: 0;
+                text-align: left;
+            }
+            .section {
+                width: 100%;
+                padding: 10px;
+                box-shadow: none;
+                color: black; /* Asegura que todo el texto en las secciones sea negro */
+            }
+            table {
+                margin-top: 0;
+                width: 100%;
+            }
+            th, td {
+                padding: 12px;
+                color: black; /* Asegura que el texto en la tabla sea negro */
+                background-color: white; /* El fondo debe ser blanco */
+                border: 1px solid black; /* Bordes de color negro */
+            }
+            th {
+                background-color: #003366;
+                color: white;
+            }
+            .print-button {
+                display: none; /* Elimina el botón de impresión en la versión impresa */
+            }
+            table, th, td {
+                border: 1px solid #000; /* Asegura que todos los bordes sean negros */
+                background-color: white; /* Fondo blanco para las celdas */
+            }
+
+            /* Asegurar que el color en los encabezados también sea negro */
+            table th {
+                color: black; /* Asegura que los encabezados también sean negros */
+                background-color: #003366; /* Mantén el fondo azul en los encabezados */
+            }
+
+            /* Ya no se incluye @page para orientación específica, lo que permite al usuario elegir */
+        }
+
+        /* Estilos para ajustar las columnas */
+        table th:nth-child(1), table td:nth-child(1) {
+            width: 10%; /* Hacer la columna "Item" más pequeña */
+        }
+
+        table th:nth-child(2), table td:nth-child(2) {
+            width: 25%; /* Hacer la columna "Elemento" más pequeña */
+        }
+
+        table th:nth-child(3), table td:nth-child(3) {
+            width: 40%; /* Hacer la columna "Action" más ancha */
+        }
+
+        table th:nth-child(4), table td:nth-child(4) {
+            width: 10%; /* Hacer la columna "MECH" más pequeña */
+        }
+
+        table th:nth-child(5), table td:nth-child(5) {
+            width: 10%; /* Hacer la columna "Inspector" más pequeña */
+        }
+    </style>
+    <script>
+        function printPage() {
+            window.print();
+        }
+    </script>
+</head>
+<body>
+    <header>
+        Guía de Inspección de Helicópteros Airbus
+    </header>
+    <div class="container">
+        <div class="section">
+            <h2> INSPECCION 15 Y    TSM   10 Y    TSI                 </h2>
+            <table>
+                <tr>
+                    <th>Aeronave</th>
+                    <td></td>
+                    <th>Engine</th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Reference</th>
+                    <td></td>
+                    <th>Location</th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Hours</th>
+                    <td></td>
+                    <th>Date</th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Page</th>
+                    <td></td>
+                    <th>Raised By</th>
+                    <td></td>
+                </tr>
+            </table>
+            <table>
+                <tr>
+                    <th>Item</th>
+                    <th>Requirement</th>
+                    <th>Action</th>
+                    <th>MECH</th>
+                    <th>INSPECTOR</th>
+                </tr>
+                <tr>
+                    <td>0001</td>
+                    <td>BAT 200 Battery Replacement Kit (ELT)
+                        "EFFECTIVITY: ELT AP-H INTEGRA 
+                        According to the expiration date indicated on each battery 
+                        Maintenance Task"
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>0002</td>
+                    <td>Battery pack in ELT 4000 "EFFECTIVITY: ARTEX ELT 4000 
+                        According to the expiration date indicated on the battery 
+                        Maintenance Task"
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>0003</td>
+                    <td>Battery of Underwater Locator Beacon (ULB) Dukane DK120/90 "Part of Underwater Locator Beacon (ULB) P/N 266E5542-00 
+                        According to the expiration date indicated on the casing of the ULB. 
+                        Maintenance Task"
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>0004</td>
+                    <td>Battery of Underwater Locator Beacon (ULB) ELP-362D   "According to the expiration date indicated on the battery. 
+                        Maintenance Task"
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>0005</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+            <button class="print-button" onclick="printPage()">Imprimir Página</button>
+        </div>
+    </div>
+    <footer>
+        &copy; 2025 Guía de Inspección de Helicópteros Airbus - Todos los derechos reservados
+    </footer>
+</body>
+</html>

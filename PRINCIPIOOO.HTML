@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de URLs en la Página</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .buscador {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .buscador input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .buscador button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .buscador button:hover {
+            background-color: #45a049;
+        }
+        .resultados {
+            margin-top: 20px;
+        }
+        .resultado-url {
+            margin: 5px 0;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Buscador de URLs en la Página</h1>
+    
+    <!-- Buscador -->
+    <div class="buscador">
+        <input type="text" id="searchInput" placeholder="Buscar URL..." onkeyup="filtrarURLs()">
+    </div>
+
+    <!-- Resultados -->
+    <div id="resultados" class="resultados"></div>
+
+    <!-- URLs a buscar -->
+    <div id="urls" style="display: none;">
+        <a href="https://www.google.com/" class="url">https://www.ejemplo1.com</a>
+        <a href="NSPECCION -ED.HTML" class="url">https://www.ejemplo2.com</a>
+        <a href="INSPECCION 15 Y    TSM   10 Y    TSI.HTML" class="url">https://www.ejemplo3.com</a>
+        <a href="https://www.ejemplo4.com" class="url">https://www.ejemplo4.com</a>
+        <a href="https://www.otroejemplo.com" class="url">https://www.otroejemplo.com</a>
+    </div>
+
+    <script>
+        // Función para filtrar las URLs cuando se escribe en el buscador
+        function filtrarURLs() {
+            var input = document.getElementById('searchInput');
+            var filter = input.value.toLowerCase();
+            var resultadosDiv = document.getElementById('resultados');
+            var urls = document.querySelectorAll('.url');
+            
+            // Limpiar resultados anteriores
+            resultadosDiv.innerHTML = '';
+            
+            // Filtrar y mostrar resultados
+            var found = false;
+            urls.forEach(function(url) {
+                if (url.href.toLowerCase().includes(filter)) {
+                    var div = document.createElement('div');
+                    div.classList.add('resultado-url');
+                    div.innerHTML = `<a href="${url.href}" target="_blank">${url.href}</a>`;
+                    resultadosDiv.appendChild(div);
+                    found = true;
+                }
+            });
+
+            // Si no hay resultados, mostrar mensaje
+            if (!found) {
+                resultadosDiv.innerHTML = 'No se encontraron resultados.';
+            }
+        }
+    </script>
+
+</body>
+</html>
