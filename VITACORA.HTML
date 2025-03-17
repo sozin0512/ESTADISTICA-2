@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitácora de Vuelo</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        header {
+            background: #007BFF;
+            color: white;
+            padding: 15px;
+        }
+        main {
+            margin: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+        }
+        th {
+            background: #007BFF;
+            color: white;
+        }
+        button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #c82333;
+        }
+        .btn-estadisticas {
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 15px;
+            display: inline-block;
+        }
+        .btn-estadisticas:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bitácora de Vuelo</h1>
+        <a href="estadisticas.html" class="btn-estadisticas">Estadísticas de Mecánicos</a>
+        <a href="horas helicotero.html" class="btn-estadisticas">CONTROL HORAS</a>
+    </header>
+    <main>
+        <section id="registro-vuelo">
+            <h2>Registrar Nuevo Vuelo</h2>
+            <form id="form-vuelo">
+                <label for="fecha">FECHA:</label>
+                <input type="date" id="fecha" required>
+                <label for="helicoptero">HELICOPTERO:</label>
+                <input type="text" id="helicoptero" required>
+                <label for="destino">DESTINO:</label>
+                <input type="text" id="destino" required>
+                <label for="duracion">DURACION (horas):</label>
+                <input type="number" id="duracion" step="0.1" required>
+                <label for="motor1">CICLOS MOTOR 1:</label>
+                <input type="number" id="motor1" required>
+                <label for="motor2">CICLOS MOTOR 2:</label>
+                <input type="number" id="motor2" required>
+                <label for="aterrizajes">ATERRIZAJES:</label>
+                <input type="number" id="aterrizajes" required>
+                <label for="mecanico">MECANICO:</label>
+                <input type="text" id="mecanico" required>
+                <label for="discrepancia">DISCREPANCIA:</label>
+                <input type="text" id="discrepancia" required>
+                <button type="submit">REGISTRAR VUELO</button>
+            </form>
+        </section>
+        <section id="bitacora">
+            <h2>Historial de Vuelos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>FECHA</th>
+                        <th>HELICOPTERO</th>
+                        <th>DESTINO</th>
+                        <th>DURACION</th>
+                        <th>CICLOS MOTOR 1</th>
+                        <th>CICLOS MOTOR 2</th>
+                        <th>ATERRIZAJES</th>
+                        <th>MECANICO</th>
+                        <th>DISCREPANCIA</th>
+                        <th>ACCION CORRECTIVA</th>
+                        <th>BORRAR SOLO ESTADISTICO</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-vuelos">
+                </tbody>
+            </table>
+        </section>
+    </main>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, onValue, update, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAS5gh5eSwzAyl_1LiDOH1ALC72B9g7K04",
+            authDomain: "datavase-133d9.firebaseapp.com",
+            databaseURL: "https://datavase-133d9-default-rtdb.firebaseio.com",
+            projectId: "datavase-133d9",
+            storageBucket: "datavase-133d9.appspot.com",
+            messagingSenderId: "453323331569",
+            appId: "1:453323331569:web:47144b220ce99ad09f1650"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Evento para el formulario de registro de vuelo
+        document.getElementById("form-vuelo").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const fecha = document.getElementById("fecha").value;
+            const helicoptero = document.getElementById("helicoptero").value;
+            const destino = document.getElementById("destino").value;
+            const duracion = document.getElementById("duracion").value;
+            const motor1 = document.getElementById("motor1").value;
+            const motor2 = document.getElementById("motor2").value;
+            const aterrizajes = document.getElementById("aterrizajes").value;
+            const mecanico = document.getElementById("mecanico").value;
+            const discrepancia = document.getElementById("discrepancia").value;
+
+            // Verificar que la duración sea un valor numérico válido
+            if (isNaN(duracion) || duracion <= 0) {
+                alert("La duración del vuelo debe ser un número mayor a 0.");
+                return;
+            }
+
+            // Referencia a la base de datos de vuelos
+            const vueloRef = ref(db, "vuelos");
+            const nuevoVuelo = {
+                fecha: fecha,
+                helicoptero: helicoptero,
+                destino: destino,
+                duracion: duracion,
+                motor1: motor1,
+                motor2: motor2,
+                aterrizajes: aterrizajes,
+                mecanico: mecanico,
+                discrepancia: discrepancia
+            };
+
+            // Registrar el nuevo vuelo
+            const vueloId = push(vueloRef, nuevoVuelo).key;
+
+            // Actualizar estadísticas del mecánico
+            const mecanicoRef = ref(db, `estadisticas_mecanicos/${mecanico}`);
+            onValue(mecanicoRef, (snapshot) => {
+                let data = snapshot.val();
+                if (data) {
+                    const vuelos = data.vuelos || 0;
+                    const discrepancias = data.discrepancias || 0;
+                    // Si hay discrepancia, sumar 1
+                    const nuevaDiscrepancia = discrepancia ? discrepancias + 1 : discrepancias;
+                    update(mecanicoRef, {
+                        vuelos: vuelos + 1,
+                        discrepancias: nuevaDiscrepancia
+                    });
+                } else {
+                    // Si el mecánico no existe, crear un nuevo registro
+                    set(mecanicoRef, {
+                        vuelos: 1,
+                        discrepancias: discrepancia ? 1 : 0
+                    });
+                }
+            });
+
+            // Limpiar el formulario
+            document.getElementById("form-vuelo").reset();
+        });
+
+        // Mostrar los vuelos registrados en la tabla
+        const vuelosRef = ref(db, "vuelos");
+
+        onValue(vuelosRef, (snapshot) => {
+            const data = snapshot.val();
+            const listaVuelos = document.getElementById("lista-vuelos");
+            listaVuelos.innerHTML = "";
+            for (let key in data) {
+                const vuelo = data[key];
+                listaVuelos.innerHTML += `
+                    <tr id="${key}">
+                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'fecha', this)">${vuelo.fecha}</td>
+                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'helicoptero', this)">${vuelo.helicoptero}</td>
+                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'destino', this)">${vuelo.destino}</td>
+                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'duracion', this)">${vuelo.duracion}</td>
+                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'motor1', this)">${vuelo.motor1}</td>
+                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'motor2', this)">${vuelo.motor2}</td>
+                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'aterrizajes', this)">${vuelo.aterrizajes}</td>
+                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'mecanico', this)">${vuelo.mecanico}</td>
+                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'discrepancia', this)">${vuelo.discrepancia}</td>
+                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'accionCorrectiva', this)">${vuelo.accionCorrectiva || ""}</td>
+                        <td><button onclick="borrarVuelo('${key}')">Borrar</button></td>
+                    </tr>
+                `;
+            }
+        });
+
+        window.guardarEdicion = function(id, campo, elemento) {
+            const password = prompt("Ingrese la contraseña para modificar:");
+            if (password === "soza123") {
+                const nuevoValor = elemento.textContent.trim();
+                const vueloRef = ref(db, `vuelos/${id}`);
+                update(vueloRef, { [campo]: nuevoValor })
+                    .then(() => alert("Actualizado correctamente"))
+                    .catch((error) => alert("Error al actualizar: " + error.message));
+            } else {
+                alert("Contraseña incorrecta");
+            }
+        };
+
+        window.borrarVuelo = function(id) {
+            const password = prompt("Ingrese la contraseña para eliminar el vuelo:");
+            if (password === "soza123") {
+                // Obtener el vuelo para ver el mecánico
+                const vueloRef = ref(db, `vuelos/${id}`);
+                onValue(vueloRef, (snapshot) => {
+                    const vuelo = snapshot.val();
+                    if (vuelo && vuelo.mecanico) {
+                        const mecanicoRef = ref(db, `estadisticas_mecanicos/${vuelo.mecanico}`);
+                        // Actualizar las estadísticas del mecánico
+                        onValue(mecanicoRef, (snapshot) => {
+                            const stats = snapshot.val();
+                            if (stats) {
+                                // Restar uno al contador de vuelos
+                                update(mecanicoRef, {
+                                    vuelos: stats.vuelos - 1,
+                                    discrepancias: stats.discrepancias - (vuelo.discrepancia ? 1 : 0)
+                                });
+                            }
+                        });
+                    }
+                    // Borrar el vuelo
+                    remove(vueloRef);
+                });
+            } else {
+                alert("Contraseña incorrecta");
+            }
+        };
+    </script>
+</body>
+</html>

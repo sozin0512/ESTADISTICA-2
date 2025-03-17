@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas de los Mecánicos</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        header {
+            background: #007BFF;
+            color: white;
+            padding: 15px;
+        }
+        #estadisticas {
+            margin-top: 30px;
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #estadisticas table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #estadisticas th, #estadisticas td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        #estadisticas th {
+            background: #007BFF;
+            color: white;
+        }
+        canvas {
+            margin-top: 20px;
+        }
+        .btn-volver {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 50px;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .btn-volver:hover {
+            background-color: #218838;
+            transform: translateY(-3px); /* Desplazar el botón ligeramente hacia arriba */
+        }
+        .btn-volver:active {
+            transform: translateY(1px); /* Cuando se hace clic, el botón se mueve un poco hacia abajo */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Estadísticas de los Mecánicos</h1>
+        <a href="VITACORA.HTML" class="btn-volver">Volver al Registro de Vuelos</a>
+    </header>
+    <main>
+        <section id="estadisticas">
+            <h2>Estadísticas de Horas Voladas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mecánico</th>
+                        <th>Horas Voladas</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-estadisticas">
+                    <!-- Aquí se mostrarán las estadísticas de horas por mecánico -->
+                </tbody>
+            </table>
+            <canvas id="graficaHoras" width="400" height="200"></canvas>
+        </section>
+    </main>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAS5gh5eSwzAyl_1LiDOH1ALC72B9g7K04",
+            authDomain: "datavase-133d9.firebaseapp.com",
+            databaseURL: "https://datavase-133d9-default-rtdb.firebaseio.com",
+            projectId: "datavase-133d9",
+            storageBucket: "datavase-133d9.appspot.com",
+            messagingSenderId: "453323331569",
+            appId: "1:453323331569:web:47144b220ce99ad09f1650"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let grafica = null;
+
+        const vuelosRef = ref(db, "vuelos");
+        onValue(vuelosRef, (snapshot) => {
+            const data = snapshot.val();
+            const listaEstadisticas = document.getElementById("lista-estadisticas");
+            const mecanicos = [];
+            const horas = [];
+            const colores = [];
+            const horasPorMecanico = {};
+
+            for (let vueloId in data) {
+                const vuelo = data[vueloId];
+                const mecanico = vuelo.mecanico;
+                const duracion = parseFloat(vuelo.duracion);
+
+                if (!isNaN(duracion)) {
+                    if (!horasPorMecanico[mecanico]) {
+                        horasPorMecanico[mecanico] = 0;
+                    }
+                    horasPorMecanico[mecanico] += duracion;
+                }
+            }
+
+            listaEstadisticas.innerHTML = "";
+            const datasets = [];
+
+            for (let mecanico in horasPorMecanico) {
+                const horasVoladas = horasPorMecanico[mecanico];
+                listaEstadisticas.innerHTML += `
+                    <tr>
+                        <td>${mecanico}</td>
+                        <td>${horasVoladas}</td>
+                    </tr>
+                `;
+
+                mecanicos.push(mecanico);
+                horas.push(horasVoladas);
+                colores.push(`rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`);
+
+                datasets.push({
+                    label: mecanico,
+                    data: [horasVoladas],
+                    backgroundColor: colores[colores.length - 1],
+                    borderColor: colores[colores.length - 1],
+                    borderWidth: 1
+                });
+            }
+
+            if (grafica) {
+                grafica.destroy();
+            }
+
+            const ctx = document.getElementById('graficaHoras').getContext('2d');
+            grafica = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: mecanicos,
+                    datasets: [{
+                        label: 'Horas Voladas',
+                        data: horas,
+                        backgroundColor: colores,
+                        borderColor: colores,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 10
+                            }
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

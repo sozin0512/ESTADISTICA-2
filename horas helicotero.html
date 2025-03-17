@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horas de Helicóptero</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        header {
+            background: #007BFF;
+            color: white;
+            padding: 15px;
+        }
+        main {
+            margin: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background: #007BFF;
+            color: white;
+        }
+        .btn-regresar {
+            background: #007BFF;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 15px;
+            display: inline-block;
+        }
+        .btn-regresar:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Horas de Helicóptero</h1>
+        <a href="VITACORA.HTML" class="btn-regresar">Regresar a la Bitácora de Vuelos</a>
+    </header>
+    <main>
+        <section id="horas-helicoptero">
+            <h2>Horas Totales por Helicóptero</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>HELICÓPTERO</th>
+                        <th>HORAS DE VUELO</th>
+                        <th>CICLOS MOTOR 1</th>
+                        <th>CICLOS MOTOR 2</th>
+                        <th>ATERRIZAJES</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-helicopteros">
+                </tbody>
+            </table>
+        </section>
+    </main>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAS5gh5eSwzAyl_1LiDOH1ALC72B9g7K04",
+            authDomain: "datavase-133d9.firebaseapp.com",
+            databaseURL: "https://datavase-133d9-default-rtdb.firebaseio.com",
+            projectId: "datavase-133d9",
+            storageBucket: "datavase-133d9.appspot.com",
+            messagingSenderId: "453323331569",
+            appId: "1:453323331569:web:47144b220ce99ad09f1650"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Mostrar las horas totales por cada helicóptero
+        const vuelosRef = ref(db, "vuelos");
+
+        onValue(vuelosRef, (snapshot) => {
+            const data = snapshot.val();
+            const listaHelicopteros = document.getElementById("lista-helicopteros");
+            const helicopterosHoras = {};
+            const helicopterosMotor1 = {};
+            const helicopterosMotor2 = {};
+            const helicopterosAterrizajes = {};
+
+            // Calcular las horas de vuelo, ciclos de motores y aterrizajes por cada helicóptero
+            for (let key in data) {
+                const vuelo = data[key];
+                const helicoptero = vuelo.helicoptero;
+                const duracion = parseFloat(vuelo.duracion);
+                const motor1 = parseInt(vuelo.motor1);
+                const motor2 = parseInt(vuelo.motor2);
+                const aterrizajes = parseInt(vuelo.aterrizajes);
+
+                // Sumar las horas de vuelo
+                if (helicopterosHoras[helicoptero]) {
+                    helicopterosHoras[helicoptero] += duracion;
+                } else {
+                    helicopterosHoras[helicoptero] = duracion;
+                }
+
+                // Sumar los ciclos del motor 1
+                if (helicopterosMotor1[helicoptero]) {
+                    helicopterosMotor1[helicoptero] += motor1;
+                } else {
+                    helicopterosMotor1[helicoptero] = motor1;
+                }
+
+                // Sumar los ciclos del motor 2
+                if (helicopterosMotor2[helicoptero]) {
+                    helicopterosMotor2[helicoptero] += motor2;
+                } else {
+                    helicopterosMotor2[helicoptero] = motor2;
+                }
+
+                // Sumar los aterrizajes
+                if (helicopterosAterrizajes[helicoptero]) {
+                    helicopterosAterrizajes[helicoptero] += aterrizajes;
+                } else {
+                    helicopterosAterrizajes[helicoptero] = aterrizajes;
+                }
+            }
+
+            // Mostrar los resultados en la tabla
+            listaHelicopteros.innerHTML = "";
+            for (let helicoptero in helicopterosHoras) {
+                const horas = helicopterosHoras[helicoptero];
+                const ciclosMotor1 = helicopterosMotor1[helicoptero];
+                const ciclosMotor2 = helicopterosMotor2[helicoptero];
+                const aterrizajes = helicopterosAterrizajes[helicoptero];
+                listaHelicopteros.innerHTML += `
+                    <tr>
+                        <td>${helicoptero}</td>
+                        <td>${horas.toFixed(2)} horas</td>
+                        <td>${ciclosMotor1}</td>
+                        <td>${ciclosMotor2}</td>
+                        <td>${aterrizajes}</td>
+                    </tr>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
