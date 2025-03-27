@@ -6,64 +6,186 @@
     <title>Bitácora de Vuelo</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
-        header {
-            background: #007BFF;
-            color: white;
-            padding: 15px;
-        }
-        main {
-            margin: 20px;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-            cursor: pointer;
-        }
-        th {
-            background: #007BFF;
-            color: white;
-        }
-        button {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:hover {
-            background: #c82333;
-        }
-        .btn-estadisticas {
-            background: #28a745;
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 16px;
-            margin-top: 15px;
-            display: inline-block;
-        }
-        .btn-estadisticas:hover {
-            background: #218838;
-        }
+       /* Estilos generales */
+/* 📌 Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+@media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+    
+    thead {
+        display: none; /* Oculta los encabezados en móviles */
+    }
+
+    tr {
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+        padding: 10px;
+        background: white;
+        border-radius: 5px;
+    }
+
+    td {
+        text-align: left;
+        padding: 8px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        margin-right: 10px;
+    }
+}
+
+header {
+    background: #007BFF;
+    color: white;
+    padding: 15px;
+}
+
+main {
+    margin: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 📌 Estilos de la tabla */
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* ⚡ Solo en móviles: permite scroll horizontal */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+}
+
+th {
+    background: #007BFF;
+    color: white;
+}
+
+/* 📌 Botones */
+button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+button:hover {
+    background: #c82333;
+}
+
+.btn-estadisticas {
+    background: #28a745;
+    color: white;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    display: inline-block;
+    margin: 10px 0;
+}
+
+.btn-estadisticas:hover {
+    background: #218838;
+}
+
+/* 📌 Buscador */
+#buscador {
+    margin: 20px 0;
+}
+
+#buscar {
+    padding: 12px;
+    width: 50%;
+    max-width: 400px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+/* 📌 Formularios */
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+form label {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+form input {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+/* 📌 🌟 RESPONSIVE 🌟 */
+@media (max-width: 768px) {
+    main {
+        margin: 10px;
+        padding: 10px;
+    }
+
+    .table-container {
+        overflow-x: auto; /* 🔥 Hace la tabla desplazable en móviles */
+    }
+
+    th, td {
+        padding: 8px;
+        font-size: 12px;
+        white-space: nowrap; /* 🔥 Evita que el texto se divida en varias líneas */
+    }
+
+    button {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .btn-estadisticas {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    form input {
+        width: 100%;
+    }
+
+    #buscar {
+        width: 90%; /* 🔥 En móviles, el buscador se agranda */
+    }
+}
+
+
     </style>
 </head>
 <body>
@@ -96,6 +218,11 @@
                 <input type="text" id="discrepancia" required>
                 <button type="submit">REGISTRAR VUELO</button>
             </form>
+            <section id="buscador">
+                <h2>Buscar Vuelos</h2>
+                <input type="text" id="buscar" placeholder="Buscar por helicóptero o destino..." oninput="filtrarVuelos()">
+            </section>
+            
         </section>
         <section id="bitacora">
             <h2>Historial de Vuelos</h2>
@@ -204,28 +331,32 @@
         const vuelosRef = ref(db, "vuelos");
 
         onValue(vuelosRef, (snapshot) => {
-            const data = snapshot.val();
-            const listaVuelos = document.getElementById("lista-vuelos");
-            listaVuelos.innerHTML = "";
-            for (let key in data) {
-                const vuelo = data[key];
-                listaVuelos.innerHTML += `
-                    <tr id="${key}">
-                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'fecha', this)">${vuelo.fecha}</td>
-                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'helicoptero', this)">${vuelo.helicoptero}</td>
-                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'destino', this)">${vuelo.destino}</td>
-                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'duracion', this)">${vuelo.duracion}</td>
-                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'motor1', this)">${vuelo.motor1}</td>
-                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'motor2', this)">${vuelo.motor2}</td>
-                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'aterrizajes', this)">${vuelo.aterrizajes}</td>
-                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'mecanico', this)">${vuelo.mecanico}</td>
-                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'discrepancia', this)">${vuelo.discrepancia}</td>
-                        <td contenteditable="true" onblur="guardarEdicion('${key}', 'accionCorrectiva', this)">${vuelo.accionCorrectiva || ""}</td>
-                        <td><button onclick="borrarVuelo('${key}')">Borrar</button></td>
-                    </tr>
-                `;
-            }
-        });
+    const data = snapshot.val();
+    const listaVuelos = document.getElementById("lista-vuelos");
+    listaVuelos.innerHTML = "";
+    for (let key in data) {
+        const vuelo = data[key];
+        listaVuelos.innerHTML += `
+            <tr id="${key}">
+                <td contenteditable="true" onblur="guardarEdicion('${key}', 'fecha', this)">${vuelo.fecha}</td>
+                <td contenteditable="true" onblur="guardarEdicion('${key}', 'helicoptero', this)">${vuelo.helicoptero}</td>
+                <td contenteditable="true" onblur="guardarEdicion('${key}', 'destino', this)">${vuelo.destino}</td>
+                <td contenteditable="true" onblur="guardarEdicion('${key}', 'duracion', this)">${vuelo.duracion}</td>
+                <td contenteditable="true" onblur="guardarEdicion('${key}', 'motor1', this)">${vuelo.motor1}</td>
+                <td contenteditable="true" onblur="guardarEdicion('${key}', 'motor2', this)">${vuelo.motor2}</td>
+                <td contenteditable="true" onblur="guardarEdicion('${key}', 'aterrizajes', this)">${vuelo.aterrizajes}</td>
+                <td contenteditable="true" onblur="guardarEdicion('${key}', 'mecanico', this)">${vuelo.mecanico}</td>
+                <td contenteditable="true" onblur="guardarEdicion('${key}', 'discrepancia', this)">${vuelo.discrepancia}</td>
+                <td contenteditable="true" onblur="guardarEdicion('${key}', 'accionCorrectiva', this)">${vuelo.accionCorrectiva || ""}</td>
+                <td><button onclick="borrarVuelo('${key}')">Borrar</button></td>
+            </tr>
+        `;
+    }
+
+    // Llamar a la función de búsqueda después de cargar los datos
+    filtrarVuelos();
+});
+
 
         window.guardarEdicion = function(id, campo, elemento) {
             const password = prompt("Ingrese la contraseña para modificar:");
@@ -268,6 +399,29 @@
                 alert("Contraseña incorrecta");
             }
         };
+        function filtrarVuelos() {
+    const filtro = document.getElementById("buscar").value.trim().toLowerCase();
+    const filas = document.querySelectorAll("#lista-vuelos tr");
+
+    filas.forEach((fila) => {
+        const celdas = fila.getElementsByTagName("td");
+        if (celdas.length === 0) return; // Evitar errores si la fila no tiene celdas
+
+        const helicoptero = (celdas[1]?.textContent || "").trim().toLowerCase();
+        const destino = (celdas[2]?.textContent || "").trim().toLowerCase();
+
+        if (helicoptero.includes(filtro) || destino.includes(filtro)) {
+            fila.style.display = "";
+        } else {
+            fila.style.display = "none";
+        }
+    });
+}
+
+// Asegurar que se ejecute la búsqueda cada vez que cambia la entrada
+document.getElementById("buscar").addEventListener("input", filtrarVuelos);
+
+
     </script>
 </body>
 </html>
