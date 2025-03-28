@@ -205,12 +205,7 @@ form input {
                 <label for="destino">DESTINO:</label>
                 <input type="text" id="destino" required>
                 <label for="duracion">DURACION:</label>
-<div>
-    <input type="text" id="duracion-hhmm" placeholder="HH:MM SOLO PARA H-145">
-    <input type="number" id="duracion-decimal" step="0.1" placeholder="Horas decimales">
-</div>
-
-                <input type="number" id="duracion" step="0.1" required>
+<input type="text" id="duracion" placeholder="Ej: 1.5 o 01:30" required>
                 <label for="motor1">CICLOS MOTOR 1:</label>
                 <input type="number" id="motor1" required>
                 <label for="motor2">CICLOS MOTOR 2:</label>
@@ -270,72 +265,80 @@ form input {
         const db = getDatabase(app);
 
         // Evento para el formulario de registro de vuelo
-        document.getElementById("form-vuelo").addEventListener("submit", function(event) {
-            event.preventDefault();
+document.getElementById("form-vuelo").addEventListener("submit", function(event) {
+    event.preventDefault();
 
-            const fecha = document.getElementById("fecha").value;
-            const helicoptero = document.getElementById("helicoptero").value;
-            const destino = document.getElementById("destino").value;
-            const duracion = document.getElementById("duracion").value;
-            const motor1 = document.getElementById("motor1").value;
-            const motor2 = document.getElementById("motor2").value;
-            const aterrizajes = document.getElementById("aterrizajes").value;
-            const mecanico = document.getElementById("mecanico").value;
-            const discrepancia = document.getElementById("discrepancia").value;
+    const fecha = document.getElementById("fecha").value;
+    const helicoptero = document.getElementById("helicoptero").value;
+    const destino = document.getElementById("destino").value;
+    let duracion = document.getElementById("duracion").value; // Mantener como HH:MM
+    const motor1 = document.getElementById("motor1").value;
+    const motor2 = document.getElementById("motor2").value;
+    const aterrizajes = document.getElementById("aterrizajes").value;
+    const mecanico = document.getElementById("mecanico").value;
+    const discrepancia = document.getElementById("discrepancia").value;
 
-            // Verificar que la duración sea un valor numérico válido
-            if (isNaN(duracion) || duracion <= 0) {
-                alert("La duración del vuelo debe ser un número mayor a 0.");
-                return;
-            }
+    // Validar que la duración esté en formato HH:MM
+    const regex = /^\d{1,2}:\d{2}$/; // Expresión regular para el formato HH:MM
+    if (!regex.test(duracion)) {
+        alert("La duración debe estar en formato HH:MM.");
+        return;
+    }
 
-            // Referencia a la base de datos de vuelos
-            const vueloRef = ref(db, "vuelos");
-            const nuevoVuelo = {
-                fecha: fecha,
-                helicoptero: helicoptero,
-                destino: destino,
-                duracion: duracion,
-                motor1: motor1,
-                motor2: motor2,
-                aterrizajes: aterrizajes,
-                mecanico: mecanico,
-                discrepancia: discrepancia
-            };
+    // Verificar que la duración sea un número mayor a 0
+    const [hh, mm] = duracion.split(":").map(Number);
+    if (hh <= 0 && mm <= 0) {
+        alert("La duración del vuelo debe ser mayor a 0.");
+        return;
+    }
 
-            // Registrar el nuevo vuelo
-            const vueloId = push(vueloRef, nuevoVuelo).key;
+    // Referencia a la base de datos de vuelos
+    const vueloRef = ref(db, "vuelos");
+    const nuevoVuelo = {
+        fecha: fecha,
+        helicoptero: helicoptero,
+        destino: destino,
+        duracion: duracion, // Mantener en formato HH:MM
+        motor1: motor1,
+        motor2: motor2,
+        aterrizajes: aterrizajes,
+        mecanico: mecanico,
+        discrepancia: discrepancia
+    };
 
-            // Actualizar estadísticas del mecánico
-            const mecanicoRef = ref(db, `estadisticas_mecanicos/${mecanico}`);
-            onValue(mecanicoRef, (snapshot) => {
-                let data = snapshot.val();
-                if (data) {
-                    const vuelos = data.vuelos || 0;
-                    const discrepancias = data.discrepancias || 0;
-                    // Si hay discrepancia, sumar 1
-                    const nuevaDiscrepancia = discrepancia ? discrepancias + 1 : discrepancias;
-                    update(mecanicoRef, {
-                        vuelos: vuelos + 1,
-                        discrepancias: nuevaDiscrepancia
-                    });
-                } else {
-                    // Si el mecánico no existe, crear un nuevo registro
-                    set(mecanicoRef, {
-                        vuelos: 1,
-                        discrepancias: discrepancia ? 1 : 0
-                    });
-                }
+    // Registrar el nuevo vuelo
+    const vueloId = push(vueloRef, nuevoVuelo).key;
+
+    // Actualizar estadísticas del mecánico
+    const mecanicoRef = ref(db, `estadisticas_mecanicos/${mecanico}`);
+    onValue(mecanicoRef, (snapshot) => {
+        let data = snapshot.val();
+        if (data) {
+            const vuelos = data.vuelos || 0;
+            const discrepancias = data.discrepancias || 0;
+            // Si hay discrepancia, sumar 1
+            const nuevaDiscrepancia = discrepancia ? discrepancias + 1 : discrepancias;
+            update(mecanicoRef, {
+                vuelos: vuelos + 1,
+                discrepancias: nuevaDiscrepancia
             });
+        } else {
+            // Si el mecánico no existe, crear un nuevo registro
+            set(mecanicoRef, {
+                vuelos: 1,
+                discrepancias: discrepancia ? 1 : 0
+            });
+        }
+    });
 
-            // Limpiar el formulario
-            document.getElementById("form-vuelo").reset();
-        });
+    // Limpiar el formulario
+    document.getElementById("form-vuelo").reset();
+});
 
-        // Mostrar los vuelos registrados en la tabla
-        const vuelosRef = ref(db, "vuelos");
+// Mostrar los vuelos registrados en la tabla
+const vuelosRef = ref(db, "vuelos");
 
-        onValue(vuelosRef, (snapshot) => {
+onValue(vuelosRef, (snapshot) => {
     const data = snapshot.val();
     const listaVuelos = document.getElementById("lista-vuelos");
     listaVuelos.innerHTML = "";
@@ -361,7 +364,6 @@ form input {
     // Llamar a la función de búsqueda después de cargar los datos
     filtrarVuelos();
 });
-
 
         window.guardarEdicion = function(id, campo, elemento) {
             const password = prompt("Ingrese la contraseña para modificar:");
