@@ -94,6 +94,43 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // Función para convertir horas en formato decimal a formato hh:mm
+        function decimalToHHMM(decimal) {
+            const horas = Math.floor(decimal);
+            const minutos = Math.round((decimal - horas) * 60);
+            return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`;
+        }
+
+        // Función para convertir horas en formato hh:mm a decimal
+        function HHMMToDecimal(hhmm) {
+            const [horas, minutos] = hhmm.split(":").map(num => parseInt(num));
+            return horas + (minutos / 60);
+        }
+
+        // Función para sumar horas en formato decimal
+        function sumarHorasDecimal(hora1, hora2) {
+            return hora1 + hora2;
+        }
+
+        // Función para sumar horas en formato hh:mm
+        function sumarHorasHHMM(hora1, hora2) {
+            const [h1, m1] = hora1.split(":").map(num => parseInt(num));
+            const [h2, m2] = hora2.split(":").map(num => parseInt(num));
+            let horasTotales = h1 + h2;
+            let minutosTotales = m1 + m2;
+
+            if (minutosTotales >= 60) {
+                horasTotales += Math.floor(minutosTotales / 60);
+                minutosTotales = minutosTotales % 60;
+            }
+            return `${String(horasTotales).padStart(2, '0')}:${String(minutosTotales).padStart(2, '0')}`;
+        }
+
+        // Función para verificar si el formato es hh:mm (contiene ":") o decimal (contiene ".")
+        function esFormatoHora(hora) {
+            return hora.includes(":");
+        }
+
         // Mostrar las horas totales por cada helicóptero
         const vuelosRef = ref(db, "vuelos");
 
@@ -109,16 +146,28 @@
             for (let key in data) {
                 const vuelo = data[key];
                 const helicoptero = vuelo.helicoptero;
-                const duracion = parseFloat(vuelo.duracion);
+                let duracion = vuelo.duracion;  // Puede ser decimal o hh:mm
                 const motor1 = parseInt(vuelo.motor1);
                 const motor2 = parseInt(vuelo.motor2);
                 const aterrizajes = parseInt(vuelo.aterrizajes);
 
-                // Sumar las horas de vuelo
-                if (helicopterosHoras[helicoptero]) {
-                    helicopterosHoras[helicoptero] += duracion;
+                // Si el formato es hh:mm
+                if (esFormatoHora(duracion)) {
+                    // Convertimos hh:mm a decimal y sumamos
+                    duracion = HHMMToDecimal(duracion);
+                    if (helicopterosHoras[helicoptero]) {
+                        helicopterosHoras[helicoptero] = sumarHorasDecimal(helicopterosHoras[helicoptero], duracion);
+                    } else {
+                        helicopterosHoras[helicoptero] = duracion;
+                    }
                 } else {
-                    helicopterosHoras[helicoptero] = duracion;
+                    // Si es decimal, sumamos directamente
+                    duracion = parseFloat(duracion);
+                    if (helicopterosHoras[helicoptero]) {
+                        helicopterosHoras[helicoptero] = sumarHorasDecimal(helicopterosHoras[helicoptero], duracion);
+                    } else {
+                        helicopterosHoras[helicoptero] = duracion;
+                    }
                 }
 
                 // Sumar los ciclos del motor 1
@@ -147,13 +196,14 @@
             listaHelicopteros.innerHTML = "";
             for (let helicoptero in helicopterosHoras) {
                 const horas = helicopterosHoras[helicoptero];
+                const horasHHMM = decimalToHHMM(horas); // Convertimos el resultado a hh:mm para mostrar
                 const ciclosMotor1 = helicopterosMotor1[helicoptero];
                 const ciclosMotor2 = helicopterosMotor2[helicoptero];
                 const aterrizajes = helicopterosAterrizajes[helicoptero];
                 listaHelicopteros.innerHTML += `
                     <tr>
                         <td>${helicoptero}</td>
-                        <td>${horas.toFixed(2)} horas</td>
+                        <td>${horasHHMM}</td>
                         <td>${ciclosMotor1}</td>
                         <td>${ciclosMotor2}</td>
                         <td>${aterrizajes}</td>
