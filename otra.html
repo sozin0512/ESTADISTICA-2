@@ -96,6 +96,9 @@
             <label for="nombre">Nombre del Mecánico:</label>
             <input type="text" id="nombre" name="nombre" required>
 
+            <label for="nombre">Horas De La Aeronave:</label>
+            <input type="text" id="nombre" name="nombre" required>
+
             <label for="numero_serie">Número de Serie:</label>
             <input type="text" id="numero_serie" name="numero_serie" required>
 
@@ -172,6 +175,7 @@
 
             // Obtener los valores del formulario
             const nombre = document.getElementById('nombre').value;
+            const HorasDeLaAeronave = document.getElementById('nombre').value;
             const numeroSerie = document.getElementById('numero_serie').value;
             const numeroParte = document.getElementById('numero_parte').value;
             const razon = document.getElementById('razon').value;
@@ -186,6 +190,7 @@
                 // Guardar en Firestore
                 await addDoc(collection(db, 'retiros_componentes'), {
                     nombre,
+                    HorasDeLaAeronave,
                     numeroSerie,
                     numeroParte,
                     razon,
@@ -207,4 +212,5 @@
     </script>
 </body>
 </html>
+
 
