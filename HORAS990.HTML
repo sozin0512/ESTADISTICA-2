@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8" />
+ <title>Datos de Vuelo</title>
+ <style>
+ body {
+ font-family: Arial, sans-serif;
+ margin: 20px;
+ }
+
+ h2 {
+ text-align: center;
+ font-weight: bold;
+ font-size: 24px;
+ margin-bottom: 20px;
+ }
+
+ @keyframes resplandor {
+ 0% {
+ box-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14, 0 0 15px #39ff14;
+ }
+ 50% {
+ box-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14, 0 0 30px #39ff14;
+ }
+ 100% {
+ box-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14, 0 0 15px #39ff14;
+ }
+ }
+
+ .led-persistente {
+ background-color: #f8f7f7 !important; /* Fondo oscuro para resalte */
+ color: #0e0f0e;
+ animation: resplandor 2s infinite;
+ font-weight: bold;
+ }
+
+ .led-effect {
+ background-color: #3714ff !important; /* Verde lima */
+ box-shadow: 0 0 8px #39ff14;
+ transition: background-color 0.3s ease, box-shadow 0.3s ease;
+ }
+
+
+ .celda-modificada {
+ animation: ledFlash 1s ease-in-out;
+ }
+
+ .year-container {
+ text-align: center;
+ margin-bottom: 10px;
+ font-weight: bold;
+ }
+
+ .tab-container {
+ text-align: center;
+ margin-bottom: 10px;
+ }
+
+ .tab-button {
+ padding: 5px 10px;
+ margin: 0 2px;
+ background-color: #ddd;
+ border: 1px solid #999;
+ cursor: pointer;
+ }
+
+ .tab-button.active {
+ background-color: #b0c4de;
+ font-weight: bold;
+ }
+
+ .button-container {
+ text-align: center;
+ margin: 15px 0;
+ }
+
+ table {
+ border-collapse: collapse;
+ width: 100%;
+ font-size: 11px;
+ }
+
+ th,
+ td {
+ border: 1px solid #000;
+ padding: 3px;
+ text-align: center;
+ min-width: 25px;
+ }
+
+ th {
+ background-color: #b0c4de;
+ }
+
+ .nomenclatura {
+ background-color: #d9d9d9;
+ font-weight: bold;
+ }
+
+ .totales {
+ background-color: #e0e0e0;
+ font-weight: bold;
+ }
+
+ td[contenteditable="true"] {
+ background-color: #fefefe;
+ }
+
+ @media print {
+ body {
+ margin: 0;
+ padding: 10mm;
+ font-size: 10px;
+ }
+
+ .button-container,
+ .tab-container,
+ .year-container {
+ display: none;
+ }
+
+ table {
+ page-break-inside: avoid;
+ width: 100%;
+ border-collapse: collapse;
+ }
+
+ tr,
+ td,
+ th {
+ page-break-inside: avoid;
+ page-break-after: auto;
+ border: 1px solid #000 !important;
+ }
+
+ th,
+ td {
+ padding: 2px;
+ font-size: 10px;
+ }
+
+ @page {
+ size: A4 landscape;
+ margin: 10mm;
+ }
+ }
+ </style>
+ <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+ <h2>DATOS DE VUELO FAH-990</h2>
+
+ <div class="year-container">
+ Año:
+ <select id="select-year"></select>
+ </div>
+
+ <div class="tab-container" id="meses"></div>
+
+ <div id="contenedor-tablas"></div>
+
+ <div class="button-container">
+ <button onclick="imprimirTabla()">Imprimir Tabla</button>
+ </div>
+
+ <script>
+ const años = [2024, 2025, 2026];
+ let añoActual = 2025;
+ let mesActual = 0;
+
+ const meses = [
+ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+ "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+ ];
+
+ const nombresFilas = [
+ "AC HRS", "LANDINGS", "ENGINE HRS 1", "ENGINE N1 CYCLES 1",
+ "ENGINE N2 CYCLES 1", "CREEP 1", "ENGINE HRS 2", "ENGINE N1 CYCLES 2",
+ "ENGINE N2 CYCLES 2", "CREEP 2", "CARGO HOOK HRS FLIGTH", "CARGO HOOK CYCLE",
+ "CARGO HOOK HRS LIFTING", "CARGO HOOK LIFTING", "CARGO HOOK LIFTING >400 KG ",
+ "HOIST RESCUE HRS", "HOIST RESCUE OP HRS", "HOIST RESCUE CYCLE"
+ ];
+
+ const contenedorTablas = document.getElementById("contenedor-tablas");
+ const contenedorMeses = document.getElementById("meses");
+ const selectYear = document.getElementById("select-year");
+
+ // Configuración de Firebase
+ const firebaseConfig = {
+  apiKey: "AIzaSyCTc4mY9p239UnNwdQ_GnxCMPfm7jrIfxQ",
+  authDomain: "fah-990.firebaseapp.com",
+  databaseURL: "https://fah-990-default-rtdb.firebaseio.com",
+  projectId: "fah-990",
+  storageBucket: "fah-990.firebasestorage.app",
+  messagingSenderId: "344019976448",
+  appId: "1:344019976448:web:a2d462d0dc23695c2133e5",
+  measurementId: "G-G4LNY0PPPZ"
+};
+
+ // Inicializar Firebase
+ const app = firebase.initializeApp(firebaseConfig);
+ const database = firebase.database();
+ const dbRef = database.ref('datos_vuelo'); // Referencia a la raíz de tus datos de vuelo
+
+ function guardarDatosEnFirebase(año, mes, datosTabla) {
+ const ruta = `<span class="math-inline">\{año\}/</span>{mes}`;
+ dbRef.child(ruta).set(datosTabla)
+ .then(() => {
+ console.log(`Datos guardados correctamente para ${mes} de ${año}`);
+ })
+ .catch((error) => {
+ console.error("Error al guardar los datos:", error);
+ });
+ }
+
+ function cargarDatosDeFirebase(año, mes) {
+ const ruta = `<span class="math-inline">\{año\}/</span>{mes}`;
+ dbRef.child(ruta).once('value')
+ .then((snapshot) => {
+ const datos = snapshot.val();
+ if (datos) {
+ cargarDatosEnTabla(datos);
+ } else {
+ console.log(`No hay datos guardados para ${mes} de ${año}`);
+ // Si no hay datos, se mantiene la tabla vacía creada inicialmente
+ }
+ })
+ .catch((error) => {
+ console.error("Error al cargar los datos:", error);
+ });
+ }
+
+ function cargarDatosEnTabla(datos) {
+ const tabla = document.querySelector(`#contenedor-tablas > div:nth-child(${mesActual + 1}) table tbody`);
+ if (tabla) {
+ tabla.querySelectorAll('tr').forEach((fila, indexFila) => {
+ const datosFila = datos[indexFila];
+ if (datosFila) {
+ fila.querySelectorAll('td').forEach((celda, indexCelda) => {
+ if (datosFila[indexCelda] !== undefined) {
+ celda.textContent = datosFila[indexCelda];
+ }
+ });
+ }
+ });
+ actualizarTotales(); // Recalcular los totales después de cargar los datos
+ }
+ }
+
+ function obtenerDatosTabla(indiceTabla) {
+ const tabla = document.querySelector(`#contenedor-tablas > div:nth-child(${indiceTabla + 1}) table tbody`);
+ const datos = [];
+ if (tabla) {
+ tabla.querySelectorAll('tr').forEach(fila => {
+ const filaData = [];
+ fila.querySelectorAll('td').forEach(celda => {
+ filaData.push(celda.textContent);
+ });
+ datos.push(filaData);
+ });
+ }
+ return datos;
+ }
+
+ function cargarAños() {
+ años.forEach((año) => {
+ const option = document.createElement("option");
+ option.value = año;
+ option.textContent = año;
+ selectYear.appendChild(option);
+ });
+ selectYear.value = añoActual;
+ }
+
+ function crearBotonesMeses() {
+ contenedorMeses.innerHTML = "";
+
+ meses.forEach((mes, i) => {
+ const btn = document.createElement("button");
+ btn.className = "tab-button";
+ btn.textContent = mes;
+ btn.onclick = () => {
+ mesActual = i;
+ mostrarTabla(i);
+ };
+ contenedorMeses.appendChild(btn);
+ });
+
+ mostrarTabla(mesActual);
+ }
+    function crearTablasParaAño(año) {
+      contenedorTablas.innerHTML = "";
+
+      meses.forEach((mes, i) => {
+        const div = document.createElement("div");
+        div.className = "tabla-mes";
+        div.style.display = i === mesActual ? "block" : "none";
+
+        const tabla = document.createElement("table");
+        tabla.className = "tabla-vuelo";
+
+        const thead = document.createElement("thead");
+        const encabezado = document.createElement("tr");
+        encabezado.innerHTML =
+          `<th>NOMENCLATURA</th><th contenteditable="true">VIENEN</th>`;
+        for (let d = 1; d <= 31; d++) {
+          encabezado.innerHTML += `<th>${d}</th>`;
+        }
+        encabezado.innerHTML += `<th>MES TOTAL</th><th>GENERAL</th>`;
+        thead.appendChild(encabezado);
+        tabla.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+
+        nombresFilas.forEach((nombre) => {
+          const fila = document.createElement("tr");
+          fila.innerHTML =
+  `<td class="nomenclatura" contenteditable="true">${nombre}</td><td contenteditable="true"></td>`;
+for (let d = 1; d <= 31; d++) {
+  fila.innerHTML += `<td contenteditable="true"></td>`;
+}
+
+          fila.innerHTML += `<td class="fila-total">0</td><td class="fila-general">0</td>`;
+          tbody.appendChild(fila);
+        });
+
+        tabla.appendChild(tbody);
+        div.appendChild(tabla);
+        contenedorTablas.appendChild(div);
+      });
+    }
+
+    function mostrarTabla(index) {
+  mesActual = index;
+  document.querySelectorAll(".tabla-mes").forEach((div, i) => {
+    div.style.display = i === index ? "block" : "none";
+  });
+  document.querySelectorAll(".tab-button").forEach((btn, i) => {
+    btn.classList.toggle("active", i === index);
+  });
+  document.title = `Datos de Vuelo - ${meses[index]} ${añoActual}`;
+
+  // Traspasar valores de GENERAL al siguiente mes en VIENEN para todos los meses después del mes actual
+  copiarValoresAlSiguienteMesParaTodosLosMeses(index);
+}
+
+// Función que copia los valores de la columna "GENERAL" al siguiente mes en la columna "VIENEN"
+function copiarValoresAlSiguienteMesParaTodosLosMeses(mesActual) {
+  // Recorre todos los meses desde el mes actual hasta diciembre (mes 11)
+  for (let i = mesActual; i < meses.length - 1; i++) { 
+    const tablaActual = document.querySelectorAll(".tabla-vuelo")[i];
+    const tablaSiguiente = document.querySelectorAll(".tabla-vuelo")[i + 1];
+
+    // Recorre todas las filas (nombres) de la tabla actual
+    const filasActual = tablaActual.querySelectorAll("tbody tr");
+
+    filasActual.forEach((fila, index) => {
+      const celdasActual = fila.querySelectorAll("td");
+      const valorGeneral = celdasActual[34].textContent.trim(); // Columna GENERAL (35, índice 34)
+
+      // Si hay un valor en GENERAL, lo traspasamos a VIENEN de la tabla siguiente
+      if (valorGeneral !== "") {
+        const filaSiguiente = tablaSiguiente.querySelectorAll("tbody tr")[index];
+        const celdasSiguiente = filaSiguiente.querySelectorAll("td");
+
+        // Colocar el valor en la columna VIENEN del siguiente mes (índice 1)
+        celdasSiguiente[1].textContent = valorGeneral;
+      }
+    });
+  }
+}
+
+    function actualizarTotales() {
+  document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
+    const filas = tabla.querySelectorAll("tbody tr");
+    filas.forEach((fila) => {
+      const celdas = fila.querySelectorAll("td");
+      const vienenStr = celdas[1].textContent.trim();
+      const valoresCeldas = [...celdas].slice(2, 33).map(td => td.textContent.trim());
+
+      // Verificar si no hay ningún valor ingresado
+      const todasVacias = [vienenStr, ...valoresCeldas].every(val => val === "");
+      if (todasVacias) {
+        celdas[33].textContent = "";
+        celdas[34].textContent = "";
+        return;
+      }
+
+      // Funciones para manejar tiempo y números
+      const aMinutos = (val) => {
+        if (val.includes(":")) {
+          const [h, m] = val.split(":").map(Number);
+          return h * 60 + m;
+        } else {
+          const num = parseFloat(val.replace(",", "."));
+          if (isNaN(num)) return 0;
+          return num % 1 === 0 ? num : num * 60;
+        }
+      };
+
+      const aHora = (minutos) => {
+        const h = Math.floor(minutos / 60);
+        const m = Math.round(minutos % 60);
+        return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+      };
+
+      const esTiempo = vienenStr.includes(":") || valoresCeldas.some(v => v.includes(":"));
+
+      if (esTiempo) {
+        const vienenMin = vienenStr ? aMinutos(vienenStr) : 0;
+        const totalMin = valoresCeldas.reduce((acc, val) => acc + (val ? aMinutos(val) : 0), 0);
+        const generalMin = vienenMin + totalMin;
+
+        celdas[33].textContent = totalMin > 0 ? aHora(totalMin) : "";
+        celdas[34].textContent = generalMin > 0 ? aHora(generalMin) : "";
+      } else {
+        const vienen = vienenStr ? parseFloat(vienenStr.replace(",", ".")) : 0;
+        const valores = valoresCeldas.map(v => v ? parseFloat(v.replace(",", ".")) : 0);
+        const total = valores.reduce((acc, val) => acc + val, 0);
+        const general = total + vienen;
+
+        const mostrarTotal = total > 0 ? (Number.isInteger(total) ? total : total.toFixed(1)) : "";
+        const mostrarGeneral = general > 0 ? (Number.isInteger(general) ? general : general.toFixed(1)) : "";
+
+        celdas[33].textContent = mostrarTotal;
+        celdas[34].textContent = mostrarGeneral;
+      }
+    });
+  });
+}
+
+
+function activarActualizacion() {
+  document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
+    tabla.addEventListener("input", (e) => {
+      const celda = e.target;
+
+      const fila = celda.parentElement;
+      const celdas = Array.from(fila.children);
+      const index = celdas.indexOf(celda);
+
+      // Saltar si es columna VIENEN (1), MET TOTAL (33) o GENERAL (34)
+      if (index === 1 || index === 33 || index === 34) {
+        actualizarTotales();
+        return;
+      }
+
+      // Verificar si la celda tiene contenido
+      if (celda.textContent.trim() !== "") {
+        // Añadir clase para el efecto de luz si tiene contenido
+        celda.classList.add("led-persistente");
+      } else {
+        // Eliminar clase si la celda está vacía
+        celda.classList.remove("led-persistente");
+      }
+
+      actualizarTotales();
+    });
+  });
+}
+
+
+
+
+    function imprimirTabla() {
+      window.print();
+    }
+
+    function iniciar() {
+      cargarAños();
+      crearTablasParaAño(añoActual);
+      crearBotonesMeses();
+      activarActualizacion();
+    }
+
+    selectYear.addEventListener("change", () => {
+      añoActual = parseInt(selectYear.value);
+      crearTablasParaAño(añoActual);
+      crearBotonesMeses();
+      activarActualizacion();
+    });
+
+    window.addEventListener("load", iniciar);
+    window.imprimirTabla = imprimirTabla;
+  </script>
+</body>
+</html>
