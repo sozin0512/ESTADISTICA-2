@@ -16,17 +16,7 @@
  margin-bottom: 20px;
  }
 
- @keyframes resplandor {
- 0% {
- box-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14, 0 0 15px #39ff14;
- }
- 50% {
- box-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14, 0 0 30px #39ff14;
- }
- 100% {
- box-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14, 0 0 15px #39ff14;
- }
- }
+
 
  .led-persistente {
  background-color: #f8f7f7 !important; /* Fondo oscuro para resalte */
@@ -205,32 +195,34 @@
  const dbRef = database.ref('datos_vuelo'); // Referencia a la raíz de tus datos de vuelo
 
  function guardarDatosEnFirebase(año, mes, datosTabla) {
- const ruta = `<span class="math-inline">\{año\}/</span>{mes}`;
- dbRef.child(ruta).set(datosTabla)
- .then(() => {
- console.log(`Datos guardados correctamente para ${mes} de ${año}`);
- })
- .catch((error) => {
- console.error("Error al guardar los datos:", error);
- });
- }
+  const ruta = `${año}/${mes}`; // ← ruta correcta
+  dbRef.child(ruta).set(datosTabla)
+    .then(() => {
+      console.log(`Datos guardados correctamente para ${mes} de ${año}`);
+    })
+    .catch((error) => {
+      console.error("Error al guardar los datos:", error);
+    });
+}
 
- function cargarDatosDeFirebase(año, mes) {
- const ruta = `<span class="math-inline">\{año\}/</span>{mes}`;
- dbRef.child(ruta).once('value')
- .then((snapshot) => {
- const datos = snapshot.val();
- if (datos) {
- cargarDatosEnTabla(datos);
- } else {
- console.log(`No hay datos guardados para ${mes} de ${año}`);
- // Si no hay datos, se mantiene la tabla vacía creada inicialmente
- }
- })
- .catch((error) => {
- console.error("Error al cargar los datos:", error);
- });
- }
+
+
+function cargarDatosDeFirebase(año, mes) {
+  const ruta = `${año}/${meses[mes]}`;
+  dbRef.child(ruta).once('value')
+    .then((snapshot) => {
+      const datos = snapshot.val();
+      if (datos) {
+        cargarDatosEnTabla(datos);
+      } else {
+        console.log(`No hay datos guardados para ${meses[mes]} de ${año}`);
+      }
+    })
+    .catch((error) => {
+      console.error("Error al cargar los datos:", error);
+    });
+}
+
 
  function cargarDatosEnTabla(datos) {
  const tabla = document.querySelector(`#contenedor-tablas > div:nth-child(${mesActual + 1}) table tbody`);
@@ -433,34 +425,70 @@ function copiarValoresAlSiguienteMesParaTodosLosMeses(mesActual) {
 
 
 function activarActualizacion() {
-  document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
+  document.querySelectorAll(".tabla-vuelo").forEach((tabla, indiceTabla) => {
     tabla.addEventListener("input", (e) => {
       const celda = e.target;
-
       const fila = celda.parentElement;
       const celdas = Array.from(fila.children);
       const index = celdas.indexOf(celda);
 
-      // Saltar si es columna VIENEN (1), MET TOTAL (33) o GENERAL (34)
+      // Saltar si es columna VIENEN (1), MES TOTAL (33) o GENERAL (34)
       if (index === 1 || index === 33 || index === 34) {
         actualizarTotales();
         return;
       }
 
-      // Verificar si la celda tiene contenido
+      // Efecto visual si se edita una celda
       if (celda.textContent.trim() !== "") {
-        // Añadir clase para el efecto de luz si tiene contenido
         celda.classList.add("led-persistente");
       } else {
-        // Eliminar clase si la celda está vacía
         celda.classList.remove("led-persistente");
       }
 
       actualizarTotales();
+
+      // Guardar automáticamente en Firebase
+      const datosActualizados = obtenerDatosTabla(indiceTabla);
+      guardarDatosEnFirebase(añoActual, indiceTabla, datosActualizados);
     });
   });
 }
 
+
+function cargarDatosDesdeFirebase(año, mes) {
+  const ruta = `${año}/${mes}`;
+  dbRef.child(ruta).once("value")
+    .then((snapshot) => {
+      const datos = snapshot.val();
+      if (datos) {
+        const tabla = document.querySelectorAll(".tabla-vuelo")[mes];
+        const filas = tabla.querySelectorAll("tbody tr");
+
+        datos.forEach((filaDatos, filaIndex) => {
+          const celdas = filas[filaIndex]?.querySelectorAll("td");
+          if (!celdas) return;
+
+          filaDatos.forEach((valor, colIndex) => {
+            // Asegurarse de que no estamos escribiendo en encabezados o celdas especiales
+            if (celdas[colIndex]) {
+              celdas[colIndex].textContent = valor;
+              if (valor && valor.trim() !== "") {
+                celdas[colIndex].classList.add("led-persistente");
+              } else {
+                celdas[colIndex].classList.remove("led-persistente");
+              }
+            }
+          });
+        });
+
+        actualizarTotales(); // opcional, para actualizar totales al cargar
+        console.log(`Datos cargados correctamente para ${mes} de ${año}`);
+      }
+    })
+    .catch((error) => {
+      console.error("Error al cargar datos desde Firebase:", error);
+    });
+}
 
 
 
@@ -484,6 +512,12 @@ function activarActualizacion() {
 
     window.addEventListener("load", iniciar);
     window.imprimirTabla = imprimirTabla;
+
+    // Cargar datos de todos los meses al inicio
+for (let i = 0; i < 12; i++) {
+  cargarDatosDesdeFirebase(añoActual, i);
+}
+
   </script>
 </body>
 </html>
