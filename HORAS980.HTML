@@ -554,6 +554,10 @@
         const database = getDatabase(app); // Obtiene la instancia de Realtime Database
         const auth = getAuth(app); // Obtiene la instancia de Autenticación
 
+        // Define __app_id con un valor por defecto si no está definida
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        console.log("App ID utilizada:", appId); // Log para depuración
+
         // Variables globales
         let añoActual = new Date().getFullYear(); // Inicia con el año actual
         let mesActual = new Date().getMonth(); // Inicia con el mes actual (0-11)
@@ -687,6 +691,7 @@
                 emailInput.value = '';
                 passwordInput.value = '';
                 // Asignar rol por defecto 'viewer' al nuevo usuario
+                // Usar la ruta correcta para user_roles
                 await set(ref(database, `user_roles/${user.uid}`), 'viewer');
                 console.log('Rol de usuario asignado como viewer.');
             } catch (error) {
@@ -767,16 +772,20 @@
                 authStatus.textContent = '';
 
                 try {
-                    const snapshot = await get(ref(database, `user_roles/${userId}`));
+                    // CORRECCIÓN: Usar la ruta correcta para user_roles
+                    const rolePath = `user_roles/${userId}`;
+                    console.log("Ruta de rol de usuario:", rolePath); // Log para depuración
+                    const snapshot = await get(ref(database, rolePath));
                     currentUserRole = snapshot.val() || 'viewer';
-                    console.log('Rol del usuario:', currentUserRole);
+                    console.log('Rol del usuario (obtenido de DB):', currentUserRole); 
                     
                     if (!snapshot.exists()) {
                         console.log('Asignando rol por defecto "viewer" al usuario:', userId);
-                        await set(ref(database, `user_roles/${userId}`), 'viewer');
+                        // Usar la ruta correcta para user_roles
+                        await set(ref(database, rolePath), 'viewer');
                         console.log('Rol "viewer" asignado exitosamente.');
                     }
-                    applyRolePermissions(currentUserRole);
+                    applyRolePermissions(currentUserRole); // Aplicar permisos después de obtener el rol
                     await cargarDatosDeFirebase(); // Cargar datos para el mes actual y año actual
                     agregarEventosDeEdicion(); // Re-agregar eventos después de cargar datos
                 } catch (error) {
@@ -887,8 +896,8 @@
                 return;
             }
 
-            const rutaDatos = `artifacts/${__app_id}/users/${userId}/datos_vuelo/${año}/${mesIndex}`;
-            const rutaRecordatorio = `artifacts/${__app_id}/users/${userId}/recordatorios/${año}/${mesIndex}`;
+            const rutaDatos = `artifacts/${appId}/users/${userId}/datos_vuelo/${año}/${mesIndex}`;
+            const rutaRecordatorio = `artifacts/${appId}/users/${userId}/recordatorios/${año}/${mesIndex}`;
 
             try {
                 await set(ref(database, rutaDatos), datosTabla);
@@ -913,8 +922,8 @@
                 return;
             }
 
-            const rutaDatos = `artifacts/${__app_id}/users/${userId}/datos_vuelo/${añoActual}/${mesActual}`;
-            const rutaRecordatorio = `artifacts/${__app_id}/users/${userId}/recordatorios/${añoActual}/${mesActual}`;
+            const rutaDatos = `artifacts/${appId}/users/${userId}/datos_vuelo/${añoActual}/${mesActual}`;
+            const rutaRecordatorio = `artifacts/${appId}/users/${userId}/recordatorios/${añoActual}/${mesActual}`;
 
             try {
                 // Cargar datos de la tabla
@@ -1286,8 +1295,8 @@
             } else if (isLabelRow) {
                 rowHtml += `
                     <td class="limite-label label-yellow" contenteditable="false">LIMITE</td>
-                    <td class="abbrd-label label-yellow" contenteditable="false">ABBR'D</td>
-                    <td class="extd-label label-yellow" contenteditable="false">EXT'D</td>
+                    <td class="abbrd-label label-yellow" contenteditable="false">ABBR\'D</td>
+                    <td class="extd-label label-yellow" contenteditable="false">EXT\'D</td>
                     <td class="flight-count-factor-label label-yellow" contenteditable="false">FLIGHT COUNT FACTOR</td>
                     <td class="restante-label label-red blinking" contenteditable="false">RESTANTE</td>
                 `;
@@ -1335,7 +1344,7 @@
         async function copiarValorGeneralAMesSiguiente(año, mesOrigenIndex, mesDestinoIndex) {
             if (!userId || userId === "anonimo") return;
 
-            const rutaOrigen = `artifacts/${__app_id}/users/${userId}/datos_vuelo/${año}/${mesOrigenIndex}`; 
+            const rutaOrigen = `artifacts/${appId}/users/${userId}/datos_vuelo/${año}/${mesOrigenIndex}`; 
             try {
                 const snapshot = await get(ref(database, rutaOrigen));
                 const datosOrigen = snapshot.val();
