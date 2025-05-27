@@ -876,7 +876,7 @@
 
         /**
          * Guarda los datos de una tabla específica y el recordatorio en Firebase.
-         * La ruta incluye el ID de usuario para datos privados.
+         * La ruta ahora es compartida.
          * @param {number} año - El año de los datos.
          * @param {number} mesIndex - El índice numérico del mes.
          * @param {Array<Array<string>>} datosTabla - Los datos de la tabla a guardar.
@@ -889,15 +889,17 @@
                 authStatus.style.color = 'orange';
                 return;
             }
-            if (!userId || userId === "anonimo") {
-                console.error("No se puede guardar: ID de usuario no válido.");
-                authStatus.textContent = "Error: No se puede guardar sin un ID de usuario válido.";
-                authStatus.style.color = 'red';
-                return;
-            }
+            // No necesitamos userId en la ruta de guardado para datos compartidos
+            // if (!userId || userId === "anonimo") {
+            //     console.error("No se puede guardar: ID de usuario no válido.");
+            //     authStatus.textContent = "Error: No se puede guardar sin un ID de usuario válido.";
+            //     authStatus.style.color = 'red';
+            //     return;
+            // }
 
-            const rutaDatos = `artifacts/${appId}/users/${userId}/datos_vuelo/${año}/${mesIndex}`;
-            const rutaRecordatorio = `artifacts/${appId}/users/${userId}/recordatorios/${año}/${mesIndex}`;
+            // *** RUTA COMPARTIDA ***
+            const rutaDatos = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesIndex}`;
+            const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${año}/${mesIndex}`;
 
             try {
                 await set(ref(database, rutaDatos), datosTabla);
@@ -914,16 +916,19 @@
 
         /**
          * Carga los datos de una tabla específica y el recordatorio desde Firebase.
-         * La ruta incluye el ID de usuario para datos privados.
+         * La ruta ahora es compartida.
          */
         async function cargarDatosDeFirebase() {
+            // No necesitamos userId en la ruta de carga para datos compartidos,
+            // pero sí necesitamos que el usuario esté autenticado para leer.
             if (!userId || userId === "anonimo") {
-                console.warn("No se pueden cargar datos: ID de usuario no válido.");
+                console.warn("No se pueden cargar datos: Usuario no autenticado.");
                 return;
             }
 
-            const rutaDatos = `artifacts/${appId}/users/${userId}/datos_vuelo/${añoActual}/${mesActual}`;
-            const rutaRecordatorio = `artifacts/${appId}/users/${userId}/recordatorios/${añoActual}/${mesActual}`;
+            // *** RUTA COMPARTIDA ***
+            const rutaDatos = `artifacts/${appId}/public_data/datos_vuelo/${añoActual}/${mesActual}`;
+            const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${añoActual}/${mesActual}`;
 
             try {
                 // Cargar datos de la tabla
@@ -1277,7 +1282,7 @@
                 const { nomenclaturaBase, varianteClave } = parseNomenclatura(nombre);
                 if (limitesConfig[nomenclaturaBase]) {
                     let config = limitesConfig[nomenclaturaBase];
-                    if (varianteClave && config[varianteClave]) { 
+                    if (varianteClave && config && config[varianteClave]) { 
                         config = config[varianteClave];
                     }
                     limiteVal = config?.limitCycles !== undefined ? config.limitCycles : '';
@@ -1344,7 +1349,8 @@
         async function copiarValorGeneralAMesSiguiente(año, mesOrigenIndex, mesDestinoIndex) {
             if (!userId || userId === "anonimo") return;
 
-            const rutaOrigen = `artifacts/${appId}/users/${userId}/datos_vuelo/${año}/${mesOrigenIndex}`; 
+            // *** RUTA COMPARTIDA para el origen ***
+            const rutaOrigen = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesOrigenIndex}`; 
             try {
                 const snapshot = await get(ref(database, rutaOrigen));
                 const datosOrigen = snapshot.val();
@@ -1383,6 +1389,7 @@
                         });
                         actualizarTotales();
                         // Guardar los datos del mes destino en Firebase después de la copia
+                        // *** RUTA COMPARTIDA para el destino ***
                         await guardarDatosEnFirebase(añoActual, mesDestinoIndex, obtenerDatosTabla(mesDestinoIndex), recordatorioTextarea.value);
                     }
                 }
@@ -1501,15 +1508,25 @@
                             const noOfFlights = generalValuesMap.get(`FLIGHTS ${motorNumero}`) || 0;
                             const noOfContingencyExcursions = generalValuesMap.get(`CONTINGENCY EXCURSIONS ${motorNumero}`) || 0;
 
-                            const term1 = noOfStarts;
-                            let term2 = 0;
-                            if (ABBREVIATED_CYCLE_FACTOR !== 0) {
-                                term2 = (noOfFlights - noOfStarts) / ABBREVIATED_CYCLE_FACTOR;
-                            }
-                            const term3 = noOfContingencyExcursions * EXTENDED_CYCLE_FACTOR;
-                            const term4 = FLIGHT_COUNT_FACTOR * noOfFlights;
+                            // --- INICIO DE LA CORRECCIÓN DE LA FÓRMULA ---
+                            // Término 1: No. of Starts
+                            const termStarts = noOfStarts;
 
-                            accumulatedTotalCycles = term1 + term2 + term3 + term4;
+                            // Término 2: (No. of Flights - No. of Starts) / Abbreviated Cycle Factor
+                            let termFlightsStarts = 0;
+                            if (ABBREVIATED_CYCLE_FACTOR !== 0) {
+                                termFlightsStarts = (noOfFlights - noOfStarts) / ABBREVIATED_CYCLE_FACTOR;
+                            }
+
+                            // Término 3: No. of Contingency Rating Excursions x Extended Cycle Factor
+                            const termContingency = noOfContingencyExcursions * EXTENDED_CYCLE_FACTOR;
+
+                            // Suma de los tres primeros términos
+                            const sumOfTerms = termStarts + termFlightsStarts + termContingency;
+
+                            // Multiplicación final por Flight Count Factor (¡Esta es la corrección!)
+                            accumulatedTotalCycles = sumOfTerms * FLIGHT_COUNT_FACTOR;
+                            // --- FIN DE LA CORRECCIÓN DE LA FÓRMULA ---
                         }
 
                         const restante = limite - accumulatedTotalCycles;
