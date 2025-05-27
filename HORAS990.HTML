@@ -1,523 +1,1281 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
- <meta charset="UTF-8" />
- <title>Datos de Vuelo</title>
- <style>
- body {
- font-family: Arial, sans-serif;
- margin: 20px;
- }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos de Vuelo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos personalizados para la aplicación */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* Fondo con efecto de cielo y gradiente */
+            background: linear-gradient(to bottom, #87CEEB 0%, #ADD8E6 100%); /* Azul cielo a azul claro */
+            overflow-x: hidden; /* Evita el scroll horizontal causado por animaciones de entrada */
+            position: relative; /* Necesario para posicionar el helicóptero y la careta absolutamente */
+        }
 
- h2 {
- text-align: center;
- font-weight: bold;
- font-size: 24px;
- margin-bottom: 20px;
- }
+        h2 {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.875rem; /* 30px */
+            margin-bottom: 1.25rem; /* 20px */
+            color: #2c3e50;
+        }
 
+        /* Estilos para el contenedor de autenticación */
+        #auth-container {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 0.75rem; /* 12px, un poco más redondeado */
+            max-width: 400px;
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #ffffff;
+            /* Mejoras de diseño para el login */
+            padding: 2.5rem; /* Más padding */
+            box-shadow: 0 20px 30px -8px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* Sombra más pronunciada y suave */
+            background: linear-gradient(135deg, #fdfefe 0%, #ffffff 100%); /* Gradiente suave */
+            border: 1px solid #d1d5db; /* Borde más sutil */
+            animation: fadeInScale 1s ease-out forwards; /* Animación de aparición con escala */
+            position: relative; /* Para que el contenido dentro de auth-container no se superponga al helicóptero */
+            z-index: 10; /* Asegura que esté debajo del helicóptero y la careta */
+        }
 
+        /* Animación de aparición con escala */
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
 
- .led-persistente {
- background-color: #f8f7f7 !important; /* Fondo oscuro para resalte */
- color: #0e0f0e;
- animation: resplandor 2s infinite;
- font-weight: bold;
- }
+        #auth-container h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.75rem; /* 28px */
+            margin-bottom: 1.75rem; /* Más espacio */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+        }
 
- .led-effect {
- background-color: #3714ff !important; /* Verde lima */
- box-shadow: 0 0 8px #39ff14;
- transition: background-color 0.3s ease, box-shadow 0.3s ease;
- }
+        #auth-container input {
+            width: calc(100% - 22px);
+            padding: 12px; /* Más padding para inputs */
+            margin: 10px 0; /* Más margen */
+            border: 1px solid #d1d5db; /* Color de borde más suave */
+            border-radius: 0.375rem; /* 6px */
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        #auth-container input:focus {
+            border-color: #4f46e5; /* Azul índigo al enfocar */
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.25); /* Sombra al enfocar */
+            outline: none;
+        }
 
+        #auth-container button {
+            padding: 12px 25px; /* Más padding para botones */
+            margin: 8px 5px; /* Más margen */
+            border: none;
+            border-radius: 0.5rem; /* 8px, más redondeado */
+            cursor: pointer;
+            font-size: 1.05rem; /* Ligeramente más grande */
+            font-weight: 700; /* Más negrita */
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15); /* Sombra más pronunciada */
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15); /* Sombra de texto más fuerte */
+            position: relative; /* Para efectos de pseudo-elementos */
+            overflow: hidden; /* Para que el pseudo-elemento no se desborde */
+        }
 
- .celda-modificada {
- animation: ledFlash 1s ease-in-out;
- }
+        /* Efecto de brillo al pasar el ratón */
+        #auth-container button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: skewX(-20deg);
+            transition: all 0.4s ease;
+        }
+        #auth-container button:hover::before {
+            left: 100%;
+        }
 
- .year-container {
- text-align: center;
- margin-bottom: 10px;
- font-weight: bold;
- }
+        #auth-container button:active {
+            transform: translateY(3px); /* Efecto de "presionar" más profundo */
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+        #auth-container button:hover {
+            box-shadow: 0 8px 15px rgba(0,0,0,0.25); /* Sombra más grande al pasar el ratón */
+        }
 
- .tab-container {
- text-align: center;
- margin-bottom: 10px;
- }
+        /* Botones con gradientes y efectos */
+        #login-btn {
+            background: linear-gradient(to right, #22c55e, #10b981); /* Verde a verde azulado */
+            color: white;
+        }
+        #login-btn:hover {
+            background: linear-gradient(to right, #16a34a, #059669);
+        }
 
- .tab-button {
- padding: 5px 10px;
- margin: 0 2px;
- background-color: #ddd;
- border: 1px solid #999;
- cursor: pointer;
- }
+        #signup-btn {
+            background: linear-gradient(to right, #3b82f6, #2563eb); /* Azul a azul oscuro */
+            color: white;
+        }
+        #signup-btn:hover {
+            background: linear-gradient(to right, #2563eb, #1d4ed8);
+        }
 
- .tab-button.active {
- background-color: #b0c4de;
- font-weight: bold;
- }
+        #forgot-password-btn {
+            background: linear-gradient(to right, #f59e0b, #eab308); /* Naranja a amarillo */
+            color: white;
+        }
+        #forgot-password-btn:hover {
+            background: linear-gradient(to right, #d97706, #ca8a04);
+        }
 
- .button-container {
- text-align: center;
- margin: 15px 0;
- }
+        #logout-btn {
+            background: linear-gradient(to right, #ef4444, #dc2626); /* Rojo a rojo oscuro */
+            color: white;
+        }
+        #logout-btn:hover {
+            background: linear-gradient(to right, #dc2626, #b91c1c);
+        }
 
- table {
- border-collapse: collapse;
- width: 100%;
- font-size: 11px;
- }
+        #auth-status {
+            color: #dc2626;
+            margin-top: 1.25rem; /* Más espacio */
+            font-size: 1rem; /* 16px */
+            font-weight: 600;
+        }
 
- th,
- td {
- border: 1px solid #000;
- padding: 3px;
- text-align: center;
- min-width: 25px;
- }
+        /* Estilos para la tabla y otros elementos */
+        .led-persistente {
+            background-color: #e0e0e0 !important;
+            color: #0e0f0e;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
 
- th {
- background-color: #b0c4de;
- }
+        .year-container, .tab-container, .button-container {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
 
- .nomenclatura {
- background-color: #d9d9d9;
- font-weight: bold;
- }
+        .tab-button {
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            background-color: #e0e0e0;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s ease;
+        }
 
- .totales {
- background-color: #e0e0e0;
- font-weight: bold;
- }
+        .tab-button:hover {
+            background-color: #d0d0d0;
+        }
 
- td[contenteditable="true"] {
- background-color: #fefefe;
- }
+        .tab-button.active {
+            background-color: #b0c4de;
+            font-weight: bold;
+            border-color: #90a4b0;
+        }
 
- @media print {
- body {
- margin: 0;
- padding: 10mm;
- font-size: 10px;
- }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.6875rem; /* 11px */
+            margin-top: 1.25rem; /* 20px */
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
 
- .button-container,
- .tab-container,
- .year-container {
- display: none;
- }
+        th, td {
+            border: 1px solid #dcdcdc;
+            padding: 0.375rem;
+            text-align: center;
+            min-width: 25px;
+            white-space: nowrap;
+        }
 
- table {
- page-break-inside: avoid;
- width: 100%;
- border-collapse: collapse;
- }
+        th {
+            background-color: #b0c4de;
+            color: #333;
+            font-weight: bold;
+        }
 
- tr,
- td,
- th {
- page-break-inside: avoid;
- page-break-after: auto;
- border: 1px solid #000 !important;
- }
+        .nomenclatura {
+            background-color: #e9e9e9;
+            font-weight: bold;
+            text-align: left;
+        }
 
- th,
- td {
- padding: 2px;
- font-size: 10px;
- }
+        .fila-total, .fila-general {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
 
- @page {
- size: A4 landscape;
- margin: 10mm;
- }
- }
- </style>
- <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
- <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+        /* Estilos para celdas editables y de solo lectura */
+        td.editable-cell {
+            background-color: #fefefe;
+            cursor: text;
+        }
+        td.editable-cell:focus {
+            outline: 2px solid #6cb2eb;
+            background-color: #e6f7ff;
+        }
+        
+        td.read-only-cell {
+            background-color: #f9f9f9; /* Un color ligeramente diferente para indicar que no es editable */
+            cursor: not-allowed;
+        }
+
+        /* Ocultar contenido principal por defecto */
+        #main-app-content {
+            display: none;
+            width: 100%;
+        }
+
+        /* Contenedor para el título y el botón de cerrar sesión */
+        #main-app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        #main-app-header h2 {
+            margin-bottom: 0;
+        }
+
+        /* Estilos del helicóptero */
+        #helicopter-svg {
+            position: absolute;
+            top: 20px; /* Posición final por encima del login */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px; /* Tamaño del helicóptero */
+            height: auto;
+            filter: drop-shadow(3px 5px 2px rgba(0, 0, 0, 0.2));
+            z-index: 20; /* Asegura que esté por encima de todo */
+            animation: flyInHeli 2s ease-out forwards, hover 3s ease-in-out infinite alternate 2s; /* Animación de entrada y flotación */
+        }
+
+        /* Animación de entrada del helicóptero */
+        @keyframes flyInHeli {
+            from { top: -150px; opacity: 0; transform: translateX(-50%) rotate(-15deg); }
+            to { top: 20px; opacity: 1; transform: translateX(-50%) rotate(0deg); }
+        }
+
+        /* Animación de flotación del helicóptero */
+        @keyframes hover {
+            0% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+            100% { transform: translateX(-50%) translateY(0px); }
+        }
+
+        /* Estilos de la careta de Anonymous */
+        #anonymous-mask-svg {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%); /* Start hidden above helicopter */
+            width: 60px; /* Size of the mask */
+            height: auto;
+            z-index: 15; /* Between helicopter and auth container */
+            opacity: 0; /* Initially hidden */
+            pointer-events: none; /* Make it not clickable */
+            animation: dropAndRiseMask 4s ease-in-out forwards 2.5s; /* Starts at 2.5s, total 4s */
+        }
+
+        @keyframes dropAndRiseMask {
+            0% { opacity: 0; transform: translateX(-50%) translateY(-100%); } /* Start hidden above */
+            10% { opacity: 1; transform: translateX(-50%) translateY(0); } /* Appears just below heli */
+            35% { transform: translateX(-50%) translateY(var(--mask-drop-distance)); } /* Drops down */
+            65% { transform: translateX(-50%) translateY(var(--mask-drop-distance)); } /* Holds at bottom */
+            90% { transform: translateX(-50%) translateY(0); } /* Rises back up */
+            100% { opacity: 0; transform: translateX(-50%) translateY(-100%); } /* Disappears above */
+        }
+
+        /* Estilos del efecto de revelación (círculo blanco) */
+        #reveal-circle {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%) scale(0); /* Start small and hidden */
+            width: 100px;
+            height: 100px;
+            background-color: white; /* Círculo blanco */
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 12; /* Under auth container */
+            pointer-events: none;
+            animation: revealEffect 1s ease-out forwards 3.9s; /* Starts when mask is down */
+        }
+
+        @keyframes revealEffect {
+            0% { opacity: 0; transform: translateX(-50%) scale(0); }
+            50% { opacity: 0.8; transform: translateX(-50%) scale(1); } /* Max size and opacity */
+            100% { opacity: 0; transform: translateX(-50%) scale(1.5); } /* Fades out and grows more */
+        }
+
+        /* Estilos de impresión */
+        @media print {
+            body {
+                margin: 0;
+                padding: 10mm;
+                font-size: 10px;
+            }
+
+            #auth-container,
+            #helicopter-svg,
+            #anonymous-mask-svg, /* Oculta la careta en la impresión */
+            #reveal-circle, /* Oculta el círculo en la impresión */
+            #main-app-header,
+            .button-container,
+            .tab-container,
+            .year-container {
+                display: none;
+            }
+
+            h2 {
+                margin-top: 0;
+                margin-bottom: 5mm;
+                text-align: center;
+            }
+
+            table {
+                page-break-inside: avoid;
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            tr,
+            td,
+            th {
+                page-break-inside: avoid;
+                page-break-after: auto;
+                border: 1px solid #000 !important;
+            }
+
+            th,
+            td {
+                padding: 2px;
+                font-size: 10px;
+            }
+
+            @page {
+                size: A4 landscape;
+                margin: 10mm;
+            }
+        }
+
+        /* Media queries para responsividad */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            #auth-container {
+                padding: 1.5rem;
+                width: 95%;
+            }
+            #auth-container input {
+                width: calc(100% - 16px);
+            }
+            #auth-container button {
+                width: 100%;
+                margin: 5px 0;
+            }
+            .flex.flex-col.sm:flex-row.justify-center.gap-2 {
+                flex-direction: column;
+                gap: 10px;
+            }
+            #main-app-header {
+                flex-direction: column;
+                align-items: center;
+            }
+            #main-app-header h2 {
+                font-size: 1.5rem;
+                margin-bottom: 10px;
+            }
+            #logout-btn {
+                width: 100%;
+            }
+            .tab-button {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+            table {
+                font-size: 0.6rem;
+            }
+            th, td {
+                padding: 0.25rem;
+            }
+            #helicopter-svg {
+                width: 100px; /* Helicóptero más pequeño en móvil */
+                top: 10px; /* Ajuste para móvil */
+            }
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
- <h2>DATOS DE VUELO FAH-990</h2>
+    <svg id="helicopter-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+        <g id="SVGRepo_iconCarrier">
+            <path d="M16 13.5C16 15.433 13.3137 17 10 17C6.68629 17 4 15.433 4 13.5C4 11.567 6.68629 10 10 10C13.3137 10 16 11.567 16 13.5Z" fill="#3498db" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M12 12.5C12 13.0523 11.5523 13.5 11 13.5H9C8.44772 13.5 8 13.0523 8 12.5C8 11.9477 8.44772 11.5 9 11.5H11C11.5523 11.5 12 11.9477 12 12.5Z" fill="#ecf0f1"></path>
+            <path d="M16 13.5H20C20.5523 13.5 21 13.0523 21 12.5C21 11.9477 20.5523 11.5 20 11.5H16" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M5 16.5L4 18.5M15 16.5L16 18.5" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M4 18.5H16" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M10 10V4C10 3.44772 10.4477 3 11 3H13C13.5523 3 14 3.44772 14 4V10" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M12 2V1C12 0.447715 11.5523 0 11 0H9C8.44772 0 8 0.447715 8 1V2" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M12 2H18C18.5523 2 19 2.44772 19 3V5C19 5.55228 18.5523 6 18 6H12" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M20 11.5V9.5C20 8.94772 20.4477 8.5 21 8.5H23C23.5523 8.5 24 8.94772 24 9.5V11.5" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M20 11.5H22C22.5523 11.5 23 11.9477 23 12.5V14.5C23 15.0523 22.5523 15.5 22 15.5H20" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </g>
+    </svg>
 
- <div class="year-container">
- Año:
- <select id="select-year"></select>
- </div>
+    <svg id="anonymous-mask-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 0C22.4 0 0 22.4 0 50C0 77.6 22.4 100 50 100C77.6 100 100 77.6 100 50C100 22.4 77.6 0 50 0Z" fill="#F0F0F0" stroke="#333333" stroke-width="2"/>
+        <circle cx="35" cy="40" r="8" fill="#333333"/>
+        <circle cx="65" cy="40" r="8" fill="#333333"/>
+        <path d="M30 65C30 65 40 75 50 75C60 75 70 65 70 65" stroke="#333333" stroke-width="4" stroke-linecap="round"/>
+        <path d="M25 30C25 30 30 25 35 30" stroke="#333333" stroke-width="2" stroke-linecap="round"/>
+        <path d="M75 30C75 30 70 25 65 30" stroke="#333333" stroke-width="2" stroke-linecap="round"/>
+    </svg>
 
- <div class="tab-container" id="meses"></div>
+    <div id="reveal-circle"></div>
 
- <div id="contenedor-tablas"></div>
+    <div id="auth-container" class="rounded-lg shadow-md p-6 bg-white">
+        <h3 class="text-xl font-semibold mb-4">Acceso de Usuario</h3>
+        <input type="email" id="email" placeholder="Correo electrónico" class="w-full p-2 mb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <input type="password" id="password" placeholder="Contraseña" class="w-full p-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="flex flex-col sm:flex-row justify-center gap-2">
+            <button id="login-btn" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">Iniciar Sesión</button>
+            <button id="signup-btn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Registrarse</button>
+        </div>
+        <button id="forgot-password-btn" class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors mt-4">Olvidé mi contraseña</button>
+        <p id="auth-status" class="text-red-600 mt-3 text-sm"></p>
+    </div>
 
- <div class="button-container">
- <button onclick="imprimirTabla()">Imprimir Tabla</button>
- </div>
+    <div id="main-app-content">
+        <div id="main-app-header" class="flex justify-between items-center mb-4">
+            <h2 class="flex-grow text-center sm:text-left">DATOS DE VUELO FAH-990</h2>
+            <button id="logout-btn" class="px-4 py-2 bg-red-500 text-white rounded-md shadow-md hover:bg-red-600 transition-colors">Cerrar Sesión</button>
+        </div>
 
- <script>
- const años = [2024, 2025, 2026];
- let añoActual = 2025;
- let mesActual = 0;
+        <div class="year-container">
+            Año:
+            <select id="select-year" class="p-2 border border-gray-300 rounded-md"></select>
+        </div>
 
- const meses = [
- "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
- "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
- ];
+        <div class="tab-container" id="meses"></div>
 
- const nombresFilas = [
- "AC HRS", "LANDINGS", "ENGINE HRS 1", "ENGINE N1 CYCLES 1",
- "ENGINE N2 CYCLES 1", "CREEP 1", "ENGINE HRS 2", "ENGINE N1 CYCLES 2",
- "ENGINE N2 CYCLES 2", "CREEP 2", "CARGO HOOK HRS FLIGTH", "CARGO HOOK CYCLE",
- "CARGO HOOK HRS LIFTING", "CARGO HOOK LIFTING", "CARGO HOOK LIFTING >400 KG ",
- "HOIST RESCUE HRS", "HOIST RESCUE OP HRS", "HOIST RESCUE CYCLE"
- ];
+        <div id="contenedor-tablas" class="overflow-x-auto"></div>
 
- const contenedorTablas = document.getElementById("contenedor-tablas");
- const contenedorMeses = document.getElementById("meses");
- const selectYear = document.getElementById("select-year");
+        <div class="button-container">
+            <button onclick="imprimirTabla()" class="px-6 py-2 bg-gray-700 text-white rounded-md shadow-md hover:bg-gray-800 transition-colors">Imprimir Tabla</button>
+        </div>
+    </div>
 
- // Configuración de Firebase
- const firebaseConfig = {
-  apiKey: "AIzaSyCTc4mY9p239UnNwdQ_GnxCMPfm7jrIfxQ",
-  authDomain: "fah-990.firebaseapp.com",
-  databaseURL: "https://fah-990-default-rtdb.firebaseio.com",
-  projectId: "fah-990",
-  storageBucket: "fah-990.firebasestorage.app",
-  messagingSenderId: "344019976448",
-  appId: "1:344019976448:web:a2d462d0dc23695c2133e5",
-  measurementId: "G-G4LNY0PPPZ"
-};
+    <script>
+        // Configuración de Firebase (asegúrate de que estas credenciales sean correctas para tu proyecto)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTc4mY9p239UnNwdQ_GnxCMPfm7jrIfxQ", // Tu clave API de Firebase
+            authDomain: "fah-990.firebaseapp.com", // Dominio de autenticación de tu proyecto
+            databaseURL: "https://fah-990-default-rtdb.firebaseio.com", // URL de tu Realtime Database
+            projectId: "fah-990", // ID de tu proyecto
+            storageBucket: "fah-990.firebasestorage.app", // Bucket de almacenamiento
+            messagingSenderId: "344019976448", // ID de remitente de mensajes
+            appId: "1:344019976448:web:a2d462d0dc23695c2133e5", // ID de la aplicación
+            measurementId: "G-G4LNY0PPPZ" // ID de medición de Google Analytics (opcional)
+        };
 
- // Inicializar Firebase
- const app = firebase.initializeApp(firebaseConfig);
- const database = firebase.database();
- const dbRef = database.ref('datos_vuelo'); // Referencia a la raíz de tus datos de vuelo
+        // Inicializar Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth(); // Inicializar el servicio de Autenticación de Firebase
+        let dbRef = database.ref('datos_vuelo'); // Referencia a la raíz de tus datos de vuelo en la Realtime Database
+        const userRolesRef = database.ref('user_roles'); // Referencia a la colección de roles de usuario
 
- function guardarDatosEnFirebase(año, mes, datosTabla) {
-  const ruta = `${año}/${mes}`; // ← ruta correcta
-  dbRef.child(ruta).set(datosTabla)
-    .then(() => {
-      console.log(`Datos guardados correctamente para ${mes} de ${año}`);
-    })
-    .catch((error) => {
-      console.error("Error al guardar los datos:", error);
-    });
-}
+        // Referencias a los elementos de la interfaz de usuario de autenticación
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const forgotPasswordBtn = document.getElementById('forgot-password-btn'); // Nuevo botón
+        const logoutBtn = document.getElementById('logout-btn'); // Ahora está en main-app-content
+        const authStatus = document.getElementById('auth-status');
+        const authContainer = document.getElementById('auth-container');
+        const mainAppContent = document.getElementById('main-app-content'); // El contenedor principal de la aplicación de vuelo
 
+        // Variable global para el rol del usuario actual
+        let currentUserRole = null;
 
+        // -----------------------------------------------------------
+        // Variables y configuraciones de la aplicación de vuelo
+        // -----------------------------------------------------------
+        const años = [2024, 2025, 2026]; // Años disponibles para la selección
+        let añoActual = 2025; // Año actualmente seleccionado
+        let mesActual = 0; // Mes actualmente seleccionado (0 para Enero, 11 para Diciembre)
 
-function cargarDatosDeFirebase(año, mes) {
-  const ruta = `${año}/${meses[mes]}`;
-  dbRef.child(ruta).once('value')
-    .then((snapshot) => {
-      const datos = snapshot.val();
-      if (datos) {
-        cargarDatosEnTabla(datos);
-      } else {
-        console.log(`No hay datos guardados para ${meses[mes]} de ${año}`);
-      }
-    })
-    .catch((error) => {
-      console.error("Error al cargar los datos:", error);
-    });
-}
+        const meses = [
+            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ];
 
+        const nombresFilas = [
+            "AC HRS", "LANDINGS", "ENGINE HRS 1", "ENGINE N1 CYCLES 1",
+            "ENGINE N2 CYCLES 1", "CREEP 1", "ENGINE HRS 2", "ENGINE N1 CYCLES 2",
+            "ENGINE N2 CYCLES 2", "CREEP 2", "CARGO HOOK HRS FLIGTH", "CARGO HOOK CYCLE",
+            "CARGO HOOK HRS LIFTING", "CARGO HOOK LIFTING", "CARGO HOOK LIFTING >400 KG ",
+            "HOIST RESCUE HRS", "HOIST RESCUE OP HRS", "HOIST RESCUE CYCLE"
+        ];
 
- function cargarDatosEnTabla(datos) {
- const tabla = document.querySelector(`#contenedor-tablas > div:nth-child(${mesActual + 1}) table tbody`);
- if (tabla) {
- tabla.querySelectorAll('tr').forEach((fila, indexFila) => {
- const datosFila = datos[indexFila];
- if (datosFila) {
- fila.querySelectorAll('td').forEach((celda, indexCelda) => {
- if (datosFila[indexCelda] !== undefined) {
- celda.textContent = datosFila[indexCelda];
- }
- });
- }
- });
- actualizarTotales(); // Recalcular los totales después de cargar los datos
- }
- }
+        // Referencias a los elementos de la interfaz de usuario de la tabla de vuelo
+        const contenedorTablas = document.getElementById("contenedor-tablas");
+        const contenedorMeses = document.getElementById("meses");
+        const selectYear = document.getElementById("select-year");
 
- function obtenerDatosTabla(indiceTabla) {
- const tabla = document.querySelector(`#contenedor-tablas > div:nth-child(${indiceTabla + 1}) table tbody`);
- const datos = [];
- if (tabla) {
- tabla.querySelectorAll('tr').forEach(fila => {
- const filaData = [];
- fila.querySelectorAll('td').forEach(celda => {
- filaData.push(celda.textContent);
- });
- datos.push(filaData);
- });
- }
- return datos;
- }
+        // -----------------------------------------------------------
+        // Funciones de Autenticación
+        // -----------------------------------------------------------
 
- function cargarAños() {
- años.forEach((año) => {
- const option = document.createElement("option");
- option.value = año;
- option.textContent = año;
- selectYear.appendChild(option);
- });
- selectYear.value = añoActual;
- }
+        // Event listener para el botón de registro
+        signupBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
 
- function crearBotonesMeses() {
- contenedorMeses.innerHTML = "";
-
- meses.forEach((mes, i) => {
- const btn = document.createElement("button");
- btn.className = "tab-button";
- btn.textContent = mes;
- btn.onclick = () => {
- mesActual = i;
- mostrarTabla(i);
- };
- contenedorMeses.appendChild(btn);
- });
-
- mostrarTabla(mesActual);
- }
-    function crearTablasParaAño(año) {
-      contenedorTablas.innerHTML = "";
-
-      meses.forEach((mes, i) => {
-        const div = document.createElement("div");
-        div.className = "tabla-mes";
-        div.style.display = i === mesActual ? "block" : "none";
-
-        const tabla = document.createElement("table");
-        tabla.className = "tabla-vuelo";
-
-        const thead = document.createElement("thead");
-        const encabezado = document.createElement("tr");
-        encabezado.innerHTML =
-          `<th>NOMENCLATURA</th><th contenteditable="true">VIENEN</th>`;
-        for (let d = 1; d <= 31; d++) {
-          encabezado.innerHTML += `<th>${d}</th>`;
-        }
-        encabezado.innerHTML += `<th>MES TOTAL</th><th>GENERAL</th>`;
-        thead.appendChild(encabezado);
-        tabla.appendChild(thead);
-
-        const tbody = document.createElement("tbody");
-
-        nombresFilas.forEach((nombre) => {
-          const fila = document.createElement("tr");
-          fila.innerHTML =
-  `<td class="nomenclatura" contenteditable="true">${nombre}</td><td contenteditable="true"></td>`;
-for (let d = 1; d <= 31; d++) {
-  fila.innerHTML += `<td contenteditable="true"></td>`;
-}
-
-          fila.innerHTML += `<td class="fila-total">0</td><td class="fila-general">0</td>`;
-          tbody.appendChild(fila);
-        });
-
-        tabla.appendChild(tbody);
-        div.appendChild(tabla);
-        contenedorTablas.appendChild(div);
-      });
-    }
-
-    function mostrarTabla(index) {
-  mesActual = index;
-  document.querySelectorAll(".tabla-mes").forEach((div, i) => {
-    div.style.display = i === index ? "block" : "none";
-  });
-  document.querySelectorAll(".tab-button").forEach((btn, i) => {
-    btn.classList.toggle("active", i === index);
-  });
-  document.title = `Datos de Vuelo - ${meses[index]} ${añoActual}`;
-
-  // Traspasar valores de GENERAL al siguiente mes en VIENEN para todos los meses después del mes actual
-  copiarValoresAlSiguienteMesParaTodosLosMeses(index);
-}
-
-// Función que copia los valores de la columna "GENERAL" al siguiente mes en la columna "VIENEN"
-function copiarValoresAlSiguienteMesParaTodosLosMeses(mesActual) {
-  // Recorre todos los meses desde el mes actual hasta diciembre (mes 11)
-  for (let i = mesActual; i < meses.length - 1; i++) { 
-    const tablaActual = document.querySelectorAll(".tabla-vuelo")[i];
-    const tablaSiguiente = document.querySelectorAll(".tabla-vuelo")[i + 1];
-
-    // Recorre todas las filas (nombres) de la tabla actual
-    const filasActual = tablaActual.querySelectorAll("tbody tr");
-
-    filasActual.forEach((fila, index) => {
-      const celdasActual = fila.querySelectorAll("td");
-      const valorGeneral = celdasActual[34].textContent.trim(); // Columna GENERAL (35, índice 34)
-
-      // Si hay un valor en GENERAL, lo traspasamos a VIENEN de la tabla siguiente
-      if (valorGeneral !== "") {
-        const filaSiguiente = tablaSiguiente.querySelectorAll("tbody tr")[index];
-        const celdasSiguiente = filaSiguiente.querySelectorAll("td");
-
-        // Colocar el valor en la columna VIENEN del siguiente mes (índice 1)
-        celdasSiguiente[1].textContent = valorGeneral;
-      }
-    });
-  }
-}
-
-    function actualizarTotales() {
-  document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
-    const filas = tabla.querySelectorAll("tbody tr");
-    filas.forEach((fila) => {
-      const celdas = fila.querySelectorAll("td");
-      const vienenStr = celdas[1].textContent.trim();
-      const valoresCeldas = [...celdas].slice(2, 33).map(td => td.textContent.trim());
-
-      // Verificar si no hay ningún valor ingresado
-      const todasVacias = [vienenStr, ...valoresCeldas].every(val => val === "");
-      if (todasVacias) {
-        celdas[33].textContent = "";
-        celdas[34].textContent = "";
-        return;
-      }
-
-      // Funciones para manejar tiempo y números
-      const aMinutos = (val) => {
-        if (val.includes(":")) {
-          const [h, m] = val.split(":").map(Number);
-          return h * 60 + m;
-        } else {
-          const num = parseFloat(val.replace(",", "."));
-          if (isNaN(num)) return 0;
-          return num % 1 === 0 ? num : num * 60;
-        }
-      };
-
-      const aHora = (minutos) => {
-        const h = Math.floor(minutos / 60);
-        const m = Math.round(minutos % 60);
-        return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-      };
-
-      const esTiempo = vienenStr.includes(":") || valoresCeldas.some(v => v.includes(":"));
-
-      if (esTiempo) {
-        const vienenMin = vienenStr ? aMinutos(vienenStr) : 0;
-        const totalMin = valoresCeldas.reduce((acc, val) => acc + (val ? aMinutos(val) : 0), 0);
-        const generalMin = vienenMin + totalMin;
-
-        celdas[33].textContent = totalMin > 0 ? aHora(totalMin) : "";
-        celdas[34].textContent = generalMin > 0 ? aHora(generalMin) : "";
-      } else {
-        const vienen = vienenStr ? parseFloat(vienenStr.replace(",", ".")) : 0;
-        const valores = valoresCeldas.map(v => v ? parseFloat(v.replace(",", ".")) : 0);
-        const total = valores.reduce((acc, val) => acc + val, 0);
-        const general = total + vienen;
-
-        const mostrarTotal = total > 0 ? (Number.isInteger(total) ? total : total.toFixed(1)) : "";
-        const mostrarGeneral = general > 0 ? (Number.isInteger(general) ? general : general.toFixed(1)) : "";
-
-        celdas[33].textContent = mostrarTotal;
-        celdas[34].textContent = mostrarGeneral;
-      }
-    });
-  });
-}
-
-
-function activarActualizacion() {
-  document.querySelectorAll(".tabla-vuelo").forEach((tabla, indiceTabla) => {
-    tabla.addEventListener("input", (e) => {
-      const celda = e.target;
-      const fila = celda.parentElement;
-      const celdas = Array.from(fila.children);
-      const index = celdas.indexOf(celda);
-
-      // Saltar si es columna VIENEN (1), MES TOTAL (33) o GENERAL (34)
-      if (index === 1 || index === 33 || index === 34) {
-        actualizarTotales();
-        return;
-      }
-
-      // Efecto visual si se edita una celda
-      if (celda.textContent.trim() !== "") {
-        celda.classList.add("led-persistente");
-      } else {
-        celda.classList.remove("led-persistente");
-      }
-
-      actualizarTotales();
-
-      // Guardar automáticamente en Firebase
-      const datosActualizados = obtenerDatosTabla(indiceTabla);
-      guardarDatosEnFirebase(añoActual, indiceTabla, datosActualizados);
-    });
-  });
-}
-
-
-function cargarDatosDesdeFirebase(año, mes) {
-  const ruta = `${año}/${mes}`;
-  dbRef.child(ruta).once("value")
-    .then((snapshot) => {
-      const datos = snapshot.val();
-      if (datos) {
-        const tabla = document.querySelectorAll(".tabla-vuelo")[mes];
-        const filas = tabla.querySelectorAll("tbody tr");
-
-        datos.forEach((filaDatos, filaIndex) => {
-          const celdas = filas[filaIndex]?.querySelectorAll("td");
-          if (!celdas) return;
-
-          filaDatos.forEach((valor, colIndex) => {
-            // Asegurarse de que no estamos escribiendo en encabezados o celdas especiales
-            if (celdas[colIndex]) {
-              celdas[colIndex].textContent = valor;
-              if (valor && valor.trim() !== "") {
-                celdas[colIndex].classList.add("led-persistente");
-              } else {
-                celdas[colIndex].classList.remove("led-persistente");
-              }
+            if (!email || !password) {
+                authStatus.textContent = 'Por favor, introduce un correo y una contraseña.';
+                return;
             }
-          });
+
+            // Crea un nuevo usuario con correo y contraseña en Firebase Authentication
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log('Usuario registrado:', user.email);
+                    authStatus.textContent = 'Registro exitoso. ¡Bienvenido!';
+                    authStatus.style.color = 'green';
+                    emailInput.value = ''; // Limpiar campos de entrada
+                    passwordInput.value = '';
+
+                    // Asignar rol por defecto 'viewer' al nuevo usuario
+                    return userRolesRef.child(user.uid).set('viewer');
+                })
+                .then(() => {
+                    console.log('Rol de usuario asignado como viewer.');
+                })
+                .catch((error) => {
+                    console.error('Error al registrar:', error.message);
+                    authStatus.textContent = `Error al registrar: ${error.message}`;
+                    authStatus.style.color = 'red';
+                });
         });
 
-        actualizarTotales(); // opcional, para actualizar totales al cargar
-        console.log(`Datos cargados correctamente para ${mes} de ${año}`);
-      }
-    })
-    .catch((error) => {
-      console.error("Error al cargar datos desde Firebase:", error);
-    });
-}
+        // Event listener para el botón de inicio de sesión
+        loginBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                authStatus.textContent = 'Por favor, introduce un correo y una contraseña.';
+                return;
+            }
+
+            // Inicia sesión con correo y contraseña en Firebase Authentication
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    console.log('Usuario ha iniciado sesión:', userCredential.user.email);
+                    authStatus.textContent = 'Sesión iniciada. ¡Bienvenido!';
+                    authStatus.style.color = 'green';
+                    emailInput.value = ''; // Limpiar campos de entrada
+                    passwordInput.value = '';
+                })
+                .catch((error) => {
+                    console.error('Error al iniciar sesión:', error.message);
+                    authStatus.textContent = `Error al iniciar sesión: ${error.message}`;
+                    authStatus.style.color = 'red';
+                });
+        });
+
+        // Event listener para el botón de "Olvidé mi contraseña"
+        forgotPasswordBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+
+            if (!email) {
+                authStatus.textContent = 'Por favor, introduce tu correo electrónico para restablecer la contraseña.';
+                authStatus.style.color = 'red';
+                return;
+            }
+
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    authStatus.textContent = 'Se ha enviado un correo de restablecimiento de contraseña a tu dirección.';
+                    authStatus.style.color = 'green'; // Mensaje de éxito
+                })
+                .catch((error) => {
+                    console.error('Error al enviar correo de restablecimiento:', error.message);
+                    authStatus.textContent = `Error al restablecer contraseña: ${error.message}`;
+                    authStatus.style.color = 'red'; // Mensaje de error
+                });
+        });
+
+        // Event listener para el botón de cierre de sesión
+        logoutBtn.addEventListener('click', () => {
+            // Cierra la sesión actual de Firebase Authentication
+            auth.signOut()
+                .then(() => {
+                    console.log('Sesión cerrada');
+                    authStatus.textContent = 'Sesión cerrada.';
+                    authStatus.style.color = 'red';
+                })
+                .catch((error) => {
+                    console.error('Error al cerrar sesión:', error.message);
+                    authStatus.textContent = `Error al cerrar sesión: ${error.message}`;
+                    authStatus.style.color = 'red';
+                });
+        });
+
+        // Observador del estado de autenticación de Firebase
+        // Se ejecuta cada vez que el estado de autenticación del usuario cambia (inicia sesión, cierra sesión, etc.)
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Si hay un usuario autenticado
+                console.log('Usuario actual:', user.email, 'UID:', user.uid);
+                authContainer.style.display = 'none'; // Oculta el contenedor de login/registro
+                mainAppContent.style.display = 'block'; // Muestra el contenido principal de la aplicación
+                // El botón de logout ya está dentro de mainAppContent y se muestra con él
+
+                authStatus.textContent = ''; // Limpia el mensaje de estado de autenticación
+
+                // Obtener el rol del usuario desde la Realtime Database
+                userRolesRef.child(user.uid).once('value')
+                    .then(snapshot => {
+                        currentUserRole = snapshot.val() || 'viewer'; // Por defecto 'viewer' si no se encuentra
+                        console.log('Rol del usuario:', currentUserRole);
+                        
+                        // Si el rol no existe (snapshot.val() es null), créalo como 'viewer'
+                        if (!snapshot.exists()) {
+                            console.log('Asignando rol por defecto "viewer" al usuario:', user.uid);
+                            userRolesRef.child(user.uid).set('viewer')
+                                .then(() => {
+                                    console.log('Rol "viewer" asignado exitosamente.');
+                                    applyRolePermissions(currentUserRole); // Aplicar permisos después de asegurar el rol
+                                    cargarDatosDesdeFirebase(añoActual, meses[mesActual]); // Cargar datos
+                                })
+                                .catch(error => {
+                                    console.error('Error al asignar rol "viewer":', error);
+                                    applyRolePermissions(currentUserRole); // Intentar aplicar permisos de todos modos
+                                    cargarDatosDesdeFirebase(añoActual, meses[mesActual]); // Cargar datos
+                                });
+                        } else {
+                            applyRolePermissions(currentUserRole); // Aplicar permisos basados en el rol existente
+                            cargarDatosDesdeFirebase(añoActual, meses[mesActual]); // Cargar datos
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error al obtener el rol del usuario:", error);
+                        currentUserRole = 'viewer'; // Fallback a 'viewer' en caso de error
+                        applyRolePermissions(currentUserRole);
+                        cargarDatosDesdeFirebase(añoActual, meses[mesActual]);
+                    });
+
+            } else {
+                // Si no hay un usuario autenticado
+                console.log('No hay usuario logueado');
+                authContainer.style.display = 'block'; // Muestra el contenedor de login/registro
+                mainAppContent.style.display = 'none'; // Oculta el contenido principal de la aplicación
+                // El botón de logout se oculta con mainAppContent
+                authStatus.textContent = 'Por favor, inicia sesión o regístrate para acceder.';
+                authStatus.style.color = 'red'; // Color por defecto para mensajes de error/estado
+                currentUserRole = null; // Limpiar el rol al cerrar sesión
+                applyRolePermissions(null); // Asegurar que los elementos estén deshabilitados
+            }
+        });
 
 
+        // -----------------------------------------------------------
+        // Funciones de Base de Datos (Firebase Realtime Database)
+        // -----------------------------------------------------------
 
-    function imprimirTabla() {
-      window.print();
-    }
+        /**
+         * Guarda los datos de una tabla específica en Firebase Realtime Database.
+         * Solo permite guardar si el usuario es un administrador.
+         * @param {number} año - El año de los datos.
+         * @param {string} mesNombre - El nombre del mes (ej. "Enero").
+         * @param {Array<Array<string>>} datosTabla - Los datos de la tabla a guardar.
+         */
+        function guardarDatosEnFirebase(año, mesNombre, datosTabla) {
+            if (currentUserRole !== 'admin') {
+                console.warn('Acceso denegado: Solo los administradores pueden guardar datos.');
+                authStatus.textContent = 'Acceso denegado: Solo los administradores pueden guardar datos.';
+                authStatus.style.color = 'orange'; // Indicar advertencia
+                return; // Prevenir el guardado
+            }
 
-    function iniciar() {
-      cargarAños();
-      crearTablasParaAño(añoActual);
-      crearBotonesMeses();
-      activarActualizacion();
-    }
+            // *** MODIFICACIÓN AQUÍ: CAMBIAR LA RUTA PARA USAR EL ÍNDICE NUMÉRICO DEL MES ***
+            const ruta = `${año}/${meses.indexOf(mesNombre)}`; // Ruta en la base de datos: año/indiceDelMes
+            dbRef.child(ruta).set(datosTabla)
+                .then(() => {
+                    console.log(`Datos guardados correctamente para ${mesNombre} (${ruta}) de ${año}`);
+                    authStatus.textContent = `Datos guardados para ${mesNombre} de ${año}.`;
+                    authStatus.style.color = 'green'; // Mensaje de éxito
+                })
+                .catch((error) => {
+                    console.error("Error al guardar los datos:", error);
+                    authStatus.textContent = `Error al guardar los datos: ${error.message}`;
+                    authStatus.style.color = 'red'; // Mensaje de error
+                });
+        }
 
-    selectYear.addEventListener("change", () => {
-      añoActual = parseInt(selectYear.value);
-      crearTablasParaAño(añoActual);
-      crearBotonesMeses();
-      activarActualizacion();
-    });
+        /**
+         * Carga los datos de una tabla específica desde Firebase Realtime Database.
+         * @param {number} año - El año de los datos a cargar.
+         * @param {string} mesNombre - El nombre del mes a cargar.
+         */
+        function cargarDatosDesdeFirebase(año, mesNombre) {
+            // *** MODIFICACIÓN AQUÍ: CAMBIAR LA RUTA PARA USAR EL ÍNDICE NUMÉRICO DEL MES ***
+            const ruta = `${año}/${meses.indexOf(mesNombre)}`; // Ruta en la base de datos: año/indiceDelMes
+            
+            console.log('DEBUG: Intentando cargar datos de la ruta:', ruta); // Agregado para depuración
+            dbRef.child(ruta).once('value') // Obtiene los datos una sola vez
+                .then((snapshot) => {
+                    const datos = snapshot.val(); // Obtiene el valor de los datos
+                    console.log('DEBUG: Datos recibidos de Firebase para', ruta, ':', datos); // Agregado para depuración
 
-    window.addEventListener("load", iniciar);
-    window.imprimirTabla = imprimirTabla;
+                    const tablaIndex = meses.indexOf(mesNombre); // Obtiene el índice numérico del mes
+                    if (datos && tablaIndex !== -1) {
+                        console.log('DEBUG: Datos existen y se cargarán en la tabla con índice:', tablaIndex); // Agregado para depuración
+                        cargarDatosEnTablaHTML(datos, tablaIndex); // Carga los datos en la tabla HTML
+                        console.log(`Datos cargados correctamente para ${mesNombre} de ${año}`);
+                    } else {
+                        console.log(`DEBUG: No hay datos guardados para ${mesNombre} (${ruta}) de ${año} o tabla no encontrada. Limpiando tabla.`); // Actualizado para depuración
+                        // Si no hay datos guardados, limpiar la tabla correspondiente
+                        const tabla = document.querySelectorAll(".tabla-vuelo")[tablaIndex];
+                        if (tabla) {
+                            tabla.querySelectorAll('tbody tr').forEach(fila => {
+                                // Limpiar solo las celdas editables (excepto la de nomenclatura)
+                                fila.querySelectorAll('td[contenteditable="true"]').forEach((celda) => {
+                                    // Limpiar solo las celdas de datos, no la primera de nomenclatura
+                                    if (celda.parentNode.querySelector('.nomenclatura') !== celda) { // Asegura que no es la celda de nomenclatura
+                                        celda.textContent = "";
+                                        celda.classList.remove("led-persistente");
+                                    }
+                                });
+                            });
+                            actualizarTotales(); // Recalcular totales después de limpiar
+                        }
+                    }
+                    // Aplicar permisos después de cargar/limpiar los datos, para asegurar el estado correcto
+                    applyRolePermissions(currentUserRole);
+                })
+                .catch((error) => {
+                    console.error("DEBUG: Error al cargar los datos:", error); // Agregado para depuración
+                    authStatus.textContent = `Error al cargar los datos: ${error.message}`;
+                    authStatus.style.color = 'red';
+                });
+        }
 
-    // Cargar datos de todos los meses al inicio
-for (let i = 0; i < 12; i++) {
-  cargarDatosDesdeFirebase(añoActual, i);
-}
+        /**
+         * Carga los datos obtenidos de Firebase en la tabla HTML correspondiente.
+         * @param {Array<Array<string>>} datos - Los datos a cargar.
+         * @param {number} indiceTabla - El índice de la tabla HTML a actualizar.
+         */
+        function cargarDatosEnTablaHTML(datos, indiceTabla) {
+            const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
+            console.log('DEBUG: Elemento de tabla HTML encontrado para cargar datos:', tabla); // Agregado para depuración
+            if (tabla) {
+                tabla.querySelectorAll('tr').forEach((fila, indexFila) => {
+                    const datosFila = datos[indexFila];
+                    if (datosFila) {
+                        fila.querySelectorAll('td').forEach((celda, indexCelda) => {
+                            // Asegurarse de que no estamos escribiendo en la celda de nomenclatura (índice 0)
+                            // y que el dato existe para esa celda
+                            if (indexCelda !== 0 && datosFila[indexCelda] !== undefined) {
+                                celda.textContent = datosFila[indexCelda];
+                                // Añadir/quitar clase 'led-persistente' si la celda tiene contenido
+                                if (celda.textContent.trim() !== "") {
+                                    celda.classList.add("led-persistente");
+                                } else {
+                                    celda.classList.remove("led-persistente");
+                                }
+                            }
+                        });
+                    }
+                });
+                actualizarTotales(); // Recalcular los totales después de cargar los datos
+            }
+        }
 
-  </script>
+        /**
+         * Obtiene los datos actuales de una tabla HTML específica.
+         * @param {number} indiceTabla - El índice de la tabla HTML de la que obtener los datos.
+         * @returns {Array<Array<string>>} Los datos de la tabla.
+         */
+        function obtenerDatosTabla(indiceTabla) {
+            const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
+            const datos = [];
+            if (tabla) {
+                tabla.querySelectorAll('tr').forEach(fila => {
+                    const filaData = [];
+                    fila.querySelectorAll('td').forEach(celda => {
+                        filaData.push(celda.textContent);
+                    });
+                    datos.push(filaData);
+                });
+            }
+            return datos;
+        }
+
+        // -----------------------------------------------------------
+        // Funciones de Interfaz de Usuario y Lógica de Tabla
+        // -----------------------------------------------------------
+
+        /**
+         * Aplica los permisos de la interfaz de usuario basados en el rol del usuario.
+         * @param {string|null} role - El rol del usuario ('admin', 'viewer' o null si no está autenticado).
+         */
+        function applyRolePermissions(role) {
+            const isAdministrator = (role === 'admin');
+            const isAuthenticated = (role !== null); // Un usuario está autenticado si tiene un rol
+
+            // Controlar la editabilidad de las celdas de la tabla
+            document.querySelectorAll('.tabla-vuelo tbody tr').forEach(fila => {
+                fila.querySelectorAll('td').forEach((celda, indexCelda) => {
+                    // Celdas de nomenclatura (0), MES TOTAL (33), GENERAL (34) siempre no editables
+                    if (indexCelda === 0 || indexCelda === 33 || indexCelda === 34) {
+                        celda.contentEditable = 'false';
+                        celda.classList.add('read-only-cell');
+                        celda.classList.remove('editable-cell');
+                    } else {
+                        // Celdas de VIENEN (1) y días (2-32) editables solo para administradores
+                        celda.contentEditable = isAdministrator ? 'true' : 'false';
+                        if (isAdministrator) {
+                            celda.classList.add('editable-cell');
+                            celda.classList.remove('read-only-cell');
+                        } else {
+                            celda.classList.add('read-only-cell');
+                            celda.classList.remove('editable-cell');
+                        }
+                    }
+                });
+            });
+
+            // Habilitar el selector de año y los botones de mes si está autenticado
+            selectYear.disabled = !isAuthenticated; 
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.disabled = !isAuthenticated; 
+            });
+
+
+            // Mostrar un mensaje de estado
+            if (role === 'viewer') {
+                authStatus.textContent = 'Has iniciado sesión como Visualizador. Puedes ver todos los datos, pero no puedes editar.';
+                authStatus.style.color = 'blue';
+            } else if (role === 'admin') {
+                authStatus.textContent = 'Has iniciado sesión como Administrador. Puedes editar todos los datos.';
+                authStatus.style.color = 'green';
+            } else {
+                authStatus.textContent = 'Por favor, inicia sesión o regístrate para acceder.';
+                authStatus.style.color = 'red';
+            }
+        }
+
+
+        /**
+         * Carga las opciones de año en el selector.
+         */
+        function cargarAños() {
+            selectYear.innerHTML = ""; // Limpiar opciones existentes
+            años.forEach((año) => {
+                const option = document.createElement("option");
+                option.value = año;
+                option.textContent = año;
+                selectYear.appendChild(option);
+            });
+            selectYear.value = añoActual; // Seleccionar el año actual por defecto
+        }
+
+        /**
+         * Crea los botones para cada mes.
+         */
+        function crearBotonesMeses() {
+            contenedorMeses.innerHTML = ""; // Limpiar botones existentes
+
+            meses.forEach((mes, i) => {
+                const btn = document.createElement("button");
+                btn.className = "tab-button";
+                btn.textContent = mes;
+                btn.onclick = () => {
+                    mesActual = i; // Actualiza el mes actual
+                    mostrarTabla(i); // Muestra la tabla del mes seleccionado
+                };
+                contenedorMeses.appendChild(btn);
+            });
+
+            // Mostrar la tabla del mes actual al cargar los botones
+            mostrarTabla(mesActual);
+        }
+
+        /**
+         * Crea todas las estructuras de tabla HTML para cada mes del año actual.
+         * @param {number} año - El año para el que se crean las tablas.
+         */
+        function crearTablasParaAño(año) {
+            contenedorTablas.innerHTML = ""; // Limpiar tablas existentes
+
+            meses.forEach((mes, i) => {
+                const div = document.createElement("div");
+                div.className = "tabla-mes";
+                div.style.display = i === mesActual ? "block" : "none"; // Ocultar/mostrar según el mes actual
+
+                const tabla = document.createElement("table");
+                tabla.className = "tabla-vuelo";
+
+                const thead = document.createElement("thead");
+                const encabezado = document.createElement("tr");
+                // Encabezados de la tabla: Nomenclatura, Vienen, Días del mes (1-31), Mes Total, General
+                encabezado.innerHTML = `<th>NOMENCLATURA</th><th contenteditable="true">VIENEN</th>`;
+                for (let d = 1; d <= 31; d++) {
+                    encabezado.innerHTML += `<th>${d}</th>`;
+                }
+                encabezado.innerHTML += `<th>MES TOTAL</th><th>GENERAL</th>`;
+                thead.appendChild(encabezado);
+                tabla.appendChild(thead);
+
+                const tbody = document.createElement("tbody");
+
+                // Crear filas para cada nombre de fila (AC HRS, LANDINGS, etc.)
+                nombresFilas.forEach((nombre) => {
+                    const fila = document.createElement("tr");
+                    // Nomenclatura (columna 0) y Totales (columnas 33, 34) no son editables directamente
+                    fila.innerHTML = `<td class="nomenclatura" contenteditable="false">${nombre}</td><td contenteditable="true"></td>`;
+                    for (let d = 1; d <= 31; d++) {
+                        fila.innerHTML += `<td contenteditable="true"></td>`;
+                    }
+                    fila.innerHTML += `<td class="fila-total" contenteditable="false"></td><td class="fila-general" contenteditable="false"></td>`;
+                    tbody.appendChild(fila);
+                });
+
+                tabla.appendChild(tbody);
+                div.appendChild(tabla);
+                contenedorTablas.appendChild(div);
+            });
+        }
+
+        /**
+         * Muestra la tabla del mes especificado y actualiza los botones de mes.
+         * También carga los datos de Firebase para el mes seleccionado y maneja la copia de datos del mes anterior.
+         * @param {number} index - El índice del mes a mostrar.
+         */
+        function mostrarTabla(index) {
+            mesActual = index;
+            // Oculta todas las tablas de mes y muestra solo la seleccionada
+            document.querySelectorAll(".tabla-mes").forEach((div, i) => {
+                div.style.display = i === index ? "block" : "none";
+            });
+            // Actualiza la clase 'active' en los botones de mes
+            document.querySelectorAll(".tab-button").forEach((btn, i) => {
+                btn.classList.toggle("active", i === index);
+            });
+            // Actualiza el título de la página
+            document.title = `Datos de Vuelo - ${meses[index]} ${añoActual}`;
+
+            // Cargar los datos del mes seleccionado desde Firebase
+            // Solo si un usuario está autenticado
+            if (auth.currentUser) {
+                cargarDatosDesdeFirebase(añoActual, meses[mesActual]);
+            }
+
+            // Traspasar valores de GENERAL del mes anterior al siguiente mes en VIENEN
+            // Solo si el mes actual no es enero (mes 0) y el usuario está autenticado
+            if (mesActual > 0 && auth.currentUser) {
+                copiarValorGeneralAMesSiguiente(añoActual, mesActual - 1, mesActual);
+            }
+        }
+
+        /**
+         * Copia el valor de la columna "GENERAL" del mes de origen a la columna "VIENEN" del mes de destino.
+         * Esto simula el traspaso de totales acumulados.
+         * @param {number} año - El año de los datos.
+         * @param {number} mesOrigenIndex - El índice del mes de donde se copian los datos.
+         * @param {number} mesDestinoIndex - El índice del mes a donde se copian los datos.
+         */
+        function copiarValorGeneralAMesSiguiente(año, mesOrigenIndex, mesDestinoIndex) {
+            // *** MODIFICACIÓN AQUÍ: USAR EL ÍNDICE NUMÉRICO PARA LA RUTA DE ORIGEN ***
+            const rutaOrigen = `${año}/${mesOrigenIndex}`; 
+            dbRef.child(rutaOrigen).once('value')
+                .then(snapshot => {
+                    const datosOrigen = snapshot.val();
+                    if (datosOrigen) {
+                        const tablaDestino = document.querySelectorAll(".tabla-vuelo")[mesDestinoIndex];
+                        if (tablaDestino) {
+                            datosOrigen.forEach((filaDatos, indexFila) => {
+                                // La columna GENERAL es la última, índice 34 (contando desde 0)
+                                const valorGeneral = filaDatos[34];
+                                if (valorGeneral !== undefined && valorGeneral !== null && valorGeneral.toString().trim() !== "") {
+                                    const filaDestino = tablaDestino.querySelectorAll("tbody tr")[indexFila];
+                                    if (filaDestino) {
+                                        // La columna VIENEN es la segunda, índice 1
+                                        const celdaVienen = filaDestino.querySelectorAll("td")[1];
+                                        if (celdaVienen) {
+                                            celdaVienen.textContent = valorGeneral;
+                                        }
+                                    }
+                                }
+                            });
+                            // Actualizar totales del mes destino después de copiar valores
+                            actualizarTotales();
+                            // Guardar los datos del mes destino en Firebase después de la copia
+                            guardarDatosEnFirebase(añoActual, meses[mesDestinoIndex], obtenerDatosTabla(mesDestinoIndex));
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al copiar datos entre meses:", error);
+                });
+        }
+
+        /**
+         * Recalcula y actualiza los valores de "MES TOTAL" y "GENERAL" para todas las filas de todas las tablas.
+         * Maneja tanto valores numéricos como de tiempo (HH:MM).
+         */
+        function actualizarTotales() {
+            document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
+                const filas = tabla.querySelectorAll("tbody tr");
+                filas.forEach((fila, filaIndex) => {
+                    const celdas = fila.querySelectorAll("td");
+                    const vienenStr = celdas[1].textContent.trim(); // Valor de la columna "VIENEN"
+                    // Obtener los valores de los días (columnas 2 a 32)
+                    const valoresCeldas = [...celdas].slice(2, 33).map(td => td.textContent.trim());
+
+                    // Si todas las celdas (incluyendo "VIENEN" y los días) están vacías, limpiar totales
+                    const todasVacias = [vienenStr, ...valoresCeldas].every(val => val === "");
+                    if (todasVacias) {
+                        celdas[33].textContent = ""; // MES TOTAL
+                        celdas[34].textContent = ""; // GENERAL
+                        return;
+                    }
+
+                    /**
+                     * Convierte un valor de tiempo (HH:MM o número) a minutos.
+                     * @param {string} val - El valor a convertir.
+                     * @returns {number} El valor en minutos.
+                     */
+                    const aMinutos = (val) => {
+                        if (val.includes(":")) {
+                            const [h, m] = val.split(":").map(Number);
+                            return h * 60 + m;
+                        } else {
+                            const num = parseFloat(val.replace(",", "."));
+                            if (isNaN(num)) return 0;
+                            // Si es un número entero, se asume que ya son minutos o unidades directas
+                            // Si es un decimal, se asume que son horas y se convierte a minutos
+                            return num % 1 === 0 ? num : num * 60;
+                        }
+                    };
+
+                    /**
+                     * Convierte un total de minutos a formato HH:MM.
+                     * @param {number} minutos - El total de minutos.
+                     * @returns {string} El tiempo en formato HH:MM o cadena vacía si es 0.
+                     */
+                    const aHora = (minutos) => {
+                        if (minutos === 0) return "";
+                        const h = Math.floor(minutos / 60);
+                        const m = Math.round(minutos % 60);
+                        return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+                    };
+
+                    // Determinar si la fila actual maneja valores de tiempo (basado en el nombre de la fila)
+                    const esTiempo = nombresFilas[filaIndex].includes("HRS");
+
+                    if (esTiempo) {
+                        // Cálculo para valores de tiempo
+                        const vienenMin = vienenStr ? aMinutos(vienenStr) : 0;
+                        const totalMin = valoresCeldas.reduce((acc, val) => acc + (val ? aMinutos(val) : 0), 0);
+                        const generalMin = vienenMin + totalMin;
+
+                        celdas[33].textContent = aHora(totalMin);
+                        celdas[34].textContent = aHora(generalMin);
+                    } else {
+                        // Cálculo para valores numéricos
+                        const vienen = vienenStr ? parseFloat(vienenStr.replace(",", ".")) : 0;
+                        const valores = valoresCeldas.map(v => v ? parseFloat(v.replace(",", ".")) : 0);
+                        const total = valores.reduce((acc, val) => acc + val, 0);
+                        const general = total + vienen;
+
+                        // Formatear la salida: si es entero, mostrar entero; si no, con un decimal.
+                        const mostrarTotal = total > 0 ? (Number.isInteger(total) ? total : total.toFixed(1)) : "";
+                        const mostrarGeneral = general > 0 ? (Number.isInteger(general) ? general : general.toFixed(1)) : "";
+
+                        celdas[33].textContent = mostrarTotal;
+                        celdas[34].textContent = mostrarGeneral;
+                    }
+                });
+            });
+        }
+
+        /**
+         * Activa el event listener para el evento 'input' en todas las tablas de vuelo.
+         * Este listener se encarga de actualizar los totales y guardar los datos en Firebase.
+         */
+        function activarActualizacion() {
+            document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
+                // Eliminar el event listener existente para evitar duplicados al llamar a iniciar() múltiples veces
+                tabla.removeEventListener("input", handleTableInput);
+                // Añadir el event listener para el evento 'input'
+                tabla.addEventListener("input", handleTableInput);
+            });
+        }
+
+        /**
+         * Manejador del evento 'input' para las celdas de la tabla.
+         * Actualiza el estado visual de la celda, recalcula totales y guarda en Firebase.
+         * @param {Event} e - El objeto de evento.
+         */
+        function handleTableInput(e) {
+            const celda = e.target;
+            // Asegurarse de que el evento proviene de una celda editable (TD)
+            if (celda.tagName === 'TD' && celda.contentEditable === 'true') {
+                // Si el usuario no es administrador, revertir el cambio y mostrar advertencia
+                if (currentUserRole !== 'admin') {
+                    console.warn('Acceso denegado: Solo los administradores pueden editar datos.');
+                    authStatus.textContent = 'Acceso denegado: Solo los administradores pueden editar datos.';
+                    authStatus.style.color = 'orange';
+                    // Revertir el contenido de la celda si no es admin (opcional, pero útil)
+                    celda.textContent = celda.dataset.originalContent || '';
+                    return; // Detener el procesamiento
+                }
+
+                // Guardar el contenido original antes de la edición para posible reversión
+                celda.dataset.originalContent = celda.textContent;
+
+                const fila = celda.parentElement;
+                const celdas = Array.from(fila.children);
+                const index = celdas.indexOf(celda);
+
+                // No hacer nada si la celda editada es la de nomenclatura (índice 0),
+                // MES TOTAL (índice 33) o GENERAL (índice 34), ya que estas no se editan directamente.
+                if (index === 0 || index === 33 || index === 34) {
+                    actualizarTotales(); // Asegurarse de que los totales se actualicen si se manipula "VIENEN"
+                    return;
+                }
+
+                // Aplicar/quitar la clase 'led-persistente' para el efecto visual
+                if (celda.textContent.trim() !== "") {
+                    celda.classList.add("led-persistente");
+                } else {
+                    celda.classList.remove("led-persistente");
+                }
+
+                actualizarTotales(); // Recalcular los totales después de la edición
+
+                // Guardar automáticamente los datos en Firebase
+                // Se obtiene el índice del mes actual para guardar en la ruta correcta
+                const tablaIndex = meses.indexOf(meses[mesActual]); // Esto es solo el mesActual
+                const datosActualizados = obtenerDatosTabla(tablaIndex);
+                guardarDatosEnFirebase(añoActual, meses[mesActual], datosActualizados);
+            }
+        }
+
+        /**
+         * Imprime la tabla de datos de vuelo.
+         */
+        function imprimirTabla() {
+            window.print();
+        }
+
+        /**
+         * Función de inicialización de la aplicación.
+         * Se ejecuta al cargar la ventana.
+         */
+        function iniciar() {
+            cargarAños(); // Carga las opciones de año
+            crearTablasParaAño(añoActual); // Crea las estructuras de tabla para el año actual
+            crearBotonesMeses(); // Crea los botones de mes y muestra la tabla inicial
+            activarActualizacion(); // Configura los listeners para la actualización y guardado de datos
+            // La función 'onAuthStateChanged' de Firebase se encargará de mostrar/ocultar
+            // el contenido principal y de cargar los datos iniciales si el usuario ya está logueado.
+        }
+
+        /**
+         * Configura la posición y la distancia de caída de la careta de Anonymous.
+         * Se llama después de que los elementos HTML se han renderizado.
+         */
+        function animateIntroElements() {
+            const helicopter = document.getElementById('helicopter-svg');
+            const authContainer = document.getElementById('auth-container');
+            const anonymousMask = document.getElementById('anonymous-mask-svg');
+            const revealCircle = document.getElementById('reveal-circle');
+
+            // Asegurarse de que los elementos existan antes de intentar calcular sus posiciones
+            if (!helicopter || !authContainer || !anonymousMask || !revealCircle) {
+                console.warn("Algunos elementos de la interfaz de usuario no se encontraron.");
+                return;
+            }
+
+            // Obtener las dimensiones y posiciones de los elementos
+            const heliRect = helicopter.getBoundingClientRect();
+            const authRect = authContainer.getBoundingClientRect();
+            
+            // Calcular la distancia de caída de la máscara
+            // Desde la parte inferior del helicóptero hasta la parte superior del contenedor de autenticación
+            const maskDropDistance = authRect.top - heliRect.bottom - (anonymousMask.offsetHeight / 2); // Ajustar para centrar la máscara
+
+            // Establecer la variable CSS para la altura final de la caída de la máscara
+            document.documentElement.style.setProperty('--mask-drop-distance', `${maskDropDistance}px`);
+
+            // Posicionar el círculo de revelación justo en la parte superior del contenedor de autenticación
+            // Ajustar para que quede visualmente bien con la caída de la máscara
+            revealCircle.style.top = `${authRect.top + (authRect.height / 2)}px`; // Centrar verticalmente en el contenedor de auth
+            revealCircle.style.left = `50%`; // Centrar horizontalmente
+        }
+
+
+        // Event listener para el cambio de año en el selector
+        selectYear.addEventListener("change", () => {
+            añoActual = parseInt(selectYear.value); // Actualiza el año actual
+            crearTablasParaAño(añoActual); // Vuelve a crear las tablas para el nuevo año
+            crearBotonesMeses(); // Vuelve a crear los botones de mes
+            activarActualizacion(); // Re-activa los listeners
+            // Cargar los datos para el nuevo año y el mes actual después de cambiar de año
+            if (auth.currentUser) {
+                cargarDatosDesdeFirebase(añoActual, meses[mesActual]);
+            }
+        });
+
+        // Iniciar la aplicación cuando la ventana esté completamente cargada
+        window.addEventListener("load", () => {
+            iniciar();
+            // Pequeño retraso para asegurar que los elementos estén renderizados antes de calcular posiciones
+            setTimeout(animateIntroElements, 100); // Llamar a la función de animación de elementos de introducción
+        });
+
+        // Hacer la función imprimirTabla accesible globalmente
+        window.imprimirTabla = imprimirTabla;
+    </script>
 </body>
 </html>
