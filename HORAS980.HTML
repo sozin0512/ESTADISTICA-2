@@ -382,8 +382,9 @@
             }
             .button-container, .tab-container, .year-container, 
             #auth-container, #helicopter-svg, #anonymous-mask-img, #reveal-circle,
-            #main-app-header, .print-options-container, .user-id-container {
-                display: none !important; /* Oculta elementos no deseados en impresión */
+            #main-app-header, .print-options-container, .user-id-container,
+            #motorStatusModal { /* Ocultar el modal de estado del motor en la impresión principal */
+                display: none !important; 
             }
             .print-header { display: block !important; }
             table {
@@ -458,6 +459,126 @@
             th, td { padding: 0.25rem; }
             #helicopter-svg { width: 100px; top: 10px; }
         }
+
+        /* Estilos para el canvas (que ya no se usa individualmente) */
+        /* #componentStatusCanvas {
+            border: 1px solid #ccc;
+            background-color: #e9e9e9;
+            margin-top: 20px;
+            display: block;
+            max-width: 100%;
+            height: auto;
+        } */
+
+        /* Estilos del modal de estado de motores */
+        #motorStatusModal {
+            /* Estilos ya definidos en Tailwind: fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden z-50 p-4 */
+        }
+        #motorStatusModal > div { /* Contenido interno del modal */
+            /* Estilos ya definidos en Tailwind: bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl overflow-y-auto */
+            max-height: 90vh;
+        }
+        #motorStatusModal h3 {
+            color: #2c3e50;
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+        }
+        #motorStatusContent {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Columnas responsivas */
+            gap: 1rem;
+        }
+        .component-status-item {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .component-status-item h4 {
+            font-weight: bold;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 0.25rem;
+            height: 20px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 0.25rem;
+            transition: width 0.5s ease-in-out;
+        }
+        .progress-text {
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            text-align: center;
+        }
+        /* Colores para las barras de progreso */
+        .progress-red { background-color: #ef4444; } /* Rojo */
+        .progress-orange { background-color: #f97316; } /* Naranja */
+        .progress-green { background-color: #22c55e; } /* Verde */
+
+        /* Estilos de impresión para el modal de estado de motores */
+        @media print {
+            body.print-motor-status #main-app-content,
+            body.print-motor-status #auth-container,
+            body.print-motor-status #helicopter-svg,
+            body.print-motor-status #anonymous-mask-img,
+            body.print-motor-status #reveal-circle,
+            body.print-motor-status .button-container,
+            body.print-motor-status .tab-container,
+            body.print-motor-status .year-container,
+            body.print-motor-status .user-id-container {
+                display: none !important;
+            }
+            body.print-motor-status #motorStatusModal {
+                position: static !important; /* Elimina el posicionamiento fijo */
+                display: block !important; /* Asegura que se muestre */
+                background-color: transparent !important; /* Fondo transparente */
+                box-shadow: none !important; /* Sin sombra */
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+            }
+            body.print-motor-status #motorStatusModal > div {
+                width: auto !important;
+                max-width: none !important;
+                max-height: none !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                background-color: transparent !important;
+            }
+            body.print-motor-status #motorStatusModal .flex.justify-between.items-center.mb-4,
+            body.print-motor-status #motorStatusModal .print-options-container,
+            body.print-motor-status #motorStatusModal #btnPrintMotorStatus {
+                display: none !important; /* Oculta controles del modal en la impresión */
+            }
+            body.print-motor-status #motorStatusContent {
+                display: block !important; /* Asegura que los elementos se apilen para imprimir */
+                grid-template-columns: 1fr !important; /* Una columna para impresión */
+                gap: 0.5rem !important;
+            }
+            body.print-motor-status .component-status-item {
+                border: 1px solid #ccc !important;
+                padding: 0.5rem !important;
+                margin-bottom: 0.5rem !important;
+                background-color: #fff !important;
+                box-shadow: none !important;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            body.print-motor-status .progress-bar-fill {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -524,8 +645,26 @@
             <label><input type="radio" name="printOption" value="no-yellow-labels"> Sin Columnas Amarillas</label>
         </div>
 
-        <div class="button-container">
+        <div class="button-container flex justify-center gap-4 mt-4">
             <button id="btnImprimir" class="px-6 py-2 bg-gray-700 text-white rounded-md shadow-md hover:bg-gray-800 transition-colors">Imprimir Tabla</button>
+            <button id="btnMotorStatus" class="px-6 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition-colors">Estado de Motores</button>
+        </div>
+    </div>
+
+    <div id="motorStatusModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl overflow-y-auto" style="max-height: 90vh;">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold">Estado de Componentes de Motores</h3>
+                <button id="closeMotorStatusModal" class="text-gray-500 hover:text-gray-700 text-3xl leading-none">&times;</button>
+            </div>
+            <div id="motorStatusContent" class="space-y-4">
+                </div>
+            <div class="print-options-container mt-6">
+                <strong>Opciones de Impresión:</strong>
+                <label><input type="radio" name="motorStatusPrintOption" value="full" checked> Completo</label>
+                <label><input type="radio" name="motorStatusPrintOption" value="critical-only"> Solo Críticos</label>
+            </div>
+            <button id="btnPrintMotorStatus" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Imprimir Estado</button>
         </div>
     </div>
 
@@ -543,7 +682,6 @@
             databaseURL: "https://fah-980-ceb96-default-rtdb.firebaseio.com",
             projectId: "fah-980-ceb96",
             storageBucket: "fah-980-ceb96.firebasestorage.app",
-            messagingSenderId: "57890484294",
             appId: "1:57890484294:web:8a27759a4da0b262e99a47",
             measurementId: "G-HSZMRM7ZCS"
         };
@@ -593,8 +731,6 @@
             "COMPRESSOR TURBINE DISK 2",
             "POWER TURBINE DISK 2.1",
             "POWER TURBINE DISK 2.2",
-            // Las filas de motor (ENGINE HRS, STARTS, FLIGHTS, CICLOS) se insertarán dinámicamente
-            // y no deben estar en esta lista principal si se manejan como sub-filas de los encabezados.
         ];
 
         // Nomenclaturas EXACTAS de las filas que deben tener las 5 columnas adicionales (editable)
@@ -654,6 +790,13 @@
         const mainAppContent = document.getElementById('main-app-content');
         const btnImprimir = document.getElementById('btnImprimir');
 
+        // Nuevos elementos para el estado de motores
+        const btnMotorStatus = document.getElementById('btnMotorStatus');
+        const motorStatusModal = document.getElementById('motorStatusModal');
+        const closeMotorStatusModal = document.getElementById('closeMotorStatusModal');
+        const motorStatusContent = document.getElementById('motorStatusContent');
+        const btnPrintMotorStatus = document.getElementById('btnPrintMotorStatus');
+
         // Helper para extraer la nomenclatura base y la variante (ej. "HUB COMPRESOR" y "1.1")
         function parseNomenclatura(nombreCompleto) {
             let nomenclaturaBase = '';
@@ -672,16 +815,10 @@
         // Funciones de Autenticación
         // -----------------------------------------------------------
 
-        // Event listener para el botón de registro
         signupBtn.addEventListener('click', async () => {
             const email = emailInput.value;
             const password = passwordInput.value;
-
-            if (!email || !password) {
-                authStatus.textContent = 'Por favor, introduce un correo y una contraseña.';
-                return;
-            }
-
+            if (!email || !password) { authStatus.textContent = 'Por favor, introduce un correo y una contraseña.'; return; }
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
@@ -690,8 +827,6 @@
                 authStatus.style.color = 'green';
                 emailInput.value = '';
                 passwordInput.value = '';
-                // Asignar rol por defecto 'viewer' al nuevo usuario
-                // Usar la ruta correcta para user_roles
                 await set(ref(database, `user_roles/${user.uid}`), 'viewer');
                 console.log('Rol de usuario asignado como viewer.');
             } catch (error) {
@@ -701,111 +836,103 @@
             }
         });
 
-        // Event listener para el botón de inicio de sesión
         loginBtn.addEventListener('click', async () => {
             const email = emailInput.value;
             const password = passwordInput.value;
-
-            if (!email || !password) {
-                authStatus.textContent = 'Por favor, introduce un correo y una contraseña.';
-                return;
-            }
-
+            if (!email || !password) { authStatus.textContent = 'Por favor, introduce un correo y una contraseña.'; return; }
             try {
-                await setPersistence(auth, browserLocalPersistence); // Persistencia local
+                console.log('Intentando iniciar sesión con:', email);
+                await setPersistence(auth, browserLocalPersistence);
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                console.log('Usuario ha iniciado sesión:', userCredential.user.email);
+                console.log('Inicio de sesión exitoso:', userCredential.user.email);
                 authStatus.textContent = 'Sesión iniciada. ¡Bienvenido!';
                 authStatus.style.color = 'green';
                 emailInput.value = '';
                 passwordInput.value = '';
             } catch (error) {
-                console.error('Error al iniciar sesión:', error.message);
+                console.error('Error al iniciar sesión:', error.code, error.message);
                 authStatus.textContent = `Error al iniciar sesión: ${error.message}`;
                 authStatus.style.color = 'red';
             }
         });
 
-        // Event listener para el botón de "Olvidé mi contraseña"
         forgotPasswordBtn.addEventListener('click', async () => {
             const email = emailInput.value;
-
-            if (!email) {
-                authStatus.textContent = 'Por favor, introduce tu correo electrónico para restablecer la contraseña.';
-                authStatus.style.color = 'red';
-                return;
-            }
-
+            if (!email) { authStatus.textContent = 'Por favor, introduce tu correo electrónico para restablecer la contraseña.'; authStatus.style.color = 'red'; return; }
             try {
+                console.log('Intentando enviar correo de restablecimiento a:', email);
                 await sendPasswordResetEmail(auth, email);
                 authStatus.textContent = 'Se ha enviado un correo de restablecimiento de contraseña a tu dirección.';
                 authStatus.style.color = 'green';
             } catch (error) {
-                console.error('Error al enviar correo de restablecimiento:', error.message);
+                console.error('Error al enviar correo de restablecimiento:', error.code, error.message);
                 authStatus.textContent = `Error al restablecer contraseña: ${error.message}`;
                 authStatus.style.color = 'red';
             }
         });
 
-        // Event listener para el botón de cierre de sesión
         logoutBtn.addEventListener('click', async () => {
             try {
+                console.log('Intentando cerrar sesión...');
                 await signOut(auth);
                 console.log('Sesión cerrada');
                 authStatus.textContent = 'Sesión cerrada.';
                 authStatus.style.color = 'red';
             } catch (error) {
-                console.error('Error al cerrar sesión:', error.message);
+                console.error('Error al cerrar sesión:', error.code, error.message);
                 authStatus.textContent = `Error al cerrar sesión: ${error.message}`;
                 authStatus.style.color = 'red';
             }
         });
 
-        // Observador del estado de autenticación de Firebase
         onAuthStateChanged(auth, async (user) => {
+            console.log('onAuthStateChanged disparado. Usuario:', user ? user.email : 'null');
             if (user) {
-                userId = user.uid; // Establecer el ID de usuario
-                userIdDisplay.textContent = userId; // Mostrar el ID de usuario
+                userId = user.uid;
+                userIdDisplay.textContent = userId;
                 console.log('Usuario actual:', user.email, 'UID:', userId);
+                
                 authContainer.style.display = 'none';
                 mainAppContent.style.display = 'block';
                 authStatus.textContent = '';
 
                 try {
-                    // CORRECCIÓN: Usar la ruta correcta para user_roles
                     const rolePath = `user_roles/${userId}`;
-                    console.log("Ruta de rol de usuario:", rolePath); // Log para depuración
+                    console.log("Ruta de rol de usuario:", rolePath);
                     const snapshot = await get(ref(database, rolePath));
                     currentUserRole = snapshot.val() || 'viewer';
                     console.log('Rol del usuario (obtenido de DB):', currentUserRole); 
                     
                     if (!snapshot.exists()) {
-                        console.log('Asignando rol por defecto "viewer" al usuario:', userId);
-                        // Usar la ruta correcta para user_roles
+                        console.log('Asignando rol por defecto "viewer" al nuevo usuario:', userId);
                         await set(ref(database, rolePath), 'viewer');
                         console.log('Rol "viewer" asignado exitosamente.');
                     }
-                    applyRolePermissions(currentUserRole); // Aplicar permisos después de obtener el rol
-                    await cargarDatosDeFirebase(); // Cargar datos para el mes actual y año actual
-                    agregarEventosDeEdicion(); // Re-agregar eventos después de cargar datos
+                    
+                    applyRolePermissions(currentUserRole);
+                    await cargarDatosDeFirebase();
+                    agregarEventosDeEdicion();
                 } catch (error) {
-                    console.error("Error al obtener o asignar el rol del usuario:", error);
-                    currentUserRole = 'viewer'; // Fallback a 'viewer' en caso de error
+                    console.error("Error en onAuthStateChanged al obtener o asignar el rol del usuario o cargar datos:", error.code, error.message);
+                    authStatus.textContent = `Error crítico: ${error.message}. Por favor, recarga.`;
+                    authStatus.style.color = 'red';
+                    currentUserRole = 'viewer';
                     applyRolePermissions(currentUserRole);
                     await cargarDatosDeFirebase();
                     agregarEventosDeEdicion();
                 }
 
             } else {
-                userId = "anonimo"; // Restablecer a anónimo si no hay usuario
+                userId = "anonimo";
                 userIdDisplay.textContent = userId;
                 console.log('No hay usuario logueado');
+                
                 authContainer.style.display = 'block';
                 mainAppContent.style.display = 'none';
                 authStatus.textContent = 'Por favor, inicia sesión o regístrate para acceder.';
                 authStatus.style.color = 'red';
                 currentUserRole = null;
-                applyRolePermissions(null); // Deshabilitar todo
+                applyRolePermissions(null);
             }
         });
 
@@ -817,11 +944,8 @@
             const isAdministrator = (role === 'admin');
             const isAuthenticated = (role !== null);
 
-            // Controlar la editabilidad de las celdas de la tabla
             document.querySelectorAll('.tabla-vuelo tbody tr').forEach(fila => {
                 fila.querySelectorAll('td').forEach((celda, indexCelda) => {
-                    // Celdas de nomenclatura (0), MES TOTAL (33), GENERAL (34)
-                    // y los encabezados de motor siempre no editables
                     const isNomenclatura = celda.classList.contains('nomenclatura');
                     const isTotalCell = celda.classList.contains('fila-total') || celda.classList.contains('fila-general');
                     const isRestanteCell = celda.classList.contains('fila-restante');
@@ -835,7 +959,6 @@
                         celda.classList.add('read-only-cell');
                         celda.classList.remove('editable-cell');
                     } else {
-                        // Las demás celdas (VIENEN, días, límites y factores de componente) son editables solo para administradores
                         celda.contentEditable = isAdministrator ? 'true' : 'false';
                         if (isAdministrator) {
                             celda.classList.add('editable-cell');
@@ -848,15 +971,13 @@
                 });
             });
 
-            // Habilitar el selector de año y los botones de mes si está autenticado
             selectYear.disabled = !isAuthenticated; 
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.disabled = !isAuthenticated; 
-            });
-            recordatorioTextarea.readOnly = !isAdministrator; // Solo admin puede editar recordatorios
-            btnImprimir.disabled = !isAuthenticated; // Solo autenticados pueden imprimir
+            document.querySelectorAll('.tab-button').forEach(btn => { btn.disabled = !isAuthenticated; });
+            recordatorioTextarea.readOnly = !isAdministrator;
+            btnImprimir.disabled = !isAuthenticated;
+            btnMotorStatus.disabled = !isAuthenticated;
+            btnPrintMotorStatus.disabled = !isAuthenticated;
 
-            // Mostrar un mensaje de estado
             if (role === 'viewer') {
                 authStatus.textContent = 'Has iniciado sesión como Visualizador. Puedes ver todos los datos, pero no puedes editar.';
                 authStatus.style.color = 'blue';
@@ -874,14 +995,6 @@
         // Funciones de Base de Datos (Firebase Realtime Database)
         // -----------------------------------------------------------
 
-        /**
-         * Guarda los datos de una tabla específica y el recordatorio en Firebase.
-         * La ruta ahora es compartida.
-         * @param {number} año - El año de los datos.
-         * @param {number} mesIndex - El índice numérico del mes.
-         * @param {Array<Array<string>>} datosTabla - Los datos de la tabla a guardar.
-         * @param {string} recordatorio - El texto del recordatorio.
-         */
         async function guardarDatosEnFirebase(año, mesIndex, datosTabla, recordatorio) {
             if (currentUserRole !== 'admin') {
                 console.warn('Acceso denegado: Solo los administradores pueden guardar datos.');
@@ -889,15 +1002,7 @@
                 authStatus.style.color = 'orange';
                 return;
             }
-            // No necesitamos userId en la ruta de guardado para datos compartidos
-            // if (!userId || userId === "anonimo") {
-            //     console.error("No se puede guardar: ID de usuario no válido.");
-            //     authStatus.textContent = "Error: No se puede guardar sin un ID de usuario válido.";
-            //     authStatus.style.color = 'red';
-            //     return;
-            // }
 
-            // *** RUTA COMPARTIDA ***
             const rutaDatos = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesIndex}`;
             const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${año}/${mesIndex}`;
 
@@ -908,30 +1013,23 @@
                 authStatus.textContent = `Datos guardados para ${meses[mesIndex]} de ${año}.`;
                 authStatus.style.color = 'green';
             } catch (error) {
-                console.error("Error al guardar los datos:", error);
+                console.error("Error al guardar los datos:", error.code, error.message);
                 authStatus.textContent = `Error al guardar los datos: ${error.message}`;
                 authStatus.style.color = 'red';
             }
         }
 
-        /**
-         * Carga los datos de una tabla específica y el recordatorio desde Firebase.
-         * La ruta ahora es compartida.
-         */
         async function cargarDatosDeFirebase() {
-            // No necesitamos userId en la ruta de carga para datos compartidos,
-            // pero sí necesitamos que el usuario esté autenticado para leer.
             if (!userId || userId === "anonimo") {
                 console.warn("No se pueden cargar datos: Usuario no autenticado.");
                 return;
             }
 
-            // *** RUTA COMPARTIDA ***
             const rutaDatos = `artifacts/${appId}/public_data/datos_vuelo/${añoActual}/${mesActual}`;
             const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${añoActual}/${mesActual}`;
 
             try {
-                // Cargar datos de la tabla
+                console.log(`Cargando datos de: ${rutaDatos}`);
                 const datosSnapshot = await get(ref(database, rutaDatos));
                 const datos = datosSnapshot.val();
                 if (datos) {
@@ -939,31 +1037,27 @@
                     console.log(`Datos de tabla cargados para ${meses[mesActual]} de ${añoActual}`);
                 } else {
                     console.log(`No hay datos de tabla guardados para ${meses[mesActual]} de ${añoActual}. Limpiando tabla.`);
-                    limpiarTablaHTML(mesActual); // Llama a la función actualizada
+                    limpiarTablaHTML(mesActual);
                 }
 
-                // Cargar recordatorio
+                console.log(`Cargando recordatorio de: ${rutaRecordatorio}`);
                 const recordatorioSnapshot = await get(ref(database, rutaRecordatorio));
                 const recordatorio = recordatorioSnapshot.val();
                 if (recordatorio !== null) {
                     recordatorioTextarea.value = recordatorio;
                     console.log(`Recordatorio cargado para ${meses[mesActual]} de ${añoActual}`);
                 } else {
-                    recordatorioTextarea.value = ""; // Limpiar si no hay recordatorio
+                    recordatorioTextarea.value = "";
                     console.log(`No hay recordatorio guardado para ${meses[mesActual]} de ${añoActual}.`);
                 }
-                actualizarTotales(); // Asegurar que los totales se calculen después de cargar
+                actualizarTotales();
             } catch (error) {
-                console.error("Error al cargar los datos de Firebase:", error);
+                console.error("Error al cargar los datos de Firebase:", error.code, error.message);
                 authStatus.textContent = `Error al cargar los datos: ${error.message}`;
                 authStatus.style.color = 'red';
             }
         }
 
-        /**
-         * Limpia los datos de una tabla HTML específica y repobla los valores predeterminados de límites/factores.
-         * @param {number} indiceTabla - El índice de la tabla HTML a limpiar.
-         */
         function limpiarTablaHTML(indiceTabla) {
             const tabla = document.querySelectorAll(".tabla-vuelo")[indiceTabla];
             if (tabla) {
@@ -978,13 +1072,11 @@
                         const isRestanteCell = celda.classList.contains('fila-restante');
                         const isMotorHeader = celda.classList.contains('motor-header');
                         
-                        // Check if it's one of the specific label cells that need yellow/red styling
                         const isSpecificLabelCell = celda.classList.contains('limite-label') || celda.classList.contains('abbrd-label') || 
                                                     celda.classList.contains('extd-label') || celda.classList.contains('flight-count-factor-label') || 
                                                     celda.classList.contains('restante-label');
 
                         if (isMotorHeader || isNomenclatura || isTotalCell || isRestanteCell || isSpecificLabelCell) {
-                            // For label cells, ensure they have their text and correct classes
                             if (isSpecificLabelCell) {
                                 if (celda.classList.contains('limite-label')) {
                                     celda.textContent = 'LIMITE';
@@ -1011,18 +1103,17 @@
                         }
 
                         if (isEditableComponentRow) {
-                            // Para filas de componentes, re-establecer los valores por defecto de limites/factores
                             const { nomenclaturaBase, varianteClave } = parseNomenclatura(nomenclaturaCompleta);
                             let config = limitesConfig[nomenclaturaBase];
                             if (varianteClave && config && config[varianteClave]) { 
                                 config = config[varianteClave];
-                            } else if (!config) { // Si no hay config para la base, o para la variante
-                                config = {}; // Usar un objeto vacío para evitar errores
+                            } else if (!config) {
+                                config = {};
                             }
 
                             if (celda.classList.contains('limite-celda')) {
                                 celda.textContent = config?.limitCycles !== undefined ? config.limitCycles : '';
-                                celda.classList.remove("led-persistente"); // Asegurar que no esté encendida por defecto
+                                celda.classList.remove("led-persistente");
                             } else if (celda.classList.contains('abbrd-celda')) {
                                 celda.textContent = config?.abbreviated !== undefined ? config.abbreviated : '';
                                 celda.classList.remove("led-persistente");
@@ -1033,35 +1124,25 @@
                                 celda.textContent = config?.flightCount !== undefined ? config.flightCount : '';
                                 celda.classList.remove("led-persistente");
                             } else {
-                                // Para celdas de días y "viene" en filas de componentes, limpiar
                                 celda.textContent = "";
                                 celda.classList.remove("led-persistente");
                             }
                         } else {
-                            // Para otras filas, limpiar todas las celdas editables y de "viene"
                             celda.textContent = "";
                             celda.classList.remove("led-persistente");
                         }
                     });
-                    // Después de iterar por todas las celdas de una fila, si es una fila de componente editable,
-                    // calcular y aplicar el estilo para 'RESTANTE'
                     if (isEditableComponentRow) {
                         const restanteCelda = fila.querySelector('.fila-restante');
                         const limiteCelda = fila.querySelector('.limite-celda');
                         const limite = parseFloat(limiteCelda?.textContent.trim()) || 0;
-                        // Para una tabla limpia, el restante será igual al límite, por lo que debería ser verde.
                         aplicarEstiloRestante(restanteCelda, limite, limite); 
                     }
                 });
-                actualizarTotales(); // Llamar una vez después de procesar todas las filas
+                actualizarTotales();
             }
         }
 
-        /**
-         * Carga los datos obtenidos de Firebase en la tabla HTML correspondiente.
-         * @param {Array<Array<string>>} datos - Los datos a cargar.
-         * @param {number} indiceTabla - El índice de la tabla HTML a actualizar.
-         */
         function cargarDatosEnTablaHTML(datos, indiceTabla) {
             const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
             if (tabla) {
@@ -1089,7 +1170,6 @@
                                     celda.classList.remove("led-persistente");
                                 }
                             } else if (isLabelCell) {
-                                // Asegurar que las etiquetas se mantengan en su lugar y con sus clases
                                 if (celda.classList.contains('limite-label')) {
                                     celda.textContent = 'LIMITE';
                                     celda.classList.add('label-yellow');
@@ -1118,17 +1198,11 @@
             }
         }
 
-        /**
-         * Obtiene los datos actuales de una tabla HTML específica, incluyendo las nuevas columnas.
-         * @param {number} indiceTabla - El índice de la tabla HTML de la que obtener los datos.
-         * @returns {Array<Array<string>>} Los datos de la tabla.
-         */
         function obtenerDatosTabla(indiceTabla) {
             const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
             const datos = [];
             if (tabla) {
                 tabla.querySelectorAll('tr').forEach(fila => {
-                    // Saltar filas de encabezado de motor al guardar
                     if (fila.querySelector('.motor-header')) {
                         return;
                     }
@@ -1146,7 +1220,6 @@
         // Funciones de Interfaz de Usuario y Lógica de Tabla
         // -----------------------------------------------------------
 
-        // Carga las opciones de año en el selector
         function cargarAños() {
             selectYear.innerHTML = "";
             años.forEach((año) => {
@@ -1161,11 +1234,10 @@
                 crearTablasParaAño(añoActual);
                 await cargarDatosDeFirebase();
                 agregarEventosDeEdicion();
-                applyRolePermissions(currentUserRole); // Re-aplicar permisos al cambiar de año/tabla
+                applyRolePermissions(currentUserRole);
             };
         }
 
-        // Crea los botones para cada mes
         function crearBotonesMeses() {
             contenedorMeses.innerHTML = "";
             meses.forEach((mes, i) => {
@@ -1177,14 +1249,13 @@
                     mostrarTabla(i);
                     await cargarDatosDeFirebase();
                     agregarEventosDeEdicion();
-                    applyRolePermissions(currentUserRole); // Re-aplicar permisos al cambiar de mes
+                    applyRolePermissions(currentUserRole);
                 };
                 contenedorMeses.appendChild(btn);
             });
             mostrarTabla(mesActual);
         }
 
-        // Crea las tablas HTML para cada mes del año
         function crearTablasParaAño(año) {
             contenedorTablas.innerHTML = "";
             meses.forEach((mes, i) => {
@@ -1197,7 +1268,6 @@
 
                 const thead = document.createElement("thead");
                 const encabezado = document.createElement("tr");
-                // El encabezado de la tabla ahora solo incluye las columnas generales
                 encabezado.innerHTML = `
                     <th>NOMENCLATURA</th>
                     <th>VIENEN</th>
@@ -1219,16 +1289,14 @@
 
                 const tbody = document.createElement("tbody");
                 
-                // Iterar sobre los nombres de filas ordenados para construir el tbody
                 nombresFilasOrdenadas.forEach((nombre) => {
-                    const totalColsInHeader = 35 + 5; // Nomenclatura (1) + Vienen (1) + Días (31) + Mes Total (1) + General (1) + 5 adicionales = 40
+                    const totalColsInHeader = 35 + 5;
                     
                     if (nombre === "HUB COMPRESOR 1.1") {
                         const separador1 = document.createElement("tr");
                         separador1.innerHTML = `<td colspan="${totalColsInHeader}" class="motor-header" contenteditable="false">MOTOR # 1</td>`;
                         tbody.appendChild(separador1);
                         
-                        // Filas de motor que deben ir después del encabezado de MOTOR #1
                         ['ENGINE HRS 1', 'ENGINE STARTS 1', 'FLIGHTS 1', 'CICLOS 1'].forEach(motorRowName => {
                             const filaMotor = crearFilaTabla(motorRowName);
                             tbody.appendChild(filaMotor);
@@ -1240,7 +1308,6 @@
                         separador2.innerHTML = `<td colspan="${totalColsInHeader}" class="motor-header" contenteditable="false">MOTOR # 2</td>`;
                         tbody.appendChild(separador2);
                         
-                        // Filas de motor que deben ir después del encabezado de MOTOR #2
                         ['ENGINE HRS 2', 'ENGINE STARTS 2', 'FLIGHTS 2', 'CICLOS 2'].forEach(motorRowName => {
                             const filaMotor = crearFilaTabla(motorRowName);
                             tbody.appendChild(filaMotor);
@@ -1257,7 +1324,6 @@
             });
         }
 
-        // Función auxiliar para crear una fila de tabla con las celdas correctas
         function crearFilaTabla(nombre) {
             const fila = document.createElement("tr");
             let limiteVal = '';
@@ -1268,7 +1334,6 @@
             const isEditableComponentRow = filasConColumnasAdicionalesEditables.includes(nombre);
             const isLabelRow = filasConColumnasAdicionalesSoloEtiquetas.includes(nombre);
 
-            // Parte común para todas las filas: Nomenclatura, Vienen, 31 días, Mes Total, General
             let rowHtml = `
                 <td class="nomenclatura" contenteditable="false">${nombre}</td>
                 <td contenteditable="true" class="viene-celda"></td>
@@ -1277,7 +1342,6 @@
                 <td class="fila-general" contenteditable="false">0.0</td>
             `;
 
-            // Añadir las 5 columnas adicionales según el tipo de fila
             if (isEditableComponentRow) {
                 const { nomenclaturaBase, varianteClave } = parseNomenclatura(nombre);
                 if (limitesConfig[nomenclaturaBase]) {
@@ -1306,7 +1370,6 @@
                     <td class="restante-label label-red blinking" contenteditable="false">RESTANTE</td>
                 `;
             } else {
-                // Para otras filas, añadir 5 celdas vacías y no editables para mantener la consistencia de columnas
                 rowHtml += `
                     <td contenteditable="false"></td>
                     <td contenteditable="false"></td>
@@ -1320,7 +1383,6 @@
             return fila;
         }
 
-        // Muestra la tabla del mes seleccionado y actualiza el título y el encabezado de impresión
         async function mostrarTabla(index) {
             mesActual = index;
             document.querySelectorAll(".tabla-mes").forEach((div, i) => {
@@ -1332,24 +1394,14 @@
             document.title = `Datos de Vuelo - ${meses[index]} ${añoActual}`;
             printMonthHeader.textContent = `DATOS DE VUELO - ${meses[index].toUpperCase()} ${añoActual}`;
 
-            // Copiar valores de "GENERAL" del mes anterior a "VIENEN" del mes actual
             if (mesActual > 0 && auth.currentUser) {
                 await copiarValorGeneralAMesSiguiente(añoActual, mesActual - 1, mesActual);
             }
-            // Los datos se cargarán por `onAuthStateChanged` o por el `change` del año/mes
         }
 
-        /**
-         * Copia el valor de la columna "GENERAL" del mes de origen a la columna "VIENEN" del mes de destino.
-         * Esto simula el traspaso de totales acumulados.
-         * @param {number} año - El año de los datos.
-         * @param {number} mesOrigenIndex - El índice del mes de donde se copian los datos.
-         * @param {number} mesDestinoIndex - El índice del mes a donde se copian los datos.
-         */
         async function copiarValorGeneralAMesSiguiente(año, mesOrigenIndex, mesDestinoIndex) {
             if (!userId || userId === "anonimo") return;
 
-            // *** RUTA COMPARTIDA para el origen ***
             const rutaOrigen = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesOrigenIndex}`; 
             try {
                 const snapshot = await get(ref(database, rutaOrigen));
@@ -1357,19 +1409,14 @@
                 if (datosOrigen) {
                     const tablaDestino = document.querySelectorAll(".tabla-vuelo")[mesDestinoIndex];
                     if (tablaDestino) {
-                        // Mapear los nombres de filas a sus índices para facilitar la búsqueda
                         const nombresFilasEnTabla = Array.from(tablaDestino.querySelectorAll('.nomenclatura')).map(td => td.textContent.trim());
 
                         datosOrigen.forEach((filaDatosOrigen, indexFilaOrigen) => {
-                            // Obtener la nomenclatura de la fila de origen para encontrar su contraparte en la tabla destino
-                            // Esto asume que la estructura de nombres de filas es consistente entre meses
-                            const nomenclaturaOrigen = nombresFilasOrdenadas[indexFilaOrigen]; // Asumiendo que el orden de datosOrigen es el mismo que nombresFilasOrdenadas
+                            const nomenclaturaOrigen = nombresFilasOrdenadas[indexFilaOrigen];
                             
-                            // Encontrar el índice de la fila correspondiente en la tabla destino
                             const indexFilaDestino = nombresFilasEnTabla.indexOf(nomenclaturaOrigen);
 
                             if (indexFilaDestino !== -1) {
-                                // *** CORRECCIÓN: Usar el índice correcto para la columna GENERAL (índice 34) ***
                                 const valorGeneral = filaDatosOrigen[34]; 
                                 if (valorGeneral !== undefined && valorGeneral !== null && valorGeneral.toString().trim() !== "") {
                                     const filaDestino = tablaDestino.querySelectorAll("tbody tr")[indexFilaDestino];
@@ -1388,27 +1435,19 @@
                             }
                         });
                         actualizarTotales();
-                        // Guardar los datos del mes destino en Firebase después de la copia
-                        // *** RUTA COMPARTIDA para el destino ***
                         await guardarDatosEnFirebase(añoActual, mesDestinoIndex, obtenerDatosTabla(mesDestinoIndex), recordatorioTextarea.value);
                     }
                 }
             } catch (error) {
-                console.error("Error al copiar datos entre meses:", error);
+                console.error("Error al copiar datos entre meses:", error.code, error.message);
             }
         }
 
-        /**
-         * Aplica el estilo de color a la celda "RESTANTE" según el valor.
-         * @param {HTMLElement} celdaRestante - La celda HTML de "RESTANTE".
-         * @param {number} restante - El valor numérico restante.
-         * @param {number} limite - El valor numérico del límite.
-         */
         function aplicarEstiloRestante(celdaRestante, restante, limite) {
             if (!celdaRestante) return; 
 
             celdaRestante.classList.remove('restante-verde', 'restante-amarillo', 'restante-rojo');
-            celdaRestante.style.color = ''; // Limpia cualquier estilo de color directo
+            celdaRestante.style.color = '';
 
             const numericRestante = parseFloat(restante);
             const numericLimite = parseFloat(limite);
@@ -1422,9 +1461,9 @@
 
             if (numericRestante < 0) {
                 celdaRestante.classList.add('restante-rojo');
-            } else if (numericRestante <= (numericLimite * 0.10)) { // 10% del límite
+            } else if (numericRestante <= (numericLimite * 0.10)) {
                 celdaRestante.classList.add('restante-rojo');
-            } else if (numericRestante <= (numericLimite * 0.20)) { // 20% del límite
+            } else if (numericRestante <= (numericLimite * 0.20)) {
                 celdaRestante.classList.add('restante-amarillo');
             } else {
                 celdaRestante.classList.add('restante-verde');
@@ -1435,16 +1474,15 @@
         function actualizarTotales() {
             document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
                 const filas = Array.from(tabla.querySelectorAll("tbody tr"));
-                const generalValuesMap = new Map(); // Para almacenar los valores GENERAL de las filas base
+                const generalValuesMap = new Map();
 
                 // PASO 1: Calcular totales para filas básicas (AC HRS, ATERRIZAJES, RINS, ENGINE HRS, STARTS, FLIGHTS, CONTINGENCY EXCURSIONS)
                 filas.forEach((fila) => {
                     const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
                     if (!nomenclaturaCompleta || fila.querySelector('.motor-header')) {
-                        return; // Saltar filas de encabezado de motor
+                        return;
                     }
 
-                    // Solo procesar filas que NO tienen las columnas adicionales de componentes ni son filas de etiquetas
                     if (!filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta) && !filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta)) {
                         const vieneCelda = fila.querySelector('.viene-celda');
                         const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
@@ -1486,11 +1524,9 @@
                         const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
 
                         const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
-                        const totalGeneral = totalMes + viene;
 
                         mesTotalCelda.textContent = totalMes.toFixed(1);
-                        generalCelda.textContent = totalGeneral.toFixed(1);
-
+                        
                         const ABBREVIATED_CYCLE_FACTOR = parseFloat(abbrdCelda?.textContent.trim()) || 0;
                         const EXTENDED_CYCLE_FACTOR = parseFloat(extdCelda?.textContent.trim()) || 0;
                         const FLIGHT_COUNT_FACTOR = parseFloat(flightCountFactorCelda?.textContent.trim()) || 0;
@@ -1508,49 +1544,38 @@
                             const noOfFlights = generalValuesMap.get(`FLIGHTS ${motorNumero}`) || 0;
                             const noOfContingencyExcursions = generalValuesMap.get(`CONTINGENCY EXCURSIONS ${motorNumero}`) || 0;
 
-                            // --- INICIO DE LA CORRECCIÓN DE LA FÓRMULA ---
-                            // Término 1: No. of Starts
                             const termStarts = noOfStarts;
-
-                            // Término 2: (No. of Flights - No. of Starts) / Abbreviated Cycle Factor
                             let termFlightsStarts = 0;
                             if (ABBREVIATED_CYCLE_FACTOR !== 0) {
                                 termFlightsStarts = (noOfFlights - noOfStarts) / ABBREVIATED_CYCLE_FACTOR;
                             }
-
-                            // Término 3: No. of Contingency Rating Excursions x Extended Cycle Factor
                             const termContingency = noOfContingencyExcursions * EXTENDED_CYCLE_FACTOR;
-
-                            // Suma de los tres primeros términos
                             const sumOfTerms = termStarts + termFlightsStarts + termContingency;
-
-                            // Multiplicación final por Flight Count Factor (¡Esta es la corrección!)
                             accumulatedTotalCycles = sumOfTerms * FLIGHT_COUNT_FACTOR;
-                            // --- FIN DE LA CORRECCIÓN DE LA FÓRMULA ---
                         }
+
+                        generalCelda.textContent = accumulatedTotalCycles.toFixed(1);
 
                         const restante = limite - accumulatedTotalCycles;
                         aplicarEstiloRestante(restanteCelda, restante, limite);
                     }
                 });
+                // Ya no necesitamos updateCanvasVisualization() aquí, ya que el canvas individual se ha eliminado.
+                // Si en el futuro se añade un nuevo canvas en la página principal, se volvería a añadir la llamada.
             });
         }
 
-        // Agrega event listeners a las celdas editables para guardar automáticamente
         function agregarEventosDeEdicion() {
             document.querySelectorAll(".tabla-vuelo td[contenteditable='true']").forEach((celda) => {
-                celda.removeEventListener("input", handleTableCellInput); // Evitar duplicados
+                celda.removeEventListener("input", handleTableCellInput);
                 celda.addEventListener("input", handleTableCellInput);
-                // Guardar el contenido original para posible reversión si no es admin
                 celda.dataset.originalContent = celda.textContent;
             });
 
-            // Listener para el textarea de recordatorios
             recordatorioTextarea.removeEventListener("input", handleRecordatorioInput);
             recordatorioTextarea.addEventListener("input", handleRecordatorioInput);
         }
 
-        // Manejador de eventos para las celdas de la tabla
         async function handleTableCellInput(e) {
             const celda = e.target;
             if (celda.contentEditable === 'true') {
@@ -1558,25 +1583,22 @@
                     console.warn('Acceso denegado: Solo los administradores pueden editar datos.');
                     authStatus.textContent = 'Acceso denegado: Solo los administradores pueden editar datos.';
                     authStatus.style.color = 'orange';
-                    celda.textContent = celda.dataset.originalContent || ''; // Revertir el cambio
+                    celda.textContent = celda.dataset.originalContent || '';
                     return;
                 }
 
-                // Actualizar el estado visual de la celda
                 if (celda.textContent.trim() !== "") {
                     celda.classList.add("led-persistente");
                 } else {
                     celda.classList.remove("led-persistente");
                 }
 
-                actualizarTotales(); // Recalcular totales
+                actualizarTotales();
 
-                // Guardar los datos en Firebase
                 await guardarDatosEnFirebase(añoActual, mesActual, obtenerDatosTabla(mesActual), recordatorioTextarea.value);
             }
         }
 
-        // Manejador de eventos para el textarea de recordatorios
         async function handleRecordatorioInput() {
             if (currentUserRole !== 'admin') {
                 console.warn('Acceso denegado: Solo los administradores pueden editar recordatorios.');
@@ -1584,11 +1606,9 @@
                 authStatus.style.color = 'orange';
                 return;
             }
-            // Guardar el recordatorio en Firebase
             await guardarDatosEnFirebase(añoActual, mesActual, obtenerDatosTabla(mesActual), recordatorioTextarea.value);
         }
 
-        // Configura las opciones de impresión
         document.querySelectorAll('input[name="printOption"]').forEach(radio => {
             radio.addEventListener('change', () => {
                 document.body.classList.remove('print-no-reminders', 'print-no-yellow-labels');
@@ -1600,18 +1620,135 @@
             });
         });
 
-        // Imprime la tabla de datos de vuelo
         btnImprimir.addEventListener('click', () => {
             window.print();
         });
 
-        // Función de inicialización de la aplicación
+        // --- FUNCIONES PARA EL MODAL DE ESTADO DE MOTORES ---
+
+        function showMotorStatusModal() {
+            if (!auth.currentUser) {
+                alert('Debes iniciar sesión para ver el estado de los motores.');
+                return;
+            }
+            motorStatusModal.classList.remove('hidden');
+            renderMotorStatus(); // Renderiza el contenido del modal cada vez que se abre
+        }
+
+        function hideMotorStatusModal() {
+            motorStatusModal.classList.add('hidden');
+        }
+
+        function renderMotorStatus() {
+            motorStatusContent.innerHTML = ''; // Limpiar contenido anterior
+
+            const tablaActual = document.querySelectorAll(".tabla-vuelo")[mesActual];
+            if (!tablaActual) {
+                motorStatusContent.innerHTML = '<p class="text-center text-gray-600">No hay datos de tabla activos para mostrar el estado de los componentes.</p>';
+                return;
+            }
+
+            const componentsToDisplay = [];
+
+            // Recopilar datos de todos los componentes editables
+            tablaActual.querySelectorAll('tbody tr').forEach(row => {
+                const nomenclaturaCell = row.querySelector('.nomenclatura');
+                if (nomenclaturaCell) {
+                    const componentName = nomenclaturaCell.textContent.trim();
+                    if (filasConColumnasAdicionalesEditables.includes(componentName)) {
+                        const restanteCelda = row.querySelector('.fila-restante');
+                        const limiteCelda = row.querySelector('.limite-celda');
+                        const generalCelda = row.querySelector('.fila-general');
+
+                        const remaining = parseFloat(restanteCelda?.textContent.trim()) || 0;
+                        const limit = parseFloat(limiteCelda?.textContent.trim()) || 0;
+                        const current = parseFloat(generalCelda?.textContent.trim()) || 0;
+                        
+                        let statusColorClass = 'progress-green';
+                        if (remaining <= 0) {
+                            statusColorClass = 'progress-red';
+                        } else if (remaining < limit * 0.2) {
+                            statusColorClass = 'progress-orange';
+                        }
+
+                        componentsToDisplay.push({
+                            name: componentName,
+                            remaining: remaining,
+                            limit: limit,
+                            current: current,
+                            statusColorClass: statusColorClass
+                        });
+                    }
+                }
+            });
+
+            const printOption = document.querySelector('input[name="motorStatusPrintOption"]:checked').value;
+
+            componentsToDisplay.forEach(component => {
+                if (printOption === 'critical-only' && component.statusColorClass === 'progress-green') {
+                    return; // Saltar componentes no críticos si la opción es "Solo Críticos"
+                }
+
+                const componentDiv = document.createElement('div');
+                componentDiv.className = 'component-status-item';
+
+                const percentUsed = (component.current / component.limit) * 100;
+                const progressBarFillWidth = Math.min(100, Math.max(0, percentUsed)); // Asegurar entre 0 y 100
+
+                componentDiv.innerHTML = `
+                    <h4>${component.name}</h4>
+                    <p>Límite: ${component.limit} | Actual: ${component.current}</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill ${component.statusColorClass}" style="width: ${progressBarFillWidth}%;"></div>
+                    </div>
+                    <p class="progress-text">Restantes: ${component.remaining}</p>
+                `;
+                motorStatusContent.appendChild(componentDiv);
+            });
+
+            if (componentsToDisplay.length === 0 || (printOption === 'critical-only' && motorStatusContent.children.length === 0)) {
+                 motorStatusContent.innerHTML = '<p class="text-center text-gray-600">No hay componentes para mostrar con los filtros actuales.</p>';
+            }
+        }
+
+        function printMotorStatus() {
+            const originalDisplay = motorStatusModal.style.display;
+            motorStatusModal.style.display = 'block'; // Asegurarse de que el modal esté visible para la impresión
+
+            renderMotorStatus(); 
+
+            document.body.classList.add('print-motor-status');
+
+            window.print();
+
+            document.body.classList.remove('print-motor-status');
+            motorStatusModal.style.display = originalDisplay;
+        }
+
+        // --- Función de inicialización de la aplicación ---
         async function iniciar() {
+            // Se elimina la creación e inserción del canvas individual aquí.
+            // const contenedorTablasDiv = document.getElementById('contenedor-tablas');
+            // if (contenedorTablasDiv) {
+            //     contenedorTablasDiv.insertAdjacentElement('afterend', COMPONENT_STATUS_CANVAS);
+            //     CTX = COMPONENT_STATUS_CANVAS.getContext('2d');
+            // } else {
+            //     console.error("No se encontró el elemento 'contenedor-tablas' para añadir el canvas.");
+            // }
+
             cargarAños();
             crearTablasParaAño(añoActual);
             crearBotonesMeses();
-            // La carga inicial de datos y la aplicación de permisos se manejan en onAuthStateChanged
-            // y en los listeners de cambio de año/mes.
+
+            // Event listeners para el nuevo botón de estado de motores
+            btnMotorStatus.addEventListener('click', showMotorStatusModal);
+            closeMotorStatusModal.addEventListener('click', hideMotorStatusModal);
+            btnPrintMotorStatus.addEventListener('click', printMotorStatus);
+
+            // Listener para las opciones de impresión del modal
+            document.querySelectorAll('input[name="motorStatusPrintOption"]').forEach(radio => {
+                radio.addEventListener('change', renderMotorStatus);
+            });
         }
 
         // Configura la posición y la distancia de caída de la careta de Anonymous.
