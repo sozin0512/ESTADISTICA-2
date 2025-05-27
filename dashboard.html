@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        /* Estilos iniciales para depuración de userStatus */
+        #userStatus {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            background-color: yellow; /* Para depuración inicial */
+            color: black;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background-image: url('Imagen1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #333;
+        }
+        .dashboard-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            box-sizing: border-box;
+            margin-top: 20px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        #userInfo {
+            font-size: 1em;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #555;
+            display: none;
+        }
+        .role-content {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .role-content p {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #c82333;
+        }
+        .action-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+        .admin-section {
+            background-color: #e6ffe6;
+            border-left: 5px solid #28a745;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+        .supervisor-section {
+            background-color: #fff8e6;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+        /* La sección de visualizador ha sido eliminada */
+
+        /* Estilos para el contenedor de botones de aeronaves */
+        #buttonContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Columnas responsivas */
+            gap: 20px;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+        #buttonContainer .btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        #buttonContainer .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        #buttonContainer .btn img {
+            width: 100px; /* Tamaño fijo para las imágenes */
+            height: auto;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        #buttonContainer .btn span {
+            font-size: 0.9em;
+            text-align: center;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h2>Bienvenido al Dashboard</h2> 
+        
+        <p id="userStatus">[INICIANDO DASHBOARD...]</p> 
+        <p id="userInfo" style="display: none;"></p>
+
+        <div id="content" style="display: none;">
+            <div id="adminContent" class="role-content admin-section" style="display: none;">
+                <h3>Sección de Administrador</h3>
+                <p>Aquí puedes gestionar usuarios, roles y configuraciones globales.</p>
+                <button class="action-button">Gestión de Usuarios</button>
+                <button class="action-button">Configuración</button>
+            </div>
+
+            <div id="supervisorContent" class="role-content supervisor-section" style="display: none;">
+                <h3>Sección de Supervisor</h3>
+                <p>Acceso a reportes detallados y supervisión de actividades.</p>
+                <button class="action-button">Ver Reportes</button>
+                <button class="action-button">Auditoría</button>
+            </div>
+
+            <h3>Aeronaves Disponibles</h3>
+            <div class="grid" id="buttonContainer">
+                <a class="btn" href="HORAS901.HTML" data-access="admin supervisor">
+                    <img src="https://i0.wp.com/militaryleak.com/wp-content/uploads/2023/06/dillon-aero-offers-mcas-500-mission-configurable-aircraft-system-for-md500-helicopters-1.jpg" alt="Helicóptero 1">
+                    <span class="label">MD-500 FAH-901</span>
+                </a>
+                <a class="btn" href="HORAS903.HTML" data-access="admin supervisor">
+                    <img src="https://i0.wp.com/militaryleak.com/wp-content/uploads/2023/06/dillon-aero-offers-mcas-500-mission-configurable-aircraft-system-for-md500-helicopters-1.jpg" alt="Helicóptero 2">
+                    <span class="label">MD-500 FAH-903</span>
+                </a>
+                <a class="btn" href="HORAS945.HTML" data-access="admin supervisor">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT0mlWDZhmmORUttCkQdXNqWihvXUSGDNq1rQ&s" alt="Helicóptero 3">
+                    <span class="label">UH-1H FAH-945</span>
+                </a>
+                <a class="btn" href="HORAS906.HTML" data-access="admin supervisor">
+                    <img src="https://global.discourse-cdn.com/infiniteflight/original/4X/7/b/7/7b73193e1ce40994998ac638ad3a031e7db1c2f.jpg" alt="Helicóptero 4">
+                    <span class="label">BO-105 FAH-906</span>
+                </a>
+                <a class="btn" href="HORAS971.HTML" data-access="admin supervisor">
+                    <img src="https://www.armytimes.com/resizer/v2/6CUYHGBE2VDJLCISBSQ6YR7HNQ.jpg?width=1200&auth=4462cae8c638d0732a2675e4143b4e771292d22585f429ba63ad23f52b96c403" alt="Helicóptero 5">
+                    <span class="label">BELL-412 FAH-971</span>
+                </a>
+                <a class="btn" href="HORAS973.HTML" data-access="admin supervisor">
+                    <img src="https://www.armytimes.com/resizer/v2/6CUYHGBE2VDJLCISBSQ6YR7HNQ.jpg?width=1200&auth=4462cae8c638d0732a2675e4143b4e771292d22585f429ba63ad23f52b96c403" alt="Helicóptero 6">
+                    <span class="label">BELL-412 FAH-973</span>
+                </a>
+                <a class="btn" href="HORAS974.HTML" data-access="admin supervisor">
+                    <img src="https://www.armytimes.com/resizer/v2/6CUYHGBE2VDJLCISBSQ6YR7HNQ.jpg?width=1200&auth=4462cae8c638d0732a2675e4143b4e771292d22585f429ba63ad23f52b96c403" alt="Helicóptero 7">
+                    <span class="label">BELL-412 FAH-974</span>
+                </a>
+                <a class="btn" href="HORAS976.HTML" data-access="admin supervisor">
+                    <img src="https://www.armytimes.com/resizer/v2/6CUYHGBE2VDJLCISBSQ6YR7HNQ.jpg?width=1200&auth=4462cae8c638d0732a2675e4143b4e771292d22585f429ba63ad23f52b96c403" alt="Helicóptero 8">
+                    <span class="label">BELL-412 FAH-976</span>
+                </a>
+                <a class="btn" href="HORAS979.HTML" data-access="admin supervisor">
+                    <img src="https://www.armytimes.com/resizer/v2/6CUYHGBE2VDJLCISBSQ6YR7HNQ.jpg?width=1200&auth=4462cae8c638d0732a2675e4143b4e771292d22585f429ba63ad23f52b96c403" alt="Helicóptero 9">
+                    <span class="label">BELL-412 FAH-979</span>
+                </a>
+                <a class="btn" href="HORAS980.HTML" data-access="admin supervisor">
+                    <img src="https://www.armytimes.com/resizer/v2/6CUYHGBE2VDJLCISBSQ6YR7HNQ.jpg?width=1200&auth=4462cae8c638d0732a2675e4143b4e771292d22585f429ba63ad23f52b96c403" alt="Helicóptero 10">
+                    <span class="label">BELL-412 FAH-980</span>
+                </a>
+                <a class="btn" href="HORAS990.HTML" data-access="admin supervisor visualizador">
+                    <img src="https://winair.ca/wp-content/uploads/2019/01/Airbus-H145-Helicopter.jpg" alt="Helicóptero 11">
+                    <span class="label">H-145 FAH-990</span>
+                </a>
+                <a class="btn" href="HORAS991.HTML" data-access="admin supervisor visualizador">
+                    <img src="https://winair.ca/wp-content/uploads/2019/01/Airbus-H145-Helicopter.jpg" alt="Helicóptero 12">
+                    <span class="label">H-145 FAH-991</span>
+                </a>
+            </div>
+            </div>
+
+        <button id="logoutButton" style="display: none;">Cerrar Sesión</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const firebaseConfig = {
+                apiKey: "AIzaSyAS5gh5eSwzAyl_1LiDOH1ALC72B9g7K04", 
+                authDomain: "datavase-133d9.firebaseapp.com",
+                projectId: "datavase-133d9",
+                storageBucket: "datavase-133d9.firebasestorage.app",
+                messagingSenderId: "453323331569",
+                appId: "1:453323331569:web:5ae65ea4f7df48859f1650"
+            };
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            const auth = firebase.auth();
+            const db = firebase.firestore();
+
+            const userStatusElement = document.getElementById('userStatus');
+            const userInfoElement = document.getElementById('userInfo');
+            const contentElement = document.getElementById('content');
+            const logoutButton = document.getElementById('logoutButton');
+
+            const adminContent = document.getElementById('adminContent');
+            const supervisorContent = document.getElementById('supervisorContent');
+            // Ya no es necesario referenciar visualizadorContent aquí
+            const buttonContainer = document.getElementById('buttonContainer'); // Referencia al contenedor de botones
+
+            function hideAllRoleContent() {
+                adminContent.style.display = 'none';
+                supervisorContent.style.display = 'none';
+                // Ya no es necesario ocultar visualizadorContent
+            }
+
+            // Función para controlar la visibilidad de los botones de aeronaves
+            function controlAircraftButtonVisibility(userRole) {
+                const buttons = buttonContainer.querySelectorAll('.btn'); // Selecciona todos los botones
+                buttons.forEach(button => {
+                    // Obtiene los roles de acceso del atributo data-access
+                    const accessRoles = button.dataset.access ? button.dataset.access.split(' ') : [];
+                    
+                    // Si el rol del usuario está incluido en los roles de acceso del botón, lo muestra
+                    if (accessRoles.includes(userRole)) {
+                        button.style.display = 'flex'; // Usamos flex para mantener el layout de columna
+                    } else {
+                        button.style.display = 'none'; // Si no coincide, lo oculta
+                    }
+                });
+            }
+
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    console.log('Usuario autenticado:', user.email);
+
+                    userStatusElement.style.backgroundColor = 'lightblue';
+                    userStatusElement.textContent = 'USUARIO DETECTADO. Obteniendo rol...';
+                    console.log('userStatusElement después del cambio de texto/color:', userStatusElement.style.display, userStatusElement.textContent, userStatusElement.style.backgroundColor);
+
+                    setTimeout(async () => {
+                        console.log('Ocultando userStatus y mostrando información de usuario...');
+                        userStatusElement.style.display = 'none'; // Aquí se oculta el mensaje inicial
+                        userInfoElement.style.display = 'block'; // Muestra la info del usuario
+
+                        let role = 'visualizador'; // Rol por defecto (sigue siendo el fallback si no se encuentra en Firestore)
+                        try {
+                            const docRef = db.collection('userRoles').doc(user.uid);
+                            const doc = await docRef.get();
+
+                            if (doc.exists) {
+                                const userData = doc.data();
+                                role = userData.role;
+                                console.log('Rol de usuario asignado:', role);
+                            } else {
+                                console.warn('No se encontró documento de rol para el usuario. Asignando rol por defecto.');
+                                await docRef.set({
+                                    role: 'visualizador',
+                                    email: user.email,
+                                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error al obtener/asignar el rol del usuario:', error);
+                        }
+
+                        // Muestra la información del usuario y su rol
+                        userInfoElement.textContent = `Bienvenido, ${user.email}. Tu rol es: ${role.toUpperCase()}`;
+                        
+                        // Oculta todas las secciones de rol (ahora solo admin y supervisor)
+                        hideAllRoleContent();
+                        switch (role) {
+                            case 'admin':
+                                adminContent.style.display = 'block';
+                                break;
+                            case 'supervisor':
+                                supervisorContent.style.display = 'block';
+                                break;
+                            case 'visualizador':
+                                // Ya no hay una sección específica para visualizador, simplemente no se muestra nada extra
+                                break;
+                            default:
+                                // Si el rol no es admin, supervisor o visualizador, tampoco se muestra nada específico
+                                break;
+                        }
+
+                        // === Llama a la función para controlar la visibilidad de los botones de aeronaves ===
+                        controlAircraftButtonVisibility(role); 
+                        // === FIN: Llamada a la función ===
+
+                        contentElement.style.display = 'block'; // Muestra el contenedor principal del contenido
+                        logoutButton.style.display = 'block'; // Muestra el botón de cerrar sesión
+
+                    }, 500); // Retraso de 500 milisegundos
+                    
+                } else {
+                    console.log('No hay usuario autenticado. Redirigiendo...');
+                    userStatusElement.textContent = 'No hay usuario autenticado. Redirigiendo...';
+                    userStatusElement.style.color = 'red';
+                    userStatusElement.style.backgroundColor = 'transparent'; // Quitar fondo de depuración
+                    userStatusElement.style.display = 'block'; // Asegurar que se muestre si no hay usuario
+                    setTimeout(() => {
+                        window.location.href = 'index.html'; // Redirige al login
+                    }, 2000);
+                }
+            });
+
+            // Lógica para cerrar sesión
+            logoutButton.addEventListener('click', async () => {
+                try {
+                    await auth.signOut();
+                    console.log('Sesión cerrada correctamente.');
+                    window.location.href = 'index.html'; // Redirige al login después de cerrar sesión
+                } catch (error) {
+                    console.error('Error al cerrar sesión:', error);
+                    alert('Error al cerrar sesión. Por favor, inténtalo de nuevo.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
