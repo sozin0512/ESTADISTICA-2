@@ -1,4 +1,3 @@
-
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
@@ -501,15 +500,15 @@
     <script>
         // Configuración de Firebase (asegúrate de que estas credenciales sean correctas para tu proyecto)
         const firebaseConfig = {
-  apiKey: "AIzaSyBeeYu08yGHmd9rX0q4jtUOz-DRufRYp-Q",
-  authDomain: "fah-991.firebaseapp.com",
-  databaseURL: "https://fah-991-default-rtdb.firebaseio.com",
-  projectId: "fah-991",
-  storageBucket: "fah-991.firebasestorage.app",
-  messagingSenderId: "308518634907",
-  appId: "1:308518634907:web:07a8edfc05a9f403204d3e",
-  measurementId: "G-15GF2F0TLY"
-};
+            apiKey: "AIzaSyBeeYu08yGHmd9rX0q4jtUOz-DRufRYp-Q",
+            authDomain: "fah-991.firebaseapp.com",
+            databaseURL: "https://fah-991-default-rtdb.firebaseio.com",
+            projectId: "fah-991",
+            storageBucket: "fah-991.firebasestorage.app",
+            messagingSenderId: "308518634907",
+            appId: "1:308518634907:web:07a8edfc05a9f403204d3e",
+            measurementId: "G-15GF2F0TLY"
+        };
 
         // Inicializar Firebase
         const app = firebase.initializeApp(firebaseConfig);
@@ -544,12 +543,26 @@
             "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
         ];
 
+        // Se modifican los nombres de las filas para incluir las nuevas líneas.
         const nombresFilas = [
-            "AC HRS", "LANDINGS", "ENGINE HRS 1", "ENGINE N1 CYCLES 1",
-            "ENGINE N2 CYCLES 1", "CREEP 1", "ENGINE HRS 2", "ENGINE N1 CYCLES 2",
-            "ENGINE N2 CYCLES 2", "CREEP 2", "CARGO HOOK HRS FLIGTH", "CARGO HOOK CYCLE",
-            "CARGO HOOK HRS LIFTING", "CARGO HOOK LIFTING", "CARGO HOOK LIFTING >400 KG ",
-            "HOIST RESCUE HRS", "HOIST RESCUE OP HRS", "HOIST RESCUE CYCLE"
+            "AC HRS", 
+            "LANDINGS", 
+            "ENGINE HRS 1", 
+            "ENGINE N1 CYCLES 1", 
+            "ENGINE N2 CYCLES 1", 
+            "CREEP 1", 
+            "ENGINE HRS 2", 
+            "ENGINE N1 CYCLES 2", 
+            "ENGINE N2 CYCLES 2", 
+            "CREEP 2", 
+            "CARGO HOOK HRS FLIGTH", 
+            "CARGO HOOK CYCLE",
+            "CARGO HOOK HRS LIFTING", 
+            "CARGO HOOK LIFTING", 
+            "CARGO HOOK LIFTING >400 KG ",
+            "HOIST RESCUE HRS", 
+            "HOIST RESCUE OP HRS", 
+            "HOIST RESCUE CYCLE"
         ];
 
         // Referencias a los elementos de la interfaz de usuario de la tabla de vuelo
@@ -735,7 +748,7 @@
                 return; // Prevenir el guardado
             }
 
-            // *** MODIFICACIÓN AQUÍ: CAMBIAR LA RUTA PARA USAR EL ÍNDICE NUMÉRICO DEL MES ***
+            // Cambiar la ruta para usar el índice numérico del mes
             const ruta = `${año}/${meses.indexOf(mesNombre)}`; // Ruta en la base de datos: año/indiceDelMes
             dbRef.child(ruta).set(datosTabla)
                 .then(() => {
@@ -756,7 +769,7 @@
          * @param {string} mesNombre - El nombre del mes a cargar.
          */
         function cargarDatosDesdeFirebase(año, mesNombre) {
-            // *** MODIFICACIÓN AQUÍ: CAMBIAR LA RUTA PARA USAR EL ÍNDICE NUMÉRICO DEL MES ***
+            // Cambiar la ruta para usar el índice numérico del mes
             const ruta = `${año}/${meses.indexOf(mesNombre)}`; // Ruta en la base de datos: año/indiceDelMes
             
             console.log('DEBUG: Intentando cargar datos de la ruta:', ruta); // Agregado para depuración
@@ -1024,7 +1037,7 @@
          * @param {number} mesDestinoIndex - El índice del mes a donde se copian los datos.
          */
         function copiarValorGeneralAMesSiguiente(año, mesOrigenIndex, mesDestinoIndex) {
-            // *** MODIFICACIÓN AQUÍ: USAR EL ÍNDICE NUMÉRICO PARA LA RUTA DE ORIGEN ***
+            // Usar el índice numérico para la ruta de origen
             const rutaOrigen = `${año}/${mesOrigenIndex}`; 
             dbRef.child(rutaOrigen).once('value')
                 .then(snapshot => {
@@ -1112,27 +1125,51 @@
                     // Determinar si la fila actual maneja valores de tiempo (basado en el nombre de la fila)
                     const esTiempo = nombresFilas[filaIndex].includes("HRS");
 
+                    // Definir las filas específicas para la fórmula "MES TOTAL = GENERAL - VIENEN"
+                    // y "GENERAL = MAX(días)"
+                    const rowsForSpecialCalculation = [
+                        nombresFilas.indexOf("ENGINE N1 CYCLES 1"),
+                        nombresFilas.indexOf("ENGINE N2 CYCLES 1"),
+                        nombresFilas.indexOf("ENGINE N1 CYCLES 2"),
+                        nombresFilas.indexOf("ENGINE N2 CYCLES 2"),
+                        nombresFilas.indexOf("CREEP 1"), // Agregado CREEP 1
+                        nombresFilas.indexOf("CREEP 2")  // Agregado CREEP 2
+                    ];
+
                     if (esTiempo) {
                         // Cálculo para valores de tiempo
                         const vienenMin = vienenStr ? aMinutos(vienenStr) : 0;
                         const totalMin = valoresCeldas.reduce((acc, val) => acc + (val ? aMinutos(val) : 0), 0);
                         const generalMin = vienenMin + totalMin;
 
-                        celdas[33].textContent = aHora(totalMin);
-                        celdas[34].textContent = aHora(generalMin);
+                        celdas[33].textContent = aHora(totalMin); // MES TOTAL
+                        celdas[34].textContent = aHora(generalMin); // GENERAL
                     } else {
                         // Cálculo para valores numéricos
                         const vienen = vienenStr ? parseFloat(vienenStr.replace(",", ".")) : 0;
-                        const valores = valoresCeldas.map(v => v ? parseFloat(v.replace(",", ".")) : 0);
-                        const total = valores.reduce((acc, val) => acc + val, 0);
-                        const general = total + vienen;
+                        const valoresNumericos = valoresCeldas.map(v => parseFloat(v.replace(",", "."))).filter(num => !isNaN(num));
+                        const total = valoresNumericos.reduce((acc, val) => acc + val, 0);
+                        
+                        let general;
+                        let mesTotalDisplayValue;
 
-                        // Formatear la salida: si es entero, mostrar entero; si no, con un decimal.
-                        const mostrarTotal = total > 0 ? (Number.isInteger(total) ? total : total.toFixed(1)) : "";
+                        if (rowsForSpecialCalculation.includes(filaIndex)) {
+                            // Para estas filas, GENERAL es el valor máximo de los días
+                            general = valoresNumericos.length > 0 ? Math.max(...valoresNumericos) : 0;
+                            // MES TOTAL = GENERAL - VIENEN
+                            let calculatedMesTotal = general - vienen;
+                            mesTotalDisplayValue = calculatedMesTotal > 0 ? (Number.isInteger(calculatedMesTotal) ? calculatedMesTotal : calculatedMesTotal.toFixed(1)) : "";
+                        } else {
+                            // Para otras filas numéricas, GENERAL es la suma de VIENEN + TOTAL de días
+                            general = total + vienen;
+                            // MES TOTAL es la suma de los valores diarios
+                            mesTotalDisplayValue = total > 0 ? (Number.isInteger(total) ? total : total.toFixed(1)) : "";
+                        }
+
                         const mostrarGeneral = general > 0 ? (Number.isInteger(general) ? general : general.toFixed(1)) : "";
 
-                        celdas[33].textContent = mostrarTotal;
-                        celdas[34].textContent = mostrarGeneral;
+                        celdas[33].textContent = mesTotalDisplayValue; // MES TOTAL
+                        celdas[34].textContent = mostrarGeneral; // GENERAL
                     }
                 });
             });
