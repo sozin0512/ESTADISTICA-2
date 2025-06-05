@@ -51,7 +51,7 @@
             max-width: 1400px;
         }
 
-        .back-button, .print-all-button {
+        .back-button, .print-all-button, .add-component-button {
             padding: 0.75rem 1.5rem;
             background-color: #4f46e5;
             color: white;
@@ -60,11 +60,11 @@
             font-weight: bold;
             transition: background-color 0.3s ease, transform 0.2s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border: none; /* Asegura que no haya borde por defecto de botón */
+            border: none;
             cursor: pointer;
         }
 
-        .back-button:hover, .print-all-button:hover {
+        .back-button:hover, .print-all-button:hover, .add-component-button:hover {
             background-color: #4338ca;
             transform: translateY(-2px);
         }
@@ -123,7 +123,7 @@
             display: flex;
             flex-direction: column;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            position: relative; /* Para posicionar los botones */
+            position: relative;
         }
 
         .component-card:hover {
@@ -161,7 +161,7 @@
             background-color: #eef2ff;
             padding: 0.75rem;
             border-radius: 0.5rem;
-            margin-top: auto; /* Empuja esta sección al final de la tarjeta */
+            margin-top: auto;
             text-align: center;
             font-size: 1.1rem;
             font-weight: bold;
@@ -171,9 +171,10 @@
             border: 1px solid #c7d2fe;
         }
 
-        .remaining-red { color: #dc2626; } /* Rojo más fuerte */
-        .remaining-orange { color: #ea580c; } /* Naranja más fuerte */
-        .remaining-green { color: #16a34a; } /* Verde más fuerte */
+        .remaining-red { color: #dc2626; }
+        .remaining-orange { color: #ea580c; }
+        .remaining-green { color: #16a34a; }
+        .remaining-blue { color: #3b82f6; } /* Nuevo estilo para "Condición" */
 
         .month-year-selector, .search-area {
             display: flex;
@@ -206,7 +207,6 @@
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
         }
 
-        /* Estilos para los botones en la tarjeta */
         .card-buttons {
             position: absolute;
             top: 10px;
@@ -216,7 +216,7 @@
         }
 
         .edit-button, .print-single-button {
-            background-color: #3b82f6; /* Azul */
+            background-color: #3b82f6;
             color: white;
             padding: 0.4rem 0.8rem;
             border-radius: 0.375rem;
@@ -230,7 +230,6 @@
             background-color: #2563eb;
         }
 
-        /* Estilos para el modal (dialog) */
         dialog {
             border: none;
             border-radius: 0.75rem;
@@ -239,7 +238,7 @@
             max-width: 600px;
             width: 90%;
             background-color: #ffffff;
-            z-index: 1000; /* Asegura que esté por encima de otros elementos */
+            z-index: 1000;
         }
 
         dialog::backdrop {
@@ -327,7 +326,6 @@
             transform: translateY(-1px);
         }
 
-        /* Responsive para el modal */
         @media (max-width: 640px) {
             dialog form {
                 grid-template-columns: 1fr;
@@ -338,22 +336,21 @@
             }
         }
 
-        /* Estilos para la barra de progreso */
         .progress-bar-container {
             width: 100%;
             background-color: #e0e0e0;
             border-radius: 0.5rem;
-            height: 1.2rem; /* Altura de la barra */
-            overflow: hidden; /* Asegura que el relleno no se desborde */
+            height: 1.2rem;
+            overflow: hidden;
             margin-top: 1rem;
             border: 1px solid #ccc;
         }
 
         .progress-bar-fill {
             height: 100%;
-            width: 0%; /* Se establecerá dinámicamente */
+            width: 0%;
             border-radius: 0.5rem;
-            transition: width 0.5s ease-in-out; /* Animación de llenado */
+            transition: width 0.5s ease-in-out;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -361,9 +358,8 @@
             font-size: 0.8rem;
             font-weight: bold;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-            /* Propiedades para el efecto de "agua fluyendo" */
-            background-size: 200% 100%; /* Duplica el tamaño para el movimiento */
-            animation: flow 0.8s linear infinite; /* Animación de flujo, ahora más rápida (0.8s) */
+            background-size: 200% 100%;
+            animation: flow 0.8s linear infinite;
         }
 
         /* Colores para la barra de progreso */
@@ -376,83 +372,83 @@
         .progress-green { 
             background-image: linear-gradient(90deg, #16a34a 0%, #22c55e 50%, #16a34a 100%);
         }
+        .progress-blue { /* Nueva clase para la barra de progreso azul */
+            background-image: linear-gradient(90deg, #3b82f6 0%, #60a5fa 50%, #3b82f6 100%);
+        }
 
-        /* Animación para el efecto de "agua fluyendo" */
         @keyframes flow {
             0% {
                 background-position: 0% 0%;
             }
             100% {
-                background-position: -100% 0%; /* Mueve el gradiente a la izquierda */
+                background-position: -100% 0%;
             }
         }
 
-        /* Estilos para impresión */
         @media print {
             body {
-                background: none; /* Elimina el fondo degradado */
+                background: none;
                 padding: 0;
                 margin: 0;
-                color: black; /* Texto negro para mejor contraste en impresión */
+                color: black;
             }
-            .top-buttons, .month-year-selector, .search-area, .edit-button, .print-single-button, dialog, .summary-section {
-                display: none !important; /* Oculta elementos no necesarios para la impresión */
+            .top-buttons, .month-year-selector, .search-area, .edit-button, .print-single-button, .add-component-button, dialog, .summary-section {
+                display: none !important;
             }
             h2, h3 {
-                color: black !important; /* Asegura que los títulos sean negros */
+                color: black !important;
                 text-align: center;
                 margin-bottom: 1rem;
             }
             .container {
-                box-shadow: none; /* Elimina sombras */
-                border: none; /* Elimina bordes del contenedor principal */
+                box-shadow: none;
+                border: none;
                 padding: 0;
                 width: 100%;
                 max-width: none;
             }
             .summary-card {
-                display: none !important; /* Oculta las tarjetas de resumen */
+                display: none !important;
             }
             .component-detail-section {
-                grid-template-columns: 1fr; /* Una columna para impresión */
+                grid-template-columns: 1fr;
                 gap: 1rem;
                 margin-top: 0;
             }
             .component-card {
-                border: 1px solid #ccc; /* Borde simple para cada componente */
-                box-shadow: none; /* Elimina sombras */
-                page-break-inside: avoid; /* Evita que las tarjetas se corten entre páginas */
-                margin-bottom: 1rem; /* Espacio entre tarjetas */
+                border: 1px solid #ccc;
+                box-shadow: none;
+                page-break-inside: avoid;
+                margin-bottom: 1rem;
                 padding: 1rem;
             }
             .component-card h4 {
-                border-bottom: 1px solid #eee; /* Borde más ligero para títulos de tarjeta */
+                border-bottom: 1px solid #eee;
                 padding-bottom: 0.5rem;
                 margin-bottom: 0.5rem;
             }
             .component-info-grid {
-                grid-template-columns: 1fr; /* Una columna para las propiedades en impresión */
+                grid-template-columns: 1fr;
                 gap: 0.5rem;
             }
             .remaining-life-section, .progress-bar-container {
                 margin-top: 0.5rem;
-                border: none; /* Elimina bordes de estas secciones */
-                background-color: transparent; /* Fondo transparente */
+                border: none;
+                background-color: transparent;
             }
             .progress-bar-fill {
-                background-image: none !important; /* Elimina el gradiente de la barra */
-                background-color: #ddd !important; /* Color sólido para la barra de progreso */
-                color: #333 !important; /* Texto oscuro para la barra */
-                animation: none !important; /* Desactiva la animación de flujo */
+                background-image: none !important;
+                background-color: #ddd !important;
+                color: #333 !important;
+                animation: none !important;
             }
-            /* Mostrar solo el componente seleccionado para impresión individual */
             body.print-single-component .component-card:not(.print-this-one) {
                 display: none !important;
             }
             body.print-single-component .component-card.print-this-one {
-                display: block !important; /* Asegura que solo se muestre el seleccionado */
-                width: 100%; /* Ocupa todo el ancho disponible */
-                margin: 0 auto; /* Centrar si es necesario */
+                display: block !important;
+                width: 100%;
+                margin: 0 auto;
             }
         }
 
@@ -462,6 +458,7 @@
     <div class="top-buttons">
         <a href="HORAS980.HTML" class="back-button">Volver a Datos de Vuelo</a>
         <button id="printAllComponentsButton" class="print-all-button">Imprimir Todos los Componentes</button>
+        <button id="addComponentButton" class="add-component-button">Agregar Componente</button>
     </div>
     <h2 class="mt-8">Estado de Componentes</h2>
 
@@ -522,51 +519,52 @@
                     <option value="hours">Horas</option>
                     <option value="cycles">Ciclos</option>
                     <option value="months">Meses</option>
+                    <option value="condition">Condición</option> <!-- Nueva opción -->
                 </select>
             </div>
 
             <div class="col-span-2 grid grid-cols-3 gap-4">
                 <div>
                     <label for="edit-currentTSNHours">TSN (Hrs):</label>
-                    <input type="number" id="edit-currentTSNHours" name="currentTSNHours">
+                    <input type="number" id="edit-currentTSNHours" name="currentTSNHours" step="0.1">
                 </div>
                 <div>
                     <label for="edit-currentTSNCycles">TSN (Ciclos):</label>
-                    <input type="number" id="edit-currentTSNCycles" name="currentTSNCycles">
+                    <input type="number" id="edit-currentTSNCycles" name="currentTSNCycles" step="0.1">
                 </div>
                 <div>
                     <label for="edit-currentTSNDays">TSN (Días/Meses):</label>
-                    <input type="number" id="edit-currentTSNDays" name="currentTSNDays">
+                    <input type="number" id="edit-currentTSNDays" name="currentTSNDays" step="0.1">
                 </div>
             </div>
 
             <div class="col-span-2 grid grid-cols-3 gap-4">
                 <div>
                     <label for="edit-currentTSOHours">TSO (Hrs):</label>
-                    <input type="number" id="edit-currentTSOHours" name="currentTSOHours">
+                    <input type="number" id="edit-currentTSOHours" name="currentTSOHours" step="0.1">
                 </div>
                 <div>
                     <label for="edit-currentTSOCycles">TSO (Ciclos):</label>
-                    <input type="number" id="edit-currentTSOCycles" name="currentTSOCycles">
+                    <input type="number" id="edit-currentTSOCycles" name="currentTSOCycles" step="0.1">
                 </div>
                 <div>
                     <label for="edit-currentTSODays">TSO (Días/Meses):</label>
-                    <input type="number" id="edit-currentTSODays" name="currentTSODays">
+                    <input type="number" id="edit-currentTSODays" name="currentTSODays" step="0.1">
                 </div>
             </div>
 
             <div class="col-span-2 grid grid-cols-3 gap-4">
                 <div>
                     <label for="edit-lifeLimitHours">Vida Límite (Hrs):</label>
-                    <input type="number" id="edit-lifeLimitHours" name="lifeLimitHours">
+                    <input type="number" id="edit-lifeLimitHours" name="lifeLimitHours" step="0.1">
                 </div>
                 <div>
                     <label for="edit-lifeLimitCycles">Vida Límite (Ciclos):</label>
-                    <input type="number" id="edit-lifeLimitCycles" name="lifeLimitCycles">
+                    <input type="number" id="edit-lifeLimitCycles" name="lifeLimitCycles" step="0.1">
                 </div>
                 <div>
                     <label for="edit-lifeLimitDays">Vida Límite (Días/Meses):</label>
-                    <input type="number" id="edit-lifeLimitDays" name="lifeLimitDays">
+                    <input type="number" id="edit-lifeLimitDays" name="lifeLimitDays" step="0.1">
                 </div>
             </div>
 
@@ -623,6 +621,7 @@
         const componentDetailsDiv = document.getElementById('componentDetails');
         const componentSearchInput = document.getElementById('componentSearchInput');
         const printAllComponentsButton = document.getElementById('printAllComponentsButton');
+        const addComponentButton = document.getElementById('addComponentButton'); // Nuevo botón
 
         // Referencias al diálogo y formulario de edición
         const editComponentDialog = document.getElementById('editComponentDialog');
@@ -675,6 +674,10 @@
 
         // Función para generar un nuevo componente con valores por defecto
         function generateComponent(name, partNumber = "GEN-PN", type = "hours", lifeLimit = 2000, currentTSN = 500, location = "General") {
+            // Asegura que los valores predeterminados numéricos sean flotantes y tengan 1 decimal
+            lifeLimit = parseFloat(lifeLimit.toFixed(1));
+            currentTSN = parseFloat(currentTSN.toFixed(1));
+
             const serialNum = `FAH-${String(globalSerialCounter++).padStart(4, '0')}`;
             let lifeLimitHours = 0, lifeLimitCycles = 0, lifeLimitDays = 0;
             let currentTSNHours = 0, currentTSNCycles = 0, currentTSNDays = 0;
@@ -692,6 +695,14 @@
                 lifeLimitDays = lifeLimit * 30; // Suponiendo 30 días por mes para el límite de vida
                 currentTSNDays = currentTSN * 30; // Suponiendo 30 días por mes para el TSN
                 dueDateTT = `${lifeLimit} meses`;
+            } else if (type === "condition") { // Nueva condición
+                lifeLimitHours = 0; // No aplica
+                lifeLimitCycles = 0; // No aplica
+                lifeLimitDays = 0; // No aplica
+                currentTSNHours = 0; // No aplica
+                currentTSNCycles = 0; // No aplica
+                currentTSNDays = 0; // No aplica
+                dueDateTT = "CONDICIÓN";
             }
 
             return {
@@ -701,15 +712,15 @@
                 installationDate: "2023-01-01", // Fecha de instalación por defecto
                 location: location,
                 type: type,
-                currentTSNHours: currentTSNHours,
-                currentTSNCycles: currentTSNCycles,
-                currentTSNDays: currentTSNDays,
-                currentTSOHours: Math.floor(currentTSNHours * 0.2), // TSO como porcentaje del TSN
-                currentTSOCycles: Math.floor(currentTSNCycles * 0.2),
-                currentTSODays: Math.floor(currentTSNDays * 0.2),
-                lifeLimitHours: lifeLimitHours,
-                lifeLimitCycles: lifeLimitCycles,
-                lifeLimitDays: lifeLimitDays,
+                currentTSNHours: parseFloat(currentTSNHours.toFixed(1)), // Asegura un decimal
+                currentTSNCycles: parseFloat(currentTSNCycles.toFixed(1)), // Asegura un decimal
+                currentTSNDays: parseFloat(currentTSNDays.toFixed(1)), // Asegura un decimal
+                currentTSOHours: parseFloat(((type === "condition" ? 0 : currentTSNHours) * 0.2).toFixed(1)), // TSO como porcentaje del TSN, con un decimal
+                currentTSOCycles: parseFloat(((type === "condition" ? 0 : currentTSNCycles) * 0.2).toFixed(1)),
+                currentTSODays: parseFloat(((type === "condition" ? 0 : currentTSNDays) * 0.2).toFixed(1)),
+                lifeLimitHours: parseFloat(lifeLimitHours.toFixed(1)), // Asegura un decimal
+                lifeLimitCycles: parseFloat(lifeLimitCycles.toFixed(1)), // Asegura un decimal
+                lifeLimitDays: parseFloat(lifeLimitDays.toFixed(1)), // Asegura un decimal
                 dueDateTT: dueDateTT,
                 status: "Operativo",
                 lastInspectionDate: "2024-01-01",
@@ -717,221 +728,166 @@
             };
         }
 
-        // Lista inicial de componentes (solo se usa si la base de datos está vacía)
+        // Lista inicial de componentes reconstruida exhaustivamente
         const initialPrincipalComponents = [
-            generateComponent("Main Rotor Blade Assembly (RED)", "MRB-R", "hours", 5000, 4800, "Rotor Principal"),
-            generateComponent("Main Rotor Blade Assembly (RED)", "MRB-R", "hours", 5000, 4700, "Rotor Principal"),
-            generateComponent("Main Rotor Blade Assembly (BLUE)", "MRB-B", "hours", 5000, 3500, "Rotor Principal"),
-            generateComponent("Main Rotor Blade Assembly (BLUE)", "MRB-B", "hours", 5000, 3400, "Rotor Principal"),
-            generateComponent("Main Rotor Blade Assembly (ORANGE)", "MRB-O", "hours", 5000, 4100, "Rotor Principal"),
-            generateComponent("Main Rotor Blade Assembly (ORANGE)", "MRB-O", "hours", 5000, 4000, "Rotor Principal"),
-            generateComponent("Main Rotor Blade Assembly (GREEN)", "MRB-G", "hours", 5000, 1200, "Rotor Principal"),
-            generateComponent("Main Rotor Blade Assembly (GREEN)", "MRB-G", "hours", 5000, 1100, "Rotor Principal"),
-            generateComponent("Bolt Expandable", "BOLT-EXP", "cycles", 500, 450, "Varios"),
-            generateComponent("Bolt Expandable", "BOLT-EXP", "cycles", 500, 400, "Varios"),
-            generateComponent("Bolt Expandable", "BOLT-EXP", "cycles", 500, 350, "Varios"),
-            generateComponent("Bolt Expandable", "BOLT-EXP", "cycles", 500, 300, "Varios"),
-            generateComponent("Blade Bolt Assembly", "BBA-PN", "cycles", 1000, 800, "Rotor Principal"),
-            generateComponent("Blade Bolt Assembly", "BBA-PN", "cycles", 1000, 750, "Rotor Principal"),
-            generateComponent("Blade Bolt Assembly", "BBA-PN", "cycles", 1000, 700, "Rotor Principal"),
-            generateComponent("Blade Bolt Assembly", "BBA-PN", "cycles", 1000, 650, "Rotor Principal"),
-            generateComponent("Main Rotor Hub Assembly", "MRH-A", "hours", 4000, 3900, "Principal"),
-            generateComponent("Main Rotor Hub Assembly", "MRH-B", "hours", 4000, 2800, "Principal"),
-            generateComponent("Yoke Assembly", "YOKE-A", "hours", 2500, 1800, "Principal"),
-            generateComponent("Yoke Assembly", "YOKE-B", "hours", 2500, 1500, "Principal"),
-            generateComponent("Seat, Lower Cone", "SLC-PN", "hours", 1500, 500, "Tren de Aterrizaje"),
-            generateComponent("Plate Assembly", "PLATE-A", "hours", 1000, 300, "Estructura"),
-            generateComponent("Plate Assembly", "PLATE-B", "hours", 1000, 250, "Estructura"),
-            generateComponent("Seat, Upper Cone", "SUC-PN", "hours", 1500, 600, "Tren de Aterrizaje"),
-            generateComponent("Drive Pin", "PIN-DR-1", "cycles", 1000, 750, "Tren de Aterrizaje"),
-            generateComponent("Drive Pin", "PIN-DR-2", "cycles", 1000, 700, "Tren de Aterrizaje"),
-            generateComponent("Drive Pin", "PIN-DR-3", "cycles", 1000, 650, "Tren de Aterrizaje"),
-            generateComponent("Drive Pin", "PIN-DR-4", "cycles", 1000, 600, "Tren de Aterrizaje"),
-            generateComponent("Drive Pin", "PIN-DR-5", "cycles", 1000, 550, "Tren de Aterrizaje"),
-            generateComponent("Drive Pin", "PIN-DR-6", "cycles", 1000, 500, "Tren de Aterrizaje"),
-            generateComponent("Drive Pin", "PIN-DR-7", "cycles", 1000, 450, "Tren de Aterrizaje"),
-            generateComponent("Drive Pin", "PIN-DR-8", "cycles", 1000, 400, "Tren de Aterrizaje"),
-            generateComponent("Arm Assembly", "ARM-A-1", "hours", 1200, 500, "Controles de Vuelo"),
-            generateComponent("Arm Assembly", "ARM-A-2", "hours", 1200, 480, "Controles de Vuelo"),
-            generateComponent("Arm Assembly", "ARM-A-3", "hours", 1200, 460, "Controles de Vuelo"),
-            generateComponent("Arm Assembly", "ARM-A-4", "hours", 1200, 440, "Controles de Vuelo"),
-            generateComponent("Arm Assembly", "ARM-A-5", "hours", 1200, 420, "Controles de Vuelo"),
-            generateComponent("Arm Assembly", "ARM-A-6", "hours", 1200, 400, "Controles de Vuelo"),
-            generateComponent("Arm Assembly", "ARM-A-7", "hours", 1200, 380, "Controles de Vuelo"),
-            generateComponent("Arm Assembly", "ARM-A-8", "hours", 1200, 360, "Controles de Vuelo"),
-            generateComponent("Bracket Assembly", "BRKT-A-1", "hours", 1500, 600, "Estructura"),
-            generateComponent("Bracket Assembly", "BRKT-A-2", "hours", 1500, 580, "Estructura"),
-            generateComponent("Bracket Assembly", "BRKT-A-3", "hours", 1500, 560, "Estructura"),
-            generateComponent("Bracket Assembly", "BRKT-A-4", "hours", 1500, 540, "Estructura"),
-            generateComponent("Bracket Assembly", "BRKT-A-5", "hours", 1500, 520, "Estructura"),
-            generateComponent("Bracket Assembly", "BRKT-A-6", "hours", 1500, 500, "Estructura"),
-            generateComponent("Bracket Assembly", "BRKT-A-7", "hours", 1500, 480, "Estructura"),
-            generateComponent("Bracket Assembly", "BRKT-A-8", "hours", 1500, 460, "Estructura"),
-            generateComponent("Damper Bridge Assembly", "DBA-PN-1", "hours", 1500, 1200, "Rotor Principal"),
-            generateComponent("Damper Bridge Assembly", "DBA-PN-2", "hours", 1500, 1150, "Rotor Principal"),
-            generateComponent("Damper Bridge Assembly", "DBA-PN-3", "hours", 1500, 1100, "Rotor Principal"),
-            generateComponent("Damper Bridge Assembly", "DBA-PN-4", "hours", 1500, 1050, "Rotor Principal"),
-            generateComponent("Damper Bridge Assembly", "DBA-PN-5", "hours", 1500, 1000, "Rotor Principal"),
-            generateComponent("Damper Bridge Assembly", "DBA-PN-6", "hours", 1500, 950, "Rotor Principal"),
-            generateComponent("Damper Bridge Assembly", "DBA-PN-7", "hours", 1500, 900, "Rotor Principal"),
-            generateComponent("Damper Bridge Assembly", "DBA-PN-8", "hours", 1500, 850, "Rotor Principal"),
-            generateComponent("Damper Bridge Assembly", "DBA-PN-9", "hours", 1500, 800, "Rotor Principal"),
-            generateComponent("Damper Bridge Assembly", "DBA-PN-10", "hours", 1500, 750, "Rotor Principal"),
-            generateComponent("Damper Bridge Assembly", "DBA-PN-11", "hours", 1500, 700, "Rotor Principal"),
-            generateComponent("Damper Bridge Assembly", "DBA-PN-12", "hours", 1500, 650, "Rotor Principal"),
-            generateComponent("Spindle And Damper Bearing", "SDB-PN-1", "cycles", 800, 650, "Rotor Principal"),
-            generateComponent("Spindle And Damper Bearing", "SDB-PN-2", "cycles", 800, 600, "Rotor Principal"),
-            generateComponent("Spindle And Damper Bearing", "SDB-PN-3", "cycles", 800, 550, "Rotor Principal"),
-            generateComponent("Spindle And Damper Bearing", "SDB-PN-4", "cycles", 800, 500, "Rotor Principal"),
-            generateComponent("Pitch Horn Assembly", "PHA-PN-1", "hours", 1000, 700, "Rotor Principal"),
-            generateComponent("Pitch Horn Assembly", "PHA-PN-2", "hours", 1000, 650, "Rotor Principal"),
-            generateComponent("Pitch Horn Assembly", "PHA-PN-3", "hours", 1000, 600, "Rotor Principal"),
-            generateComponent("Pitch Horn Assembly", "PHA-PN-4", "hours", 1000, 550, "Rotor Principal"),
-            generateComponent("Fitting", "FIT-PN-1", "cycles", 700, 550, "Cola"),
-            generateComponent("Fitting", "FIT-PN-2", "cycles", 700, 500, "Cola"),
-            generateComponent("Fitting", "FIT-PN-3", "cycles", 700, 450, "Cola"),
-            generateComponent("Fitting", "FIT-PN-4", "cycles", 700, 400, "Cola"),
-            generateComponent("Bolt, Weight", "BW-PN-1", "cycles", 500, 300, "Varios"),
-            generateComponent("Bolt, Weight", "BW-PN-2", "cycles", 500, 280, "Varios"),
-            generateComponent("Bolt, Weight", "BW-PN-3", "cycles", 500, 260, "Varios"),
-            generateComponent("Bolt, Weight", "BW-PN-4", "cycles", 500, 240, "Varios"),
-            generateComponent("Bolt, Arm", "BA-PN-1", "cycles", 500, 350, "Varios"),
-            generateComponent("Bolt, Arm", "BA-PN-2", "cycles", 500, 330, "Varios"),
-            generateComponent("Bolt, Arm", "BA-PN-3", "cycles", 500, 310, "Varios"),
-            generateComponent("Bolt, Arm", "BA-PN-4", "cycles", 500, 290, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-1", "cycles", 500, 200, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-2", "cycles", 500, 190, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-3", "cycles", 500, 180, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-4", "cycles", 500, 170, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-5", "cycles", 500, 160, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-6", "cycles", 500, 150, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-7", "cycles", 500, 140, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-8", "cycles", 500, 130, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-9", "cycles", 500, 120, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-10", "cycles", 500, 110, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-11", "cycles", 500, 100, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-12", "cycles", 500, 90, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-13", "cycles", 500, 80, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-14", "cycles", 500, 70, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-15", "cycles", 500, 60, "Varios"),
-            generateComponent("Bolt, Bracket", "BB-PN-16", "cycles", 500, 50, "Varios"),
-            generateComponent("Bushing, Yoke", "BY-PN", "hours", 1000, 400, "Principal"),
-            generateComponent("Cap", "CAP-PN", "months", 24, 12, "Varios"),
-            generateComponent("Cone Superior", "CS-PN", "hours", 800, 300, "Tren de Aterrizaje"),
-            generateComponent("Cone Inferior", "CI-PN", "hours", 800, 300, "Tren de Aterrizaje"),
-            generateComponent("Cam To Upper Yoke", "CTUY-PN-1", "cycles", 1000, 600, "Controles de Vuelo"),
-            generateComponent("Cam To Upper Yoke", "CTUY-PN-2", "cycles", 1000, 580, "Controles de Vuelo"),
-            generateComponent("Cam To Upper Yoke", "CTUY-PN-3", "cycles", 1000, 560, "Controles de Vuelo"),
-            generateComponent("Cam To Upper Yoke", "CTUY-PN-4", "cycles", 1000, 540, "Controles de Vuelo"),
-            generateComponent("Cam To Upper Yoke", "CTUY-PN-5", "cycles", 1000, 520, "Controles de Vuelo"),
-            generateComponent("Cam To Upper Yoke", "CTUY-PN-6", "cycles", 1000, 500, "Controles de Vuelo"),
-            generateComponent("Cam To Upper Yoke", "CTUY-PN-7", "cycles", 1000, 480, "Controles de Vuelo"),
-            generateComponent("Cam To Upper Yoke", "CTUY-PN-8", "cycles", 1000, 460, "Controles de Vuelo"),
-            generateComponent("Upper Yoke To Cam", "UYTC-PN-1", "cycles", 1000, 550, "Controles de Vuelo"),
-            generateComponent("Upper Yoke To Cam", "UYTC-PN-2", "cycles", 1000, 530, "Controles de Vuelo"),
-            generateComponent("Upper Yoke To Cam", "UYTC-PN-3", "cycles", 1000, 510, "Controles de Vuelo"),
-            generateComponent("Upper Yoke To Cam", "UYTC-PN-4", "cycles", 1000, 490, "Controles de Vuelo"),
-            generateComponent("Upper Yoke To Cam", "UYTC-PN-5", "cycles", 1000, 470, "Controles de Vuelo"),
-            generateComponent("Upper Yoke To Cam", "UYTC-PN-6", "cycles", 1000, 450, "Controles de Vuelo"),
-            generateComponent("Upper Yoke To Cam", "UYTC-PN-7", "cycles", 1000, 430, "Controles de Vuelo"),
-            generateComponent("Upper Yoke To Cam", "UYTC-PN-8", "cycles", 1000, 410, "Controles de Vuelo"),
-            generateComponent("Clevis To Cam", "CTC-PN-1", "cycles", 800, 400, "Controles de Vuelo"),
-            generateComponent("Clevis To Cam", "CTC-PN-2", "cycles", 800, 380, "Controles de Vuelo"),
-            generateComponent("Clevis To Cam", "CTC-PN-3", "cycles", 800, 360, "Controles de Vuelo"),
-            generateComponent("Clevis To Cam", "CTC-PN-4", "cycles", 800, 340, "Controles de Vuelo"),
-            generateComponent("Clevis Assy To Lower Cone", "CALC-PN-1", "cycles", 800, 350, "Controles de Vuelo"),
-            generateComponent("Clevis Assy To Lower Cone", "CALC-PN-2", "cycles", 800, 330, "Controles de Vuelo"),
-            generateComponent("Clevis Assy To Lower Cone", "CALC-PN-3", "cycles", 800, 310, "Controles de Vuelo"),
-            generateComponent("Clevis Assy To Lower Cone", "CALC-PN-4", "cycles", 800, 290, "Controles de Vuelo"),
-            generateComponent("Control System Bolts", "CSB-PN", "hours", 2000, 800, "Controles de Vuelo"),
-            generateComponent("Sup. Control System Bolt", "SCSB-PN-1", "hours", 1000, 400, "Controles de Vuelo"),
-            generateComponent("Sup. Control System Bolt", "SCSB-PN-2", "hours", 1000, 380, "Controles de Vuelo"),
-            generateComponent("Sup. Control System Bolt", "SCSB-PN-3", "hours", 1000, 360, "Controles de Vuelo"),
-            generateComponent("M/R Pitch Link Assembly", "MRPLA-PN-1", "hours", 1200, 900, "Rotor Principal"),
-            generateComponent("M/R Pitch Link Assembly", "MRPLA-PN-2", "hours", 1200, 850, "Rotor Principal"),
-            generateComponent("M/R Pitch Link Assembly", "MRPLA-PN-3", "hours", 1200, 800, "Rotor Principal"),
-            generateComponent("M/R Pitch Link Assembly", "MRPLA-PN-4", "hours", 1200, 750, "Rotor Principal"),
-            generateComponent("P/C Link Tube", "PCLT-PN-1", "hours", 1000, 700, "Rotor Principal"),
-            generateComponent("P/C Link Tube", "PCLT-PN-2", "hours", 1000, 650, "Rotor Principal"),
-            generateComponent("P/C Link Tube", "PCLT-PN-3", "hours", 1000, 600, "Rotor Principal"),
-            generateComponent("P/C Link Tube", "PCLT-PN-4", "hours", 1000, 550, "Rotor Principal"),
-            generateComponent("Bearing Rod End", "BRE-PN-1", "cycles", 500, 300, "Varios"),
-            generateComponent("Bearing Rod End", "BRE-PN-2", "cycles", 500, 280, "Varios"),
-            generateComponent("Bearing Rod End", "BRE-PN-3", "cycles", 500, 260, "Varios"),
-            generateComponent("Bearing Rod End", "BRE-PN-4", "cycles", 500, 240, "Varios"),
-            generateComponent("Bearing Rod End", "BRE-PN-5", "cycles", 500, 220, "Varios"),
-            generateComponent("Bearing Rod End", "BRE-PN-6", "cycles", 500, 200, "Varios"),
-            generateComponent("Hub & Sleeve Assembly", "HSA-PN", "hours", 2000, 1800, "Controles de Vuelo"),
-            generateComponent("Scissors Hub", "SHUB-PN", "hours", 1500, 1000, "Controles de Vuelo"),
-            generateComponent("Lever Driver Assembly", "LDA-PN-1", "hours", 1000, 700, "Controles de Vuelo"),
-            generateComponent("Lever Driver Assembly", "LDA-PN-2", "hours", 1000, 650, "Controles de Vuelo"),
-            generateComponent("Lever Driver Assembly", "LDA-PN-3", "hours", 1000, 600, "Controles de Vuelo"),
-            generateComponent("Lever Driver Assembly", "LDA-PN-4", "hours", 1000, 550, "Controles de Vuelo"),
-            generateComponent("Lever Driver Assembly", "LDA-PN-5", "hours", 1000, 500, "Controles de Vuelo"),
-            generateComponent("Collective Sleeve", "CSLEEVE-PN", "hours", 1500, 1200, "Controles de Vuelo"),
-            generateComponent("Swashplate Link Assembly", "SLA-PN-1", "hours", 1000, 800, "Controles de Vuelo"),
-            generateComponent("Swashplate Link Assembly", "SLA-PN-2", "hours", 1000, 750, "Controles de Vuelo"),
-            generateComponent("Link Tube", "LTUBE-PN-1", "hours", 800, 500, "Controles de Vuelo"),
-            generateComponent("Link Tube", "LTUBE-PN-2", "hours", 800, 450, "Controles de Vuelo"),
-            generateComponent("Swashplate & Support Assembly", "SSA-PN", "hours", 3200, 2900, "Controles de Vuelo"),
-            generateComponent("Gimbal Ring", "GRING-PN", "hours", 2500, 1800, "Controles de Vuelo"),
-            generateComponent("Outer Ring", "ORING-PN", "hours", 2500, 1700, "Controles de Vuelo"),
-            generateComponent("Support Assembly", "SUPA-PN", "hours", 2000, 1500, "Controles de Vuelo"),
-            generateComponent("Collective Lever", "CL-PN-1", "hours", 1500, 1000, "Controles de Vuelo"),
-            generateComponent("Collective Lever", "CL-PN-2", "hours", 1500, 950, "Controles de Vuelo"),
-            generateComponent("Mast Assembly", "MAST-A-1", "hours", 4500, 3800, "Estructura"),
-            generateComponent("Mast Assembly", "MAST-A-2", "hours", 4500, 3600, "Estructura"),
-            generateComponent("Mast Assembly", "MAST-A-3", "hours", 4500, 3400, "Estructura"),
-            generateComponent("Mast Pole", "MP-PN-1", "hours", 4500, 3800, "Estructura"),
-            generateComponent("Mast Pole", "MP-PN-2", "hours", 4500, 3600, "Estructura"),
-            generateComponent("Main Gearbox Assembly", "MGA-A", "hours", 8000, 6800, "Transmisión"),
-            generateComponent("Gearbox Assembly", "GBA-A", "hours", 6000, 5200, "Transmisión"),
-            generateComponent("Quill Assembly Hydraulic Drive", "QAHD-PN", "hours", 1000, 700, "Transmisión"),
-            generateComponent("Main Input Quills", "MIQ-A", "hours", 3000, 2500, "Transmisión"),
-            generateComponent("Main Input Quill Gen", "MIQG-A", "hours", 3000, 2800, "Transmisión"),
-            generateComponent("Quill T/R Drive", "QTRD-A", "hours", 2500, 1800, "Transmisión"),
-            generateComponent("Spider", "SPIDER-PN-1", "cycles", 1000, 700, "Transmisión"),
-            generateComponent("Spider", "SPIDER-PN-2", "cycles", 1000, 650, "Transmisión"),
-            generateComponent("Rotor Brake Quill", "RBQ-PN", "hours", 1500, 800, "Transmisión"),
-            generateComponent("Main Driveshaft", "MDS-A", "hours", 4000, 3200, "Transmisión"),
-            generateComponent("Hydraulic Cylinder Assy (Coll.)", "HCA-A", "hours", 2500, 2000, "Controles de Vuelo"),
-            generateComponent("Hydraulic Cylinder Assy (RH)", "HCA-B", "hours", 2500, 2300, "Controles de Vuelo"),
-            generateComponent("Hydraulic Cylinder Assy (LH)", "HCA-C", "hours", 2500, 1500, "Controles de Vuelo"),
-            generateComponent("Main Actuator", "MA-A", "hours", 3000, 2500, "Controles de Vuelo"),
-            generateComponent("Hanger Assembly", "HA-PN-1", "hours", 2200, 1800, "Transmisión"),
-            generateComponent("Hanger Assembly", "HA-PN-2", "hours", 2200, 1750, "Transmisión"),
-            generateComponent("Hanger Assembly", "HA-PN-3", "hours", 2200, 1700, "Transmisión"),
-            generateComponent("Hanger Assembly", "HA-PN-4", "hours", 2200, 1650, "Transmisión"),
-            generateComponent("Hanger Assembly", "HA-PN-5", "hours", 2200, 1600, "Transmisión"),
-            generateComponent("Hanger Assembly", "HA-PN-6", "hours", 2200, 1550, "Transmisión"),
-            generateComponent("T/R Driveshaft Coupling", "TRDC-PN-1", "hours", 1000, 700, "Transmisión"),
-            generateComponent("T/R Driveshaft Coupling", "TRDC-PN-2", "hours", 1000, 650, "Transmisión"),
-            generateComponent("T/R Driveshaft Coupling", "TRDC-PN-3", "hours", 1000, 600, "Transmisión"),
-            generateComponent("T/R Driveshaft Coupling", "TRDC-PN-4", "hours", 1000, 550, "Transmisión"),
-            generateComponent("42 Gearbox", "42GB-PN-1", "hours", 3000, 2000, "Transmisión"),
-            generateComponent("42 Gearbox", "42GB-PN-2", "hours", 3000, 1800, "Transmisión"),
-            generateComponent("Tail Gearbox Assembly", "TGA-A", "hours", 3500, 2800, "Rotor de Cola"),
-            generateComponent("90 Gearbox", "90GB-PN", "hours", 3500, 2500, "Rotor de Cola"),
-            generateComponent("T/R Hub Assembly", "TRHA-PN", "hours", 2000, 1500, "Rotor de Cola"),
-            generateComponent("T/R Yoke Idler Assembly", "TRYIA-PN", "hours", 1500, 1000, "Rotor de Cola"),
-            generateComponent("Lever Assembly", "LVR-PN", "hours", 1200, 800, "Rotor de Cola"),
-            generateComponent("T/R Retention Nut", "TRRN-PN", "months", 36, 24, "Rotor de Cola"),
-            generateComponent("Crosshead Link Assembly", "CHLA-PN", "hours", 1000, 700, "Rotor de Cola"),
-            generateComponent("Tail Rotor Blade Assembly", "TRB-PN-1", "hours", 3000, 2500, "Rotor de Cola"),
-            generateComponent("Tail Rotor Blade Assembly", "TRB-PN-2", "hours", 3000, 2700, "Rotor de Cola"),
+            generateComponent("M/R BLADE (RED)", "MRB-R", "hours", 5000, 4800, "Rotor Principal"),
+            generateComponent("M/R BLADE (RED)", "MRB-R", "hours", 5000, 4750, "Rotor Principal"),
+            generateComponent("M/R BLADE (BLUE)", "MRB-B", "hours", 5000, 3500, "Rotor Principal"),
+            generateComponent("M/R BLADE (BLUE)", "MRB-B", "hours", 5000, 3450, "Rotor Principal"),
+            generateComponent("M/R BLADE (ORANGE)", "MRB-O", "hours", 5000, 4100, "Rotor Principal"),
+            generateComponent("M/R BLADE (ORANGE)", "MRB-O", "hours", 5000, 4050, "Rotor Principal"),
+            generateComponent("M/R BLADE (GREEN)", "MRB-G", "hours", 5000, 1200, "Rotor Principal"),
+            generateComponent("M/R BLADE (GREEN)", "MRB-G", "hours", 5000, 1150, "Rotor Principal"),
+            
+            generateComponent("BOLT EXPANDABLE", "BOLT-EXP", "cycles", 500, 450, "Varios"),
+            generateComponent("BOLT EXPANDABLE", "BOLT-EXP", "cycles", 500, 400, "Varios"),
+            generateComponent("BOLT EXPANDABLE", "BOLT-EXP", "cycles", 500, 350, "Varios"),
+            generateComponent("BOLT EXPANDABLE", "BOLT-EXP", "cycles", 500, 300, "Varios"),
+            
+            generateComponent("BLADE BOLT ASSY", "BBA-PN", "cycles", 1000, 800, "Rotor Principal"),
+            generateComponent("BLADE BOLT ASSY", "BBA-PN", "cycles", 1000, 750, "Rotor Principal"),
+            generateComponent("BLADE BOLT ASSY", "BBA-PN", "cycles", 1000, 700, "Rotor Principal"),
+            generateComponent("BLADE BOLT ASSY", "BBA-PN", "cycles", 1000, 650, "Rotor Principal"),
+            
+            generateComponent("M/R HUB ASSEMBLY", "MRH-A", "hours", 4000, 3900, "Principal"),
+            generateComponent("M/R HUB ASSEMBLY", "MRH-B", "hours", 4000, 2800, "Principal"),
+            generateComponent("YOKE ASSEMBLY", "YOKE-A", "hours", 2500, 1800, "Principal"),
+            generateComponent("YOKE ASSEMBLY", "YOKE-B", "hours", 2500, 1500, "Principal"),
+            generateComponent("SEAT, LOWER CONE", "SLC-PN", "hours", 1500, 500, "Tren de Aterrizaje"),
+            generateComponent("PLATE ASSEMBLY", "PLATE-A", "hours", 1000, 300, "Estructura"),
+            generateComponent("PLATE ASSEMBLY", "PLATE-B", "hours", 1000, 250, "Estructura"),
+            generateComponent("SEAT, UPPER CONE", "SUC-PN", "hours", 1500, 600, "Tren de Aterrizaje"),
+            
+            ...Array(8).fill(null).map((_, i) => generateComponent("DRIVE PIN", `PIN-DR-${globalSerialCounter++}`, "cycles", 1000, 750 - (i * 50), "Tren de Aterrizaje")),
+            ...Array(8).fill(null).map((_, i) => generateComponent("ARM ASSEMBLY", `ARM-A-${globalSerialCounter++}`, "hours", 1200, 500 - (i * 20), "Controles de Vuelo")),
+            ...Array(16).fill(null).map((_, i) => generateComponent("BRACKET ASSEMBLY", `BRKT-A-${globalSerialCounter++}`, "hours", 1500, 600 - (i * 10), "Estructura")),
+            ...Array(12).fill(null).map((_, i) => generateComponent("DAMPER BRIDGE ASSY", `DBA-PN-${globalSerialCounter++}`, "hours", 1500, 1200 - (i * 50), "Rotor Principal")),
+            
+            generateComponent("SPINDLE AND DAMPER BRG", "SDB-PN-1", "cycles", 800, 650, "Rotor Principal"),
+            generateComponent("SPINDLE AND DAMPER BRG", "SDB-PN-2", "cycles", 800, 600, "Rotor Principal"),
+            generateComponent("SPINDLE AND DAMPER BRG", "SDB-PN-3", "cycles", 800, 550, "Rotor Principal"),
+            generateComponent("SPINDLE AND DAMPER BRG", "SDB-PN-4", "cycles", 800, 500, "Rotor Principal"),
+            
+            generateComponent("PITCH HORN ASSY", "PHA-PN-1", "hours", 1000, 700, "Rotor Principal"),
+            generateComponent("PITCH HORN ASSY", "PHA-PN-2", "hours", 1000, 650, "Rotor Principal"),
+            generateComponent("PITCH HORN ASSY", "PHA-PN-3", "hours", 1000, 600, "Rotor Principal"),
+            generateComponent("PITCH HORN ASSY", "PHA-PN-4", "hours", 1000, 550, "Rotor Principal"),
+            
+            generateComponent("FITTING", "FIT-PN-1", "cycles", 700, 550, "Cola"),
+            generateComponent("FITTING", "FIT-PN-2", "cycles", 700, 500, "Cola"),
+            generateComponent("FITTING", "FIT-PN-3", "cycles", 700, 450, "Cola"),
+            generateComponent("FITTING", "FIT-PN-4", "cycles", 700, 400, "Cola"),
+            
+            ...Array(4).fill(null).map((_, i) => generateComponent("BOLT, WEIGHT", `BW-PN-${globalSerialCounter++}`, "cycles", 500, 300 - (i * 20), "Varios")),
+            ...Array(4).fill(null).map((_, i) => generateComponent("BOLT, ARM", `BA-PN-${globalSerialCounter++}`, "cycles", 500, 350 - (i * 20), "Varios")),
+            ...Array(16).fill(null).map((_, i) => generateComponent("BOLT, BRACKET", `BB-PN-${globalSerialCounter++}`, "cycles", 500, 200 - (i * 10), "Varios")),
+            
+            generateComponent("BUSHING, YOKE", "BY-PN", "hours", 1000, 400, "Principal"),
+            generateComponent("CAP", "CAP-PN", "months", 24, 12, "Varios"),
+            generateComponent("CONE SUPERIOR", "CS-PN", "hours", 800, 300, "Tren de Aterrizaje"),
+            generateComponent("CONE INFERIOR", "CI-PN", "hours", 800, 300, "Tren de Aterrizaje"),
+            
+            ...Array(8).fill(null).map((_, i) => generateComponent("CAM TO UPPER YOKE", `CTUY-PN-${globalSerialCounter++}`, "cycles", 1000, 600 - (i * 20), "Controles de Vuelo")),
+            ...Array(8).fill(null).map((_, i) => generateComponent("UPPER YOKE TO CAM", `UYTC-PN-${globalSerialCounter++}`, "cycles", 1000, 550 - (i * 20), "Controles de Vuelo")),
+            ...Array(4).fill(null).map((_, i) => generateComponent("CLEVIS TO CAM", `CTC-PN-${globalSerialCounter++}`, "cycles", 800, 400 - (i * 20), "Controles de Vuelo")),
+            ...Array(4).fill(null).map((_, i) => generateComponent("CLEVIS ASSY TO LWR CONE", `CALC-PN-${globalSerialCounter++}`, "cycles", 800, 350 - (i * 20), "Controles de Vuelo")),
+            
+            generateComponent("CONTROL SYSTEM BOLTS", "CSB-PN", "hours", 2000, 800, "Controles de Vuelo"),
+            
+            ...Array(3).fill(null).map((_, i) => generateComponent("SUP. CONTROL SYST. BOLT", `SCSB-PN-${globalSerialCounter++}`, "hours", 1000, 400 - (i * 20), "Controles de Vuelo")),
+            
+            ...Array(4).fill(null).map((_, i) => generateComponent("M/R PITCH LINK ASSY", `MRPLA-PN-${globalSerialCounter++}`, "hours", 1200, 900 - (i * 50), "Rotor Principal")),
+            ...Array(4).fill(null).map((_, i) => generateComponent("P/C LINK TUBE", `PCLT-PN-${globalSerialCounter++}`, "hours", 1000, 700 - (i * 50), "Rotor Principal")),
+            ...Array(6).fill(null).map((_, i) => generateComponent("BEARING ROD END", `BRE-PN-${globalSerialCounter++}`, "cycles", 500, 300 - (i * 20), "Varios")),
+            
+            generateComponent("HUB & SLEEVE ASSY", "HSA-PN", "hours", 2000, 1800, "Controles de Vuelo"),
+            generateComponent("SCISSORS HUB", "SHUB-PN", "hours", 1500, 1000, "Controles de Vuelo"),
+            
+            ...Array(5).fill(null).map((_, i) => generateComponent("LEVER DRIVER ASSY", `LDA-PN-${globalSerialCounter++}`, "hours", 1000, 700 - (i * 50), "Controles de Vuelo")),
+            
+            generateComponent("COLLECTIVE SLEEVE", "CSLEEVE-PN", "hours", 1500, 1200, "Controles de Vuelo"),
+            
+            generateComponent("SWASHPLATE LINK ASSY", "SLA-PN-1", "hours", 1000, 800, "Controles de Vuelo"),
+            generateComponent("SWASHPLATE LINK ASSY", "SLA-PN-2", "hours", 1000, 750, "Controles de Vuelo"),
+
+            generateComponent("LINK TUBE", "LTUBE-PN-1", "hours", 800, 500, "Controles de Vuelo"),
+            generateComponent("LINK TUBE", "LTUBE-PN-2", "hours", 800, 450, "Controles de Vuelo"),
+
+            generateComponent("SWASHPLATE & SUPPORT", "SSA-PN", "hours", 3200, 2900, "Controles de Vuelo"),
+            generateComponent("GIMBAL RING", "GRING-PN", "hours", 2500, 1800, "Controles de Vuelo"),
+            generateComponent("OUTER RING", "ORING-PN", "hours", 2500, 1700, "Controles de Vuelo"),
+            generateComponent("SUPPORT ASSY", "SUPA-PN", "hours", 2000, 1500, "Controles de Vuelo"),
+            generateComponent("COLLECTIVE LEVER", "CL-PN-1", "hours", 1500, 1000, "Controles de Vuelo"),
+            generateComponent("COLLECTIVE LEVER", "CL-PN-2", "hours", 1500, 950, "Controles de Vuelo"),
+            
+            generateComponent("MAST ASSEMBLY", "MAST-A-1", "hours", 4500, 3800, "Estructura"),
+            generateComponent("MAST ASSEMBLY", "MAST-A-2", "hours", 4500, 3600, "Estructura"),
+            generateComponent("MAST ASSEMBLY", "MAST-A-3", "hours", 4500, 3400, "Estructura"),
+            generateComponent("MAST POLE", "MP-PN-1", "hours", 4500, 3800, "Estructura"),
+            generateComponent("MAST POLE", "MP-PN-2", "hours", 4500, 3600, "Estructura"),
+            
+            generateComponent("TRANSMISSION ASSY", "TX-A", "hours", 8000, 6800, "Transmisión"),
+            generateComponent("TRANSMISSION ASSY", "TX-B", "hours", 6000, 5200, "Transmisión"),
+            
+            generateComponent("QUILL ASSY. HYD. DRIVE", "QAHD-PN", "hours", 1000, 700, "Transmisión"),
+            generateComponent("QUILL ASSEMBLY", "QA-A", "hours", 3000, 2500, "Transmisión"), 
+            generateComponent("QUILL ASSEMBLY", "QA-B", "hours", 3000, 2800, "Transmisión"),
+            generateComponent("SPIDER", "SPIDER-PN-1", "cycles", 1000, 700, "Transmisión"),
+            generateComponent("SPIDER", "SPIDER-PN-2", "cycles", 1000, 650, "Transmisión"),
+            generateComponent("ROTOR BRAKE QUILL", "RBQ-PN", "hours", 1500, 800, "Transmisión"),
+            generateComponent("DRIVESHAFT ASSY", "DS-A", "hours", 4000, 3200, "Transmisión"),
+            
+            generateComponent("HYDRAULIC CYLINDER ASSY", "HCA-A", "hours", 2500, 2000, "Controles de Vuelo"),
+            generateComponent("HYDRAULIC CYLINDER ASSY", "HCA-B", "hours", 2500, 2300, "Controles de Vuelo"),
+            generateComponent("HYDRAULIC CYLINDER ASSY", "HCA-C", "hours", 2500, 1500, "Controles de Vuelo"),
+            
+            generateComponent("HYD. SERVO ACTUATOR", "HSA-PN", "hours", 3000, 2500, "Controles de Vuelo"),
+            
+            ...Array(6).fill(null).map((_, i) => generateComponent("HANGER ASSY", `HA-PN-${globalSerialCounter++}`, "hours", 2200, 1800 - (i * 50), "Transmisión")),
+            
+            ...Array(4).fill(null).map((_, i) => generateComponent("T/R DRIVESHAFT COUPLING", `TRDC-PN-${globalSerialCounter++}`, "hours", 1000, 700 - (i * 50), "Transmisión")),
+            
+            generateComponent("42 GEARBOX", "42GB-PN-1", "hours", 3000, 2000, "Transmisión"),
+            generateComponent("42 GEARBOX", "42GB-PN-2", "hours", 3000, 1800, "Transmisión"),
+            generateComponent("90 GEARBOX", "90GB-PN-1", "hours", 3500, 2500, "Rotor de Cola"), 
+            generateComponent("90 GEARBOX", "90GB-PN-2", "hours", 3500, 2400, "Rotor de Cola"),
+            
+            generateComponent("T/R HUB ASSY", "TRHA-PN", "hours", 2000, 1500, "Rotor de Cola"),
+            generateComponent("T/R YOKE IDLER ASSY", "TRYIA-PN", "hours", 1500, 1000, "Rotor de Cola"),
+            generateComponent("LEVER ASSY", "LVR-PN", "hours", 1200, 800, "Rotor de Cola"),
+            generateComponent("T/R RETENTION NUT", "TRRN-PN", "months", 36, 24, "Rotor de Cola"),
+            generateComponent("CROSSHEAD LINK ASSY", "CHLA-PN", "hours", 1000, 700, "Rotor de Cola"),
+            
+            generateComponent("T/R BLADE", "TRB-PN-1", "hours", 3000, 2500, "Rotor de Cola"),
+            generateComponent("T/R BLADE", "TRB-PN-2", "hours", 3000, 2700, "Rotor de Cola"),
+            
             generateComponent("FIRE EXTINGUISHER # 1", "FE-A01-1", "months", 60, 48, "Cabina"),
             generateComponent("FIRE EXTINGUISHER # 1", "FE-A01-2", "months", 60, 55, "Cabina"),
+            
             generateComponent("CARTRIDGE", "CART-A01-1", "months", 60, 48, "Cabina"),
             generateComponent("CARTRIDGE", "CART-A01-2", "months", 60, 55, "Cabina"),
+            generateComponent("CARTRIDGE", "CART-A02-1", "months", 60, 49, "Cabina"), 
+            generateComponent("CARTRIDGE", "CART-A02-2", "months", 60, 56, "Cabina"), 
+
             generateComponent("FIRE EXTINGUISHER # 2", "FE-A02-1", "months", 60, 48, "Cabina"),
             generateComponent("FIRE EXTINGUISHER # 2", "FE-A02-2", "months", 60, 55, "Cabina"),
+            
             generateComponent("STARTER GENERATOR # 1", "SG-B01-1", "hours", 1500, 1200, "Motor 1"),
             generateComponent("STARTER GENERATOR # 2", "SG-B01-2", "hours", 1500, 1400, "Motor 2"),
-            generateComponent("BLOWER OIL COOLER BEARING (2)", "BOCB-C01-1", "cycles", 800, 650, "Motor 1"),
-            generateComponent("BLOWER OIL COOLER BEARING (2)", "BOCB-C01-2", "cycles", 800, 780, "Motor 2"),
+            
+            generateComponent("BLOWER OIL COOLER BEARING", "BOCB-C01-1", "cycles", 800, 650, "Motor 1"),
+            generateComponent("BLOWER OIL COOLER BEARING", "BOCB-C01-2", "cycles", 800, 780, "Motor 2"),
+            generateComponent("BLOWER OIL COOLER BEARING", "BOCB-C01-3", "cycles", 800, 660, "Motor 1"), 
+            generateComponent("BLOWER OIL COOLER BEARING", "BOCB-C01-4", "cycles", 800, 790, "Motor 2"),
+
             generateComponent("ENGINE PT6T-3B # 1", "PT6T-3B-1", "hours", 3600, 3000, "Motor 1"),
-            generateComponent("MANUAL FUEL CONTROL", "MFC-D01-1", "hours", 2000, 1600, "Motor 1"),
-            generateComponent("MANUAL FUEL CONTROL", "MFC-D01-2", "hours", 2000, 1500, "Motor 2"),
+            generateComponent("ENGINE PT6T-3B # 2", "PT6T-3B-2", "hours", 3600, 3050, "Motor 2"), 
+
+            generateComponent("MANUAL FUEL CONTROL", "MFC-D01-1A", "hours", 2000, 1600, "Motor 1"),
+            generateComponent("MANUAL FUEL CONTROL", "MFC-D01-1B", "hours", 2000, 1550, "Motor 1"),
+            generateComponent("MANUAL FUEL CONTROL", "MFC-D01-2A", "hours", 2000, 1500, "Motor 2"),
+            generateComponent("MANUAL FUEL CONTROL", "MFC-D01-2B", "hours", 2000, 1450, "Motor 2"),
+
             generateComponent("AUTOMATIC FUEL CONTROL", "AFC-E01-1A", "hours", 2000, 1800, "Motor 1"),
             generateComponent("AUTOMATIC FUEL CONTROL", "AFC-E01-1B", "hours", 2000, 1950, "Motor 1"),
             generateComponent("AUTOMATIC FUEL CONTROL", "AFC-E01-1C", "hours", 2000, 1500, "Motor 1"),
@@ -940,38 +896,77 @@
             generateComponent("AUTOMATIC FUEL CONTROL", "AFC-E01-2B", "hours", 2000, 1900, "Motor 2"),
             generateComponent("AUTOMATIC FUEL CONTROL", "AFC-E01-2C", "hours", 2000, 1400, "Motor 2"),
             generateComponent("AUTOMATIC FUEL CONTROL", "AFC-E01-2D", "hours", 2000, 1650, "Motor 2"),
-            generateComponent("FUEL PUMP", "FP-F01-1", "hours", 1800, 1500, "Motor 1"),
-            generateComponent("FUEL PUMP", "FP-F01-2", "hours", 1800, 1450, "Motor 2"),
-            generateComponent("OIL TO FUEL HEATER", "OFH-G01-1", "hours", 1800, 1700, "Motor 1"),
-            generateComponent("OIL TO FUEL HEATER", "OFH-G01-2", "hours", 1800, 1600, "Motor 2"),
-            generateComponent("BLEED VALVE", "BV-H01-1", "hours", 1200, 900, "Motor 1"),
-            generateComponent("BLEED VALVE", "BV-H01-2", "hours", 1200, 850, "Motor 2"),
-            generateComponent("FLOW DIVIDER", "FD-I01-1", "hours", 1200, 1100, "Motor 1"),
-            generateComponent("FLOW DIVIDER", "FD-I01-2", "hours", 1200, 1050, "Motor 2"),
-            generateComponent("FUEL SURGE ACCUMULATOR", "FSA-J01-1", "hours", 1000, 800, "Motor 1"),
-            generateComponent("FUEL SURGE ACCUMULATOR", "FSA-J01-2", "hours", 1000, 750, "Motor 2"),
-            generateComponent("TRIM COMPENSATOR", "TC-K01-1", "hours", 1000, 950, "Motor 1"),
-            generateComponent("TRIM COMPENSADOR", "TC-K01-2", "hours", 1000, 900, "Motor 2"),
-            generateComponent("IGNITION EXCITER", "IE-L01-1", "cycles", 500, 400, "Motor 1"),
-            generateComponent("IGNITION EXCITER", "IE-L01-2", "cycles", 500, 380, "Motor 2"),
-            generateComponent("IGNITION CABLE (2)", "IC-M01-1", "cycles", 500, 480, "Motor 1"),
-            generateComponent("IGNITION CABLE (2)", "IC-M01-2", "cycles", 500, 450, "Motor 2"),
-            generateComponent("DISK-STG 1 P.T.", "DS1PT-N01-1A", "cycles", 2500, 2000, "Motor 1"),
-            generateComponent("DISK-STG 1 P.T.", "DS1PT-N01-1B", "cycles", 2500, 2300, "Motor 1"),
-            generateComponent("DISK-STG 1 P.T.", "DS1PT-N01-2A", "cycles", 2500, 1900, "Motor 2"),
-            generateComponent("DISK-STG 1 P.T.", "DS1PT-N01-2B", "cycles", 2500, 2200, "Motor 2"),
-            generateComponent("IMPELLER", "IMP-O01-1", "cycles", 2000, 1600, "Motor 1"),
-            generateComponent("IMPELLER", "IMP-O01-2", "cycles", 2000, 1550, "Motor 2"),
-            generateComponent("DISK-STG 3 COMPRESSOR", "DS3C-P01-1", "cycles", 2000, 1800, "Motor 1"),
-            generateComponent("DISK-STG 3 COMPRESSOR", "DS3C-P01-2", "cycles", 2000, 1750, "Motor 2"),
-            generateComponent("DISK-STG 2 COMPRESSOR", "DS2C-Q01-1", "cycles", 2000, 1950, "Motor 1"),
-            generateComponent("DISK-STG 2 COMPRESSOR", "DS2C-Q01-2", "cycles", 2000, 1850, "Motor 2"),
+            
+            generateComponent("FUEL PUMP", "FP-F01-1A", "hours", 1800, 1500, "Motor 1"),
+            generateComponent("FUEL PUMP", "FP-F01-1B", "hours", 1800, 1480, "Motor 1"),
+            generateComponent("FUEL PUMP", "FP-F01-2A", "hours", 1800, 1450, "Motor 2"),
+            generateComponent("FUEL PUMP", "FP-F01-2B", "hours", 1800, 1430, "Motor 2"),
+
+            generateComponent("OIL TO FUEL HEATER", "OFH-G01-1A", "hours", 1800, 1700, "Motor 1"),
+            generateComponent("OIL TO FUEL HEATER", "OFH-G01-1B", "hours", 1800, 1650, "Motor 1"),
+            generateComponent("OIL TO FUEL HEATER", "OFH-G01-2A", "hours", 1800, 1600, "Motor 2"),
+            generateComponent("OIL TO FUEL HEATER", "OFH-G01-2B", "hours", 1800, 1580, "Motor 2"),
+
+            generateComponent("BLEED VALVE", "BV-H01-1A", "hours", 1200, 900, "Motor 1"),
+            generateComponent("BLEED VALVE", "BV-H01-1B", "hours", 1200, 880, "Motor 1"),
+            generateComponent("BLEED VALVE", "BV-H01-2A", "hours", 1200, 850, "Motor 2"),
+            generateComponent("BLEED VALVE", "BV-H01-2B", "hours", 1200, 830, "Motor 2"),
+
+            generateComponent("FLOW DIVIDER", "FD-I01-1A", "hours", 1200, 1100, "Motor 1"),
+            generateComponent("FLOW DIVIDER", "FD-I01-1B", "hours", 1200, 1080, "Motor 1"),
+            generateComponent("FLOW DIVIDER", "FD-I01-2A", "hours", 1200, 1050, "Motor 2"),
+            generateComponent("FLOW DIVIDER", "FD-I01-2B", "hours", 1200, 1030, "Motor 2"),
+
+            generateComponent("FUEL SURGE ACCUMULATOR", "FSA-J01-1A", "hours", 1000, 800, "Motor 1"),
+            generateComponent("FUEL SURGE ACCUMULATOR", "FSA-J01-1B", "hours", 1000, 780, "Motor 1"),
+            generateComponent("FUEL SURGE ACCUMULATOR", "FSA-J01-2A", "hours", 1000, 750, "Motor 2"),
+            generateComponent("FUEL SURGE ACCUMULATOR", "FSA-J01-2B", "hours", 1000, 730, "Motor 2"),
+
+            generateComponent("TRIM COMPENSATOR", "TC-K01-1A", "hours", 1000, 950, "Motor 1"),
+            generateComponent("TRIM COMPENSATOR", "TC-K01-1B", "hours", 1000, 930, "Motor 1"),
+            generateComponent("TRIM COMPENSADOR", "TC-K01-2A", "hours", 1000, 900, "Motor 2"), 
+            generateComponent("TRIM COMPENSADOR", "TC-K01-2B", "hours", 1000, 880, "Motor 2"),
+
+            generateComponent("IGNITION EXCITER", "IE-L01-1A", "cycles", 500, 400, "Motor 1"),
+            generateComponent("IGNITION EXCITER", "IE-L01-1B", "cycles", 500, 390, "Motor 1"),
+            generateComponent("IGNITION EXCITER", "IE-L01-2A", "cycles", 500, 380, "Motor 2"),
+            generateComponent("IGNITION EXCITER", "IE-L01-2B", "cycles", 500, 370, "Motor 2"),
+
+            generateComponent("IGNITION CABLE (2)", "IC-M01-1A", "cycles", 500, 480, "Motor 1"),
+            generateComponent("IGNITION CABLE (2)", "IC-M01-1B", "cycles", 500, 470, "Motor 1"),
+            generateComponent("IGNITION CABLE (2)", "IC-M01-2A", "cycles", 500, 450, "Motor 2"),
+            generateComponent("IGNITION CABLE (2)", "IC-M01-2B", "cycles", 500, 440, "Motor 2"),
+            
+            generateComponent("DISK- STG 1 P.T.", "DS1PT-N01-1A", "cycles", 2500, 2000, "Motor 1"),
+            generateComponent("DISK- STG 1 P.T.", "DS1PT-N01-1B", "cycles", 2500, 2300, "Motor 1"),
+            generateComponent("DISK- STG 1 P.T.", "DS1PT-N01-2A", "cycles", 2500, 1900, "Motor 2"),
+            generateComponent("DISK- STG 1 P.T.", "DS1PT-N01-2B", "cycles", 2500, 2200, "Motor 2"),
+            
+            generateComponent("IMPELLER", "IMP-O01-1A", "cycles", 2000, 1600, "Motor 1"),
+            generateComponent("IMPELLER", "IMP-O01-1B", "cycles", 2000, 1580, "Motor 1"),
+            generateComponent("IMPELLER", "IMP-O01-2A", "cycles", 2000, 1550, "Motor 2"),
+            generateComponent("IMPELLER", "IMP-O01-2B", "cycles", 2000, 1530, "Motor 2"),
+
+            generateComponent("DISK- STG 3 COMPRESSOR", "DS3C-P01-1A", "cycles", 2000, 1800, "Motor 1"),
+            generateComponent("DISK- STG 3 COMPRESSOR", "DS3C-P01-1B", "cycles", 2000, 1780, "Motor 1"),
+            generateComponent("DISK- STG 3 COMPRESSOR", "DS3C-P01-2A", "cycles", 2000, 1750, "Motor 2"),
+            generateComponent("DISK- STG 3 COMPRESSOR", "DS3C-P01-2B", "cycles", 2000, 1730, "Motor 2"),
+
+            generateComponent("DISK- STG 2 COMPRESSOR", "DS2C-Q01-1A", "cycles", 2000, 1950, "Motor 1"),
+            generateComponent("DISK- STG 2 COMPRESSOR", "DS2C-Q01-1B", "cycles", 2000, 1920, "Motor 1"),
+            generateComponent("DISK- STG 2 COMPRESSOR", "DS2C-Q01-2A", "cycles", 2000, 1850, "Motor 2"),
+            generateComponent("DISK- STG 2 COMPRESSOR", "DS2C-Q01-2B", "cycles", 2000, 1820, "Motor 2"),
+
             generateComponent("REAR HUB", "RH-R01-1A", "cycles", 1500, 1200, "Motor 1"),
             generateComponent("REAR HUB", "RH-R01-1B", "cycles", 1500, 1400, "Motor 1"),
             generateComponent("REAR HUB", "RH-R01-2A", "cycles", 1500, 1150, "Motor 2"),
             generateComponent("REAR HUB", "RH-R01-2B", "cycles", 1500, 1350, "Motor 2"),
-            generateComponent("DISK-COMPRESSOR TURBINE", "DCT-S01-1", "cycles", 1800, 1500, "Motor 1"),
-            generateComponent("DISK-COMPRESSOR TURBINE", "DCT-S01-2", "cycles", 1800, 1400, "Motor 2"),
+            
+            generateComponent("DISK- COMPRESSOR TURBINE", "DCT-S01-1A", "cycles", 1800, 1500, "Motor 1"),
+            generateComponent("DISK- COMPRESSOR TURBINE", "DCT-S01-1B", "cycles", 1800, 1450, "Motor 1"),
+            generateComponent("DISK- COMPRESSOR TURBINE", "DCT-S01-2A", "cycles", 1800, 1400, "Motor 2"),
+            generateComponent("DISK- COMPRESSOR TURBINE", "DCT-S01-2B", "cycles", 1800, 1350, "Motor 2"),
+            
             generateComponent("COMBINING GEARBOX", "CGB-T01", "hours", 4000, 3200, "Transmisión Central"),
             generateComponent("NF GOVERNOR # 1", "NFG-U01-1", "hours", 1500, 1200, "Motor 1"),
             generateComponent("NF GOVERNOR # 2", "NFG-U01-2", "hours", 1500, 1400, "Motor 2"),
@@ -983,7 +978,12 @@
             generateComponent("COMPRESSOR ASSY", "CA-Z01", "hours", 1800, 1500, "Motor"),
             generateComponent("ARTEX 406 ELT BATTERY", "ELT-AA01-1", "months", 12, 10, "Aviónica"),
             generateComponent("ARTEX 406 ELT BATTERY", "ELT-AA01-2", "months", 12, 5, "Aviónica"),
+            // Nuevos componentes de tipo "condicion" para demostración
+            generateComponent("SENSOR DE PRESIÓN", `SEN-P-COND-${globalSerialCounter++}`, "condition", 0, 0, "Motor"),
+            generateComponent("VÁLVULA DE CIERRE", `VALV-C-COND-${globalSerialCounter++}`, "condition", 0, 0, "Combustible"),
+            generateComponent("INDICADOR DE TEMPERATURA", `IND-T-COND-${globalSerialCounter++}`, "condition", 0, 0, "Cabina"),
         ];
+
 
         // Variable para almacenar los componentes cargados desde Firebase
         let principalComponents = [];
@@ -992,44 +992,55 @@
         /**
          * Calcula la vida restante de un componente basándose en su tipo principal.
          * @param {object} component - El objeto del componente.
-         * @returns {number} Vida restante calculada.
+         * @returns {number|string} Vida restante calculada o un marcador para "condicion".
          */
         function calculateRemainingLife(component) {
+            // Asegúrate de que el componente sea válido
+            if (!component) return 0;
+
+            if (component.type === "condition") { // Nuevo tipo "condition"
+                return "CONDICION_TYPE"; // Marcador especial para "condición"
+            }
+
             let totalLife = 0;
             let currentLife = 0;
             let remaining = 0;
 
+            // Usa parseFloat y toFixed(1) para manejar decimales consistentemente
             if (component.type === "hours") {
-                totalLife = component.lifeLimitHours || 0;
-                currentLife = currentAcHrs; // Horas acumuladas del helicóptero
+                totalLife = parseFloat(component.lifeLimitHours) || 0;
+                currentLife = currentAcHrs; // Horas acumuladas del helicóptero (ya es float)
                 remaining = totalLife - currentLife; 
             } else if (component.type === "cycles") {
-                totalLife = component.lifeLimitCycles || 0;
-                currentLife = currentRins; // RINS acumulados del helicóptero
+                totalLife = parseFloat(component.lifeLimitCycles) || 0;
+                currentLife = currentRins; // RINS acumulados del helicóptero (ya es float)
                 remaining = totalLife - currentLife; 
             } else if (component.type === "months") { 
-                totalLife = component.lifeLimitDays || 0; // Se asume que lifeLimitDays es el total de días de vida útil
+                totalLife = parseFloat(component.lifeLimitDays) || 0; // Se asume que lifeLimitDays es el total de días de vida útil
                 if (component.installationDate) {
                     const today = new Date();
                     const installationDate = new Date(component.installationDate);
                     // Calcula los días transcurridos desde la instalación
                     const timeDiff = today.getTime() - installationDate.getTime();
-                    currentLife = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                    currentLife = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1)); // Convertir a float y redondear
                     remaining = Math.max(0, totalLife - currentLife);
                 } else {
                     remaining = totalLife; // Si no hay fecha de instalación, se asume vida completa restante
                 }
             }
-            return remaining;
+            return parseFloat(remaining.toFixed(1)); // Devuelve con un decimal
         }
 
         /**
          * Determina la clase de color para el valor restante.
-         * @param {number} remaining - Vida restante actual.
+         * @param {number|string} remaining - Vida restante actual o el marcador "CONDICION_TYPE".
          * @param {number} totalLife - Vida útil total del componente.
          * @returns {string} Clase CSS para el color.
          */
         function getRemainingColorClass(remaining, totalLife) {
+            if (remaining === "CONDICION_TYPE") { // Maneja el tipo "condition"
+                return 'remaining-blue'; // Nueva clase para color azul
+            }
             if (totalLife === 0) return '';
 
             if (remaining <= 0) { 
@@ -1050,22 +1061,28 @@
          * @returns {number} Porcentaje de vida consumida (0-100).
          */
         function calculateConsumedLifePercentage(component) {
+            if (!component) return 0;
+
+            if (component.type === "condition") { // Nuevo tipo "condition"
+                return 100; // Siempre mostrar barra llena para "condición"
+            }
+
             let totalLife = 0;
             let currentConsumed = 0;
 
             if (component.type === "hours") {
-                totalLife = component.lifeLimitHours || 0;
+                totalLife = parseFloat(component.lifeLimitHours) || 0;
                 currentConsumed = currentAcHrs;
             } else if (component.type === "cycles") {
-                totalLife = component.lifeLimitCycles || 0;
+                totalLife = parseFloat(component.lifeLimitCycles) || 0;
                 currentConsumed = currentRins;
             } else if (component.type === "months") {
-                totalLife = component.lifeLimitDays || 0;
+                totalLife = parseFloat(component.lifeLimitDays) || 0;
                 if (component.installationDate) {
                     const today = new Date();
                     const installationDate = new Date(component.installationDate);
                     const timeDiff = today.getTime() - installationDate.getTime();
-                    currentConsumed = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                    currentConsumed = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1)); // Convertir a float y redondear
                 }
             }
 
@@ -1181,25 +1198,48 @@
             const componentsRef = ref(database, `artifacts/${appId}/public_data/components`);
             
             onValue(componentsRef, (snapshot) => {
+                let fetchedComponents = [];
                 if (snapshot.exists()) {
-                    // Convierte el objeto de Firebase a un array de componentes
                     const componentsObject = snapshot.val();
-                    principalComponents = Object.keys(componentsObject).map(key => componentsObject[key]);
-                    console.log("Componentes cargados desde Firebase:", principalComponents);
+                    // Verificar si componentsObject es un objeto iterable con propiedades esperadas
+                    if (typeof componentsObject === 'object' && componentsObject !== null && !Array.isArray(componentsObject)) {
+                        fetchedComponents = Object.keys(componentsObject)
+                                                  .map(key => componentsObject[key])
+                                                  .filter(component => component && component.serialNumber); // Filtra nulos/indefinidos y componentes sin serial
+                    } else {
+                        console.warn("Datos de componentes en Firebase en formato inesperado o vacío:", componentsObject);
+                    }
+                }
+
+                if (fetchedComponents.length > 0) {
+                    principalComponents = fetchedComponents;
+                    console.log("Componentes cargados desde Firebase:", principalComponents.length); // Muestra el número de componentes
+                    // Encontrar el número de serie más alto para el contador global
+                    const maxSerial = principalComponents.reduce((max, comp) => {
+                        const serialNumMatch = comp.serialNumber ? comp.serialNumber.match(/FAH-(\d+)/) : null;
+                        return serialNumMatch ? Math.max(max, parseInt(serialNumMatch[1])) : max;
+                    }, 0);
+                    globalSerialCounter = maxSerial + 1; // Establece el contador al siguiente número disponible
                     filterAndRenderComponents();
                 } else {
-                    console.log("No se encontraron componentes en Firebase. Inicializando con datos predefinidos...");
-                    // Si no hay datos, carga los componentes iniciales
+                    console.log("No se encontraron componentes válidos en Firebase o los datos estaban vacíos/malformados. Inicializando con datos predefinidos...");
+                    // Reinicializar la base de datos con la lista completa y correcta
                     principalComponents = initialPrincipalComponents;
-                    // Guarda estos componentes iniciales en Firebase
                     const updates = {};
+                    // Reiniciar el contador global para la inicialización
+                    globalSerialCounter = 1; 
                     initialPrincipalComponents.forEach(comp => {
-                        updates[comp.serialNumber] = comp;
+                        // Regenerar el serial para los componentes iniciales si el contador global fue reseteado
+                        const newComp = { ...comp, serialNumber: `FAH-${String(globalSerialCounter++).padStart(4, '0')}` };
+                        if (newComp.serialNumber) { 
+                            updates[newComp.serialNumber] = newComp;
+                        }
                     });
+
                     set(componentsRef, updates)
                         .then(() => {
                             console.log("Datos iniciales de componentes guardados en Firebase.");
-                            filterAndRenderComponents(); // Renderiza después de guardar
+                            filterAndRenderComponents();
                         })
                         .catch((error) => {
                             console.error("Error al guardar los datos iniciales de componentes:", error);
@@ -1217,33 +1257,88 @@
          * Abre el diálogo de edición y precarga los datos del componente.
          * @param {object} component - El objeto del componente a editar.
          */
-        function openEditDialog(component) {
-            editInputs.serialNumberHidden.value = component.serialNumber || '';
-            editInputs.name.value = component.name || '';
-            editInputs.partNumber.value = component.partNumber || '';
-            editInputs.serialNumber.value = component.serialNumber || '';
-            editInputs.installationDate.value = component.installationDate || '';
-            editInputs.location.value = component.location || '';
-            editInputs.type.value = component.type || 'hours';
+        function openEditDialog(component = null) { // Permite llamar sin componente para "Agregar"
+            // Limpiar el formulario antes de cargar nuevos datos o vaciarlo para un nuevo componente
+            editComponentForm.reset(); 
+            editInputs.serialNumberHidden.value = ''; // Borra el serial oculto por si es un nuevo componente
 
-            // Asegúrate de que los valores numéricos sean tratados como números, no strings vacías
-            editInputs.currentTSNHours.value = component.currentTSNHours || 0;
-            editInputs.currentTSNCycles.value = component.currentTSNCycles || 0;
-            editInputs.currentTSNDays.value = component.currentTSNDays || 0;
-            editInputs.currentTSOHours.value = component.currentTSOHours || 0;
-            editInputs.currentTSOCycles.value = component.currentTSOCycles || 0;
-            editInputs.currentTSODays.value = component.currentTSODays || 0;
+            if (component) {
+                // Si se pasa un componente, precarga sus datos para edición
+                editInputs.serialNumberHidden.value = component.serialNumber || '';
+                editInputs.name.value = component.name || '';
+                editInputs.partNumber.value = component.partNumber || '';
+                editInputs.serialNumber.value = component.serialNumber || '';
+                editInputs.installationDate.value = component.installationDate || '';
+                editInputs.location.value = component.location || '';
+                editInputs.type.value = component.type || 'hours';
 
-            editInputs.lifeLimitHours.value = component.lifeLimitHours || 0;
-            editInputs.lifeLimitCycles.value = component.lifeLimitCycles || 0;
-            editInputs.lifeLimitDays.value = component.lifeLimitDays || 0;
+                // Asegura que los valores numéricos se muestren como flotantes (sin toFixed aquí, solo parseFloat)
+                editInputs.currentTSNHours.value = parseFloat(component.currentTSNHours) || 0;
+                editInputs.currentTSNCycles.value = parseFloat(component.currentTSNCycles) || 0;
+                editInputs.currentTSNDays.value = parseFloat(component.currentTSNDays) || 0;
+                editInputs.currentTSOHours.value = parseFloat(component.currentTSOHours) || 0;
+                editInputs.currentTSOCycles.value = parseFloat(component.currentTSOCycles) || 0;
+                editInputs.currentTSODays.value = parseFloat(component.currentTSODays) || 0;
+                editInputs.lifeLimitHours.value = parseFloat(component.lifeLimitHours) || 0;
+                editInputs.lifeLimitCycles.value = parseFloat(component.lifeLimitCycles) || 0;
+                editInputs.lifeLimitDays.value = parseFloat(component.lifeLimitDays) || 0;
 
-            editInputs.dueDateTT.value = component.dueDateTT || '';
-            editInputs.status.value = component.status || '';
-            editInputs.lastInspectionDate.value = component.lastInspectionDate || '';
-            editInputs.nextInspectionDue.value = component.nextInspectionDue || '';
+                editInputs.dueDateTT.value = component.dueDateTT || '';
+                editInputs.status.value = component.status || '';
+                editInputs.lastInspectionDate.value = component.lastInspectionDate || '';
+                editInputs.nextInspectionDue.value = component.nextInspectionDue || '';
+
+                editComponentDialog.querySelector('h3').textContent = 'Editar Componente';
+
+                // Deshabilitar/habilitar campos según el tipo de vida existente
+                toggleNumericFields(component.type === 'condition');
+            } else {
+                // Si no se pasa componente, prepara para un nuevo componente
+                editComponentDialog.querySelector('h3').textContent = 'Agregar Nuevo Componente';
+                editInputs.type.value = 'hours'; // Por defecto, Horas
+                editInputs.serialNumber.value = `FAH-${String(globalSerialCounter).padStart(4, '0')}`; // Nuevo serial sugerido
+                editInputs.installationDate.valueAsDate = new Date(); // Fecha actual
+                editInputs.lastInspectionDate.valueAsDate = new Date(); // Fecha actual
+                editInputs.nextInspectionDue.valueAsDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1)); // Un año en el futuro
+
+                // Asegurarse de que los campos numéricos estén habilitados por defecto para "hours"
+                toggleNumericFields(false);
+                editInputs.dueDateTT.value = ""; // Limpiar el vencimiento
+            }
 
             editComponentDialog.showModal();
+        }
+
+        /**
+         * Habilita o deshabilita los campos numéricos del formulario.
+         * @param {boolean} disable - Si es true, los campos se deshabilitan; si es false, se habilitan.
+         */
+        function toggleNumericFields(disable) {
+            const fieldsToToggle = [
+                'currentTSNHours', 'currentTSNCycles', 'currentTSNDays',
+                'currentTSOHours', 'currentTSOCycles', 'currentTSODays',
+                'lifeLimitHours', 'lifeLimitCycles', 'lifeLimitDays'
+            ];
+
+            fieldsToToggle.forEach(field => {
+                editInputs[field].disabled = disable;
+                if (disable) {
+                    editInputs[field].value = 0; // Opcional: poner a 0 si se deshabilita
+                }
+            });
+
+            editInputs.dueDateTT.disabled = disable;
+            if (disable) {
+                editInputs.dueDateTT.value = "CONDICIÓN";
+            } else {
+                // Si se habilita, restaurar el valor si no es un componente nuevo, o dejar vacío
+                // Para esto, necesitaríamos guardar el valor original antes de deshabilitar
+                // Por ahora, simplemente lo limpio si se vuelve a habilitar, para un nuevo componente.
+                // En edición, el valor se cargaría desde 'component' nuevamente.
+                if (!editInputs.serialNumberHidden.value) { // Si es un nuevo componente
+                    editInputs.dueDateTT.value = "";
+                }
+            }
         }
 
         /**
@@ -1253,57 +1348,63 @@
         async function saveEditedComponent(event) {
             event.preventDefault();
 
-            const oldSerialNumber = editInputs.serialNumberHidden.value;
-            const newSerialNumber = editInputs.serialNumber.value;
+            const oldSerialNumber = editInputs.serialNumberHidden.value; // Será vacío para nuevos componentes
+            let newSerialNumber = editInputs.serialNumber.value.trim(); 
+
+            if (!newSerialNumber) {
+                console.error("Error: El número de serie no puede estar vacío. Por favor, introduce un valor.");
+                return; 
+            }
+
+            // Asegurar que el nuevo serial no sea un duplicado si estamos agregando uno nuevo
+            if (!oldSerialNumber && principalComponents.some(comp => comp.serialNumber === newSerialNumber)) {
+                console.error("Error: El número de serie ya existe. Por favor, elige uno diferente.");
+                return;
+            }
+
+            const selectedType = editInputs.type.value;
 
             const updatedComponentData = {
-                name: editInputs.name.value || '', // Asegura que no sea null/undefined
-                partNumber: editInputs.partNumber.value || '', // Asegura que no sea null/undefined
-                serialNumber: newSerialNumber || '', // Asegura que no sea null/undefined
+                name: editInputs.name.value.trim() || '', 
+                partNumber: editInputs.partNumber.value.trim() || '',
+                serialNumber: newSerialNumber, 
                 installationDate: editInputs.installationDate.value || '',
-                location: editInputs.location.value || '',
-                type: editInputs.type.value || 'hours',
-                // Asegura que los valores numéricos sean tratados como números, no strings vacías
-                currentTSNHours: parseFloat(editInputs.currentTSNHours.value) || 0,
-                currentTSNCycles: parseFloat(editInputs.currentTSNCycles.value) || 0,
-                currentTSNDays: parseFloat(editInputs.currentTSNDays.value) || 0,
-                currentTSOHours: parseFloat(editInputs.currentTSOHours.value) || 0,
-                currentTSOCycles: parseFloat(editInputs.currentTSOCycles.value) || 0,
-                currentTSODays: parseFloat(editInputs.currentTSODays.value) || 0,
-                lifeLimitHours: parseFloat(editInputs.lifeLimitHours.value) || 0,
-                lifeLimitCycles: parseFloat(editInputs.lifeLimitCycles.value) || 0,
-                lifeLimitDays: parseFloat(editInputs.lifeLimitDays.value) || 0,
-                dueDateTT: editInputs.dueDateTT.value || '',
-                status: editInputs.status.value || '',
+                location: editInputs.location.value.trim() || '',
+                type: selectedType,
+                
+                // Usar parseFloat para permitir decimales, o 0 si es "condition"
+                currentTSNHours: (selectedType === 'condition' ? 0 : parseFloat(editInputs.currentTSNHours.value) || 0),
+                currentTSNCycles: (selectedType === 'condition' ? 0 : parseFloat(editInputs.currentTSNCycles.value) || 0),
+                currentTSNDays: (selectedType === 'condition' ? 0 : parseFloat(editInputs.currentTSNDays.value) || 0),
+                currentTSOHours: (selectedType === 'condition' ? 0 : parseFloat(editInputs.currentTSOHours.value) || 0),
+                currentTSOCycles: (selectedType === 'condition' ? 0 : parseFloat(editInputs.currentTSOCycles.value) || 0),
+                currentTSODays: (selectedType === 'condition' ? 0 : parseFloat(editInputs.currentTSODays.value) || 0),
+                lifeLimitHours: (selectedType === 'condition' ? 0 : parseFloat(editInputs.lifeLimitHours.value) || 0),
+                lifeLimitCycles: (selectedType === 'condition' ? 0 : parseFloat(editInputs.lifeLimitCycles.value) || 0),
+                lifeLimitDays: (selectedType === 'condition' ? 0 : parseFloat(editInputs.lifeLimitDays.value) || 0),
+
+                dueDateTT: (selectedType === 'condition' ? 'CONDICIÓN' : editInputs.dueDateTT.value.trim() || ''),
+                status: editInputs.status.value.trim() || '',
                 lastInspectionDate: editInputs.lastInspectionDate.value || '',
                 nextInspectionDue: editInputs.nextInspectionDue.value || '',
             };
 
             try {
-                // Si el número de serie ha cambiado, necesitamos eliminar el antiguo y crear uno nuevo
+                // Si el número de serie ha cambiado (es una edición y el serial fue modificado) o es un componente nuevo
                 if (oldSerialNumber && oldSerialNumber !== newSerialNumber) {
-                    // Primero, elimina el componente antiguo
                     const oldComponentRef = ref(database, `artifacts/${appId}/public_data/components/${oldSerialNumber}`);
-                    await set(oldComponentRef, null); // Establecer a null para eliminar
-
+                    await set(oldComponentRef, null); // Elimina el componente antiguo
                     console.log(`Componente con serial antiguo ${oldSerialNumber} eliminado.`);
                 }
 
                 // Guarda o actualiza el componente con el nuevo (o el mismo) número de serie
-                // Solo guardar si el nuevo serialNumber no está vacío
-                if (newSerialNumber) {
-                    const newComponentRef = ref(database, `artifacts/${appId}/public_data/components/${newSerialNumber}`);
-                    await set(newComponentRef, updatedComponentData);
-                    console.log("Componente actualizado y guardado en Firebase:", updatedComponentData);
-                } else {
-                    console.warn("No se pudo guardar el componente: el número de serie está vacío.");
-                    // Podrías mostrar un mensaje de error al usuario aquí
-                }
-                
+                const newComponentRef = ref(database, `artifacts/${appId}/public_data/components/${newSerialNumber}`);
+                await set(newComponentRef, updatedComponentData);
+
+                console.log("Componente guardado/actualizado en Firebase:", updatedComponentData);
                 editComponentDialog.close();
             } catch (error) {
                 console.error("Error al guardar el componente en Firebase:", error);
-                // Aquí podrías mostrar un mensaje de error al usuario en el modal
             }
         }
 
@@ -1317,47 +1418,60 @@
             }
 
             componentsToDisplay.forEach(component => {
-                // Asegurarse de que los valores sean números antes de usarlos en cálculos
+                if (!component || !component.serialNumber) { 
+                    console.warn("Componente mal formado encontrado y omitido:", component);
+                    return;
+                }
+
                 const lifeLimitHours = parseFloat(component.lifeLimitHours) || 0;
                 const lifeLimitCycles = parseFloat(component.lifeLimitCycles) || 0;
                 const lifeLimitDays = parseFloat(component.lifeLimitDays) || 0;
-
 
                 const remainingLife = calculateRemainingLife(component);
                 const totalLifeForColor = component.type === "hours" ? lifeLimitHours : 
                                           component.type === "cycles" ? lifeLimitCycles : 
                                           lifeLimitDays;
-                const colorClass = getRemainingColorClass(remainingLife, totalLifeForColor);
-
+                
+                let colorClass = getRemainingColorClass(remainingLife, totalLifeForColor);
                 let progressBarColorClass = '';
-                if (remainingLife <= 0) {
-                    progressBarColorClass = 'progress-red';
-                } else {
-                    const percentageOfTotalLifeRemaining = (remainingLife / totalLifeForColor) * 100;
-                    if (percentageOfTotalLifeRemaining < 20) {
-                        progressBarColorClass = 'progress-orange';
-                    } else {
-                        progressBarColorClass = 'progress-green';
-                    }
-                }
 
-                const consumedPercentage = calculateConsumedLifePercentage(component);
                 let unit = "unidades";
-                let remainingLifeDisplay = remainingLife.toFixed(1);
+                let remainingLifeDisplay = ""; 
+                let progressBarText = "";
 
-                if (component.type === "hours") {
-                    unit = "hrs";
-                } else if (component.type === "cycles") {
-                    unit = "ciclos";
-                    remainingLifeDisplay = remainingLife.toFixed(0);
-                } else if (component.type === "months") {
-                    unit = "días";
-                    remainingLifeDisplay = remainingLife.toFixed(0);
+                if (component.type === "condition") { // Lógica específica para "condicion"
+                    remainingLifeDisplay = "CONDICIÓN";
+                    unit = "";
+                    colorClass = 'remaining-blue';
+                    progressBarColorClass = 'progress-blue';
+                    progressBarText = "CONDICIÓN";
+                } else {
+                    remainingLifeDisplay = remainingLife.toFixed(1);
+                    if (component.type === "hours") {
+                        unit = "hrs";
+                    } else if (component.type === "cycles") {
+                        unit = "ciclos";
+                    } else if (component.type === "months") {
+                        unit = "días";
+                    }
+
+                    if (remainingLife <= 0) {
+                        progressBarColorClass = 'progress-red';
+                    } else {
+                        const percentageOfTotalLifeRemaining = (remainingLife / totalLifeForColor) * 100;
+                        if (percentageOfTotalLifeRemaining < 20) {
+                            progressBarColorClass = 'progress-orange';
+                        } else {
+                            progressBarColorClass = 'progress-green';
+                        }
+                    }
+                    progressBarText = `${calculateConsumedLifePercentage(component).toFixed(0)}% Consumido`;
                 }
+
 
                 const card = document.createElement('div');
                 card.className = 'component-card';
-                card.id = `component-${component.serialNumber}`;
+                card.id = `component-${component.serialNumber}`; 
                 card.innerHTML = `
                     <h4>${component.name || 'Sin Descripción'}</h4>
                     <div class="card-buttons">
@@ -1370,17 +1484,17 @@
                         <p><strong>Instalado:</strong> ${component.installationDate || 'N/A'}</p>
                         <p><strong>Ubicación:</strong> ${component.location || 'N/A'}</p>
                         
-                        <p><strong>Vida Límite (Hrs):</strong> ${lifeLimitHours}</p>
-                        <p><strong>Vida Límite (Ciclos):</strong> ${lifeLimitCycles}</p>
-                        <p><strong>Vida Límite (Días):</strong> ${lifeLimitDays}</p>
+                        <p><strong>Vida Límite (Hrs):</strong> ${lifeLimitHours.toFixed(1)}</p>
+                        <p><strong>Vida Límite (Ciclos):</strong> ${lifeLimitCycles.toFixed(1)}</p>
+                        <p><strong>Vida Límite (Días):</strong> ${lifeLimitDays.toFixed(1)}</p>
                         <p><strong>Tipo de Vida:</strong> ${component.type || 'N/A'}</p>
 
-                        <p><strong>TSN (Hrs):</strong> ${component.currentTSNHours || 0}</p>
-                        <p><strong>TSN (Ciclos):</strong> ${component.currentTSNCycles || 0}</p>
-                        <p><strong>TSN (Días):</strong> ${component.currentTSNDays || 0}</p>
-                        <p><strong>TSO (Hrs):</strong> ${component.currentTSOHours || 0}</p>
-                        <p><strong>TSO (Ciclos):</strong> ${component.currentTSOCycles || 0}</p>
-                        <p><strong>TSO (Días):</strong> ${component.currentTSODays || 0}</p>
+                        <p><strong>TSN (Hrs):</strong> ${(parseFloat(component.currentTSNHours) || 0).toFixed(1)}</p>
+                        <p><strong>TSN (Ciclos):</strong> ${(parseFloat(component.currentTSNCycles) || 0).toFixed(1)}</p>
+                        <p><strong>TSN (Días):</strong> ${(parseFloat(component.currentTSNDays) || 0).toFixed(1)}</p>
+                        <p><strong>TSO (Hrs):</strong> ${(parseFloat(component.currentTSOHours) || 0).toFixed(1)}</p>
+                        <p><strong>TSO (Ciclos):</strong> ${(parseFloat(component.currentTSOCycles) || 0).toFixed(1)}</p>
+                        <p><strong>TSO (Días):</strong> ${(parseFloat(component.currentTSODays) || 0).toFixed(1)}</p>
 
                         <p><strong>Última Inspección:</strong> ${component.lastInspectionDate || 'N/A'}</p>
                         <p><strong>Próxima Inspección:</strong> ${component.nextInspectionDue || 'N/A'}</p>
@@ -1392,8 +1506,8 @@
                         <span class="${colorClass}">${remainingLifeDisplay} ${unit}</span>
                     </div>
                     <div class="progress-bar-container">
-                        <div class="progress-bar-fill ${progressBarColorClass}" style="width: ${consumedPercentage}%;">
-                            ${consumedPercentage.toFixed(0)}% Consumido
+                        <div class="progress-bar-fill ${progressBarColorClass}" style="width: ${calculateConsumedLifePercentage(component)}%;">
+                            ${progressBarText}
                         </div>
                     </div>
                 `;
@@ -1401,7 +1515,7 @@
 
                 const editButton = card.querySelector('.edit-button');
                 editButton.addEventListener('click', () => {
-                    const selectedComponent = principalComponents.find(comp => comp.serialNumber === editButton.dataset.serial);
+                    const selectedComponent = principalComponents.find(comp => comp && comp.serialNumber === editButton.dataset.serial);
                     if (selectedComponent) {
                         openEditDialog(selectedComponent);
                     }
@@ -1418,7 +1532,7 @@
         function filterAndRenderComponents() {
             const searchTerm = componentSearchInput.value.toLowerCase();
             const filteredComponents = principalComponents.filter(component => {
-                // Añade el operador || '' para asegurar que toLowerCase() se llama en una cadena
+                if (!component) return false;
                 const nameMatch = (component.name || '').toLowerCase().includes(searchTerm);
                 const serialMatch = (component.serialNumber || '').toLowerCase().includes(searchTerm);
                 const partMatch = (component.partNumber || '').toLowerCase().includes(searchTerm);
@@ -1457,6 +1571,8 @@
 
         // Se ejecuta cuando el DOM está completamente cargado
         document.addEventListener('DOMContentLoaded', () => {
+            console.clear(); // Limpia la consola para una depuración más clara
+
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     console.log("Usuario autenticado en COMPONENTES980.HTML:", user.uid);
@@ -1468,11 +1584,17 @@
                     editComponentForm.addEventListener('submit', saveEditedComponent);
                     cancelEditButton.addEventListener('click', () => editComponentDialog.close());
                     printAllComponentsButton.addEventListener('click', () => printComponents());
+                    addComponentButton.addEventListener('click', () => openEditDialog()); // Nuevo componente
+
+                    // Listener para el cambio de tipo de vida en el diálogo de edición
+                    editInputs.type.addEventListener('change', (event) => {
+                        const isConditionType = event.target.value === 'condition';
+                        toggleNumericFields(isConditionType);
+                    });
 
                 } else {
                     console.log("No hay usuario autenticado en COMPONENTES980.HTML. Intentando autenticación anónima...");
                     try {
-                        // Intenta iniciar sesión anónimamente si no hay token inicial
                         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
                         if (initialAuthToken) {
                             await signInWithCustomToken(auth, initialAuthToken);
@@ -1489,6 +1611,13 @@
                         editComponentForm.addEventListener('submit', saveEditedComponent);
                         cancelEditButton.addEventListener('click', () => editComponentDialog.close());
                         printAllComponentsButton.addEventListener('click', () => printComponents());
+                        addComponentButton.addEventListener('click', () => openEditDialog()); // Nuevo componente
+
+                        // Listener para el cambio de tipo de vida en el diálogo de edición
+                        editInputs.type.addEventListener('change', (event) => {
+                            const isConditionType = event.target.value === 'condition';
+                            toggleNumericFields(isConditionType);
+                        });
 
                     } catch (error) {
                         console.error("Error en la autenticación:", error);
