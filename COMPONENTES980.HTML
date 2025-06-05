@@ -506,7 +506,7 @@
             </div>
             <div>
                 <label for="edit-serialNumber">N° de Serie:</label>
-                <input type="text" id="edit-serialNumber" name="serialNumber"> <!-- Removed readonly here -->
+                <input type="text" id="edit-serialNumber" name="serialNumber">
             </div>
             <div>
                 <label for="edit-installationDate">Instalado:</label>
@@ -1226,6 +1226,7 @@
             editInputs.location.value = component.location || '';
             editInputs.type.value = component.type || 'hours';
 
+            // Asegúrate de que los valores numéricos sean tratados como números, no strings vacías
             editInputs.currentTSNHours.value = component.currentTSNHours || 0;
             editInputs.currentTSNCycles.value = component.currentTSNCycles || 0;
             editInputs.currentTSNDays.value = component.currentTSNDays || 0;
@@ -1256,30 +1257,31 @@
             const newSerialNumber = editInputs.serialNumber.value;
 
             const updatedComponentData = {
-                name: editInputs.name.value,
-                partNumber: editInputs.partNumber.value,
-                serialNumber: newSerialNumber, // Usa el nuevo número de serie (si se cambió)
-                installationDate: editInputs.installationDate.value,
-                location: editInputs.location.value,
-                type: editInputs.type.value,
-                currentTSNHours: parseInt(editInputs.currentTSNHours.value) || 0,
-                currentTSNCycles: parseInt(editInputs.currentTSNCycles.value) || 0,
-                currentTSNDays: parseInt(editInputs.currentTSNDays.value) || 0,
-                currentTSOHours: parseInt(editInputs.currentTSOHours.value) || 0,
-                currentTSOCycles: parseInt(editInputs.currentTSOCycles.value) || 0,
-                currentTSODays: parseInt(editInputs.currentTSODays.value) || 0,
-                lifeLimitHours: parseInt(editInputs.lifeLimitHours.value) || 0,
-                lifeLimitCycles: parseInt(editInputs.lifeLimitCycles.value) || 0,
-                lifeLimitDays: parseInt(editInputs.lifeLimitDays.value) || 0,
-                dueDateTT: editInputs.dueDateTT.value,
-                status: editInputs.status.value,
-                lastInspectionDate: editInputs.lastInspectionDate.value,
-                nextInspectionDue: editInputs.nextInspectionDue.value,
+                name: editInputs.name.value || '', // Asegura que no sea null/undefined
+                partNumber: editInputs.partNumber.value || '', // Asegura que no sea null/undefined
+                serialNumber: newSerialNumber || '', // Asegura que no sea null/undefined
+                installationDate: editInputs.installationDate.value || '',
+                location: editInputs.location.value || '',
+                type: editInputs.type.value || 'hours',
+                // Asegura que los valores numéricos sean tratados como números, no strings vacías
+                currentTSNHours: parseFloat(editInputs.currentTSNHours.value) || 0,
+                currentTSNCycles: parseFloat(editInputs.currentTSNCycles.value) || 0,
+                currentTSNDays: parseFloat(editInputs.currentTSNDays.value) || 0,
+                currentTSOHours: parseFloat(editInputs.currentTSOHours.value) || 0,
+                currentTSOCycles: parseFloat(editInputs.currentTSOCycles.value) || 0,
+                currentTSODays: parseFloat(editInputs.currentTSODays.value) || 0,
+                lifeLimitHours: parseFloat(editInputs.lifeLimitHours.value) || 0,
+                lifeLimitCycles: parseFloat(editInputs.lifeLimitCycles.value) || 0,
+                lifeLimitDays: parseFloat(editInputs.lifeLimitDays.value) || 0,
+                dueDateTT: editInputs.dueDateTT.value || '',
+                status: editInputs.status.value || '',
+                lastInspectionDate: editInputs.lastInspectionDate.value || '',
+                nextInspectionDue: editInputs.nextInspectionDue.value || '',
             };
 
             try {
                 // Si el número de serie ha cambiado, necesitamos eliminar el antiguo y crear uno nuevo
-                if (oldSerialNumber !== newSerialNumber) {
+                if (oldSerialNumber && oldSerialNumber !== newSerialNumber) {
                     // Primero, elimina el componente antiguo
                     const oldComponentRef = ref(database, `artifacts/${appId}/public_data/components/${oldSerialNumber}`);
                     await set(oldComponentRef, null); // Establecer a null para eliminar
@@ -1288,13 +1290,20 @@
                 }
 
                 // Guarda o actualiza el componente con el nuevo (o el mismo) número de serie
-                const newComponentRef = ref(database, `artifacts/${appId}/public_data/components/${newSerialNumber}`);
-                await set(newComponentRef, updatedComponentData);
-
-                console.log("Componente actualizado y guardado en Firebase:", updatedComponentData);
+                // Solo guardar si el nuevo serialNumber no está vacío
+                if (newSerialNumber) {
+                    const newComponentRef = ref(database, `artifacts/${appId}/public_data/components/${newSerialNumber}`);
+                    await set(newComponentRef, updatedComponentData);
+                    console.log("Componente actualizado y guardado en Firebase:", updatedComponentData);
+                } else {
+                    console.warn("No se pudo guardar el componente: el número de serie está vacío.");
+                    // Podrías mostrar un mensaje de error al usuario aquí
+                }
+                
                 editComponentDialog.close();
             } catch (error) {
                 console.error("Error al guardar el componente en Firebase:", error);
+                // Aquí podrías mostrar un mensaje de error al usuario en el modal
             }
         }
 
@@ -1308,10 +1317,16 @@
             }
 
             componentsToDisplay.forEach(component => {
+                // Asegurarse de que los valores sean números antes de usarlos en cálculos
+                const lifeLimitHours = parseFloat(component.lifeLimitHours) || 0;
+                const lifeLimitCycles = parseFloat(component.lifeLimitCycles) || 0;
+                const lifeLimitDays = parseFloat(component.lifeLimitDays) || 0;
+
+
                 const remainingLife = calculateRemainingLife(component);
-                const totalLifeForColor = component.type === "hours" ? component.lifeLimitHours : 
-                                          component.type === "cycles" ? component.lifeLimitCycles : 
-                                          component.lifeLimitDays;
+                const totalLifeForColor = component.type === "hours" ? lifeLimitHours : 
+                                          component.type === "cycles" ? lifeLimitCycles : 
+                                          lifeLimitDays;
                 const colorClass = getRemainingColorClass(remainingLife, totalLifeForColor);
 
                 let progressBarColorClass = '';
@@ -1344,7 +1359,7 @@
                 card.className = 'component-card';
                 card.id = `component-${component.serialNumber}`;
                 card.innerHTML = `
-                    <h4>${component.name}</h4>
+                    <h4>${component.name || 'Sin Descripción'}</h4>
                     <div class="card-buttons">
                         <button class="edit-button" data-serial="${component.serialNumber}">Editar</button>
                         <button class="print-single-button" data-serial="${component.serialNumber}">Imprimir</button>
@@ -1355,9 +1370,9 @@
                         <p><strong>Instalado:</strong> ${component.installationDate || 'N/A'}</p>
                         <p><strong>Ubicación:</strong> ${component.location || 'N/A'}</p>
                         
-                        <p><strong>Vida Límite (Hrs):</strong> ${component.lifeLimitHours || 0}</p>
-                        <p><strong>Vida Límite (Ciclos):</strong> ${component.lifeLimitCycles || 0}</p>
-                        <p><strong>Vida Límite (Días):</strong> ${component.lifeLimitDays || 0}</p>
+                        <p><strong>Vida Límite (Hrs):</strong> ${lifeLimitHours}</p>
+                        <p><strong>Vida Límite (Ciclos):</strong> ${lifeLimitCycles}</p>
+                        <p><strong>Vida Límite (Días):</strong> ${lifeLimitDays}</p>
                         <p><strong>Tipo de Vida:</strong> ${component.type || 'N/A'}</p>
 
                         <p><strong>TSN (Hrs):</strong> ${component.currentTSNHours || 0}</p>
@@ -1403,7 +1418,8 @@
         function filterAndRenderComponents() {
             const searchTerm = componentSearchInput.value.toLowerCase();
             const filteredComponents = principalComponents.filter(component => {
-                const nameMatch = component.name.toLowerCase().includes(searchTerm);
+                // Añade el operador || '' para asegurar que toLowerCase() se llama en una cadena
+                const nameMatch = (component.name || '').toLowerCase().includes(searchTerm);
                 const serialMatch = (component.serialNumber || '').toLowerCase().includes(searchTerm);
                 const partMatch = (component.partNumber || '').toLowerCase().includes(searchTerm);
                 return nameMatch || serialMatch || partMatch;
