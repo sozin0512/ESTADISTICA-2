@@ -131,31 +131,138 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
 
-        .component-card h4 {
-            font-weight: bold;
-            font-size: 1.5rem;
+        /* Estilos para la cabecera de la tarjeta con título y botones */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* Alinea los botones arriba si el título es largo */
             margin-bottom: 1rem;
-            color: #2c3e50;
-            text-align: center;
             border-bottom: 2px solid #e0e0e0;
             padding-bottom: 0.75rem;
+            gap: 0.5rem; /* Espacio entre título y botones */
+            flex-wrap: wrap; /* Permite que el header se envuelva si el espacio es muy pequeño */
         }
 
-        .component-info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem 1rem;
-            margin-bottom: 1rem;
+        .card-header .title-container {
+            flex-grow: 1; /* Permite que el título ocupe el espacio restante */
+            flex-shrink: 1; /* Permite que el título se encoja */
+            /* min-width: 0; Eliminado porque overflow: hidden y flex-grow: 1 en el contenedor son más robustos */
+            overflow: hidden; /* Esto es clave para que el texto se envuelva */
+            text-align: left;
         }
 
+        .card-header h4 {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 0; /* Elimina el margen inferior del h4 ya que el contenedor lo maneja */
+            overflow-wrap: break-word; /* Rompe palabras largas si es necesario */
+            word-wrap: break-word; /* Fallback para word-break */
+            word-break: break-word; /* Para navegadores más modernos */
+            white-space: normal; /* Asegura que el texto se envuelva */
+        }
+
+        .card-buttons {
+            display: flex;
+            gap: 0.5rem; /* Espacio entre los botones */
+            flex-shrink: 0; /* Evita que los botones se encojan */
+            opacity: 0; /* Ocultar los botones por defecto */
+            transition: opacity 0.3s ease-in-out; /* Transición suave */
+        }
+
+        .component-card:hover .card-buttons {
+            opacity: 1; /* Mostrar los botones al pasar el ratón */
+        }
+
+
+        .edit-button, .print-single-button, .history-button, .retire-button, .restore-button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.375rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border: none;
+            white-space: nowrap; /* Evita que el texto del botón se rompa */
+        }
+        .edit-button:hover, .print-single-button:hover, .history-button:hover, .restore-button:hover {
+            background-color: #2563eb;
+        }
+        .retire-button {
+            background-color: #ef4444; /* Rojo para el botón de retirar */
+        }
+        .retire-button:hover {
+            background-color: #dc2626;
+        }
+        .restore-button {
+            background-color: #10B981; /* Verde para restaurar */
+        }
+        .restore-button:hover {
+            background-color: #059669;
+        }
+
+
+        /* Estilos para la estructura de la información del componente dentro de las tarjetas (para vista normal y print) */
+        .component-info-grid,
+        .log-entry-card .component-sections-print {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center; /* Centrar los bloques dentro de su contenedor */
+            width: 100%; /* Asegura que el contenedor de las secciones ocupe todo el ancho */
+        }
+        
         .component-info-grid p {
+            flex: 1 1 calc(50% - 0.5rem); /* Por defecto, 2 columnas */
+            max-width: calc(50% - 0.5rem);
             font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+            line-height: 1.4;
             color: #555;
         }
-
         .component-info-grid p strong {
             color: #333;
         }
+
+
+        .log-entry-card .section-block-print {
+            flex: 1 1 calc(50% - 0.5rem); /* Por defecto, 2 columnas */
+            max-width: calc(50% - 0.5rem);
+            background-color: #fcfdff;
+            border: 1px solid #e9eef2;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            page-break-inside: avoid; /* Asegura que no se rompa la página dentro del bloque */
+        }
+
+        /* La primera sección siempre es full width en las tarjetas de log */
+        .log-entry-card .section-block-print:first-child {
+            flex: 1 1 100%;
+            max-width: 100%;
+        }
+
+        .log-entry-card .section-title-print {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #4f46e5;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px dashed #d1d5db;
+            padding-bottom: 0.5rem;
+        }
+
+        .log-entry-card .section-block-print p {
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+            line-height: 1.4;
+            color: #555;
+        }
+        .log-entry-card .section-block-print p strong {
+            color: #333;
+        }
+
 
         .remaining-life-section {
             background-color: #eef2ff;
@@ -207,29 +314,6 @@
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
         }
 
-        .card-buttons {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .edit-button, .print-single-button {
-            background-color: #3b82f6;
-            color: white;
-            padding: 0.4rem 0.8rem;
-            border-radius: 0.375rem;
-            font-size: 0.8rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            border: none;
-        }
-        .edit-button:hover, .print-single-button:hover {
-            background-color: #2563eb;
-        }
-
         dialog {
             border: none;
             border-radius: 0.75rem;
@@ -240,6 +324,26 @@
             background-color: #ffffff;
             z-index: 1000;
         }
+        /* New dialog style for the uninstallation reason */
+        #uninstallationReasonDialog {
+            max-width: 450px;
+        }
+        #uninstallationReasonDialog textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 0.6rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 0.375rem;
+            font-size: 0.95rem;
+            background-color: #f8fafc;
+            resize: vertical;
+        }
+        #uninstallationReasonDialog textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+
 
         dialog::backdrop {
             background-color: rgba(0, 0, 0, 0.5);
@@ -325,6 +429,32 @@
             background-color: #dc2626;
             transform: translateY(-1px);
         }
+        dialog .form-buttons .print-history-button { /* Nuevo estilo para botón de imprimir historial */
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+        }
+        dialog .form-buttons .print-history-button:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        /* Estilos para el botón de borrar historial */
+        dialog .form-buttons .delete-history-button {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        dialog .form-buttons .delete-history-button:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+        }
+
 
         @media (max-width: 640px) {
             dialog form {
@@ -385,73 +515,324 @@
             }
         }
 
+        /* Estilos para el diálogo de historial de cambios */
+        #changeLogDialog {
+            max-width: 700px;
+        }
+        #changeLogContent {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            background-color: #f8fafc;
+        }
+        /* Oculta el estilo base de log-entry que ya no se usa */
+        .log-entry { 
+            display: none; 
+        }
+
+        /* Nuevo estilo para la tarjeta de entrada de log (el "sticker") */
+        .log-entry-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.75rem; /* Bordes más redondeados */
+            padding: 1.5rem; /* Más padding para una sensación de "sticker" */
+            margin-bottom: 1.5rem; /* Más espacio entre "stickers" */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Sombra para profundidad */
+            position: relative;
+            page-break-inside: avoid; /* Evita que la tarjeta se rompa en la impresión */
+        }
+        .log-entry-card h4 {
+            font-size: 1.4rem; /* Título más grande */
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0.75rem;
+        }
+        .log-entry-card p {
+            font-size: 0.95rem; /* Texto ligeramente más grande */
+            color: #555;
+            margin-bottom: 0.3rem; /* Espaciado entre párrafos */
+            line-height: 1.5; /* Mejor legibilidad */
+        }
+        .log-entry-card p strong {
+            color: #333;
+        }
+        /* Contenedor para la información estructurada dentro del log-entry-card */
+        .log-entry-card .change-details-container {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #d1d5db; /* Separador antes de los detalles estructurados */
+        }
+
+
+        .delete-log-entry-button { /* Botón de borrar entrada de log */
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%; /* Hace el botón redondo */
+            width: 24px; /* Tamaño fijo */
+            height: 24px; /* Tamaño fijo */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .delete-log-entry-button:hover {
+            background-color: #dc2626;
+        }
+
+
+        /* Nuevo estilo para componentes retirados */
+        .component-card.retired {
+            opacity: 0.7;
+            background-color: #fcfcfc;
+            border-color: #e0e0e0;
+            box-shadow: none;
+            transition: opacity 0.3s ease;
+        }
+        .component-card.retired:hover {
+            opacity: 1; /* Al pasar el ratón, se hace más visible */
+            transform: none; /* No hay efecto de elevación */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .component-card.retired:hover .card-buttons {
+            opacity: 1; /* Mostrar los botones al pasar el ratón */
+        }
+
+        /* Estilos de impresión mejorados */
         @media print {
             body {
-                background: none;
-                padding: 0;
-                margin: 0;
-                color: black;
-            }
-            .top-buttons, .month-year-selector, .search-area, .edit-button, .print-single-button, .add-component-button, dialog, .summary-section {
-                display: none !important;
-            }
-            h2, h3 {
+                background: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
                 color: black !important;
-                text-align: center;
-                margin-bottom: 1rem;
+                -webkit-print-color-adjust: exact !important; /* Para Chrome/Safari */
+                print-color-adjust: exact !important; /* Estándar */
             }
-            .container {
-                box-shadow: none;
-                border: none;
-                padding: 0;
-                width: 100%;
-                max-width: none;
-            }
-            .summary-card {
+
+            /* Oculta todos los elementos de la interfaz de usuario que no son de impresión */
+            .top-buttons, .month-year-selector, .search-area,
+            .edit-button, .history-button,
+            .print-single-button, .retire-button, .restore-button, .add-component-button, /* Incluye los nuevos botones */
+            /* Oculta el título principal de la página a menos que se especifique lo contrario */
+            h2,
+            /* Oculta todos los diálogos por defecto, y luego los mostramos selectivamente */
+            dialog {
                 display: none !important;
             }
-            .component-detail-section {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-                margin-top: 0;
+
+            /* --- Modos de impresión específicos --- */
+
+            /* Modo: Imprimir historial de cambios */
+            body.print-change-log-mode {
+                /* Asegura que solo el historial sea visible */
+                display: block !important;
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
             }
-            .component-card {
-                border: 1px solid #ccc;
-                box-shadow: none;
-                page-break-inside: avoid;
+            body.print-change-log-mode .container, /* Oculta el contenedor principal de la UI */
+            body.print-change-log-mode h2 { /* Oculta el título principal de la página */
+                display: none !important;
+            }
+
+            body.print-change-log-mode #changeLogDialog {
+                display: block !important; /* Muestra el diálogo de historial */
+                position: static !important; /* Elimina el posicionamiento fijo */
+                margin: 0 auto !important; /* Centra en la página impresa */
+                padding: 1rem !important;
+                width: 100% !important;
+                max-width: 1100px !important; /* Ancho legible para impresión horizontal */
+                box-shadow: none !important; /* Sin sombra en impresión */
+                background-color: transparent !important; /* Fondo transparente */
+                overflow: visible !important; /* Asegura que todo el contenido sea visible */
+                page-break-inside: avoid; /* Evita que el diálogo se rompa a la mitad de una página */
+            }
+            body.print-change-log-mode #changeLogDialog::backdrop {
+                display: none !important;
+            }
+            body.print-change-log-mode #changeLogDialog h3 {
+                color: black !important;
+                text-align: left;
+                font-size: 1.5rem;
                 margin-bottom: 1rem;
-                padding: 1rem;
             }
-            .component-card h4 {
-                border-bottom: 1px solid #eee;
-                padding-bottom: 0.5rem;
-                margin-bottom: 0.5rem;
+            body.print-change-log-mode #changeLogContent {
+                max-height: none !important;
+                overflow-y: visible !important;
+                border: 1px solid #ccc !important;
+                background-color: #fff !important;
+                padding: 1rem !important;
             }
-            .component-info-grid {
-                grid-template-columns: 1fr;
-                gap: 0.5rem;
+            body.print-change-log-mode .log-entry-card { /* Usar la nueva clase para impresión */
+                border: 1px solid #eee;
+                page-break-inside: avoid;
+                margin-bottom: 1rem !important; /* Más espacio entre stickers impresos */
+                padding: 1rem !important;
+                box-shadow: none;
+                width: 100% !important; /* El sticker ocupa todo el ancho disponible */
             }
-            .remaining-life-section, .progress-bar-container {
-                margin-top: 0.5rem;
-                border: none;
-                background-color: transparent;
+
+            body.print-change-log-mode .log-entry-card h4 {
+                font-size: 1.2rem !important;
+                margin-bottom: 0.75rem !important;
+                padding-bottom: 0.5rem !important;
             }
-            .progress-bar-fill {
-                background-image: none !important;
-                background-color: #ddd !important;
-                color: #333 !important;
-                animation: none !important;
+            body.print-change-log-mode .log-entry-card p {
+                font-size: 0.9rem !important;
+                margin-bottom: 0.2rem !important;
+            }
+
+            body.print-change-log-mode .log-entry-card .component-sections-print {
+                gap: 0.75rem !important; /* Ajustar el gap para que quepan 4 columnas */
+            }
+
+            body.print-change-log-mode .log-entry-card .section-block-print {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important; /* Borde más sutil para impresión */
+                padding: 0.75rem !important; /* Ajustar padding */
+            }
+
+            body.print-change-log-mode .log-entry-card .section-block-print:first-child {
+                flex: 1 1 100% !important;
+                max-width: 100% !important;
+            }
+
+            body.print-change-log-mode .log-entry-card .section-block-print:not(:first-child) {
+                /* Los 4 bloques restantes se distribuyen en 4 columnas */
+                flex: 1 1 calc(25% - 0.5625rem) !important; /* Calcula para 4 columnas con 0.75rem de gap (3 gaps, entonces 100% - 2.25rem / 4) */
+                max-width: calc(25% - 0.5625rem) !important;
+            }
+            body.print-change-log-mode .log-entry-card .section-title-print {
+                font-size: 0.9rem !important; /* Títulos de sección más pequeños para caber */
+                margin-bottom: 0.5rem !important;
+                padding-bottom: 0.3rem !important;
+            }
+            body.print-change-log-mode .log-entry-card .section-block-print p {
+                font-size: 0.8rem !important; /* Texto de detalles aún más pequeño */
+                margin-bottom: 0.1rem !important;
+            }
+
+
+            body.print-change-log-mode #changeLogDialog .form-buttons,
+            body.print-change-log-mode .delete-log-entry-button {
+                display: none !important; /* Oculta botones dentro del diálogo de historial */
+            }
+
+            /* Modo: Imprimir un solo componente */
+            body.print-single-component {
+                display: block !important; /* Restablece el display para el body */
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
             }
             body.print-single-component .component-card:not(.print-this-one) {
-                display: none !important;
+                display: none !important; /* Oculta todos los componentes excepto el seleccionado */
             }
             body.print-single-component .component-card.print-this-one {
                 display: block !important;
-                width: 100%;
-                margin: 0 auto;
+                width: 100% !important;
+                margin: 0 auto !important;
+                border: 1px solid #ccc !important;
+                box-shadow: none !important;
+                page-break-inside: avoid !important;
+                padding: 1rem !important;
+            }
+            body.print-single-component .container {
+                display: block !important; /* Asegura que el contenedor principal esté visible */
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+            }
+            body.print-single-component .container h3 {
+                display: none !important; /* Oculta el título del resumen si aparece */
+            }
+            body.print-single-component .component-info-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.75rem 1rem !important; /* Mantener la disposición de 2 columnas */
+            }
+            body.print-single-component .component-info-grid p {
+                padding: 2px 0;
+                font-size: 0.9rem;
+            }
+            body.print-single-component .remaining-life-section,
+            body.print-single-component .progress-bar-container {
+                margin-top: 0.5rem;
+                border: 1px solid #e0e0e0;
+                padding: 0.5rem;
+                background-color: #f8fafc;
+            }
+            body.print-single-component .progress-bar-fill {
+                background-image: none !important;
+                background-color: #d0d0d0 !important;
+                color: #333 !important;
+                animation: none !important;
+                box-shadow: none !important;
+            }
+            body.print-single-component .component-card h4 {
+                font-size: 1.2rem;
+                margin-bottom: 0.5rem;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 0.5rem;
+            }
+            body.print-single-component .component-card.retired {
+                opacity: 1 !important;
+            }
+            /* Mostrar el título de la página en la impresión de un solo componente */
+            body.print-single-component h2 {
+                display: block !important;
+                text-align: center;
+                margin-top: 1rem;
+                font-size: 1.8rem;
+                color: black;
+            }
+            /* Ocultar el input de búsqueda en la impresión de todos los componentes */
+            body.print-all-components-mode .search-area,
+            body.print-all-components-mode .month-year-selector {
+                display: none !important;
+            }
+
+            /* Modo: Imprimir todos los componentes */
+            body.print-all-components-mode .component-detail-section {
+                display: grid !important;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+                gap: 1.5rem !important;
+                margin-top: 1rem !important;
+            }
+            body.print-all-components-mode .component-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin-bottom: 1rem;
+            }
+            body.print-all-components-mode .container {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+            }
+            body.print-all-components-mode h2 {
+                display: block !important;
+                text-align: center;
+                margin-top: 1rem;
+                font-size: 1.8rem;
+                color: black;
             }
         }
-
     </style>
 </head>
 <body>
@@ -482,8 +863,13 @@
             <input type="text" id="componentSearchInput" placeholder="Buscar componente por nombre, serie o parte..." class="rounded-md">
         </div>
 
-        <div id="componentDetails" class="component-detail-section">
-            <p class="text-center text-gray-600 col-span-full">Cargando detalles de componentes...</p>
+        <div id="activeComponentsSection" class="component-detail-section">
+            <p class="text-center text-gray-600 col-span-full">Cargando componentes activos...</p>
+        </div>
+
+        <h3 class="text-xl font-semibold mb-4 mt-8 text-center">Componentes Retirados</h3>
+        <div id="retiredComponentsSection" class="component-detail-section">
+            <p class="text-center text-gray-600 col-span-full">Cargando componentes retirados...</p>
         </div>
     </div>
 
@@ -502,11 +888,12 @@
                 <input type="text" id="edit-partNumber" name="partNumber">
             </div>
             <div>
+
                 <label for="edit-serialNumber">N° de Serie:</label>
                 <input type="text" id="edit-serialNumber" name="serialNumber">
             </div>
             <div>
-                <label for="edit-installationDate">Instalado:</label>
+                <label for="edit-installationDate">Instalado (Fecha):</label>
                 <input type="date" id="edit-installationDate" name="installationDate">
             </div>
             <div>
@@ -519,37 +906,48 @@
                     <option value="hours">Horas</option>
                     <option value="cycles">Ciclos</option>
                     <option value="months">Meses</option>
-                    <option value="condition">Condición</option> <!-- Nueva opción -->
+                    <option value="condition">Condición</option>
                 </select>
             </div>
 
             <div class="col-span-2 grid grid-cols-3 gap-4">
                 <div>
-                    <label for="edit-currentTSNHours">TSN (Hrs):</label>
-                    <input type="number" id="edit-currentTSNHours" name="currentTSNHours" step="0.1">
+                    <label for="edit-initialTSNHours">TSN Inicial Componente (Hrs):</label>
+                    <input type="number" id="edit-initialTSNHours" name="initialTSNHours" step="0.1">
                 </div>
                 <div>
-                    <label for="edit-currentTSNCycles">TSN (Ciclos):</label>
-                    <input type="number" id="edit-currentTSNCycles" name="currentTSNCycles" step="0.1">
+                    <label for="edit-initialTSNCycles">TSN Inicial Componente (Ciclos):</label>
+                    <input type="number" id="edit-initialTSNCycles" name="initialTSNCycles" step="0.1">
                 </div>
                 <div>
-                    <label for="edit-currentTSNDays">TSN (Días/Meses):</label>
-                    <input type="number" id="edit-currentTSNDays" name="currentTSNDays" step="0.1">
+                    <label for="edit-initialTSNDays">TSN Inicial Componente (Días):</label>
+                    <input type="number" id="edit-initialTSNDays" name="initialTSNDays" step="0.1">
+                </div>
+            </div>
+
+            <div class="col-span-2 grid grid-cols-2 gap-4">
+                <div>
+                    <label for="edit-aircraftHrsAtInstallation">Horas AC al Instalar:</label>
+                    <input type="number" id="edit-aircraftHrsAtInstallation" name="aircraftHrsAtInstallation" step="0.1" readonly>
+                </div>
+                <div>
+                    <label for="edit-aircraftRinsAtInstallation">RINS AC al Instalar:</label>
+                    <input type="number" id="edit-aircraftRinsAtInstallation" name="aircraftRinsAtInstallation" step="0.1" readonly>
                 </div>
             </div>
 
             <div class="col-span-2 grid grid-cols-3 gap-4">
                 <div>
-                    <label for="edit-currentTSOHours">TSO (Hrs):</label>
-                    <input type="number" id="edit-currentTSOHours" name="currentTSOHours" step="0.1">
+                    <label for="edit-initialTSOHours">TSO Inicial Componente (Hrs):</label>
+                    <input type="number" id="edit-initialTSOHours" name="initialTSOHours" step="0.1">
                 </div>
                 <div>
-                    <label for="edit-currentTSOCycles">TSO (Ciclos):</label>
-                    <input type="number" id="edit-currentTSOCycles" name="currentTSOCycles" step="0.1">
+                    <label for="edit-initialTSOCycles">TSO Inicial Componente (Ciclos):</label>
+                    <input type="number" id="edit-initialTSOCycles" name="initialTSOCycles" step="0.1">
                 </div>
                 <div>
-                    <label for="edit-currentTSODays">TSO (Días/Meses):</label>
-                    <input type="number" id="edit-currentTSODays" name="currentTSODays" step="0.1">
+                    <label for="edit-initialTSODays">TSO Inicial Componente (Días/Meses):</label>
+                    <input type="number" id="edit-initialTSODays" name="initialTSODays" step="0.1">
                 </div>
             </div>
 
@@ -592,23 +990,68 @@
         </form>
     </dialog>
 
-    <script type="module">
-        // Importa las funciones necesarias de Firebase SDK para Realtime Database
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-        import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+    <!-- Nuevo Diálogo para Historial de Cambios -->
+    <dialog id="changeLogDialog">
+        <h3 id="changeLogTitle">Historial de Cambios para Componente: </h3>
+        <div id="changeLogContent" class="text-left">
+            <!-- Los registros de cambios se cargarán aquí -->
+        </div>
+        <div class="form-buttons">
+            <button type="button" class="print-history-button" id="printChangeLogButton">Imprimir Historial</button>
+            <button type="button" class="delete-history-button" id="deleteAllHistoryButton">Borrar Historial</button>
+            <button type="button" class="cancel-button" id="closeChangeLogButton">Cerrar</button>
+        </div>
+    </dialog>
 
-        // Configuración de Firebase (debe ser la misma que en HORAS980.HTML si la usas)
-        const firebaseConfig = {
-            apiKey: "AIzaSyC6pUgMRSRCZLZfW0Cy1b00AFN6nkPjsF8",
-            authDomain: "fah-980-ceb96.firebaseapp.com",
-            databaseURL: "https://fah-980-ceb96-default-rtdb.firebaseio.com",
-            projectId: "fah-980-ceb96",
-            storageBucket: "fah-980-ceb96.firebasestorage.app",
-            messagingSenderId: "57890484294",
-            appId: "1:57890484294:web:8a27759a4da0b262e99a47",
-            measurementId: "G-HSZMRM7ZCS"
-        };
+    <!-- Diálogo de Confirmación Genérico -->
+    <dialog id="confirmDialog">
+        <h3>Confirmar Acción</h3>
+        <p id="confirmMessage" class="text-center my-4">¿Estás seguro de que quieres realizar esta acción?</p>
+        <div class="form-buttons justify-center">
+            <button type="button" class="cancel-button" id="cancelConfirmButton">Cancelar</button>
+            <button type="button" class="save-button" id="proceedConfirmButton">Confirmar</button>
+        </div>
+    </dialog>
+
+    <!-- Nuevo Diálogo para Motivo de Desinstalación -->
+    <dialog id="uninstallationReasonDialog">
+        <h3>Motivo de Desinstalación</h3>
+        <p class="mb-4">Por favor, especifica el motivo de la desinstalación del componente con el Número de Serie: <strong id="uninstallationSerialNumber"></strong></p>
+        <textarea id="uninstallationReasonTextarea" class="w-full p-2 border rounded-md" placeholder="Escribe el motivo aquí..."></textarea>
+        <div class="form-buttons mt-4 justify-end">
+            <button type="button" class="cancel-button" id="cancelUninstallationReasonButton">Cancelar</button>
+            <button type="button" class="save-button" id="confirmUninstallationReasonButton">Confirmar</button>
+        </div>
+    </dialog>
+
+
+    <script type="module">
+        // Importa las funciones necesarias de Firebase SDK
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        // Añadir 'child' a la lista de importaciones de firebase/database
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { getDatabase, ref, onValue, set, get, remove, child } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+        // Define __app_id con un valor por defecto si no está definida
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Configuración de Firebase: Intenta analizar __firebase_config. Si no existe o no es un JSON válido, usa un objeto vacío.
+        let firebaseConfig = {};
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                firebaseConfig = JSON.parse(__firebase_config);
+            }
+        } catch (e) {
+            console.error("Error al parsear __firebase_config. Usando configuración vacía.", e);
+        }
+
+        // Asegúrate de que las propiedades mínimas estén presentes para evitar errores de inicialización.
+        // Se añade un fallback para apiKey usando la clave del documento firebase-security-rules si no está presente o es vacío.
+        firebaseConfig.apiKey = firebaseConfig.apiKey || "AIzaSyC6pUgMRSRCZLZfW0Cy1b00AFN6nkPjsF8"; // Fallback usando la clave proporcionada en firebase-security-rules
+        firebaseConfig.databaseURL = firebaseConfig.databaseURL || "https://fah-980-ceb96-default-rtdb.firebaseio.com"; // Usar la URL específica del proyecto
+        firebaseConfig.projectId = firebaseConfig.projectId || "fah-980-ceb96"; // Usar el ID de proyecto específico
+        
+        console.log("Firebase Config utilizada:", firebaseConfig);
 
         // Inicializa Firebase
         const app = initializeApp(firebaseConfig);
@@ -618,17 +1061,40 @@
         const generalSummaryDiv = document.getElementById('generalSummary');
         const monthSelect = document.getElementById('monthSelect');
         const yearSelect = document.getElementById('yearSelect');
-        const componentDetailsDiv = document.getElementById('componentDetails');
+        // Secciones para componentes activos y retirados
+        const activeComponentsSection = document.getElementById('activeComponentsSection');
+        const retiredComponentsSection = document.getElementById('retiredComponentsSection');
+
         const componentSearchInput = document.getElementById('componentSearchInput');
         const printAllComponentsButton = document.getElementById('printAllComponentsButton');
-        const addComponentButton = document.getElementById('addComponentButton'); // Nuevo botón
+        const addComponentButton = document.getElementById('addComponentButton');
 
-        // Referencias al diálogo y formulario de edición
         const editComponentDialog = document.getElementById('editComponentDialog');
         const editComponentForm = document.getElementById('editComponentForm');
         const cancelEditButton = document.getElementById('cancelEditButton');
 
-        // Inputs del formulario de edición
+        const changeLogDialog = document.getElementById('changeLogDialog');
+        const changeLogTitle = document.getElementById('changeLogTitle');
+        const changeLogContent = document.getElementById('changeLogContent');
+        const closeChangeLogButton = document.getElementById('closeChangeLogButton');
+        const printChangeLogButton = document.getElementById('printChangeLogButton');
+        const deleteAllHistoryButton = document.getElementById('deleteAllHistoryButton');
+
+        const confirmDialog = document.getElementById('confirmDialog');
+        const confirmMessage = document.getElementById('confirmMessage');
+        const cancelConfirmButton = document.getElementById('cancelConfirmButton');
+        const proceedConfirmButton = document.getElementById('proceedConfirmButton');
+
+        let confirmActionResolve = null;
+
+        const uninstallationReasonDialog = document.getElementById('uninstallationReasonDialog');
+        const uninstallationSerialNumberSpan = document.getElementById('uninstallationSerialNumber');
+        const uninstallationReasonTextarea = document.getElementById('uninstallationReasonTextarea');
+        const cancelUninstallationReasonButton = document.getElementById('cancelUninstallationReasonButton');
+        const confirmUninstallationReasonButton = document.getElementById('confirmUninstallationReasonButton');
+
+        let uninstallationReasonResolve = null;
+
         const editInputs = {
             serialNumberHidden: document.getElementById('edit-serialNumber-hidden'),
             name: document.getElementById('edit-name'),
@@ -637,12 +1103,14 @@
             installationDate: document.getElementById('edit-installationDate'),
             location: document.getElementById('edit-location'),
             type: document.getElementById('edit-type'),
-            currentTSNHours: document.getElementById('edit-currentTSNHours'),
-            currentTSNCycles: document.getElementById('edit-currentTSNCycles'),
-            currentTSNDays: document.getElementById('edit-currentTSNDays'),
-            currentTSOHours: document.getElementById('edit-currentTSOHours'),
-            currentTSOCycles: document.getElementById('edit-currentTSOCycles'),
-            currentTSODays: document.getElementById('edit-currentTSODays'),
+            initialTSNHours: document.getElementById('edit-initialTSNHours'),
+            initialTSNCycles: document.getElementById('edit-initialTSNCycles'),
+            initialTSNDays: document.getElementById('edit-initialTSNDays'),
+            aircraftHrsAtInstallation: document.getElementById('edit-aircraftHrsAtInstallation'),
+            aircraftRinsAtInstallation: document.getElementById('edit-aircraftRinsAtInstallation'),
+            initialTSOHours: document.getElementById('edit-initialTSOHours'),
+            initialTSOCycles: document.getElementById('edit-initialTSOCycles'),
+            initialTSODays: document.getElementById('edit-initialTSODays'),
             lifeLimitHours: document.getElementById('edit-lifeLimitHours'),
             lifeLimitCycles: document.getElementById('edit-lifeLimitCycles'),
             lifeLimitDays: document.getElementById('edit-lifeLimitDays'),
@@ -652,14 +1120,9 @@
             nextInspectionDue: document.getElementById('edit-nextInspectionDue'),
         };
 
-        // Define __app_id con un valor por defecto si no está definida
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // Variables para el mes y año seleccionados
-        let currentMonth = new Date().getMonth(); // 0-indexed (0 for January)
+        let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
 
-        // Variables globales para almacenar los totales mensuales
         let currentAcHrs = 0; 
         let currentRins = 0;
 
@@ -669,324 +1132,8 @@
         ];
         const years = Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i);
 
-        // Contador global para números de serie de nuevos componentes generados
         let globalSerialCounter = 1;
-
-        // Función para generar un nuevo componente con valores por defecto
-        function generateComponent(name, partNumber = "GEN-PN", type = "hours", lifeLimit = 2000, currentTSN = 500, location = "General") {
-            // Asegura que los valores predeterminados numéricos sean flotantes y tengan 1 decimal
-            lifeLimit = parseFloat(lifeLimit.toFixed(1));
-            currentTSN = parseFloat(currentTSN.toFixed(1));
-
-            const serialNum = `FAH-${String(globalSerialCounter++).padStart(4, '0')}`;
-            let lifeLimitHours = 0, lifeLimitCycles = 0, lifeLimitDays = 0;
-            let currentTSNHours = 0, currentTSNCycles = 0, currentTSNDays = 0;
-            let dueDateTT = "";
-
-            if (type === "hours") {
-                lifeLimitHours = lifeLimit;
-                currentTSNHours = currentTSN;
-                dueDateTT = `${lifeLimit} hrs`;
-            } else if (type === "cycles") {
-                lifeLimitCycles = lifeLimit;
-                currentTSNCycles = currentTSN;
-                dueDateTT = `${lifeLimit} ciclos`;
-            } else if (type === "months") {
-                lifeLimitDays = lifeLimit * 30; // Suponiendo 30 días por mes para el límite de vida
-                currentTSNDays = currentTSN * 30; // Suponiendo 30 días por mes para el TSN
-                dueDateTT = `${lifeLimit} meses`;
-            } else if (type === "condition") { // Nueva condición
-                lifeLimitHours = 0; // No aplica
-                lifeLimitCycles = 0; // No aplica
-                lifeLimitDays = 0; // No aplica
-                currentTSNHours = 0; // No aplica
-                currentTSNCycles = 0; // No aplica
-                currentTSNDays = 0; // No aplica
-                dueDateTT = "CONDICIÓN";
-            }
-
-            return {
-                name: name,
-                partNumber: partNumber,
-                serialNumber: serialNum,
-                installationDate: "2023-01-01", // Fecha de instalación por defecto
-                location: location,
-                type: type,
-                currentTSNHours: parseFloat(currentTSNHours.toFixed(1)), // Asegura un decimal
-                currentTSNCycles: parseFloat(currentTSNCycles.toFixed(1)), // Asegura un decimal
-                currentTSNDays: parseFloat(currentTSNDays.toFixed(1)), // Asegura un decimal
-                currentTSOHours: parseFloat(((type === "condition" ? 0 : currentTSNHours) * 0.2).toFixed(1)), // TSO como porcentaje del TSN, con un decimal
-                currentTSOCycles: parseFloat(((type === "condition" ? 0 : currentTSNCycles) * 0.2).toFixed(1)),
-                currentTSODays: parseFloat(((type === "condition" ? 0 : currentTSNDays) * 0.2).toFixed(1)),
-                lifeLimitHours: parseFloat(lifeLimitHours.toFixed(1)), // Asegura un decimal
-                lifeLimitCycles: parseFloat(lifeLimitCycles.toFixed(1)), // Asegura un decimal
-                lifeLimitDays: parseFloat(lifeLimitDays.toFixed(1)), // Asegura un decimal
-                dueDateTT: dueDateTT,
-                status: "Operativo",
-                lastInspectionDate: "2024-01-01",
-                nextInspectionDue: "2025-01-01"
-            };
-        }
-
-        // Lista inicial de componentes reconstruida exhaustivamente
-        const initialPrincipalComponents = [
-            generateComponent("M/R BLADE (RED)", "MRB-R", "hours", 5000, 4800, "Rotor Principal"),
-            generateComponent("M/R BLADE (RED)", "MRB-R", "hours", 5000, 4750, "Rotor Principal"),
-            generateComponent("M/R BLADE (BLUE)", "MRB-B", "hours", 5000, 3500, "Rotor Principal"),
-            generateComponent("M/R BLADE (BLUE)", "MRB-B", "hours", 5000, 3450, "Rotor Principal"),
-            generateComponent("M/R BLADE (ORANGE)", "MRB-O", "hours", 5000, 4100, "Rotor Principal"),
-            generateComponent("M/R BLADE (ORANGE)", "MRB-O", "hours", 5000, 4050, "Rotor Principal"),
-            generateComponent("M/R BLADE (GREEN)", "MRB-G", "hours", 5000, 1200, "Rotor Principal"),
-            generateComponent("M/R BLADE (GREEN)", "MRB-G", "hours", 5000, 1150, "Rotor Principal"),
-            
-            generateComponent("BOLT EXPANDABLE", "BOLT-EXP", "cycles", 500, 450, "Varios"),
-            generateComponent("BOLT EXPANDABLE", "BOLT-EXP", "cycles", 500, 400, "Varios"),
-            generateComponent("BOLT EXPANDABLE", "BOLT-EXP", "cycles", 500, 350, "Varios"),
-            generateComponent("BOLT EXPANDABLE", "BOLT-EXP", "cycles", 500, 300, "Varios"),
-            
-            generateComponent("BLADE BOLT ASSY", "BBA-PN", "cycles", 1000, 800, "Rotor Principal"),
-            generateComponent("BLADE BOLT ASSY", "BBA-PN", "cycles", 1000, 750, "Rotor Principal"),
-            generateComponent("BLADE BOLT ASSY", "BBA-PN", "cycles", 1000, 700, "Rotor Principal"),
-            generateComponent("BLADE BOLT ASSY", "BBA-PN", "cycles", 1000, 650, "Rotor Principal"),
-            
-            generateComponent("M/R HUB ASSEMBLY", "MRH-A", "hours", 4000, 3900, "Principal"),
-            generateComponent("M/R HUB ASSEMBLY", "MRH-B", "hours", 4000, 2800, "Principal"),
-            generateComponent("YOKE ASSEMBLY", "YOKE-A", "hours", 2500, 1800, "Principal"),
-            generateComponent("YOKE ASSEMBLY", "YOKE-B", "hours", 2500, 1500, "Principal"),
-            generateComponent("SEAT, LOWER CONE", "SLC-PN", "hours", 1500, 500, "Tren de Aterrizaje"),
-            generateComponent("PLATE ASSEMBLY", "PLATE-A", "hours", 1000, 300, "Estructura"),
-            generateComponent("PLATE ASSEMBLY", "PLATE-B", "hours", 1000, 250, "Estructura"),
-            generateComponent("SEAT, UPPER CONE", "SUC-PN", "hours", 1500, 600, "Tren de Aterrizaje"),
-            
-            ...Array(8).fill(null).map((_, i) => generateComponent("DRIVE PIN", `PIN-DR-${globalSerialCounter++}`, "cycles", 1000, 750 - (i * 50), "Tren de Aterrizaje")),
-            ...Array(8).fill(null).map((_, i) => generateComponent("ARM ASSEMBLY", `ARM-A-${globalSerialCounter++}`, "hours", 1200, 500 - (i * 20), "Controles de Vuelo")),
-            ...Array(16).fill(null).map((_, i) => generateComponent("BRACKET ASSEMBLY", `BRKT-A-${globalSerialCounter++}`, "hours", 1500, 600 - (i * 10), "Estructura")),
-            ...Array(12).fill(null).map((_, i) => generateComponent("DAMPER BRIDGE ASSY", `DBA-PN-${globalSerialCounter++}`, "hours", 1500, 1200 - (i * 50), "Rotor Principal")),
-            
-            generateComponent("SPINDLE AND DAMPER BRG", "SDB-PN-1", "cycles", 800, 650, "Rotor Principal"),
-            generateComponent("SPINDLE AND DAMPER BRG", "SDB-PN-2", "cycles", 800, 600, "Rotor Principal"),
-            generateComponent("SPINDLE AND DAMPER BRG", "SDB-PN-3", "cycles", 800, 550, "Rotor Principal"),
-            generateComponent("SPINDLE AND DAMPER BRG", "SDB-PN-4", "cycles", 800, 500, "Rotor Principal"),
-            
-            generateComponent("PITCH HORN ASSY", "PHA-PN-1", "hours", 1000, 700, "Rotor Principal"),
-            generateComponent("PITCH HORN ASSY", "PHA-PN-2", "hours", 1000, 650, "Rotor Principal"),
-            generateComponent("PITCH HORN ASSY", "PHA-PN-3", "hours", 1000, 600, "Rotor Principal"),
-            generateComponent("PITCH HORN ASSY", "PHA-PN-4", "hours", 1000, 550, "Rotor Principal"),
-            
-            generateComponent("FITTING", "FIT-PN-1", "cycles", 700, 550, "Cola"),
-            generateComponent("FITTING", "FIT-PN-2", "cycles", 700, 500, "Cola"),
-            generateComponent("FITTING", "FIT-PN-3", "cycles", 700, 450, "Cola"),
-            generateComponent("FITTING", "FIT-PN-4", "cycles", 700, 400, "Cola"),
-            
-            ...Array(4).fill(null).map((_, i) => generateComponent("BOLT, WEIGHT", `BW-PN-${globalSerialCounter++}`, "cycles", 500, 300 - (i * 20), "Varios")),
-            ...Array(4).fill(null).map((_, i) => generateComponent("BOLT, ARM", `BA-PN-${globalSerialCounter++}`, "cycles", 500, 350 - (i * 20), "Varios")),
-            ...Array(16).fill(null).map((_, i) => generateComponent("BOLT, BRACKET", `BB-PN-${globalSerialCounter++}`, "cycles", 500, 200 - (i * 10), "Varios")),
-            
-            generateComponent("BUSHING, YOKE", "BY-PN", "hours", 1000, 400, "Principal"),
-            generateComponent("CAP", "CAP-PN", "months", 24, 12, "Varios"),
-            generateComponent("CONE SUPERIOR", "CS-PN", "hours", 800, 300, "Tren de Aterrizaje"),
-            generateComponent("CONE INFERIOR", "CI-PN", "hours", 800, 300, "Tren de Aterrizaje"),
-            
-            ...Array(8).fill(null).map((_, i) => generateComponent("CAM TO UPPER YOKE", `CTUY-PN-${globalSerialCounter++}`, "cycles", 1000, 600 - (i * 20), "Controles de Vuelo")),
-            ...Array(8).fill(null).map((_, i) => generateComponent("UPPER YOKE TO CAM", `UYTC-PN-${globalSerialCounter++}`, "cycles", 1000, 550 - (i * 20), "Controles de Vuelo")),
-            ...Array(4).fill(null).map((_, i) => generateComponent("CLEVIS TO CAM", `CTC-PN-${globalSerialCounter++}`, "cycles", 800, 400 - (i * 20), "Controles de Vuelo")),
-            ...Array(4).fill(null).map((_, i) => generateComponent("CLEVIS ASSY TO LWR CONE", `CALC-PN-${globalSerialCounter++}`, "cycles", 800, 350 - (i * 20), "Controles de Vuelo")),
-            
-            generateComponent("CONTROL SYSTEM BOLTS", "CSB-PN", "hours", 2000, 800, "Controles de Vuelo"),
-            
-            ...Array(3).fill(null).map((_, i) => generateComponent("SUP. CONTROL SYST. BOLT", `SCSB-PN-${globalSerialCounter++}`, "hours", 1000, 400 - (i * 20), "Controles de Vuelo")),
-            
-            ...Array(4).fill(null).map((_, i) => generateComponent("M/R PITCH LINK ASSY", `MRPLA-PN-${globalSerialCounter++}`, "hours", 1200, 900 - (i * 50), "Rotor Principal")),
-            ...Array(4).fill(null).map((_, i) => generateComponent("P/C LINK TUBE", `PCLT-PN-${globalSerialCounter++}`, "hours", 1000, 700 - (i * 50), "Rotor Principal")),
-            ...Array(6).fill(null).map((_, i) => generateComponent("BEARING ROD END", `BRE-PN-${globalSerialCounter++}`, "cycles", 500, 300 - (i * 20), "Varios")),
-            
-            generateComponent("HUB & SLEEVE ASSY", "HSA-PN", "hours", 2000, 1800, "Controles de Vuelo"),
-            generateComponent("SCISSORS HUB", "SHUB-PN", "hours", 1500, 1000, "Controles de Vuelo"),
-            
-            ...Array(5).fill(null).map((_, i) => generateComponent("LEVER DRIVER ASSY", `LDA-PN-${globalSerialCounter++}`, "hours", 1000, 700 - (i * 50), "Controles de Vuelo")),
-            
-            generateComponent("COLLECTIVE SLEEVE", "CSLEEVE-PN", "hours", 1500, 1200, "Controles de Vuelo"),
-            
-            generateComponent("SWASHPLATE LINK ASSY", "SLA-PN-1", "hours", 1000, 800, "Controles de Vuelo"),
-            generateComponent("SWASHPLATE LINK ASSY", "SLA-PN-2", "hours", 1000, 750, "Controles de Vuelo"),
-
-            generateComponent("LINK TUBE", "LTUBE-PN-1", "hours", 800, 500, "Controles de Vuelo"),
-            generateComponent("LINK TUBE", "LTUBE-PN-2", "hours", 800, 450, "Controles de Vuelo"),
-
-            generateComponent("SWASHPLATE & SUPPORT", "SSA-PN", "hours", 3200, 2900, "Controles de Vuelo"),
-            generateComponent("GIMBAL RING", "GRING-PN", "hours", 2500, 1800, "Controles de Vuelo"),
-            generateComponent("OUTER RING", "ORING-PN", "hours", 2500, 1700, "Controles de Vuelo"),
-            generateComponent("SUPPORT ASSY", "SUPA-PN", "hours", 2000, 1500, "Controles de Vuelo"),
-            generateComponent("COLLECTIVE LEVER", "CL-PN-1", "hours", 1500, 1000, "Controles de Vuelo"),
-            generateComponent("COLLECTIVE LEVER", "CL-PN-2", "hours", 1500, 950, "Controles de Vuelo"),
-            
-            generateComponent("MAST ASSEMBLY", "MAST-A-1", "hours", 4500, 3800, "Estructura"),
-            generateComponent("MAST ASSEMBLY", "MAST-A-2", "hours", 4500, 3600, "Estructura"),
-            generateComponent("MAST ASSEMBLY", "MAST-A-3", "hours", 4500, 3400, "Estructura"),
-            generateComponent("MAST POLE", "MP-PN-1", "hours", 4500, 3800, "Estructura"),
-            generateComponent("MAST POLE", "MP-PN-2", "hours", 4500, 3600, "Estructura"),
-            
-            generateComponent("TRANSMISSION ASSY", "TX-A", "hours", 8000, 6800, "Transmisión"),
-            generateComponent("TRANSMISSION ASSY", "TX-B", "hours", 6000, 5200, "Transmisión"),
-            
-            generateComponent("QUILL ASSY. HYD. DRIVE", "QAHD-PN", "hours", 1000, 700, "Transmisión"),
-            generateComponent("QUILL ASSEMBLY", "QA-A", "hours", 3000, 2500, "Transmisión"), 
-            generateComponent("QUILL ASSEMBLY", "QA-B", "hours", 3000, 2800, "Transmisión"),
-            generateComponent("SPIDER", "SPIDER-PN-1", "cycles", 1000, 700, "Transmisión"),
-            generateComponent("SPIDER", "SPIDER-PN-2", "cycles", 1000, 650, "Transmisión"),
-            generateComponent("ROTOR BRAKE QUILL", "RBQ-PN", "hours", 1500, 800, "Transmisión"),
-            generateComponent("DRIVESHAFT ASSY", "DS-A", "hours", 4000, 3200, "Transmisión"),
-            
-            generateComponent("HYDRAULIC CYLINDER ASSY", "HCA-A", "hours", 2500, 2000, "Controles de Vuelo"),
-            generateComponent("HYDRAULIC CYLINDER ASSY", "HCA-B", "hours", 2500, 2300, "Controles de Vuelo"),
-            generateComponent("HYDRAULIC CYLINDER ASSY", "HCA-C", "hours", 2500, 1500, "Controles de Vuelo"),
-            
-            generateComponent("HYD. SERVO ACTUATOR", "HSA-PN", "hours", 3000, 2500, "Controles de Vuelo"),
-            
-            ...Array(6).fill(null).map((_, i) => generateComponent("HANGER ASSY", `HA-PN-${globalSerialCounter++}`, "hours", 2200, 1800 - (i * 50), "Transmisión")),
-            
-            ...Array(4).fill(null).map((_, i) => generateComponent("T/R DRIVESHAFT COUPLING", `TRDC-PN-${globalSerialCounter++}`, "hours", 1000, 700 - (i * 50), "Transmisión")),
-            
-            generateComponent("42 GEARBOX", "42GB-PN-1", "hours", 3000, 2000, "Transmisión"),
-            generateComponent("42 GEARBOX", "42GB-PN-2", "hours", 3000, 1800, "Transmisión"),
-            generateComponent("90 GEARBOX", "90GB-PN-1", "hours", 3500, 2500, "Rotor de Cola"), 
-            generateComponent("90 GEARBOX", "90GB-PN-2", "hours", 3500, 2400, "Rotor de Cola"),
-            
-            generateComponent("T/R HUB ASSY", "TRHA-PN", "hours", 2000, 1500, "Rotor de Cola"),
-            generateComponent("T/R YOKE IDLER ASSY", "TRYIA-PN", "hours", 1500, 1000, "Rotor de Cola"),
-            generateComponent("LEVER ASSY", "LVR-PN", "hours", 1200, 800, "Rotor de Cola"),
-            generateComponent("T/R RETENTION NUT", "TRRN-PN", "months", 36, 24, "Rotor de Cola"),
-            generateComponent("CROSSHEAD LINK ASSY", "CHLA-PN", "hours", 1000, 700, "Rotor de Cola"),
-            
-            generateComponent("T/R BLADE", "TRB-PN-1", "hours", 3000, 2500, "Rotor de Cola"),
-            generateComponent("T/R BLADE", "TRB-PN-2", "hours", 3000, 2700, "Rotor de Cola"),
-            
-            generateComponent("FIRE EXTINGUISHER # 1", "FE-A01-1", "months", 60, 48, "Cabina"),
-            generateComponent("FIRE EXTINGUISHER # 1", "FE-A01-2", "months", 60, 55, "Cabina"),
-            
-            generateComponent("CARTRIDGE", "CART-A01-1", "months", 60, 48, "Cabina"),
-            generateComponent("CARTRIDGE", "CART-A01-2", "months", 60, 55, "Cabina"),
-            generateComponent("CARTRIDGE", "CART-A02-1", "months", 60, 49, "Cabina"), 
-            generateComponent("CARTRIDGE", "CART-A02-2", "months", 60, 56, "Cabina"), 
-
-            generateComponent("FIRE EXTINGUISHER # 2", "FE-A02-1", "months", 60, 48, "Cabina"),
-            generateComponent("FIRE EXTINGUISHER # 2", "FE-A02-2", "months", 60, 55, "Cabina"),
-            
-            generateComponent("STARTER GENERATOR # 1", "SG-B01-1", "hours", 1500, 1200, "Motor 1"),
-            generateComponent("STARTER GENERATOR # 2", "SG-B01-2", "hours", 1500, 1400, "Motor 2"),
-            
-            generateComponent("BLOWER OIL COOLER BEARING", "BOCB-C01-1", "cycles", 800, 650, "Motor 1"),
-            generateComponent("BLOWER OIL COOLER BEARING", "BOCB-C01-2", "cycles", 800, 780, "Motor 2"),
-            generateComponent("BLOWER OIL COOLER BEARING", "BOCB-C01-3", "cycles", 800, 660, "Motor 1"), 
-            generateComponent("BLOWER OIL COOLER BEARING", "BOCB-C01-4", "cycles", 800, 790, "Motor 2"),
-
-            generateComponent("ENGINE PT6T-3B # 1", "PT6T-3B-1", "hours", 3600, 3000, "Motor 1"),
-            generateComponent("ENGINE PT6T-3B # 2", "PT6T-3B-2", "hours", 3600, 3050, "Motor 2"), 
-
-            generateComponent("MANUAL FUEL CONTROL", "MFC-D01-1A", "hours", 2000, 1600, "Motor 1"),
-            generateComponent("MANUAL FUEL CONTROL", "MFC-D01-1B", "hours", 2000, 1550, "Motor 1"),
-            generateComponent("MANUAL FUEL CONTROL", "MFC-D01-2A", "hours", 2000, 1500, "Motor 2"),
-            generateComponent("MANUAL FUEL CONTROL", "MFC-D01-2B", "hours", 2000, 1450, "Motor 2"),
-
-            generateComponent("AUTOMATIC FUEL CONTROL", "AFC-E01-1A", "hours", 2000, 1800, "Motor 1"),
-            generateComponent("AUTOMATIC FUEL CONTROL", "AFC-E01-1B", "hours", 2000, 1950, "Motor 1"),
-            generateComponent("AUTOMATIC FUEL CONTROL", "AFC-E01-1C", "hours", 2000, 1500, "Motor 1"),
-            generateComponent("AUTOMATIC FUEL CONTROL", "AFC-E01-1D", "hours", 2000, 1700, "Motor 1"),
-            generateComponent("AUTOMATIC FUEL CONTROL", "AFC-E01-2A", "hours", 2000, 1750, "Motor 2"),
-            generateComponent("AUTOMATIC FUEL CONTROL", "AFC-E01-2B", "hours", 2000, 1900, "Motor 2"),
-            generateComponent("AUTOMATIC FUEL CONTROL", "AFC-E01-2C", "hours", 2000, 1400, "Motor 2"),
-            generateComponent("AUTOMATIC FUEL CONTROL", "AFC-E01-2D", "hours", 2000, 1650, "Motor 2"),
-            
-            generateComponent("FUEL PUMP", "FP-F01-1A", "hours", 1800, 1500, "Motor 1"),
-            generateComponent("FUEL PUMP", "FP-F01-1B", "hours", 1800, 1480, "Motor 1"),
-            generateComponent("FUEL PUMP", "FP-F01-2A", "hours", 1800, 1450, "Motor 2"),
-            generateComponent("FUEL PUMP", "FP-F01-2B", "hours", 1800, 1430, "Motor 2"),
-
-            generateComponent("OIL TO FUEL HEATER", "OFH-G01-1A", "hours", 1800, 1700, "Motor 1"),
-            generateComponent("OIL TO FUEL HEATER", "OFH-G01-1B", "hours", 1800, 1650, "Motor 1"),
-            generateComponent("OIL TO FUEL HEATER", "OFH-G01-2A", "hours", 1800, 1600, "Motor 2"),
-            generateComponent("OIL TO FUEL HEATER", "OFH-G01-2B", "hours", 1800, 1580, "Motor 2"),
-
-            generateComponent("BLEED VALVE", "BV-H01-1A", "hours", 1200, 900, "Motor 1"),
-            generateComponent("BLEED VALVE", "BV-H01-1B", "hours", 1200, 880, "Motor 1"),
-            generateComponent("BLEED VALVE", "BV-H01-2A", "hours", 1200, 850, "Motor 2"),
-            generateComponent("BLEED VALVE", "BV-H01-2B", "hours", 1200, 830, "Motor 2"),
-
-            generateComponent("FLOW DIVIDER", "FD-I01-1A", "hours", 1200, 1100, "Motor 1"),
-            generateComponent("FLOW DIVIDER", "FD-I01-1B", "hours", 1200, 1080, "Motor 1"),
-            generateComponent("FLOW DIVIDER", "FD-I01-2A", "hours", 1200, 1050, "Motor 2"),
-            generateComponent("FLOW DIVIDER", "FD-I01-2B", "hours", 1200, 1030, "Motor 2"),
-
-            generateComponent("FUEL SURGE ACCUMULATOR", "FSA-J01-1A", "hours", 1000, 800, "Motor 1"),
-            generateComponent("FUEL SURGE ACCUMULATOR", "FSA-J01-1B", "hours", 1000, 780, "Motor 1"),
-            generateComponent("FUEL SURGE ACCUMULATOR", "FSA-J01-2A", "hours", 1000, 750, "Motor 2"),
-            generateComponent("FUEL SURGE ACCUMULATOR", "FSA-J01-2B", "hours", 1000, 730, "Motor 2"),
-
-            generateComponent("TRIM COMPENSATOR", "TC-K01-1A", "hours", 1000, 950, "Motor 1"),
-            generateComponent("TRIM COMPENSATOR", "TC-K01-1B", "hours", 1000, 930, "Motor 1"),
-            generateComponent("TRIM COMPENSADOR", "TC-K01-2A", "hours", 1000, 900, "Motor 2"), 
-            generateComponent("TRIM COMPENSADOR", "TC-K01-2B", "hours", 1000, 880, "Motor 2"),
-
-            generateComponent("IGNITION EXCITER", "IE-L01-1A", "cycles", 500, 400, "Motor 1"),
-            generateComponent("IGNITION EXCITER", "IE-L01-1B", "cycles", 500, 390, "Motor 1"),
-            generateComponent("IGNITION EXCITER", "IE-L01-2A", "cycles", 500, 380, "Motor 2"),
-            generateComponent("IGNITION EXCITER", "IE-L01-2B", "cycles", 500, 370, "Motor 2"),
-
-            generateComponent("IGNITION CABLE (2)", "IC-M01-1A", "cycles", 500, 480, "Motor 1"),
-            generateComponent("IGNITION CABLE (2)", "IC-M01-1B", "cycles", 500, 470, "Motor 1"),
-            generateComponent("IGNITION CABLE (2)", "IC-M01-2A", "cycles", 500, 450, "Motor 2"),
-            generateComponent("IGNITION CABLE (2)", "IC-M01-2B", "cycles", 500, 440, "Motor 2"),
-            
-            generateComponent("DISK- STG 1 P.T.", "DS1PT-N01-1A", "cycles", 2500, 2000, "Motor 1"),
-            generateComponent("DISK- STG 1 P.T.", "DS1PT-N01-1B", "cycles", 2500, 2300, "Motor 1"),
-            generateComponent("DISK- STG 1 P.T.", "DS1PT-N01-2A", "cycles", 2500, 1900, "Motor 2"),
-            generateComponent("DISK- STG 1 P.T.", "DS1PT-N01-2B", "cycles", 2500, 2200, "Motor 2"),
-            
-            generateComponent("IMPELLER", "IMP-O01-1A", "cycles", 2000, 1600, "Motor 1"),
-            generateComponent("IMPELLER", "IMP-O01-1B", "cycles", 2000, 1580, "Motor 1"),
-            generateComponent("IMPELLER", "IMP-O01-2A", "cycles", 2000, 1550, "Motor 2"),
-            generateComponent("IMPELLER", "IMP-O01-2B", "cycles", 2000, 1530, "Motor 2"),
-
-            generateComponent("DISK- STG 3 COMPRESSOR", "DS3C-P01-1A", "cycles", 2000, 1800, "Motor 1"),
-            generateComponent("DISK- STG 3 COMPRESSOR", "DS3C-P01-1B", "cycles", 2000, 1780, "Motor 1"),
-            generateComponent("DISK- STG 3 COMPRESSOR", "DS3C-P01-2A", "cycles", 2000, 1750, "Motor 2"),
-            generateComponent("DISK- STG 3 COMPRESSOR", "DS3C-P01-2B", "cycles", 2000, 1730, "Motor 2"),
-
-            generateComponent("DISK- STG 2 COMPRESSOR", "DS2C-Q01-1A", "cycles", 2000, 1950, "Motor 1"),
-            generateComponent("DISK- STG 2 COMPRESSOR", "DS2C-Q01-1B", "cycles", 2000, 1920, "Motor 1"),
-            generateComponent("DISK- STG 2 COMPRESSOR", "DS2C-Q01-2A", "cycles", 2000, 1850, "Motor 2"),
-            generateComponent("DISK- STG 2 COMPRESSOR", "DS2C-Q01-2B", "cycles", 2000, 1820, "Motor 2"),
-
-            generateComponent("REAR HUB", "RH-R01-1A", "cycles", 1500, 1200, "Motor 1"),
-            generateComponent("REAR HUB", "RH-R01-1B", "cycles", 1500, 1400, "Motor 1"),
-            generateComponent("REAR HUB", "RH-R01-2A", "cycles", 1500, 1150, "Motor 2"),
-            generateComponent("REAR HUB", "RH-R01-2B", "cycles", 1500, 1350, "Motor 2"),
-            
-            generateComponent("DISK- COMPRESSOR TURBINE", "DCT-S01-1A", "cycles", 1800, 1500, "Motor 1"),
-            generateComponent("DISK- COMPRESSOR TURBINE", "DCT-S01-1B", "cycles", 1800, 1450, "Motor 1"),
-            generateComponent("DISK- COMPRESSOR TURBINE", "DCT-S01-2A", "cycles", 1800, 1400, "Motor 2"),
-            generateComponent("DISK- COMPRESSOR TURBINE", "DCT-S01-2B", "cycles", 1800, 1350, "Motor 2"),
-            
-            generateComponent("COMBINING GEARBOX", "CGB-T01", "hours", 4000, 3200, "Transmisión Central"),
-            generateComponent("NF GOVERNOR # 1", "NFG-U01-1", "hours", 1500, 1200, "Motor 1"),
-            generateComponent("NF GOVERNOR # 2", "NFG-U01-2", "hours", 1500, 1400, "Motor 2"),
-            generateComponent("TORQUE CONTROL UNIT", "TCU-V01", "hours", 1200, 900, "Motor"),
-            generateComponent("AFT CROSSTUBE", "ACT-W01", "hours", 2500, 2000, "Estructura"),
-            generateComponent("MOTOR & BLADE ASSY #1", "MBA-X01-1", "hours", 1000, 800, "Tren de Aterrizaje"),
-            generateComponent("MOTOR & BLADE ASSY #2", "MBA-X01-2", "hours", 1000, 950, "Tren de Aterrizaje"),
-            generateComponent("SPEED REDUCER BEARING", "SRB-Y01", "cycles", 800, 650, "Transmisión"),
-            generateComponent("COMPRESSOR ASSY", "CA-Z01", "hours", 1800, 1500, "Motor"),
-            generateComponent("ARTEX 406 ELT BATTERY", "ELT-AA01-1", "months", 12, 10, "Aviónica"),
-            generateComponent("ARTEX 406 ELT BATTERY", "ELT-AA01-2", "months", 12, 5, "Aviónica"),
-            // Nuevos componentes de tipo "condicion" para demostración
-            generateComponent("SENSOR DE PRESIÓN", `SEN-P-COND-${globalSerialCounter++}`, "condition", 0, 0, "Motor"),
-            generateComponent("VÁLVULA DE CIERRE", `VALV-C-COND-${globalSerialCounter++}`, "condition", 0, 0, "Combustible"),
-            generateComponent("INDICADOR DE TEMPERATURA", `IND-T-COND-${globalSerialCounter++}`, "condition", 0, 0, "Cabina"),
-        ];
-
-
-        // Variable para almacenar los componentes cargados desde Firebase
-        let principalComponents = [];
+        let principalComponents = []; // Almacena todos los componentes (activos y retirados)
 
 
         /**
@@ -995,40 +1142,46 @@
          * @returns {number|string} Vida restante calculada o un marcador para "condicion".
          */
         function calculateRemainingLife(component) {
-            // Asegúrate de que el componente sea válido
             if (!component) return 0;
 
-            if (component.type === "condition") { // Nuevo tipo "condition"
-                return "CONDICION_TYPE"; // Marcador especial para "condición"
+            if (component.type === "condition") {
+                return "CONDICION_TYPE"; // Marcador especial
             }
 
             let totalLife = 0;
-            let currentLife = 0;
-            let remaining = 0;
+            let currentLifeEffective = 0; // Vida efectiva para el cálculo
 
-            // Usa parseFloat y toFixed(1) para manejar decimales consistentemente
+            // Estos son los TSN iniciales del componente
+            const initialTSNHours = parseFloat(component.initialTSNHours) || 0;
+            const initialTSNCycles = parseFloat(component.initialTSNCycles) || 0;
+            const initialTSNDays = parseFloat(component.initialTSNDays) || 0;
+
+            // Horas/RINS de la aeronave en el momento de la instalación del componente
+            const aircraftHrsAtInstallation = parseFloat(component.aircraftHrsAtInstallation) || 0;
+            const aircraftRinsAtInstallation = parseFloat(component.aircraftRinsAtInstallation) || 0;
+
+
             if (component.type === "hours") {
                 totalLife = parseFloat(component.lifeLimitHours) || 0;
-                currentLife = currentAcHrs; // Horas acumuladas del helicóptero (ya es float)
-                remaining = totalLife - currentLife; 
+                // La vida efectiva es (AC HRS actual - AC HRS al instalar) + TSN Inicial del Componente
+                currentLifeEffective = (currentAcHrs - aircraftHrsAtInstallation) + initialTSNHours; 
             } else if (component.type === "cycles") {
                 totalLife = parseFloat(component.lifeLimitCycles) || 0;
-                currentLife = currentRins; // RINS acumulados del helicóptero (ya es float)
-                remaining = totalLife - currentLife; 
+                // La vida efectiva es (RINS actual - RINS al instalar) + TSN Inicial del Componente
+                currentLifeEffective = (currentRins - aircraftRinsAtInstallation) + initialTSNCycles; 
             } else if (component.type === "months") { 
-                totalLife = parseFloat(component.lifeLimitDays) || 0; // Se asume que lifeLimitDays es el total de días de vida útil
+                totalLife = parseFloat(component.lifeLimitDays) || 0; 
+                let daysSinceInstallation = 0;
                 if (component.installationDate) {
                     const today = new Date();
                     const installationDate = new Date(component.installationDate);
-                    // Calcula los días transcurridos desde la instalación
                     const timeDiff = today.getTime() - installationDate.getTime();
-                    currentLife = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1)); // Convertir a float y redondear
-                    remaining = Math.max(0, totalLife - currentLife);
-                } else {
-                    remaining = totalLife; // Si no hay fecha de instalación, se asume vida completa restante
+                    daysSinceInstallation = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1));
                 }
+                // La vida efectiva es (Días desde la instalación) + TSN Inicial del Componente
+                currentLifeEffective = daysSinceInstallation + initialTSNDays; 
             }
-            return parseFloat(remaining.toFixed(1)); // Devuelve con un decimal
+            return parseFloat((totalLife - currentLifeEffective).toFixed(1)); 
         }
 
         /**
@@ -1038,10 +1191,10 @@
          * @returns {string} Clase CSS para el color.
          */
         function getRemainingColorClass(remaining, totalLife) {
-            if (remaining === "CONDICION_TYPE") { // Maneja el tipo "condition"
-                return 'remaining-blue'; // Nueva clase para color azul
+            if (remaining === "CONDICION_TYPE") {
+                return 'remaining-blue';
             }
-            if (totalLife === 0) return '';
+            if (totalLife === 0) return ''; // Evita división por cero
 
             if (remaining <= 0) { 
                 return 'remaining-red';
@@ -1063,31 +1216,42 @@
         function calculateConsumedLifePercentage(component) {
             if (!component) return 0;
 
-            if (component.type === "condition") { // Nuevo tipo "condition"
-                return 100; // Siempre mostrar barra llena para "condición"
+            if (component.type === "condition") {
+                return 100; 
             }
 
             let totalLife = 0;
-            let currentConsumed = 0;
+            let currentConsumedEffective = 0; // Consumido efectivo para el cálculo
+
+            // Estos son los TSN iniciales del componente
+            const initialTSNHours = parseFloat(component.initialTSNHours) || 0;
+            const initialTSNCycles = parseFloat(component.initialTSNCycles) || 0;
+            const initialTSNDays = parseFloat(component.initialTSNDays) || 0;
+
+            // Horas/RINS de la aeronave en el momento de la instalación del componente
+            const aircraftHrsAtInstallation = parseFloat(component.aircraftHrsAtInstallation) || 0;
+            const aircraftRinsAtInstallation = parseFloat(component.aircraftRinsAtInstallation) || 0;
 
             if (component.type === "hours") {
                 totalLife = parseFloat(component.lifeLimitHours) || 0;
-                currentConsumed = currentAcHrs;
+                currentConsumedEffective = (currentAcHrs - aircraftHrsAtInstallation) + initialTSNHours;
             } else if (component.type === "cycles") {
                 totalLife = parseFloat(component.lifeLimitCycles) || 0;
-                currentConsumed = currentRins;
+                currentConsumedEffective = (currentRins - aircraftRinsAtInstallation) + initialTSNCycles;
             } else if (component.type === "months") {
                 totalLife = parseFloat(component.lifeLimitDays) || 0;
+                let daysSinceInstallation = 0;
                 if (component.installationDate) {
                     const today = new Date();
                     const installationDate = new Date(component.installationDate);
                     const timeDiff = today.getTime() - installationDate.getTime();
-                    currentConsumed = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1)); // Convertir a float y redondear
+                    daysSinceInstallation = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1)); 
                 }
+                currentConsumedEffective = daysSinceInstallation + initialTSNDays; 
             }
 
-            if (totalLife === 0) return 0;
-            return Math.min(100, Math.max(0, (currentConsumed / totalLife) * 100));
+            if (totalLife === 0) return 0; // Evita división por cero
+            return Math.min(100, Math.max(0, (currentConsumedEffective / totalLife) * 100));
         }
 
         // Función para poblar los selectores de mes y año
@@ -1205,7 +1369,7 @@
                     if (typeof componentsObject === 'object' && componentsObject !== null && !Array.isArray(componentsObject)) {
                         fetchedComponents = Object.keys(componentsObject)
                                                   .map(key => componentsObject[key])
-                                                  .filter(component => component && component.serialNumber); // Filtra nulos/indefinidos y componentes sin serial
+                                                  .filter(component => component && component.serialNumber);
                     } else {
                         console.warn("Datos de componentes en Firebase en formato inesperado o vacío:", componentsObject);
                     }
@@ -1213,42 +1377,24 @@
 
                 if (fetchedComponents.length > 0) {
                     principalComponents = fetchedComponents;
-                    console.log("Componentes cargados desde Firebase:", principalComponents.length); // Muestra el número de componentes
-                    // Encontrar el número de serie más alto para el contador global
+                    console.log("Componentes cargados desde Firebase:", principalComponents.length);
                     const maxSerial = principalComponents.reduce((max, comp) => {
                         const serialNumMatch = comp.serialNumber ? comp.serialNumber.match(/FAH-(\d+)/) : null;
                         return serialNumMatch ? Math.max(max, parseInt(serialNumMatch[1])) : max;
                     }, 0);
-                    globalSerialCounter = maxSerial + 1; // Establece el contador al siguiente número disponible
-                    filterAndRenderComponents();
+                    globalSerialCounter = maxSerial + 1;
+                    filterAndRenderComponents(); // Llama a la función de filtrado y renderizado
                 } else {
-                    console.log("No se encontraron componentes válidos en Firebase o los datos estaban vacíos/malformados. Inicializando con datos predefinidos...");
-                    // Reinicializar la base de datos con la lista completa y correcta
-                    principalComponents = initialPrincipalComponents;
-                    const updates = {};
-                    // Reiniciar el contador global para la inicialización
-                    globalSerialCounter = 1; 
-                    initialPrincipalComponents.forEach(comp => {
-                        // Regenerar el serial para los componentes iniciales si el contador global fue reseteado
-                        const newComp = { ...comp, serialNumber: `FAH-${String(globalSerialCounter++).padStart(4, '0')}` };
-                        if (newComp.serialNumber) { 
-                            updates[newComp.serialNumber] = newComp;
-                        }
-                    });
-
-                    set(componentsRef, updates)
-                        .then(() => {
-                            console.log("Datos iniciales de componentes guardados en Firebase.");
-                            filterAndRenderComponents();
-                        })
-                        .catch((error) => {
-                            console.error("Error al guardar los datos iniciales de componentes:", error);
-                            componentDetailsDiv.innerHTML = `<p class="text-center text-red-600 col-span-full">Error al inicializar componentes: ${error.message}</p>`;
-                        });
+                    console.log("No se encontraron componentes válidos en Firebase. Comienza agregando nuevos componentes.");
+                    activeComponentsSection.innerHTML = '<p class="text-center text-gray-600 col-span-full">No hay componentes en la base de datos. ¡Agrega uno para empezar!</p>';
+                    retiredComponentsSection.innerHTML = '<p class="text-center text-gray-600 col-span-full">No hay componentes retirados.</p>';
+                    principalComponents = []; // Asegúrate de que la lista esté vacía
+                    globalSerialCounter = 1; // Reinicia el contador para nuevos componentes
                 }
             }, (error) => {
                 console.error("Error al cargar los componentes desde Firebase:", error);
-                componentDetailsDiv.innerHTML = `<p class="text-center text-red-600 col-span-full">Error al cargar componentes: ${error.message}</p>`;
+                activeComponentsSection.innerHTML = `<p class="text-center text-red-600 col-span-full">Error al cargar componentes: ${error.message}</p>`;
+                retiredComponentsSection.innerHTML = `<p class="text-center text-red-600 col-span-full">Error al cargar componentes retirados: ${error.message}</p>`;
             });
         }
 
@@ -1257,13 +1403,11 @@
          * Abre el diálogo de edición y precarga los datos del componente.
          * @param {object} component - El objeto del componente a editar.
          */
-        function openEditDialog(component = null) { // Permite llamar sin componente para "Agregar"
-            // Limpiar el formulario antes de cargar nuevos datos o vaciarlo para un nuevo componente
+        function openEditDialog(component = null) {
             editComponentForm.reset(); 
-            editInputs.serialNumberHidden.value = ''; // Borra el serial oculto por si es un nuevo componente
+            editInputs.serialNumberHidden.value = '';
 
             if (component) {
-                // Si se pasa un componente, precarga sus datos para edición
                 editInputs.serialNumberHidden.value = component.serialNumber || '';
                 editInputs.name.value = component.name || '';
                 editInputs.partNumber.value = component.partNumber || '';
@@ -1272,13 +1416,20 @@
                 editInputs.location.value = component.location || '';
                 editInputs.type.value = component.type || 'hours';
 
-                // Asegura que los valores numéricos se muestren como flotantes (sin toFixed aquí, solo parseFloat)
-                editInputs.currentTSNHours.value = parseFloat(component.currentTSNHours) || 0;
-                editInputs.currentTSNCycles.value = parseFloat(component.currentTSNCycles) || 0;
-                editInputs.currentTSNDays.value = parseFloat(component.currentTSNDays) || 0;
-                editInputs.currentTSOHours.value = parseFloat(component.currentTSOHours) || 0;
-                editInputs.currentTSOCycles.value = parseFloat(component.currentTSOCycles) || 0;
-                editInputs.currentTSODays.value = parseFloat(component.currentTSODays) || 0;
+                // Cargar los valores de TSN Inicial del Componente
+                editInputs.initialTSNHours.value = parseFloat(component.initialTSNHours) || 0;
+                editInputs.initialTSNCycles.value = parseFloat(component.initialTSNCycles) || 0;
+                editInputs.initialTSNDays.value = parseFloat(component.initialTSNDays) || 0;
+                
+                // Cargar los valores de Horas/RINS AC al Instalar
+                editInputs.aircraftHrsAtInstallation.value = parseFloat(component.aircraftHrsAtInstallation) || 0;
+                editInputs.aircraftRinsAtInstallation.value = parseFloat(component.aircraftRinsAtInstallation) || 0;
+
+                // Cargar los valores de TSO Inicial del Componente
+                editInputs.initialTSOHours.value = parseFloat(component.initialTSOHours) || 0;
+                editInputs.initialTSOCycles.value = parseFloat(component.initialTSOCycles) || 0;
+                editInputs.initialTSODays.value = parseFloat(component.initialTSODays) || 0;
+
                 editInputs.lifeLimitHours.value = parseFloat(component.lifeLimitHours) || 0;
                 editInputs.lifeLimitCycles.value = parseFloat(component.lifeLimitCycles) || 0;
                 editInputs.lifeLimitDays.value = parseFloat(component.lifeLimitDays) || 0;
@@ -1290,20 +1441,35 @@
 
                 editComponentDialog.querySelector('h3').textContent = 'Editar Componente';
 
-                // Deshabilitar/habilitar campos según el tipo de vida existente
                 toggleNumericFields(component.type === 'condition');
             } else {
-                // Si no se pasa componente, prepara para un nuevo componente
                 editComponentDialog.querySelector('h3').textContent = 'Agregar Nuevo Componente';
-                editInputs.type.value = 'hours'; // Por defecto, Horas
-                editInputs.serialNumber.value = `FAH-${String(globalSerialCounter).padStart(4, '0')}`; // Nuevo serial sugerido
-                editInputs.installationDate.valueAsDate = new Date(); // Fecha actual
-                editInputs.lastInspectionDate.valueAsDate = new Date(); // Fecha actual
-                editInputs.nextInspectionDue.valueAsDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1)); // Un año en el futuro
+                editInputs.type.value = 'hours';
+                editInputs.serialNumber.value = `FAH-${String(globalSerialCounter).padStart(4, '0')}`;
+                editInputs.installationDate.valueAsDate = new Date();
+                editInputs.lastInspectionDate.valueAsDate = new Date();
+                editInputs.nextInspectionDue.valueAsDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+                
+                // Asegurarse de que los campos de TSN Inicial estén vacíos/cero para un nuevo componente
+                editInputs.initialTSNHours.value = 0;
+                editInputs.initialTSNCycles.value = 0;
+                editInputs.initialTSNDays.value = 0;
 
-                // Asegurarse de que los campos numéricos estén habilitados por defecto para "hours"
+                // Pre-rellenar Horas/RINS AC al Instalar con los totales actuales del helicóptero
+                editInputs.aircraftHrsAtInstallation.value = currentAcHrs.toFixed(1);
+                editInputs.aircraftRinsAtInstallation.value = currentRins.toFixed(1);
+
+                // Asegurarse de que los campos TSO Inicial y Vida Límite estén vacíos/cero
+                editInputs.initialTSOHours.value = 0;
+                editInputs.initialTSOCycles.value = 0;
+                editInputs.initialTSODays.value = 0;
+                editInputs.lifeLimitHours.value = 0;
+                editInputs.lifeLimitCycles.value = 0;
+                editInputs.lifeLimitDays.value = 0;
+
+
                 toggleNumericFields(false);
-                editInputs.dueDateTT.value = ""; // Limpiar el vencimiento
+                editInputs.dueDateTT.value = "";
             }
 
             editComponentDialog.showModal();
@@ -1315,31 +1481,109 @@
          */
         function toggleNumericFields(disable) {
             const fieldsToToggle = [
-                'currentTSNHours', 'currentTSNCycles', 'currentTSNDays',
-                'currentTSOHours', 'currentTSOCycles', 'currentTSODays',
+                'initialTSNHours', 'initialTSNCycles', 'initialTSNDays',
+                'initialTSOHours', 'initialTSOCycles', 'initialTSODays',
                 'lifeLimitHours', 'lifeLimitCycles', 'lifeLimitDays'
             ];
 
             fieldsToToggle.forEach(field => {
                 editInputs[field].disabled = disable;
                 if (disable) {
-                    editInputs[field].value = 0; // Opcional: poner a 0 si se deshabilita
+                    editInputs[field].value = 0;
                 }
             });
+
+            // Los campos aircraftHrsAtInstallation y aircraftRinsAtInstallation siempre deben estar habilitados
+            // pero si es 'condition', su valor no es relevante para el cálculo de vida.
+            // Los ponemos como readonly si el tipo es 'condition' y no se deshabilitan totalmente.
+            if (disable) {
+                editInputs.aircraftHrsAtInstallation.readOnly = true;
+                editInputs.aircraftRinsAtInstallation.readOnly = true;
+            } else {
+                editInputs.aircraftHrsAtInstallation.readOnly = false;
+                editInputs.aircraftRinsAtInstallation.readOnly = false;
+            }
+
 
             editInputs.dueDateTT.disabled = disable;
             if (disable) {
                 editInputs.dueDateTT.value = "CONDICIÓN";
             } else {
-                // Si se habilita, restaurar el valor si no es un componente nuevo, o dejar vacío
-                // Para esto, necesitaríamos guardar el valor original antes de deshabilitar
-                // Por ahora, simplemente lo limpio si se vuelve a habilitar, para un nuevo componente.
-                // En edición, el valor se cargaría desde 'component' nuevamente.
-                if (!editInputs.serialNumberHidden.value) { // Si es un nuevo componente
+                if (!editInputs.serialNumberHidden.value) {
                     editInputs.dueDateTT.value = "";
+                } else {
+                    const currentComponent = principalComponents.find(comp => comp.serialNumber === editInputs.serialNumberHidden.value);
+                    if (currentComponent && currentComponent.type !== 'condition') {
+                        editInputs.dueDateTT.value = currentComponent.dueDateTT || '';
+                    } else {
+                        editInputs.dueDateTT.value = "";
+                    }
                 }
             }
         }
+
+        /**
+         * Registra un cambio en la base de datos de Firebase.
+         * @param {object} changeData - Los datos del componente (estado actual, después del cambio).
+         * @param {string} changeType - El tipo de cambio (e.g., 'Instalación', 'Edición', 'Retiro', 'Eliminación').
+         * @param {object|null} oldComponent - Los datos del componente antes del cambio (para 'Edición' y 'Retiro').
+         * @param {string|null} replacesSerialNumber - El serial del componente que este reemplaza (para 'Instalación').
+         * @param {string|null} replacedBySerialNumber - El serial del componente que reemplaza a este (para 'Retiro').
+         * @param {string|null} uninstallationReason - El motivo de desinstalación (para 'Retiro').
+         */
+        async function recordComponentChange(changeData, changeType, oldComponent = null, replacesSerialNumber = null, replacedBySerialNumber = null, uninstallationReason = null) {
+            const changeRecord = {
+                timestamp: new Date().toISOString(),
+                serialNumber: changeData.serialNumber || (oldComponent ? oldComponent.serialNumber : 'N/A'),
+                changeType: changeType,
+                oldValues: oldComponent ? JSON.parse(JSON.stringify(oldComponent)) : null, // Copia profunda
+                newValues: changeData ? JSON.parse(JSON.stringify(changeData)) : null, // Copia profunda
+            };
+
+            if (replacesSerialNumber) {
+                changeRecord.replacesSerialNumber = replacesSerialNumber;
+            }
+            if (replacedBySerialNumber) {
+                changeRecord.replacedBySerialNumber = replacedBySerialNumber;
+            }
+            if (uninstallationReason && changeType === 'Retiro') { // Solo añade la razón si es un 'Retiro'
+                changeRecord.uninstallationReason = uninstallationReason;
+            }
+
+            // Solo registra 'Edición' si hay cambios significativos
+            if (changeType === 'Edición' && oldComponent) {
+                const keysToCheck = [
+                    'name', 'partNumber', 'location', 'type',
+                    'initialTSNHours', 'initialTSNCycles', 'initialTSNDays',
+                    'aircraftHrsAtInstallation', 'aircraftRinsAtInstallation',
+                    'initialTSOHours', 'initialTSOCycles', 'initialTSODays',
+                    'lifeLimitHours', 'lifeLimitCycles', 'lifeLimitDays',
+                    'dueDateTT', 'status', 'lastInspectionDate', 'nextInspectionDue'
+                ];
+                let changesDetected = false;
+                for (const key of keysToCheck) {
+                    // Comparar valores después de convertirlos a string para manejar 0 vs "" y números.
+                    if (String(oldComponent[key] || '') !== String(changeData[key] || '')) {
+                        changesDetected = true;
+                        break;
+                    }
+                }
+                if (!changesDetected) {
+                    console.log("No se detectaron cambios significativos para 'Edición'. No se guardará el registro de cambio.");
+                    return; // No registra si no hay cambios
+                }
+            }
+
+            // Usa un ID único para cada registro de cambio
+            const changesRef = ref(database, `artifacts/${appId}/public_data/component_changes/${changeRecord.serialNumber}_${Date.now()}`);
+            try {
+                await set(changesRef, changeRecord);
+                console.log(`Registro de cambio '${changeType}' guardado para ${changeRecord.serialNumber}`);
+            } catch (error) {
+                console.error("Error al guardar el registro de cambio:", error);
+            }
+        }
+
 
         /**
          * Maneja el envío del formulario de edición para guardar los cambios en Firebase.
@@ -1348,7 +1592,7 @@
         async function saveEditedComponent(event) {
             event.preventDefault();
 
-            const oldSerialNumber = editInputs.serialNumberHidden.value; // Será vacío para nuevos componentes
+            const oldSerialNumber = editInputs.serialNumberHidden.value;
             let newSerialNumber = editInputs.serialNumber.value.trim(); 
 
             if (!newSerialNumber) {
@@ -1356,7 +1600,6 @@
                 return; 
             }
 
-            // Asegurar que el nuevo serial no sea un duplicado si estamos agregando uno nuevo
             if (!oldSerialNumber && principalComponents.some(comp => comp.serialNumber === newSerialNumber)) {
                 console.error("Error: El número de serie ya existe. Por favor, elige uno diferente.");
                 return;
@@ -1371,49 +1614,161 @@
                 installationDate: editInputs.installationDate.value || '',
                 location: editInputs.location.value.trim() || '',
                 type: selectedType,
+                status: editInputs.status.value.trim() || 'Activo', // Asegúrate de que el estado por defecto sea 'Activo'
                 
-                // Usar parseFloat para permitir decimales, o 0 si es "condition"
-                currentTSNHours: (selectedType === 'condition' ? 0 : parseFloat(editInputs.currentTSNHours.value) || 0),
-                currentTSNCycles: (selectedType === 'condition' ? 0 : parseFloat(editInputs.currentTSNCycles.value) || 0),
-                currentTSNDays: (selectedType === 'condition' ? 0 : parseFloat(editInputs.currentTSNDays.value) || 0),
-                currentTSOHours: (selectedType === 'condition' ? 0 : parseFloat(editInputs.currentTSOHours.value) || 0),
-                currentTSOCycles: (selectedType === 'condition' ? 0 : parseFloat(editInputs.currentTSOCycles.value) || 0),
-                currentTSODays: (selectedType === 'condition' ? 0 : parseFloat(editInputs.currentTSODays.value) || 0),
+                // Estos campos almacenarán los valores de "TSN Inicial Componente"
+                initialTSNHours: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSNHours.value) || 0),
+                initialTSNCycles: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSNCycles.value) || 0),
+                initialTSNDays: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSNDays.value) || 0),
+
+                // Horas/RINS AC al Instalar
+                aircraftHrsAtInstallation: (selectedType === 'condition' ? 0 : parseFloat(editInputs.aircraftHrsAtInstallation.value) || 0),
+                aircraftRinsAtInstallation: (selectedType === 'condition' ? 0 : parseFloat(editInputs.aircraftRinsAtInstallation.value) || 0),
+
+                // TSO Inicial del Componente
+                initialTSOHours: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSOHours.value) || 0), 
+                initialTSOCycles: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSOCycles.value) || 0),
+                initialTSODays: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSODays.value) || 0),
+
                 lifeLimitHours: (selectedType === 'condition' ? 0 : parseFloat(editInputs.lifeLimitHours.value) || 0),
                 lifeLimitCycles: (selectedType === 'condition' ? 0 : parseFloat(editInputs.lifeLimitCycles.value) || 0),
                 lifeLimitDays: (selectedType === 'condition' ? 0 : parseFloat(editInputs.lifeLimitDays.value) || 0),
 
                 dueDateTT: (selectedType === 'condition' ? 'CONDICIÓN' : editInputs.dueDateTT.value.trim() || ''),
-                status: editInputs.status.value.trim() || '',
                 lastInspectionDate: editInputs.lastInspectionDate.value || '',
                 nextInspectionDue: editInputs.nextInspectionDue.value || '',
             };
 
             try {
-                // Si el número de serie ha cambiado (es una edición y el serial fue modificado) o es un componente nuevo
-                if (oldSerialNumber && oldSerialNumber !== newSerialNumber) {
-                    const oldComponentRef = ref(database, `artifacts/${appId}/public_data/components/${oldSerialNumber}`);
-                    await set(oldComponentRef, null); // Elimina el componente antiguo
-                    console.log(`Componente con serial antiguo ${oldSerialNumber} eliminado.`);
+                let oldComponentData = null;
+                if (oldSerialNumber) {
+                    // Fetch the existing component data before it's potentially overwritten/deleted
+                    const existingCompRef = ref(database, `artifacts/${appId}/public_data/components/${oldSerialNumber}`);
+                    const snapshot = await get(existingCompRef); // Usa get() para obtener los datos una vez
+                    if (snapshot.exists()) {
+                        oldComponentData = snapshot.val();
+                    }
                 }
 
-                // Guarda o actualiza el componente con el nuevo (o el mismo) número de serie
-                const newComponentRef = ref(database, `artifacts/${appId}/public_data/components/${newSerialNumber}`);
-                await set(newComponentRef, updatedComponentData);
+                let uninstallationReason = '';
+                const oldPartNumber = oldComponentData ? oldComponentData.partNumber : '';
+                const newPartNumber = updatedComponentData.partNumber;
 
-                console.log("Componente guardado/actualizado en Firebase:", updatedComponentData);
+                // Si el número de serie o el número de parte cambia para un componente existente, pedir motivo de desinstalación.
+                if (oldSerialNumber && (oldSerialNumber !== newSerialNumber || oldPartNumber !== newPartNumber)) {
+                    uninstallationReason = await openUninstallationReasonDialog(oldSerialNumber);
+                    if (uninstallationReason === null) { // El usuario canceló el diálogo de motivo de desinstalación
+                        console.log("Actualización cancelada por el usuario (motivo de desinstalación no proporcionado).");
+                        return; // Detener la operación de guardado
+                    }
+                }
+
+
+                if (oldSerialNumber && oldSerialNumber !== newSerialNumber) {
+                    // El número de serie del componente ha cambiado (implica eliminación del antiguo, instalación del nuevo)
+                    const oldComponentRef = ref(database, `artifacts/${appId}/public_data/components/${oldSerialNumber}`);
+                    
+                    // Actualizar el estado del componente antiguo a 'Retirado' y añadir 'replacedBy' y 'uninstallationReason'
+                    if (oldComponentData) {
+                        oldComponentData.status = 'Retirado';
+                        oldComponentData.replacedBy = newSerialNumber; // Referencia al nuevo serial
+                        if (uninstallationReason) { // Añade la razón si se proporcionó
+                            oldComponentData.uninstallationReason = uninstallationReason;
+                        }
+                        await set(oldComponentRef, oldComponentData); // Actualizar el registro antiguo
+                        console.log(`Componente con serial antiguo ${oldSerialNumber} marcado como 'Retirado' y actualizado.`);
+                        // Pasa uninstallationReason a recordComponentChange para 'Retiro'
+                        await recordComponentChange(oldComponentData, 'Retiro', oldComponentData, null, newSerialNumber, uninstallationReason);
+                    } else {
+                        // Si oldComponentData no se encontró, solo registra el retiro con el motivo
+                        await recordComponentChange({ serialNumber: oldSerialNumber, status: 'Retirado' }, 'Retiro', null, null, newSerialNumber, uninstallationReason);
+                    }
+                    
+                    // Instalar el nuevo componente
+                    const newComponentRef = ref(database, `artifacts/${appId}/public_data/components/${newSerialNumber}`);
+                    await set(newComponentRef, updatedComponentData);
+                    console.log("Nuevo componente agregado en Firebase:", updatedComponentData);
+                    await recordComponentChange(updatedComponentData, 'Instalación', null, oldSerialNumber, null); // Registrar instalación del nuevo
+
+                } else if (!oldSerialNumber) {
+                    // Nuevo componente siendo añadido (no reemplazo)
+                    const newComponentRef = ref(database, `artifacts/${appId}/public_data/components/${newSerialNumber}`);
+                    await set(newComponentRef, updatedComponentData);
+                    console.log("Nuevo componente agregado en Firebase:", updatedComponentData);
+                    await recordComponentChange(updatedComponentData, 'Instalación');
+
+                } else {
+                    // Componente existente siendo actualizado (el número de serie no cambió)
+                    const componentRef = ref(database, `artifacts/${appId}/public_data/components/${newSerialNumber}`);
+                    await set(componentRef, updatedComponentData); // Actualizar la entrada existente
+                    console.log("Componente actualizado en Firebase:", updatedComponentData);
+                    await recordComponentChange(updatedComponentData, 'Edición', oldComponentData);
+                }
+
                 editComponentDialog.close();
             } catch (error) {
                 console.error("Error al guardar el componente en Firebase:", error);
             }
         }
 
-        // Función para renderizar los detalles de los componentes
-        function renderComponentDetails(componentsToDisplay) {
-            componentDetailsDiv.innerHTML = '';
+        /**
+         * Calcula el TSO actual de un componente.
+         * @param {object} component - El objeto del componente.
+         * @param {string} type - Tipo de vida ('hours', 'cycles', 'months').
+         * @returns {number} El valor TSO actual calculado.
+         */
+        function calculateCurrentTSO(component, type) {
+            let initialTSO = 0;
+            let aircraftValueAtInstallation = 0;
+            let currentAircraftValue = 0;
+            let accruedTime = 0; // Tiempo acumulado desde la instalación
+
+            if (type === 'hours') {
+                initialTSO = parseFloat(component.initialTSOHours) || 0;
+                aircraftValueAtInstallation = parseFloat(component.aircraftHrsAtInstallation) || 0;
+                currentAircraftValue = currentAcHrs;
+            } else if (type === 'cycles') {
+                initialTSO = parseFloat(component.initialTSOCycles) || 0;
+                aircraftValueAtInstallation = parseFloat(component.aircraftRinsAtInstallation) || 0;
+                currentAircraftValue = currentRins;
+            } else if (type === 'months') { // TSO en días para tipo 'months'
+                initialTSO = parseFloat(component.initialTSODays) || 0;
+                if (component.installationDate) {
+                    const today = new Date();
+                    const installationDate = new Date(component.installationDate);
+                    const timeDiff = today.getTime() - installationDate.getTime();
+                    accruedTime = parseFloat(((today.getTime() - installationDate.getTime()) / (1000 * 60 * 60 * 24)).toFixed(1));
+                }
+            }
+
+            // Si el TSO inicial es 0, no se acumula tiempo para TSO
+            if (initialTSO === 0) {
+                return 0;
+            }
+
+            // Si es un tipo basado en horas o ciclos, el tiempo acumulado es la diferencia + el TSO inicial
+            if (type === 'hours' || type === 'cycles') {
+                accruedTime = (currentAircraftValue - aircraftValueAtInstallation) + initialTSO;
+            } else if (type === 'months') {
+                // Para meses/días, accruedTime ya está calculado como días desde instalación + TSO inicial
+                accruedTime += initialTSO;
+            }
+            
+            return parseFloat(accruedTime.toFixed(1));
+        }
+
+
+        /**
+         * Renderiza los detalles de los componentes en una sección específica.
+         * @param {Array<object>} componentsToDisplay - Array de componentes a renderizar.
+         * @param {HTMLElement} targetElement - El elemento DOM donde se renderizarán los componentes.
+         * @param {boolean} isRetiredSection - True si es la sección de componentes retirados.
+         */
+        function renderComponentCards(componentsToDisplay, targetElement, isRetiredSection = false) {
+            targetElement.innerHTML = ''; // Limpiar el contenido existente
 
             if (componentsToDisplay.length === 0) {
-                componentDetailsDiv.innerHTML = '<p class="text-center text-gray-600 col-span-full">No se encontraron componentes que coincidan con la búsqueda.</p>';
+                targetElement.innerHTML = `<p class="text-center text-gray-600 col-span-full">No se encontraron componentes ${isRetiredSection ? 'retirados' : 'activos'} que coincidan con la búsqueda.</p>`;
                 return;
             }
 
@@ -1439,22 +1794,40 @@
                 let remainingLifeDisplay = ""; 
                 let progressBarText = "";
 
-                if (component.type === "condition") { // Lógica específica para "condicion"
+                // Calculo de TSN para mostrar en la tarjeta
+                let displayedTSNHours = "N/A";
+                let displayedTSNCycles = "N/A";
+                let displayedTSNDays = "N/A";
+
+                if (component.type === "hours") {
+                    const aircraftHrsDiff = currentAcHrs - (parseFloat(component.aircraftHrsAtInstallation) || 0);
+                    displayedTSNHours = (aircraftHrsDiff + (parseFloat(component.initialTSNHours) || 0)).toFixed(1);
+                    unit = "hrs";
+                } else if (component.type === "cycles") {
+                    const aircraftRinsDiff = currentRins - (parseFloat(component.aircraftRinsAtInstallation) || 0);
+                    displayedTSNCycles = (aircraftRinsDiff + (parseFloat(component.initialTSNCycles) || 0)).toFixed(1);
+                    unit = "ciclos";
+                } else if (component.type === "months" && component.installationDate) {
+                    const today = new Date();
+                    const installationDate = new Date(component.installationDate);
+                    const timeDiff = today.getTime() - installationDate.getTime();
+                    const daysSinceInstallation = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1));
+                    displayedTSNDays = (daysSinceInstallation + (parseFloat(component.initialTSNDays) || 0)).toFixed(1);
+                    unit = "días";
+                }
+
+
+                if (component.type === "condition") {
                     remainingLifeDisplay = "CONDICIÓN";
                     unit = "";
                     colorClass = 'remaining-blue';
                     progressBarColorClass = 'progress-blue';
                     progressBarText = "CONDICIÓN";
+                    displayedTSNHours = "N/A";
+                    displayedTSNCycles = "N/A";
+                    displayedTSNDays = "N/A";
                 } else {
                     remainingLifeDisplay = remainingLife.toFixed(1);
-                    if (component.type === "hours") {
-                        unit = "hrs";
-                    } else if (component.type === "cycles") {
-                        unit = "ciclos";
-                    } else if (component.type === "months") {
-                        unit = "días";
-                    }
-
                     if (remainingLife <= 0) {
                         progressBarColorClass = 'progress-red';
                     } else {
@@ -1468,20 +1841,36 @@
                     progressBarText = `${calculateConsumedLifePercentage(component).toFixed(0)}% Consumido`;
                 }
 
+                // Calcular TSO para visualización
+                const displayedTSOHours = calculateCurrentTSO(component, 'hours');
+                const displayedTSOCycles = calculateCurrentTSO(component, 'cycles'); 
+                const displayedTSODays = calculateCurrentTSO(component, 'months');
+
+                // Añadir clase 'retired' si el componente tiene status 'Retirado'
+                const cardClass = isRetiredSection ? 'component-card retired' : 'component-card';
 
                 const card = document.createElement('div');
-                card.className = 'component-card';
+                card.className = cardClass;
                 card.id = `component-${component.serialNumber}`; 
                 card.innerHTML = `
-                    <h4>${component.name || 'Sin Descripción'}</h4>
-                    <div class="card-buttons">
-                        <button class="edit-button" data-serial="${component.serialNumber}">Editar</button>
-                        <button class="print-single-button" data-serial="${component.serialNumber}">Imprimir</button>
+                    <div class="card-header">
+                        <div class="title-container">
+                            <h4>${component.name || 'Sin Descripción'} ${isRetiredSection ? '(Retirado)' : ''}</h4>
+                        </div>
+                        <div class="card-buttons">
+                            ${isRetiredSection ? 
+                                `<button class="restore-button" data-serial="${component.serialNumber}">Restaurar</button>` :
+                                `<button class="edit-button" data-serial="${component.serialNumber}">Editar</button>
+                                <button class="history-button" data-serial="${component.serialNumber}">Historial</button>
+                                <button class="print-single-button" data-serial="${component.serialNumber}">Imprimir</button>
+                                <button class="retire-button" data-serial="${component.serialNumber}">Retirar</button>`
+                            }
+                        </div>
                     </div>
                     <div class="component-info-grid">
                         <p><strong>No. Parte:</strong> ${component.partNumber || 'N/A'}</p>
                         <p><strong>No. Serie:</strong> ${component.serialNumber || 'N/A'}</p>
-                        <p><strong>Instalado:</strong> ${component.installationDate || 'N/A'}</p>
+                        <p><strong>Instalado (Fecha):</strong> ${component.installationDate || 'N/A'}</p>
                         <p><strong>Ubicación:</strong> ${component.location || 'N/A'}</p>
                         
                         <p><strong>Vida Límite (Hrs):</strong> ${lifeLimitHours.toFixed(1)}</p>
@@ -1489,17 +1878,23 @@
                         <p><strong>Vida Límite (Días):</strong> ${lifeLimitDays.toFixed(1)}</p>
                         <p><strong>Tipo de Vida:</strong> ${component.type || 'N/A'}</p>
 
-                        <p><strong>TSN (Hrs):</strong> ${(parseFloat(component.currentTSNHours) || 0).toFixed(1)}</p>
-                        <p><strong>TSN (Ciclos):</strong> ${(parseFloat(component.currentTSNCycles) || 0).toFixed(1)}</p>
-                        <p><strong>TSN (Días):</strong> ${(parseFloat(component.currentTSNDays) || 0).toFixed(1)}</p>
-                        <p><strong>TSO (Hrs):</strong> ${(parseFloat(component.currentTSOHours) || 0).toFixed(1)}</p>
-                        <p><strong>TSO (Ciclos):</strong> ${(parseFloat(component.currentTSOCycles) || 0).toFixed(1)}</p>
-                        <p><strong>TSO (Días):</strong> ${(parseFloat(component.currentTSODays) || 0).toFixed(1)}</p>
+                        <p><strong>TSN (Hrs):</strong> ${displayedTSNHours}</p>
+                        <p><strong>TSN (Ciclos):</strong> ${displayedTSNCycles}</p>
+                        <p><strong>TSN (Días):</strong> ${displayedTSNDays}</p>
+                        <p><strong>TSN Inicial Componente (Hrs):</strong> ${(parseFloat(component.initialTSNHours) || 0).toFixed(1)}</p>
+                        <p><strong>TSN Inicial Componente (Ciclos):</strong> ${(parseFloat(component.initialTSNCycles) || 0).toFixed(1)}</p>
+                        <p><strong>TSN Inicial Componente (Días):</strong> ${(parseFloat(component.initialTSNDays) || 0).toFixed(1)}</p>
+                        <p><strong>Horas AC al Instalar:</strong> ${(parseFloat(component.aircraftHrsAtInstallation) || 0).toFixed(1)}</p>
+                        <p><strong>RINS AC al Instalar:</strong> ${(parseFloat(component.aircraftRinsAtInstallation) || 0).toFixed(1)}</p>
+                        <p><strong>TSO (Hrs):</strong> ${displayedTSOHours.toFixed(1)}</p>
+                        <p><strong>TSO (Ciclos):</strong> ${displayedTSOCycles.toFixed(1)}</p>
+                        <p><strong>TSO (Días):</strong> ${displayedTSODays.toFixed(1)}</p>
 
                         <p><strong>Última Inspección:</strong> ${component.lastInspectionDate || 'N/A'}</p>
                         <p><strong>Próxima Inspección:</strong> ${component.nextInspectionDue || 'N/A'}</p>
                         <p><strong>Vencimiento (A LAS TT):</strong> ${component.dueDateTT || 'N/A'}</p>
                         <p><strong>Estado:</strong> ${component.status || 'N/A'}</p>
+                        ${component.uninstallationReason ? `<p class="col-span-full"><strong>Motivo Retiro:</strong> ${component.uninstallationReason}</p>` : ''}
                     </div>
                     <div class="remaining-life-section">
                         <span>Remanente:</span>
@@ -1511,34 +1906,268 @@
                         </div>
                     </div>
                 `;
-                componentDetailsDiv.appendChild(card);
+                targetElement.appendChild(card);
 
-                const editButton = card.querySelector('.edit-button');
-                editButton.addEventListener('click', () => {
-                    const selectedComponent = principalComponents.find(comp => comp && comp.serialNumber === editButton.dataset.serial);
-                    if (selectedComponent) {
-                        openEditDialog(selectedComponent);
+                // Asignar listeners a los botones
+                if (isRetiredSection) {
+                    const restoreButton = card.querySelector('.restore-button');
+                    if (restoreButton) {
+                        restoreButton.addEventListener('click', () => {
+                            restoreComponent(component.serialNumber);
+                        });
                     }
-                });
-
-                const printSingleButton = card.querySelector('.print-single-button');
-                printSingleButton.addEventListener('click', () => {
-                    printComponents(component.serialNumber);
-                });
+                } else {
+                    const editButton = card.querySelector('.edit-button');
+                    if (editButton) {
+                        editButton.addEventListener('click', () => {
+                            const selectedComponent = principalComponents.find(comp => comp && comp.serialNumber === editButton.dataset.serial);
+                            if (selectedComponent) {
+                                openEditDialog(selectedComponent);
+                            }
+                        });
+                    }
+                    const historyButton = card.querySelector('.history-button');
+                    if (historyButton) {
+                        historyButton.addEventListener('click', () => {
+                            const serial = historyButton.dataset.serial;
+                            changeLogTitle.textContent = `Historial de Cambios para Componente: ${serial}`;
+                            fetchAndDisplayChangeLogs(serial);
+                            changeLogDialog.showModal();
+                        });
+                    }
+                    const printSingleButton = card.querySelector('.print-single-button');
+                    if (printSingleButton) {
+                        printSingleButton.addEventListener('click', () => {
+                            printComponents(component.serialNumber);
+                        });
+                    }
+                    const retireButton = card.querySelector('.retire-button');
+                    if (retireButton) {
+                        retireButton.addEventListener('click', () => {
+                            retireComponent(component.serialNumber); // Llamar a retireComponent
+                        });
+                    }
+                }
             });
         }
 
-        // Función para filtrar y renderizar componentes
+
+        /**
+         * Generates structured HTML for component details.
+         * @param {object} component - The component data to display.
+         * @returns {string} HTML string with structured details.
+         */
+        function generateStructuredComponentDetailsHtml(component) {
+            if (!component) return '<p>No hay datos disponibles.</p>';
+
+            const lifeLimitHours = parseFloat(component.lifeLimitHours) || 0;
+            const lifeLimitCycles = parseFloat(component.lifeLimitCycles) || 0;
+            const lifeLimitDays = parseFloat(component.lifeLimitDays) || 0;
+
+            let html = `
+                <div class="component-sections-print">
+                    <div class="section-block-print">
+                        <h5 class="section-title-print">Información del Componente</h5>
+                        <p><strong>Descripción:</strong> ${component.name || 'N/A'}</p>
+                        <p><strong>N° de Parte:</strong> ${component.partNumber || 'N/A'}</p>
+                        <p><strong>N° de Serie:</strong> ${component.serialNumber || 'N/A'}</p>
+                        <p><strong>Ubicación:</strong> ${component.location || 'N/A'}</p>
+                        <p><strong>Tipo de Vida:</strong> ${component.type || 'N/A'}</p>
+                    </div>
+
+                    <div class="section-block-print">
+                        <h5 class="section-title-print">Detalles de TSN</h5>
+                        <p><strong>TSN Inicial (Hrs):</strong> ${(parseFloat(component.initialTSNHours) || 0).toFixed(1)}</p>
+                        <p><strong>TSN Inicial (Ciclos):</strong> ${(parseFloat(component.initialTSNCycles) || 0).toFixed(1)}</p>
+                        <p><strong>TSN Inicial (Días):</strong> ${(parseFloat(component.initialTSNDays) || 0).toFixed(1)}</p>
+                        <p><strong>Horas AC al Instalar:</strong> ${(parseFloat(component.aircraftHrsAtInstallation) || 0).toFixed(1)}</p>
+                        <p><strong>RINS AC al Instalar:</strong> ${(parseFloat(component.aircraftRinsAtInstallation) || 0).toFixed(1)}</p>
+                    </div>
+
+                    <div class="section-block-print">
+                        <h5 class="section-title-print">Detalles de TSO</h5>
+                        <p><strong>TSO Inicial (Hrs):</strong> ${(parseFloat(component.initialTSOHours) || 0).toFixed(1)}</p>
+                        <p><strong>TSO Inicial (Ciclos):</strong> ${(parseFloat(component.initialTSOCycles) || 0).toFixed(1)}</p>
+                        <p><strong>TSO Inicial (Días/Meses):</strong> ${(parseFloat(component.initialTSODays) || 0).toFixed(1)}</p>
+                    </div>
+
+                    <div class="section-block-print">
+                        <h5 class="section-title-print">Límites de Vida</h5>
+                        <p><strong>Vida Límite (Hrs):</strong> ${lifeLimitHours.toFixed(1)}</p>
+                        <p><strong>Vida Límite (Ciclos):</strong> ${lifeLimitCycles.toFixed(1)}</p>
+                        <p><strong>Vida Límite (Días/Meses):</strong> ${lifeLimitDays.toFixed(1)}</p>
+                    </div>
+
+                    <div class="section-block-print">
+                        <h5 class="section-title-print">Fechas y Estado</h5>
+                        <p><strong>Instalado (Fecha):</strong> ${component.installationDate || 'N/A'}</p>
+                        <p><strong>Vencimiento (A LAS TT):</strong> ${component.dueDateTT || 'N/A'}</p>
+                        <p><strong>Estado:</strong> ${component.status || 'N/A'}</p>
+                        <p><strong>Última Inspección:</strong> ${component.lastInspectionDate || 'N/A'}</p>
+                        <p><strong>Próxima Inspección:</strong> ${component.nextInspectionDue || 'N/A'}</p>
+                        ${component.uninstallationReason ? `<p><strong>Motivo Retiro:</strong> ${component.uninstallationReason}</p>` : ''}
+                    </div>
+                </div>
+            `;
+            return html;
+        }
+
+        /**
+         * Fetches and displays change logs for a specific component.
+         * @param {string} serialNumber - The serial number of the component.
+         */
+        async function fetchAndDisplayChangeLogs(serialNumber) {
+            changeLogContent.innerHTML = '<p class="text-center text-gray-600">Cargando historial...</p>';
+            const logsRef = ref(database, `artifacts/${appId}/public_data/component_changes/`);
+            const componentsRef = ref(database, `artifacts/${appId}/public_data/components/`); // Referencia para obtener info de componentes
+
+            try {
+                const snapshot = await get(logsRef);
+                const allLogs = snapshot.exists() ? snapshot.val() : {};
+                let componentLogs = [];
+
+                for (const key in allLogs) {
+                    if (allLogs.hasOwnProperty(key)) {
+                        const log = allLogs[key];
+                        if (log.serialNumber === serialNumber || 
+                            (log.changeType === 'Retiro' && log.replacedBySerialNumber === serialNumber) ||
+                            (log.changeType === 'Instalación' && log.replacesSerialNumber === serialNumber)
+                           ) {
+                            componentLogs.push(log);
+                        }
+                    }
+                }
+                
+                componentLogs.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+                changeLogContent.innerHTML = '';
+                if (componentLogs.length === 0) {
+                    changeLogContent.innerHTML = '<p class="text-center text-gray-600">No hay registros de cambios para este componente.</p>';
+                    return;
+                }
+
+                for (const log of componentLogs) { // Usar for...of para await
+                    const logEntryCard = document.createElement('div');
+                    logEntryCard.className = 'log-entry-card'; 
+
+                    const timestamp = new Date(log.timestamp).toLocaleString('es-ES', { dateStyle: 'full', timeStyle: 'medium' });
+                    
+                    let detailsHtml = '';
+                    detailsHtml += `<p><strong>Número de Serie :</strong> ${log.serialNumber || 'N/A'}</p>`; 
+                    
+                    if (log.changeType === 'Instalación') {
+                        detailsHtml += `<p>Componente **instalado**.</p>`;
+                        if (log.replacesSerialNumber) {
+                            // Fetch info of the component that was replaced
+                            const replacedCompSnapshot = await get(child(componentsRef, log.replacesSerialNumber));
+                            let replacedInfo = ``;
+                            if (replacedCompSnapshot.exists()) {
+                                const replacedComp = replacedCompSnapshot.val();
+                                replacedInfo = `Descripción: ${replacedComp.name || 'N/A'}, N° Parte: ${replacedComp.partNumber || 'N/A'}, N° Serie: ${replacedComp.serialNumber || 'N/A'}`;
+                            } else {
+                                replacedInfo = `N° Serie: ${log.replacesSerialNumber} (Componente ya no existe)`
+                            }
+                            detailsHtml += `<p>Este componente **reemplaza a**: <strong>${replacedInfo}</strong></p>`;
+                        }
+                        if (log.newValues) {
+                            detailsHtml += `<div class="change-details-container"><strong>Valores Iniciales:</strong>`;
+                            detailsHtml += generateStructuredComponentDetailsHtml(log.newValues);
+                            detailsHtml += `</div>`;
+                        }
+                    } else if (log.changeType === 'Edición') {
+                        detailsHtml += `<p>Componente **editado**.</p>`;
+                        detailsHtml += `<div class="change-details-container">`;
+                        detailsHtml += `<strong>Valores Antes:</strong>`;
+                        detailsHtml += generateStructuredComponentDetailsHtml(log.oldValues);
+                        detailsHtml += `<strong>Valores Después:</strong>`;
+                        detailsHtml += generateStructuredComponentDetailsHtml(log.newValues);
+                        detailsHtml += `</div>`;
+                    } else if (log.changeType === 'Retiro') {
+                        detailsHtml += `<p>Componente **retirado**.</p>`;
+                        if (log.replacedBySerialNumber) {
+                            // Fetch info of the component that replaced this one
+                            const replacedByCompSnapshot = await get(child(componentsRef, log.replacedBySerialNumber));
+                            let replacedByInfo = ``;
+                            if (replacedByCompSnapshot.exists()) {
+                                const replacedByComp = replacedByCompSnapshot.val();
+                                replacedByInfo = `Descripción: ${replacedByComp.name || 'N/A'}, N° Parte: ${replacedByComp.partNumber || 'N/A'}, N° Serie: ${replacedByComp.serialNumber || 'N/A'}`;
+                            } else {
+                                replacedByInfo = `N° Serie: ${log.replacedBySerialNumber} (Componente ya no existe)`
+                            }
+                            detailsHtml += `<p>Este componente fue **reemplazado por**: <strong>${replacedByInfo}</strong></p>`;
+                        }
+                        if (log.uninstallationReason) {
+                            detailsHtml += `<p><strong>Motivo de Desinstalación:</strong> ${log.uninstallationReason}</p>`;
+                        }
+                        if (log.oldValues) {
+                            detailsHtml += `<div class="change-details-container"><strong>Valores al Retirar:</strong>`;
+                            detailsHtml += generateStructuredComponentDetailsHtml(log.oldValues);
+                            detailsHtml += `</div>`;
+                        }
+                    } else if (log.changeType === 'Eliminación') {
+                        detailsHtml += `<p>Componente **eliminado permanentemente**.</p>`;
+                         if (log.oldValues) {
+                            detailsHtml += `<div class="change-details-container"><strong>Valores al Eliminar:</strong>`;
+                            detailsHtml += generateStructuredComponentDetailsHtml(log.oldValues);
+                            detailsHtml += `</div>`;
+                        }
+                    }
+
+                    logEntryCard.innerHTML = `
+                        <h4>Tipo de Cambio: ${log.changeType}</h4>
+                        <p><strong>Fecha/Hora:</strong> ${timestamp}</p>
+                        ${detailsHtml}
+                        <button class="delete-log-entry-button" data-log-id="${log.serialNumber}_${new Date(log.timestamp).getTime()}">X</button>
+                    `;
+                    changeLogContent.appendChild(logEntryCard);
+                }
+
+                changeLogContent.querySelectorAll('.delete-log-entry-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const logId = e.target.dataset.logId;
+                        deleteChangeLogEntry(logId, serialNumber);
+                    });
+                });
+
+            } catch (error) {
+                console.error("Error al cargar registros de cambios:", error);
+                changeLogContent.innerHTML = `<p class="text-center text-red-600">Error al cargar el historial: ${error.message}</p>`;
+            }
+        }
+
+
+        /**
+         * Función para filtrar y renderizar componentes en sus respectivas secciones.
+         */
         function filterAndRenderComponents() {
             const searchTerm = componentSearchInput.value.toLowerCase();
-            const filteredComponents = principalComponents.filter(component => {
-                if (!component) return false;
+            const activeComponents = [];
+            const retiredComponents = [];
+
+            principalComponents.forEach(component => {
+                if (!component) return; // Skip malformed components
                 const nameMatch = (component.name || '').toLowerCase().includes(searchTerm);
                 const serialMatch = (component.serialNumber || '').toLowerCase().includes(searchTerm);
                 const partMatch = (component.partNumber || '').toLowerCase().includes(searchTerm);
-                return nameMatch || serialMatch || partMatch;
+
+                const matchesSearch = nameMatch || serialMatch || partMatch;
+
+                if (matchesSearch) {
+                    if (component.status === 'Retirado') {
+                        retiredComponents.push(component);
+                    } else {
+                        activeComponents.push(component);
+                    }
+                }
             });
-            renderComponentDetails(filteredComponents);
+
+            // Ordenar componentes activos por algún criterio, por ejemplo, por nombre
+            activeComponents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            retiredComponents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+
+            renderComponentCards(activeComponents, activeComponentsSection, false);
+            renderComponentCards(retiredComponents, retiredComponentsSection, true);
         }
 
         /**
@@ -1548,45 +2177,271 @@
         function printComponents(serialNumber = null) {
             const body = document.body;
             
+            // Elimina clases de impresión anteriores para evitar conflictos
+            body.classList.remove('print-single-component', 'print-change-log-mode', 'print-all-components-mode');
+
             if (serialNumber) {
                 body.classList.add('print-single-component');
                 const componentToPrint = document.getElementById(`component-${serialNumber}`);
                 if (componentToPrint) {
                     componentToPrint.classList.add('print-this-one');
                 }
+            } else {
+                body.classList.add('print-all-components-mode');
             }
 
             window.print();
 
             setTimeout(() => {
+                // Limpia las clases de impresión después de que la impresión haya comenzado
+                body.classList.remove('print-single-component', 'print-all-components-mode');
                 if (serialNumber) {
-                    body.classList.remove('print-single-component');
                     const componentToPrint = document.getElementById(`component-${serialNumber}`);
                     if (componentToPrint) {
                         componentToPrint.classList.remove('print-this-one');
                     }
                 }
-            }, 500);
+            }, 500); // Pequeño retraso para asegurar que el diálogo de impresión se haya abierto
         }
 
-        // Se ejecuta cuando el DOM está completamente cargado
+        /**
+         * Función para imprimir el contenido del diálogo de historial de cambios.
+         */
+        function printChangeLog() {
+            const body = document.body;
+            // Elimina clases de impresión anteriores para evitar conflictos
+            body.classList.remove('print-single-component', 'print-all-components-mode');
+            body.classList.add('print-change-log-mode'); 
+
+            window.print();
+
+            setTimeout(() => {
+                body.classList.remove('print-change-log-mode');
+            }, 500); // Pequeño retraso para asegurar que el diálogo de impresión se haya abierto
+        }
+
+        /**
+         * Opens a generic confirmation dialog.
+         * @param {string} message - The message to display in the confirmation dialog.
+         * @returns {Promise<boolean>} A promise that resolves to true if confirmed, false otherwise.
+         */
+        function openConfirmDialog(message) {
+            confirmMessage.textContent = message;
+            confirmDialog.showModal();
+            return new Promise(resolve => {
+                confirmActionResolve = resolve;
+            });
+        }
+
+        cancelConfirmButton.addEventListener('click', () => {
+            confirmDialog.close();
+            if (confirmActionResolve) {
+                confirmActionResolve(false);
+                confirmActionResolve = null;
+            }
+        });
+
+        proceedConfirmButton.addEventListener('click', () => {
+            confirmDialog.close();
+            if (confirmActionResolve) {
+                confirmActionResolve(true);
+                confirmActionResolve = null;
+            }
+        });
+
+        /**
+         * Opens the uninstallation reason dialog.
+         * @param {string} serialNumber - The serial number of the component being uninstalled.
+         * @returns {Promise<string|null>} A promise that resolves with the reason string or null if cancelled.
+         */
+        function openUninstallationReasonDialog(serialNumber) {
+            uninstallationSerialNumberSpan.textContent = serialNumber;
+            uninstallationReasonTextarea.value = '';
+            uninstallationReasonDialog.showModal();
+
+            return new Promise(resolve => {
+                uninstallationReasonResolve = resolve;
+            });
+        }
+
+        cancelUninstallationReasonButton.addEventListener('click', () => {
+            uninstallationReasonDialog.close();
+            if (uninstallationReasonResolve) {
+                uninstallationReasonResolve(null);
+                uninstallationReasonResolve = null;
+            }
+        });
+
+        confirmUninstallationReasonButton.addEventListener('click', () => {
+            const reason = uninstallationReasonTextarea.value.trim();
+            uninstallationReasonDialog.close();
+            if (uninstallationReasonResolve) {
+                uninstallationReasonResolve(reason);
+                uninstallationReasonResolve = null;
+            }
+        });
+
+        /**
+         * Función para retirar (desinstalar) un componente.
+         * Muestra un diálogo de confirmación y luego pide el motivo de desinstalación.
+         * @param {string} serialNumberToRetire - El número de serie del componente a retirar.
+         */
+        async function retireComponent(serialNumberToRetire) {
+            const componentToRetire = principalComponents.find(comp => comp.serialNumber === serialNumberToRetire);
+            if (!componentToRetire) {
+                console.error("Componente no encontrado para retirar:", serialNumberToRetire);
+                return;
+            }
+
+            const confirmed = await openConfirmDialog(`¿Estás seguro de que quieres **retirar** el componente "${componentToRetire.name}" (N° Serie: ${serialNumberToRetire})?`);
+
+            if (confirmed) {
+                const uninstallationReason = await openUninstallationReasonDialog(serialNumberToRetire);
+                if (uninstallationReason === null) {
+                    console.log("Retiro de componente cancelado por el usuario (motivo no proporcionado).");
+                    return;
+                }
+
+                try {
+                    const componentRef = ref(database, `artifacts/${appId}/public_data/components/${serialNumberToRetire}`);
+                    const updatedData = { ...componentToRetire, status: 'Retirado', uninstallationReason: uninstallationReason };
+                    await set(componentRef, updatedData);
+                    console.log(`Componente ${serialNumberToRetire} marcado como 'Retirado' en Firebase.`);
+
+                    // Asegúrate de que el log registre el motivo de desinstalación
+                    await recordComponentChange(updatedData, 'Retiro', componentToRetire, null, null, uninstallationReason); 
+                    
+                    filterAndRenderComponents(); // Volver a renderizar para actualizar las secciones
+                } catch (error) {
+                    console.error("Error al retirar el componente de Firebase:", error);
+                }
+            } else {
+                console.log("Retiro de componente cancelado.");
+            }
+        }
+
+        /**
+         * Función para restaurar un componente de la papelera de reciclaje a activo.
+         * @param {string} serialNumberToRestore - El número de serie del componente a restaurar.
+         */
+        async function restoreComponent(serialNumberToRestore) {
+            const componentToRestore = principalComponents.find(comp => comp.serialNumber === serialNumberToRestore);
+            if (!componentToRestore) {
+                console.error("Componente no encontrado para restaurar:", serialNumberToRestore);
+                return;
+            }
+
+            const confirmed = await openConfirmDialog(`¿Estás seguro de que quieres **restaurar** el componente "${componentToRestore.name}" (N° Serie: ${serialNumberToRestore}) a la lista de componentes activos?`);
+
+            if (confirmed) {
+                try {
+                    const componentRef = ref(database, `artifacts/${appId}/public_data/components/${serialNumberToRestore}`);
+                    // Crear una copia de los datos y cambiar el estado
+                    const updatedData = { ...componentToRestore, status: 'Activo' };
+                    // Eliminar el motivo de desinstalación si existe
+                    delete updatedData.uninstallationReason; 
+                    await set(componentRef, updatedData);
+                    console.log(`Componente ${serialNumberToRestore} restaurado a 'Activo' en Firebase.`);
+
+                    await recordComponentChange(updatedData, 'Instalación', componentToRestore); // Registrar como 'Instalación' al restaurar
+                    
+                    filterAndRenderComponents(); // Volver a renderizar para actualizar las secciones
+                } catch (error) {
+                    console.error("Error al restaurar el componente en Firebase:", error);
+                }
+            } else {
+                console.log("Restauración de componente cancelada.");
+            }
+        }
+
+
+        /**
+         * Elimina una entrada de historial de cambios específica de Firebase.
+         * @param {string} logId - El ID del registro de historial a eliminar (e.g., "SERIAL_TIMESTAMP").
+         * @param {string} componentSerialNumber - El número de serie del componente al que pertenece el historial (para recargar).
+         */
+        async function deleteChangeLogEntry(logId, componentSerialNumber) {
+            const confirmed = await openConfirmDialog(`¿Estás seguro de que quieres eliminar esta entrada del historial de cambios? Esta acción no se puede deshacer.`);
+            if (confirmed) {
+                try {
+                    const logRef = ref(database, `artifacts/${appId}/public_data/component_changes/${logId}`);
+                    await remove(logRef);
+                    console.log(`Entrada de historial ${logId} eliminada.`);
+                    fetchAndDisplayChangeLogs(componentSerialNumber);
+                } catch (error) {
+                    console.error("Error al eliminar la entrada del historial:", error);
+                }
+            } else {
+                console.log("Eliminación de entrada de historial cancelada.");
+            }
+        }
+
+        /**
+         * Elimina todo el historial de cambios para un componente específico.
+         * @param {string} componentSerialNumber - El número de serie del componente cuyo historial se borrará.
+         */
+        async function deleteAllHistoryForComponent(componentSerialNumber) {
+            const confirmed = await openConfirmDialog(`¿Estás seguro de que quieres eliminar **TODO** el historial de cambios para el componente "${componentSerialNumber}"? Esta acción no se puede deshacer.`);
+            if (confirmed) {
+                try {
+                    const logsRef = ref(database, `artifacts/${appId}/public_data/component_changes/`);
+                    const snapshot = await get(logsRef);
+                    const allLogs = snapshot.exists() ? snapshot.val() : {};
+
+                    const updates = {};
+                    for (const key in allLogs) {
+                        if (allLogs.hasOwnProperty(key)) {
+                            const log = allLogs[key];
+                            if (log.serialNumber === componentSerialNumber ||
+                                (log.changeType === 'Retiro' && log.replacedBySerialNumber === componentSerialNumber) ||
+                                (log.changeType === 'Instalación' && log.replacesSerialNumber === componentSerialNumber)) {
+                                updates[`${key}`] = null;
+                            }
+                        }
+                    }
+
+                    if (Object.keys(updates).length > 0) {
+                        await set(logsRef, updates);
+                        console.log(`Todo el historial para el componente ${componentSerialNumber} ha sido eliminado.`);
+                        changeLogContent.innerHTML = '<p class="text-center text-green-600">Historial eliminado con éxito.</p>';
+                    } else {
+                        console.log(`No se encontró historial para el componente ${componentSerialNumber}.`);
+                        changeLogContent.innerHTML = '<p class="text-center text-gray-600">No hay historial para borrar para este componente.</p>';
+                    }
+
+                } catch (error) {
+                    console.error("Error al eliminar todo el historial:", error);
+                    changeLogContent.innerHTML = `<p class="text-center text-red-600">Error al eliminar el historial: ${error.message}</p>`;
+                }
+            } else {
+                console.log("Borrado de historial cancelado.");
+            }
+        }
+
+
         document.addEventListener('DOMContentLoaded', () => {
-            console.clear(); // Limpia la consola para una depuración más clara
+            console.clear();
 
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     console.log("Usuario autenticado en COMPONENTES980.HTML:", user.uid);
                     populateMonthYearSelectors();
                     loadMonthlyTotalsFromFirebase();
-                    loadComponentsFromFirebase(); // Carga los componentes desde Firebase
+                    loadComponentsFromFirebase();
 
                     componentSearchInput.addEventListener('input', filterAndRenderComponents);
                     editComponentForm.addEventListener('submit', saveEditedComponent);
                     cancelEditButton.addEventListener('click', () => editComponentDialog.close());
+                    closeChangeLogButton.addEventListener('click', () => changeLogDialog.close());
                     printAllComponentsButton.addEventListener('click', () => printComponents());
-                    addComponentButton.addEventListener('click', () => openEditDialog()); // Nuevo componente
+                    addComponentButton.addEventListener('click', () => openEditDialog());
+                    printChangeLogButton.addEventListener('click', printChangeLog);
+                    
+                    deleteAllHistoryButton.addEventListener('click', () => {
+                        const serialNumber = changeLogTitle.textContent.replace('Historial de Cambios para Componente: ', '');
+                        deleteAllHistoryForComponent(serialNumber);
+                    });
 
-                    // Listener para el cambio de tipo de vida en el diálogo de edición
                     editInputs.type.addEventListener('change', (event) => {
                         const isConditionType = event.target.value === 'condition';
                         toggleNumericFields(isConditionType);
@@ -1603,26 +2458,33 @@
                             await signInAnonymously(auth);
                             console.log("Autenticación anónima exitosa.");
                         }
-                        // Vuelve a llamar la lógica de inicialización si la autenticación anónima es exitosa
                         populateMonthYearSelectors();
                         loadMonthlyTotalsFromFirebase();
                         loadComponentsFromFirebase();
                         componentSearchInput.addEventListener('input', filterAndRenderComponents);
                         editComponentForm.addEventListener('submit', saveEditedComponent);
                         cancelEditButton.addEventListener('click', () => editComponentDialog.close());
+                        closeChangeLogButton.addEventListener('click', () => changeLogDialog.close());
                         printAllComponentsButton.addEventListener('click', () => printComponents());
-                        addComponentButton.addEventListener('click', () => openEditDialog()); // Nuevo componente
+                        addComponentButton.addEventListener('click', () => openEditDialog());
+                        printChangeLogButton.addEventListener('click', printChangeLog);
 
-                        // Listener para el cambio de tipo de vida en el diálogo de edición
+                        deleteAllHistoryButton.addEventListener('click', () => {
+                            const serialNumber = changeLogTitle.textContent.replace('Historial de Cambios para Componente: ', '');
+                            deleteAllHistoryForComponent(serialNumber);
+                        });
+
                         editInputs.type.addEventListener('change', (event) => {
                             const isConditionType = event.target.value === 'condition';
                             toggleNumericFields(isConditionType);
                         });
 
                     } catch (error) {
-                        console.error("Error en la autenticación:", error);
+                        console.error("Error en la autenticación (después del intento anónimo/con token):", error);
                         generalSummaryDiv.innerHTML = '<p class="text-center text-red-600 col-span-full">Error de autenticación. Por favor, intenta de nuevo.</p>';
-                        componentDetailsDiv.innerHTML = '<p class="text-center text-red-600 col-span-full">Error de autenticación. No se pueden cargar los componentes.</p>';
+                        // componentDetailsDiv.innerHTML = '<p class="text-center text-red-600 col-span-full">Error de autenticación. No se pueden cargar los componentes.</p>'; // Esta línea no es necesaria aquí, ya que activeComponentsSection y retiredComponentsSection lo manejarán
+                        activeComponentsSection.innerHTML = '<p class="text-center text-red-600 col-span-full">Error de autenticación. No se pueden cargar los componentes activos.</p>';
+                        retiredComponentsSection.innerHTML = '<p class="text-center text-red-600 col-span-full">Error de autenticación. No se pueden cargar los componentes retirados.</p>';
                     }
                 }
             });
