@@ -146,7 +146,6 @@
         .card-header .title-container {
             flex-grow: 1; /* Permite que el título ocupe el espacio restante */
             flex-shrink: 1; /* Permite que el título se encoja */
-            /* min-width: 0; Eliminado porque overflow: hidden y flex-grow: 1 en el contenedor son más robustos */
             overflow: hidden; /* Esto es clave para que el texto se envuelva */
             text-align: left;
         }
@@ -166,13 +165,11 @@
             display: flex;
             gap: 0.5rem; /* Espacio entre los botones */
             flex-shrink: 0; /* Evita que los botones se encojan */
-            opacity: 0; /* Ocultar los botones por defecto */
-            transition: opacity 0.3s ease-in-out; /* Transición suave */
+            /* Se ha eliminado opacity: 0; para que siempre sean visibles */
+            /* Se ha eliminado transition: opacity 0.3s ease-in-out; */
         }
 
-        .component-card:hover .card-buttons {
-            opacity: 1; /* Mostrar los botones al pasar el ratón */
-        }
+        /* Se ha eliminado .component-card:hover .card-buttons para que siempre sean visibles */
 
 
         .edit-button, .print-single-button, .history-button, .retire-button, .restore-button {
@@ -605,9 +602,7 @@
             transform: none; /* No hay efecto de elevación */
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .component-card.retired:hover .card-buttons {
-            opacity: 1; /* Mostrar los botones al pasar el ratón */
-        }
+        /* Se ha eliminado .component-card.retired:hover .card-buttons para que los botones siempre sean visibles */
 
         /* Estilos de impresión mejorados */
         @media print {
