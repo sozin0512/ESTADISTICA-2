@@ -251,19 +251,10 @@
         }
 
         /* Estilos para el texto de RESTANTE */
-        .restante-verde { color: #6B8E23; font-weight: bold; } /* Verde Oliva */
-        .restante-amarillo { color: #D2B48C; font-weight: bold; } /* Bronceado */
-        .restante-rojo { color: #CD5C5C; font-weight: bold; } /* Rojo Indio */
+        /* Eliminados */
 
         /* Nuevos estilos para las etiquetas y el parpadeo */
-        .label-yellow { background-color: #FFD700; font-weight: bold; color: #4A4A4A; } /* Oro */
-        .label-red { background-color: #CD5C5C; color: white; font-weight: bold; } /* Rojo Indio */
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
-        .blinking { animation: blink 1s infinite; }
+        /* Eliminados */
 
         /* Contenedor para el cuadro de recordatorio global */
         .recordatorio-global-container {
@@ -407,11 +398,7 @@
                 padding-left: 2px !important;
                 min-width: 120px !important; 
             }
-            .restante-verde, .restante-amarillo, .restante-rojo,
-            .label-yellow, .label-red {
-                -webkit-print-color-adjust: exact !important; 
-                color-adjust: exact !important;
-            }
+            /* Eliminados estilos de impresión para restantes y etiquetas */
             .recordatorio-global-container, #recordatorio-textarea {
                 display: block !important; 
                 -webkit-print-color-adjust: exact !important;
@@ -423,24 +410,12 @@
                 text-shadow: none !important; 
                 color: #000 !important;
             }
-            .blinking {
-                animation: none !important;
-                opacity: 1 !important;
-            }
+            /* Eliminado .blinking de impresión */
             /* Reglas específicas para ocultar elementos según la clase del body */
             body.print-no-reminders .recordatorio-global-container {
                 display: none !important;
             }
-            body.print-no-yellow-labels .recordatorio-global-container,
-            body.print-no-yellow-labels .label-yellow,
-            body.print-no-yellow-labels .restante-label,
-            body.print-no-yellow-labels .limite-celda,
-            body.print-no-yellow-labels .abbrd-celda,
-            body.print-no-yellow-labels .extd-celda,
-            body.print-no-yellow-labels .flight-count-factor-celda,
-            body.print-no-yellow-labels .fila-restante {
-                display: none !important;
-            }
+            /* Eliminado print-no-yellow-labels de impresión */
             @page {
                 size: A4 landscape;
                 margin: 10mm;
@@ -449,112 +424,7 @@
 
         /* Estilos del modal de estado de motores */
         #motorStatusModal {
-            /* Estilos ya definidos en Tailwind: fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden z-50 p-4 */
-        }
-        #motorStatusModal > div { /* Contenido interno del modal */
-            /* Estilos ya definidos en Tailwind: bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl overflow-y-auto */
-            max-height: 90vh;
-        }
-        #motorStatusModal h3 {
-            color: #4A4A4A;
-            font-size: 1.75rem;
-            margin-bottom: 1rem;
-        }
-        #motorStatusContent {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Columnas responsivas */
-            gap: 1rem;
-        }
-        .component-status-item {
-            background-color: #F8F8F8;
-            border: 1px solid #E0E0E0;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-        }
-        .component-status-item h4 {
-            font-weight: bold;
-            font-size: 1.125rem;
-            margin-bottom: 0.5rem;
-            color: #4A4A4A;
-        }
-        .progress-bar-container {
-            width: 100%;
-            background-color: #E0E0E0;
-            border-radius: 0.25rem;
-            height: 20px;
-            overflow: hidden;
-            margin-top: 0.5rem;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            border-radius: 0.25rem;
-            transition: width 0.5s ease-in-out;
-        }
-        .progress-text {
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
-            text-align: center;
-        }
-        /* Colores para las barras de progreso */
-        .progress-red { background-color: #CD5C5C; } /* Rojo Indio */
-        .progress-orange { background-color: #D2B48C; } /* Bronceado */
-        .progress-green { background-color: #6B8E23; } /* Verde Oliva */
-
-        /* Estilos de impresión para el modal de estado de motores */
-        @media print {
-            body.print-motor-status #main-app-content,
-            body.print-motor-status #auth-container,
-            body.print-motor-status #helicopter-svg,
-            body.print-motor-status #anonymous-mask-img,
-            body.print-motor-status #reveal-circle,
-            body.print-motor-status .button-container,
-            body.print-motor-status .tab-container,
-            body.print-motor-status .year-container,
-            body.print-motor-status .user-id-container {
-                display: none !important;
-            }
-            body.print-motor-status #motorStatusModal {
-                position: static !important; /* Elimina el posicionamiento fijo */
-                display: block !important; /* Asegura que se muestre */
-                background-color: transparent !important; /* Fondo transparente */
-                box-shadow: none !important; /* Sin sombra */
-                padding: 0 !important;
-                margin: 0 !important;
-                overflow: visible !important;
-            }
-            body.print-motor-status #motorStatusModal > div {
-                width: auto !important;
-                max-width: none !important;
-                max-height: none !important;
-                box-shadow: none !important;
-                border: none !important;
-                padding: 0 !important;
-                background-color: transparent !important;
-            }
-            body.print-motor-status #motorStatusModal .flex.justify-between.items-center.mb-4,
-            body.print-motor-status #motorStatusModal .print-options-container,
-            body.print-motor-status #motorStatusModal #btnPrintMotorStatus {
-                display: none !important; /* Oculta controles del modal en la impresión */
-            }
-            body.print-motor-status #motorStatusContent {
-                display: block !important; /* Asegura que los elementos se apilen para imprimir */
-                grid-template-columns: 1fr !important; /* Una columna para impresión */
-                gap: 0.5rem !important;
-            }
-            body.print-motor-status .component-status-item {
-                border: 1px solid #ccc !important;
-                padding: 0.5rem !important;
-                margin-bottom: 0.5rem !important;
-                background-color: #fff !important;
-                box-shadow: none !important;
-                -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important;
-            }
-            body.print-motor-status .progress-bar-fill {
-                -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important;
-            }
+            display: none !important; /* Ocultar completamente el modal */
         }
     </style>
 </head>
@@ -567,7 +437,6 @@
         5.  **Recordatorios del Mes:** Un área de texto debajo de la tabla para que los usuarios autenticados puedan guardar notas o recordatorios específicos del mes.
         6.  **Opciones de Impresión:** Controles para personalizar la salida impresa de la tabla.
         7.  **Botones de Acción:** Botones para imprimir la tabla, y acceder a modales de "Estado de Motores" y "Estado de Componentes".
-        8.  **Modal de Estado de Motores:** Una superposición interactiva que muestra el estado de salud de los componentes del motor con barras de progreso.
         
         La estructura fue elegida para centralizar la entrada y visualización de datos de vuelo por mes y año, haciendo la navegación temporal fácil. La distinción clara entre la tabla principal y los modales de estado permite un enfoque en diferentes niveles de detalle sin sobrecargar la vista principal. La edición directa en la tabla y los recordatorios facilitan la interacción y gestión de datos.
     -->
@@ -576,15 +445,13 @@
         - Goal: Registrar y visualizar las horas de vuelo, aterrizajes, RINS y el estado de los componentes del motor a lo largo del tiempo.
         - Viz/Presentation Method:
             - **Tabla interactiva (HTML table):** Para los datos de vuelo diarios y totales. Permite la entrada directa de datos y la visualización organizada de grandes conjuntos de números.
-            - **Barras de progreso (HTML/CSS):** Dentro del modal de "Estado de Motores" para visualizar el uso de los componentes en relación con sus límites. Ofrecen una representación rápida y visual del "salud" del componente.
             - **Área de texto (HTML textarea):** Para los "Recordatorios del Mes". Facilita la entrada de notas cualitativas.
         - Interaction:
             - **Edición directa en celdas:** Los usuarios autenticados pueden modificar los valores numéricos directamente en la tabla, lo que activa el guardado automático en Firebase.
             - **Pestañas (HTML buttons + JS):** Para cambiar entre los meses. Proporciona una navegación clara y rápida entre los períodos de datos.
             - **Selector de año (HTML select + JS):** Para cambiar el año de visualización de los datos.
-            - **Modales (HTML div + JS show/hide):** Para el "Estado de Motores" y "Estado de Componentes". Permiten drill-down en información más específica sin abandonar la página principal.
-        - Justification: La tabla es el formato más adecuado para la entrada de datos numéricos diarios. Las barras de progreso en el modal proporcionan una visión general inmediata del estado crítico de los componentes, que es una información clave del reporte. La navegación por pestañas y selector de año hace que explorar los datos históricos sea intuitivo. La edición en vivo y el autoguardado mejoran la usabilidad.
-        - Library/Method: Vanilla JS para toda la lógica interactiva, Chart.js para futuras visualizaciones si se requieren (no se utiliza en esta versión, pero está planificado), Tailwind CSS para el diseño responsive y la estética.
+        - Justification: La tabla es el formato más adecuado para la entrada de datos numéricos diarios. La navegación por pestañas y selector de año hace que explorar los datos históricos sea intuitivo. La edición en vivo y el autoguardado mejoran la usabilidad.
+        - Library/Method: Vanilla JS para toda la lógica interactiva, Tailwind CSS para el diseño responsive y la estética.
     -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <svg id="helicopter-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -622,7 +489,7 @@
 
     <div id="main-app-content">
         <div id="main-app-header" class="flex justify-between items-center mb-4">
-            <h2 class="flex-grow text-center sm:text-left">DATOS DE VUELO FAH-945</h2>
+            <h2 class="flex-grow text-center sm:text-left">DATOS DE VUELO FAH-980</h2>
             <button id="logout-btn" class="px-4 py-2 bg-red-500 text-white rounded-md shadow-md hover:bg-red-600 transition-colors">Cerrar Sesión</button>
         </div>
 
@@ -647,32 +514,17 @@
             <strong>Opciones de Impresión:</strong>
             <label><input type="radio" name="printOption" value="full" checked> Tabla Completa</label>
             <label><input type="radio" name="printOption" value="no-reminders"> Sin Recordatorios</label>
-            <label><input type="radio" name="printOption" value="no-yellow-labels"> Sin Columnas Amarillas</label>
+            <!-- Eliminado "Sin Columnas Amarillas" ya que no existen -->
         </div>
 
         <div class="button-container flex justify-center gap-4 mt-4">
             <button id="btnImprimir" class="px-6 py-2 bg-gray-700 text-white rounded-md shadow-md hover:bg-gray-800 transition-colors">Imprimir Tabla</button>
-            <button id="btnMotorStatus" class="px-6 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition-colors">Estado de Motores</button>
+            <!-- Eliminado el botón "Estado de Motores" -->
             <button id="btnComponentStatus" class="px-6 py-2 bg-purple-500 text-white rounded-md shadow-md hover:bg-purple-600 transition-colors">Estado de Componentes</button>
         </div>
     </div>
 
-    <div id="motorStatusModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl overflow-y-auto" style="max-height: 90vh;">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-2xl font-bold">Estado de Componentes de Motores</h3>
-                <button id="closeMotorStatusModal" class="text-gray-500 hover:text-gray-700 text-3xl leading-none">&times;</button>
-            </div>
-            <div id="motorStatusContent" class="space-y-4">
-                </div>
-            <div class="print-options-container mt-6">
-                <strong>Opciones de Impresión:</strong>
-                <label><input type="radio" name="motorStatusPrintOption" value="full" checked> Completo</label>
-                <label><input type="radio" name="motorStatusPrintOption" value="critical-only"> Solo Críticos</label>
-            </div>
-            <button id="btnPrintMotorStatus" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Imprimir Estado</button>
-        </div>
-    </div>
+    <!-- Eliminado el modal de estado de motores completamente -->
 
     <script type="module">
         // Importa las funciones necesarias de Firebase SDK
@@ -721,43 +573,16 @@
             "RINS",
             "CONTINGENCY EXCURSIONS 1",
             "HUB COMPRESOR 1.1",
-            "HUB COMPRESOR 1.2",
-            "2ND STAGE COMPRESOR DISK 1",
-            "3RD STAGE COMPRESOR DISK 1",
-            "IMPELLER 1",
-            "COMPRESSOR TURBINE DISK 1",
-            "POWER TURBINE DISK 1.1",
-            "POWER TURBINE DISK 1.2",
+            "IMPELLER", /* Renombrado de "HUB COMPRESOR 1.2" */
+            "GAS TURBINE", /* Renombrado de "2ND STAGE COMPRESOR DISK 1" */
+            "GAS PRODUCER", /* Renombrado de "3RD STAGE COMPRESOR DISK 1" */
         ];
 
-        // Nomenclaturas EXACTAS de las filas que deben tener las 5 columnas adicionales (editable) (solo para MOTOR #1)
-        const filasConColumnasAdicionalesEditables = [
-            "HUB COMPRESOR 1.1", "HUB COMPRESOR 1.2",
-            "2ND STAGE COMPRESOR DISK 1", "3RD STAGE COMPRESOR DISK 1", "IMPELLER 1",
-            "COMPRESSOR TURBINE DISK 1",
-            "POWER TURBINE DISK 1.1", "POWER TURBINE DISK 1.2",
-        ];
+        // Eliminadas las listas de filas con columnas adicionales editables/solo etiquetas
+        // ya que estas columnas se eliminan por completo.
         
-        // Nomenclaturas EXACTAS de las filas que deben tener las 5 columnas adicionales (solo etiquetas, como CICLOS) (solo para MOTOR #1)
-        const filasConColumnasAdicionalesSoloEtiquetas = [
-            "CICLOS 1",
-        ];
-
-        // Definición de límites y factores fijos (solo para MOTOR #1)
-        const limitesConfig = {
-            "HUB COMPRESOR": {
-                "1.1": { abbreviated: 2, extended: 0, flightCount: 3.0, limitCycles: 110000 },
-                "1.2": { abbreviated: 2, extended: 0, flightCount: 1.0, limitCycles: 35000 },
-            },
-            "2ND STAGE COMPRESOR DISK": { abbreviated: 2, extended: 0, flightCount: 1.0, limitCycles: 29000 },
-            "3RD STAGE COMPRESOR DISK": { abbreviated: 2, extended: 0, flightCount: 1.0, limitCycles: 29000 },
-            "IMPELLER": { abbreviated: 2, extended: 0, flightCount: 1.0, limitCycles: 29000 },
-            "COMPRESSOR TURBINE DISK": { abbreviated: 4, extended: 15, flightCount: 0.9, limitCycles: 7200 },
-            "POWER TURBINE DISK": {
-                "1.1": { abbreviated: 10, extended: 3, flightCount: 4.0, limitCycles: 57000 },
-                "1.2": { abbreviated: 10, extended: 3, flightCount: 1.0, limitCycles: 15000 },
-            }
-        };
+        // Eliminada la definición de límites y factores fijos
+        // ya que estas columnas se eliminan por completo.
 
         // Referencias a elementos del DOM
         const contenedorTablas = document.getElementById("contenedor-tablas");
@@ -779,17 +604,17 @@
         const mainAppContent = document.getElementById('main-app-content');
         const btnImprimir = document.getElementById('btnImprimir');
 
-        // Nuevos elementos para el estado de motores
-        const btnMotorStatus = document.getElementById('btnMotorStatus');
-        const motorStatusModal = document.getElementById('motorStatusModal');
-        const closeMotorStatusModal = document.getElementById('closeMotorStatusModal');
-        const motorStatusContent = document.getElementById('motorStatusContent');
-        const btnPrintMotorStatus = document.getElementById('btnPrintMotorStatus');
+        // Eliminados elementos del modal de estado de motores
+        // const btnMotorStatus = document.getElementById('btnMotorStatus');
+        // const motorStatusModal = document.getElementById('motorStatusModal');
+        // const closeMotorStatusModal = document.getElementById('closeMotorStatusModal');
+        // const motorStatusContent = document.getElementById('motorStatusContent');
+        // const btnPrintMotorStatus = document.getElementById('btnPrintMotorStatus');
         // Nuevo botón de estado de componentes
         const btnComponentStatus = document.getElementById('btnComponentStatus');
 
 
-        // Helper para extraer la nomenclatura base y la variante (ej. "HUB COMPRESOR" y "1.1")
+        // Helper para extraer la nomenclatura base y la variante (Ya no es estrictamente necesario sin límites, pero se mantiene si hay nombres con formato similar)
         function parseNomenclatura(nombreCompleto) {
             let nomenclaturaBase = '';
             let varianteClave = ''; 
@@ -798,7 +623,8 @@
                 varianteClave = matchNumericPart[1];
                 nomenclaturaBase = nombreCompleto.substring(0, nombreCompleto.length - varianteClave.length).trim();
             } else {
-                nomenclaturaBase = nombreCompleto;
+                nomenclaturaBase = nombreCompleto; 
+                varianteClave = '1.0'; 
             }
             return { nomenclaturaBase, varianteClave };
         }
@@ -814,8 +640,6 @@
             if (isNaN(num)) {
                 return '';
             }
-            // Si el número es un entero (no tiene parte decimal), lo devuelve como entero.
-            // De lo contrario, lo devuelve con sus decimales originales.
             if (num % 1 === 0) {
                 return num.toString();
             } else {
@@ -941,13 +765,10 @@
                 fila.querySelectorAll('td').forEach((celda) => {
                     const isNomenclatura = celda.classList.contains('nomenclatura');
                     const isTotalCell = celda.classList.contains('fila-total') || celda.classList.contains('fila-general');
-                    const isRestanteCell = celda.classList.contains('fila-restante');
                     const isMotorHeader = celda.classList.contains('motor-header');
-                    const isLabelCell = celda.classList.contains('limite-label') || celda.classList.contains('abbrd-label') || 
-                                        celda.classList.contains('extd-label') || celda.classList.contains('flight-count-factor-label') || 
-                                        celda.classList.contains('restante-label');
-
-                    if (isNomenclatura || isTotalCell || isRestanteCell || isMotorHeader || isLabelCell) {
+                    
+                    // No hay más celdas de "Restante" o "Label" específicas después de la eliminación
+                    if (isNomenclatura || isTotalCell || isMotorHeader) {
                         celda.contentEditable = 'false';
                         celda.classList.add('read-only-cell');
                         celda.classList.remove('editable-cell');
@@ -968,9 +789,9 @@
             document.querySelectorAll('.tab-button').forEach(btn => { btn.disabled = !isAuthenticated; });
             recordatorioTextarea.readOnly = !isAuthenticated;
             btnImprimir.disabled = !isAuthenticated;
-            btnMotorStatus.disabled = !isAuthenticated;
+            // btnMotorStatus.disabled = !isAuthenticated; // Eliminado
             btnComponentStatus.disabled = !isAuthenticated; 
-            btnPrintMotorStatus.disabled = !isAuthenticated;
+            // btnPrintMotorStatus.disabled = !isAuthenticated; // Eliminado
 
             if (isAuthenticated) {
                 authStatus.textContent = `Has iniciado sesión. Puedes ver y editar todos los datos.`;
@@ -1033,6 +854,8 @@
                         for (const monthKey in yearData) {
                             if (Object.hasOwnProperty.call(yearData, monthKey)) {
                                 const monthData = yearData[monthKey];
+                                // Los índices 0, 1, 2 corresponden a AC HRS, ATERRIZAJES, RINS respectivamente.
+                                // La columna 34 es la "GENERAL" para estas filas.
                                 if (monthData && Array.isArray(monthData) && monthData[0] && !isNaN(parseFloat(monthData[0][34]))) {
                                     newCumulativeTotals['AC HRS'] += parseFloat(monthData[0][34]) || 0; 
                                 }
@@ -1092,82 +915,20 @@
             const tabla = document.querySelectorAll(".tabla-vuelo")[indiceTabla];
             if (tabla) {
                 tabla.querySelectorAll('tbody tr').forEach(fila => {
-                    const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
-                    const isEditableComponentRow = filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta);
-                    const isLabelRow = filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta);
-
                     fila.querySelectorAll('td').forEach((celda) => {
                         const isNomenclatura = celda.classList.contains('nomenclatura');
                         const isTotalCell = celda.classList.contains('fila-total') || celda.classList.contains('fila-general');
-                        const isRestanteCell = celda.classList.contains('fila-restante');
                         const isMotorHeader = celda.classList.contains('motor-header');
                         
-                        const isSpecificLabelCell = celda.classList.contains('limite-label') || celda.classList.contains('abbrd-label') || 
-                                                    celda.classList.contains('extd-label') || celda.classList.contains('flight-count-factor-label') || 
-                                                    celda.classList.contains('restante-label');
-
-                        if (isMotorHeader || isNomenclatura || isTotalCell || isRestanteCell || isSpecificLabelCell) {
-                            if (isSpecificLabelCell) {
-                                if (celda.classList.contains('limite-label')) {
-                                    celda.textContent = 'LIMITE';
-                                    celda.classList.add('label-yellow');
-                                }
-                                if (celda.classList.contains('abbrd-label')) {
-                                    celda.textContent = 'ABBR\'D';
-                                    celda.classList.add('label-yellow');
-                                }
-                                if (celda.classList.contains('extd-label')) {
-                                    celda.textContent = 'EXT\'D';
-                                    celda.classList.add('label-yellow');
-                                }
-                                if (celda.classList.contains('flight-count-factor-label')) {
-                                    celda.textContent = 'FLIGHT COUNT FACTOR';
-                                    celda.classList.add('label-yellow');
-                                }
-                                if (celda.classList.contains('restante-label')) {
-                                    celda.textContent = 'RESTANTE';
-                                    celda.classList.add('label-red', 'blinking');
-                                }
-                            }
+                        if (isMotorHeader || isNomenclatura || isTotalCell) {
+                            // No hacer nada, son celdas de solo lectura o encabezados
                             return; 
                         }
-
-                        if (isEditableComponentRow) {
-                            const { nomenclaturaBase, varianteClave } = parseNomenclatura(nomenclaturaCompleta);
-                            let config = limitesConfig[nomenclaturaBase];
-                            if (varianteClave && config && config[varianteClave]) { 
-                                config = config[varianteClave];
-                            } else if (!config) {
-                                config = {};
-                            }
-
-                            if (celda.classList.contains('limite-celda')) {
-                                celda.textContent = config?.limitCycles !== undefined ? formatNumber(config.limitCycles) : '';
-                                celda.classList.remove("led-persistente");
-                            } else if (celda.classList.contains('abbrd-celda')) {
-                                celda.textContent = config?.abbreviated !== undefined ? formatNumber(config.abbreviated) : '';
-                                celda.classList.remove("led-persistente");
-                            } else if (celda.classList.contains('extd-celda')) {
-                                celda.textContent = config?.extended !== undefined ? formatNumber(config.extended) : '';
-                                celda.classList.remove("led-persistente");
-                            } else if (celda.classList.contains('flight-count-factor-celda')) {
-                                celda.textContent = config?.flightCount !== undefined ? formatNumber(config.flightCount) : '';
-                                celda.classList.remove("led-persistente");
-                            } else {
-                                celda.textContent = "";
-                                celda.classList.remove("led-persistente");
-                            }
-                        } else {
-                            celda.textContent = "";
-                            celda.classList.remove("led-persistente");
-                        }
+                        
+                        // Limpiar el contenido de todas las celdas de datos
+                        celda.textContent = "";
+                        celda.classList.remove("led-persistente");
                     });
-                    if (isEditableComponentRow) {
-                        const restanteCelda = fila.querySelector('.fila-restante');
-                        const limiteCelda = fila.querySelector('.limite-celda');
-                        const limite = parseFloat(limiteCelda?.textContent.trim()) || 0;
-                        aplicarEstiloRestante(restanteCelda, limite, limite); 
-                    }
                 });
                 actualizarTotales();
             }
@@ -1188,37 +949,13 @@
                     if (datosFila) {
                         filaHTML.querySelectorAll('td').forEach((celda, indexCelda) => {
                             const isNomenclatura = celda.classList.contains('nomenclatura');
-                            const isLabelCell = celda.classList.contains('limite-label') || celda.classList.contains('abbrd-label') || 
-                                                celda.classList.contains('extd-label') || celda.classList.contains('flight-count-factor-label') || 
-                                                celda.classList.contains('restante-label');
-
-                            if (celda && !isNomenclatura && !isLabelCell && datosFila[indexCelda] !== undefined) {
+                            // Ya no hay isLabelCell, isRestanteCell, etc.
+                            if (celda && !isNomenclatura && datosFila[indexCelda] !== undefined) {
                                 celda.textContent = formatNumber(datosFila[indexCelda]);
                                 if (celda.textContent.trim() !== "") {
                                     celda.classList.add("led-persistente");
                                 } else {
                                     celda.classList.remove("led-persistente");
-                                }
-                            } else if (isLabelCell) {
-                                if (celda.classList.contains('limite-label')) {
-                                    celda.textContent = 'LIMITE';
-                                    celda.classList.add('label-yellow');
-                                }
-                                if (celda.classList.contains('abbrd-label')) {
-                                    celda.textContent = 'ABBR\'D';
-                                    celda.classList.add('label-yellow');
-                                }
-                                if (celda.classList.contains('extd-label')) {
-                                    celda.textContent = 'EXT\'D';
-                                    celda.classList.add('label-yellow');
-                                }
-                                if (celda.classList.contains('flight-count-factor-label')) {
-                                    celda.textContent = 'FLIGHT COUNT FACTOR';
-                                    celda.classList.add('label-yellow');
-                                }
-                                if (celda.classList.contains('restante-label')) {
-                                    celda.textContent = 'RESTANTE';
-                                    celda.classList.add('label-red', 'blinking');
                                 }
                             }
                         });
@@ -1308,11 +1045,6 @@
                 encabezado.innerHTML += `
                     <th>MES TOTAL</th>
                     <th>GENERAL</th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
                 `;
                 thead.appendChild(encabezado);
                 tabla.appendChild(thead);
@@ -1320,17 +1052,18 @@
                 const tbody = document.createElement("tbody");
                 
                 nombresFilasOrdenadas.forEach((nombre) => {
-                    const totalColsInHeader = 35 + 5;
+                    const totalColsInHeader = 35; /* Actualizado: 2 (nomenclatura, vienen) + 31 (días) + 2 (totales) = 35 */
                     
                     if (nombre === "HUB COMPRESOR 1.1") {
                         const separador1 = document.createElement("tr");
                         separador1.innerHTML = `<td colspan="${totalColsInHeader}" class="motor-header" contenteditable="false">MOTOR # 1</td>`;
                         tbody.appendChild(separador1);
                         
-                        ['ENGINE HRS 1', 'ENGINE STARTS 1', 'FLIGHTS 1', 'CICLOS 1'].forEach(motorRowName => {
+                        ['ENGINE HRS 1', 'ENGINE STARTS 1', 'FLIGHTS 1'].forEach(motorRowName => {
                             const filaMotor = crearFilaTabla(motorRowName);
                             tbody.appendChild(filaMotor);
                         });
+                        // CICLOS 1 eliminado ya que estaba ligado a las columnas de factores.
                     }
                     
                     const fila = crearFilaTabla(nombre);
@@ -1345,14 +1078,8 @@
 
         function crearFilaTabla(nombre) {
             const fila = document.createElement("tr");
-            let limiteVal = '';
-            let abbrdVal = '';
-            let extdVal = '';
-            let flightCountFactorVal = '';
-
-            const isEditableComponentRow = filasConColumnasAdicionalesEditables.includes(nombre);
-            const isLabelRow = filasConColumnasAdicionalesSoloEtiquetas.includes(nombre);
-
+            
+            // Todas las filas se crearán con la misma estructura simplificada
             let rowHtml = `
                 <td class="nomenclatura" contenteditable="false">${nombre}</td>
                 <td contenteditable="true" class="viene-celda"></td>
@@ -1360,43 +1087,6 @@
                 <td class="fila-total" contenteditable="false">0.0</td>
                 <td class="fila-general" contenteditable="false">0.0</td>
             `;
-
-            if (isEditableComponentRow) {
-                const { nomenclaturaBase, varianteClave } = parseNomenclatura(nombre);
-                if (limitesConfig[nomenclaturaBase]) {
-                    let config = limitesConfig[nomenclaturaBase];
-                    if (varianteClave && config && config[varianteClave]) { 
-                        config = config[varianteClave];
-                    }
-                    limiteVal = config?.limitCycles !== undefined ? formatNumber(config.limitCycles) : '';
-                    abbrdVal = config?.abbreviated !== undefined ? formatNumber(config.abbreviated) : '';
-                    extdVal = config?.extended !== undefined ? formatNumber(config.extended) : '';
-                    flightCountFactorVal = config?.flightCount !== undefined ? formatNumber(config.flightCount) : '';
-                }
-                rowHtml += `
-                    <td contenteditable="true" class="limite-celda">${limiteVal}</td>
-                    <td contenteditable="true" class="abbrd-celda">${abbrdVal}</td>
-                    <td contenteditable="true" class="extd-celda">${extdVal}</td>
-                    <td contenteditable="true" class="flight-count-factor-celda">${flightCountFactorVal}</td>
-                    <td class="fila-restante" contenteditable="false">0.0</td>
-                `;
-            } else if (isLabelRow) {
-                rowHtml += `
-                    <td class="limite-label label-yellow" contenteditable="false">LIMITE</td>
-                    <td class="abbrd-label label-yellow" contenteditable="false">ABBR\'D</td>
-                    <td class="extd-label label-yellow" contenteditable="false">EXT\'D</td>
-                    <td class="flight-count-factor-label label-yellow" contenteditable="false">FLIGHT COUNT FACTOR</td>
-                    <td class="restante-label label-red blinking" contenteditable="false">RESTANTE</td>
-                `;
-            } else {
-                rowHtml += `
-                    <td contenteditable="false"></td>
-                    <td contenteditable="false"></td>
-                    <td contenteditable="false"></td>
-                    <td contenteditable="false"></td>
-                    <td contenteditable="false"></td>
-                `;
-            }
 
             fila.innerHTML = rowHtml;
             return fila;
@@ -1436,6 +1126,7 @@
                                 const indexFilaDestino = nombresFilasEnTabla.indexOf(originalRowName);
 
                                 if (indexFilaDestino !== -1) {
+                                    // La columna 34 es la columna "GENERAL" en la estructura de datos de la tabla (ahora simplificada)
                                     const valorGeneral = filaDatosOrigen[34]; 
                                     if (valorGeneral !== undefined && valorGeneral !== null && valorGeneral.toString().trim() !== "") {
                                         const filaDestino = tablaDestino.querySelectorAll("tbody tr")[indexFilaDestino];
@@ -1463,126 +1154,42 @@
             }
         }
 
-        function aplicarEstiloRestante(celdaRestante, restante, limite) {
-            if (!celdaRestante) return; 
+        // Eliminada la función aplicarEstiloRestante()
 
-            celdaRestante.classList.remove('restante-verde', 'restante-amarillo', 'restante-rojo');
-            celdaRestante.style.color = '';
-
-            const numericRestante = parseFloat(restante);
-            const numericLimite = parseFloat(limite);
-
-            if (isNaN(numericLimite) || numericLimite <= 0 || isNaN(numericRestante)) {
-                celdaRestante.textContent = isNaN(numericRestante) ? '' : formatNumber(numericRestante);
-                return;
-            }
-
-            celdaRestante.textContent = formatNumber(numericRestante);
-
-            if (numericRestante < 0) {
-                celdaRestante.classList.add('restante-rojo');
-            } else if (numericRestante <= (numericLimite * 0.10)) {
-                celdaRestante.classList.add('restante-rojo');
-            } else if (numericRestante <= (numericLimite * 0.20)) {
-                celdaRestante.classList.add('restante-amarillo');
-            } else {
-                celdaRestante.classList.add('restante-verde');
-            }
-        }
-
-        // Calcula y actualiza todos los totales en la tabla (solo para MOTOR #1)
+        // Calcula y actualiza todos los totales en la tabla (ahora simplificado para todas las filas)
         function actualizarTotales() {
             document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
                 const filas = Array.from(tabla.querySelectorAll("tbody tr"));
-                const generalValuesMap = new Map();
+                // generalValuesMap ya no se necesita para cálculos entre filas, pero puede usarse para la página de componentes
+                const generalValuesMap = new Map(); 
 
-                // PASO 1: Calcular totales para filas básicas (AC HRS, ATERRIZAJES, RINS, ENGINE HRS, STARTS, FLIGHTS, CONTINGENCY EXCURSIONS)
                 filas.forEach((fila) => {
                     const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
                     if (!nomenclaturaCompleta || fila.querySelector('.motor-header')) {
                         return;
                     }
 
-                    if (!filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta) && !filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta)) {
-                        const vieneCelda = fila.querySelector('.viene-celda');
-                        const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
-                        const mesTotalCelda = fila.querySelector('.fila-total');
-                        const generalCelda = fila.querySelector('.fila-general');
-                        
-                        const viene = parseFloat(vieneCelda?.textContent.trim()) || 0;
-                        const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
-                        
-                        const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
-                        let totalGeneral = totalMes + viene;
-                        
-                        mesTotalCelda.textContent = formatNumber(totalMes);
-                        generalCelda.textContent = formatNumber(totalGeneral);
+                    const vieneCelda = fila.querySelector('.viene-celda');
+                    const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
+                    const mesTotalCelda = fila.querySelector('.fila-total');
+                    const generalCelda = fila.querySelector('.fila-general');
+                    
+                    const viene = parseFloat(vieneCelda?.textContent.trim()) || 0;
+                    const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
+                    
+                    const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
+                    let totalGeneral = totalMes + viene;
+                    
+                    mesTotalCelda.textContent = formatNumber(totalMes);
+                    generalCelda.textContent = formatNumber(totalGeneral);
 
+                    // Almacenar los totales generales de las filas clave para el modal de componentes
+                    if (nomenclaturaCompleta === 'AC HRS' || nomenclaturaCompleta === 'ATERRIZAJES' || nomenclaturaCompleta === 'RINS') {
                         generalValuesMap.set(nomenclaturaCompleta, totalGeneral);
                     }
                 });
-
-                // PASO 2: Calcular totales y restantes para filas de componentes de motor (solo MOTOR #1)
-                filas.forEach((fila) => {
-                    const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
-                    if (!nomenclaturaCompleta || fila.querySelector('.motor-header')) {
-                        return;
-                    }
-
-                    if (filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta)) {
-                        const vieneCelda = fila.querySelector('.viene-celda');
-                        const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
-                        const mesTotalCelda = fila.querySelector('.fila-total');
-                        const generalCelda = fila.querySelector('.fila-general');
-                        const limiteCelda = fila.querySelector('.limite-celda');
-                        const abbrdCelda = fila.querySelector('.abbrd-celda');
-                        const extdCelda = fila.querySelector('.extd-celda');
-                        const flightCountFactorCelda = fila.querySelector('.flight-count-factor-celda');
-                        const restanteCelda = fila.querySelector('.fila-restante');
-
-                        const viene = parseFloat(vieneCelda?.textContent.trim()) || 0;
-                        const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
-
-                        const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
-
-                        mesTotalCelda.textContent = formatNumber(totalMes);
-                        
-                        const ABBREVIATED_CYCLE_FACTOR = parseFloat(abbrdCelda?.textContent.trim()) || 0;
-                        const EXTENDED_CYCLE_FACTOR = parseFloat(extdCelda?.textContent.trim()) || 0;
-                        const FLIGHT_COUNT_FACTOR = parseFloat(flightCountFactorCelda?.textContent.trim()) || 0;
-                        const limite = parseFloat(limiteCelda?.textContent.trim()) || 0;
-
-                        let motorNumero = null;
-                        const motorMatch = nomenclaturaCompleta.match(/\s(\d)(?:\.\d)?$/);
-                        if (motorMatch) {
-                            motorNumero = parseInt(motorMatch[1]);
-                        }
-                        
-                        let accumulatedTotalCycles = 0;
-                        // Asegurarse de que solo se calculen para MOTOR #1
-                        if (motorNumero === 1) { 
-                            const noOfStarts = generalValuesMap.get(`ENGINE STARTS 1`) || 0;
-                            const noOfFlights = generalValuesMap.get(`FLIGHTS 1`) || 0;
-                            const noOfContingencyExcursions = generalValuesMap.get(`CONTINGENCY EXCURSIONS 1`) || 0;
-
-                            const termStarts = noOfStarts;
-                            let termFlightsStarts = 0;
-                            if (ABBREVIATED_CYCLE_FACTOR !== 0) {
-                                termFlightsStarts = (noOfFlights - termStarts) / ABBREVIATED_CYCLE_FACTOR;
-                            }
-                            const termContingency = noOfContingencyExcursions * EXTENDED_CYCLE_FACTOR;
-                            const sumOfTerms = termStarts + termFlightsStarts + termContingency;
-                            accumulatedTotalCycles = sumOfTerms * FLIGHT_COUNT_FACTOR;
-                        }
-
-                        generalCelda.textContent = formatNumber(accumulatedTotalCycles);
-
-                        const restante = limite - accumulatedTotalCycles;
-                        aplicarEstiloRestante(restanteCelda, restante, limite);
-                    }
-                });
             });
-            calcularYGuardarTotalesGenerales();
+            calcularYGuardarTotalesGenerales(); // Llamada para actualizar los totales acumulados en Firebase
         }
 
         function agregarEventosDeEdicion() {
@@ -1630,12 +1237,11 @@
 
         document.querySelectorAll('input[name="printOption"]').forEach(radio => {
             radio.addEventListener('change', () => {
-                document.body.classList.remove('print-no-reminders', 'print-no-yellow-labels');
+                document.body.classList.remove('print-no-reminders');
                 if (radio.value === 'no-reminders') {
                     document.body.classList.add('print-no-reminders');
-                } else if (radio.value === 'no-yellow-labels') {
-                    document.body.classList.add('print-no-yellow-labels');
                 }
+                // La opción 'no-yellow-labels' ha sido eliminada
             });
         });
 
@@ -1643,106 +1249,9 @@
             window.print();
         });
 
-        // --- FUNCIONES PARA EL MODAL DE ESTADO DE MOTORES ---
-
-        function showMotorStatusModal() {
-            if (!auth.currentUser) {
-                showCustomAlert('Debes iniciar sesión para ver el estado de los motores.');
-                return;
-            }
-            motorStatusModal.classList.remove('hidden');
-            renderMotorStatus();
-        }
-
-        function hideMotorStatusModal() {
-            motorStatusModal.classList.add('hidden');
-        }
-
-        function renderMotorStatus() {
-            motorStatusContent.innerHTML = '';
-
-            const tablaActual = document.querySelectorAll(".tabla-vuelo")[mesActual];
-            if (!tablaActual) {
-                motorStatusContent.innerHTML = '<p class="text-center text-gray-600">No hay datos de tabla activos para mostrar el estado de los componentes.</p>';
-                return;
-            }
-
-            const componentsToDisplay = [];
-
-            tablaActual.querySelectorAll('tbody tr').forEach(row => {
-                const nomenclaturaCell = row.querySelector('.nomenclatura');
-                if (nomenclaturaCell) {
-                    const componentName = nomenclaturaCell.textContent.trim();
-                    if (filasConColumnasAdicionalesEditables.includes(componentName)) {
-                        const restanteCelda = row.querySelector('.fila-restante');
-                        const limiteCelda = row.querySelector('.limite-celda');
-                        const generalCelda = row.querySelector('.fila-general');
-
-                        const remaining = parseFloat(restanteCelda?.textContent.trim()) || 0;
-                        const limit = parseFloat(limiteCelda?.textContent.trim()) || 0;
-                        const current = parseFloat(generalCelda?.textContent.trim()) || 0;
-                        
-                        let statusColorClass = 'progress-green';
-                        if (remaining <= 0) {
-                            statusColorClass = 'progress-red';
-                        } else if (remaining < limit * 0.2) {
-                            statusColorClass = 'progress-orange';
-                        }
-
-                        componentsToDisplay.push({
-                            name: componentName,
-                            remaining: remaining,
-                            limit: limit,
-                            current: current,
-                            statusColorClass: statusColorClass
-                        });
-                    }
-                }
-            });
-
-            const printOption = document.querySelector('input[name="motorStatusPrintOption"]:checked').value;
-
-            componentsToDisplay.forEach(component => {
-                if (printOption === 'critical-only' && component.statusColorClass === 'progress-green') {
-                    return;
-                }
-
-                const componentDiv = document.createElement('div');
-                componentDiv.className = 'component-status-item';
-
-                const percentUsed = (component.current / component.limit) * 100;
-                const progressBarFillWidth = Math.min(100, Math.max(0, percentUsed));
-
-                componentDiv.innerHTML = `
-                    <h4>${component.name}</h4>
-                    <p>Límite: ${formatNumber(component.limit)} | Actual: ${formatNumber(component.current)}</p>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill ${component.statusColorClass}" style="width: ${progressBarFillWidth}%;"></div>
-                    </div>
-                    <p class="progress-text">Restantes: ${formatNumber(component.remaining)}</p>
-                `;
-                motorStatusContent.appendChild(componentDiv);
-            });
-
-            if (componentsToDisplay.length === 0 || (printOption === 'critical-only' && motorStatusContent.children.length === 0)) {
-                 motorStatusContent.innerHTML = '<p class="text-center text-gray-600">No hay componentes para mostrar con los filtros actuales.</p>';
-            }
-        }
-
-        function printMotorStatus() {
-            const originalDisplay = motorStatusModal.style.display;
-            motorStatusModal.style.display = 'block';
-
-            renderMotorStatus(); 
-
-            document.body.classList.add('print-motor-status');
-
-            window.print();
-
-            document.body.classList.remove('print-motor-status');
-            motorStatusModal.style.display = originalDisplay;
-        }
-
+        // --- FUNCIONES PARA EL MODAL DE ESTADO DE MOTORES (ahora eliminado) ---
+        // showMotorStatusModal, hideMotorStatusModal, renderMotorStatus, printMotorStatus han sido eliminadas.
+        
         // Función para mostrar un mensaje personalizado en lugar de alert()
         function showCustomAlert(message) {
             const alertModal = document.createElement('div');
@@ -1767,20 +1276,24 @@
             crearTablasParaAño(añoActual);
             crearBotonesMeses();
 
-            btnMotorStatus.addEventListener('click', showMotorStatusModal);
-            closeMotorStatusModal.addEventListener('click', hideMotorStatusModal);
-            btnPrintMotorStatus.addEventListener('click', printMotorStatus);
+            // Eliminados los event listeners para el modal de estado de motores
+            // btnMotorStatus.addEventListener('click', showMotorStatusModal);
+            // closeMotorStatusModal.addEventListener('click', hideMotorStatusModal);
+            // btnPrintMotorStatus.addEventListener('click', printMotorStatus);
 
-            document.querySelectorAll('input[name="motorStatusPrintOption"]').forEach(radio => {
-                radio.addEventListener('change', renderMotorStatus);
-            });
+            // Eliminado el listener para las opciones de impresión del modal
+            // document.querySelectorAll('input[name="motorStatusPrintOption"]').forEach(radio => {
+            //     radio.addEventListener('change', renderMotorStatus);
+            // });
 
+            // Event listener para el botón "Estado de Componentes"
             btnComponentStatus.addEventListener('click', async () => {
                 if (!auth.currentUser) {
                     showCustomAlert('Debes iniciar sesión para ver el estado de los componentes.');
                     return;
                 }
 
+                // Obtener los totales generales directamente de Firebase Realtime Database
                 const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-980-Overall`;
                 try {
                     const snapshot = await get(ref(database, rutaTotalesGenerales));
@@ -1795,9 +1308,10 @@
                         { name: "RINS", current: generalTotals['RINS'] || 0, type: "general_total" }
                     ];
                     
+                    // Guardar los datos en localStorage (para compatibilidad si COMPONENTES945.HTML aún lo usa)
                     localStorage.setItem('componentStatusData', JSON.stringify(componentsData));
                     
-                    window.location.href = 'COMPONENTES945.HTML';
+                    window.location.href = 'COMPONENTES945.HTML'; // Redirige a la nueva página
                 } catch (error) {
                     showCustomAlert(`Error al cargar datos para la página de componentes: ${error.message}`);
                 }
