@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Inventario Logístico </title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos personalizados para la fuente Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Caja de mensajes para notificaciones */
+        #message-box {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50; /* Green */
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            text-align: center;
+        }
+        #message-box.error {
+            background-color: #f44336; /* Red */
+        }
+        #loading-overlay {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        /* Modals: Ocultos por defecto */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 50; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.flex { /* Override display: none when showing */
+            display: flex;
+        }
+        .modal > div {
+             background-color: #fff;
+             padding: 2rem;
+             border-radius: 0.5rem;
+             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+             width: 90%;
+             max-width: 32rem; /* md:max-w-md for withdrawal, larger for delivery */
+        }
+        #delivery-invoice-modal > div {
+            max-width: 50rem; /* Larger modal for delivery invoice */
+        }
+
+        /* Estilos específicos para la tabla dentro del modal de entrega */
+        #delivery-items-list th, #delivery-items-list td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        #delivery-items-list th {
+            background-color: #f3f4f6;
+        }
+
+        /* Estilos para los resultados de búsqueda en el modal de entrega */
+        #delivery-search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            margin-top: 0.5rem;
+            background-color: #fff;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .search-result-item:hover {
+            background-color: #f9fafb;
+        }
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        /* New styles for print - logos in header */
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .invoice-container, .inventory-container { width: 100%; border: none; padding: 0; box-shadow: none; }
+            .invoice-header, .inventory-header, .signatures-container { page-break-inside: avoid; }
+            table { page-break-inside: auto; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+            
+            /* Print-specific header layout */
+            .invoice-header .print-logo-left,
+            .inventory-header .print-logo-left {
+                position: absolute;
+                left: 20px; /* Adjust as needed */
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            .invoice-header .print-logo-right,
+            .inventory-header .print-logo-right {
+                position: absolute;
+                right: 20px; /* Adjust as needed */
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            .invoice-header h1,
+            .inventory-header h1 {
+                text-align: center;
+                flex-grow: 1; /* Center the title between logos */
+                margin: 0 120px; /* Adjust margin to prevent overlap with logos */
+            }
+            .created-by-text {
+                font-family: 'Bebas Neue', sans-serif !important; /* Ensure font applies for print */
+                font-size: 0.8em !important;
+                color: #555 !important;
+                margin-top: 5px !important;
+                letter-spacing: 1px !important;
+            }
+        }
+
+        /* Custom font for "Creado por" text */
+        .created-by-text {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.2rem; /* Adjusted for better visibility */
+            color: #d1d5db; /* Light gray to stand out on dark blue */
+            margin-top: 5px; /* Space from the main title */
+            letter-spacing: 1.5px; /* Spacing for a more distinct look */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3); /* Slight shadow for depth */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 antialiased">
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">Cargando datos...</div>
+
+    <!-- Caja de mensajes para notificaciones -->
+    <div id="message-box" class="rounded-lg shadow-lg"></div>
+
+    <!-- Modal de Retiro de Cantidad (para un solo artículo) -->
+    <div id="withdrawal-modal" class="modal">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Retirar Cantidad de Artículo</h3>
+            <div id="modal-item-details" class="mb-4 text-gray-700">
+                <p><span class="font-semibold">Número de Parte:</span> <span id="modal-item-id"></span></p>
+                <p><span class="font-semibold">Nombre:</span> <span id="modal-item-name"></span></p>
+                <p><span class="font-semibold">Cantidad Actual:</span> <span id="modal-item-current-quantity"></span></p>
+            </div>
+            <div class="mb-4">
+                <label for="withdrawal-quantity" class="block text-sm font-medium text-gray-700 mb-1">Cantidad a Retirar:</label>
+                <input type="number" id="withdrawal-quantity" min="1" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div class="mb-6">
+                <label for="withdrawal-responsible" class="block text-sm font-medium text-gray-700 mb-1">Responsable:</label>
+                <input type="text" id="withdrawal-responsible" value="Usuario" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div class="flex justify-end space-x-4">
+                <button id="cancel-withdrawal-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                    Cancelar
+                </button>
+                <button id="confirm-withdrawal-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
+                    Confirmar Retiro
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nuevo Modal de Factura de Entrega (retiro de múltiples componentes) -->
+    <div id="delivery-invoice-modal" class="modal">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Crear Factura de Entrega</h3>
+            
+            <div class="mb-4">
+                <label for="delivery-responsible" class="block text-sm font-medium text-gray-700 mb-1">Responsable de la Entrega:</label>
+                <input type="text" id="delivery-responsible" value="Usuario de Entrega" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+
+            <div class="mb-4">
+                <label for="delivery-search-input" class="block text-sm font-medium text-gray-700 mb-1">Buscar y Añadir Artículo:</label>
+                <input type="text" id="delivery-search-input" placeholder="Buscar por Número de Parte o nombre..." class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <div id="delivery-search-results" class="hidden"></div> <!-- Resultados de búsqueda en vivo -->
+            </div>
+
+            <div class="overflow-x-auto mb-6 border rounded-lg">
+                <table class="min-w-full bg-white">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="py-2 px-4 text-left text-sm font-semibold text-gray-700">Número de Parte</th>
+                            <th class="py-2 px-4 text-left text-sm font-semibold text-gray-700">Nombre</th>
+                            <th class="py-2 px-4 text-left text-sm font-semibold text-gray-700">Cantidad a Retirar</th>
+                            <th class="py-2 px-4 text-left text-sm font-semibold text-gray-700">Stock Disponible</th>
+                            <th class="py-2 px-4 text-left text-sm font-semibold text-gray-700">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="delivery-items-list" class="divide-y divide-gray-200">
+                        <!-- Items added to delivery will appear here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Sección de Firmas -->
+            <div class="mt-8 pt-4 border-t border-gray-300 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                <div class="signature-block">
+                    <div class="h-16 border-b border-gray-400 mb-2"></div>
+                    <p class="text-sm font-semibold text-gray-700">Jefe de Taller</p>
+                </div>
+                <div class="signature-block">
+                    <div class="h-16 border-b border-gray-400 mb-2"></div>
+                    <p class="text-sm font-semibold text-gray-700">Aprobado por A-4</p>
+                </div>
+                <div class="signature-block">
+                    <div class="h-16 border-b border-gray-400 mb-2"></div>
+                    <p class="text-sm font-semibold text-gray-700">Entregado por</p>
+                </div>
+                <div class="signature-block">
+                    <div class="h-16 border-b border-gray-400 mb-2"></div>
+                    <p class="text-sm font-semibold text-gray-700">Recibido por</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-4 mt-8">
+                <button id="cancel-delivery-invoice-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                    Cancelar
+                </button>
+                <button id="confirm-delivery-invoice-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+                    <svg class="h-5 w-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Confirmar Entrega
+                </button>
+                <button id="print-delivery-invoice-btn" class="hidden inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors duration-200">
+                    <svg class="h-5 w-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm-5-8H2V3h20v6h-3"></path></svg>
+                    Imprimir Factura
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="custom-confirm-modal" class="modal">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm text-center">
+            <h3 id="custom-confirm-title" class="text-xl font-bold text-gray-800 mb-4"></h3>
+            <p id="custom-confirm-message" class="text-gray-700 mb-6"></p>
+            <div class="flex justify-center space-x-4">
+                <button id="custom-confirm-cancel" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                    Cancelar
+                </button>
+                <button id="confirm-confirm-ok" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <header class="bg-gradient-to-r from-blue-700 to-blue-900 text-white p-6 shadow-md rounded-b-lg relative">
+        <div class="container mx-auto text-center flex flex-col items-center justify-center">
+            <!-- New Logo (left) -->
+            <img src="uploaded:image_f52739.jpg-f0804319-ffb6-4d31-8154-4538d699b6d9" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="absolute left-6 top-6 h-24 w-24 object-contain rounded-full shadow-lg">
+            
+            <h1 class="text-4xl font-bold mb-2">Sistema de Gestión de Inventario Logístico A-4 HAM</h1>
+            <!-- Adjusted for proper positioning and custom font -->
+            <p class="created-by-text">CREADO POR EL COMANDO 2 HERNANDEZ SOZA EL 16-JUN-25</p>
+            
+            <!-- Original Logo (right) -->
+            <img src="https://th.bing.com/th/id/R.59cc9f2e73d8d451406634361766bef7?rik=mCYsnanv4J45Pw&riu=http%3a%2f%2fwww.logotypes101.com%2flogos%2f189%2fBCEBADF0F47AD978734FAB5B57BADCB4%2flogofuerzaaerea.png&ehk=d4iwHlQczHRwWHC2JOmvJ4y0hQD1jPKlMuc%2bgjePcvc%3d&risl=&pid=ImgRaw&r=0" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="absolute right-6 top-6 h-24 w-24 object-contain rounded-full shadow-lg">
+        </div>
+    </header>
+
+    <nav class="bg-blue-800 text-white p-3 shadow-sm rounded-t-lg mt-4 mx-auto w-11/12 md:w-4/5 lg:w-3/4">
+        <div class="container mx-auto flex flex-wrap justify-center space-x-4">
+            <a href="#vision-general" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Visión General</a>
+            <a href="#inventario-actual" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Inventario Actual</a>
+            <a href="#historial-movimientos" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Historial de Movimientos</a>
+            <a href="#historial-facturas" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Historial de Facturas</a>
+            <a href="#anadir-articulo" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Añadir Artículo</a>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-6 bg-white shadow-xl rounded-lg mt-6 mb-8 w-11/12 md:w-4/5 lg:w-3/4">
+        
+        <!-- Sección de Visión General -->
+        <section id="vision-general" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
+            <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Visión General del Inventario</h2>
+            <p class="text-lg text-gray-700 leading-relaxed mb-4">Este sistema permite una gestión detallada y eficiente de todos los componentes, partes, herramientas y otros materiales necesarios para tus operaciones. Mantén un control preciso sobre las existencias, optimiza los flujos de trabajo y minimiza los costos de almacenamiento.</p>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+                <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+                    <p class="text-sm text-gray-500">Artículos en stock</p>
+                    <p id="total-items" class="text-4xl font-bold text-green-600">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+                    <p class="text-sm text-gray-500">Total de Stock</p>
+                    <p id="total-stock" class="text-4xl font-bold text-blue-600">0</p>
+                </div>
+                <div id="critical-items-card" class="bg-white p-4 rounded-lg shadow-md border border-gray-200 cursor-pointer hover:bg-red-50 transition-colors duration-200">
+                    <p class="text-sm text-gray-500">Artículos críticos (bajo stock)</p>
+                    <p id="critical-items" class="text-4xl font-bold text-red-600">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+                    <p class="text-sm text-gray-500">Última actualización</p>
+                    <p id="last-update" class="text-lg font-medium text-gray-700"></p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-8 border-gray-300">
+
+        <!-- Sección de Inventario Actual -->
+        <section id="inventario-actual" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
+            <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Inventario Actual de Componentes y Partes</h2>
+            
+            <!-- Barra de búsqueda y botones de acción -->
+            <div class="flex flex-col md:flex-row items-center justify-between mb-6 space-y-3 md:space-y-0 md:space-x-4">
+                <div class="flex w-full md:w-auto flex-grow space-x-2">
+                    <input type="text" id="search-input" placeholder="Buscar por Número de Parte, nombre, categoría..." class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <button id="search-button" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </button>
+                    <button id="clear-search-button" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                        Todo
+                    </button>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="print-inventory-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors duration-200 whitespace-nowrap">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm-5-8H2V3h20v6h-3"></path></svg>
+                        Imprimir Inventario
+                    </button>
+                    <button id="open-delivery-invoice-modal-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200 whitespace-nowrap">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                        Crear Factura de Entrega
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-lg shadow-md">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Número de Parte</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Nombre del Artículo</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Categoría</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Cantidad</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Unidad</th><!-- New column for Unit -->
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Ubicación</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Stock Mínimo</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-list" class="divide-y divide-gray-200">
+                        <!-- Los datos se cargarán desde Firebase -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <hr class="my-8 border-gray-300">
+
+        <!-- Sección de Historial de Movimientos -->
+        <section id="historial-movimientos" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
+            <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Historial de Movimientos Recientes</h2>
+            <div class="flex justify-end mb-4">
+                <button id="clear-history-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-colors duration-200">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Borrar Historial
+                </button>
+            </div>
+            <div class="overflow-x-auto rounded-lg shadow-md">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Fecha/Hora</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Número de Parte</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Nombre Artículo</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Tipo Movimiento</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Cantidad</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Fuente/Destino</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Responsable</th>
+                        </tr>
+                    </thead>
+                    <tbody id="movement-history-list" class="divide-y divide-gray-200">
+                        <!-- Las entradas se cargarán desde Firebase -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <hr class="my-8 border-gray-300">
+
+        <!-- Nueva Sección: Historial de Facturas -->
+        <section id="historial-facturas" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
+            <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Historial de Facturas de Entrega</h2>
+            <div class="flex justify-end mb-4">
+                <button id="clear-invoice-history-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-colors duration-200">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Borrar Historial de Facturas
+                </button>
+            </div>
+            <div class="overflow-x-auto rounded-lg shadow-md">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Número de Factura</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Fecha/Hora</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Responsable</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Artículos</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoice-history-list" class="divide-y divide-gray-200">
+                        <!-- Las entradas de facturas se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <hr class="my-8 border-gray-300">
+
+        <!-- Sección para Añadir Nuevo Artículo -->
+        <section id="anadir-articulo" class="p-6 bg-gray-50 rounded-lg shadow-inner">
+            <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Añadir Nuevo Artículo al Inventario</h2>
+            <form id="add-item-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="item-id" class="block text-sm font-medium text-gray-700 mb-1">Número de Parte del Artículo:</label>
+                    <input type="text" id="item-id" name="itemId" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="item-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Artículo:</label>
+                    <input type="text" id="item-name" name="itemName" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="item-category" class="block text-sm font-medium text-gray-700 mb-1">Categoría:</label>
+                    <input type="text" id="item-category" name="itemCategory" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="item-quantity" class="block text-sm font-medium text-gray-700 mb-1">Cantidad:</label>
+                    <input type="number" id="item-quantity" name="itemQuantity" min="0" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="item-unit" class="block text-sm font-medium text-gray-700 mb-1">Unidad de Medida:</label>
+                    <select id="item-unit" name="itemUnit" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <option value="">Seleccione una unidad</option>
+                        <option value="unidades">Unidades</option>
+                        <option value="litros">Litros</option>
+                        <option value="kilogramos">Kilogramos</option>
+                        <option value="metros">Metros</option>
+                        <option value="cajas">Cajas</option>
+                        <option value="paquetes">Paquetes</option>
+                        <option value="piezas">Piezas</option>
+                        <option value="galones">Galones</option>
+                        <option value="pares">Pares</option>
+                        <option value="juegos">Juegos</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="item-location" class="block text-sm font-medium text-gray-700 mb-1">Ubicación:</label>
+                    <input type="text" id="item-location" name="itemLocation" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="item-min-stock" class="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo:</label>
+                    <input type="number" id="item-min-stock" name="itemMinStock" min="0" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div class="md:col-span-2 text-center mt-4">
+                    <button type="submit" class="inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-lg font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:scale-105">
+                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        Añadir Artículo
+                    </button>
+                </div>
+            </form>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white p-6 text-center rounded-t-lg mt-8 shadow-inner">
+        <p class="text-sm">
+            &copy; 2025 Sistema de Logística de Inventario. Todos los derechos reservados.
+            <br>
+            <span id="user-id-display"></span>
+        </p>
+    </footer>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
+        // Importar módulos de Realtime Database
+        import { getDatabase, ref, push, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
+
+        // Global variables for Firebase instances and user data
+        let db;
+        let auth;
+        let userId = 'anonymous'; // Default to anonymous
+        let inventoryRef; // Reference for Realtime Database
+        let historyRef; // Reference for movement history
+        let invoiceHistoryRef; // Reference for invoice history
+        let isAuthReady = false; // Flag to indicate Firebase auth is ready
+        let currentInventoryItems = []; // To store a local copy of inventory for live search
+
+        // Your provided Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMmICpFCInGwg74YK-5bPKvM4kk5nUJpw",
+            authDomain: "abastos-bb76a.firebaseapp.com",
+            databaseURL: "https://abastos-bb76a-default-rtdb.firebaseio.com", // This points to Realtime Database
+            projectId: "abastos-bb76a",
+            storageBucket: "abastos-bb76a.firebasestorage.app",
+            messagingSenderId: "708455293960",
+            appId: "1:708455293960:web:144e21229865e7f25f9dbd",
+            measurementId: "G-BZT4HZZ857"
+        };
+
+        // Check if __app_id is defined by the environment (used for collection paths specific to Canvas)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Function to show custom message box
+        function showMessage(message, isError = false) {
+            const messageBox = document.getElementById('message-box');
+            messageBox.textContent = message;
+            messageBox.classList.remove('bg-green-600', 'bg-red-600', 'error');
+            if (isError) {
+                messageBox.classList.add('bg-red-600', 'error');
+            } else {
+                messageBox.classList.add('bg-green-600');
+            }
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 3000);
+        }
+
+        // Function to update the last update time on the UI
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('last-update').textContent = now.toLocaleDateString('es-ES', options);
+        }
+
+        // Function to get formatted date and time for history
+        function getFormattedDateTime() {
+            const now = new Date();
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            return now.toLocaleDateString('es-ES', options).replace(/\//g, '-') + ' ' + now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+        }
+
+        // Function to add a movement entry to Realtime Database
+        async function addMovementToHistory(itemId, itemName, movementType, quantity, sourceDestination, responsible) {
+            if (!isAuthReady) {
+                console.warn("Realtime Database no está lista, no se puede añadir entrada al historial de movimientos.");
+                return;
+            }
+            try {
+                // Use push() to generate a unique key for each history entry
+                await push(historyRef, {
+                    timestamp: new Date().toISOString(), // Store as ISO string for RTDB
+                    itemId,
+                    itemName,
+                    movementType,
+                    quantity,
+                    sourceDestination,
+                    responsible
+                });
+            } catch (e) {
+                console.error("Error al añadir documento al historial de movimientos en Realtime Database: ", e);
+                showMessage("Error al guardar en el historial de movimientos.", true);
+            }
+        }
+
+        // Function to render inventory items to the table
+        function renderInventory(items) {
+            const tableBody = document.getElementById('inventory-list');
+            tableBody.innerHTML = ''; // Clear current table
+            currentInventoryItems = items; // Update local copy for live search
+
+            let totalItemsCount = 0;
+            let criticalItemsCount = 0;
+            let totalStockQuantity = 0; // New: Initialize total stock quantity
+
+            items.forEach(item => {
+                totalItemsCount++; // Count distinct items
+                totalStockQuantity += item.quantity; // Sum all quantities for total stock quantity
+
+                if (item.quantity <= item.minStock) {
+                    criticalItemsCount++;
+                }
+
+                const newRow = tableBody.insertRow();
+                newRow.classList.add('hover:bg-gray-50');
+                // Store Realtime Database key in the row for easy access
+                newRow.dataset.dbKey = item.id; 
+
+                newRow.insertCell().textContent = item.itemId; // Custom item ID
+                newRow.insertCell().textContent = item.name;
+                newRow.insertCell().textContent = item.category;
+                newRow.insertCell().textContent = item.quantity;
+                newRow.insertCell().textContent = item.unit; // New: Display unit
+                newRow.insertCell().textContent = item.location;
+                newRow.insertCell().textContent = item.minStock;
+
+                const actionsCell = newRow.insertCell();
+                actionsCell.classList.add('flex', 'flex-col', 'space-y-1', 'justify-center', 'items-center'); // Center buttons vertically
+
+                const withdrawButton = document.createElement('button');
+                withdrawButton.textContent = 'Retirar Cantidad';
+                withdrawButton.classList.add('bg-red-500', 'hover:bg-red-600', 'text-white', 'font-bold', 'py-1', 'px-3', 'rounded-full', 'text-xs', 'transition-colors', 'duration-200');
+                withdrawButton.addEventListener('click', function() { 
+                    openWithdrawalModal(item.id, item.itemId, item.name, item.quantity); 
+                });
+                actionsCell.appendChild(withdrawButton);
+
+                // Nuevo botón de eliminar
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Eliminar';
+                deleteButton.classList.add('bg-gray-600', 'hover:bg-gray-700', 'text-white', 'font-bold', 'py-1', 'px-3', 'rounded-full', 'text-xs', 'transition-colors', 'duration-200', 'mt-1');
+                deleteButton.addEventListener('click', function() { 
+                    deleteItem(item.id, item.itemId, item.name); 
+                });
+                actionsCell.appendChild(deleteButton);
+            });
+
+            document.getElementById('total-items').textContent = totalItemsCount;
+            document.getElementById('critical-items').textContent = criticalItemsCount;
+            document.getElementById('total-stock').textContent = totalStockQuantity; // New: Update total stock quantity
+            updateLastUpdateTime();
+        }
+
+        // Function to render history items to the table
+        function renderHistory(movements) {
+            const historyTableBody = document.getElementById('movement-history-list');
+            historyTableBody.innerHTML = ''; // Clear current table
+
+            // Sort movements by timestamp in descending order (most recent first)
+            // Timestamps are ISO strings, so direct comparison works
+            movements.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            movements.forEach(move => {
+                const newRow = historyTableBody.insertRow();
+                newRow.classList.add('hover:bg-gray-50');
+
+                newRow.insertCell().textContent = new Date(move.timestamp).toLocaleString('es-ES', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                }).replace(/\//g, '-');
+                newRow.insertCell().textContent = move.itemId;
+                newRow.insertCell().textContent = move.itemName;
+                newRow.insertCell().textContent = move.movementType;
+                newRow.insertCell().textContent = move.quantity;
+                newRow.insertCell().textContent = move.sourceDestination;
+                newRow.insertCell().textContent = move.responsible;
+            });
+        }
+
+        // Function to render invoice history items to the table
+        function renderInvoices(invoices) {
+            const invoiceHistoryTableBody = document.getElementById('invoice-history-list');
+            invoiceHistoryTableBody.innerHTML = ''; // Clear current table
+
+            // Sort invoices by timestamp in descending order (most recent first)
+            invoices.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            invoices.forEach(invoice => {
+                const newRow = invoiceHistoryTableBody.insertRow();
+                newRow.classList.add('hover:bg-gray-50');
+
+                newRow.insertCell().textContent = invoice.invoiceId.substring(0, 8); // Display first 8 chars of Firebase key as Invoice ID
+                newRow.insertCell().textContent = new Date(invoice.timestamp).toLocaleString('es-ES', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                }).replace(/\//g, '-');
+                newRow.insertCell().textContent = invoice.responsible;
+                
+                const itemsSummaryCell = newRow.insertCell();
+                if (invoice.items && Array.isArray(invoice.items)) {
+                    itemsSummaryCell.textContent = invoice.items.map(item => `${item.name} (x${item.quantityToWithdraw})`).join(', ');
+                } else {
+                    itemsSummaryCell.textContent = 'N/A';
+                }
+
+                const actionsCell = newRow.insertCell();
+                const printButton = document.createElement('button');
+                printButton.textContent = 'Imprimir';
+                printButton.classList.add('bg-blue-500', 'hover:bg-blue-600', 'text-white', 'font-bold', 'py-1', 'px-3', 'rounded-full', 'text-xs', 'transition-colors', 'duration-200');
+                printButton.addEventListener('click', () => printExistingInvoice(invoice)); // Function to print an existing invoice
+                actionsCell.appendChild(printButton);
+            });
+        }
+
+        // --- Firebase Initialization and Data Listeners ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('loading-overlay').style.display = 'flex'; // Show loading
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getDatabase(app); // Initialize Realtime Database
+
+                // Authenticate user
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        document.getElementById('user-id-display').textContent = `Número de Parte de Usuario: ${userId}`;
+                        // Referencias para Realtime Database
+                        inventoryRef = ref(db, `artifacts/${appId}/users/${userId}/inventory`);
+                        historyRef = ref(db, `artifacts/${appId}/users/${userId}/movementHistory`);
+                        invoiceHistoryRef = ref(db, `artifacts/${appId}/users/${userId}/invoiceHistory`);
+                        isAuthReady = true;
+
+                        // Listen to Realtime Database collections
+                        onValue(inventoryRef, (snapshot) => {
+                            const itemsObject = snapshot.val(); // Get object of items
+                            const itemsArray = [];
+                            if (itemsObject) {
+                                // Convert object to array for rendering
+                                for (const key in itemsObject) {
+                                    itemsArray.push({ id: key, ...itemsObject[key] });
+                                }
+                            }
+                            renderInventory(itemsArray); // This also updates currentInventoryItems
+                            console.log("Inventario cargado/actualizado desde Realtime Database.");
+                        }, (error) => {
+                            console.error("Error al escuchar el inventario de Realtime Database: ", error);
+                            showMessage("Error al cargar el inventario.", true);
+                        });
+
+                        onValue(historyRef, (snapshot) => {
+                            const movementsObject = snapshot.val(); // Get object of movements
+                            const movementsArray = [];
+                            if (movementsObject) {
+                                // Convert object to array for rendering
+                                for (const key in movementsObject) {
+                                    movementsArray.push({ id: key, ...movementsObject[key] });
+                                }
+                            }
+                            renderHistory(movementsArray);
+                            console.log("Historial de movimientos cargado/actualizado desde Realtime Database.");
+                        }, (error) => {
+                            console.error("Error al escuchar el historial de movimientos de Realtime Database: ", error);
+                            showMessage("Error al cargar el historial de movimientos.", true);
+                        });
+
+                        // New listener for invoice history
+                        onValue(invoiceHistoryRef, (snapshot) => {
+                            const invoicesObject = snapshot.val();
+                            const invoicesArray = [];
+                            if (invoicesObject) {
+                                for (const key in invoicesObject) {
+                                    invoicesArray.push({ invoiceId: key, ...invoicesObject[key] });
+                                }
+                            }
+                            renderInvoices(invoicesArray);
+                            console.log("Historial de facturas cargado/actualizado desde Realtime Database.");
+                        }, (error) => {
+                            console.error("Error al escuchar el historial de facturas de Realtime Database: ", error);
+                            showMessage("Error al cargar el historial de facturas.", true);
+                        });
+
+
+                        document.getElementById('loading-overlay').style.display = 'none'; // Hide loading
+                    } else {
+                        console.log("No hay usuario autenticado.");
+                        document.getElementById('loading-overlay').style.display = 'none'; // Hide loading
+                        showMessage("No se pudo autenticar. Datos no persistirán.", true);
+                        isAuthReady = false;
+                    }
+                });
+
+            } catch (e) {
+                console.error("Error inicializando Firebase Realtime Database:", e);
+                document.getElementById('loading-overlay').style.display = 'none'; // Hide loading
+                showMessage("Error grave al inicializar la aplicación. Ver consola para más detalles.", true);
+            }
+
+            // --- Attach Event Listeners (ensure they are attached AFTER DOMContentLoaded) ---
+            document.getElementById('open-delivery-invoice-modal-btn').addEventListener('click', openDeliveryInvoiceModal);
+            document.getElementById('search-button').addEventListener('click', searchInventory);
+            document.getElementById('clear-search-button').addEventListener('click', clearSearch);
+            document.getElementById('cancel-withdrawal-btn').addEventListener('click', cancelWithdrawal);
+            document.getElementById('confirm-withdrawal-btn').addEventListener('click', confirmWithdrawal);
+            // Changed from click to input for live search
+            document.getElementById('delivery-search-input').addEventListener('input', filterDeliverySearch); 
+            document.getElementById('cancel-delivery-invoice-btn').addEventListener('click', cancelDeliveryInvoice);
+            document.getElementById('confirm-delivery-invoice-btn').addEventListener('click', confirmDeliveryInvoice);
+            document.getElementById('print-delivery-invoice-btn').addEventListener('click', printDeliveryInvoice);
+            document.getElementById('clear-history-btn').addEventListener('click', clearHistory);
+            document.getElementById('clear-invoice-history-btn').addEventListener('click', clearInvoiceHistory); // New listener for clearing invoice history
+            document.getElementById('critical-items-card').addEventListener('click', filterCriticalItems); // New event listener for critical items card
+            document.getElementById('print-inventory-btn').addEventListener('click', printInventory); // New event listener for printing inventory
+            // Custom confirm modal buttons already have listeners attached correctly
+
+            // Add listener for add item form
+            document.getElementById('add-item-form').addEventListener('submit', async function(event) {
+                event.preventDefault(); 
+
+                if (!isAuthReady) {
+                    showMessage("La base de datos no está lista. Intente de nuevo en unos segundos.", true);
+                    return;
+                }
+
+                const itemId = document.getElementById('item-id').value.trim();
+                const itemName = document.getElementById('item-name').value.trim();
+                const itemCategory = document.getElementById('item-category').value.trim();
+                const itemQuantity = parseInt(document.getElementById('item-quantity').value);
+                const itemUnit = document.getElementById('item-unit').value; // Get the unit of measure
+                const itemLocation = document.getElementById('item-location').value.trim();
+                const itemMinStock = parseInt(document.getElementById('item-min-stock').value);
+
+                if (!itemId || !itemName || !itemCategory || isNaN(itemQuantity) || !itemUnit || !itemLocation || isNaN(itemMinStock)) {
+                    showMessage('Por favor, complete todos los campos correctamente.', true);
+                    return;
+                }
+                if (itemQuantity < 0 || itemMinStock < 0) {
+                     showMessage('La cantidad y el stock mínimo no pueden ser números negativos.', true);
+                     return;
+                }
+                if (itemUnit === "") {
+                    showMessage('Por favor, seleccione una unidad de medida.', true);
+                    return;
+                }
+
+                try {
+                    // Check if item with this itemId already exists
+                    let itemExists = false;
+                    let existingItemKey = null;
+                    let existingItemQuantity = 0;
+
+                    // Query the currentInventoryItems array to find the item
+                    const existingItem = currentInventoryItems.find(item => item.itemId === itemId);
+                    
+                    if (existingItem) {
+                        itemExists = true;
+                        existingItemKey = existingItem.id; // The Realtime Database key
+                        existingItemQuantity = existingItem.quantity;
+                    }
+
+                    if (itemExists) {
+                        // If item exists, update quantity and unit
+                        const newTotalQuantity = existingItemQuantity + itemQuantity;
+                        const itemDbRef = ref(db, `artifacts/${appId}/users/${userId}/inventory/${existingItemKey}`);
+                        await update(itemDbRef, { quantity: newTotalQuantity, unit: itemUnit }); // Update unit as well
+                        await addMovementToHistory(itemId, itemName, 'Actualización (Ingreso)', itemQuantity, 'Formulario de Entrada', 'Usuario');
+                        showMessage(`Cantidad de "${itemName}" actualizada a ${newTotalQuantity} ${itemUnit} en Realtime Database!`, false);
+                    } else {
+                        await push(inventoryRef, {
+                            itemId: itemId, 
+                            name: itemName,
+                            category: itemCategory,
+                            quantity: itemQuantity,
+                            unit: itemUnit, // Store unit
+                            location: itemLocation,
+                            minStock: itemMinStock,
+                            createdAt: new Date().toISOString()
+                        });
+                        await addMovementToHistory(itemId, itemName, 'Ingreso', itemQuantity, 'Formulario de Entrada', 'Usuario');
+                        showMessage('Artículo añadido con éxito a Realtime Database!', false);
+                    }
+
+                    document.getElementById('add-item-form').reset();
+
+                } catch (e) {
+                    console.error("Error al añadir/actualizar el artículo en Realtime Database: ", e);
+                    showMessage("Error al añadir/actualizar el artículo. Intente de nuevo.", true);
+                }
+            });
+
+
+        });
+
+
+        // --- Modals and Forms Logic ---
+
+        // Variables para el modal de retiro individual
+        let selectedDbKeyForWithdrawal = null; 
+        let selectedItemIdForWithdrawal = null;
+        let selectedItemNameForWithdrawal = null;
+        let selectedItemCurrentQuantity = 0;
+
+        // Función para abrir el modal de retiro individual
+        function openWithdrawalModal(dbKey, itemId, itemName, currentQuantity) {
+            selectedDbKeyForWithdrawal = dbKey;
+            selectedItemIdForWithdrawal = itemId;
+            selectedItemNameForWithdrawal = itemName;
+            selectedItemCurrentQuantity = currentQuantity;
+
+            document.getElementById('modal-item-id').textContent = itemId;
+            document.getElementById('modal-item-name').textContent = itemName;
+            document.getElementById('modal-item-current-quantity').textContent = currentQuantity; 
+            document.getElementById('withdrawal-quantity').value = ''; 
+            document.getElementById('withdrawal-responsible').value = 'Usuario'; 
+
+            document.getElementById('withdrawal-modal').classList.add('flex');
+        }
+
+        // Función para cerrar el modal de retiro individual
+        function cancelWithdrawal() {
+            document.getElementById('withdrawal-modal').classList.remove('flex');
+            selectedDbKeyForWithdrawal = null;
+            selectedItemIdForWithdrawal = null;
+            selectedItemNameForWithdrawal = null;
+            selectedItemCurrentQuantity = 0;
+        }
+
+        // Función para confirmar y procesar el retiro individual
+        async function confirmWithdrawal() {
+            const withdrawalQuantity = parseInt(document.getElementById('withdrawal-quantity').value);
+            const responsible = document.getElementById('withdrawal-responsible').value.trim();
+
+            if (isNaN(withdrawalQuantity) || withdrawalQuantity <= 0) {
+                showMessage('Por favor, ingrese una cantidad válida a retirar (mayor que 0).', true);
+                return;
+            }
+
+            if (withdrawalQuantity > selectedItemCurrentQuantity) {
+                showMessage(`No hay suficientes "${selectedItemNameForWithdrawal}" en stock. Cantidad disponible: ${selectedItemCurrentQuantity}.`, true);
+                return;
+            }
+
+            if (!responsible) {
+                showMessage('Por favor, ingrese el responsable del retiro.', true);
+                return;
+            }
+
+            const newQuantity = selectedItemCurrentQuantity - withdrawalQuantity;
+
+            try {
+                const itemDbRef = ref(db, `artifacts/${appId}/users/${userId}/inventory/${selectedDbKeyForWithdrawal}`);
+                
+                if (newQuantity <= 0) {
+                    await remove(itemDbRef); 
+                    showMessage(`Artículo "${selectedItemNameForWithdrawal}" completamente retirado y eliminado del inventario.`, false);
+                } else {
+                    await update(itemDbRef, { quantity: newQuantity }); 
+                    showMessage(`Se retiraron ${withdrawalQuantity} unidades de "${selectedItemNameForWithdrawal}". Cantidad restante: ${newQuantity}.`, false);
+                }
+                
+                await addMovementToHistory(selectedItemIdForWithdrawal, selectedItemNameForWithdrawal, 'Retiro', withdrawalQuantity, 'Salida de Inventario (Individual)', responsible);
+
+                cancelWithdrawal();
+            } catch (e) {
+                console.error("Error al procesar el retiro en Realtime Database: ", e);
+                showMessage("Error al procesar el retiro. Intente de nuevo.", true);
+            }
+        }
+
+        // Función para eliminar un artículo
+        async function deleteItem(dbKey, itemId, itemName) {
+            if (!isAuthReady) {
+                showMessage("La base de datos no está lista. Intente de nuevo en unos segundos.", true);
+                return;
+            }
+
+            const confirmed = await showConfirm(
+                'Confirmar Eliminación',
+                `¿Está seguro de que desea eliminar el artículo "${itemName}" (Número de Parte: ${itemId}) del inventario? Esta acción es irreversible.`
+            );
+            
+            if (!confirmed) {
+                return; 
+            }
+
+            try {
+                const itemDbRef = ref(db, `artifacts/${appId}/users/${userId}/inventory/${dbKey}`);
+                await remove(itemDbRef); 
+
+                await addMovementToHistory(itemId, itemName, 'Eliminación', 0, 'Eliminado del Inventario', 'Usuario'); 
+
+                showMessage(`Artículo "${itemName}" eliminado con éxito.`, false);
+            } catch (e) {
+                console.error("Error al eliminar el artículo de Realtime Database: ", e);
+                showMessage("Error al eliminar el artículo. Intente de nuevo.", true);
+            }
+        }
+
+        // --- Historial: Borrar Historial Completo ---
+        async function clearHistory() {
+            if (!isAuthReady) {
+                showMessage("La base de datos no está lista. Intente de nuevo en unos segundos.", true);
+                return;
+            }
+
+            const confirmed = await showConfirm(
+                'Borrar Historial Completo',
+                `¿Está seguro de que desea eliminar TODO el historial de movimientos? Esta acción es irreversible.`
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                await remove(historyRef); // Elimina todo el nodo de historial
+                showMessage('Historial de movimientos borrado con éxito.', false);
+            } catch (e) {
+                console.error("Error al borrar el historial de Realtime Database: ", e);
+                showMessage("Error al borrar el historial. Intente de nuevo.", true);
+            }
+        }
+
+        // --- Nuevo: Funcionalidad de Factura de Entrega (Múltiples Componentes) ---
+
+        let deliveryItems = [];
+
+        function openDeliveryInvoiceModal() {
+            deliveryItems = []; 
+            renderDeliveryItems(); 
+            document.getElementById('delivery-responsible').value = 'Usuario de Entrega'; 
+            document.getElementById('delivery-search-input').value = ''; 
+            document.getElementById('delivery-search-results').classList.add('hidden'); // Hide search results on open
+            document.getElementById('print-delivery-invoice-btn').classList.add('hidden'); // Hide print button initially
+            document.getElementById('delivery-invoice-modal').classList.add('flex');
+        }
+
+        function cancelDeliveryInvoice() {
+            document.getElementById('delivery-invoice-modal').classList.remove('flex');
+            deliveryItems = []; 
+            document.getElementById('print-delivery-invoice-btn').classList.add('hidden'); // Ensure hidden on cancel
+        }
+
+        // Nuevo: Función para filtrar y mostrar resultados de búsqueda en vivo en el modal de entrega
+        function filterDeliverySearch() {
+            const searchInput = document.getElementById('delivery-search-input').value.trim().toUpperCase();
+            const searchResultsDiv = document.getElementById('delivery-search-results');
+            searchResultsDiv.innerHTML = ''; // Clear previous results
+
+            if (searchInput.length < 2) { // Only search if at least 2 characters are typed
+                searchResultsDiv.classList.add('hidden');
+                return;
+            }
+
+            const filteredItems = currentInventoryItems.filter(item => 
+                item.itemId.toUpperCase().includes(searchInput) || 
+                item.name.toUpperCase().includes(searchInput) ||
+                item.category.toUpperCase().includes(searchInput)
+            );
+
+            if (filteredItems.length === 0) {
+                searchResultsDiv.classList.add('hidden');
+                return;
+            }
+
+            searchResultsDiv.classList.remove('hidden');
+            filteredItems.forEach(item => {
+                const resultItemDiv = document.createElement('div');
+                resultItemDiv.classList.add('search-result-item');
+                resultItemDiv.textContent = `${item.name} (Número de Parte: ${item.itemId}, Stock: ${item.quantity} ${item.unit || ''})`; // Include unit in search results
+                resultItemDiv.addEventListener('click', () => addItemToDeliveryModal(item));
+                searchResultsDiv.appendChild(resultItemDiv);
+            });
+        }
+
+        // Nuevo: Función para añadir un artículo de los resultados de búsqueda a la factura de entrega
+        function addItemToDeliveryModal(item) {
+            const existingItemIndex = deliveryItems.findIndex(dItem => dItem.itemId === item.itemId);
+            if (existingItemIndex !== -1) {
+                showMessage(`"${item.name}" ya está en la factura.`, true);
+            } else {
+                deliveryItems.push({ 
+                    dbKey: item.id, // Realtime Database key
+                    itemId: item.itemId,
+                    name: item.name,
+                    currentStock: item.quantity,
+                    unit: item.unit || '', // Add unit to delivery item
+                    quantityToWithdraw: 1, // Default quantity to 1
+                    finalStock: item.quantity - 1 // Initial calculation for final stock
+                });
+                renderDeliveryItems();
+                document.getElementById('delivery-search-input').value = ''; // Clear search input
+                document.getElementById('delivery-search-results').classList.add('hidden'); // Hide results
+                showMessage(`"${item.name}" añadido a la factura.`, false);
+            }
+        }
+
+
+        function renderDeliveryItems() {
+            const deliveryListBody = document.getElementById('delivery-items-list');
+            deliveryListBody.innerHTML = ''; 
+
+            deliveryItems.forEach((item, index) => {
+                const row = deliveryListBody.insertRow();
+                row.insertCell().textContent = item.itemId; 
+                row.insertCell().textContent = item.name;
+                
+                const quantityCell = row.insertCell();
+                const quantityInput = document.createElement('input');
+                quantityInput.type = 'number';
+                quantityInput.min = '1';
+                quantityInput.value = item.quantityToWithdraw;
+                quantityInput.classList.add('w-24', 'px-2', 'py-1', 'border', 'rounded-md', 'text-sm');
+                quantityInput.onchange = (e) => {
+                    const newQty = parseInt(e.target.value);
+                    if (isNaN(newQty) || newQty <= 0) {
+                        showMessage('Cantidad inválida. Debe ser un número mayor que 0.', true);
+                        e.target.value = item.quantityToWithdraw;
+                        return;
+                    }
+                    if (newQty > item.currentStock) {
+                        showMessage(`No puedes retirar ${newQty} de ${item.name}. Stock disponible: ${item.currentStock}.`, true);
+                        e.target.value = item.quantityToWithdraw;
+                        return;
+                    }
+                    item.quantityToWithdraw = newQty;
+                    item.finalStock = item.currentStock - newQty; // Update final stock on change
+                };
+                quantityCell.appendChild(quantityInput);
+
+                row.insertCell().textContent = `${item.currentStock} ${item.unit || ''}`; // Display current stock with unit
+
+                const actionCell = row.insertCell();
+                const removeButton = document.createElement('button');
+                removeButton.textContent = 'Remover';
+                removeButton.classList.add('bg-gray-400', 'hover:bg-gray-500', 'text-white', 'font-bold', 'py-1', 'px-3', 'rounded-full', 'text-xs');
+                removeButton.onclick = () => {
+                    deliveryItems.splice(index, 1);
+                    renderDeliveryItems();
+                    showMessage(`"${item.name}" eliminado de la factura.`, false);
+                };
+                actionCell.appendChild(removeButton);
+            });
+        }
+
+        async function confirmDeliveryInvoice() {
+            const responsible = document.getElementById('delivery-responsible').value.trim();
+            if (!responsible) {
+                showMessage('Por favor, ingrese el responsable de la entrega.', true);
+                return;
+            }
+
+            if (deliveryItems.length === 0) {
+                showMessage('No hay artículos en la factura de entrega.', true);
+                return;
+            }
+
+            let deliverySummary = [];
+            let allValid = true;
+
+            deliveryItems.forEach(item => {
+                if (item.quantityToWithdraw <= 0 || isNaN(item.quantityToWithdraw)) {
+                    showMessage(`Error: Cantidad inválida para "${item.name}".`, true);
+                    allValid = false;
+                }
+                if (item.quantityToWithdraw > item.currentStock) {
+                    showMessage(`Error: No hay suficiente stock para "${item.name}". Solo quedan ${item.currentStock}.`, true);
+                    allValid = false;
+                }
+            });
+
+            if (!allValid) {
+                return;
+            }
+
+            try {
+                const updates = {};
+                let finalInvoiceItems = []; // To store items for invoice history
+
+                for (const item of deliveryItems) {
+                    const newQuantity = item.currentStock - item.quantityToWithdraw;
+                    const itemPath = `artifacts/${appId}/users/${userId}/inventory/${item.dbKey}`;
+                    
+                    if (newQuantity <= 0) {
+                        updates[itemPath] = null; 
+                    } else {
+                        updates[itemPath + '/quantity'] = newQuantity; 
+                    }
+                    // Update final stock in deliveryItems array for printing and invoice history
+                    item.finalStock = newQuantity; 
+                    finalInvoiceItems.push({ // Prepare item for invoice history
+                        itemId: item.itemId,
+                        name: item.name,
+                        quantityToWithdraw: item.quantityToWithdraw,
+                        currentStock: item.currentStock,
+                        unit: item.unit, // Include unit in invoice items
+                        finalStock: item.finalStock 
+                    });
+                    deliverySummary.push(`${item.name} (x${item.quantityToWithdraw} ${item.unit || ''})`);
+                }
+
+                await update(ref(db, '/'), updates);
+
+                // Add entry to movement history
+                await addMovementToHistory(
+                    'MÚLTIPLE',
+                    'Entrega de componentes',
+                    'Entrega',
+                    deliveryItems.reduce((sum, item) => sum + item.quantityToWithdraw, 0),
+                    'Artículos: ' + deliverySummary.join(', '),
+                    responsible
+                );
+
+                // Add entry to invoice history
+                const newInvoiceRef = push(invoiceHistoryRef);
+                await set(newInvoiceRef, {
+                    timestamp: new Date().toISOString(),
+                    responsible: responsible,
+                    items: finalInvoiceItems // Store the processed items
+                });
+
+
+                showMessage('Factura de entrega procesada con éxito. Stock actualizado.', false);
+                document.getElementById('print-delivery-invoice-btn').classList.remove('hidden'); // Show print button
+                // cancelDeliveryInvoice(); // Don't close immediately, let user print first
+            } catch (e) {
+                console.error("Error al procesar la factura de entrega en Realtime Database: ", e);
+                showMessage("Error al procesar la factura de entrega. Intente de nuevo.", true);
+            }
+        }
+
+        // Function to print a newly generated invoice
+        function printDeliveryInvoice() {
+            const responsible = document.getElementById('delivery-responsible').value.trim();
+            const now = new Date().toLocaleString('es-ES', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', hour12: false
+            }).replace(/\//g, '-');
+            
+            const printUserId = userId; // Use the global userId directly
+
+            let invoiceContent = `
+                <html lang="es">
+                <head>
+                    <title>Factura de Entrega</title>
+                    <style>
+                        body { font-family: 'Inter', sans-serif; margin: 20px; color: #333; }
+                        .invoice-container { 
+                            width: 80%; 
+                            margin: 0 auto; 
+                            border: 1px solid #ccc; 
+                            padding: 20px; 
+                            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                        }
+                        .invoice-header { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            align-items: center; 
+                            margin-bottom: 20px; 
+                            border-bottom: 2px solid #1e40af; 
+                            padding-bottom: 10px;
+                            position: relative; /* Ensure relative positioning for absolute children */
+                        }
+                        .invoice-header h1 { 
+                            text-align: left; 
+                            color: #1e40af; 
+                            margin: 0; 
+                            font-size: 2em; 
+                            flex-grow: 1;
+                        }
+                        .invoice-header .print-logo-left {
+                            max-width: 100px; 
+                            height: auto; 
+                            border-radius: 8px;
+                            position: absolute;
+                            left: 0;
+                            top: 50%;
+                            transform: translateY(-50%);
+                        }
+                        .invoice-header .print-logo-right { 
+                            max-width: 100px; 
+                            height: auto; 
+                            border-radius: 8px;
+                            position: absolute;
+                            right: 0;
+                            top: 50%;
+                            transform: translateY(-50%);
+                        }
+                        .header-info-block { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            margin-bottom: 20px; 
+                            font-size: 0.9em; 
+                            line-height: 1.5;
+                            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+                        }
+                        .header-info-block div { 
+                            width: 48%; /* Adjust for two columns */
+                            margin-bottom: 10px; /* Space between rows on wrap */
+                        }
+                        .header-info-block div:last-child {
+                            text-align: right; /* Align date/ID to the right */
+                        }
+                        table { 
+                            width: 100%; 
+                            border-collapse: collapse; 
+                            margin-top: 20px; 
+                            font-size: 0.9em;
+                        }
+                        th, td { 
+                            border: 1px solid #ddd; 
+                            padding: 8px; 
+                            text-align: left; 
+                        }
+                        th { 
+                            background-color: #f2f2f2; 
+                            color: #555;
+                        }
+                        .signatures-container { 
+                            margin-top: 50px; 
+                            text-align: center; 
+                            display: grid; /* Use grid for better control */
+                            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive grid */
+                            gap: 20px; /* Spacing between signature blocks */
+                        }
+                        .signature-block { 
+                            /* Flex properties are less needed with grid, but can fine-tune */
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                        }
+                        .signature-line { 
+                            border-bottom: 1px solid #000; 
+                            height: 40px; /* Height for signature space */
+                            width: 100%; /* Ensure line stretches within its block */
+                            max-width: 250px; /* Max width for line */
+                            margin-bottom: 5px; 
+                        }
+                        .signature-label { 
+                            font-size: 0.9em; 
+                            margin-top: 5px; 
+                            color: #555;
+                        }
+                        @media print {
+                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            .invoice-container { width: 100%; border: none; padding: 0; box-shadow: none; }
+                            .invoice-header, .signatures-container { page-break-inside: avoid; }
+                            table { page-break-inside: auto; }
+                            tr { page-break-inside: avoid; page-break-after: auto; }
+                            .invoice-header h1 {
+                                /* Adjust margin for print layout if logos are absolute */
+                                margin: 0 120px; /* Example: space for 100px logo + 20px margin */
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="invoice-container">
+                        <div class="invoice-header">
+                            <img src="uploaded:image_f52739.jpg-f0804319-ffb6-4d31-8154-4538d699b6d9" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="print-logo-left">
+                            <h1>Factura de Entrega</h1>
+                            <img src="https://th.bing.com/th/id/R.59cc9f2e73d8d451406634361766bef7?rik=mCYsnanv4J45Pw&riu=http%3a%2f%2fwww.logotypes101.com%2flogos%2f189%2fBCEBADF0F47AD978734FAB5B57BADCB4%2flogofuerzaaerea.png&ehk=d4iwHlQczHRwWHC2JOmvJ4y0hQD1jPKlMuc%2bgjePcvc%3d&risl=&pid=ImgRaw&r=0" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="print-logo-right">
+                        </div>
+                        <div class="header-info-block">
+                            <div>
+                                <p><strong>Responsable de la Entrega:</strong> ${responsible}</p>
+                            </div>
+                            <div>
+                                <p><strong>Fecha:</strong> ${now}</p>
+                                <p><strong>Número de Parte de Usuario:</strong> ${printUserId}</p>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Número de Parte Artículo</th>
+                                    <th>Nombre</th>
+                                    <th>Cantidad Retirada</th>
+                                    <th>Stock Inicial</th>
+                                    <th>Stock Final</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${deliveryItems.map(item => `
+                                    <tr>
+                                        <td>${item.itemId}</td>
+                                        <td>${item.name}</td>
+                                        <td>${item.quantityToWithdraw} ${item.unit || ''}</td>
+                                        <td>${item.currentStock} ${item.unit || ''}</td>
+                                        <td>${item.finalStock} ${item.unit || ''}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        <div class="signatures-container">
+                            <div class="signature-block">
+                                <div class="signature-line"></div>
+                                <p class="signature-label">Jefe de Taller</p>
+                            </div>
+                            <div class="signature-block">
+                                <div class="signature-line"></div>
+                                <p class="signature-label">Aprobado por A-4</p>
+                            </div>
+                            <div class="signature-block">
+                                <div class="signature-line"></div>
+                                <p class="signature-label">Entregado por</p>
+                            </div>
+                            <div class="signature-block">
+                                <div class="signature-line"></div>
+                                <p class="signature-label">Recibido por</p>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.open();
+                printWindow.document.write(invoiceContent);
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+                // printWindow.close(); // Optional: close after printing, but user might want to review
+            } else {
+                showMessage("No se pudo abrir la ventana de impresión. Asegúrese de que los bloqueadores de pop-ups estén desactivados.", true);
+            }
+        }
+
+        // New function to print an existing invoice from history
+        function printExistingInvoice(invoice) {
+             const now = new Date(invoice.timestamp).toLocaleString('es-ES', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', hour12: false
+            }).replace(/\//g, '-');
+            
+            const printUserId = userId; // Use the global userId directly, as it's the current user viewing
+
+            let invoiceContent = `
+                <html lang="es">
+                <head>
+                    <title>Factura de Entrega #${invoice.invoiceId.substring(0,8)}</title>
+                    <style>
+                        body { font-family: 'Inter', sans-serif; margin: 20px; color: #333; }
+                        .invoice-container { 
+                            width: 80%; 
+                            margin: 0 auto; 
+                            border: 1px solid #ccc; 
+                            padding: 20px; 
+                            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                        }
+                        .invoice-header { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            align-items: center; 
+                            margin-bottom: 20px; 
+                            border-bottom: 2px solid #1e40af; 
+                            padding-bottom: 10px;
+                            position: relative; /* Ensure relative positioning for absolute children */
+                        }
+                        .invoice-header h1 { 
+                            text-align: left; 
+                            color: #1e40af; 
+                            margin: 0; 
+                            font-size: 2em; 
+                            flex-grow: 1;
+                        }
+                        .invoice-header .print-logo-left {
+                            max-width: 100px; 
+                            height: auto; 
+                            border-radius: 8px;
+                            position: absolute;
+                            left: 0;
+                            top: 50%;
+                            transform: translateY(-50%);
+                        }
+                        .invoice-header .print-logo-right { 
+                            max-width: 100px; 
+                            height: auto; 
+                            border-radius: 8px;
+                            position: absolute;
+                            right: 0;
+                            top: 50%;
+                            transform: translateY(-50%);
+                        }
+                        .header-info-block { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            margin-bottom: 20px; 
+                            font-size: 0.9em; 
+                            line-height: 1.5;
+                            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+                        }
+                        .header-info-block div { 
+                            width: 48%; /* Adjust for two columns */
+                            margin-bottom: 10px; /* Space between rows on wrap */
+                        }
+                        .header-info-block div:last-child {
+                            text-align: right; /* Align date/ID to the right */
+                        }
+                        table { 
+                            width: 100%; 
+                            border-collapse: collapse; 
+                            margin-top: 20px; 
+                            font-size: 0.9em;
+                        }
+                        th, td { 
+                            border: 1px solid #ddd; 
+                            padding: 8px; 
+                            text-align: left; 
+                        }
+                        th { 
+                            background-color: #f2f2f2; 
+                            color: #555;
+                        }
+                        .signatures-container { 
+                            margin-top: 50px; 
+                            text-align: center; 
+                            display: grid; /* Use grid for better control */
+                            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive grid */
+                            gap: 20px; /* Spacing between signature blocks */
+                        }
+                        .signature-block { 
+                            /* Flex properties are less needed with grid, but can fine-tune */
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                        }
+                        .signature-line { 
+                            border-bottom: 1px solid #000; 
+                            height: 40px; /* Height for signature space */
+                            width: 100%; /* Ensure line stretches within its block */
+                            max-width: 250px; /* Max width for line */
+                            margin-bottom: 5px; 
+                        }
+                        .signature-label { 
+                            font-size: 0.9em; 
+                            margin-top: 5px; 
+                            color: #555;
+                        }
+                        @media print {
+                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            .invoice-container { width: 100%; border: none; padding: 0; box-shadow: none; }
+                            .invoice-header, .signatures-container { page-break-inside: avoid; }
+                            table { page-break-inside: auto; }
+                            tr { page-break-inside: avoid; page-break-after: auto; }
+                            .invoice-header h1 {
+                                /* Adjust margin for print layout if logos are absolute */
+                                margin: 0 120px; /* Example: space for 100px logo + 20px margin */
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="invoice-container">
+                        <div class="invoice-header">
+                            <img src="uploaded:image_f52739.jpg-f0804319-ffb6-4d31-8154-4538d699b6d9" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="print-logo-left">
+                            <h1>Factura de Entrega #${invoice.invoiceId.substring(0,8)}</h1>
+                            <img src="https://th.bing.com/th/id/R.59cc9f2e73d8d451406634361766bef7?rik=mCYsnanv4J45Pw&riu=http%3a%2f%2fwww.logotypes101.com%2flogos%2f189%2fBCEBADF0F47AD978734FAB5B57BADCB4%2flogofuerzaaerea.png&ehk=d4iwHlQczHRwWHC2JOmvJ4y0hQD1jPKlMuc%2bgjePcvc%3d&risl=&pid=ImgRaw&r=0" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="print-logo-right">
+                        </div>
+                        <div class="header-info-block">
+                            <div>
+                                <p><strong>Responsable de la Entrega:</strong> ${invoice.responsible}</p>
+                            </div>
+                            <div>
+                                <p><strong>Fecha:</strong> ${now}</p>
+                                <p><strong>Número de Parte de Usuario:</strong> ${printUserId}</p>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Número de Parte Artículo</th>
+                                    <th>Nombre</th>
+                                    <th>Cantidad Retirada</th>
+                                    <th>Stock Inicial</th>
+                                    <th>Stock Final</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${invoice.items.map(item => `
+                                    <tr>
+                                        <td>${item.itemId}</td>
+                                        <td>${item.name}</td>
+                                        <td>${item.quantityToWithdraw} ${item.unit || ''}</td>
+                                        <td>${item.currentStock} ${item.unit || ''}</td>
+                                        <td>${item.finalStock} ${item.unit || ''}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        <div class="signatures-container">
+                            <div class="signature-block">
+                                <div class="signature-line"></div>
+                                <p class="signature-label">Jefe de Taller</p>
+                            </div>
+                            <div class="signature-block">
+                                <div class="signature-line"></div>
+                                <p class="signature-label">Aprobado por A-4</p>
+                            </div>
+                            <div class="signature-block">
+                                <div class="signature-line"></div>
+                                <p class="signature-label">Entregado por</p>
+                            </div>
+                            <div class="signature-block">
+                                <div class="signature-line"></div>
+                                <p class="signature-label">Recibido por</p>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.open();
+                printWindow.document.write(invoiceContent);
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+            } else {
+                showMessage("No se pudo abrir la ventana de impresión. Asegúrese de que los bloqueadores de pop-ups estén desactivados.", true);
+            }
+        }
+
+
+        // --- Historial de Facturas: Borrar Historial Completo ---
+        async function clearInvoiceHistory() {
+            if (!isAuthReady) {
+                showMessage("La base de datos no está lista. Intente de nuevo en unos segundos.", true);
+                return;
+            }
+
+            const confirmed = await showConfirm(
+                'Borrar Historial de Facturas Completo',
+                `¿Está seguro de que desea eliminar TODO el historial de facturas? Esta acción es irreversible.`
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                await remove(invoiceHistoryRef); // Elimina todo el nodo de historial de facturas
+                showMessage('Historial de facturas borrado con éxito.', false);
+            } catch (e) {
+                console.error("Error al borrar el historial de facturas de Realtime Database: ", e);
+                showMessage("Error al borrar el historial de facturas. Intente de nuevo.", true);
+            }
+        }
+
+
+        // --- Funcionalidad de Búsqueda de Inventario Principal ---
+        function searchInventory() {
+            const input = document.getElementById('search-input');
+            const filter = input.value.toUpperCase(); 
+            const tableBody = document.getElementById('inventory-list');
+            const tr = tableBody.getElementsByTagName('tr');
+
+            for (let i = 0; i < tr.length; i++) {
+                let found = false;
+                const tds = tr[i].getElementsByTagName('td');
+                // Iterate through columns, excluding the last one (Actions) and including the new 'Unit' column.
+                // Assuming 'Unit' is at index 4, 'Ubicacion' at 5, 'Min Stock' at 6.
+                for (let j = 0; j < tds.length - 1; j++) { 
+                    const cellValue = tds[j].textContent || tds[j].innerText;
+                    if (cellValue.toUpperCase().indexOf(filter) > -1) {
+                        found = true;
+                        break; 
+                    }
+                }
+                if (found) {
+                    tr[i].style.display = ''; 
+                } else {
+                    tr[i].style.display = 'none'; 
+                }
+            }
+        }
+
+        // Función para limpiar la búsqueda y mostrar todas las filas
+        function clearSearch() {
+            document.getElementById('search-input').value = ''; 
+            // Re-render the inventory to show all items. This implicitly clears the filter.
+            if (isAuthReady) {
+                onValue(inventoryRef, (snapshot) => {
+                    const itemsObject = snapshot.val();
+                    const itemsArray = [];
+                    if (itemsObject) {
+                        for (const key in itemsObject) {
+                            itemsArray.push({ id: key, ...itemsObject[key] });
+                        }
+                    }
+                    renderInventory(itemsArray);
+                }, { onlyOnce: true }); // Use onlyOnce to avoid re-attaching listener
+            }
+        }
+
+        // Function to filter and display only critical items
+        function filterCriticalItems() {
+            document.getElementById('search-input').value = ''; // Clear search input when filtering critical items
+
+            const tableBody = document.getElementById('inventory-list');
+            const tr = tableBody.getElementsByTagName('tr');
+
+            let criticalItemsFound = false;
+
+            for (let i = 0; i < tr.length; i++) {
+                // Quantity is at index 3, Min Stock is at index 6 after adding Unit at index 4
+                const itemQuantity = parseInt(tr[i].cells[3].textContent); 
+                const minStock = parseInt(tr[i].cells[6].textContent); 
+
+                if (itemQuantity <= minStock) {
+                    tr[i].style.display = ''; // Show critical item
+                    criticalItemsFound = true;
+                } else {
+                    tr[i].style.display = 'none'; // Hide non-critical item
+                }
+            }
+
+            if (!criticalItemsFound) {
+                showMessage("No hay artículos críticos en este momento.", false);
+            } else {
+                showMessage("Mostrando solo artículos críticos.", false);
+            }
+            // Scroll to the inventory section to show the filtered results
+            document.getElementById('inventario-actual').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Function to print the current inventory
+        function printInventory() {
+            const now = new Date().toLocaleString('es-ES', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', hour12: false
+            }).replace(/\//g, '-');
+            
+            const printUserId = userId; 
+
+            // Get the current visible items in the inventory table
+            const tableBody = document.getElementById('inventory-list');
+            const rows = tableBody.getElementsByTagName('tr');
+            let inventoryItemsToPrint = [];
+
+            for (let i = 0; i < rows.length; i++) {
+                // Only include visible rows (those not hidden by filters)
+                if (rows[i].style.display !== 'none') {
+                    const cells = rows[i].getElementsByTagName('td');
+                    inventoryItemsToPrint.push({
+                        itemId: cells[0].textContent,
+                        name: cells[1].textContent,
+                        category: cells[2].textContent,
+                        quantity: cells[3].textContent,
+                        unit: cells[4].textContent, // Get unit from the 5th column
+                        location: cells[5].textContent,
+                        minStock: cells[6].textContent
+                    });
+                }
+            }
+
+            let inventoryContent = `
+                <html lang="es">
+                <head>
+                    <title>Inventario Actual</title>
+                    <style>
+                        body { font-family: 'Inter', sans-serif; margin: 20px; color: #333; }
+                        .inventory-container { 
+                            width: 80%; 
+                            margin: 0 auto; 
+                            border: 1px solid #ccc; 
+                            padding: 20px; 
+                            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                        }
+                        .inventory-header { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            align-items: center; 
+                            margin-bottom: 20px; 
+                            border-bottom: 2px solid #1e40af; 
+                            padding-bottom: 10px;
+                            position: relative; /* Ensure relative positioning for absolute children */
+                        }
+                        .inventory-header h1 { 
+                            text-align: left; 
+                            color: #1e40af; 
+                            margin: 0; 
+                            font-size: 2em; 
+                            flex-grow: 1;
+                        }
+                        .inventory-header .print-logo-left {
+                            max-width: 100px; 
+                            height: auto; 
+                            border-radius: 8px;
+                            position: absolute;
+                            left: 0;
+                            top: 50%;
+                            transform: translateY(-50%);
+                        }
+                        .inventory-header .print-logo-right { 
+                            max-width: 100px; 
+                            height: auto; 
+                            border-radius: 8px;
+                            position: absolute;
+                            right: 0;
+                            top: 50%;
+                            transform: translateY(-50%);
+                        }
+                        .header-info-block { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            margin-bottom: 20px; 
+                            font-size: 0.9em; 
+                            line-height: 1.5;
+                            flex-wrap: wrap;
+                        }
+                        .header-info-block div { 
+                            width: 48%; 
+                            margin-bottom: 10px;
+                        }
+                        .header-info-block div:last-child {
+                            text-align: right;
+                        }
+                        table { 
+                            width: 100%; 
+                            border-collapse: collapse; 
+                            margin-top: 20px; 
+                            font-size: 0.9em;
+                        }
+                        th, td { 
+                            border: 1px solid #ddd; 
+                            padding: 8px; 
+                            text-align: left; 
+                        }
+                        th { 
+                            background-color: #f2f2f2; 
+                            color: #555;
+                        }
+                        .created-by-text {
+                            font-family: 'Bebas Neue', sans-serif !important; /* Ensure font applies for print */
+                            font-size: 0.8em !important;
+                            color: #555 !important;
+                            margin-top: 5px !important;
+                            letter-spacing: 1px !important;
+                        }
+                        @media print {
+                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            .inventory-container { width: 100%; border: none; padding: 0; box-shadow: none; }
+                            .inventory-header { page-break-inside: avoid; }
+                            table { page-break-inside: auto; }
+                            tr { page-break-inside: avoid; page-break-after: auto; }
+                            .inventory-header h1 {
+                                /* Adjust margin for print layout if logos are absolute */
+                                margin: 0 120px; /* Example: space for 100px logo + 20px margin */
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="inventory-container">
+                        <div class="inventory-header">
+                            <img src="uploaded:image_f52739.jpg-f0804319-ffb6-4d31-8154-4538d699b6d9" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="print-logo-left">
+                            <h1>Inventario Actual</h1>
+                            <img src="https://th.bing.com/th/id/R.59cc9f2e73d8d451406634361766bef7?rik=mCYsnanv4J45Pw&riu=http%3a%2f%2fwww.logotypes101.com%2flogos%2f189%2fBCEBADF0F47AD978734FAB5B57BADCB4%2flogofuerzaaerea.png&ehk=d4iwHlQczHRwWHC2JOmvJ4y0hQD1jPKlMuc%2bgjePcvc%3d&risl=&pid=ImgRaw&r=0" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="print-logo-right">
+                        </div>
+                        <div class="header-info-block">
+                            <div>
+                                <p><strong>Fecha de Impresión:</strong> ${now}</p>
+                            </div>
+                            <div>
+                                <p><strong>Número de Parte de Usuario:</strong> ${printUserId}</p>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Número de Parte Artículo</th>
+                                    <th>Nombre del Artículo</th>
+                                    <th>Categoría</th>
+                                    <th>Cantidad</th>
+                                    <th>Unidad</th> <!-- New column for Unit -->
+                                    <th>Ubicación</th>
+                                    <th>Stock Mínimo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${inventoryItemsToPrint.map(item => `
+                                    <tr>
+                                        <td>${item.itemId}</td>
+                                        <td>${item.name}</td>
+                                        <td>${item.category}</td>
+                                        <td>${item.quantity}</td>
+                                        <td>${item.unit}</td> <!-- Display unit -->
+                                        <td>${item.location}</td>
+                                        <td>${item.minStock}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.open();
+                printWindow.document.write(inventoryContent);
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+            } else {
+                showMessage("No se pudo abrir la ventana de impresión. Asegúrese de que los bloqueadores de pop-ups estén desactivados.", true);
+            }
+        }
+
+
+        // Custom Confirmation Modal Logic
+        let confirmResolver = null;
+
+        function showConfirm(title, message) {
+            return new Promise((resolve) => {
+                confirmResolver = resolve;
+                document.getElementById('custom-confirm-title').textContent = title;
+                document.getElementById('custom-confirm-message').textContent = message;
+                document.getElementById('custom-confirm-modal').classList.add('flex');
+            });
+        }
+
+        document.getElementById('custom-confirm-ok').onclick = () => {
+            document.getElementById('custom-confirm-modal').classList.remove('flex');
+            if (confirmResolver) {
+                confirmResolver(true);
+                confirmResolver = null;
+            }
+        };
+
+        document.getElementById('custom-confirm-cancel').onclick = () => {
+            document.getElementById('custom-confirm-modal').classList.remove('flex');
+            if (confirmResolver) {
+                confirmResolver(false);
+                confirmResolver = null;
+            }
+        };
+
+    </script>
+
+</body>
+</html>
