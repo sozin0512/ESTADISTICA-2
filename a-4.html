@@ -2315,7 +2315,7 @@
             
             // Custom confirm modal buttons must be attached here to ensure they exist
             // Using optional chaining and specific error handling for robustness
-            const customConfirmOkButton = document.getElementById('custom-confirm-ok');
+            const customConfirmOkButton = document.getElementById('confirm-confirm-ok'); // Fixed ID
             const customConfirmCancelButton = document.getElementById('custom-confirm-cancel');
 
             if (customConfirmOkButton) {
@@ -2327,7 +2327,7 @@
                     }
                 };
             } else {
-                console.warn("Botón 'custom-confirm-ok' no encontrado. La funcionalidad de confirmación puede no funcionar.");
+                console.warn("Botón 'confirm-confirm-ok' no encontrado. La funcionalidad de confirmación puede no funcionar.");
             }
 
             if (customConfirmCancelButton) {
