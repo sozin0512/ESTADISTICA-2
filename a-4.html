@@ -481,8 +481,9 @@
                     </select>
                 </div>
 
+                <!-- Modificación aquí: Campo de texto para ubicación -->
                 <div>
-                    <label for="item-location" class="block text-sm font-medium text-gray-700 mb-1">Ubicación:</label>
+                    <label for="item-location" class="block text-sm font-medium text-gray-700 mb-1">Ubicación (Ej. Estante A1, Pasillo 2):</label>
                     <input type="text" id="item-location" name="itemLocation" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 </div>
 
@@ -526,18 +527,34 @@
         let invoiceHistoryRef; // Reference for invoice history
         let isAuthReady = false; // Flag to indicate Firebase auth is ready
         let currentInventoryItems = []; // To store a local copy of inventory for live search
+        let initialDataLoadedCount = 0; // New: Counter for initial loads
+        const expectedInitialLoads = 3; // Number of onValue listeners to wait for
 
-        // Your provided Firebase configuration
-        const firebaseConfig = {
+        // Direct Firebase configuration (fallback)
+        const localFirebaseConfig = {
             apiKey: "AIzaSyDMmICpFCInGwg74YK-5bPKvM4kk5nUJpw",
             authDomain: "abastos-bb76a.firebaseapp.com",
-            databaseURL: "https://abastos-bb76a-default-rtdb.firebaseio.com", // This points to Realtime Database
+            databaseURL: "https://abastos-bb76a-default-rtdb.firebaseio.com",
             projectId: "abastos-bb76a",
             storageBucket: "abastos-bb76a.firebasestorage.app",
             messagingSenderId: "708455293960",
             appId: "1:708455293960:web:144e21229865e7f25f9dbd",
             measurementId: "G-BZT4HZZ857"
         };
+
+        // PRIORITIZE: Use __firebase_config if available, otherwise use localFirebaseConfig
+        let firebaseConfig;
+        try {
+            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : localFirebaseConfig;
+            if (!firebaseConfig) {
+                console.error("Firebase config is not available from __firebase_config and local fallback is also missing or invalid. Please ensure the Canvas environment provides it or hardcode a valid config.");
+                showMessage("Error: Configuración de Firebase no encontrada. La aplicación no persistirá datos.", true);
+            }
+        } catch (e) {
+            console.error("Error parsing __firebase_config, falling back to local config:", e);
+            firebaseConfig = localFirebaseConfig; // Fallback in case of parsing error
+            showMessage("Advertencia: Error al cargar la configuración de Firebase. Usando configuración local.", false); // Use false for warning
+        }
 
         // Check if __app_id is defined by the environment (used for collection paths specific to Canvas)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -557,6 +574,15 @@
             setTimeout(() => {
                 messageBox.style.display = 'none';
             }, 3000);
+        }
+
+        // New: Function to hide the loading overlay
+        function hideLoadingOverlay() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay.style.display !== 'none') {
+                loadingOverlay.style.display = 'none';
+                console.log("Loading overlay hidden.");
+            }
         }
 
         // Function to update the last update time on the UI
@@ -719,7 +745,21 @@
         document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('loading-overlay').style.display = 'flex'; // Show loading
 
+            // New: Timeout to hide loading overlay even if data fails to load
+            const loadingTimeout = setTimeout(() => {
+                hideLoadingOverlay();
+                showMessage("La carga de datos iniciales tardó demasiado o falló. Verifique la conexión o las reglas de Firebase.", true);
+            }, 7000); // Hide after 7 seconds
+
             try {
+                // Ensure firebaseConfig is available before initializing
+                if (!firebaseConfig) {
+                    console.error("Firebase initialization skipped due to missing config. Please check your Firebase setup.");
+                    clearTimeout(loadingTimeout);
+                    hideLoadingOverlay();
+                    return; // Exit if config is missing
+                }
+
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getDatabase(app); // Initialize Realtime Database
@@ -736,6 +776,8 @@
                         userId = user.uid;
                         document.getElementById('user-id-display').textContent = `Número de Parte de Usuario: ${userId}`;
                         // Referencias para Realtime Database
+                        // Importante: Las rutas deben seguir el esquema de seguridad de Firebase:
+                        // /artifacts/{appId}/users/{userId}/...
                         inventoryRef = ref(db, `artifacts/${appId}/users/${userId}/inventory`);
                         historyRef = ref(db, `artifacts/${appId}/users/${userId}/movementHistory`);
                         invoiceHistoryRef = ref(db, `artifacts/${appId}/users/${userId}/invoiceHistory`);
@@ -753,9 +795,19 @@
                             }
                             renderInventory(itemsArray); // This also updates currentInventoryItems
                             console.log("Inventario cargado/actualizado desde Realtime Database.");
+                            initialDataLoadedCount++; // Increment counter
+                            if (initialDataLoadedCount >= expectedInitialLoads) {
+                                clearTimeout(loadingTimeout); // Clear the timeout if all loaded
+                                hideLoadingOverlay();
+                            }
                         }, (error) => {
                             console.error("Error al escuchar el inventario de Realtime Database: ", error);
                             showMessage("Error al cargar el inventario.", true);
+                            initialDataLoadedCount++; // Still increment to attempt hiding overlay
+                            if (initialDataLoadedCount >= expectedInitialLoads) {
+                                clearTimeout(loadingTimeout);
+                                hideLoadingOverlay();
+                            }
                         });
 
                         onValue(historyRef, (snapshot) => {
@@ -769,9 +821,19 @@
                             }
                             renderHistory(movementsArray);
                             console.log("Historial de movimientos cargado/actualizado desde Realtime Database.");
+                            initialDataLoadedCount++; // Increment counter
+                            if (initialDataLoadedCount >= expectedInitialLoads) {
+                                clearTimeout(loadingTimeout);
+                                hideLoadingOverlay();
+                            }
                         }, (error) => {
                             console.error("Error al escuchar el historial de movimientos de Realtime Database: ", error);
                             showMessage("Error al cargar el historial de movimientos.", true);
+                            initialDataLoadedCount++; // Still increment to attempt hiding overlay
+                            if (initialDataLoadedCount >= expectedInitialLoads) {
+                                clearTimeout(loadingTimeout);
+                                hideLoadingOverlay();
+                            }
                         });
 
                         // New listener for invoice history
@@ -785,24 +847,35 @@
                             }
                             renderInvoices(invoicesArray);
                             console.log("Historial de facturas cargado/actualizado desde Realtime Database.");
+                            initialDataLoadedCount++; // Increment counter
+                            if (initialDataLoadedCount >= expectedInitialLoads) {
+                                clearTimeout(loadingTimeout);
+                                hideLoadingOverlay();
+                            }
                         }, (error) => {
                             console.error("Error al escuchar el historial de facturas de Realtime Database: ", error);
                             showMessage("Error al cargar el historial de facturas.", true);
+                            initialDataLoadedCount++; // Still increment to attempt hiding overlay
+                            if (initialDataLoadedCount >= expectedInitialLoads) {
+                                clearTimeout(loadingTimeout);
+                                hideLoadingOverlay();
+                            }
                         });
 
 
-                        document.getElementById('loading-overlay').style.display = 'none'; // Hide loading
                     } else {
                         console.log("No hay usuario autenticado.");
-                        document.getElementById('loading-overlay').style.display = 'none'; // Hide loading
-                        showMessage("No se pudo autenticar. Datos no persistirán.", true);
+                        clearTimeout(loadingTimeout); // Clear timeout as auth failed
+                        hideLoadingOverlay(); // Hide overlay even if no user
+                        showMessage("No se pudo autenticar. Los datos no persistirán para este usuario si es nuevo.", true);
                         isAuthReady = false;
                     }
                 });
 
             } catch (e) {
                 console.error("Error inicializando Firebase Realtime Database:", e);
-                document.getElementById('loading-overlay').style.display = 'none'; // Hide loading
+                clearTimeout(loadingTimeout); // Clear timeout on initialization error
+                hideLoadingOverlay(); // Hide overlay on initialization error
                 showMessage("Error grave al inicializar la aplicación. Ver consola para más detalles.", true);
             }
 
@@ -821,7 +894,23 @@
             document.getElementById('clear-invoice-history-btn').addEventListener('click', clearInvoiceHistory); // New listener for clearing invoice history
             document.getElementById('critical-items-card').addEventListener('click', filterCriticalItems); // New event listener for critical items card
             document.getElementById('print-inventory-btn').addEventListener('click', printInventory); // New event listener for printing inventory
-            // Custom confirm modal buttons already have listeners attached correctly
+            
+            // Custom confirm modal buttons must be attached here to ensure they exist
+            document.getElementById('custom-confirm-ok').onclick = () => {
+                document.getElementById('custom-confirm-modal').classList.remove('flex');
+                if (confirmResolver) {
+                    confirmResolver(true);
+                    confirmResolver = null;
+                }
+            };
+
+            document.getElementById('custom-confirm-cancel').onclick = () => {
+                document.getElementById('custom-confirm-modal').classList.remove('flex');
+                if (confirmResolver) {
+                    confirmResolver(false);
+                    confirmResolver = null;
+                }
+            };
 
             // Add listener for add item form
             document.getElementById('add-item-form').addEventListener('submit', async function(event) {
@@ -837,11 +926,14 @@
                 const itemCategory = document.getElementById('item-category').value.trim();
                 const itemQuantity = parseInt(document.getElementById('item-quantity').value);
                 const itemUnit = document.getElementById('item-unit').value; // Get the unit of measure
+                // Obtener el valor del campo de texto de ubicación
                 const itemLocation = document.getElementById('item-location').value.trim();
+
+
                 const itemMinStock = parseInt(document.getElementById('item-min-stock').value);
 
                 if (!itemId || !itemName || !itemCategory || isNaN(itemQuantity) || !itemUnit || !itemLocation || isNaN(itemMinStock)) {
-                    showMessage('Por favor, complete todos los campos correctamente.', true);
+                    showMessage('Por favor, complete todos los campos correctamente (incluyendo la unidad de medida y la ubicación).', true);
                     return;
                 }
                 if (itemQuantity < 0 || itemMinStock < 0) {
@@ -872,7 +964,8 @@
                         // If item exists, update quantity and unit
                         const newTotalQuantity = existingItemQuantity + itemQuantity;
                         const itemDbRef = ref(db, `artifacts/${appId}/users/${userId}/inventory/${existingItemKey}`);
-                        await update(itemDbRef, { quantity: newTotalQuantity, unit: itemUnit }); // Update unit as well
+                        // Update unit and location as well
+                        await update(itemDbRef, { quantity: newTotalQuantity, unit: itemUnit, location: itemLocation }); 
                         await addMovementToHistory(itemId, itemName, 'Actualización (Ingreso)', itemQuantity, 'Formulario de Entrada', 'Usuario');
                         showMessage(`Cantidad de "${itemName}" actualizada a ${newTotalQuantity} ${itemUnit} en Realtime Database!`, false);
                     } else {
@@ -882,7 +975,7 @@
                             category: itemCategory,
                             quantity: itemQuantity,
                             unit: itemUnit, // Store unit
-                            location: itemLocation,
+                            location: itemLocation, // Store location from text input
                             minStock: itemMinStock,
                             createdAt: new Date().toISOString()
                         });
@@ -891,6 +984,8 @@
                     }
 
                     document.getElementById('add-item-form').reset();
+                    // Limpiar el campo de texto de ubicación después del envío
+                    document.getElementById('item-location').value = ''; 
 
                 } catch (e) {
                     console.error("Error al añadir/actualizar el artículo en Realtime Database: ", e);
@@ -1096,7 +1191,7 @@
                     currentStock: item.quantity,
                     unit: item.unit || '', // Add unit to delivery item
                     quantityToWithdraw: 1, // Default quantity to 1
-                    finalStock: item.quantity - 1 // Initial calculation for final stock
+                    finalStock: item.currentStock - 1 // Initial calculation for final stock
                 });
                 renderDeliveryItems();
                 document.getElementById('delivery-search-input').value = ''; // Clear search input
@@ -1936,21 +2031,22 @@
             });
         }
 
-        document.getElementById('custom-confirm-ok').onclick = () => {
-            document.getElementById('custom-confirm-modal').classList.remove('flex');
-            if (confirmResolver) {
-                confirmResolver(true);
-                confirmResolver = null;
-            }
-        };
+        // Estas asignaciones se movieron dentro de DOMContentLoaded para asegurar que los elementos existan.
+        // document.getElementById('custom-confirm-ok').onclick = () => {
+        //     document.getElementById('custom-confirm-modal').classList.remove('flex');
+        //     if (confirmResolver) {
+        //         confirmResolver(true);
+        //         confirmResolver = null;
+        //     }
+        // };
 
-        document.getElementById('custom-confirm-cancel').onclick = () => {
-            document.getElementById('custom-confirm-modal').classList.remove('flex');
-            if (confirmResolver) {
-                confirmResolver(false);
-                confirmResolver = null;
-            }
-        };
+        // document.getElementById('custom-confirm-cancel').onclick = () => {
+        //     document.getElementById('custom-confirm-modal').classList.remove('flex');
+        //     if (confirmResolver) {
+        //         confirmResolver(false);
+        //         confirmResolver = null;
+        //     }
+        // };
 
     </script>
 
