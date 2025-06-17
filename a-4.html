@@ -73,6 +73,9 @@
         #delivery-invoice-modal > div {
             max-width: 50rem; /* Larger modal for delivery invoice */
         }
+        #edit-item-modal > div {
+            max-width: 38rem; /* Slightly larger for edit modal */
+        }
 
         /* Estilos específicos para la tabla dentro del modal de entrega */
         #delivery-items-list th, #delivery-items-list td {
@@ -277,18 +280,85 @@
         </div>
     </div>
 
+    <!-- Nuevo Modal de Edición de Artículo -->
+    <div id="edit-item-modal" class="modal">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Editar Artículo de Inventario</h3>
+            <form id="edit-item-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Hidden input for the item's Firebase Realtime Database key -->
+                <input type="hidden" id="edit-db-key">
+
+                <div>
+                    <label for="edit-item-id" class="block text-sm font-medium text-gray-700 mb-1">Número de Parte del Artículo:</label>
+                    <input type="text" id="edit-item-id" name="itemId" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="edit-item-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Artículo:</label>
+                    <input type="text" id="edit-item-name" name="itemName" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="edit-item-category" class="block text-sm font-medium text-gray-700 mb-1">Categoría:</label>
+                    <input type="text" id="edit-item-category" name="itemCategory" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="edit-item-quantity" class="block text-sm font-medium text-gray-700 mb-1">Cantidad:</label>
+                    <input type="number" id="edit-item-quantity" name="itemQuantity" min="0" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="edit-item-unit" class="block text-sm font-medium text-gray-700 mb-1">Unidad de Medida:</label>
+                    <select id="edit-item-unit" name="itemUnit" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <option value="">Seleccione una unidad</option>
+                        <option value="unidades">Unidades</option>
+                        <option value="litros">Litros</option>
+                        <option value="kilogramos">Kilogramos</option>
+                        <option value="metros">Metros</option>
+                        <option value="cajas">Cajas</option>
+                        <option value="paquetes">Paquetes</option>
+                        <option value="piezas">Piezas</option>
+                        <option value="galones">Galones</option>
+                        <option value="pares">Pares</option>
+                        <option value="juegos">Juegos</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="edit-item-location" class="block text-sm font-medium text-gray-700 mb-1">Ubicación (Ej. Estante A1, Pasillo 2):</label>
+                    <input type="text" id="edit-item-location" name="itemLocation" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="edit-item-min-stock" class="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo:</label>
+                    <input type="number" id="edit-item-min-stock" name="itemMinStock" min="0" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div class="md:col-span-2 flex justify-end space-x-4 mt-6">
+                    <button type="button" id="cancel-edit-item-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <header class="bg-gradient-to-r from-blue-700 to-blue-900 text-white p-6 shadow-md rounded-b-lg relative">
         <div class="container mx-auto text-center flex flex-col items-center justify-center">
             <!-- New Logo (left) -->
-            <img src="uploaded:image_f52739.jpg-f0804319-ffb6-4d31-8154-4538d699b6d9" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="absolute left-6 top-6 h-24 w-24 object-contain rounded-full shadow-lg">
+            <img src="https://placehold.co/100x100/blue/white?text=LOGO_IZQUIERDA" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="absolute left-6 top-6 h-24 w-24 object-contain rounded-full shadow-lg">
             
             <h1 class="text-4xl font-bold mb-2">Sistema de Gestión de Inventario Logístico A-4 HAM</h1>
             <!-- Adjusted for proper positioning and custom font -->
             <p class="created-by-text">CREADO POR EL COMANDO 2 HERNANDEZ SOZA EL 16-JUN-25</p>
             
             <!-- Original Logo (right) -->
-            <img src="https://th.bing.com/th/id/R.59cc9f2e73d8d451406634361766bef7?rik=mCYsnanv4J45Pw&riu=http%3a%2f%2fwww.logotypes101.com%2flogos%2f189%2fBCEBADF0F47AD978734FAB5B57BADCB4%2flogofuerzaaerea.png&ehk=d4iwHlQczHRwWHC2JOmvJ4y0hQD1jPKlMuc%2bgjePcvc%3d&risl=&pid=ImgRaw&r=0" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="absolute right-6 top-6 h-24 w-24 object-contain rounded-full shadow-lg">
+            <img src="https://placehold.co/100x100/blue/white?text=LOGO_DERECHA" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="absolute right-6 top-6 h-24 w-24 object-contain rounded-full shadow-lg">
         </div>
     </header>
 
@@ -622,6 +692,111 @@
             }
         }
 
+        // Custom Confirmation Modal Logic
+        let confirmResolver = null;
+
+        function showConfirm(title, message) {
+            return new Promise((resolve) => {
+                confirmResolver = resolve;
+                document.getElementById('custom-confirm-title').textContent = title;
+                document.getElementById('custom-confirm-message').textContent = message;
+                document.getElementById('custom-confirm-modal').classList.add('flex');
+            });
+        }
+
+        // Función para abrir el modal de edición de artículo y precargar datos
+        function openEditItemModal(dbKey, itemId, itemName, itemCategory, itemQuantity, itemUnit, itemLocation, itemMinStock) {
+            document.getElementById('edit-db-key').value = dbKey;
+            document.getElementById('edit-item-id').value = itemId;
+            document.getElementById('edit-item-name').value = itemName;
+            document.getElementById('edit-item-category').value = itemCategory;
+            document.getElementById('edit-item-quantity').value = itemQuantity;
+            document.getElementById('edit-item-unit').value = itemUnit;
+            document.getElementById('edit-item-location').value = itemLocation;
+            document.getElementById('edit-item-min-stock').value = itemMinStock;
+
+            document.getElementById('edit-item-modal').classList.add('flex');
+        }
+
+        // Función para cerrar el modal de edición
+        function cancelEditItem() {
+            document.getElementById('edit-item-modal').classList.remove('flex');
+        }
+
+        // Función para confirmar y guardar los cambios del artículo editado
+        async function confirmEditItem(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            if (!isAuthReady) {
+                showMessage("La base de datos no está lista. Intente de nuevo en unos segundos.", true);
+                return;
+            }
+
+            const dbKey = document.getElementById('edit-db-key').value;
+            const newItemId = document.getElementById('edit-item-id').value.trim();
+            const newItemName = document.getElementById('edit-item-name').value.trim();
+            const newCategory = document.getElementById('edit-item-category').value.trim();
+            const newQuantity = parseInt(document.getElementById('edit-item-quantity').value);
+            const newUnit = document.getElementById('edit-item-unit').value;
+            const newLocation = document.getElementById('edit-item-location').value.trim();
+            const newMinStock = parseInt(document.getElementById('edit-item-min-stock').value);
+
+            if (!newItemId || !newItemName || !newCategory || isNaN(newQuantity) || !newUnit || !newLocation || isNaN(newMinStock)) {
+                showMessage('Por favor, complete todos los campos en el formulario de edición correctamente.', true);
+                return;
+            }
+            if (newQuantity < 0 || newMinStock < 0) {
+                 showMessage('La cantidad y el stock mínimo no pueden ser números negativos.', true);
+                 return;
+            }
+            if (newUnit === "") {
+                showMessage('Por favor, seleccione una unidad de medida para el artículo editado.', true);
+                return;
+            }
+
+            try {
+                const itemDbRef = ref(db, `artifacts/${appId}/users/${userId}/inventory/${dbKey}`);
+                await update(itemDbRef, {
+                    itemId: newItemId,
+                    name: newItemName,
+                    category: newCategory,
+                    quantity: newQuantity,
+                    unit: newUnit,
+                    location: newLocation,
+                    minStock: newMinStock
+                });
+
+                // Get original item details for movement history (assuming we have them in currentInventoryItems)
+                const originalItem = currentInventoryItems.find(item => item.id === dbKey);
+                const oldQuantity = originalItem ? originalItem.quantity : 0;
+                const quantityDifference = newQuantity - oldQuantity;
+                let movementType = '';
+                let movementQuantity = Math.abs(quantityDifference);
+
+                if (quantityDifference > 0) {
+                    movementType = 'Edición (Ingreso)';
+                } else if (quantityDifference < 0) {
+                    movementType = 'Edición (Retiro)';
+                } else {
+                    movementType = 'Edición (Sin cambio de cantidad)';
+                    movementQuantity = 0; // No quantity change to log
+                }
+                
+                // Only log if there was an actual change or if it's important to log all edits
+                if (movementQuantity > 0 || movementType === 'Edición (Sin cambio de cantidad)') {
+                    await addMovementToHistory(newItemId, newItemName, movementType, movementQuantity, 'Formulario de Edición', 'Usuario');
+                }
+                
+
+                showMessage(`Artículo "${newItemName}" actualizado con éxito en Realtime Database.`, false);
+                cancelEditItem(); // Close the modal
+            } catch (e) {
+                console.error("Error al actualizar el artículo en Realtime Database: ", e);
+                showMessage("Error al guardar los cambios del artículo. Intente de nuevo.", true);
+            }
+        }
+
+
         // Function to render inventory items to the table
         function renderInventory(items) {
             const tableBody = document.getElementById('inventory-list');
@@ -664,6 +839,15 @@
                 });
                 actionsCell.appendChild(withdrawButton);
 
+                // Nuevo botón de editar
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Editar';
+                editButton.classList.add('bg-blue-500', 'hover:bg-blue-600', 'text-white', 'font-bold', 'py-1', 'px-3', 'rounded-full', 'text-xs', 'transition-colors', 'duration-200', 'mt-1');
+                editButton.addEventListener('click', function() {
+                    openEditItemModal(item.id, item.itemId, item.name, item.category, item.quantity, item.unit, item.location, item.minStock);
+                });
+                actionsCell.appendChild(editButton);
+
                 // Nuevo botón de eliminar
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Eliminar';
@@ -679,325 +863,6 @@
             document.getElementById('total-stock').textContent = totalStockQuantity; // New: Update total stock quantity
             updateLastUpdateTime();
         }
-
-        // Function to render history items to the table
-        function renderHistory(movements) {
-            const historyTableBody = document.getElementById('movement-history-list');
-            historyTableBody.innerHTML = ''; // Clear current table
-
-            // Sort movements by timestamp in descending order (most recent first)
-            // Timestamps are ISO strings, so direct comparison works
-            movements.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-            movements.forEach(move => {
-                const newRow = historyTableBody.insertRow();
-                newRow.classList.add('hover:bg-gray-50');
-
-                newRow.insertCell().textContent = new Date(move.timestamp).toLocaleString('es-ES', {
-                    year: 'numeric', month: '2-digit', day: '2-digit',
-                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-                }).replace(/\//g, '-');
-                newRow.insertCell().textContent = move.itemId;
-                newRow.insertCell().textContent = move.itemName;
-                newRow.insertCell().textContent = move.movementType;
-                newRow.insertCell().textContent = move.quantity;
-                newRow.insertCell().textContent = move.sourceDestination;
-                newRow.insertCell().textContent = move.responsible;
-            });
-        }
-
-        // Function to render invoice history items to the table
-        function renderInvoices(invoices) {
-            const invoiceHistoryTableBody = document.getElementById('invoice-history-list');
-            invoiceHistoryTableBody.innerHTML = ''; // Clear current table
-
-            // Sort invoices by timestamp in descending order (most recent first)
-            invoices.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-            invoices.forEach(invoice => {
-                const newRow = invoiceHistoryTableBody.insertRow();
-                newRow.classList.add('hover:bg-gray-50');
-
-                newRow.insertCell().textContent = invoice.invoiceId.substring(0, 8); // Display first 8 chars of Firebase key as Invoice ID
-                newRow.insertCell().textContent = new Date(invoice.timestamp).toLocaleString('es-ES', {
-                    year: 'numeric', month: '2-digit', day: '2-digit',
-                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-                }).replace(/\//g, '-');
-                newRow.insertCell().textContent = invoice.responsible;
-                
-                const itemsSummaryCell = newRow.insertCell();
-                if (invoice.items && Array.isArray(invoice.items)) {
-                    itemsSummaryCell.textContent = invoice.items.map(item => `${item.name} (x${item.quantityToWithdraw})`).join(', ');
-                } else {
-                    itemsSummaryCell.textContent = 'N/A';
-                }
-
-                const actionsCell = newRow.insertCell();
-                const printButton = document.createElement('button');
-                printButton.textContent = 'Imprimir';
-                printButton.classList.add('bg-blue-500', 'hover:bg-blue-600', 'text-white', 'font-bold', 'py-1', 'px-3', 'rounded-full', 'text-xs', 'transition-colors', 'duration-200');
-                printButton.addEventListener('click', () => printExistingInvoice(invoice)); // Function to print an existing invoice
-                actionsCell.appendChild(printButton);
-            });
-        }
-
-        // --- Firebase Initialization and Data Listeners ---
-        document.addEventListener('DOMContentLoaded', async () => {
-            document.getElementById('loading-overlay').style.display = 'flex'; // Show loading
-
-            // New: Timeout to hide loading overlay even if data fails to load
-            const loadingTimeout = setTimeout(() => {
-                hideLoadingOverlay();
-                showMessage("La carga de datos iniciales tardó demasiado o falló. Verifique la conexión o las reglas de Firebase.", true);
-            }, 7000); // Hide after 7 seconds
-
-            try {
-                // Ensure firebaseConfig is available before initializing
-                if (!firebaseConfig) {
-                    console.error("Firebase initialization skipped due to missing config. Please check your Firebase setup.");
-                    clearTimeout(loadingTimeout);
-                    hideLoadingOverlay();
-                    return; // Exit if config is missing
-                }
-
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getDatabase(app); // Initialize Realtime Database
-
-                // Authenticate user
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        document.getElementById('user-id-display').textContent = `Número de Parte de Usuario: ${userId}`;
-                        // Referencias para Realtime Database
-                        // Importante: Las rutas deben seguir el esquema de seguridad de Firebase:
-                        // /artifacts/{appId}/users/{userId}/...
-                        inventoryRef = ref(db, `artifacts/${appId}/users/${userId}/inventory`);
-                        historyRef = ref(db, `artifacts/${appId}/users/${userId}/movementHistory`);
-                        invoiceHistoryRef = ref(db, `artifacts/${appId}/users/${userId}/invoiceHistory`);
-                        isAuthReady = true;
-
-                        // Listen to Realtime Database collections
-                        onValue(inventoryRef, (snapshot) => {
-                            const itemsObject = snapshot.val(); // Get object of items
-                            const itemsArray = [];
-                            if (itemsObject) {
-                                // Convert object to array for rendering
-                                for (const key in itemsObject) {
-                                    itemsArray.push({ id: key, ...itemsObject[key] });
-                                }
-                            }
-                            renderInventory(itemsArray); // This also updates currentInventoryItems
-                            console.log("Inventario cargado/actualizado desde Realtime Database.");
-                            initialDataLoadedCount++; // Increment counter
-                            if (initialDataLoadedCount >= expectedInitialLoads) {
-                                clearTimeout(loadingTimeout); // Clear the timeout if all loaded
-                                hideLoadingOverlay();
-                            }
-                        }, (error) => {
-                            console.error("Error al escuchar el inventario de Realtime Database: ", error);
-                            showMessage("Error al cargar el inventario.", true);
-                            initialDataLoadedCount++; // Still increment to attempt hiding overlay
-                            if (initialDataLoadedCount >= expectedInitialLoads) {
-                                clearTimeout(loadingTimeout);
-                                hideLoadingOverlay();
-                            }
-                        });
-
-                        onValue(historyRef, (snapshot) => {
-                            const movementsObject = snapshot.val(); // Get object of movements
-                            const movementsArray = [];
-                            if (movementsObject) {
-                                // Convert object to array for rendering
-                                for (const key in movementsObject) {
-                                    movementsArray.push({ id: key, ...movementsObject[key] });
-                                }
-                            }
-                            renderHistory(movementsArray);
-                            console.log("Historial de movimientos cargado/actualizado desde Realtime Database.");
-                            initialDataLoadedCount++; // Increment counter
-                            if (initialDataLoadedCount >= expectedInitialLoads) {
-                                clearTimeout(loadingTimeout);
-                                hideLoadingOverlay();
-                            }
-                        }, (error) => {
-                            console.error("Error al escuchar el historial de movimientos de Realtime Database: ", error);
-                            showMessage("Error al cargar el historial de movimientos.", true);
-                            initialDataLoadedCount++; // Still increment to attempt hiding overlay
-                            if (initialDataLoadedCount >= expectedInitialLoads) {
-                                clearTimeout(loadingTimeout);
-                                hideLoadingOverlay();
-                            }
-                        });
-
-                        // New listener for invoice history
-                        onValue(invoiceHistoryRef, (snapshot) => {
-                            const invoicesObject = snapshot.val();
-                            const invoicesArray = [];
-                            if (invoicesObject) {
-                                for (const key in invoicesObject) {
-                                    invoicesArray.push({ invoiceId: key, ...invoicesObject[key] });
-                                }
-                            }
-                            renderInvoices(invoicesArray);
-                            console.log("Historial de facturas cargado/actualizado desde Realtime Database.");
-                            initialDataLoadedCount++; // Increment counter
-                            if (initialDataLoadedCount >= expectedInitialLoads) {
-                                clearTimeout(loadingTimeout);
-                                hideLoadingOverlay();
-                            }
-                        }, (error) => {
-                            console.error("Error al escuchar el historial de facturas de Realtime Database: ", error);
-                            showMessage("Error al cargar el historial de facturas.", true);
-                            initialDataLoadedCount++; // Still increment to attempt hiding overlay
-                            if (initialDataLoadedCount >= expectedInitialLoads) {
-                                clearTimeout(loadingTimeout);
-                                hideLoadingOverlay();
-                            }
-                        });
-
-
-                    } else {
-                        console.log("No hay usuario autenticado.");
-                        clearTimeout(loadingTimeout); // Clear timeout as auth failed
-                        hideLoadingOverlay(); // Hide overlay even if no user
-                        showMessage("No se pudo autenticar. Los datos no persistirán para este usuario si es nuevo.", true);
-                        isAuthReady = false;
-                    }
-                });
-
-            } catch (e) {
-                console.error("Error inicializando Firebase Realtime Database:", e);
-                clearTimeout(loadingTimeout); // Clear timeout on initialization error
-                hideLoadingOverlay(); // Hide overlay on initialization error
-                showMessage("Error grave al inicializar la aplicación. Ver consola para más detalles.", true);
-            }
-
-            // --- Attach Event Listeners (ensure they are attached AFTER DOMContentLoaded) ---
-            document.getElementById('open-delivery-invoice-modal-btn').addEventListener('click', openDeliveryInvoiceModal);
-            document.getElementById('search-button').addEventListener('click', searchInventory);
-            document.getElementById('clear-search-button').addEventListener('click', clearSearch);
-            document.getElementById('cancel-withdrawal-btn').addEventListener('click', cancelWithdrawal);
-            document.getElementById('confirm-withdrawal-btn').addEventListener('click', confirmWithdrawal);
-            // Changed from click to input for live search
-            document.getElementById('delivery-search-input').addEventListener('input', filterDeliverySearch); 
-            document.getElementById('cancel-delivery-invoice-btn').addEventListener('click', cancelDeliveryInvoice);
-            document.getElementById('confirm-delivery-invoice-btn').addEventListener('click', confirmDeliveryInvoice);
-            document.getElementById('print-delivery-invoice-btn').addEventListener('click', printDeliveryInvoice);
-            document.getElementById('clear-history-btn').addEventListener('click', clearHistory);
-            document.getElementById('clear-invoice-history-btn').addEventListener('click', clearInvoiceHistory); // New listener for clearing invoice history
-            document.getElementById('critical-items-card').addEventListener('click', filterCriticalItems); // New event listener for critical items card
-            document.getElementById('print-inventory-btn').addEventListener('click', printInventory); // New event listener for printing inventory
-            
-            // Custom confirm modal buttons must be attached here to ensure they exist
-            document.getElementById('custom-confirm-ok').onclick = () => {
-                document.getElementById('custom-confirm-modal').classList.remove('flex');
-                if (confirmResolver) {
-                    confirmResolver(true);
-                    confirmResolver = null;
-                }
-            };
-
-            document.getElementById('custom-confirm-cancel').onclick = () => {
-                document.getElementById('custom-confirm-modal').classList.remove('flex');
-                if (confirmResolver) {
-                    confirmResolver(false);
-                    confirmResolver = null;
-                }
-            };
-
-            // Add listener for add item form
-            document.getElementById('add-item-form').addEventListener('submit', async function(event) {
-                event.preventDefault(); 
-
-                if (!isAuthReady) {
-                    showMessage("La base de datos no está lista. Intente de nuevo en unos segundos.", true);
-                    return;
-                }
-
-                const itemId = document.getElementById('item-id').value.trim();
-                const itemName = document.getElementById('item-name').value.trim();
-                const itemCategory = document.getElementById('item-category').value.trim();
-                const itemQuantity = parseInt(document.getElementById('item-quantity').value);
-                const itemUnit = document.getElementById('item-unit').value; // Get the unit of measure
-                // Obtener el valor del campo de texto de ubicación
-                const itemLocation = document.getElementById('item-location').value.trim();
-
-
-                const itemMinStock = parseInt(document.getElementById('item-min-stock').value);
-
-                if (!itemId || !itemName || !itemCategory || isNaN(itemQuantity) || !itemUnit || !itemLocation || isNaN(itemMinStock)) {
-                    showMessage('Por favor, complete todos los campos correctamente (incluyendo la unidad de medida y la ubicación).', true);
-                    return;
-                }
-                if (itemQuantity < 0 || itemMinStock < 0) {
-                     showMessage('La cantidad y el stock mínimo no pueden ser números negativos.', true);
-                     return;
-                }
-                if (itemUnit === "") {
-                    showMessage('Por favor, seleccione una unidad de medida.', true);
-                    return;
-                }
-
-                try {
-                    // Check if item with this itemId already exists
-                    let itemExists = false;
-                    let existingItemKey = null;
-                    let existingItemQuantity = 0;
-
-                    // Query the currentInventoryItems array to find the item
-                    const existingItem = currentInventoryItems.find(item => item.itemId === itemId);
-                    
-                    if (existingItem) {
-                        itemExists = true;
-                        existingItemKey = existingItem.id; // The Realtime Database key
-                        existingItemQuantity = existingItem.quantity;
-                    }
-
-                    if (itemExists) {
-                        // If item exists, update quantity and unit
-                        const newTotalQuantity = existingItemQuantity + itemQuantity;
-                        const itemDbRef = ref(db, `artifacts/${appId}/users/${userId}/inventory/${existingItemKey}`);
-                        // Update unit and location as well
-                        await update(itemDbRef, { quantity: newTotalQuantity, unit: itemUnit, location: itemLocation }); 
-                        await addMovementToHistory(itemId, itemName, 'Actualización (Ingreso)', itemQuantity, 'Formulario de Entrada', 'Usuario');
-                        showMessage(`Cantidad de "${itemName}" actualizada a ${newTotalQuantity} ${itemUnit} en Realtime Database!`, false);
-                    } else {
-                        await push(inventoryRef, {
-                            itemId: itemId, 
-                            name: itemName,
-                            category: itemCategory,
-                            quantity: itemQuantity,
-                            unit: itemUnit, // Store unit
-                            location: itemLocation, // Store location from text input
-                            minStock: itemMinStock,
-                            createdAt: new Date().toISOString()
-                        });
-                        await addMovementToHistory(itemId, itemName, 'Ingreso', itemQuantity, 'Formulario de Entrada', 'Usuario');
-                        showMessage('Artículo añadido con éxito a Realtime Database!', false);
-                    }
-
-                    document.getElementById('add-item-form').reset();
-                    // Limpiar el campo de texto de ubicación después del envío
-                    document.getElementById('item-location').value = ''; 
-
-                } catch (e) {
-                    console.error("Error al añadir/actualizar el artículo en Realtime Database: ", e);
-                    showMessage("Error al añadir/actualizar el artículo. Intente de nuevo.", true);
-                }
-            });
-
-
-        });
-
-
-        // --- Modals and Forms Logic ---
 
         // Variables para el modal de retiro individual
         let selectedDbKeyForWithdrawal = null; 
@@ -1099,6 +964,67 @@
                 console.error("Error al eliminar el artículo de Realtime Database: ", e);
                 showMessage("Error al eliminar el artículo. Intente de nuevo.", true);
             }
+        }
+
+        // Function to render history items to the table
+        function renderHistory(movements) {
+            const historyTableBody = document.getElementById('movement-history-list');
+            historyTableBody.innerHTML = ''; // Clear current table
+
+            // Sort movements by timestamp in descending order (most recent first)
+            // Timestamps are ISO strings, so direct comparison works
+            movements.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            movements.forEach(move => {
+                const newRow = historyTableBody.insertRow();
+                newRow.classList.add('hover:bg-gray-50');
+
+                newRow.insertCell().textContent = new Date(move.timestamp).toLocaleString('es-ES', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                }).replace(/\//g, '-');
+                newRow.insertCell().textContent = move.itemId;
+                newRow.insertCell().textContent = move.itemName;
+                newRow.insertCell().textContent = move.movementType;
+                newRow.insertCell().textContent = move.quantity;
+                newRow.insertCell().textContent = move.sourceDestination;
+                newRow.insertCell().textContent = move.responsible;
+            });
+        }
+
+        // Function to render invoice history items to the table
+        function renderInvoices(invoices) {
+            const invoiceHistoryTableBody = document.getElementById('invoice-history-list');
+            invoiceHistoryTableBody.innerHTML = ''; // Clear current table
+
+            // Sort invoices by timestamp in descending order (most recent first)
+            invoices.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            invoices.forEach(invoice => {
+                const newRow = invoiceHistoryTableBody.insertRow();
+                newRow.classList.add('hover:bg-gray-50');
+
+                newRow.insertCell().textContent = invoice.invoiceId.substring(0, 8); // Display first 8 chars of Firebase key as Invoice ID
+                newRow.insertCell().textContent = new Date(invoice.timestamp).toLocaleString('es-ES', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                }).replace(/\//g, '-');
+                newRow.insertCell().textContent = invoice.responsible;
+                
+                const itemsSummaryCell = newRow.insertCell();
+                if (invoice.items && Array.isArray(invoice.items)) {
+                    itemsSummaryCell.textContent = invoice.items.map(item => `${item.name} (x${item.quantityToWithdraw})`).join(', ');
+                } else {
+                    itemsSummaryCell.textContent = 'N/A';
+                }
+
+                const actionsCell = newRow.insertCell();
+                const printButton = document.createElement('button');
+                printButton.textContent = 'Imprimir';
+                printButton.classList.add('bg-blue-500', 'hover:bg-blue-600', 'text-white', 'font-bold', 'py-1', 'px-3', 'rounded-full', 'text-xs', 'transition-colors', 'duration-200');
+                printButton.addEventListener('click', () => printExistingInvoice(invoice)); // Function to print an existing invoice
+                actionsCell.appendChild(printButton);
+            });
         }
 
         // --- Historial: Borrar Historial Completo ---
@@ -1462,9 +1388,9 @@
                 <body>
                     <div class="invoice-container">
                         <div class="invoice-header">
-                            <img src="uploaded:image_f52739.jpg-f0804319-ffb6-4d31-8154-4538d699b6d9" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="print-logo-left">
+                            <img src="https://placehold.co/100x100/blue/white?text=LOGO_IZQUIERDA" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="print-logo-left">
                             <h1>Factura de Entrega</h1>
-                            <img src="https://th.bing.com/th/id/R.59cc9f2e73d8d451406634361766bef7?rik=mCYsnanv4J45Pw&riu=http%3a%2f%2fwww.logotypes101.com%2flogos%2f189%2fBCEBADF0F47AD978734FAB5B57BADCB4%2flogofuerzaaerea.png&ehk=d4iwHlQczHRwWHC2JOmvJ4y0hQD1jPKlMuc%2bgjePcvc%3d&risl=&pid=ImgRaw&r=0" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="print-logo-right">
+                            <img src="https://placehold.co/100x100/blue/white?text=LOGO_DERECHA" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="print-logo-right">
                         </div>
                         <div class="header-info-block">
                             <div>
@@ -1660,9 +1586,9 @@
                 <body>
                     <div class="invoice-container">
                         <div class="invoice-header">
-                            <img src="uploaded:image_f52739.jpg-f0804319-ffb6-4d31-8154-4538d699b6d9" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="print-logo-left">
+                            <img src="https://placehold.co/100x100/blue/white?text=LOGO_IZQUIERDA" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="print-logo-left">
                             <h1>Factura de Entrega #${invoice.invoiceId.substring(0,8)}</h1>
-                            <img src="https://th.bing.com/th/id/R.59cc9f2e73d8d451406634361766bef7?rik=mCYsnanv4J45Pw&riu=http%3a%2f%2fwww.logotypes101.com%2flogos%2f189%2fBCEBADF0F47AD978734FAB5B57BADCB4%2flogofuerzaaerea.png&ehk=d4iwHlQczHRwWHC2JOmvJ4y0hQD1jPKlMuc%2bgjePcvc%3d&risl=&pid=ImgRaw&r=0" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="print-logo-right">
+                            <img src="https://placehold.co/100x100/blue/white?text=LOGO_DERECHA" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="print-logo-right">
                         </div>
                         <div class="header-info-block">
                             <div>
@@ -1963,9 +1889,9 @@
                 <body>
                     <div class="inventory-container">
                         <div class="inventory-header">
-                            <img src="uploaded:image_f52739.jpg-f0804319-ffb6-4d31-8154-4538d699b6d9" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="print-logo-left">
+                            <img src="https://placehold.co/100x100/blue/white?text=LOGO_IZQUIERDA" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="print-logo-left">
                             <h1>Inventario Actual</h1>
-                            <img src="https://th.bing.com/th/id/R.59cc9f2e73d8d451406634361766bef7?rik=mCYsnanv4J45Pw&riu=http%3a%2f%2fwww.logotypes101.com%2flogos%2f189%2fBCEBADF0F47AD978734FAB5B57BADCB4%2flogofuerzaaerea.png&ehk=d4iwHlQczHRwWHC2JOmvJ4y0hQD1jPKlMuc%2bgjePcvc%3d&risl=&pid=ImgRaw&r=0" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="print-logo-right">
+                            <img src="https://placehold.co/100x100/blue/white?text=LOGO_DERECHA" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="print-logo-right">
                         </div>
                         <div class="header-info-block">
                             <div>
@@ -2019,35 +1945,260 @@
         }
 
 
-        // Custom Confirmation Modal Logic
-        let confirmResolver = null;
+        // --- Firestore Initialization and Data Listeners ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('loading-overlay').style.display = 'flex'; // Show loading
 
-        function showConfirm(title, message) {
-            return new Promise((resolve) => {
-                confirmResolver = resolve;
-                document.getElementById('custom-confirm-title').textContent = title;
-                document.getElementById('custom-confirm-message').textContent = message;
-                document.getElementById('custom-confirm-modal').classList.add('flex');
+            // New: Timeout to hide loading overlay even if data fails to load
+            const loadingTimeout = setTimeout(() => {
+                hideLoadingOverlay();
+                showMessage("La carga de datos iniciales tardó demasiado o falló. Verifique la conexión o las reglas de Firebase.", true);
+            }, 7000); // Hide after 7 seconds
+
+            try {
+                // Ensure firebaseConfig is available before initializing
+                if (!firebaseConfig) {
+                    console.error("Firebase initialization skipped due to missing config. Please check your Firebase setup.");
+                    clearTimeout(loadingTimeout);
+                    hideLoadingOverlay();
+                    return; // Exit if config is missing
+                }
+
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getDatabase(app); // Initialize Realtime Database
+
+                // Authenticate user
+                await signInAnonymously(auth); // Always sign in anonymously first.
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        document.getElementById('user-id-display').textContent = `Número de Parte de Usuario: ${userId}`;
+                        // Referencias para Realtime Database
+                        // Importante: Las rutas deben seguir el esquema de seguridad de Firebase:
+                        // /artifacts/{appId}/users/{userId}/...
+                        inventoryRef = ref(db, `artifacts/${appId}/users/${userId}/inventory`);
+                        historyRef = ref(db, `artifacts/${appId}/users/${userId}/movementHistory`);
+                        invoiceHistoryRef = ref(db, `artifacts/${appId}/users/${userId}/invoiceHistory`);
+                        isAuthReady = true;
+
+                        // Only attach listeners AFTER auth is ready and refs are set
+                        onValue(inventoryRef, (snapshot) => {
+                            const itemsObject = snapshot.val(); // Get object of items
+                            const itemsArray = [];
+                            if (itemsObject) {
+                                // Convert object to array for rendering
+                                for (const key in itemsObject) {
+                                    itemsArray.push({ id: key, ...itemsObject[key] });
+                                }
+                            }
+                            renderInventory(itemsArray); // This also updates currentInventoryItems
+                            console.log("Inventario cargado/actualizado desde Realtime Database.");
+                            initialDataLoadedCount++; // Increment counter
+                            if (initialDataLoadedCount >= expectedInitialLoads) {
+                                clearTimeout(loadingTimeout); // Clear the timeout if all loaded
+                                hideLoadingOverlay();
+                            }
+                        }, (error) => {
+                            console.error("Error al escuchar el inventario de Realtime Database: ", error);
+                            showMessage("Error al cargar el inventario.", true);
+                            initialDataLoadedCount++; // Still increment to attempt hiding overlay
+                            if (initialDataLoadedCount >= expectedInitialLoads) {
+                                clearTimeout(loadingTimeout);
+                                hideLoadingOverlay();
+                            }
+                        });
+
+                        onValue(historyRef, (snapshot) => {
+                            const movementsObject = snapshot.val(); // Get object of movements
+                            const movementsArray = [];
+                            if (movementsObject) {
+                                // Convert object to array for rendering
+                                for (const key in movementsObject) {
+                                    movementsArray.push({ id: key, ...movementsObject[key] });
+                                }
+                            }
+                            renderHistory(movementsArray);
+                            console.log("Historial de movimientos cargado/actualizado desde Realtime Database.");
+                            initialDataLoadedCount++; // Increment counter
+                            if (initialDataLoadedCount >= expectedInitialLoads) {
+                                clearTimeout(loadingTimeout);
+                                hideLoadingOverlay();
+                            }
+                        }, (error) => {
+                            console.error("Error al escuchar el historial de movimientos de Realtime Database: ", error);
+                            showMessage("Error al cargar el historial de movimientos.", true);
+                            initialDataLoadedCount++; // Still increment to attempt hiding overlay
+                            if (initialDataLoadedCount >= expectedInitialLoads) {
+                                clearTimeout(loadingTimeout);
+                                hideLoadingOverlay();
+                            }
+                        });
+
+                        // New listener for invoice history
+                        onValue(invoiceHistoryRef, (snapshot) => {
+                            const invoicesObject = snapshot.val();
+                            const invoicesArray = [];
+                            if (invoicesObject) {
+                                for (const key in invoicesObject) {
+                                    invoicesArray.push({ invoiceId: key, ...invoicesObject[key] });
+                                }
+                            }
+                            renderInvoices(invoicesArray);
+                            console.log("Historial de facturas cargado/actualizado desde Realtime Database.");
+                            initialDataLoadedCount++; // Increment counter
+                            if (initialDataLoadedCount >= expectedInitialLoads) {
+                                clearTimeout(loadingTimeout);
+                                hideLoadingOverlay();
+                            }
+                        }, (error) => {
+                            console.error("Error al escuchar el historial de facturas de Realtime Database: ", error);
+                            showMessage("Error al cargar el historial de facturas.", true);
+                            initialDataLoadedCount++; // Still increment to attempt hiding overlay
+                            if (initialDataLoadedCount >= expectedInitialLoads) {
+                                clearTimeout(loadingTimeout);
+                                hideLoadingOverlay();
+                            }
+                        });
+
+
+                    } else {
+                        console.log("No hay usuario autenticado.");
+                        clearTimeout(loadingTimeout); // Clear timeout as auth failed
+                        hideLoadingOverlay(); // Hide overlay even if no user
+                        showMessage("No se pudo autenticar. Los datos no persistirán para este usuario si es nuevo.", true);
+                        isAuthReady = false;
+                    }
+                });
+
+            } catch (e) {
+                console.error("Error inicializando Firebase Realtime Database:", e);
+                clearTimeout(loadingTimeout); // Clear timeout on initialization error
+                hideLoadingOverlay(); // Hide overlay on initialization error
+                showMessage("Error grave al inicializar la aplicación. Ver consola para más detalles.", true);
+            }
+
+            // --- Attach Event Listeners (ensure they are attached AFTER DOMContentLoaded) ---
+            document.getElementById('open-delivery-invoice-modal-btn').addEventListener('click', openDeliveryInvoiceModal);
+            document.getElementById('search-button').addEventListener('click', searchInventory);
+            document.getElementById('clear-search-button').addEventListener('click', clearSearch);
+            document.getElementById('cancel-withdrawal-btn').addEventListener('click', cancelWithdrawal);
+            document.getElementById('confirm-withdrawal-btn').addEventListener('click', confirmWithdrawal);
+            // Changed from click to input for live search
+            document.getElementById('delivery-search-input').addEventListener('input', filterDeliverySearch); 
+            document.getElementById('cancel-delivery-invoice-btn').addEventListener('click', cancelDeliveryInvoice);
+            document.getElementById('confirm-delivery-invoice-btn').addEventListener('click', confirmDeliveryInvoice);
+            document.getElementById('print-delivery-invoice-btn').addEventListener('click', printDeliveryInvoice);
+            document.getElementById('clear-history-btn').addEventListener('click', clearHistory);
+            document.getElementById('clear-invoice-history-btn').addEventListener('click', clearInvoiceHistory); // New listener for clearing invoice history
+            document.getElementById('critical-items-card').addEventListener('click', filterCriticalItems); // New event listener for critical items card
+            document.getElementById('print-inventory-btn').addEventListener('click', printInventory); // New event listener for printing inventory
+            
+            // Custom confirm modal buttons must be attached here to ensure they exist
+            document.getElementById('custom-confirm-ok').onclick = () => {
+                document.getElementById('custom-confirm-modal').classList.remove('flex');
+                if (confirmResolver) {
+                    confirmResolver(true);
+                    confirmResolver = null;
+                }
+            };
+
+            document.getElementById('custom-confirm-cancel').onclick = () => {
+                document.getElementById('custom-confirm-modal').classList.remove('flex');
+                if (confirmResolver) {
+                    confirmResolver(false);
+                    confirmResolver = null;
+                }
+            };
+
+            // Event listeners for the new edit item modal
+            document.getElementById('cancel-edit-item-btn').addEventListener('click', cancelEditItem);
+            document.getElementById('edit-item-form').addEventListener('submit', confirmEditItem);
+
+            // Add listener for add item form
+            document.getElementById('add-item-form').addEventListener('submit', async function(event) {
+                event.preventDefault(); 
+
+                if (!isAuthReady) {
+                    showMessage("La base de datos no está lista. Intente de nuevo en unos segundos.", true);
+                    return;
+                }
+
+                const itemId = document.getElementById('item-id').value.trim();
+                const itemName = document.getElementById('item-name').value.trim();
+                const itemCategory = document.getElementById('item-category').value.trim();
+                const itemQuantity = parseInt(document.getElementById('item-quantity').value);
+                const itemUnit = document.getElementById('item-unit').value; // Get the unit of measure
+                // Obtener el valor del campo de texto de ubicación
+                const itemLocation = document.getElementById('item-location').value.trim();
+
+
+                const itemMinStock = parseInt(document.getElementById('item-min-stock').value);
+
+                if (!itemId || !itemName || !itemCategory || isNaN(itemQuantity) || !itemUnit || !itemLocation || isNaN(itemMinStock)) {
+                    showMessage('Por favor, complete todos los campos correctamente (incluyendo la unidad de medida y la ubicación).', true);
+                    return;
+                }
+                if (itemQuantity < 0 || itemMinStock < 0) {
+                     showMessage('La cantidad y el stock mínimo no pueden ser números negativos.', true);
+                     return;
+                }
+                if (itemUnit === "") {
+                    showMessage('Por favor, seleccione una unidad de medida.', true);
+                    return;
+                }
+
+                try {
+                    // Check if item with this itemId already exists
+                    let itemExists = false;
+                    let existingItemKey = null;
+                    let existingItemQuantity = 0;
+
+                    // Query the currentInventoryItems array to find the item
+                    const existingItem = currentInventoryItems.find(item => item.itemId === itemId);
+                    
+                    if (existingItem) {
+                        itemExists = true;
+                        existingItemKey = existingItem.id; // The Realtime Database key
+                        existingItemQuantity = existingItem.quantity;
+                    }
+
+                    if (itemExists) {
+                        // If item exists, update quantity and unit
+                        const newTotalQuantity = existingItemQuantity + itemQuantity;
+                        const itemDbRef = ref(db, `artifacts/${appId}/users/${userId}/inventory/${existingItemKey}`);
+                        // Update unit and location as well
+                        await update(itemDbRef, { quantity: newTotalQuantity, unit: itemUnit, location: itemLocation }); 
+                        await addMovementToHistory(itemId, itemName, 'Actualización (Ingreso)', itemQuantity, 'Formulario de Entrada', 'Usuario');
+                        showMessage(`Cantidad de "${itemName}" actualizada a ${newTotalQuantity} ${itemUnit} en Realtime Database!`, false);
+                    } else {
+                        await push(inventoryRef, {
+                            itemId: itemId, 
+                            name: itemName,
+                            category: itemCategory,
+                            quantity: itemQuantity,
+                            unit: itemUnit, // Store unit
+                            location: itemLocation, // Store location from text input
+                            minStock: itemMinStock,
+                            createdAt: new Date().toISOString()
+                        });
+                        await addMovementToHistory(itemId, itemName, 'Ingreso', itemQuantity, 'Formulario de Entrada', 'Usuario');
+                        showMessage('Artículo añadido con éxito a Realtime Database!', false);
+                    }
+
+                    document.getElementById('add-item-form').reset();
+                    // Limpiar el campo de texto de ubicación después del envío
+                    document.getElementById('item-location').value = ''; 
+
+                } catch (e) {
+                    console.error("Error al añadir/actualizar el artículo en Realtime Database: ", e);
+                    showMessage("Error al añadir/actualizar el artículo. Intente de nuevo.", true);
+                }
             });
-        }
 
-        // Estas asignaciones se movieron dentro de DOMContentLoaded para asegurar que los elementos existan.
-        // document.getElementById('custom-confirm-ok').onclick = () => {
-        //     document.getElementById('custom-confirm-modal').classList.remove('flex');
-        //     if (confirmResolver) {
-        //         confirmResolver(true);
-        //         confirmResolver = null;
-        //     }
-        // };
 
-        // document.getElementById('custom-confirm-cancel').onclick = () => {
-        //     document.getElementById('custom-confirm-modal').classList.remove('flex');
-        //     if (confirmResolver) {
-        //         confirmResolver(false);
-        //         confirmResolver = null;
-        //     }
-        // };
-
+        });
     </script>
 
 </body>
