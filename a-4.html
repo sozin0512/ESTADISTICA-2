@@ -157,6 +157,51 @@
             letter-spacing: 1.5px; /* Spacing for a more distinct look */
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3); /* Slight shadow for depth */
         }
+
+        /* Styles for authentication section */
+        #auth-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+            background-color: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: inset 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        #auth-section input {
+            width: 100%;
+            max-width: 300px;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+        }
+
+        #auth-section button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            color: white;
+            transition: background-color 0.2s ease-in-out;
+            cursor: pointer;
+        }
+
+        #auth-section .bg-blue-600 {
+            background-color: #2563eb;
+        }
+        #auth-section .bg-blue-600:hover {
+            background-color: #1d4ed8;
+        }
+        #auth-section .bg-gray-600 {
+            background-color: #4b5563;
+        }
+        #auth-section .bg-gray-600:hover {
+            background-color: #374151;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 antialiased">
@@ -373,8 +418,27 @@
     </nav>
 
     <main class="container mx-auto p-6 bg-white shadow-xl rounded-lg mt-6 mb-8 w-11/12 md:w-4/5 lg:w-3/4">
-        
-        <!-- Sección de Visión General -->
+        <!-- Authentication Section -->
+        <section id="auth-section" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
+            <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Acceso de Usuario</h2>
+            <div id="logged-out-view">
+                <p class="text-lg text-gray-700 mb-4">Inicia sesión o regístrate para acceder y gestionar tu inventario persistente en cualquier dispositivo.</p>
+                <div class="flex flex-col space-y-4 items-center">
+                    <input type="email" id="auth-email" placeholder="Correo electrónico" class="w-full max-w-sm px-4 py-2 border rounded-md">
+                    <input type="password" id="auth-password" placeholder="Contraseña" class="w-full max-w-sm px-4 py-2 border rounded-md">
+                    <div class="flex space-x-4">
+                        <button id="login-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Iniciar Sesión</button>
+                        <button id="register-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Registrarse</button>
+                    </div>
+                </div>
+            </div>
+            <div id="logged-in-view" class="hidden text-center">
+                <p class="text-lg text-gray-700 mb-4">Has iniciado sesión como: <span id="current-user-email" class="font-semibold text-blue-700"></span></p>
+                <button id="logout-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Cerrar Sesión</button>
+            </div>
+        </section>
+
+        <!-- Sección de Visión General (Now visible by default) -->
         <section id="vision-general" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
             <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Visión General del Inventario</h2>
             <p class="text-lg text-gray-700 leading-relaxed mb-4">Este sistema permite una gestión detallada y eficiente de todos los componentes, partes, herramientas y otros materiales necesarios para tus operaciones. Mantén un control preciso sobre las existencias, optimiza los flujos de trabajo y minimiza los costos de almacenamiento.</p>
@@ -398,9 +462,9 @@
             </div>
         </section>
 
-        <hr class="my-8 border-gray-300">
+        <hr class="my-8 border-gray-300 main-content-divider">
 
-        <!-- Sección de Inventario Actual -->
+        <!-- Sección de Inventario Actual (Now visible by default) -->
         <section id="inventario-actual" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
             <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Inventario Actual de Componentes y Partes</h2>
             
@@ -410,8 +474,6 @@
                     <input type="text" id="search-input" placeholder="Buscar por Número de Parte, nombre, categoría..." class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                     <button id="search-button" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </button>
-                    <button id="clear-search-button" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                         Todo
                     </button>
                 </div>
@@ -448,9 +510,9 @@
             </div>
         </section>
 
-        <hr class="my-8 border-gray-300">
+        <hr class="my-8 border-gray-300 main-content-divider">
 
-        <!-- Sección de Historial de Movimientos -->
+        <!-- Sección de Historial de Movimientos (Now visible by default) -->
         <section id="historial-movimientos" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
             <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Historial de Movimientos Recientes</h2>
             <div class="flex justify-end mb-4">
@@ -479,9 +541,9 @@
             </div>
         </section>
 
-        <hr class="my-8 border-gray-300">
+        <hr class="my-8 border-gray-300 main-content-divider">
 
-        <!-- Nueva Sección: Historial de Facturas -->
+        <!-- Nueva Sección: Historial de Facturas (Now visible by default) -->
         <section id="historial-facturas" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
             <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Historial de Facturas de Entrega</h2>
             <div class="flex justify-end mb-4">
@@ -508,9 +570,9 @@
             </div>
         </section>
 
-        <hr class="my-8 border-gray-300">
+        <hr class="my-8 border-gray-300 main-content-divider">
 
-        <!-- Sección para Añadir Nuevo Artículo -->
+        <!-- Sección para Añadir Nuevo Artículo (Now visible by default) -->
         <section id="anadir-articulo" class="p-6 bg-gray-50 rounded-lg shadow-inner">
             <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Añadir Nuevo Artículo al Inventario</h2>
             <form id="add-item-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -584,7 +646,7 @@
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
+        import { getAuth, signInAnonymously, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
         // Importar módulos de Realtime Database
         import { getDatabase, ref, push, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
 
@@ -628,7 +690,9 @@
 
         // Check if __app_id is defined by the environment (used for collection paths specific to Canvas)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // Note: __initial_auth_token is primarily for initial anonymous sign-in in Canvas.
+        // For cross-device persistence, explicit user authentication (email/password) is needed.
+        // const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // Function to show custom message box
         function showMessage(message, isError = false) {
@@ -686,6 +750,7 @@
                     sourceDestination,
                     responsible
                 });
+                console.log(`Movimiento de historial añadido para ${itemName}.`);
             } catch (e) {
                 console.error("Error al añadir documento al historial de movimientos en Realtime Database: ", e);
                 showMessage("Error al guardar en el historial de movimientos.", true);
@@ -698,9 +763,18 @@
         function showConfirm(title, message) {
             return new Promise((resolve) => {
                 confirmResolver = resolve;
-                document.getElementById('custom-confirm-title').textContent = title;
-                document.getElementById('custom-confirm-message').textContent = message;
-                document.getElementById('custom-confirm-modal').classList.add('flex');
+                const confirmModal = document.getElementById('custom-confirm-modal');
+                const confirmTitle = document.getElementById('custom-confirm-title');
+                const confirmMessage = document.getElementById('custom-confirm-message');
+                
+                if (confirmModal && confirmTitle && confirmMessage) { // Defensive check
+                    confirmTitle.textContent = title;
+                    confirmMessage.textContent = message;
+                    confirmModal.classList.add('flex');
+                } else {
+                    console.error("No se encontraron elementos del modal de confirmación. Asegúrese de que existen en el DOM.");
+                    resolve(false); // Resolve false if modal elements are missing
+                }
             });
         }
 
@@ -755,7 +829,8 @@
             }
 
             try {
-                const itemDbRef = ref(db, `artifacts/${appId}/users/${userId}/inventory/${dbKey}`);
+                // Point to public inventory
+                const itemDbRef = ref(db, `artifacts/${appId}/public/data/inventory/${dbKey}`);
                 await update(itemDbRef, {
                     itemId: newItemId,
                     name: newItemName,
@@ -787,7 +862,7 @@
                     await addMovementToHistory(newItemId, newItemName, movementType, movementQuantity, 'Formulario de Edición', 'Usuario');
                 }
                 
-
+                console.log(`Artículo "${newItemName}" actualizado con éxito en Realtime Database.`);
                 showMessage(`Artículo "${newItemName}" actualizado con éxito en Realtime Database.`, false);
                 cancelEditItem(); // Close the modal
             } catch (e) {
@@ -918,7 +993,8 @@
             const newQuantity = selectedItemCurrentQuantity - withdrawalQuantity;
 
             try {
-                const itemDbRef = ref(db, `artifacts/${appId}/users/${userId}/inventory/${selectedDbKeyForWithdrawal}`);
+                // Point to public inventory
+                const itemDbRef = ref(db, `artifacts/${appId}/public/data/inventory/${selectedDbKeyForWithdrawal}`);
                 
                 if (newQuantity <= 0) {
                     await remove(itemDbRef); 
@@ -929,7 +1005,7 @@
                 }
                 
                 await addMovementToHistory(selectedItemIdForWithdrawal, selectedItemNameForWithdrawal, 'Retiro', withdrawalQuantity, 'Salida de Inventario (Individual)', responsible);
-
+                console.log(`Retiro procesado para ${selectedItemNameForWithdrawal}.`);
                 cancelWithdrawal();
             } catch (e) {
                 console.error("Error al procesar el retiro en Realtime Database: ", e);
@@ -954,11 +1030,12 @@
             }
 
             try {
-                const itemDbRef = ref(db, `artifacts/${appId}/users/${userId}/inventory/${dbKey}`);
+                // Point to public inventory
+                const itemDbRef = ref(db, `artifacts/${appId}/public/data/inventory/${dbKey}`);
                 await remove(itemDbRef); 
 
                 await addMovementToHistory(itemId, itemName, 'Eliminación', 0, 'Eliminado del Inventario', 'Usuario'); 
-
+                console.log(`Artículo "${itemName}" eliminado.`);
                 showMessage(`Artículo "${itemName}" eliminado con éxito.`, false);
             } catch (e) {
                 console.error("Error al eliminar el artículo de Realtime Database: ", e);
@@ -1044,8 +1121,10 @@
             }
 
             try {
+                // Point to public history
                 await remove(historyRef); // Elimina todo el nodo de historial
                 showMessage('Historial de movimientos borrado con éxito.', false);
+                console.log("Historial de movimientos borrado.");
             } catch (e) {
                 console.error("Error al borrar el historial de Realtime Database: ", e);
                 showMessage("Error al borrar el historial. Intente de nuevo.", true);
@@ -1210,7 +1289,8 @@
 
                 for (const item of deliveryItems) {
                     const newQuantity = item.currentStock - item.quantityToWithdraw;
-                    const itemPath = `artifacts/${appId}/users/${userId}/inventory/${item.dbKey}`;
+                    // Point to public inventory
+                    const itemPath = `artifacts/${appId}/public/data/inventory/${item.dbKey}`;
                     
                     if (newQuantity <= 0) {
                         updates[itemPath] = null; 
@@ -1230,9 +1310,10 @@
                     deliverySummary.push(`${item.name} (x${item.quantityToWithdraw} ${item.unit || ''})`);
                 }
 
+                // Apply updates to the public database root
                 await update(ref(db, '/'), updates);
 
-                // Add entry to movement history
+                // Add entry to movement history (public)
                 await addMovementToHistory(
                     'MÚLTIPLE',
                     'Entrega de componentes',
@@ -1242,7 +1323,7 @@
                     responsible
                 );
 
-                // Add entry to invoice history
+                // Add entry to invoice history (public)
                 const newInvoiceRef = push(invoiceHistoryRef);
                 await set(newInvoiceRef, {
                     timestamp: new Date().toISOString(),
@@ -1250,7 +1331,7 @@
                     items: finalInvoiceItems // Store the processed items
                 });
 
-
+                console.log('Factura de entrega procesada con éxito. Stock actualizado.');
                 showMessage('Factura de entrega procesada con éxito. Stock actualizado.', false);
                 document.getElementById('print-delivery-invoice-btn').classList.remove('hidden'); // Show print button
                 // cancelDeliveryInvoice(); // Don't close immediately, let user print first
@@ -1674,8 +1755,10 @@
             }
 
             try {
+                // Point to public invoice history
                 await remove(invoiceHistoryRef); // Elimina todo el nodo de historial de facturas
                 showMessage('Historial de facturas borrado con éxito.', false);
+                console.log("Historial de facturas borrado.");
             } catch (e) {
                 console.error("Error al borrar el historial de facturas de Realtime Database: ", e);
                 showMessage("Error al borrar el historial de facturas. Intente de nuevo.", true);
@@ -1715,6 +1798,7 @@
             document.getElementById('search-input').value = ''; 
             // Re-render the inventory to show all items. This implicitly clears the filter.
             if (isAuthReady) {
+                // Point to public inventory
                 onValue(inventoryRef, (snapshot) => {
                     const itemsObject = snapshot.val();
                     const itemsArray = [];
@@ -1968,42 +2052,45 @@
                 auth = getAuth(app);
                 db = getDatabase(app); // Initialize Realtime Database
 
-                // Authenticate user
-                await signInAnonymously(auth); // Always sign in anonymously first.
-
-                onAuthStateChanged(auth, (user) => {
+                // IMPORTANT: This onAuthStateChanged listener will handle both initial auth and subsequent login/logout
+                onAuthStateChanged(auth, async (user) => {
                     if (user) {
-                        userId = user.uid;
+                        // User is signed in.
+                        userId = user.uid; // Update userId with authenticated user's UID
                         document.getElementById('user-id-display').textContent = `Número de Parte de Usuario: ${userId}`;
-                        // Referencias para Realtime Database
-                        // Importante: Las rutas deben seguir el esquema de seguridad de Firebase:
-                        // /artifacts/{appId}/users/{userId}/...
-                        inventoryRef = ref(db, `artifacts/${appId}/users/${userId}/inventory`);
-                        historyRef = ref(db, `artifacts/${appId}/users/${userId}/movementHistory`);
-                        invoiceHistoryRef = ref(db, `artifacts/${appId}/users/${userId}/invoiceHistory`);
+                        document.getElementById('current-user-email').textContent = user.email || "Usuario Anónimo";
+                        document.getElementById('logged-out-view').classList.add('hidden');
+                        document.getElementById('logged-in-view').classList.remove('hidden');
+                        
+                        // References for Realtime Database pointing to the PUBLIC data path
+                        // All users (anonymous or logged in) will see the same data
+                        inventoryRef = ref(db, `artifacts/${appId}/public/data/inventory`);
+                        historyRef = ref(db, `artifacts/${appId}/public/data/movementHistory`);
+                        invoiceHistoryRef = ref(db, `artifacts/${appId}/public/data/invoiceHistory`);
                         isAuthReady = true;
+                        console.log("Firebase Auth está listo y referencias de Realtime Database establecidas.");
 
-                        // Only attach listeners AFTER auth is ready and refs are set
+
+                        // Attach listeners only once after auth is ready and refs are set
                         onValue(inventoryRef, (snapshot) => {
-                            const itemsObject = snapshot.val(); // Get object of items
+                            const itemsObject = snapshot.val();
                             const itemsArray = [];
                             if (itemsObject) {
-                                // Convert object to array for rendering
                                 for (const key in itemsObject) {
                                     itemsArray.push({ id: key, ...itemsObject[key] });
                                 }
                             }
-                            renderInventory(itemsArray); // This also updates currentInventoryItems
+                            renderInventory(itemsArray);
                             console.log("Inventario cargado/actualizado desde Realtime Database.");
-                            initialDataLoadedCount++; // Increment counter
+                            initialDataLoadedCount++;
                             if (initialDataLoadedCount >= expectedInitialLoads) {
-                                clearTimeout(loadingTimeout); // Clear the timeout if all loaded
+                                clearTimeout(loadingTimeout);
                                 hideLoadingOverlay();
                             }
                         }, (error) => {
                             console.error("Error al escuchar el inventario de Realtime Database: ", error);
-                            showMessage("Error al cargar el inventario.", true);
-                            initialDataLoadedCount++; // Still increment to attempt hiding overlay
+                            showMessage("Error al cargar el inventario: " + error.message, true); // Mostrar mensaje de error detallado
+                            initialDataLoadedCount++;
                             if (initialDataLoadedCount >= expectedInitialLoads) {
                                 clearTimeout(loadingTimeout);
                                 hideLoadingOverlay();
@@ -2011,32 +2098,30 @@
                         });
 
                         onValue(historyRef, (snapshot) => {
-                            const movementsObject = snapshot.val(); // Get object of movements
+                            const movementsObject = snapshot.val();
                             const movementsArray = [];
                             if (movementsObject) {
-                                // Convert object to array for rendering
                                 for (const key in movementsObject) {
                                     movementsArray.push({ id: key, ...movementsObject[key] });
                                 }
                             }
                             renderHistory(movementsArray);
                             console.log("Historial de movimientos cargado/actualizado desde Realtime Database.");
-                            initialDataLoadedCount++; // Increment counter
+                            initialDataLoadedCount++;
                             if (initialDataLoadedCount >= expectedInitialLoads) {
                                 clearTimeout(loadingTimeout);
                                 hideLoadingOverlay();
                             }
                         }, (error) => {
                             console.error("Error al escuchar el historial de movimientos de Realtime Database: ", error);
-                            showMessage("Error al cargar el historial de movimientos.", true);
-                            initialDataLoadedCount++; // Still increment to attempt hiding overlay
+                            showMessage("Error al cargar el historial de movimientos: " + error.message, true); // Mostrar mensaje de error detallado
+                            initialDataLoadedCount++;
                             if (initialDataLoadedCount >= expectedInitialLoads) {
                                 clearTimeout(loadingTimeout);
                                 hideLoadingOverlay();
                             }
                         });
 
-                        // New listener for invoice history
                         onValue(invoiceHistoryRef, (snapshot) => {
                             const invoicesObject = snapshot.val();
                             const invoicesArray = [];
@@ -2047,28 +2132,128 @@
                             }
                             renderInvoices(invoicesArray);
                             console.log("Historial de facturas cargado/actualizado desde Realtime Database.");
-                            initialDataLoadedCount++; // Increment counter
+                            initialDataLoadedCount++;
                             if (initialDataLoadedCount >= expectedInitialLoads) {
                                 clearTimeout(loadingTimeout);
                                 hideLoadingOverlay();
                             }
                         }, (error) => {
                             console.error("Error al escuchar el historial de facturas de Realtime Database: ", error);
-                            showMessage("Error al cargar el historial de facturas.", true);
-                            initialDataLoadedCount++; // Still increment to attempt hiding overlay
+                            showMessage("Error al cargar el historial de facturas: " + error.message, true); // Mostrar mensaje de error detallado
+                            initialDataLoadedCount++;
                             if (initialDataLoadedCount >= expectedInitialLoads) {
                                 clearTimeout(loadingTimeout);
                                 hideLoadingOverlay();
                             }
                         });
 
-
                     } else {
-                        console.log("No hay usuario autenticado.");
-                        clearTimeout(loadingTimeout); // Clear timeout as auth failed
-                        hideLoadingOverlay(); // Hide overlay even if no user
-                        showMessage("No se pudo autenticar. Los datos no persistirán para este usuario si es nuevo.", true);
-                        isAuthReady = false;
+                        // User is signed out.
+                        // Try to sign in anonymously. In Canvas, if __initial_auth_token is provided,
+                        // this ensures the user is "authenticated" for Firebase rules that require request.auth != null.
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            try {
+                                await signInAnonymously(auth); 
+                                console.log("Signed in anonymously with custom token provided by Canvas environment.");
+                            } catch (error) {
+                                console.error("Error signing in anonymously:", error);
+                                showMessage("Error al iniciar sesión anónimamente. Intente iniciar sesión con correo electrónico.", true);
+                                clearTimeout(loadingTimeout);
+                                hideLoadingOverlay();
+                            }
+                        } else {
+                             // If no initial auth token, and no user logged in, then userId is truly 'anonymous'.
+                             // The system will still attempt to load data from public paths, but write operations might fail
+                             // if Firebase Security Rules require authentication.
+                             userId = 'anonymous'; // Keep anonymous for display
+                             isAuthReady = true; // Still consider auth ready for public data access
+                             document.getElementById('user-id-display').textContent = `Número de Parte de Usuario: Anónimo`;
+                             document.getElementById('current-user-email').textContent = 'Anónimo';
+                             document.getElementById('logged-out-view').classList.remove('hidden');
+                             document.getElementById('logged-in-view').classList.add('hidden');
+
+                             // Set public references even if no specific auth occurs, for read attempts
+                             inventoryRef = ref(db, `artifacts/${appId}/public/data/inventory`);
+                             historyRef = ref(db, `artifacts/${appId}/public/data/movementHistory`);
+                             invoiceHistoryRef = ref(db, `artifacts/${appId}/public/data/invoiceHistory`);
+                             console.log("Firebase Auth está listo (usuario anónimo) y referencias de Realtime Database establecidas.");
+
+                             // Proceed to load data even if auth is truly anonymous
+                             onValue(inventoryRef, (snapshot) => {
+                                const itemsObject = snapshot.val();
+                                const itemsArray = [];
+                                if (itemsObject) {
+                                    for (const key in itemsObject) {
+                                        itemsArray.push({ id: key, ...itemsObject[key] });
+                                    }
+                                }
+                                renderInventory(itemsArray);
+                                console.log("Inventario cargado/actualizado desde Realtime Database (anónimo).");
+                                initialDataLoadedCount++;
+                                if (initialDataLoadedCount >= expectedInitialLoads) {
+                                    clearTimeout(loadingTimeout);
+                                    hideLoadingOverlay();
+                                }
+                            }, (error) => {
+                                console.error("Error al escuchar el inventario de Realtime Database (anónimo): ", error);
+                                showMessage("Error al cargar el inventario: " + error.message, true); // Mostrar mensaje de error detallado
+                                initialDataLoadedCount++;
+                                if (initialDataLoadedCount >= expectedInitialLoads) {
+                                    clearTimeout(loadingTimeout);
+                                    hideLoadingOverlay();
+                                }
+                            });
+
+                            onValue(historyRef, (snapshot) => {
+                                const movementsObject = snapshot.val();
+                                const movementsArray = [];
+                                if (movementsObject) {
+                                    for (const key in movementsObject) {
+                                        movementsArray.push({ id: key, ...movementsObject[key] });
+                                    }
+                                }
+                                renderHistory(movementsArray);
+                                console.log("Historial de movimientos cargado/actualizado desde Realtime Database (anónimo).");
+                                initialDataLoadedCount++;
+                                if (initialDataLoadedCount >= expectedInitialLoads) {
+                                    clearTimeout(loadingTimeout);
+                                    hideLoadingOverlay();
+                                }
+                            }, (error) => {
+                                console.error("Error al escuchar el historial de movimientos de Realtime Database (anónimo): ", error);
+                                showMessage("Error al cargar el historial de movimientos: " + error.message, true); // Mostrar mensaje de error detallado
+                                initialDataLoadedCount++;
+                                if (initialDataLoadedCount >= expectedInitialLoads) {
+                                    clearTimeout(loadingTimeout);
+                                    hideLoadingOverlay();
+                                }
+                            });
+
+                            onValue(invoiceHistoryRef, (snapshot) => {
+                                const invoicesObject = snapshot.val();
+                                const invoicesArray = [];
+                                if (invoicesObject) {
+                                    for (const key in invoicesObject) {
+                                        invoicesArray.push({ invoiceId: key, ...invoicesObject[key] });
+                                    }
+                                }
+                                renderInvoices(invoicesArray);
+                                console.log("Historial de facturas cargado/actualizado desde Realtime Database (anónimo).");
+                                initialDataLoadedCount++;
+                                if (initialDataLoadedCount >= expectedInitialLoads) {
+                                    clearTimeout(loadingTimeout);
+                                    hideLoadingOverlay();
+                                }
+                            }, (error) => {
+                                console.error("Error al escuchar el historial de facturas de Realtime Database (anónimo): ", error);
+                                showMessage("Error al cargar el historial de facturas: " + error.message, true); // Mostrar mensaje de error detallado
+                                initialDataLoadedCount++;
+                                if (initialDataLoadedCount >= expectedInitialLoads) {
+                                    clearTimeout(loadingTimeout);
+                                    hideLoadingOverlay();
+                                }
+                            });
+                        }
                     }
                 });
 
@@ -2076,48 +2261,93 @@
                 console.error("Error inicializando Firebase Realtime Database:", e);
                 clearTimeout(loadingTimeout); // Clear timeout on initialization error
                 hideLoadingOverlay(); // Hide overlay on initialization error
-                showMessage("Error grave al inicializar la aplicación. Ver consola para más detalles.", true);
+                showMessage("Error grave al inicializar la aplicación. Ver consola para más detalles: " + e.message, true); // Mostrar mensaje de error detallado
             }
 
-            // --- Attach Event Listeners (ensure they are attached AFTER DOMContentLoaded) ---
-            document.getElementById('open-delivery-invoice-modal-btn').addEventListener('click', openDeliveryInvoiceModal);
-            document.getElementById('search-button').addEventListener('click', searchInventory);
-            document.getElementById('clear-search-button').addEventListener('click', clearSearch);
-            document.getElementById('cancel-withdrawal-btn').addEventListener('click', cancelWithdrawal);
-            document.getElementById('confirm-withdrawal-btn').addEventListener('click', confirmWithdrawal);
-            // Changed from click to input for live search
-            document.getElementById('delivery-search-input').addEventListener('input', filterDeliverySearch); 
-            document.getElementById('cancel-delivery-invoice-btn').addEventListener('click', cancelDeliveryInvoice);
-            document.getElementById('confirm-delivery-invoice-btn').addEventListener('click', confirmDeliveryInvoice);
-            document.getElementById('print-delivery-invoice-btn').addEventListener('click', printDeliveryInvoice);
-            document.getElementById('clear-history-btn').addEventListener('click', clearHistory);
-            document.getElementById('clear-invoice-history-btn').addEventListener('click', clearInvoiceHistory); // New listener for clearing invoice history
-            document.getElementById('critical-items-card').addEventListener('click', filterCriticalItems); // New event listener for critical items card
-            document.getElementById('print-inventory-btn').addEventListener('click', printInventory); // New event listener for printing inventory
+            // --- Authentication Button Handlers ---
+            document.getElementById('register-btn')?.addEventListener('click', async () => { // Usar optional chaining para seguridad
+                const email = document.getElementById('auth-email').value;
+                const password = document.getElementById('auth-password').value;
+                try {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    showMessage("Usuario registrado y sesión iniciada con éxito.", false);
+                } catch (error) {
+                    console.error("Error al registrar usuario:", error);
+                    showMessage(`Error al registrar: ${error.message}`, true);
+                }
+            });
+
+            document.getElementById('login-btn')?.addEventListener('click', async () => { // Usar optional chaining para seguridad
+                const email = document.getElementById('auth-email').value;
+                const password = document.getElementById('auth-password').value;
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    showMessage("Sesión iniciada con éxito.", false);
+                } catch (error) {
+                    console.error("Error al iniciar sesión:", error);
+                    showMessage(`Error al iniciar sesión: ${error.message}`, true);
+                }
+            });
+
+            document.getElementById('logout-btn')?.addEventListener('click', async () => { // Usar optional chaining para seguridad
+                try {
+                    await signOut(auth);
+                    showMessage("Sesión cerrada correctamente.", false);
+                } catch (error) {
+                    console.error("Error al cerrar sesión:", error);
+                    showMessage(`Error al cerrar sesión: ${error.message}`, true);
+                }
+            });
+
+            // --- Attach Other Event Listeners (ensure they are attached AFTER DOMContentLoaded) ---
+            document.getElementById('open-delivery-invoice-modal-btn')?.addEventListener('click', openDeliveryInvoiceModal);
+            document.getElementById('search-button')?.addEventListener('click', searchInventory);
+            document.getElementById('cancel-withdrawal-btn')?.addEventListener('click', cancelWithdrawal);
+            document.getElementById('confirm-withdrawal-btn')?.addEventListener('click', confirmWithdrawal);
+            document.getElementById('delivery-search-input')?.addEventListener('input', filterDeliverySearch); 
+            document.getElementById('cancel-delivery-invoice-btn')?.addEventListener('click', cancelDeliveryInvoice);
+            document.getElementById('confirm-delivery-invoice-btn')?.addEventListener('click', confirmDeliveryInvoice);
+            document.getElementById('print-delivery-invoice-btn')?.addEventListener('click', printDeliveryInvoice);
+            document.getElementById('clear-history-btn')?.addEventListener('click', clearHistory);
+            document.getElementById('clear-invoice-history-btn')?.addEventListener('click', clearInvoiceHistory);
+            document.getElementById('critical-items-card')?.addEventListener('click', filterCriticalItems);
+            document.getElementById('print-inventory-btn')?.addEventListener('click', printInventory);
             
             // Custom confirm modal buttons must be attached here to ensure they exist
-            document.getElementById('custom-confirm-ok').onclick = () => {
-                document.getElementById('custom-confirm-modal').classList.remove('flex');
-                if (confirmResolver) {
-                    confirmResolver(true);
-                    confirmResolver = null;
-                }
-            };
+            // Using optional chaining and specific error handling for robustness
+            const customConfirmOkButton = document.getElementById('custom-confirm-ok');
+            const customConfirmCancelButton = document.getElementById('custom-confirm-cancel');
 
-            document.getElementById('custom-confirm-cancel').onclick = () => {
-                document.getElementById('custom-confirm-modal').classList.remove('flex');
-                if (confirmResolver) {
-                    confirmResolver(false);
-                    confirmResolver = null;
-                }
-            };
+            if (customConfirmOkButton) {
+                customConfirmOkButton.onclick = () => {
+                    document.getElementById('custom-confirm-modal')?.classList.remove('flex');
+                    if (confirmResolver) {
+                        confirmResolver(true);
+                        confirmResolver = null;
+                    }
+                };
+            } else {
+                console.warn("Botón 'custom-confirm-ok' no encontrado. La funcionalidad de confirmación puede no funcionar.");
+            }
+
+            if (customConfirmCancelButton) {
+                customConfirmCancelButton.onclick = () => {
+                    document.getElementById('custom-confirm-modal')?.classList.remove('flex');
+                    if (confirmResolver) {
+                        confirmResolver(false);
+                        confirmResolver = null;
+                    }
+                };
+            } else {
+                console.warn("Botón 'custom-confirm-cancel' no encontrado. La funcionalidad de confirmación puede no funcionar.");
+            }
 
             // Event listeners for the new edit item modal
-            document.getElementById('cancel-edit-item-btn').addEventListener('click', cancelEditItem);
-            document.getElementById('edit-item-form').addEventListener('submit', confirmEditItem);
+            document.getElementById('cancel-edit-item-btn')?.addEventListener('click', cancelEditItem);
+            document.getElementById('edit-item-form')?.addEventListener('submit', confirmEditItem);
 
             // Add listener for add item form
-            document.getElementById('add-item-form').addEventListener('submit', async function(event) {
+            document.getElementById('add-item-form')?.addEventListener('submit', async function(event) { // Usar optional chaining para seguridad
                 event.preventDefault(); 
 
                 if (!isAuthReady) {
@@ -2129,11 +2359,8 @@
                 const itemName = document.getElementById('item-name').value.trim();
                 const itemCategory = document.getElementById('item-category').value.trim();
                 const itemQuantity = parseInt(document.getElementById('item-quantity').value);
-                const itemUnit = document.getElementById('item-unit').value; // Get the unit of measure
-                // Obtener el valor del campo de texto de ubicación
+                const itemUnit = document.getElementById('item-unit').value; 
                 const itemLocation = document.getElementById('item-location').value.trim();
-
-
                 const itemMinStock = parseInt(document.getElementById('item-min-stock').value);
 
                 if (!itemId || !itemName || !itemCategory || isNaN(itemQuantity) || !itemUnit || !itemLocation || isNaN(itemMinStock)) {
@@ -2150,50 +2377,50 @@
                 }
 
                 try {
-                    // Check if item with this itemId already exists
                     let itemExists = false;
                     let existingItemKey = null;
                     let existingItemQuantity = 0;
 
-                    // Query the currentInventoryItems array to find the item
                     const existingItem = currentInventoryItems.find(item => item.itemId === itemId);
                     
                     if (existingItem) {
                         itemExists = true;
-                        existingItemKey = existingItem.id; // The Realtime Database key
+                        existingItemKey = existingItem.id;
                         existingItemQuantity = existingItem.quantity;
+                        console.log(`Artículo existente encontrado: ${itemName} con ID Firebase: ${existingItemKey}`);
                     }
 
                     if (itemExists) {
-                        // If item exists, update quantity and unit
                         const newTotalQuantity = existingItemQuantity + itemQuantity;
-                        const itemDbRef = ref(db, `artifacts/${appId}/users/${userId}/inventory/${existingItemKey}`);
-                        // Update unit and location as well
+                        // Point to public inventory
+                        const itemDbRef = ref(db, `artifacts/${appId}/public/data/inventory/${existingItemKey}`);
                         await update(itemDbRef, { quantity: newTotalQuantity, unit: itemUnit, location: itemLocation }); 
                         await addMovementToHistory(itemId, itemName, 'Actualización (Ingreso)', itemQuantity, 'Formulario de Entrada', 'Usuario');
                         showMessage(`Cantidad de "${itemName}" actualizada a ${newTotalQuantity} ${itemUnit} en Realtime Database!`, false);
+                        console.log(`Artículo "${itemName}" (ID: ${itemId}) actualizado en Realtime Database.`);
                     } else {
+                        // Point to public inventory
                         await push(inventoryRef, {
                             itemId: itemId, 
                             name: itemName,
                             category: itemCategory,
                             quantity: itemQuantity,
-                            unit: itemUnit, // Store unit
-                            location: itemLocation, // Store location from text input
+                            unit: itemUnit,
+                            location: itemLocation,
                             minStock: itemMinStock,
                             createdAt: new Date().toISOString()
                         });
                         await addMovementToHistory(itemId, itemName, 'Ingreso', itemQuantity, 'Formulario de Entrada', 'Usuario');
                         showMessage('Artículo añadido con éxito a Realtime Database!', false);
+                        console.log(`Nuevo artículo "${itemName}" (ID: ${itemId}) añadido a Realtime Database.`);
                     }
 
                     document.getElementById('add-item-form').reset();
-                    // Limpiar el campo de texto de ubicación después del envío
                     document.getElementById('item-location').value = ''; 
 
                 } catch (e) {
                     console.error("Error al añadir/actualizar el artículo en Realtime Database: ", e);
-                    showMessage("Error al añadir/actualizar el artículo. Intente de nuevo.", true);
+                    showMessage("Error al añadir/actualizar el artículo. Intente de nuevo: " + e.message, true); // Mostrar mensaje de error detallado
                 }
             });
 
