@@ -7,6 +7,12 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <!-- Lucide Icons for modern SVG icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js CDN for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
     <style>
         /* Estilos personalizados para la fuente Inter */
         body {
@@ -113,28 +119,31 @@
         /* New styles for print - logos in header */
         @media print {
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .invoice-container, .inventory-container { width: 100%; border: none; padding: 0; box-shadow: none; }
-            .invoice-header, .inventory-header, .signatures-container { page-break-inside: avoid; }
+            .invoice-container, .inventory-container, .report-container { width: 100%; border: none; padding: 0; box-shadow: none; }
+            .invoice-header, .inventory-header, .report-header, .signatures-container { page-break-inside: avoid; }
             table { page-break-inside: auto; }
             tr { page-break-inside: avoid; page-break-after: auto; }
             
             /* Print-specific header layout */
             .invoice-header .print-logo-left,
-            .inventory-header .print-logo-left {
+            .inventory-header .print-logo-left,
+            .report-header .print-logo-left {
                 position: absolute;
                 left: 20px; /* Adjust as needed */
                 top: 50%;
                 transform: translateY(-50%);
             }
             .invoice-header .print-logo-right,
-            .inventory-header .print-logo-right {
+            .inventory-header .print-logo-right,
+            .report-header .print-logo-right {
                 position: absolute;
                 right: 20px; /* Adjust as needed */
                 top: 50%;
                 transform: translateY(-50%);
             }
             .invoice-header h1,
-            .inventory-header h1 {
+            .inventory-header h1,
+            .report-header h1 {
                 text-align: center;
                 flex-grow: 1; /* Center the title between logos */
                 margin: 0 120px; /* Adjust margin to prevent overlap with logos */
@@ -201,6 +210,24 @@
         }
         #auth-section .bg-gray-600:hover {
             background-color: #374151;
+        }
+        
+        /* Collapsible section styles */
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out; /* Slower transition for content */
+        }
+        .collapsible-content.expanded {
+            max-height: 2000px; /* Large enough to fit content, adjust if needed */
+            transition: max-height 0.7s ease-in; /* Slightly faster for expansion */
+        }
+        /* Style for the chevron icon */
+        .chevron-icon {
+            transition: transform 0.3s ease;
+        }
+        .expanded .chevron-icon {
+            transform: rotate(180deg);
         }
     </style>
 </head>
@@ -298,11 +325,13 @@
                     Cancelar
                 </button>
                 <button id="confirm-delivery-invoice-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
-                    <svg class="h-5 w-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <!-- Lucide check-circle icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle mr-1"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
                     Confirmar Entrega
                 </button>
                 <button id="print-delivery-invoice-btn" class="hidden inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors duration-200">
-                    <svg class="h-5 w-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm-5-8H2V3h20v6h-3"></path></svg>
+                    <!-- Lucide printer icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer mr-1"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
                     Imprimir Factura
                 </button>
             </div>
@@ -411,8 +440,10 @@
         <div class="container mx-auto flex flex-wrap justify-center space-x-4">
             <a href="#vision-general" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Visión General</a>
             <a href="#inventario-actual" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Inventario Actual</a>
+            <a href="#analisis-inventario" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Análisis del Inventario</a>
             <a href="#historial-movimientos" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Historial de Movimientos</a>
             <a href="#historial-facturas" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Historial de Facturas</a>
+            <a href="#ordenes-reabastecimiento" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Órdenes de Reabastecimiento</a>
             <a href="#anadir-articulo" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Añadir Artículo</a>
         </div>
     </nav>
@@ -466,107 +497,197 @@
 
         <!-- Sección de Inventario Actual (Now visible by default) -->
         <section id="inventario-actual" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
-            <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Inventario Actual de Componentes y Partes</h2>
+            <div class="flex justify-between items-center mb-4 border-b-2 border-blue-300 pb-2">
+                <h2 class="text-3xl font-semibold text-blue-800">Inventario Actual de Componentes y Partes</h2>
+                <button id="toggle-inventory-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center">
+                    Desplegar/Plegar
+                    <!-- Lucide chevron-down icon for toggle -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-2 chevron-icon"></svg>
+                </button>
+            </div>
             
-            <!-- Barra de búsqueda y botones de acción -->
-            <div class="flex flex-col md:flex-row items-center justify-between mb-6 space-y-3 md:space-y-0 md:space-x-4">
-                <div class="flex w-full md:w-auto flex-grow space-x-2">
-                    <input type="text" id="search-input" placeholder="Buscar por Número de Parte, nombre, categoría..." class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                    <button id="search-button" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        Todo
-                    </button>
+            <div id="inventory-content" class="collapsible-content">
+                <!-- Barra de búsqueda y botones de acción -->
+                <div class="flex flex-col md:flex-row items-center justify-between mb-6 space-y-3 md:space-y-0 md:space-x-4">
+                    <div class="flex w-full md:w-auto flex-grow space-x-2">
+                        <input type="text" id="search-input" placeholder="Buscar por Número de Parte, nombre, categoría..." class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <button id="search-button" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                            <!-- Lucide refresh-cw icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw mr-1"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+                            Todo
+                        </button>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="print-inventory-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors duration-200 whitespace-nowrap">
+                            <!-- Lucide printer icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer mr-2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                            Imprimir Inventario
+                        </button>
+                        <button id="open-delivery-invoice-modal-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200 whitespace-nowrap">
+                            <!-- Lucide file-text icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text mr-2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                            Crear Factura de Entrega
+                        </button>
+                    </div>
                 </div>
-                <div class="flex space-x-2">
-                    <button id="print-inventory-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors duration-200 whitespace-nowrap">
-                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm-5-8H2V3h20v6h-3"></path></svg>
-                        Imprimir Inventario
-                    </button>
-                    <button id="open-delivery-invoice-modal-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200 whitespace-nowrap">
-                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                        Crear Factura de Entrega
-                    </button>
-                </div>
-            </div>
 
-            <div class="overflow-x-auto rounded-lg shadow-md">
-                <table class="min-w-full bg-white border border-gray-200">
-                    <thead class="bg-gray-200">
-                        <tr>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Número de Parte</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Nombre del Artículo</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Categoría</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Cantidad</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Unidad</th><!-- New column for Unit -->
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Ubicación</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Stock Mínimo</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventory-list" class="divide-y divide-gray-200">
-                        <!-- Los datos se cargarán desde Firebase -->
-                    </tbody>
-                </table>
+                <div class="overflow-x-auto rounded-lg shadow-md">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Número de Parte</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Nombre del Artículo</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Categoría</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Cantidad</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Unidad</th><!-- New column for Unit -->
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Ubicación</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Stock Mínimo</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-list" class="divide-y divide-gray-200">
+                            <!-- Los datos se cargarán desde Firebase -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
         <hr class="my-8 border-gray-300 main-content-divider">
 
-        <!-- Sección de Historial de Movimientos (Now visible by default) -->
+        <!-- Nueva Sección: Análisis del Inventario (Gráficos) -->
+        <section id="analisis-inventario" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
+            <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Análisis del Inventario</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-3">Inventario por Categoría</h3>
+                    <canvas id="inventoryByCategoryChart"></canvas>
+                </div>
+                <!-- You can add more charts here -->
+            </div>
+        </section>
+
+        <hr class="my-8 border-gray-300 main-content-divider">
+
+        <!-- Sección de Historial de Movimientos -->
         <section id="historial-movimientos" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
-            <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Historial de Movimientos Recientes</h2>
-            <div class="flex justify-end mb-4">
-                <button id="clear-history-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-colors duration-200">
-                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    Borrar Historial
+            <div class="flex justify-between items-center mb-4 border-b-2 border-blue-300 pb-2">
+                <h2 class="text-3xl font-semibold text-blue-800">Historial de Movimientos Recientes</h2>
+                <button id="toggle-history-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center">
+                    Desplegar/Plegar
+                    <!-- Lucide chevron-down icon for toggle -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-2 chevron-icon"></svg>
                 </button>
             </div>
-            <div class="overflow-x-auto rounded-lg shadow-md">
-                <table class="min-w-full bg-white border border-gray-200">
-                    <thead class="bg-gray-200">
-                        <tr>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Fecha/Hora</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Número de Parte</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Nombre Artículo</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Tipo Movimiento</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Cantidad</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Fuente/Destino</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Responsable</th>
-                        </tr>
-                    </thead>
-                    <tbody id="movement-history-list" class="divide-y divide-gray-200">
-                        <!-- Las entradas se cargarán desde Firebase -->
-                    </tbody>
-                </table>
+            
+            <div id="history-content" class="collapsible-content">
+                <div class="flex justify-end mb-4">
+                    <button id="clear-history-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-colors duration-200">
+                        <!-- Lucide trash icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash mr-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        Borrar Historial
+                    </button>
+                </div>
+                <div class="overflow-x-auto rounded-lg shadow-md">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Fecha/Hora</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Número de Parte</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Nombre Artículo</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Tipo Movimiento</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Cantidad</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Fuente/Destino</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Responsable</th>
+                            </tr>
+                        </thead>
+                        <tbody id="movement-history-list" class="divide-y divide-gray-200">
+                            <!-- Las entradas se cargarán desde Firebase -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
         <hr class="my-8 border-gray-300 main-content-divider">
 
-        <!-- Nueva Sección: Historial de Facturas (Now visible by default) -->
+        <!-- Nueva Sección: Historial de Facturas -->
         <section id="historial-facturas" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
-            <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Historial de Facturas de Entrega</h2>
-            <div class="flex justify-end mb-4">
-                <button id="clear-invoice-history-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-colors duration-200">
-                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    Borrar Historial de Facturas
+            <div class="flex justify-between items-center mb-4 border-b-2 border-blue-300 pb-2">
+                <h2 class="text-3xl font-semibold text-blue-800">Historial de Facturas de Entrega</h2>
+                <button id="toggle-invoice-history-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center">
+                    Desplegar/Plegar
+                    <!-- Lucide chevron-down icon for toggle -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-2 chevron-icon"></svg>
                 </button>
             </div>
-            <div class="overflow-x-auto rounded-lg shadow-md">
-                <table class="min-w-full bg-white border border-gray-200">
-                    <thead class="bg-gray-200">
-                        <tr>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Número de Factura</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Fecha/Hora</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Responsable</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Artículos</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="invoice-history-list" class="divide-y divide-gray-200">
-                        <!-- Las entradas de facturas se cargarán aquí -->
-                    </tbody>
-                </table>
+            
+            <div id="invoice-history-content" class="collapsible-content">
+                <div class="flex justify-end mb-4">
+                    <button id="clear-invoice-history-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-colors duration-200">
+                        <!-- Lucide trash icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash mr-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        Borrar Historial de Facturas
+                    </button>
+                </div>
+                <div class="overflow-x-auto rounded-lg shadow-md">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Número de Factura</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Fecha/Hora</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Responsable</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Artículos</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoice-history-list" class="divide-y divide-gray-200">
+                            <!-- Las entradas de facturas se cargarán aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-8 border-gray-300 main-content-divider">
+
+        <!-- Nueva Sección: Artículos para Reabastecer (Sugerencias) -->
+        <section id="ordenes-reabastecimiento" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
+            <div class="flex justify-between items-center mb-4 border-b-2 border-blue-300 pb-2">
+                <h2 class="text-3xl font-semibold text-blue-800">Artículos para Reabastecer</h2>
+                <button id="toggle-reorder-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center">
+                    Desplegar/Plegar
+                    <!-- Lucide chevron-down icon for toggle -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-2 chevron-icon"></svg>
+                </button>
+            </div>
+            
+            <div id="reorder-content" class="collapsible-content">
+                <p class="text-lg text-gray-700 leading-relaxed mb-4">Los siguientes artículos están en o por debajo de su stock mínimo y pueden requerir reabastecimiento.</p>
+                <div class="flex justify-end mb-4">
+                    <button id="print-reorder-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors duration-200 whitespace-nowrap">
+                        <!-- Lucide printer icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer mr-2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                        Imprimir Sugerencias
+                    </button>
+                </div>
+                <div class="overflow-x-auto rounded-lg shadow-md">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Número de Parte</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Nombre del Artículo</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Cantidad Actual</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Stock Mínimo</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Cantidad Sugerida</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reorder-list" class="divide-y divide-gray-200">
+                            <!-- Los artículos para reabastecer se cargarán aquí -->
+                        </tbody>
+                    </table>
+                    <p id="no-reorder-items" class="text-gray-600 text-center py-4 hidden">No hay artículos que requieran reabastecimiento en este momento. ¡Buen trabajo!</p>
+                </div>
             </div>
         </section>
 
@@ -626,7 +747,8 @@
 
                 <div class="md:col-span-2 text-center mt-4">
                     <button type="submit" class="inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-lg font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:scale-105">
-                        <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        <!-- Lucide plus icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus mr-2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                         Añadir Artículo
                     </button>
                 </div>
@@ -660,7 +782,13 @@
         let isAuthReady = false; // Flag to indicate Firebase auth is ready
         let currentInventoryItems = []; // To store a local copy of inventory for live search
         let initialDataLoadedCount = 0; // New: Counter for initial loads
+        // Changed expectedInitialLoads to 4 (inventory, history, invoices, *charts data trigger* or just use all data loaded for it)
         const expectedInitialLoads = 3; // Number of onValue listeners to wait for
+
+        // Chart.js global variable
+        let inventoryByCategoryChartInstance = null;
+        let reorderItemsToPrint = []; // New: To store items for reorder suggestions printout
+
 
         // Direct Firebase configuration (fallback)
         const localFirebaseConfig = {
@@ -797,6 +925,62 @@
             document.getElementById('edit-item-modal').classList.remove('flex');
         }
 
+        // NEW: Function to standardize and validate category input
+        function standardizeAndValidateCategory(categoryInput) {
+            let category = categoryInput.trim().toUpperCase();
+            let originalCategory = category; // Store original for messages
+
+            // 1. Standardize "NUEVA" to "NUEVO"
+            if (category === 'NUEVA') {
+                category = 'NUEVO';
+            }
+
+            // 2. Attempt simple plural to singular conversion for common patterns
+            // This is a best-effort, based on common Spanish plural endings and exceptions.
+            // For true natural language processing, a more complex solution is needed.
+            const pluralToSingularMap = {
+                'HERRAMIENTAS': 'HERRAMIENTA',
+                'REPUESTOS': 'REPUESTO',
+                'COMPONENTES': 'COMPONENTE',
+                'UNIDADES': 'UNIDAD',
+                'PIEZAS': 'PIEZA',
+                'CAJAS': 'CAJA',
+                'PAQUETES': 'PAQUETE',
+                'PARES': 'PAR',
+                'JUEGOS': 'JUEGO',
+                'FILTROS': 'FILTRO',
+                'LUBRICANTES': 'LUBRICANTE',
+                'BATERIAS': 'BATERIA',
+                'NEUMATICOS': 'NEUMATICO'
+            };
+
+            if (pluralToSingularMap[category]) {
+                category = pluralToSingularMap[category];
+                showMessage(`La categoría "${originalCategory}" ha sido estandarizada a "${category}". Por favor, intente usar siempre términos singulares.`, false);
+            } else if (category.endsWith('ES') && category.length > 2) {
+                // Generic rule for words ending in 'ES', avoiding common singular exceptions
+                const exceptionsEndingES = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'ANALISIS', 'CRISIS', 'SINTESIS'];
+                if (!exceptionsEndingES.includes(category)) {
+                    category = category.slice(0, -2);
+                    showMessage(`La categoría "${originalCategory}" ha sido estandarizada a "${category}" (se removió 'ES'). Por favor, intente usar siempre términos singulares.`, false);
+                }
+            } else if (category.endsWith('S') && category.length > 1) {
+                // Generic rule for words ending in 'S', avoiding common singular exceptions
+                const exceptionsEndingS = ['ATLAS', 'PARAGUAS'];
+                if (!exceptionsEndingS.includes(category)) {
+                    category = category.slice(0, -1);
+                    showMessage(`La categoría "${originalCategory}" ha sido estandarizada a "${category}" (se removió 'S'). Por favor, intente usar siempre términos singulares.`, false);
+                }
+            }
+            // If the category was NUEVA and not caught by pluralization, still show message
+            else if (originalCategory !== category) {
+                 showMessage(`La categoría "${originalCategory}" ha sido estandarizada a "${category}".`, false);
+            }
+            
+            return category;
+        }
+
+
         // Función para confirmar y guardar los cambios del artículo editado
         async function confirmEditItem(event) {
             event.preventDefault(); // Prevent default form submission
@@ -807,9 +991,10 @@
             }
 
             const dbKey = document.getElementById('edit-db-key').value;
-            const newItemId = document.getElementById('edit-item-id').value.trim();
-            const newItemName = document.getElementById('edit-item-name').value.trim();
-            const newCategory = document.getElementById('edit-item-category').value.trim();
+            // Convert to uppercase and standardize
+            const newItemId = document.getElementById('edit-item-id').value.trim().toUpperCase();
+            const newItemName = document.getElementById('edit-item-name').value.trim().toUpperCase();
+            const newCategory = standardizeAndValidateCategory(document.getElementById('edit-item-category').value); // Use new standardization function
             const newQuantity = parseInt(document.getElementById('edit-item-quantity').value);
             const newUnit = document.getElementById('edit-item-unit').value;
             const newLocation = document.getElementById('edit-item-location').value.trim();
@@ -937,6 +1122,11 @@
             document.getElementById('critical-items').textContent = criticalItemsCount;
             document.getElementById('total-stock').textContent = totalStockQuantity; // New: Update total stock quantity
             updateLastUpdateTime();
+            lucide.createIcons(); // Re-render Lucide icons after updating table
+
+            // Call render charts and reorder suggestions after inventory is rendered
+            renderCharts(items);
+            renderReorderSuggestions(items); // This function will also update `reorderItemsToPrint`
         }
 
         // Variables para el modal de retiro individual
@@ -2020,6 +2210,300 @@
             }
         }
 
+        // Function to toggle collapsible content
+        function toggleCollapsible(contentId, buttonId) {
+            const content = document.getElementById(contentId);
+            const button = document.getElementById(buttonId);
+            if (content && button) {
+                content.classList.toggle('expanded');
+                // The chevron icon is a child of the button, so we can toggle classes on the button itself
+                // and use CSS to rotate the chevron based on the 'expanded' class on the content.
+            } else {
+                console.error(`Error: Contenido o botón no encontrado para ID: ${contentId}, ${buttonId}`);
+            }
+        }
+
+        // NEW: Function to render charts based on inventory data
+        function renderCharts(items) {
+            const categories = {};
+            items.forEach(item => {
+                if (categories[item.category]) {
+                    categories[item.category] += item.quantity;
+                } else {
+                    categories[item.category] = item.quantity;
+                }
+            });
+
+            const chartLabels = Object.keys(categories);
+            const chartData = Object.values(categories);
+
+            const ctx = document.getElementById('inventoryByCategoryChart').getContext('2d');
+
+            // Destroy existing chart instance if it exists
+            if (inventoryByCategoryChartInstance) {
+                inventoryByCategoryChartInstance.destroy();
+            }
+
+            inventoryByCategoryChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Cantidad de Artículos por Categoría',
+                        data: chartData,
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)',
+                            'rgba(255, 159, 64, 0.6)',
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(201, 203, 207, 0.6)',
+                            'rgba(255, 205, 86, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(201, 203, 207, 1)',
+                            'rgba(255, 205, 86, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Cantidad'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Categoría'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribución de Inventario por Categoría'
+                        }
+                    }
+                }
+            });
+        }
+
+        // NEW: Function to render reorder suggestions
+        function renderReorderSuggestions(items) {
+            const reorderTableBody = document.getElementById('reorder-list');
+            reorderTableBody.innerHTML = ''; // Clear current table
+            reorderItemsToPrint = []; // Clear items for printing
+            let hasReorderItems = false;
+
+            items.forEach(item => {
+                if (item.quantity <= item.minStock) {
+                    hasReorderItems = true;
+                    const suggestedQuantity = Math.max(1, item.minStock * 2 - item.quantity); // Suggest to double min stock, or at least 1
+                    
+                    reorderItemsToPrint.push({ // Add to list for printing
+                        itemId: item.itemId,
+                        name: item.name,
+                        currentQuantity: item.quantity,
+                        minStock: item.minStock,
+                        suggestedQuantity: suggestedQuantity,
+                        unit: item.unit || ''
+                    });
+
+                    const newRow = reorderTableBody.insertRow();
+                    newRow.classList.add('hover:bg-gray-50');
+
+                    newRow.insertCell().textContent = item.itemId;
+                    newRow.insertCell().textContent = item.name;
+                    newRow.insertCell().textContent = `${item.quantity} ${item.unit || ''}`;
+                    newRow.insertCell().textContent = `${item.minStock} ${item.unit || ''}`;
+                    newRow.insertCell().textContent = `${suggestedQuantity} ${item.unit || ''}`;
+                }
+            });
+
+            const noReorderItemsMessage = document.getElementById('no-reorder-items');
+            if (hasReorderItems) {
+                noReorderItemsMessage.classList.add('hidden');
+            } else {
+                noReorderItemsMessage.classList.remove('hidden');
+            }
+        }
+
+        // NEW: Function to print reorder suggestions
+        function printReorderSuggestions() {
+            const now = new Date().toLocaleString('es-ES', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', hour12: false
+            }).replace(/\//g, '-');
+            
+            const printUserId = userId; 
+
+            let reorderContent = `
+                <html lang="es">
+                <head>
+                    <title>Sugerencias de Reabastecimiento</title>
+                    <style>
+                        body { font-family: 'Inter', sans-serif; margin: 20px; color: #333; }
+                        .report-container { 
+                            width: 80%; 
+                            margin: 0 auto; 
+                            border: 1px solid #ccc; 
+                            padding: 20px; 
+                            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                        }
+                        .report-header { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            align-items: center; 
+                            margin-bottom: 20px; 
+                            border-bottom: 2px solid #1e40af; 
+                            padding-bottom: 10px;
+                            position: relative;
+                        }
+                        .report-header h1 { 
+                            text-align: left; 
+                            color: #1e40af; 
+                            margin: 0; 
+                            font-size: 2em; 
+                            flex-grow: 1;
+                        }
+                        .report-header .print-logo-left {
+                            max-width: 100px; 
+                            height: auto; 
+                            border-radius: 8px;
+                            position: absolute;
+                            left: 0;
+                            top: 50%;
+                            transform: translateY(-50%);
+                        }
+                        .report-header .print-logo-right { 
+                            max-width: 100px; 
+                            height: auto; 
+                            border-radius: 8px;
+                            position: absolute;
+                            right: 0;
+                            top: 50%;
+                            transform: translateY(-50%);
+                        }
+                        .header-info-block { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            margin-bottom: 20px; 
+                            font-size: 0.9em; 
+                            line-height: 1.5;
+                            flex-wrap: wrap;
+                        }
+                        .header-info-block div { 
+                            width: 48%; 
+                            margin-bottom: 10px;
+                        }
+                        .header-info-block div:last-child {
+                            text-align: right;
+                        }
+                        table { 
+                            width: 100%; 
+                            border-collapse: collapse; 
+                            margin-top: 20px; 
+                            font-size: 0.9em;
+                        }
+                        th, td { 
+                            border: 1px solid #ddd; 
+                            padding: 8px; 
+                            text-align: left; 
+                        }
+                        th { 
+                            background-color: #f2f2f2; 
+                            color: #555;
+                        }
+                        .created-by-text {
+                            font-family: 'Bebas Neue', sans-serif !important; 
+                            font-size: 0.8em !important;
+                            color: #555 !important;
+                            margin-top: 5px !important;
+                            letter-spacing: 1px !important;
+                        }
+                        @media print {
+                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            .report-container { width: 100%; border: none; padding: 0; box-shadow: none; }
+                            .report-header { page-break-inside: avoid; }
+                            table { page-break-inside: auto; }
+                            tr { page-break-inside: avoid; page-break-after: auto; }
+                            .report-header h1 {
+                                margin: 0 120px; 
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="report-container">
+                        <div class="report-header">
+                            <img src="https://placehold.co/100x100/blue/white?text=LOGO_IZQUIERDA" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="print-logo-left">
+                            <h1>Sugerencias de Reabastecimiento</h1>
+                            <img src="https://placehold.co/100x100/blue/white?text=LOGO_DERECHA" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="print-logo-right">
+                        </div>
+                        <div class="header-info-block">
+                            <div>
+                                <p><strong>Fecha de Impresión:</strong> ${now}</p>
+                            </div>
+                            <div>
+                                <p><strong>Número de Parte de Usuario:</strong> ${printUserId}</p>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Número de Parte</th>
+                                    <th>Nombre del Artículo</th>
+                                    <th>Cantidad Actual</th>
+                                    <th>Stock Mínimo</th>
+                                    <th>Cantidad Sugerida</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${reorderItemsToPrint.map(item => `
+                                    <tr>
+                                        <td>${item.itemId}</td>
+                                        <td>${item.name}</td>
+                                        <td>${item.currentQuantity} ${item.unit}</td>
+                                        <td>${item.minStock} ${item.unit}</td>
+                                        <td>${item.suggestedQuantity} ${item.unit}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        ${reorderItemsToPrint.length === 0 ? '<p style="text-align: center; margin-top: 20px;">No hay artículos que requieran reabastecimiento en este momento.</p>' : ''}
+                    </div>
+                </body>
+                </html>
+            `;
+
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.open();
+                printWindow.document.write(reorderContent);
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+            } else {
+                showMessage("No se pudo abrir la ventana de impresión. Asegúrese de que los bloqueadores de pop-ups estén desactivados.", true);
+            }
+        }
+
 
         // --- Firestore Initialization and Data Listeners ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -2072,7 +2556,7 @@
                                     itemsArray.push({ id: key, ...itemsObject[key] });
                                 }
                             }
-                            renderInventory(itemsArray);
+                            renderInventory(itemsArray); // This now also triggers chart and reorder rendering
                             console.log("Inventario cargado/actualizado desde Realtime Database.");
                             initialDataLoadedCount++;
                             if (initialDataLoadedCount >= expectedInitialLoads) {
@@ -2179,7 +2663,7 @@
                                         itemsArray.push({ id: key, ...itemsObject[key] });
                                     }
                                 }
-                                renderInventory(itemsArray);
+                                renderInventory(itemsArray); // This now also triggers chart and reorder rendering
                                 console.log("Inventario cargado/actualizado desde Realtime Database (anónimo).");
                                 initialDataLoadedCount++;
                                 if (initialDataLoadedCount >= expectedInitialLoads) {
@@ -2285,7 +2769,8 @@
                 try {
                     await signOut(auth);
                     showMessage("Sesión cerrada correctamente.", false);
-                } catch (error) {
+                }
+                catch (error) {
                     console.error("Error al cerrar sesión:", error);
                     showMessage(`Error al cerrar sesión: ${error.message}`, true);
                 }
@@ -2304,10 +2789,12 @@
             document.getElementById('cancel-delivery-invoice-btn')?.addEventListener('click', cancelDeliveryInvoice);
             document.getElementById('confirm-delivery-invoice-btn')?.addEventListener('click', confirmDeliveryInvoice);
             document.getElementById('print-delivery-invoice-btn')?.addEventListener('click', printDeliveryInvoice);
+            // Updated clear history button logic for collapsible content
             document.getElementById('clear-history-btn')?.addEventListener('click', clearHistory);
             document.getElementById('clear-invoice-history-btn')?.addEventListener('click', clearInvoiceHistory);
             document.getElementById('critical-items-card')?.addEventListener('click', filterCriticalItems);
             document.getElementById('print-inventory-btn')?.addEventListener('click', printInventory);
+            document.getElementById('print-reorder-btn')?.addEventListener('click', printReorderSuggestions); // NEW: Reorder print button
             
             // Custom confirm modal buttons must be attached here to ensure they exist
             // Using optional chaining and specific error handling for robustness
@@ -2342,6 +2829,21 @@
             document.getElementById('cancel-edit-item-btn')?.addEventListener('click', cancelEditItem);
             document.getElementById('edit-item-form')?.addEventListener('submit', confirmEditItem);
 
+            // Add listeners for collapsible sections
+            document.getElementById('toggle-history-btn')?.addEventListener('click', () => {
+                toggleCollapsible('history-content', 'toggle-history-btn');
+            });
+            document.getElementById('toggle-invoice-history-btn')?.addEventListener('click', () => {
+                toggleCollapsible('invoice-history-content', 'toggle-invoice-history-btn');
+            });
+            document.getElementById('toggle-reorder-btn')?.addEventListener('click', () => { // NEW: Reorder toggle button
+                toggleCollapsible('reorder-content', 'toggle-reorder-btn');
+            });
+            document.getElementById('toggle-inventory-btn')?.addEventListener('click', () => { // NEW: Inventory toggle button
+                toggleCollapsible('inventory-content', 'toggle-inventory-btn');
+            });
+
+
             // Add listener for add item form
             document.getElementById('add-item-form')?.addEventListener('submit', async function(event) { // Usar optional chaining para seguridad
                 event.preventDefault(); 
@@ -2351,9 +2853,10 @@
                     return;
                 }
 
-                const itemId = document.getElementById('item-id').value.trim();
-                const itemName = document.getElementById('item-name').value.trim();
-                const itemCategory = document.getElementById('item-category').value.trim();
+                // Convert to uppercase and standardize where applicable
+                const itemId = document.getElementById('item-id').value.trim().toUpperCase();
+                const itemName = document.getElementById('item-name').value.trim().toUpperCase();
+                const itemCategory = standardizeAndValidateCategory(document.getElementById('item-category').value); // Use new standardization function
                 const itemQuantity = parseInt(document.getElementById('item-quantity').value);
                 const itemUnit = document.getElementById('item-unit').value; 
                 const itemLocation = document.getElementById('item-location').value.trim();
@@ -2390,7 +2893,15 @@
                         const newTotalQuantity = existingItemQuantity + itemQuantity;
                         // Point to public inventory
                         const itemDbRef = ref(db, `artifacts/${appId}/public/data/inventory/${existingItemKey}`);
-                        await update(itemDbRef, { quantity: newTotalQuantity, unit: itemUnit, location: itemLocation }); 
+                        // Update category, name, unit, location, minStock even if item already exists
+                        await update(itemDbRef, { 
+                            quantity: newTotalQuantity, 
+                            name: itemName, // Update name
+                            category: itemCategory, // Update category
+                            unit: itemUnit, 
+                            location: itemLocation, 
+                            minStock: itemMinStock 
+                        }); 
                         await addMovementToHistory(itemId, itemName, 'Actualización (Ingreso)', itemQuantity, 'Formulario de Entrada', 'Usuario');
                         showMessage(`Cantidad de "${itemName}" actualizada a ${newTotalQuantity} ${itemUnit} en Realtime Database!`, false);
                         console.log(`Artículo "${itemName}" (ID: ${itemId}) actualizado en Realtime Database.`);
