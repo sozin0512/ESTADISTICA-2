@@ -1796,20 +1796,12 @@
         // Función para limpiar la búsqueda y mostrar todas las filas
         function clearSearch() {
             document.getElementById('search-input').value = ''; 
-            // Re-render the inventory to show all items. This implicitly clears the filter.
-            if (isAuthReady) {
-                // Point to public inventory
-                onValue(inventoryRef, (snapshot) => {
-                    const itemsObject = snapshot.val();
-                    const itemsArray = [];
-                    if (itemsObject) {
-                        for (const key in itemsObject) {
-                            itemsArray.push({ id: key, ...itemsObject[key] });
-                        }
-                    }
-                    renderInventory(itemsArray);
-                }, { onlyOnce: true }); // Use onlyOnce to avoid re-attaching listener
+            const tableBody = document.getElementById('inventory-list');
+            const tr = tableBody.getElementsByTagName('tr');
+            for (let i = 0; i < tr.length; i++) {
+                tr[i].style.display = ''; // Mostrar todas las filas
             }
+            showMessage("Mostrando todos los artículos.", false);
         }
 
         // Function to filter and display only critical items
@@ -2301,7 +2293,11 @@
 
             // --- Attach Other Event Listeners (ensure they are attached AFTER DOMContentLoaded) ---
             document.getElementById('open-delivery-invoice-modal-btn')?.addEventListener('click', openDeliveryInvoiceModal);
-            document.getElementById('search-button')?.addEventListener('click', searchInventory);
+            // Changed: search-button now calls clearSearch instead of searchInventory
+            document.getElementById('search-button')?.addEventListener('click', clearSearch);
+            // Added: Input listener for real-time search
+            document.getElementById('search-input')?.addEventListener('input', searchInventory);
+            
             document.getElementById('cancel-withdrawal-btn')?.addEventListener('click', cancelWithdrawal);
             document.getElementById('confirm-withdrawal-btn')?.addEventListener('click', confirmWithdrawal);
             document.getElementById('delivery-search-input')?.addEventListener('input', filterDeliverySearch); 
@@ -2315,7 +2311,7 @@
             
             // Custom confirm modal buttons must be attached here to ensure they exist
             // Using optional chaining and specific error handling for robustness
-            const customConfirmOkButton = document.getElementById('confirm-confirm-ok'); // Fixed ID
+            const customConfirmOkButton = document.getElementById('confirm-confirm-ok'); 
             const customConfirmCancelButton = document.getElementById('custom-confirm-cancel');
 
             if (customConfirmOkButton) {
