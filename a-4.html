@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
     <!-- Lucide Icons for modern SVG icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/lucide.min.js"></script> 
     <!-- Chart.js CDN for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -81,6 +81,36 @@
         }
         #edit-item-modal > div {
             max-width: 38rem; /* Slightly larger for edit modal */
+        }
+        #image-search-modal > div { /* Style for image search modal */
+            max-width: 48rem; /* Make it wider for camera stream */
+        }
+        #item-history-modal > div { /* Style for item history modal */
+            max-width: 55rem; /* Wider for history table */
+        }
+
+        /* Specific styles for camera stream and canvas */
+        #camera-feed-container {
+            width: 100%;
+            background-color: #000;
+            border-radius: 0.5rem;
+            overflow: hidden; /* Ensure video/canvas stay within bounds */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            min-height: 250px; /* Minimum height for camera feed area */
+        }
+        #camera-feed-container video,
+        #camera-feed-container canvas {
+            max-width: 100%;
+            height: auto; /* Maintain aspect ratio */
+            display: block;
+        }
+        #camera-feed-container #captured-image-preview {
+            max-width: 100%;
+            height: auto;
+            display: none; /* Hidden by default */
         }
 
         /* Estilos específicos para la tabla dentro del modal de entrega */
@@ -228,6 +258,33 @@
         }
         .expanded .chevron-icon {
             transform: rotate(180deg);
+        }
+
+        /* Style for the inventory table container with scrollbar */
+        #inventory-table-container {
+            max-height: 500px; /* Adjust this value as needed for desired height */
+            overflow-y: auto; /* Enable vertical scrolling */
+            overflow-x: auto; /* Enable horizontal scrolling if content overflows */
+            border-radius: 0.5rem; /* Rounded corners */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional: add shadow */
+            border: 1px solid #e5e7eb; /* Optional: add border */
+        }
+
+        /* Ensure the table within the scroll container takes full width */
+        #inventory-table-container table {
+            min-width: 100%; /* Ensure table doesn't shrink smaller than container */
+            border-collapse: collapse; /* Remove double borders */
+        }
+
+        /* Critical items card pulsing animation */
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .pulse-red {
+            animation: pulse-red 2s infinite;
         }
     </style>
 </head>
@@ -421,6 +478,103 @@
         </div>
     </div>
 
+    <!-- NEW: Modal for Image URL/Camera Search -->
+    <div id="image-search-modal" class="modal">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm md:max-w-xl">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Buscar por Imagen</h3>
+            
+            <!-- Option selection buttons -->
+            <div id="image-search-options" class="flex justify-center space-x-4 mb-6">
+                <button id="open-url-search-option-btn" class="py-2 px-4 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200 flex-1">
+                    Buscar por URL de Imagen
+                </button>
+                <button id="open-camera-search-option-btn" class="py-2 px-4 border border-purple-600 text-purple-600 rounded-md hover:bg-purple-50 transition-colors duration-200 flex-1">
+                    Buscar por Cámara
+                </button>
+            </div>
+
+            <!-- Content for URL Search -->
+            <div id="url-search-content" class="mb-4">
+                <p class="text-gray-700 mb-4 text-sm">Pega la URL de una imagen para realizar una búsqueda inversa en Google Lens.</p>
+                <div>
+                    <label for="image-url-input" class="block text-sm font-medium text-gray-700 mb-1">URL de la Imagen:</label>
+                    <input type="url" id="image-url-input" placeholder="Ej: https://ejemplo.com/imagen.jpg" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button id="cancel-image-search-url-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                        Cancelar
+                    </button>
+                    <button id="confirm-image-search-url-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                        Buscar Imagen
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content for Camera Search (initially hidden) -->
+            <div id="camera-search-content" class="hidden">
+                <p class="text-gray-700 mb-4 text-sm">Asegúrate de que la iluminación sea buena y el artículo esté claro en la imagen.</p>
+                <div id="camera-feed-container" class="relative bg-gray-200 flex justify-center items-center overflow-hidden mb-4 rounded-lg">
+                    <video id="camera-feed" class="w-full h-auto rounded-lg" autoplay playsinline style="display: block;"></video>
+                    <canvas id="camera-canvas" class="w-full h-auto rounded-lg hidden" style="display: none;"></canvas>
+                    <img id="captured-image-preview" src="" alt="Captured Image" class="w-full h-auto rounded-lg hidden">
+                </div>
+                
+                <div class="flex justify-center space-x-4 mb-4" id="camera-controls">
+                    <button id="capture-image-btn" class="py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+                        Capturar Foto
+                    </button>
+                    <button id="retake-image-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 hidden">
+                        Volver a Tomar
+                    </button>
+                    <button id="download-image-btn" class="py-2 px-4 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200 hidden">
+                        Descargar Imagen
+                    </button>
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <button id="cancel-image-search-camera-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                        Cancelar
+                    </button>
+                    <button id="search-captured-image-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200 hidden">
+                        Buscar Imagen Capturada
+                    </button>
+                </div>
+                <p id="camera-search-hint" class="text-xs text-gray-500 mt-2 text-center hidden">
+                    Nota: Primero descarga la imagen, luego haz clic en "Buscar Imagen Capturada" y sube el archivo descargado en Google Lens.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Modal for Item History -->
+    <div id="item-history-modal" class="modal">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-3xl">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Historial de Movimientos para: <span id="history-item-name" class="text-blue-600"></span></h3>
+            <div class="overflow-x-auto rounded-lg shadow-md mb-4">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Fecha/Hora</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Tipo Movimiento</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Cantidad</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Fuente/Destino</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Responsable</th>
+                        </tr>
+                    </thead>
+                    <tbody id="specific-item-history-list" class="divide-y divide-gray-200">
+                        <!-- History entries for the specific item will be loaded here -->
+                    </tbody>
+                </table>
+                <p id="no-specific-history-items" class="text-gray-600 text-center py-4 hidden">No hay historial de movimientos para este artículo.</p>
+            </div>
+            <div class="flex justify-end">
+                <button id="close-item-history-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <header class="bg-gradient-to-r from-blue-700 to-blue-900 text-white p-6 shadow-md rounded-b-lg relative">
         <div class="container mx-auto text-center flex flex-col items-center justify-center">
@@ -516,6 +670,16 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw mr-1"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
                             Todo
                         </button>
+                        <!-- Button to open Image Search Modal -->
+                        <button id="open-image-search-modal-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-gray-500 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors duration-200 whitespace-nowrap">
+                            <!-- Lucide image icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image mr-2">
+                                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                                <circle cx="9" cy="9" r="2"/>
+                                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                            </svg>
+                            Buscar por Imagen
+                        </button>
                     </div>
                     <div class="flex space-x-2">
                         <button id="print-inventory-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors duration-200 whitespace-nowrap">
@@ -531,15 +695,17 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto rounded-lg shadow-md">
+                <!-- Contenedor con barra de desplazamiento -->
+                <div id="inventory-table-container">
                     <table class="min-w-full bg-white border border-gray-200">
-                        <thead class="bg-gray-200">
+                        <thead class="bg-gray-200 sticky top-0"> <!-- Sticky header -->
                             <tr>
                                 <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Número de Parte</th>
                                 <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Nombre del Artículo</th>
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Imagen</th>
                                 <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Categoría</th>
                                 <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Cantidad</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Unidad</th><!-- New column for Unit -->
+                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Unidad</th>
                                 <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Ubicación</th>
                                 <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Stock Mínimo</th>
                                 <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Acciones</th>
@@ -581,7 +747,7 @@
             </div>
             
             <div id="history-content" class="collapsible-content">
-                <div class="flex justify-end mb-4">
+                <div class="flex justify-end mb-4 space-x-2">
                     <button id="clear-history-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-colors duration-200">
                         <!-- Lucide trash icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash mr-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
@@ -623,7 +789,7 @@
             </div>
             
             <div id="invoice-history-content" class="collapsible-content">
-                <div class="flex justify-end mb-4">
+                <div class="flex justify-end mb-4 space-x-2">
                     <button id="clear-invoice-history-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-colors duration-200">
                         <!-- Lucide trash icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash mr-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
@@ -664,7 +830,7 @@
             
             <div id="reorder-content" class="collapsible-content">
                 <p class="text-lg text-gray-700 leading-relaxed mb-4">Los siguientes artículos están en o por debajo de su stock mínimo y pueden requerir reabastecimiento.</p>
-                <div class="flex justify-end mb-4">
+                <div class="flex justify-end mb-4 space-x-2">
                     <button id="print-reorder-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors duration-200 whitespace-nowrap">
                         <!-- Lucide printer icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer mr-2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
@@ -767,28 +933,33 @@
 
     <!-- Firebase SDKs -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-        import { getAuth, signInAnonymously, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
-        // Importar módulos de Realtime Database
-        import { getDatabase, ref, push, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
+        // UPDATED FIREBASE CDNs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, push, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
 
         // Global variables for Firebase instances and user data
         let db;
         let auth;
         let userId = 'anonymous'; // Default to anonymous
+        let currentUserIdentifier = 'Anónimo'; // New: Stores email or uid, or 'Anónimo'
         let inventoryRef; // Reference for Realtime Database
         let historyRef; // Reference for movement history
         let invoiceHistoryRef; // Reference for invoice history
         let isAuthReady = false; // Flag to indicate Firebase auth is ready
         let currentInventoryItems = []; // To store a local copy of inventory for live search
+        let allMovementHistory = []; // To store a local copy of all movement history for detailed view
         let initialDataLoadedCount = 0; // New: Counter for initial loads
-        // Changed expectedInitialLoads to 4 (inventory, history, invoices, *charts data trigger* or just use all data loaded for it)
         const expectedInitialLoads = 3; // Number of onValue listeners to wait for
 
         // Chart.js global variable
         let inventoryByCategoryChartInstance = null;
         let reorderItemsToPrint = []; // New: To store items for reorder suggestions printout
 
+        // Camera and Image search variables
+        let cameraStream = null;
+        let capturedImageDataUrl = null; // Store data URL of captured image
 
         // Direct Firebase configuration (fallback)
         const localFirebaseConfig = {
@@ -796,7 +967,7 @@
             authDomain: "abastos-bb76a.firebaseapp.com",
             databaseURL: "https://abastos-bb76a-default-rtdb.firebaseio.com",
             projectId: "abastos-bb76a",
-            storageBucket: "abastos-bb76a.firebasestorage.app",
+            storageBucket: "abastos-bb76a.appspot.com",
             messagingSenderId: "708455293960",
             appId: "1:708455293960:web:144e21229865e7f25f9dbd",
             measurementId: "G-BZT4HZZ857"
@@ -876,7 +1047,7 @@
                     movementType,
                     quantity,
                     sourceDestination,
-                    responsible
+                    responsible: responsible || currentUserIdentifier // Use provided responsible or default to currentUserIdentifier
                 });
                 console.log(`Movimiento de historial añadido para ${itemName}.`);
             } catch (e) {
@@ -925,7 +1096,7 @@
             document.getElementById('edit-item-modal').classList.remove('flex');
         }
 
-        // NEW: Function to standardize and validate category input
+        // Function to standardize and validate category input
         function standardizeAndValidateCategory(categoryInput) {
             let category = categoryInput.trim().toUpperCase();
             let originalCategory = category; // Store original for messages
@@ -1044,7 +1215,7 @@
                 
                 // Only log if there was an actual change or if it's important to log all edits
                 if (movementQuantity > 0 || movementType === 'Edición (Sin cambio de cantidad)') {
-                    await addMovementToHistory(newItemId, newItemName, movementType, movementQuantity, 'Formulario de Edición', 'Usuario');
+                    await addMovementToHistory(newItemId, newItemName, movementType, movementQuantity, 'Formulario de Edición', currentUserIdentifier);
                 }
                 
                 console.log(`Artículo "${newItemName}" actualizado con éxito en Realtime Database.`);
@@ -1054,6 +1225,181 @@
                 console.error("Error al actualizar el artículo en Realtime Database: ", e);
                 showMessage("Error al guardar los cambios del artículo. Intente de nuevo.", true);
             }
+        }
+
+        /**
+         * Function to open a Google Image search in a new tab for a given part number.
+         * @param {string} partNumber The part number to search for.
+         * @param {string} itemName The name of the item (for better search query).
+         */
+        async function searchImageInGoogle(partNumber, itemName) {
+            // Show alert/message before opening the new tab
+            const confirmed = await showConfirm(
+                'Búsqueda de Imagen',
+                `Se abrirá una nueva pestaña con la búsqueda de imágenes para "${partNumber} ${itemName}". Las imágenes mostradas son solo de referencia y pueden no ser exactas.`
+            );
+
+            if (!confirmed) {
+                return; // User cancelled
+            }
+
+            // Encode the query to handle special characters correctly in the URL
+            const searchQuery = encodeURIComponent(`${partNumber} ${itemName} component image`);
+            const googleSearchUrl = `https://www.google.com/search?q=${searchQuery}&tbm=isch`;
+            
+            // Open the URL in a new tab
+            window.open(googleSearchUrl, '_blank');
+            showMessage(`Buscando imágenes de "${partNumber}" en Google...`, false);
+        }
+
+        /**
+         * NEW: Function to perform a reverse image search on Google Lens using a URL.
+         * @param {string} imageUrl The URL of the image to search for.
+         */
+        function reverseImageSearchGoogle(imageUrl) {
+            const encodedImageUrl = encodeURIComponent(imageUrl);
+            const googleLensUrl = `https://lens.google.com/uploadbyurl?url=${encodedImageUrl}`;
+            window.open(googleLensUrl, '_blank');
+            showMessage(`Realizando búsqueda inversa de imagen en Google Lens...`, false);
+        }
+
+        /**
+         * NEW: Functions for Camera Image Search
+         */
+        const cameraFeed = document.getElementById('camera-feed');
+        const cameraCanvas = document.getElementById('camera-canvas');
+        const cameraCtx = cameraCanvas.getContext('2d');
+        const capturedImagePreview = document.getElementById('captured-image-preview');
+        const captureImageBtn = document.getElementById('capture-image-btn');
+        const retakeImageBtn = document.getElementById('retake-image-btn');
+        const downloadImageBtn = document.getElementById('download-image-btn'); // NEW: Download button
+        const searchCapturedImageBtn = document.getElementById('search-captured-image-btn');
+        const cameraSearchHint = document.getElementById('camera-search-hint');
+
+        async function startCamera() {
+            stopCamera(); // Stop any existing stream first
+            cameraFeed.style.display = 'block';
+            cameraCanvas.style.display = 'none';
+            capturedImagePreview.style.display = 'none';
+            captureImageBtn.classList.remove('hidden');
+            retakeImageBtn.classList.add('hidden');
+            downloadImageBtn.classList.add('hidden'); // Hide download button initially
+            searchCapturedImageBtn.classList.add('hidden');
+            cameraSearchHint.classList.add('hidden');
+
+            try {
+                // Request access to the rear camera if available, otherwise default camera
+                cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                cameraFeed.srcObject = cameraStream;
+                showMessage("Cámara iniciada. Apunte al artículo y capture la foto.", false);
+            } catch (err) {
+                console.error("Error al acceder a la cámara:", err);
+                showMessage("Error al acceder a la cámara. Asegúrese de que ha dado permisos y de que su dispositivo tiene cámara. " + err.message, true);
+                // Fallback or disable camera features if no camera
+                document.getElementById('open-camera-search-option-btn').disabled = true;
+                document.getElementById('open-camera-search-option-btn').textContent = "Cámara no disponible";
+            }
+        }
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+        }
+
+        function captureImage() {
+            if (!cameraStream) {
+                showMessage("No hay una cámara activa para capturar la imagen.", true);
+                return;
+            }
+
+            // Set canvas dimensions to match video stream
+            cameraCanvas.width = cameraFeed.videoWidth;
+            cameraCanvas.height = cameraFeed.videoHeight;
+            cameraCtx.drawImage(cameraFeed, 0, 0, cameraCanvas.width, cameraCanvas.height);
+            
+            capturedImageDataUrl = cameraCanvas.toDataURL('image/png'); // Get image as data URL
+            capturedImagePreview.src = capturedImageDataUrl;
+
+            // Stop camera stream after capturing
+            stopCamera(); 
+
+            cameraFeed.style.display = 'none';
+            cameraCanvas.style.display = 'none'; // Hide canvas used for drawing
+            capturedImagePreview.style.display = 'block'; // Show captured image
+            captureImageBtn.classList.add('hidden');
+            retakeImageBtn.classList.remove('hidden');
+            downloadImageBtn.classList.remove('hidden'); // Show download button
+            searchCapturedImageBtn.classList.remove('hidden');
+            cameraSearchHint.classList.remove('hidden');
+            showMessage("Imagen capturada. Puedes descargarla o volver a tomarla.", false);
+        }
+
+        // NEW: Function to download the captured image
+        function downloadCapturedImage() {
+            if (!capturedImageDataUrl) {
+                showMessage("No hay imagen capturada para descargar.", true);
+                return;
+            }
+            const a = document.createElement('a');
+            a.href = capturedImageDataUrl;
+            a.download = `imagen_capturada_${Date.now()}.png`;
+            document.body.appendChild(a); // Append to body to make it clickable
+            a.click(); // Programmatically click the link
+            document.body.removeChild(a); // Remove the link after clicking
+            showMessage("Imagen descargada con éxito.", false);
+        }
+
+
+        function searchCapturedImage() {
+            if (!capturedImageDataUrl) {
+                showMessage("Primero, captura una imagen para buscar.", true);
+                return;
+            }
+
+            showMessage("Abriendo Google Lens. Por favor, sube la imagen que acabas de descargar.", false);
+
+            // Open Google Lens in a new tab
+            window.open('https://lens.google.com/', '_blank');
+        }
+
+        // --- NEW: Item History Modals (Improvement 6) ---
+        function openItemHistoryModal(itemId, itemName) {
+            document.getElementById('history-item-name').textContent = `${itemName} (${itemId})`;
+            const specificItemHistoryList = document.getElementById('specific-item-history-list');
+            specificItemHistoryList.innerHTML = ''; // Clear previous entries
+
+            const filteredHistory = allMovementHistory.filter(move => move.itemId === itemId);
+
+            if (filteredHistory.length === 0) {
+                document.getElementById('no-specific-history-items').classList.remove('hidden');
+            } else {
+                document.getElementById('no-specific-history-items').classList.add('hidden');
+                // Sort movements by timestamp in descending order (most recent first)
+                filteredHistory.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                filteredHistory.forEach(move => {
+                    const newRow = specificItemHistoryList.insertRow();
+                    newRow.classList.add('hover:bg-gray-50');
+
+                    newRow.insertCell().textContent = new Date(move.timestamp).toLocaleString('es-ES', {
+                        year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                    }).replace(/\//g, '-');
+                    newRow.insertCell().textContent = move.movementType;
+                    newRow.insertCell().textContent = move.quantity;
+                    newRow.insertCell().textContent = move.sourceDestination;
+                    newRow.insertCell().textContent = move.responsible;
+                });
+            }
+            document.getElementById('item-history-modal').classList.add('flex');
+        }
+
+        function closeItemHistoryModal() {
+            document.getElementById('item-history-modal').classList.remove('flex');
         }
 
 
@@ -1082,6 +1428,24 @@
 
                 newRow.insertCell().textContent = item.itemId; // Custom item ID
                 newRow.insertCell().textContent = item.name;
+                
+                // Cell for the image search button
+                const imageSearchCell = newRow.insertCell();
+                const imageSearchButton = document.createElement('button');
+                imageSearchButton.classList.add('bg-gray-200', 'hover:bg-gray-300', 'text-gray-800', 'py-1', 'px-2', 'rounded-full', 'text-xs', 'transition-colors', 'duration-200');
+                imageSearchButton.title = `Buscar imagen de ${item.itemId}`;
+                imageSearchButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image">
+                        <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                        <circle cx="9" cy="9" r="2"/>
+                        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                    </svg>
+                `;
+                imageSearchButton.addEventListener('click', () => searchImageInGoogle(item.itemId, item.name));
+                imageSearchCell.appendChild(imageSearchButton);
+                imageSearchCell.classList.add('text-center'); // Center the icon in its cell
+
+
                 newRow.insertCell().textContent = item.category;
                 newRow.insertCell().textContent = item.quantity;
                 newRow.insertCell().textContent = item.unit; // New: Display unit
@@ -1108,6 +1472,16 @@
                 });
                 actionsCell.appendChild(editButton);
 
+                // NEW: Button to view item-specific history
+                const viewHistoryButton = document.createElement('button');
+                viewHistoryButton.textContent = 'Historial';
+                viewHistoryButton.classList.add('bg-indigo-500', 'hover:bg-indigo-600', 'text-white', 'font-bold', 'py-1', 'px-3', 'rounded-full', 'text-xs', 'transition-colors', 'duration-200', 'mt-1');
+                viewHistoryButton.addEventListener('click', function() {
+                    openItemHistoryModal(item.itemId, item.name);
+                });
+                actionsCell.appendChild(viewHistoryButton);
+
+
                 // Nuevo botón de eliminar
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Eliminar';
@@ -1123,6 +1497,17 @@
             document.getElementById('total-stock').textContent = totalStockQuantity; // New: Update total stock quantity
             updateLastUpdateTime();
             lucide.createIcons(); // Re-render Lucide icons after updating table
+
+            // Improvement 5: Real-time notification for critical stock
+            const criticalItemsCard = document.getElementById('critical-items-card');
+            if (criticalItemsCount > 0) {
+                criticalItemsCard.classList.remove('bg-white', 'border-gray-200', 'hover:bg-red-50');
+                criticalItemsCard.classList.add('bg-red-100', 'border-red-400', 'shadow-lg', 'pulse-red');
+                showMessage(`¡ATENCIÓN! Hay ${criticalItemsCount} artículos en stock crítico.`, true);
+            } else {
+                criticalItemsCard.classList.remove('bg-red-100', 'border-red-400', 'shadow-lg', 'pulse-red');
+                criticalItemsCard.classList.add('bg-white', 'border-gray-200', 'hover:bg-red-50');
+            }
 
             // Call render charts and reorder suggestions after inventory is rendered
             renderCharts(items);
@@ -1146,7 +1531,7 @@
             document.getElementById('modal-item-name').textContent = itemName;
             document.getElementById('modal-item-current-quantity').textContent = currentQuantity; 
             document.getElementById('withdrawal-quantity').value = ''; 
-            document.getElementById('withdrawal-responsible').value = 'Usuario'; 
+            document.getElementById('withdrawal-responsible').value = currentUserIdentifier; // Set default to current user
 
             document.getElementById('withdrawal-modal').classList.add('flex');
         }
@@ -1163,7 +1548,7 @@
         // Función para confirmar y procesar el retiro individual
         async function confirmWithdrawal() {
             const withdrawalQuantity = parseInt(document.getElementById('withdrawal-quantity').value);
-            const responsible = document.getElementById('withdrawal-responsible').value.trim();
+            const responsible = document.getElementById('withdrawal-responsible').value.trim() || currentUserIdentifier; // Use input value or default
 
             if (isNaN(withdrawalQuantity) || withdrawalQuantity <= 0) {
                 showMessage('Por favor, ingrese una cantidad válida a retirar (mayor que 0).', true);
@@ -1224,7 +1609,7 @@
                 const itemDbRef = ref(db, `artifacts/${appId}/public/data/inventory/${dbKey}`);
                 await remove(itemDbRef); 
 
-                await addMovementToHistory(itemId, itemName, 'Eliminación', 0, 'Eliminado del Inventario', 'Usuario'); 
+                await addMovementToHistory(itemId, itemName, 'Eliminación', 0, 'Eliminado del Inventario', currentUserIdentifier); 
                 console.log(`Artículo "${itemName}" eliminado.`);
                 showMessage(`Artículo "${itemName}" eliminado con éxito.`, false);
             } catch (e) {
@@ -1237,6 +1622,7 @@
         function renderHistory(movements) {
             const historyTableBody = document.getElementById('movement-history-list');
             historyTableBody.innerHTML = ''; // Clear current table
+            allMovementHistory = movements; // Store all movements for item-specific history
 
             // Sort movements by timestamp in descending order (most recent first)
             // Timestamps are ISO strings, so direct comparison works
@@ -1274,7 +1660,7 @@
                 newRow.insertCell().textContent = invoice.invoiceId.substring(0, 8); // Display first 8 chars of Firebase key as Invoice ID
                 newRow.insertCell().textContent = new Date(invoice.timestamp).toLocaleString('es-ES', {
                     year: 'numeric', month: '2-digit', day: '2-digit',
-                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                    hour: '2-digit', minute: '2-digit', hour12: false
                 }).replace(/\//g, '-');
                 newRow.insertCell().textContent = invoice.responsible;
                 
@@ -1328,7 +1714,7 @@
         function openDeliveryInvoiceModal() {
             deliveryItems = []; 
             renderDeliveryItems(); 
-            document.getElementById('delivery-responsible').value = 'Usuario de Entrega'; 
+            document.getElementById('delivery-responsible').value = currentUserIdentifier; // Set default to current user
             document.getElementById('delivery-search-input').value = ''; 
             document.getElementById('delivery-search-results').classList.add('hidden'); // Hide search results on open
             document.getElementById('print-delivery-invoice-btn').classList.add('hidden'); // Hide print button initially
@@ -1444,7 +1830,7 @@
         }
 
         async function confirmDeliveryInvoice() {
-            const responsible = document.getElementById('delivery-responsible').value.trim();
+            const responsible = document.getElementById('delivery-responsible').value.trim() || currentUserIdentifier; // Use input value or default
             if (!responsible) {
                 showMessage('Por favor, ingrese el responsable de la entrega.', true);
                 return;
@@ -1866,8 +2252,8 @@
                                 <p><strong>Responsable de la Entrega:</strong> ${invoice.responsible}</p>
                             </div>
                             <div>
-                                <p><strong>Fecha:</strong> ${now}</p>
                                 <p><strong>Número de Parte de Usuario:</strong> ${printUserId}</p>
+                                <p><strong>Fecha:</strong> ${now}</p>
                             </div>
                         </div>
                         <table>
@@ -1951,7 +2337,7 @@
                 console.log("Historial de facturas borrado.");
             } catch (e) {
                 console.error("Error al borrar el historial de facturas de Realtime Database: ", e);
-                showMessage("Error al borrar el historial de facturas. Intente de nuevo.", true);
+                showMessage("Error al borrar el historial. Intente de nuevo.", true);
             }
         }
 
@@ -1965,16 +2351,25 @@
 
             for (let i = 0; i < tr.length; i++) {
                 let found = false;
-                const tds = tr[i].getElementsByTagName('td');
-                // Iterate through columns, excluding the last one (Actions) and including the new 'Unit' column.
-                // Assuming 'Unit' is at index 4, 'Ubicacion' at 5, 'Min Stock' at 6.
-                for (let j = 0; j < tds.length - 1; j++) { 
-                    const cellValue = tds[j].textContent || tds[j].innerText;
-                    if (cellValue.toUpperCase().indexOf(filter) > -1) {
-                        found = true;
-                        break; 
-                    }
+                // Updated indices: 0: Numbero de Parte, 1: Nombre, 2: Imagen, 3: Categoria, 4: Cantidad, 5: Unidad, 6: Ubicacion, 7: Stock Minimo, 8: Acciones
+                const itemIdCell = tr[i].cells[0]; // Numero de Parte
+                const itemNameCell = tr[i].cells[1]; // Nombre del Articulo
+                const itemCategoryCell = tr[i].cells[3]; // Categoria
+                const itemUnitCell = tr[i].cells[5]; // Unidad
+                const itemLocationCell = tr[i].cells[6]; // Ubicacion
+
+                if (itemIdCell && itemIdCell.textContent.toUpperCase().indexOf(filter) > -1) {
+                    found = true;
+                } else if (itemNameCell && itemNameCell.textContent.toUpperCase().indexOf(filter) > -1) {
+                    found = true;
+                } else if (itemCategoryCell && itemCategoryCell.textContent.toUpperCase().indexOf(filter) > -1) {
+                    found = true;
+                } else if (itemUnitCell && itemUnitCell.textContent.toUpperCase().indexOf(filter) > -1) {
+                    found = true;
+                } else if (itemLocationCell && itemLocationCell.textContent.toUpperCase().indexOf(filter) > -1) {
+                    found = true;
                 }
+                
                 if (found) {
                     tr[i].style.display = ''; 
                 } else {
@@ -2004,9 +2399,9 @@
             let criticalItemsFound = false;
 
             for (let i = 0; i < tr.length; i++) {
-                // Quantity is at index 3, Min Stock is at index 6 after adding Unit at index 4
-                const itemQuantity = parseInt(tr[i].cells[3].textContent); 
-                const minStock = parseInt(tr[i].cells[6].textContent); 
+                // Quantity is at index 4, Min Stock is at index 7 (after adding image and unit columns)
+                const itemQuantity = parseInt(tr[i].cells[4].textContent); 
+                const minStock = parseInt(tr[i].cells[7].textContent); 
 
                 if (itemQuantity <= minStock) {
                     tr[i].style.display = ''; // Show critical item
@@ -2043,14 +2438,15 @@
                 // Only include visible rows (those not hidden by filters)
                 if (rows[i].style.display !== 'none') {
                     const cells = rows[i].getElementsByTagName('td');
+                    // Adjust cell indices for the new 'Imagen' column
                     inventoryItemsToPrint.push({
                         itemId: cells[0].textContent,
                         name: cells[1].textContent,
-                        category: cells[2].textContent,
-                        quantity: cells[3].textContent,
-                        unit: cells[4].textContent, // Get unit from the 5th column
-                        location: cells[5].textContent,
-                        minStock: cells[6].textContent
+                        category: cells[3].textContent, // Category is now at index 3
+                        quantity: cells[4].textContent, // Quantity is now at index 4
+                        unit: cells[5].textContent, // Unit is now at index 5
+                        location: cells[6].textContent, // Location is now at index 6
+                        minStock: cells[7].textContent // Min Stock is now at index 7
                     });
                 }
             }
@@ -2505,6 +2901,15 @@
         }
 
 
+        // REMOVED: Export to PDF/CSV functions (Improvement 4)
+        // function exportToPdf(data, headers, title, filename) { ... }
+        // function exportToCsv(data, headers, filename) { ... }
+        // function getPrintableInventoryData() { ... }
+        // function getPrintableMovementHistoryData() { ... }
+        // function getPrintableInvoiceHistoryData() { ... }
+        // function getPrintableReorderSuggestionsData() { ... }
+
+
         // --- Firestore Initialization and Data Listeners ---
         document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('loading-overlay').style.display = 'flex'; // Show loading
@@ -2533,6 +2938,7 @@
                     if (user) {
                         // User is signed in.
                         userId = user.uid; // Update userId with authenticated user's UID
+                        currentUserIdentifier = user.email || user.uid; // Prioritize email
                         document.getElementById('user-id-display').textContent = `Número de Parte de Usuario: ${userId}`;
                         document.getElementById('current-user-email').textContent = user.email || "Usuario Anónimo";
                         document.getElementById('logged-out-view').classList.add('hidden');
@@ -2581,7 +2987,7 @@
                                     movementsArray.push({ id: key, ...movementsObject[key] });
                                 }
                             }
-                            renderHistory(movementsArray);
+                            renderHistory(movementsArray); // This also updates allMovementHistory
                             console.log("Historial de movimientos cargado/actualizado desde Realtime Database.");
                             initialDataLoadedCount++;
                             if (initialDataLoadedCount >= expectedInitialLoads) {
@@ -2642,6 +3048,7 @@
                              // The system will still attempt to load data from public paths, but write operations might fail
                              // if Firebase Security Rules require authentication.
                              userId = 'anonymous'; // Keep anonymous for display
+                             currentUserIdentifier = 'Anónimo'; // Set identifier to 'Anónimo'
                              isAuthReady = true; // Still consider auth ready for public data access
                              document.getElementById('user-id-display').textContent = `Número de Parte de Usuario: Anónimo`;
                              document.getElementById('current-user-email').textContent = 'Anónimo';
@@ -2688,7 +3095,7 @@
                                         movementsArray.push({ id: key, ...movementsObject[key] });
                                     }
                                 }
-                                renderHistory(movementsArray);
+                                renderHistory(movementsArray); // This also updates allMovementHistory
                                 console.log("Historial de movimientos cargado/actualizado desde Realtime Database (anónimo).");
                                 initialDataLoadedCount++;
                                 if (initialDataLoadedCount >= expectedInitialLoads) {
@@ -2739,42 +3146,6 @@
                 hideLoadingOverlay(); // Hide overlay on initialization error
                 showMessage("Error grave al inicializar la aplicación. Ver consola para más detalles: " + e.message, true); // Mostrar mensaje de error detallado
             }
-
-            // --- Authentication Button Handlers ---
-            document.getElementById('register-btn')?.addEventListener('click', async () => { // Usar optional chaining para seguridad
-                const email = document.getElementById('auth-email').value;
-                const password = document.getElementById('auth-password').value;
-                try {
-                    await createUserWithEmailAndPassword(auth, email, password);
-                    showMessage("Usuario registrado y sesión iniciada con éxito.", false);
-                } catch (error) {
-                    console.error("Error al registrar usuario:", error);
-                    showMessage(`Error al registrar: ${error.message}`, true);
-                }
-            });
-
-            document.getElementById('login-btn')?.addEventListener('click', async () => { // Usar optional chaining para seguridad
-                const email = document.getElementById('auth-email').value;
-                const password = document.getElementById('auth-password').value;
-                try {
-                    await signInWithEmailAndPassword(auth, email, password);
-                    showMessage("Sesión iniciada con éxito.", false);
-                } catch (error) {
-                    console.error("Error al iniciar sesión:", error);
-                    showMessage(`Error al iniciar sesión: ${error.message}`, true);
-                }
-            });
-
-            document.getElementById('logout-btn')?.addEventListener('click', async () => { // Usar optional chaining para seguridad
-                try {
-                    await signOut(auth);
-                    showMessage("Sesión cerrada correctamente.", false);
-                }
-                catch (error) {
-                    console.error("Error al cerrar sesión:", error);
-                    showMessage(`Error al cerrar sesión: ${error.message}`, true);
-                }
-            });
 
             // --- Attach Other Event Listeners (ensure they are attached AFTER DOMContentLoaded) ---
             document.getElementById('open-delivery-invoice-modal-btn')?.addEventListener('click', openDeliveryInvoiceModal);
@@ -2843,6 +3214,69 @@
                 toggleCollapsible('inventory-content', 'toggle-inventory-btn');
             });
 
+            // Image search modal buttons (modified logic)
+            const imageSearchModal = document.getElementById('image-search-modal');
+            const urlSearchContent = document.getElementById('url-search-content');
+            const cameraSearchContent = document.getElementById('camera-search-content');
+            const openUrlSearchOptionBtn = document.getElementById('open-url-search-option-btn');
+            const openCameraSearchOptionBtn = document.getElementById('open-camera-search-option-btn');
+            const cancelImageSearchUrlBtn = document.getElementById('cancel-image-search-url-btn');
+            const confirmImageSearchUrlBtn = document.getElementById('confirm-image-search-url-btn');
+            const cancelImageSearchCameraBtn = document.getElementById('cancel-image-search-camera-btn');
+
+            document.getElementById('open-image-search-modal-btn')?.addEventListener('click', () => {
+                // Show options and hide all content initially
+                imageSearchModal.classList.add('flex');
+                urlSearchContent.classList.add('hidden');
+                cameraSearchContent.classList.add('hidden');
+                document.getElementById('image-search-options').classList.remove('hidden');
+                stopCamera(); // Ensure camera is off when modal is first opened to choose option
+            });
+
+            openUrlSearchOptionBtn?.addEventListener('click', () => {
+                document.getElementById('image-search-options').classList.add('hidden');
+                urlSearchContent.classList.remove('hidden');
+                cameraSearchContent.classList.add('hidden');
+                document.getElementById('image-url-input').value = '';
+                stopCamera(); // Stop camera if switching from camera view
+            });
+
+            openCameraSearchOptionBtn?.addEventListener('click', () => {
+                document.getElementById('image-search-options').classList.add('hidden');
+                urlSearchContent.classList.add('hidden');
+                cameraSearchContent.classList.remove('hidden');
+                startCamera(); // Start camera when camera option is selected
+            });
+
+            cancelImageSearchUrlBtn?.addEventListener('click', () => {
+                imageSearchModal.classList.remove('flex');
+                stopCamera(); // Ensure camera is off when modal is closed
+            });
+
+            confirmImageSearchUrlBtn?.addEventListener('click', () => {
+                const imageUrl = document.getElementById('image-url-input').value.trim();
+                if (imageUrl) {
+                    reverseImageSearchGoogle(imageUrl);
+                    imageSearchModal.classList.remove('flex');
+                } else {
+                    showMessage('Por favor, introduce una URL de imagen válida.', true);
+                }
+                stopCamera(); // Ensure camera is off after URL search
+            });
+
+            cancelImageSearchCameraBtn?.addEventListener('click', () => {
+                imageSearchModal.classList.remove('flex');
+                stopCamera(); // Ensure camera is off when modal is closed
+            });
+
+            captureImageBtn?.addEventListener('click', captureImage);
+            retakeImageBtn?.addEventListener('click', startCamera); // Retake simply restarts the camera
+            downloadImageBtn?.addEventListener('click', downloadCapturedImage); // NEW: Attach download function
+            searchCapturedImageBtn?.addEventListener('click', searchCapturedImage);
+
+
+            // NEW: Item History Modal Event Listener
+            document.getElementById('close-item-history-btn')?.addEventListener('click', closeItemHistoryModal);
 
             // Add listener for add item form
             document.getElementById('add-item-form')?.addEventListener('submit', async function(event) { // Usar optional chaining para seguridad
@@ -2922,7 +3356,7 @@
                             location: itemLocation, 
                             minStock: itemMinStock 
                         }); 
-                        await addMovementToHistory(itemId, itemName, 'Actualización (Ingreso)', itemQuantity, 'Formulario de Entrada', 'Usuario');
+                        await addMovementToHistory(itemId, itemName, 'Actualización (Ingreso)', itemQuantity, 'Formulario de Entrada', currentUserIdentifier);
                         showMessage(`Cantidad de "${itemName}" actualizada a ${newTotalQuantity} ${itemUnit} en Realtime Database!`, false);
                         console.log(`Artículo "${itemName}" (ID: ${itemId}) actualizado en Realtime Database.`);
                     } else {
@@ -2937,7 +3371,7 @@
                             minStock: itemMinStock,
                             createdAt: new Date().toISOString()
                         });
-                        await addMovementToHistory(itemId, itemName, 'Ingreso', itemQuantity, 'Formulario de Entrada', 'Usuario');
+                        await addMovementToHistory(itemId, itemName, 'Ingreso', itemQuantity, 'Formulario de Entrada', currentUserIdentifier);
                         showMessage('Artículo añadido con éxito a Realtime Database!', false);
                         console.log(`Nuevo artículo "${itemName}" (ID: ${itemId}) añadido a Realtime Database.`);
                     }
@@ -2951,6 +3385,51 @@
                 }
             });
 
+
+            // Authentication button listeners
+            document.getElementById('login-btn')?.addEventListener('click', async () => {
+                const email = document.getElementById('auth-email').value;
+                const password = document.getElementById('auth-password').value;
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    showMessage("Sesión iniciada correctamente.", false);
+                } catch (error) {
+                    console.error("Error al iniciar sesión:", error);
+                    showMessage(`Error al iniciar sesión: ${error.message}`, true);
+                }
+            });
+
+            document.getElementById('register-btn')?.addEventListener('click', async () => {
+                const email = document.getElementById('auth-email').value;
+                const password = document.getElementById('auth-password').value;
+                try {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    showMessage("Usuario registrado y sesión iniciada correctamente.", false);
+                } catch (error) {
+                    console.error("Error al registrar usuario:", error);
+                    showMessage(`Error al registrar: ${error.message}`, true);
+                }
+            });
+
+            document.getElementById('logout-btn')?.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    showMessage("Sesión cerrada correctamente.", false);
+                    // Reset UI for logged out view
+                    document.getElementById('logged-out-view').classList.remove('hidden');
+                    document.getElementById('logged-in-view').classList.add('hidden');
+                    document.getElementById('user-id-display').textContent = 'Número de Parte de Usuario: Anónimo';
+                    document.getElementById('current-user-email').textContent = 'Anónimo';
+                    userId = 'anonymous'; // Reset userId on logout
+                    currentUserIdentifier = 'Anónimo'; // Reset identifier
+                    // When logging out, clear data and attempt anonymous sign-in to reload public data
+                    // This is important because public data access requires auth != null, even if it's anonymous
+                    await signInAnonymously(auth); // Re-authenticate anonymously to allow reading public data
+                } catch (error) {
+                    console.error("Error al cerrar sesión:", error);
+                    showMessage(`Error al cerrar sesión: ${error.message}`, true);
+                }
+            });
 
         });
     </script>
