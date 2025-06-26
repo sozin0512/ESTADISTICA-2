@@ -2879,6 +2879,8 @@
                     let itemExists = false;
                     let existingItemKey = null;
                     let existingItemQuantity = 0;
+                    let existingItemLocation = ''; // New variable to store existing item's location
+                    let existingItemUnit = ''; // New variable to store existing item's unit
 
                     const existingItem = currentInventoryItems.find(item => item.itemId === itemId);
                     
@@ -2886,10 +2888,28 @@
                         itemExists = true;
                         existingItemKey = existingItem.id;
                         existingItemQuantity = existingItem.quantity;
+                        existingItemLocation = existingItem.location; // Get existing location
+                        existingItemUnit = existingItem.unit || ''; // Get existing unit
                         console.log(`Artículo existente encontrado: ${itemName} con ID Firebase: ${existingItemKey}`);
                     }
 
                     if (itemExists) {
+                        // NEW: Show confirmation modal with location
+                        const confirmed = await showConfirm(
+                            'Artículo Existente',
+                            `El artículo "${existingItem.name}" (Número de Parte: ${itemId}) ya existe en el inventario.` +
+                            `\nCantidad actual: ${existingItemQuantity} ${existingItemUnit}.` +
+                            `\nUbicación: ${existingItemLocation}.` +
+                            `\n¿Desea añadir ${itemQuantity} unidades a este artículo?`
+                        );
+
+                        if (!confirmed) {
+                            showMessage('Adición de stock cancelada.', false);
+                            document.getElementById('add-item-form').reset();
+                            document.getElementById('item-location').value = '';
+                            return; // Stop execution if cancelled
+                        }
+
                         const newTotalQuantity = existingItemQuantity + itemQuantity;
                         // Point to public inventory
                         const itemDbRef = ref(db, `artifacts/${appId}/public/data/inventory/${existingItemKey}`);
