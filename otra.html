@@ -3,214 +3,1521 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Retiro de Componentes</title>
+    <title>Control de Componentes de Aviación</title>
+    <!-- Enlace a la fuente Inter de Google Fonts para un look más moderno -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Enlace a Font Awesome para los iconos de flecha, editar y borrar -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- jsPDF para la exportación a PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        /* Estilos generales del cuerpo de la página */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            font-family: 'Inter', sans-serif; /* Usamos Inter para un look más profesional */
             margin: 0;
             padding: 0;
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: #0e0d0d;
-        }
-
-        .container {
-            width: 60%;
-            margin: 0 auto;
-            background-color: rgba(179, 46, 46, 0.8);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        h1 {
-            text-align: center;
+            background: linear-gradient(to right, #ece9e6, #ffffff); /* Gradiente suave de fondo */
             color: #333;
-            font-size: 2rem;
+            line-height: 1.6;
+            display: flex; /* Para centrar el contenido verticalmente */
+            justify-content: center; /* Para centrar el contenido horizontalmente */
+            align-items: center; /* Para centrar el contenido verticalmente */
+            min-height: 100vh; /* Altura mínima de la ventana para centrar */
+        }
+        /* Contenedor principal de la página */
+        .container {
+            width: 90%;
+            max-width: 1000px; /* Un poco más ancho para más espacio */
+            margin: 30px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px; /* Bordes más redondeados */
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada y suave */
+            border: 1px solid #e0e0e0; /* Borde sutil */
+        }
+        /* Estilos del encabezado */
+        header {
+            background: linear-gradient(to right, #2c3e50, #34495e); /* Gradiente oscuro para el encabezado */
+            color: #ffffff;
+            padding: 25px 0; /* Más relleno */
+            text-align: center;
+            border-radius: 15px 15px 0 0; /* Bordes más redondeados solo arriba */
+            margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra para el encabezado */
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.8em; /* Título más grande */
+            letter-spacing: 1px; /* Espaciado entre letras */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2); /* Sombra de texto */
+        }
+        /* User ID display */
+        #userIdDisplay {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        /* Estilos de la barra de navegación */
+        nav {
+            text-align: center;
+            margin-bottom: 25px; /* Más margen */
+            background-color: #f8f8f8; /* Fondo sutil para la nav */
+            padding: 10px 0;
+            border-radius: 10px; /* Bordes redondeados */
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); /* Sombra interna sutil */
+        }
+        nav a {
+            text-decoration: none;
+            color: #2c3e50;
+            padding: 12px 20px; /* Más relleno para botones */
+            margin: 0 8px; /* Más margen entre enlaces */
+            border-radius: 8px; /* Bordes más redondeados */
+            transition: all 0.3s ease; /* Transición suave para todos los cambios */
+            font-weight: 600; /* Texto más audaz */
+            text-transform: uppercase; /* Texto en mayúsculas */
+            position: relative; /* Para el pseudo-elemento hover */
+            overflow: hidden; /* Para que la animación de hover no se desborde */
+        }
+        nav a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(52, 152, 219, 0.1); /* Color de resaltado */
+            transition: left 0.3s ease;
+            z-index: 0;
+        }
+        nav a:hover::before {
+            left: 0;
+        }
+        nav a:hover {
+            background-color: #eaf6fc; /* Fondo más claro al pasar el ratón */
+            color: #3498db; /* Color del texto azul */
+            transform: translateY(-2px); /* Pequeño levantamiento */
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2); /* Sombra sutil al pasar el ratón */
+        }
+        /* Estilos de los títulos de sección */
+        h2 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db; /* Línea más gruesa y vibrante */
+            padding-bottom: 12px; /* Más relleno inferior */
+            margin-top: 40px; /* Más margen superior */
+            font-size: 2em; /* Títulos de sección más grandes */
+            font-weight: 700; /* Más audaz */
+            text-align: center; /* Centrar títulos de sección */
+            position: relative; /* Para pseudo-elemento */
+        }
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -3px; /* Alineado con el borde */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px; /* Pequeño subrayado azul */
+            height: 3px;
+            background-color: #3498db;
         }
 
-        label {
-            font-size: 1rem;
-            margin-bottom: 5px;
+        /* Estilos de las secciones de contenido */
+        .section {
+            margin-bottom: 30px; /* Más margen inferior */
+            padding: 25px; /* Más relleno interno */
+            background-color: #fdfdfd; /* Fondo más blanco */
+            border-left: 6px solid #3498db; /* Borde izquierdo más grueso y azul */
+            border-radius: 10px; /* Bordes más redondeados */
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08); /* Sombra suave */
+            transition: transform 0.2s ease-in-out; /* Transición para hover */
+        }
+        .section:hover {
+            transform: translateY(-5px); /* Efecto de levantamiento al pasar el ratón */
+        }
+        .section p {
+            margin-bottom: 12px;
+            color: #555; /* Color de texto ligeramente más claro */
+        }
+        /* Estilos de los controles de búsqueda y categoría */
+        .filter-controls {
+            display: flex;
+            gap: 15px; /* Espacio entre elementos */
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+            justify-content: center;
+            align-items: center;
+        }
+        .filter-controls input[type="text"],
+        .filter-controls select {
+            padding: 10px 15px;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            font-size: 1.1em; /* Un poco más grande */
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            flex-grow: 1; /* Permitir que ocupe espacio disponible */
+            min-width: 150px; /* Ancho mínimo para inputs de filtro */
+        }
+        .filter-controls input[type="text"]:focus,
+        .filter-controls select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+        .filter-controls button {
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .filter-controls button:hover {
+            background: linear-gradient(to right, #2980b9, #3498db);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+        }
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+            flex-wrap: wrap; /* Wrap buttons on small screens */
+        }
+        .export-buttons .button {
+            padding: 8px 15px;
+            font-size: 0.9em;
+            margin-top: 0; /* Override default button margin-top */
+        }
+
+        /* Estilos de listas (registros) */
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            background-color: #ffffff; /* Fondo blanco para elementos de lista */
+            margin-bottom: 10px; /* Más margen entre elementos */
+            padding: 15px 20px; /* Más relleno */
+            border-radius: 8px; /* Bordes más redondeados */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Sombra sutil */
+            border: 1px solid #f0f0f0; /* Borde más claro */
+            transition: all 0.2s ease-in-out; /* Transición para hover */
+            cursor: pointer; /* Cursor de puntero para indicar que son clicables */
+            overflow: hidden; /* Oculta el contenido extra hasta que se despliegue */
+        }
+        ul li:hover {
+            background-color: #f7faff; /* Fondo ligeramente azulado al pasar el ratón */
+            transform: translateY(-3px); /* Pequeño levantamiento */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Sombra más pronunciada */
+        }
+
+        .list-item-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #2c3e50;
+            padding-bottom: 10px; /* Space before details link */
+            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+        .list-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .list-item-actions .action-button {
+            background: none;
+            border: none;
+            color: #3498db;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: color 0.3s ease;
+            padding: 5px;
+            border-radius: 50%;
+        }
+        .list-item-actions .action-button:hover {
+            color: #2980b9;
+            background-color: #eaf6fc;
+        }
+        .list-item-details {
+            max-height: 0; /* Inicialmente oculto */
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out; /* Transición para desplegar */
+            padding-top: 0;
+            margin-top: 0; /* Remove top top margin as border is in summary */
+            color: #555;
+            font-size: 0.95em;
+        }
+        ul li.expanded .list-item-details {
+            max-height: 500px; /* Suficiente altura para mostrar contenido, ajustado para fotos/firmas */
+            padding-top: 10px;
+        }
+        .arrow-icon {
+            transition: transform 0.3s ease; /* Transición para rotar la flecha */
+        }
+        ul li.expanded .arrow-icon {
+            transform: rotate(90deg); /* Rotar flecha cuando está expandido */
+        }
+
+        /* Estilos para botones de acción */
+        .button {
+            display: inline-block;
+            background: linear-gradient(to right, #3498db, #2980b9); /* Gradiente azul para botones */
+            color: white;
+            padding: 12px 25px; /* Más relleno para botones */
+            border: none;
+            border-radius: 8px; /* Bordes más redondeados */
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease; /* Transición suave */
+            margin-top: 15px; /* Más margen superior */
+            font-size: 1.1em; /* Texto más grande */
+            font-weight: 600; /* Más audaz */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Sombra más fuerte */
+        }
+        .button:hover {
+            background: linear-gradient(to right, #2980b9, #3498db); /* Invertir gradiente al pasar el ratón */
+            transform: translateY(-2px); /* Pequeño levantamiento */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25); /* Sombra más grande */
+        }
+        .button.secondary {
+            background: linear-gradient(to right, #e74c3c, #c0392b); /* Rojo para eliminar/cancelar */
+        }
+        .button.secondary:hover {
+            background: linear-gradient(to right, #c0392b, #e74c3c);
+        }
+
+        /* Loading indicator */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden; /* Hidden by default */
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s linear;
+        }
+        #loadingOverlay.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+        .spinner {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Estilos para grupos de formulario */
+        .form-group {
+            margin-bottom: 20px; /* Más margen inferior */
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px; /* Más margen inferior */
+            font-weight: 600; /* Más audaz */
+            color: #444; /* Color de texto ligeramente más oscuro */
+            font-size: 1.05em; /* Ligeramente más grande */
+        }
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group textarea,
+        .form-group select,
+        .form-group input[type="file"] { /* Estilo para input de archivo */
+            width: calc(100% - 24px); /* Ajuste de ancho */
+            padding: 12px; /* Más relleno */
+            border: 1px solid #dcdcdc; /* Borde más claro */
+            border-radius: 8px; /* Bordes más redondeados */
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Transición para focus */
+        }
+        .form-group input[type="text"]:focus,
+        .form-group input[type="date"]:focus,
+        .form-group textarea:focus,
+        .form-group select:focus,
+        .form-group input[type="file"]:focus {
+            border-color: #3498db; /* Borde azul al enfocar */
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); /* Sombra de enfoque */
+            outline: none; /* Eliminar el contorno predeterminado */
+        }
+        .form-group textarea {
+            min-height: 100px; /* Mayor altura mínima */
+        }
+
+        /* Signature pad styles */
+        .signature-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background-color: #f8f8f8;
+        }
+
+        .signature-group canvas {
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            background-color: #fcfcfc;
+            cursor: crosshair;
+            touch-action: none; /* Previene el scroll en dispositivos táctiles */
+            /* Ensure canvas is responsive */
+            width: 100%;
+            height: auto; /* Maintain aspect ratio */
+            max-width: 300px; /* Original width */
+            max-height: 150px; /* Original height */
+        }
+        .signature-group .button {
+            margin-top: 5px;
+            background: linear-gradient(to right, #6c757d, #495057); /* Gray gradient */
+        }
+        .signature-group .button:hover {
+            background: linear-gradient(to right, #495057, #6c757d);
+        }
+        .image-preview {
+            max-width: 150px;
+            max-height: 150px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: block; /* Para que la imagen ocupe su propia línea */
+        }
+        /* Make image preview clickable */
+        .image-preview-container {
+            display: inline-block; /* Allows click on the image itself */
+            cursor: pointer;
+            max-width: 150px;
+        }
+        .signature-preview {
+            max-width: 150px;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 10px;
+            background-color: #fff;
             display: block;
         }
 
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            border: 2px solid #ddd;
-            background-color: #fff;
-            font-size: 1rem;
+        /* Estilos del pie de página */
+        footer {
+            text-align: center;
+            margin-top: 50px; /* Más margen superior */
+            padding-top: 25px; /* Más relleno superior */
+            border-top: 1px solid #e0e0e0; /* Borde más definido */
+            color: #888; /* Color de texto más suave */
+            font-size: 0.9em;
+        }
+
+        /* Pagination styles */
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        .pagination-controls button {
+            background-color: #f0f0f0;
+            color: #555;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .pagination-controls button:hover:not(:disabled) {
+            background-color: #e0e0e0;
             color: #333;
         }
-
-        input:focus, select:focus, textarea:focus {
-            border-color: #4CAF50;
-            outline: none;
+        .pagination-controls button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .pagination-controls span {
+            font-weight: bold;
+            color: #2c3e50;
         }
 
-        button {
-            background-color: #4CAF50;
+        /* Message box/Modal for alerts */
+        .message-box-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s linear;
+        }
+        .message-box-overlay.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+        .message-box {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        .message-box h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .message-box p {
+            color: #555;
+            margin-bottom: 25px;
+        }
+        .message-box button {
+            background: linear-gradient(to right, #3498db, #2980b9);
             color: white;
+            padding: 10px 20px;
             border: none;
-            padding: 12px 30px;
+            border-radius: 5px;
             cursor: pointer;
-            border-radius: 8px;
-            font-size: 1rem;
             transition: background-color 0.3s ease;
         }
-
-        button:hover {
-            background-color: #45a049;
+        .message-box button:hover {
+            background: linear-gradient(to right, #2980b9, #3498db);
         }
 
-        ::placeholder {
-            color: #777;
-        }
-
+        /* Responsive adjustments for smaller screens */
         @media (max-width: 768px) {
             .container {
-                width: 90%;
+                margin: 20px auto;
                 padding: 20px;
             }
-
-            h1 {
-                font-size: 1.5rem;
+            header h1 {
+                font-size: 2em;
             }
-
-            button {
+            nav a {
+                padding: 10px 12px;
+                margin: 0 4px;
+                font-size: 0.9em;
+            }
+            h2 {
+                font-size: 1.7em;
+            }
+            .section {
+                padding: 18px;
+            }
+            ul li {
+                padding: 12px 15px;
+            }
+            .button {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+            .form-group label {
+                font-size: 1em;
+            }
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-controls input,
+            .filter-controls select,
+            .filter-controls button {
                 width: 100%;
+                margin-bottom: 10px;
+            }
+            .export-buttons {
+                flex-direction: column;
+            }
+            .export-buttons .button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav a {
+                display: block; /* Enlaces de navegación en bloques */
+                margin-bottom: 5px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Formulario de Retiro de Componentes</h1>
-        <form id="formulario" action="https://formsubmit.co/manto.helicopteros.fah@gmail.com" method="POST">
-            <label for="nombre">Nombre del Mecánico:</label>
-            <input type="text" id="nombre" name="nombre" required>
-
-            <label for="nombre">Horas De La Aeronave:</label>
-            <input type="text" id="nombre" name="nombre" required>
-
-            <label for="numero_serie">Número de Serie:</label>
-            <input type="text" id="numero_serie" name="numero_serie" required>
-
-            <label for="numero_parte">Número de Parte:</label>
-            <input type="text" id="numero_parte" name="numero_parte" required>
-
-            <label for="razon">Razón por la cual se remueve:</label>
-            <input type="text" id="razon" name="razon" required>
-
-            <label for="nombre_componente">Nombre del Componente:</label>
-            <input type="text" id="nombre_componente" name="nombre_componente" required>
-
-            <label for="inspector_autoriza">Inspector que autoriza:</label>
-            <select id="inspector_autoriza" name="inspector_autoriza" required>
-                <option value="">Seleccione un inspector</option>
-                <option value="jeferodriguez">Jefe Rodríguez</option>
-                <option value="jefepavon">Jefe Pavón</option>
-                <option value="jeferendon">Jefe Rendón</option>
-                <option value="jefeandino">Jefe Andino</option>
-                <option value="jefemejia">Jefe Mejía</option>
-            </select>
-
-            <label for="fecha_desinstalacion">Fecha de Desinstalación:</label>
-            <input type="date" id="fecha_desinstalacion" name="fecha_desinstalacion" required>
-
-            <label for="hora_desinstalacion">Hora de Desinstalación:</label>
-            <input type="time" id="hora_desinstalacion" name="hora_desinstalacion" required>
-
-            <label for="tipo_helicoptero">Tipo de Helicóptero:</label>
-            <select id="tipo_helicoptero" name="tipo_helicoptero" required>
-                <option value="">Seleccione un tipo</option>
-                <option value="UH-1H">UH-1H</option>
-                <option value="BELL-412">BELL-412</option>
-                <option value="H-145">H-145</option>
-                <option value="BO-105">BO-105</option>
-            </select>
-
-            <label for="leyenda">Leyenda:</label>
-            <textarea id="leyenda" name="leyenda" rows="4" placeholder="Escriba la leyenda de la forma..."></textarea>
-
-            <!-- Campos ocultos para FormSubmit -->
-            <input type="hidden" name="_next" value=""> <!-- Redirige a una página de agradecimiento -->
-            <input type="hidden" name="_captcha" value="false"> <!-- Desactiva el captcha -->
-
-            <button type="submit">Retirar Componente</button>
-        </form>
+    <div id="loadingOverlay" class="">
+        <div class="spinner"></div>
     </div>
 
-    <!-- Firebase SDK -->
+    <div id="messageBoxOverlay" class="message-box-overlay">
+        <div class="message-box">
+            <h3 id="messageBoxTitle"></h3>
+            <p id="messageBoxContent"></p>
+            <button id="messageBoxCloseButton">Aceptar</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Control de Componentes de Aviación</h1>
+            <div id="userIdDisplay"></div>
+        </header>
+
+        <nav>
+            <a href="#inicio">Inicio</a>
+            <a href="#desinstalaciones">Desinstalaciones</a>
+            <a href="#instalaciones">Instalaciones</a>
+            <a href="#registrar">Registrar Operación</a>
+        </nav>
+
+        <div id="inicio" class="section">
+            <h2>Bienvenido</h2>
+            <p>Esta es tu herramienta para llevar un registro claro y eficiente de las operaciones de desinstalación e instalación de componentes en aeronaves.</p>
+            <p>Utiliza las secciones de navegación para ver los registros o para añadir nuevas operaciones.</p>
+        </div>
+
+        <div id="desinstalaciones" class="section">
+            <h2>Historial de Desinstalaciones</h2>
+            <div class="filter-controls">
+                <input type="text" id="searchInputDesinstalacion" placeholder="Buscar por componente o aeronave...">
+                <select id="categoryFilterDesinstalacion">
+                    <option value="">Todas las Categorías</option>
+                    <option value="Aviónica">Aviónica</option>
+                    <option value="Hidráulica">Hidráulica</option>
+                    <option value="Motores">Motores</option>
+                    <option value="Estructura">Estructura</option>
+                    <option value="Cabina">Cabina</option>
+                    <option value="Tren de Aterrizaje">Tren de Aterrizaje</option>
+                    <option value="Sistemas Eléctricos">Sistemas Eléctricos</option>
+                    <option value="Sistemas de Combustible">Sistemas de Combustible</option>
+                    <option value="Otros">Otros</option>
+                </select>
+                <button onclick="filterComponents('desinstalacion')">Buscar/Filtrar</button>
+            </div>
+            <ul id="desinstalacionesList">
+                <!-- Los componentes se cargarán aquí dinámicamente desde Firestore -->
+            </ul>
+            <div class="pagination-controls">
+                <button id="prevPageDesinstalacion" disabled>Anterior</button>
+                <span id="currentPageDesinstalacion">Página 1</span>
+                <button id="nextPageDesinstalacion">Siguiente</button>
+            </div>
+            <div class="export-buttons">
+                <button class="button" onclick="exportToPDF('desinstalacion')">Exportar PDF</button>
+                <button class="button" onclick="sendEmailNotification('desinstalacion')">Enviar Notificación (Email)</button>
+            </div>
+        </div>
+
+        <div id="instalaciones" class="section">
+            <h2>Historial de Instalaciones</h2>
+            <div class="filter-controls">
+                <input type="text" id="searchInputInstalacion" placeholder="Buscar por componente o aeronave...">
+                <select id="categoryFilterInstalacion">
+                    <option value="">Todas las Categorías</option>
+                    <option value="Aviónica">Aviónica</option>
+                    <option value="Hidráulica">Hidráulica</option>
+                    <option value="Motores">Motores</option>
+                    <option value="Estructura">Estructura</option>
+                    <option value="Cabina">Cabina</option>
+                    <option value="Tren de Aterrizaje">Tren de Aterrizaje</option>
+                    <option value="Sistemas Eléctricos">Sistemas Eléctricos</option>
+                    <option value="Sistemas de Combustible">Sistemas de Combustible</option>
+                    <option value="Otros">Otros</option>
+                </select>
+                <button onclick="filterComponents('instalacion')">Buscar/Filtrar</button>
+            </div>
+            <ul id="instalacionesList">
+                <!-- Los componentes se cargarán aquí dinámicamente desde Firestore -->
+            </ul>
+            <div class="pagination-controls">
+                <button id="prevPageInstalacion" disabled>Anterior</button>
+                <span id="currentPageInstalacion">Página 1</span>
+                <button id="nextPageInstalacion">Siguiente</button>
+            </div>
+            <div class="export-buttons">
+                <button class="button" onclick="exportToPDF('instalacion')">Exportar PDF</button>
+                <button class="button" onclick="sendEmailNotification('instalacion')">Enviar Notificación (Email)</button>
+            </div>
+        </div>
+
+        <div id="registrar" class="section">
+            <h2>Registrar Nueva Operación</h2>
+            <p>Utiliza este formulario para registrar una desinstalación o instalación.</p>
+            <form id="registroForm">
+                <input type="hidden" id="componentIdToEdit"> <!-- Campo oculto para guardar el ID del componente a editar -->
+                <div class="form-group">
+                    <label for="tipoOperacion">Tipo de Operación:</label>
+                    <select id="tipoOperacion" name="tipoOperacion" class="form-control">
+                        <option value="instalacion">Instalación</option>
+                        <option value="desinstalacion">Desinstalación</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="componente">Nombre del Componente:</label>
+                    <input type="text" id="componente" name="componente" placeholder="Ej: Unidad de Control de Vuelo" required>
+                </div>
+                <div class="form-group">
+                    <label for="parteNumero">Número de Parte (P/N):</label>
+                    <input type="text" id="parteNumero" name="parteNumero" placeholder="Ej: ABC-12345">
+                </div>
+                <div class="form-group">
+                    <label for="numeroSerieComponente">Número de Serie del Componente:</label>
+                    <input type="text" id="numeroSerieComponente" name="numeroSerieComponente" placeholder="Ej: SN-987654321">
+                </div>
+                <div class="form-group">
+                    <label for="aeronave">Matrícula de Aeronave:</label>
+                    <input type="text" id="aeronave" name="aeronave" placeholder="Ej: N123UA" required>
+                </div>
+                <!-- REMOVIDO: Número de Serie de la Aeronave -->
+                <div class="form-group">
+                    <label for="category">Categoría:</label>
+                    <select id="category" name="category" class="form-control" required>
+                        <option value="">Selecciona una categoría</option>
+                        <option value="Aviónica">Aviónica</option>
+                        <option value="Hidráulica">Hidráulica</option>
+                        <option value="Motores">Motores</option>
+                        <option value="Estructura">Estructura</option>
+                        <option value="Cabina">Cabina</option>
+                        <option value="Tren de Aterrizaje">Tren de Aterrizaje</option>
+                        <option value="Sistemas Eléctricos">Sistemas Eléctricos</option>
+                        <option value="Sistemas de Combustible">Sistemas de Combustible</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fecha">Fecha de la Operación:</label>
+                    <input type="date" id="fecha" name="fecha" required>
+                </div>
+                <div class="form-group">
+                    <label for="notas">Motivo / Notas (Opcional):</label>
+                    <textarea id="notas" name="notas" placeholder="Ej: Mantenimiento preventivo, falla detectada, etc."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="photoUpload">Foto del Componente (Opcional):</label>
+                    <input type="file" id="photoUpload" name="photoUpload" accept="image/*">
+                    <img id="photoPreview" class="image-preview" src="" alt="Previsualización de la foto" style="display: none;">
+                    <p style="font-size: 0.8em; color: #777; margin-top: 5px;">**Nota sobre la foto:** Para guardar imágenes reales de forma permanente, se necesita un servicio de almacenamiento como Firebase Storage, que no está integrado en esta demostración directa. La foto no se guardará con la entrada del componente.</p>
+                </div>
+
+                <div class="signature-group">
+                    <label for="signatureTechnicianName">Nombre del Técnico:</label>
+                    <input type="text" id="signatureTechnicianName" name="signatureTechnicianName" placeholder="Nombre completo del técnico">
+                    <label for="signatureCanvasTechnician">Firma del Técnico:</label>
+                    <canvas id="signatureCanvasTechnician" width="300" height="150"></canvas>
+                    <button type="button" class="button" id="signatureClearButtonTechnician">Borrar Firma Técnico</button>
+                    <p style="font-size: 0.8em; color: #777; margin-top: 5px;">Dibuja la firma del técnico en el recuadro de arriba.</p>
+                </div>
+
+                <div class="signature-group">
+                    <label for="signatureInspectorName">Nombre del Inspector:</label>
+                    <input type="text" id="signatureInspectorName" name="signatureInspectorName" placeholder="Nombre completo del inspector">
+                    <label for="signatureCanvasInspector">Firma del Inspector:</label>
+                    <canvas id="signatureCanvasInspector" width="300" height="150"></canvas>
+                    <button type="button" class="button" id="signatureClearButtonInspector">Borrar Firma Inspector</button>
+                    <p style="font-size: 0.8em; color: #777; margin-top: 5px;">Dibuja la firma del inspector en el recuadro de arriba.</p>
+                </div>
+
+                <button type="submit" class="button" id="submitButton">Registrar Operación</button>
+                <button type="button" class="button secondary" id="cancelEditButton" style="display: none;">Cancelar Edición</button>
+            </form>
+            <p style="margin-top: 20px; font-style: italic; font-size: 0.9em; color: #777;">
+                **Nota:** Esta página ahora guarda tus datos de forma permanente usando Firestore (una base de datos en la nube).
+            </p>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Control de Componentes de Aviación. Todos los derechos reservados.</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDKs -->
     <script type="module">
-        // Importar Firebase Modular SDK
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Configuración de Firebase
+        // Firebase Configuration (provided by user)
         const firebaseConfig = {
-          apiKey: "AIzaSyCIzSu7zf54j48AqkSDBCTLvMq3CH89jk4",
-          authDomain: "database-80e6d.firebaseapp.com",
-          projectId: "database-80e6d",
-          storageBucket: "database-80e6d.firebasestorage.app",
-          messagingSenderId: "343574290642",
-          appId: "1:343574290642:web:cefa4cc16895fd405a4d0b"
-        }; 
-      
-        // Inicializa Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+            apiKey: "AIzaSyD5p5tQXDq9O0oawXKuhKP07A94oRgGUF8",
+            authDomain: "componentes-a6c48.firebaseapp.com",
+            projectId: "componentes-a6c48",
+            storageBucket: "componentes-a6c48.firebasestorage.app",
+            messagingSenderId: "757276581076",
+            appId: "1:757276581076:web:0f76f914776ae925932f41",
+            measurementId: "G-TT5JNJ5QJR"
+        };
+        // *** IMPORTANTE: Asegúrate de que la Autenticación de Firebase esté habilitada en tu consola de Firebase
+        // (Authentication -> Get started -> elige un método como "Anonymous" o "Email/Password") ***
+        console.log("Firebase Configuración Usada:", firebaseConfig); // Para depuración
 
-        // Referencia al formulario
-        const formulario = document.getElementById('formulario');
+        const appId = firebaseConfig.projectId; // Usamos projectId como appId, es más fiable para la ruta de Firestore
 
-        formulario.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Evitar el envío inmediato del formulario
+        // Global Firebase variables
+        let app;
+        let db;
+        let auth;
+        let currentUserId = null;
+        let componentsCollectionRef;
+        let allComponents = []; // Almacena todos los componentes para filtrado y paginación
 
-            // Obtener los valores del formulario
-            const nombre = document.getElementById('nombre').value;
-            const HorasDeLaAeronave = document.getElementById('nombre').value;
-            const numeroSerie = document.getElementById('numero_serie').value;
-            const numeroParte = document.getElementById('numero_parte').value;
-            const razon = document.getElementById('razon').value;
-            const nombreComponente = document.getElementById('nombre_componente').value;
-            const inspectorAutoriza = document.getElementById('inspector_autoriza').value;
-            const fechaDesinstalacion = document.getElementById('fecha_desinstalacion').value;
-            const horaDesinstalacion = document.getElementById('hora_desinstalacion').value;
-            const tipoHelicoptero = document.getElementById('tipo_helicoptero').value;
-            const leyenda = document.getElementById('leyenda').value;
+        // Pagination state
+        let currentPageDesinstalacion = 1;
+        let currentPageInstalacion = 1;
+        const itemsPerPage = 5; // Número de elementos por página
+
+        // UI Elements
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const registroForm = document.getElementById('registroForm');
+        const submitButton = document.getElementById('submitButton');
+        const cancelEditButton = document.getElementById('cancelEditButton');
+        const componentIdToEditInput = document.getElementById('componentIdToEdit');
+
+        const messageBoxOverlay = document.getElementById('messageBoxOverlay');
+        const messageBoxTitle = document.getElementById('messageBoxTitle');
+        const messageBoxContent = document.getElementById('messageBoxContent');
+        const messageBoxCloseButton = document.getElementById('messageBoxCloseButton');
+
+        // Signature pad instances (now managed by initSignaturePad)
+        let technicianSignaturePad;
+        let inspectorSignaturePad;
+
+        // Photo upload elements
+        const photoUploadInput = document.getElementById('photoUpload');
+        const photoPreview = document.getElementById('photoPreview');
+        let currentPhotoBase64 = null; // To store tiny photo base64 or URL if already fetched
+
+        /**
+         * Muestra el overlay de carga.
+         */
+        function showLoading() {
+            loadingOverlay.classList.add('visible');
+            console.log("showLoading() llamado."); // Log de depuración
+        }
+
+        /**
+         * Oculta el overlay de carga.
+         */
+        function hideLoading() {
+            loadingOverlay.classList.remove('visible');
+            console.log("hideLoading() llamado."); // Log de depuración
+        }
+
+        /**
+         * Muestra un mensaje en una ventana modal personalizada.
+         * @param {string} title - El título del mensaje.
+         * @param {string} message - El contenido del mensaje.
+         */
+        function showMessageBox(title, message) {
+            messageBoxTitle.textContent = title;
+            messageBoxContent.textContent = message;
+            messageBoxOverlay.classList.add('visible');
+        }
+
+        /**
+         * Oculta la ventana modal de mensajes.
+         */
+        messageBoxCloseButton.addEventListener('click', () => {
+            messageBoxOverlay.classList.remove('visible');
+        });
+
+        /**
+         * Inicializa y gestiona un pad de firma individual.
+         * @param {HTMLCanvasElement} canvasElement - El elemento canvas para la firma.
+         * @param {HTMLButtonElement} clearButtonElement - El botón para borrar esta firma.
+         * @returns {Object} Un objeto con métodos para obtener la firma y borrarla.
+         */
+        function initSignaturePad(canvasElement, clearButtonElement) {
+            const ctx = canvasElement.getContext('2d');
+            let drawing = false;
+            let lastX = 0;
+            let lastY = 0;
+
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000';
+
+            const getMousePos = (e) => {
+                const rect = canvasElement.getBoundingClientRect();
+                return {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            };
+
+            const getTouchPos = (e) => {
+                const rect = canvasElement.getBoundingClientRect();
+                const touch = e.touches[0];
+                return {
+                    x: touch.clientX - rect.left,
+                    y: touch.clientY - rect.top
+                };
+            };
+
+            canvasElement.addEventListener('mousedown', (e) => {
+                drawing = true;
+                const pos = getMousePos(e);
+                lastX = pos.x;
+                lastY = pos.y;
+            });
+
+            canvasElement.addEventListener('mouseup', () => drawing = false);
+            canvasElement.addEventListener('mouseout', () => drawing = false);
+
+            canvasElement.addEventListener('mousemove', (e) => {
+                if (!drawing) return;
+                e.preventDefault();
+                const pos = getMousePos(e);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                lastX = pos.x;
+                lastY = pos.y;
+            });
+
+            canvasElement.addEventListener('touchstart', (e) => {
+                drawing = true;
+                e.preventDefault();
+                const pos = getTouchPos(e);
+                lastX = pos.x;
+                lastY = pos.y;
+            }, { passive: false });
+
+            canvasElement.addEventListener('touchend', () => drawing = false);
+
+            canvasElement.addEventListener('touchmove', (e) => {
+                if (!drawing) return;
+                e.preventDefault();
+                const pos = getTouchPos(e);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                lastX = pos.x;
+                lastY = pos.y;
+            }, { passive: false });
+
+            clearButtonElement.addEventListener('click', () => clear());
+
+            const clear = () => {
+                ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+                ctx.fillStyle = '#fcfcfc'; // Restore background
+                ctx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+            };
+
+            clear(); // Clear canvas on load
+
+            return {
+                getSignatureData: () => canvasElement.toDataURL('image/png'),
+                clear: clear,
+                loadSignature: (dataUrl) => {
+                    clear(); // Clear current signature before loading new one
+                    if (dataUrl) {
+                        const img = new Image();
+                        img.onload = () => {
+                            ctx.drawImage(img, 0, 0, canvasElement.width, canvasElement.height);
+                        };
+                        img.src = dataUrl;
+                    }
+                }
+            };
+        }
+
+
+        // Initialize Firebase
+        document.addEventListener('DOMContentLoaded', async () => {
+            showLoading(); // Show loading indicator
+            try {
+                console.log("Intentando inicializar Firebase con la configuración:", firebaseConfig);
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                console.log("Firebase inicializado. Intentando autenticar.");
+
+                // Siempre intenta iniciar sesión de forma anónima
+                console.log("Intentando signInAnonymously...");
+                await signInAnonymously(auth);
+                console.log("signInAnonymously exitoso.");
+                
+                // onAuthStateChanged se encargará de establecer el currentUserId y el listener de Firestore
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        currentUserId = user.uid;
+                        userIdDisplay.textContent = `ID de Usuario: ${currentUserId}`;
+                        console.log("Firebase Auth Listo. ID de Usuario:", currentUserId);
+                        // Define collection reference after user is authenticated
+                        componentsCollectionRef = collection(db, `artifacts/${appId}/users/${currentUserId}/components`);
+                        console.log("Referencia a la colección de Firestore establecida:", componentsCollectionRef.path);
+                        // Un pequeño retraso para asegurar que todo esté listo antes de establecer el listener de datos
+                        setTimeout(() => {
+                            setupRealtimeListener(); // Iniciar la escucha de cambios de datos
+                        }, 500); // 500ms de retraso
+                    } else {
+                        currentUserId = null;
+                        userIdDisplay.textContent = 'No autenticado';
+                        console.log("Ningún usuario ha iniciado sesión.");
+                        hideLoading(); // Ocultar indicador si la autenticación falla
+                        showMessageBox("Error de Autenticación", "No se pudo autenticar el usuario. Por favor, recarga la página. Asegúrate de que la autenticación anónima esté habilitada en tu proyecto de Firebase.");
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error al inicializar Firebase o durante la autenticación:", error);
+                hideLoading();
+                showMessageBox("Error de Inicialización", `No se pudo iniciar Firebase. Revisa la consola para más detalles: ${error.message}`);
+            }
+
+            // Setup signature pads using the new function
+            technicianSignaturePad = initSignaturePad(signatureCanvasTechnician, signatureClearButtonTechnician);
+            inspectorSignaturePad = initSignaturePad(signatureCanvasInspector, signatureClearButtonInspector);
+        });
+
+        /**
+         * Configura el listener en tiempo real para los componentes en Firestore.
+         */
+        function setupRealtimeListener() {
+            if (!componentsCollectionRef) {
+                console.warn("componentsCollectionRef no está definida. La escucha en tiempo real no se iniciará. Ocultando spinner.");
+                hideLoading(); // Asegurarse de ocultar el spinner incluso si la ref de colección es nula
+                return; // Ensure collection ref is set
+            }
+            console.log("Estableciendo listener onSnapshot..."); // Log de depuración
+            // Use onSnapshot for real-time updates
+            onSnapshot(query(componentsCollectionRef), (snapshot) => {
+                console.log("onSnapshot: Datos recibidos o cambios detectados."); // Log de depuración
+                allComponents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                console.log("Datos de Firestore actualizados (dentro de onSnapshot):", allComponents); // Log de depuración
+                renderComponents('desinstalacion', document.getElementById('searchInputDesinstalacion').value, document.getElementById('categoryFilterDesinstalacion').value);
+                renderComponents('instalacion', document.getElementById('searchInputInstalacion').value, document.getElementById('categoryFilterInstalacion').value);
+                hideLoading(); // Ocultar indicador de carga después de la carga inicial de datos
+            }, (error) => {
+                console.error("Error al obtener documentos de Firestore (dentro de onSnapshot):", error); // Log de depuración
+                hideLoading();
+                showMessageBox("Error de Datos", "No se pudieron cargar los datos de los componentes. Por favor, inténtalo de nuevo.");
+            });
+            console.log("onSnapshot listener establecido."); // Log de depuración
+        }
+
+
+        /**
+         * Renderiza la lista de componentes en la sección especificada.
+         * @param {string} type - El tipo de operación ('desinstalacion' o 'instalacion').
+         * @param {string} searchTerm - El término de búsqueda para filtrar los componentes.
+         * @param {string} categoryFilter - La categoría para filtrar los componentes.
+         */
+        function renderComponents(type, searchTerm = '', categoryFilter = '') {
+            const listElement = type === 'desinstalacion' ? document.getElementById('desinstalacionesList') : document.getElementById('instalacionesList');
+            const prevButton = type === 'desinstalacion' ? document.getElementById('prevPageDesinstalacion') : document.getElementById('prevPageInstalacion');
+            const nextButton = type === 'desinstalacion' ? document.getElementById('nextPageDesinstalacion') : document.getElementById('nextPageInstalacion');
+            const currentPageSpan = type === 'desinstalacion' ? document.getElementById('currentPageDesinstalacion') : document.getElementById('currentPageInstalacion');
+
+            listElement.innerHTML = ''; // Limpiar la lista antes de volver a renderizar
+
+            const filteredComponents = allComponents.filter(component => {
+                const matchesType = component.type === type;
+                const matchesSearch = searchTerm === '' ||
+                                      (component.componente && component.componente.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                                      (component.aeronave && component.aeronave.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                                      (component.parteNumero && component.parteNumero.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                                      (component.numeroSerieComponente && component.numeroSerieComponente.toLowerCase().includes(searchTerm.toLowerCase()));
+                const matchesCategory = categoryFilter === '' || (component.category && component.category === categoryFilter);
+                return matchesType && matchesSearch && matchesCategory;
+            }).sort((a, b) => {
+                // Asegurarse de que las fechas sean objetos Date válidos para la comparación
+                const dateA = new Date(a.fecha);
+                const dateB = new Date(b.fecha);
+
+                // Comprobar si las fechas son válidas. Si no, manejar como un caso especial (por ejemplo, poner al final)
+                if (isNaN(dateA.getTime())) return 1; // Mover inválidos al final
+                if (isNaN(dateB.getTime())) return -1; // Mover inválidos al final
+
+                return dateB.getTime() - dateA.getTime(); // Ordenar por fecha, más reciente primero
+            });
+
+            // Pagination logic
+            const totalPages = Math.ceil(filteredComponents.length / itemsPerPage);
+            let currentPage = (type === 'desinstalacion' ? currentPageDesinstalacion : currentPageInstalacion);
+            if (currentPage > totalPages && totalPages > 0) { // Adjust current page if it's out of bounds after filtering
+                currentPage = totalPages;
+                if (type === 'desinstalacion') currentPageDesinstalacion = totalPages;
+                else currentPageInstalacion = totalPages;
+            } else if (totalPages === 0) {
+                currentPage = 0; // No pages if no components
+            }
+
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedComponents = filteredComponents.slice(startIndex, endIndex);
+
+            currentPageSpan.textContent = `Página ${currentPage || 0} de ${totalPages || 0}`;
+            prevButton.disabled = currentPage <= 1;
+            nextButton.disabled = currentPage >= totalPages;
+
+            // Add event listeners for pagination buttons
+            prevButton.onclick = () => {
+                if (type === 'desinstalacion') currentPageDesinstalacion--;
+                else currentPageInstalacion--;
+                filterComponents(type);
+            };
+            nextButton.onclick = () => {
+                if (type === 'desinstalacion') currentPageInstalacion++;
+                else currentPageInstalacion++;
+                filterComponents(type);
+            };
+
+            if (paginatedComponents.length === 0 && filteredComponents.length > 0) {
+                 // This case happens when current page becomes 0 or invalid after some components are filtered out.
+                 // Reset to page 1 if there are still filtered components
+                 if (type === 'desinstalacion') currentPageDesinstalacion = 1;
+                 else currentPageInstalacion = 1;
+                 filterComponents(type);
+                 return; // Exit to re-render
+            }
+
+
+            if (filteredComponents.length === 0) {
+                listElement.innerHTML = `<p style="text-align: center; color: #777; margin-top: 20px;">No hay registros ${type === 'desinstalacion' ? 'de desinstalaciones' : 'de instalaciones'} que coincidan con la búsqueda.</p>`;
+                return;
+            }
+
+            paginatedComponents.forEach(component => {
+                const listItem = document.createElement('li');
+                listItem.dataset.id = component.id; // Guarda el ID para futuras interacciones
+
+                let photoHtml = '';
+                if (component.photoUrl) {
+                    // Make image clickable for download if it's a URL
+                    photoHtml = `<p><strong>Foto:</strong> <a href="${component.photoUrl}" download="${component.componente}_${component.id}.jpg" target="_blank" class="image-preview-container"><img src="${component.photoUrl}" alt="Foto del componente" class="image-preview"></a></p>`;
+                } else if (component.photoBase64) {
+                    // Make image clickable for download if it's base64 data
+                    photoHtml = `<p><strong>Foto:</strong> <a href="${component.photoBase64}" download="${component.componente}_${component.id}.png" target="_blank" class="image-preview-container"><img src="${component.photoBase64}" alt="Foto del componente" class="image-preview"></a></p>`;
+                }
+
+                let signatureTechnicianHtml = '';
+                if (component.signatureDataTechnician) {
+                    signatureTechnicianHtml = `<p><strong>Firma Técnico (${component.signatureTechnicianName || 'N/A'}):</strong> <img src="${component.signatureDataTechnician}" alt="Firma del técnico" class="signature-preview"></p>`;
+                }
+                let signatureInspectorHtml = '';
+                if (component.signatureDataInspector) {
+                    signatureInspectorHtml = `<p><strong>Firma Inspector (${component.signatureInspectorName || 'N/A'}):</strong> <img src="${component.signatureDataInspector}" alt="Firma del inspector" class="signature-preview"></p>`;
+                }
+
+                // Estructura del elemento de lista con resumen, detalles y botones de acción
+                listItem.innerHTML = `
+                    <div class="list-item-summary">
+                        <span><strong>${component.componente}</strong> - ${component.aeronave} (${component.fecha})</span>
+                        <div class="list-item-actions">
+                            <button class="action-button edit-button" data-id="${component.id}" title="Editar"><i class="fas fa-edit"></i></button>
+                            <button class="action-button delete-button" data-id="${component.id}" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
+                            <i class="fas fa-chevron-right arrow-icon"></i>
+                        </div>
+                    </div>
+                    <div class="list-item-details">
+                        <p><strong>Número de Parte (P/N):</strong> ${component.parteNumero || 'N/A'}</p>
+                        <p><strong>Número de Serie Componente:</strong> ${component.numeroSerieComponente || 'N/A'}</p>
+                        <p><strong>Categoría:</strong> ${component.category || 'No especificada'}</p>
+                        <p><strong>Motivo / Notas:</strong> ${component.motivoNotas || 'N/A'}</p>
+                        ${photoHtml}
+                        ${signatureTechnicianHtml}
+                        ${signatureInspectorHtml}
+                    </div>
+                `;
+
+                // Añadir evento click para expandir/colapsar detalles (en la flecha)
+                listItem.querySelector('.arrow-icon').addEventListener('click', (e) => {
+                    e.stopPropagation(); // Evitar que el clic en la flecha también active el edit/delete
+                    listItem.classList.toggle('expanded');
+                });
+
+                // Añadir eventos a los botones de Editar y Eliminar
+                listItem.querySelector('.edit-button').addEventListener('click', (e) => {
+                    e.stopPropagation(); // Evitar que el clic en el botón expanda/colapse
+                    editComponent(component.id);
+                });
+                listItem.querySelector('.delete-button').addEventListener('click', (e) => {
+                    e.stopPropagation(); // Evitar que el clic en el botón expanda/colapse
+                    deleteComponent(component.id);
+                });
+
+                listElement.appendChild(listItem);
+            });
+        }
+
+        /**
+         * Maneja la lógica de filtrado y búsqueda.
+         * @param {string} type - El tipo de operación ('desinstalacion' o 'instalacion').
+         */
+        window.filterComponents = function(type) { // Made global for onclick in HTML
+            const searchInput = type === 'desinstalacion' ? document.getElementById('searchInputDesinstalacion') : document.getElementById('searchInputInstalacion');
+            const categoryFilter = type === 'desinstalacion' ? document.getElementById('categoryFilterDesinstalacion') : document.getElementById('categoryFilterInstalacion');
+
+            const searchTerm = searchInput.value;
+            const selectedCategory = categoryFilter.value;
+
+            // Reset current page to 1 when a new filter/search is applied
+            if (type === 'desinstalacion') currentPageDesinstalacion = 1;
+            else currentPageInstalacion = 1;
+
+            renderComponents(type, searchTerm, selectedCategory);
+        }
+
+        /**
+         * Función para editar un componente existente.
+         * @param {string} id - El ID del componente a editar.
+         */
+        async function editComponent(id) {
+            const componentToEdit = allComponents.find(comp => comp.id === id);
+            if (componentToEdit) {
+                // Rellenar el formulario con los datos del componente
+                document.getElementById('tipoOperacion').value = componentToEdit.type;
+                document.getElementById('componente').value = componentToEdit.componente;
+                document.getElementById('parteNumero').value = componentToEdit.parteNumero || '';
+                document.getElementById('numeroSerieComponente').value = componentToEdit.numeroSerieComponente || '';
+                document.getElementById('aeronave').value = componentToEdit.aeronave;
+                // document.getElementById('aeronaveSerie').value = componentToEdit.aeronaveSerie || ''; // Removido
+                document.getElementById('category').value = componentToEdit.category || '';
+                document.getElementById('fecha').value = componentToEdit.fecha;
+                document.getElementById('notas').value = componentToEdit.motivoNotas || '';
+                document.getElementById('componentIdToEdit').value = componentToEdit.id; // Guardar el ID
+
+                // Cargar firma del técnico si existe
+                document.getElementById('signatureTechnicianName').value = componentToEdit.signatureTechnicianName || '';
+                technicianSignaturePad.loadSignature(componentToEdit.signatureDataTechnician);
+
+                // Cargar firma del inspector si existe
+                document.getElementById('signatureInspectorName').value = componentToEdit.signatureInspectorName || '';
+                inspectorSignaturePad.loadSignature(componentToEdit.signatureDataInspector);
+
+                // Cargar foto si existe (solo preview, no el archivo real)
+                if (componentToEdit.photoUrl) {
+                    photoPreview.src = componentToEdit.photoUrl;
+                    photoPreview.style.display = 'block';
+                    currentPhotoBase64 = componentToEdit.photoUrl; // Store as if it's the current photo
+                } else if (componentToEdit.photoBase64) {
+                    photoPreview.src = componentToEdit.photoBase64;
+                    photoPreview.style.display = 'block';
+                    currentPhotoBase64 = componentToEdit.photoBase64;
+                }
+                else {
+                    photoPreview.style.display = 'none';
+                    photoPreview.src = '';
+                    currentPhotoBase64 = null;
+                }
+                photoUploadInput.value = ''; // Clear file input field
+
+                // Cambiar el botón de submit a "Actualizar Operación" y mostrar botón de cancelar
+                submitButton.textContent = 'Actualizar Operación';
+                cancelEditButton.style.display = 'inline-block';
+
+                // Desplazarse al formulario
+                registroForm.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                showMessageBox("Error", "Componente no encontrado para editar.");
+            }
+        }
+
+        /**
+         * Función para eliminar un componente.
+         * @param {string} id - El ID del componente a eliminar.
+         */
+        async function deleteComponent(id) {
+            if (!currentUserId) {
+                showMessageBox("Error", "Usuario no autenticado. No se puede eliminar el componente.");
+                return;
+            }
+
+            showMessageBox("Confirmar Eliminación", "¿Estás seguro de que quieres eliminar este componente?");
+            // Temporarily change messageBoxCloseButton to handle confirmation
+            messageBoxCloseButton.textContent = "Sí, Eliminar";
+            // Set a flag or use a temporary function for confirmation action
+            messageBoxCloseButton.onclick = async () => {
+                showMessageBox("Eliminando...", "Por favor espera.");
+                showLoading();
+                try {
+                    await deleteDoc(doc(db, `artifacts/${appId}/users/${currentUserId}/components`, id));
+                    showMessageBox("Éxito", "Componente eliminado exitosamente.");
+                    // No need to manually update `allComponents` or re-render, onSnapshot will handle it.
+                } catch (error) {
+                    console.error("Error deleting document:", error);
+                    showMessageBox("Error", "No se pudo eliminar el componente. Inténtalo de nuevo.");
+                } finally {
+                    hideLoading();
+                    // Restore original message box close behavior
+                    messageBoxCloseButton.textContent = "Aceptar";
+                    // Restore default message box close button behavior
+                    messageBoxCloseButton.onclick = () => messageBoxOverlay.classList.remove('visible');
+                    messageBoxOverlay.classList.remove('visible'); // Close confirmation box
+                }
+            };
+        }
+
+        // Manejar el envío del formulario (para añadir o actualizar)
+        registroForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Evitar que el formulario se envíe
+
+            if (!currentUserId) {
+                showMessageBox("Error", "Usuario no autenticado. No se puede registrar la operación.");
+                return;
+            }
+
+            showLoading(); // Mostrar indicador de carga
+
+            // Get signature data from the pad instances
+            const signatureDataTechnician = technicianSignaturePad.getSignatureData();
+            const signatureDataInspector = inspectorSignaturePad.getSignatureData();
+
+            const componentData = {
+                type: document.getElementById('tipoOperacion').value,
+                componente: document.getElementById('componente').value,
+                parteNumero: document.getElementById('parteNumero').value || null,
+                numeroSerieComponente: document.getElementById('numeroSerieComponente').value || null,
+                aeronave: document.getElementById('aeronave').value,
+                category: document.getElementById('category').value,
+                fecha: document.getElementById('fecha').value,
+                motivoNotas: document.getElementById('notas').value || null,
+                signatureTechnicianName: document.getElementById('signatureTechnicianName').value || null,
+                signatureDataTechnician: signatureDataTechnician, // Save technician signature base64
+                signatureInspectorName: document.getElementById('signatureInspectorName').value || null,
+                signatureDataInspector: signatureDataInspector, // Save inspector signature base64
+                photoBase64: currentPhotoBase64 && currentPhotoBase64.startsWith('data:image/') ? currentPhotoBase64 : null // Only save base64 if it's a data URL
+            };
+
+            const idToEdit = componentIdToEditInput.value;
 
             try {
-                // Guardar en Firestore
-                await addDoc(collection(db, 'retiros_componentes'), {
-                    nombre,
-                    HorasDeLaAeronave,
-                    numeroSerie,
-                    numeroParte,
-                    razon,
-                    nombreComponente,
-                    inspectorAutoriza,
-                    fechaDesinstalacion,
-                    horaDesinstalacion,
-                    tipoHelicoptero,
-                    leyenda
-                });
-                
-                // Al guardar exitosamente en Firebase, enviar el formulario a FormSubmit
-                formulario.submit(); // Este comando envía el formulario a FormSubmit
+                if (idToEdit) { // Modo edición
+                    await updateDoc(doc(db, `artifacts/${appId}/users/${currentUserId}/components`, idToEdit), componentData);
+                    showMessageBox("Éxito", "Componente actualizado exitosamente.");
+                } else { // Modo añadir
+                    await addDoc(componentsCollectionRef, componentData);
+                    showMessageBox("Éxito", "Operación registrada exitosamente.");
+                }
+                registroForm.reset(); // Limpiar el formulario
+                componentIdToEditInput.value = ''; // Reset ID de edición
+                submitButton.textContent = 'Registrar Operación'; // Restaurar texto del botón
+                cancelEditButton.style.display = 'none'; // Ocultar botón de cancelar
+                technicianSignaturePad.clear(); // Clear technician signature pad
+                inspectorSignaturePad.clear(); // Clear inspector signature pad
+                document.getElementById('signatureTechnicianName').value = '';
+                document.getElementById('signatureInspectorName').value = '';
+                clearPhotoPreview(); // Clear photo preview
+                // onSnapshot se encargará de re-renderizar
             } catch (error) {
-                console.error('Error al guardar los datos:', error);
-                alert('Hubo un error al registrar el retiro.');
+                console.error("Error al guardar o actualizar el documento:", error);
+                showMessageBox("Error", "No se pudo registrar la operación. Inténtalo de nuevo.");
+            } finally {
+                hideLoading(); // Ocultar indicador de carga
             }
         });
+
+        // Manejar el botón de cancelar edición
+        cancelEditButton.addEventListener('click', () => {
+            registroForm.reset();
+            componentIdToEditInput.value = '';
+            submitButton.textContent = 'Registrar Operación';
+            cancelEditButton.style.display = 'none';
+            technicianSignaturePad.clear();
+            inspectorSignaturePad.clear();
+            document.getElementById('signatureTechnicianName').value = '';
+            document.getElementById('signatureInspectorName').value = '';
+            clearPhotoPreview();
+        });
+        
+        /**
+         * Maneja la selección de archivos de foto.
+         */
+        photoUploadInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        // Resize image to a small thumbnail if needed, to fit Firestore limits (approx 1MB)
+                        // For a real app, this should be uploaded to Firebase Storage
+                        const MAX_SIZE = 150; // Max width/height for thumbnail
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_SIZE) {
+                                height *= MAX_SIZE / width;
+                                width = MAX_SIZE;
+                            }
+                        } else {
+                            if (height > MAX_SIZE) {
+                                width *= MAX_SIZE / height;
+                                height = MAX_SIZE;
+                            }
+                        }
+
+                        const tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = width;
+                        tempCanvas.height = height;
+                        const tempCtx = tempCanvas.getContext('2d');
+                        tempCtx.drawImage(img, 0, 0, width, height);
+
+                        // Get the base64 string of the resized image
+                        const dataUrl = tempCanvas.toDataURL('image/jpeg', 0.8); // Compress to JPEG with 80% quality
+
+                        // Check size (base64 string is larger than binary data)
+                        // This check is a simplification. For actual robust handling, use Firebase Storage.
+                        const MAX_BASE64_SIZE_KB = 50; // Rough estimate to keep it very small for Firestore document
+                        if (dataUrl.length / 1024 > MAX_BASE64_SIZE_KB) {
+                            showMessageBox("Advertencia de Imagen", "La imagen es demasiado grande. Solo se guardará un pequeño preview o un enlace si se usara almacenamiento dedicado (Firebase Storage).");
+                            photoPreview.src = ''; // Clear preview
+                            photoPreview.style.display = 'none';
+                            currentPhotoBase64 = null; // Don't store if too large
+                        } else {
+                            photoPreview.src = dataUrl;
+                            photoPreview.style.display = 'block';
+                            currentPhotoBase64 = dataUrl; // Store base64 if small enough
+                        }
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                clearPhotoPreview();
+            }
+        });
+
+        /**
+         * Limpia la previsualización de la foto.
+         */
+        function clearPhotoPreview() {
+            photoPreview.src = '';
+            photoPreview.style.display = 'none';
+            currentPhotoBase64 = null;
+            photoUploadInput.value = ''; // Clear the file input
+        }
+
+        /**
+         * Exporta los datos a un archivo PDF.
+         * @param {string} type - El tipo de datos a exportar ('desinstalacion' o 'instalacion').
+         */
+        window.exportToPDF = function(type) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const relevantComponents = allComponents.filter(c => c.type === type);
+            if (relevantComponents.length === 0) {
+                showMessageBox("Atención", `No hay datos de ${type === 'desinstalacion' ? 'desinstalaciones' : 'instalaciones'} para exportar a PDF.`);
+                return;
+            }
+
+            let yOffset = 10;
+            const margin = 10;
+            const lineHeight = 7;
+
+            doc.setFontSize(16);
+            doc.text(`Historial de ${type === 'desinstalacion' ? 'Desinstalaciones' : 'Instalaciones'}`, margin, yOffset);
+            yOffset += 10;
+
+            doc.setFontSize(10);
+
+            relevantComponents.forEach((comp, index) => {
+                doc.text(`--- Componente ${index + 1} ---`, margin, yOffset);
+                yOffset += lineHeight;
+                doc.text(`Tipo: ${comp.type}`, margin, yOffset); yOffset += lineHeight;
+                doc.text(`Componente: ${comp.componente}`, margin, yOffset); yOffset += lineHeight;
+                doc.text(`P/N: ${comp.parteNumero || 'N/A'}`, margin, yOffset); yOffset += lineHeight;
+                doc.text(`S/N Componente: ${comp.numeroSerieComponente || 'N/A'}`, margin, yOffset); yOffset += lineHeight;
+                doc.text(`Matrícula Aeronave: ${comp.aeronave}`, margin, yOffset); yOffset += lineHeight;
+                doc.text(`Categoría: ${comp.category || 'No especificada'}`, margin, yOffset); yOffset += lineHeight;
+                doc.text(`Fecha: ${comp.fecha}`, margin, yOffset); yOffset += lineHeight;
+                doc.text(`Notas: ${comp.motivoNotas || 'N/A'}`, margin, yOffset); yOffset += lineHeight;
+
+                // Add Technician Signature and Name
+                if (comp.signatureTechnicianName) {
+                    doc.text(`Nombre Técnico: ${comp.signatureTechnicianName}`, margin, yOffset); yOffset += lineHeight;
+                }
+                if (comp.signatureDataTechnician) {
+                    try {
+                        // Scale signature image down to fit PDF (adjust width/height as needed)
+                        doc.addImage(comp.signatureDataTechnician, 'PNG', margin, yOffset, 50, 25);
+                        yOffset += 30; // Move Y down for image height + padding
+                    } catch (e) {
+                        console.error("Error adding technician signature image to PDF:", e);
+                        doc.text("Firma Técnico: [Error al cargar imagen]", margin, yOffset); yOffset += lineHeight;
+                    }
+                }
+
+                // Add Inspector Signature and Name
+                if (comp.signatureInspectorName) {
+                    doc.text(`Nombre Inspector: ${comp.signatureInspectorName}`, margin, yOffset); yOffset += lineHeight;
+                }
+                if (comp.signatureDataInspector) {
+                    try {
+                        // Scale signature image down to fit PDF (adjust width/height as needed)
+                        doc.addImage(comp.signatureDataInspector, 'PNG', margin, yOffset, 50, 25);
+                        yOffset += 30; // Move Y down for image height + padding
+                    } catch (e) {
+                        console.error("Error adding inspector signature image to PDF:", e);
+                        doc.text("Firma Inspector: [Error al cargar imagen]", margin, yOffset); yOffset += lineHeight;
+                    }
+                }
+
+                // Add Component Photo (if any)
+                if (comp.photoBase64) {
+                    try {
+                         // Scale photo image down to fit PDF (adjust width/height as needed)
+                        doc.addImage(comp.photoBase64, 'JPEG', margin, yOffset, 80, 60); // Adjust size as needed
+                        yOffset += 65; // Move Y down for image height + padding
+                    } catch (e) {
+                        console.error("Error adding component photo to PDF:", e);
+                        doc.text("Foto Componente: [Error al cargar imagen]", margin, yOffset); yOffset += lineHeight;
+                    }
+                } else if (comp.photoUrl) {
+                     // For external URLs, jsPDF might need the image to be loaded first or fetched via CORS.
+                     // For simplicity in this client-side demo, we'll note it.
+                     doc.text(`Foto Componente: ${comp.photoUrl} (URL)`, margin, yOffset); yOffset += lineHeight;
+                }
+
+
+                yOffset += 10; // Space after each component's details
+
+                // Add new page if content overflows
+                if (yOffset > doc.internal.pageSize.height - margin * 2) {
+                    doc.addPage();
+                    yOffset = margin;
+                }
+            });
+
+            doc.save(`${type === 'desinstalacion' ? 'desinstalaciones' : 'instalaciones'}_${new Date().toISOString().slice(0,10)}.pdf`);
+            showMessageBox("Éxito", `Datos de ${type === 'desinstalacion' ? 'desinstalaciones' : 'instalaciones'} exportados a PDF.`);
+        }
+
+        /**
+         * Función simulada para enviar notificación por correo.
+         * Explica que se necesita un backend.
+         * @param {string} type - Tipo de operación.
+         */
+        window.sendEmailNotification = function(type) { // Made global for onclick in HTML
+            showMessageBox("Notificación por Correo",
+                `Para enviar una notificación por correo electrónico de forma automática con los datos de ${type === 'desinstalacion' ? 'desinstalaciones' : 'instalaciones'}, necesitarías un **servidor de backend** o un **servicio de computación en la nube** (como Firebase Cloud Functions, Google Cloud Run, Node.js, Python, etc.).\n\nDesde el navegador, directamente, hay restricciones de seguridad que impiden enviar correos de forma arbitraria para evitar spam y abusos. El backend se encargaría de:\n\n1.  **Recibir la solicitud** de tu aplicación web.\n2.  **Autenticarse de forma segura** con un proveedor de correo (como SendGrid, Mailgun, Nodemailer, la API de Gmail).\n3.  **Preparar y enviar el correo** con los datos adjuntos o formateados. \n\nEsta implementación actual es solo un placeholder para demostrar el concepto.`
+            );
+        }
     </script>
 </body>
 </html>
-
-
