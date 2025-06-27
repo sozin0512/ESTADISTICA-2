@@ -775,7 +775,7 @@
         let db;
         let auth;
         let currentUserId = null;
-        let componentsCollectionRef;
+        let componentsCollectionRef; // Esta referencia será a la colección pública
         let allComponents = []; // Almacena todos los componentes para filtrado y paginación
 
         // Pagination state
@@ -964,9 +964,11 @@
                         currentUserId = user.uid;
                         userIdDisplay.textContent = `ID de Usuario: ${currentUserId}`;
                         console.log("Firebase Auth Listo. ID de Usuario:", currentUserId);
-                        // Define collection reference after user is authenticated
-                        componentsCollectionRef = collection(db, `artifacts/${appId}/users/${currentUserId}/components`);
-                        console.log("Referencia a la colección de Firestore establecida:", componentsCollectionRef.path);
+                        // CAMBIADO PARA SOLUCIONAR EL ERROR DE SEGMENTOS:
+                        // La ruta ahora es artifacts/{appId}/shared_components
+                        // Esto hace que la ruta de la colección tenga 3 segmentos (impar)
+                        componentsCollectionRef = collection(db, `artifacts/${appId}/shared_components`);
+                        console.log("Referencia a la colección de Firestore establecida (PÚBLICA Y CORREGIDA):", componentsCollectionRef.path);
                         // Un pequeño retraso para asegurar que todo esté listo antes de establecer el listener de datos
                         setTimeout(() => {
                             setupRealtimeListener(); // Iniciar la escucha de cambios de datos
@@ -1114,7 +1116,7 @@
                 }
 
                 let signatureTechnicianHtml = '';
-                if (component.signatureDataTechnician) {
+                if (component.signatureTechnicianName) {
                     signatureTechnicianHtml = `<p><strong>Firma Técnico (${component.signatureTechnicianName || 'N/A'}):</strong> <img src="${component.signatureDataTechnician}" alt="Firma del técnico" class="signature-preview"></p>`;
                 }
                 let signatureInspectorHtml = '';
@@ -1254,7 +1256,8 @@
                 showMessageBox("Eliminando...", "Por favor espera.");
                 showLoading();
                 try {
-                    await deleteDoc(doc(db, `artifacts/${appId}/users/${currentUserId}/components`, id));
+                    // CAMBIADO: Eliminar de la colección pública
+                    await deleteDoc(doc(db, `artifacts/${appId}/shared_components`, id));
                     showMessageBox("Éxito", "Componente eliminado exitosamente.");
                     // No need to manually update `allComponents` or re-render, onSnapshot will handle it.
                 } catch (error) {
@@ -1306,9 +1309,11 @@
 
             try {
                 if (idToEdit) { // Modo edición
-                    await updateDoc(doc(db, `artifacts/${appId}/users/${currentUserId}/components`, idToEdit), componentData);
+                    // CAMBIADO: Actualizar en la colección pública
+                    await updateDoc(doc(db, `artifacts/${appId}/shared_components`, idToEdit), componentData);
                     showMessageBox("Éxito", "Componente actualizado exitosamente.");
                 } else { // Modo añadir
+                    // CAMBIADO: Añadir a la colección pública
                     await addDoc(componentsCollectionRef, componentData);
                     showMessageBox("Éxito", "Operación registrada exitosamente.");
                 }
