@@ -27,11 +27,13 @@
             transform: translateX(-50%);
             background-color: #4CAF50; /* Green */
             color: white;
-            padding: 15px 20px;
+            padding: 15px 20px; /* Adjusted padding for mobile */
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             z-index: 1000;
             text-align: center;
+            width: 90%; /* Responsive width for mobile */
+            max-width: 400px; /* Max width for larger screens */
         }
         #message-box.error {
             background-color: #f44336; /* Red */
@@ -47,7 +49,7 @@
             justify-content: center;
             align-items: center;
             z-index: 10000;
-            font-size: 1.5rem;
+            font-size: 1.2rem; /* Smaller font size for mobile */
             color: #333;
         }
 
@@ -64,29 +66,32 @@
             background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
             align-items: center;
             justify-content: center;
+            padding: 1rem; /* Added padding for mobile screens */
         }
         .modal.flex { /* Override display: none when showing */
             display: flex;
         }
         .modal > div {
              background-color: #fff;
-             padding: 2rem;
+             padding: 1.5rem; /* Adjusted padding for mobile */
              border-radius: 0.5rem;
              box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-             width: 90%;
+             width: 100%; /* Full width on small screens */
              max-width: 32rem; /* md:max-w-md for withdrawal, larger for delivery */
         }
-        #delivery-invoice-modal > div {
-            max-width: 50rem; /* Larger modal for delivery invoice */
-        }
-        #edit-item-modal > div {
-            max-width: 38rem; /* Slightly larger for edit modal */
-        }
-        #image-search-modal > div { /* Style for image search modal */
-            max-width: 48rem; /* Make it wider for camera stream */
-        }
-        #item-history-modal > div { /* Style for item history modal */
-            max-width: 55rem; /* Wider for history table */
+        @media (min-width: 768px) { /* Medium screens and up */
+            #delivery-invoice-modal > div {
+                max-width: 50rem; /* Larger modal for delivery invoice */
+            }
+            #edit-item-modal > div {
+                max-width: 38rem; /* Slightly larger for edit modal */
+            }
+            #image-search-modal > div { /* Style for image search modal */
+                max-width: 48rem; /* Make it wider for camera stream */
+            }
+            #item-history-modal > div { /* Style for item history modal */
+                max-width: 55rem; /* Wider for history table */
+            }
         }
 
         /* Specific styles for camera stream and canvas */
@@ -99,7 +104,12 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            min-height: 250px; /* Minimum height for camera feed area */
+            min-height: 200px; /* Minimum height for camera feed area on mobile */
+        }
+        @media (min-width: 768px) {
+            #camera-feed-container {
+                min-height: 250px; /* Larger min-height on desktop */
+            }
         }
         #camera-feed-container video,
         #camera-feed-container canvas {
@@ -115,9 +125,10 @@
 
         /* Estilos específicos para la tabla dentro del modal de entrega */
         #delivery-items-list th, #delivery-items-list td {
-            padding: 0.75rem 1rem;
+            padding: 0.5rem 0.75rem; /* Adjusted padding for mobile */
             text-align: left;
             border-bottom: 1px solid #e5e7eb;
+            font-size: 0.875rem; /* Smaller font size for mobile tables */
         }
         #delivery-items-list th {
             background-color: #f3f4f6;
@@ -125,7 +136,7 @@
 
         /* Estilos para los resultados de búsqueda en el modal de entrega */
         #delivery-search-results {
-            max-height: 200px;
+            max-height: 150px; /* Smaller height for mobile */
             overflow-y: auto;
             border: 1px solid #e5e7eb;
             border-radius: 0.25rem;
@@ -134,10 +145,11 @@
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
         .search-result-item {
-            padding: 0.75rem 1rem;
+            padding: 0.5rem 0.75rem; /* Adjusted padding */
             border-bottom: 1px solid #f3f4f6;
             cursor: pointer;
             transition: background-color 0.2s;
+            font-size: 0.875rem; /* Smaller font size */
         }
         .search-result-item:hover {
             background-color: #f9fafb;
@@ -190,11 +202,16 @@
         /* Custom font for "Creado por" text */
         .created-by-text {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.2rem; /* Adjusted for better visibility */
+            font-size: 1rem; /* Adjusted for better visibility on mobile */
             color: #d1d5db; /* Light gray to stand out on dark blue */
             margin-top: 5px; /* Space from the main title */
             letter-spacing: 1.5px; /* Spacing for a more distinct look */
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3); /* Slight shadow for depth */
+        }
+        @media (min-width: 768px) {
+            .created-by-text {
+                font-size: 1.2rem; /* Larger on desktop */
+            }
         }
 
         /* Styles for authentication section */
@@ -202,31 +219,33 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 200px;
+            min-height: 150px; /* Smaller min-height for mobile */
             background-color: #f3f4f6;
-            padding: 20px;
+            padding: 1.5rem; /* Adjusted padding */
             border-radius: 8px;
             box-shadow: inset 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem; /* Adjusted margin */
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.75rem; /* Adjusted gap */
         }
 
         #auth-section input {
             width: 100%;
-            max-width: 300px;
-            padding: 0.75rem;
+            max-width: 280px; /* Smaller max-width for mobile inputs */
+            padding: 0.625rem; /* Adjusted padding */
             border: 1px solid #d1d5db;
             border-radius: 0.375rem;
+            font-size: 0.875rem; /* Smaller font size */
         }
 
         #auth-section button {
-            padding: 0.75rem 1.5rem;
+            padding: 0.625rem 1.25rem; /* Adjusted padding */
             border-radius: 0.375rem;
             font-weight: 600;
             color: white;
             transition: background-color 0.2s ease-in-out;
             cursor: pointer;
+            font-size: 0.875rem; /* Smaller font size */
         }
 
         #auth-section .bg-blue-600 {
@@ -262,18 +281,35 @@
 
         /* Style for the inventory table container with scrollbar */
         #inventory-table-container {
-            max-height: 500px; /* Adjust this value as needed for desired height */
+            max-height: 400px; /* Adjusted for mobile view */
             overflow-y: auto; /* Enable vertical scrolling */
             overflow-x: auto; /* Enable horizontal scrolling if content overflows */
             border-radius: 0.5rem; /* Rounded corners */
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional: add shadow */
             border: 1px solid #e5e7eb; /* Optional: add border */
         }
+        @media (min-width: 768px) {
+            #inventory-table-container {
+                max-height: 500px; /* Larger height on desktop */
+            }
+        }
 
         /* Ensure the table within the scroll container takes full width */
         #inventory-table-container table {
             min-width: 100%; /* Ensure table doesn't shrink smaller than container */
             border-collapse: collapse; /* Remove double borders */
+        }
+
+        /* Table cell padding and font size for mobile */
+        #inventory-table-container th, #inventory-table-container td {
+            padding: 0.5rem 0.75rem; /* Adjusted padding for mobile */
+            font-size: 0.875rem; /* Smaller font size for mobile tables */
+        }
+        @media (min-width: 768px) {
+            #inventory-table-container th, #inventory-table-container td {
+                padding: 0.75rem 1rem; /* Standard padding for desktop */
+                font-size: 0.95rem; /* Standard font size for desktop */
+            }
         }
 
         /* Critical items card pulsing animation */
@@ -298,26 +334,26 @@
 
     <!-- Modal de Retiro de Cantidad (para un solo artículo) -->
     <div id="withdrawal-modal" class="modal">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Retirar Cantidad de Artículo</h3>
-            <div id="modal-item-details" class="mb-4 text-gray-700">
+        <div class="bg-white p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-sm sm:max-w-md">
+            <h3 class="text-xl sm:text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Retirar Cantidad de Artículo</h3>
+            <div id="modal-item-details" class="mb-4 text-gray-700 text-sm sm:text-base">
                 <p><span class="font-semibold">Número de Parte:</span> <span id="modal-item-id"></span></p>
                 <p><span class="font-semibold">Nombre:</span> <span id="modal-item-name"></span></p>
                 <p><span class="font-semibold">Cantidad Actual:</span> <span id="modal-item-current-quantity"></span></p>
             </div>
             <div class="mb-4">
                 <label for="withdrawal-quantity" class="block text-sm font-medium text-gray-700 mb-1">Cantidad a Retirar:</label>
-                <input type="number" id="withdrawal-quantity" min="1" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <input type="number" id="withdrawal-quantity" min="1" class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div class="mb-6">
                 <label for="withdrawal-responsible" class="block text-sm font-medium text-gray-700 mb-1">Responsable:</label>
-                <input type="text" id="withdrawal-responsible" value="Usuario" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <input type="text" id="withdrawal-responsible" value="Usuario" class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
-            <div class="flex justify-end space-x-4">
-                <button id="cancel-withdrawal-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
+                <button id="cancel-withdrawal-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-sm sm:text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                     Cancelar
                 </button>
-                <button id="confirm-withdrawal-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
+                <button id="confirm-withdrawal-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm sm:text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
                     Confirmar Retiro
                 </button>
             </div>
@@ -326,17 +362,17 @@
 
     <!-- Nuevo Modal de Factura de Entrega (retiro de múltiples componentes) -->
     <div id="delivery-invoice-modal" class="modal">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl">
-            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Crear Factura de Entrega</h3>
+        <div class="bg-white p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-xl sm:max-w-2xl">
+            <h3 class="text-xl sm:text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Crear Factura de Entrega</h3>
             
             <div class="mb-4">
                 <label for="delivery-responsible" class="block text-sm font-medium text-gray-700 mb-1">Responsable de la Entrega:</label>
-                <input type="text" id="delivery-responsible" value="Usuario de Entrega" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <input type="text" id="delivery-responsible" value="Usuario de Entrega" class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <div class="mb-4">
                 <label for="delivery-search-input" class="block text-sm font-medium text-gray-700 mb-1">Buscar y Añadir Artículo:</label>
-                <input type="text" id="delivery-search-input" placeholder="Buscar por Número de Parte o nombre..." class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <input type="text" id="delivery-search-input" placeholder="Buscar por Número de Parte o nombre..." class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 <div id="delivery-search-results" class="hidden"></div> <!-- Resultados de búsqueda en vivo -->
             </div>
 
@@ -344,11 +380,11 @@
                 <table class="min-w-full bg-white">
                     <thead class="bg-gray-200">
                         <tr>
-                            <th class="py-2 px-4 text-left text-sm font-semibold text-gray-700">Número de Parte</th>
-                            <th class="py-2 px-4 text-left text-sm font-semibold text-gray-700">Nombre</th>
-                            <th class="py-2 px-4 text-left text-sm font-semibold text-gray-700">Cantidad a Retirar</th>
-                            <th class="py-2 px-4 text-left text-sm font-semibold text-gray-700">Stock Disponible</th>
-                            <th class="py-2 px-4 text-left text-sm font-semibold text-gray-700">Acción</th>
+                            <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700">Número de Parte</th>
+                            <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700">Nombre</th>
+                            <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700">Cantidad a Retirar</th>
+                            <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700">Stock Disponible</th>
+                            <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700">Acción</th>
                         </tr>
                     </thead>
                     <tbody id="delivery-items-list" class="divide-y divide-gray-200">
@@ -358,37 +394,37 @@
             </div>
 
             <!-- Sección de Firmas -->
-            <div class="mt-8 pt-4 border-t border-gray-300 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+            <div class="mt-6 pt-4 border-t border-gray-300 grid grid-cols-2 lg:grid-cols-4 gap-4 text-center text-sm">
                 <div class="signature-block">
-                    <div class="h-16 border-b border-gray-400 mb-2"></div>
-                    <p class="text-sm font-semibold text-gray-700">Jefe de Taller</p>
+                    <div class="h-12 sm:h-16 border-b border-gray-400 mb-2"></div>
+                    <p class="text-xs sm:text-sm font-semibold text-gray-700">Jefe de Taller</p>
                 </div>
                 <div class="signature-block">
-                    <div class="h-16 border-b border-gray-400 mb-2"></div>
-                    <p class="text-sm font-semibold text-gray-700">Aprobado por A-4</p>
+                    <div class="h-12 sm:h-16 border-b border-gray-400 mb-2"></div>
+                    <p class="text-xs sm:text-sm font-semibold text-gray-700">Aprobado por A-4</p>
                 </div>
                 <div class="signature-block">
-                    <div class="h-16 border-b border-gray-400 mb-2"></div>
-                    <p class="text-sm font-semibold text-gray-700">Entregado por</p>
+                    <div class="h-12 sm:h-16 border-b border-gray-400 mb-2"></div>
+                    <p class="text-xs sm:text-sm font-semibold text-gray-700">Entregado por</p>
                 </div>
                 <div class="signature-block">
-                    <div class="h-16 border-b border-gray-400 mb-2"></div>
-                    <p class="text-sm font-semibold text-gray-700">Recibido por</p>
+                    <div class="h-12 sm:h-16 border-b border-gray-400 mb-2"></div>
+                    <p class="text-xs sm:text-sm font-semibold text-gray-700">Recibido por</p>
                 </div>
             </div>
 
-            <div class="flex justify-end space-x-4 mt-8">
-                <button id="cancel-delivery-invoice-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 mt-6">
+                <button id="cancel-delivery-invoice-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-sm sm:text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                     Cancelar
                 </button>
-                <button id="confirm-delivery-invoice-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+                <button id="confirm-delivery-invoice-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm sm:text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
                     <!-- Lucide check-circle icon -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle mr-1"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle mr-1"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
                     Confirmar Entrega
                 </button>
-                <button id="print-delivery-invoice-btn" class="hidden inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors duration-200">
+                <button id="print-delivery-invoice-btn" class="hidden inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm sm:text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors duration-200">
                     <!-- Lucide printer icon -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer mr-1"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer mr-1"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
                     Imprimir Factura
                 </button>
             </div>
@@ -397,14 +433,14 @@
 
     <!-- Custom Confirmation Modal -->
     <div id="custom-confirm-modal" class="modal">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm text-center">
-            <h3 id="custom-confirm-title" class="text-xl font-bold text-gray-800 mb-4"></h3>
-            <p id="custom-confirm-message" class="text-gray-700 mb-6"></p>
-            <div class="flex justify-center space-x-4">
-                <button id="custom-confirm-cancel" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+        <div class="bg-white p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-xs sm:max-w-sm text-center">
+            <h3 id="custom-confirm-title" class="text-lg sm:text-xl font-bold text-gray-800 mb-4"></h3>
+            <p id="custom-confirm-message" class="text-sm sm:text-base text-gray-700 mb-6"></p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4">
+                <button id="custom-confirm-cancel" class="py-2 px-4 border border-gray-300 shadow-sm text-sm sm:text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                     Cancelar
                 </button>
-                <button id="confirm-confirm-ok" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
+                <button id="confirm-confirm-ok" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm sm:text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
                     Confirmar
                 </button>
             </div>
@@ -413,35 +449,35 @@
 
     <!-- Nuevo Modal de Edición de Artículo -->
     <div id="edit-item-modal" class="modal">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Editar Artículo de Inventario</h3>
-            <form id="edit-item-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-md sm:max-w-lg">
+            <h3 class="text-xl sm:text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Editar Artículo de Inventario</h3>
+            <form id="edit-item-form" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <!-- Hidden input for the item's Firebase Realtime Database key -->
                 <input type="hidden" id="edit-db-key">
 
                 <div>
                     <label for="edit-item-id" class="block text-sm font-medium text-gray-700 mb-1">Número de Parte del Artículo:</label>
-                    <input type="text" id="edit-item-id" name="itemId" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="text" id="edit-item-id" name="itemId" required class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div>
                     <label for="edit-item-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Artículo:</label>
-                    <input type="text" id="edit-item-name" name="itemName" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="text" id="edit-item-name" name="itemName" required class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div>
                     <label for="edit-item-category" class="block text-sm font-medium text-gray-700 mb-1">Categoría:</label>
-                    <input type="text" id="edit-item-category" name="itemCategory" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="text" id="edit-item-category" name="itemCategory" required class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div>
                     <label for="edit-item-quantity" class="block text-sm font-medium text-gray-700 mb-1">Cantidad:</label>
-                    <input type="number" id="edit-item-quantity" name="itemQuantity" min="0" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="number" id="edit-item-quantity" name="itemQuantity" min="0" required class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div>
                     <label for="edit-item-unit" class="block text-sm font-medium text-gray-700 mb-1">Unidad de Medida:</label>
-                    <select id="edit-item-unit" name="itemUnit" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <select id="edit-item-unit" name="itemUnit" required class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Seleccione una unidad</option>
                         <option value="unidades">Unidades</option>
                         <option value="litros">Litros</option>
@@ -458,19 +494,19 @@
 
                 <div>
                     <label for="edit-item-location" class="block text-sm font-medium text-gray-700 mb-1">Ubicación (Ej. Estante A1, Pasillo 2):</label>
-                    <input type="text" id="edit-item-location" name="itemLocation" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="text" id="edit-item-location" name="itemLocation" required class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div>
                     <label for="edit-item-min-stock" class="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo:</label>
-                    <input type="number" id="edit-item-min-stock" name="itemMinStock" min="0" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="number" id="edit-item-min-stock" name="itemMinStock" min="0" required class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
-                <div class="md:col-span-2 flex justify-end space-x-4 mt-6">
-                    <button type="button" id="cancel-edit-item-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                <div class="md:col-span-2 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 mt-4 sm:mt-6">
+                    <button type="button" id="cancel-edit-item-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-sm sm:text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                         Cancelar
                     </button>
-                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm sm:text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                         Guardar Cambios
                     </button>
                 </div>
@@ -480,15 +516,15 @@
 
     <!-- NEW: Modal for Image URL/Camera Search -->
     <div id="image-search-modal" class="modal">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm md:max-w-xl">
-            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Buscar por Imagen</h3>
+        <div class="bg-white p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-sm md:max-w-xl">
+            <h3 class="text-xl sm:text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Buscar por Imagen</h3>
             
             <!-- Option selection buttons -->
-            <div id="image-search-options" class="flex justify-center space-x-4 mb-6">
-                <button id="open-url-search-option-btn" class="py-2 px-4 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200 flex-1">
+            <div id="image-search-options" class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4 mb-4 sm:mb-6">
+                <button id="open-url-search-option-btn" class="py-2 px-4 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200 flex-1 text-sm">
                     Buscar por URL de Imagen
                 </button>
-                <button id="open-camera-search-option-btn" class="py-2 px-4 border border-purple-600 text-purple-600 rounded-md hover:bg-purple-50 transition-colors duration-200 flex-1">
+                <button id="open-camera-search-option-btn" class="py-2 px-4 border border-purple-600 text-purple-600 rounded-md hover:bg-purple-50 transition-colors duration-200 flex-1 text-sm">
                     Buscar por Cámara
                 </button>
             </div>
@@ -498,13 +534,13 @@
                 <p class="text-gray-700 mb-4 text-sm">Pega la URL de una imagen para realizar una búsqueda inversa en Google Lens.</p>
                 <div>
                     <label for="image-url-input" class="block text-sm font-medium text-gray-700 mb-1">URL de la Imagen:</label>
-                    <input type="url" id="image-url-input" placeholder="Ej: https://ejemplo.com/imagen.jpg" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="url" id="image-url-input" placeholder="Ej: https://ejemplo.com/imagen.jpg" class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div class="flex justify-end space-x-4 mt-6">
-                    <button id="cancel-image-search-url-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 mt-4 sm:mt-6">
+                    <button id="cancel-image-search-url-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-sm sm:text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                         Cancelar
                     </button>
-                    <button id="confirm-image-search-url-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                    <button id="confirm-image-search-url-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm sm:text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                         Buscar Imagen
                     </button>
                 </div>
@@ -519,23 +555,23 @@
                     <img id="captured-image-preview" src="" alt="Captured Image" class="w-full h-auto rounded-lg hidden">
                 </div>
                 
-                <div class="flex justify-center space-x-4 mb-4" id="camera-controls">
-                    <button id="capture-image-btn" class="py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+                <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4 mb-4" id="camera-controls">
+                    <button id="capture-image-btn" class="py-2 px-4 border border-transparent shadow-sm text-sm sm:text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
                         Capturar Foto
                     </button>
-                    <button id="retake-image-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 hidden">
+                    <button id="retake-image-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-sm sm:text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 hidden">
                         Volver a Tomar
                     </button>
-                    <button id="download-image-btn" class="py-2 px-4 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200 hidden">
+                    <button id="download-image-btn" class="py-2 px-4 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200 hidden text-sm">
                         Descargar Imagen
                     </button>
                 </div>
 
-                <div class="flex justify-end space-x-4">
-                    <button id="cancel-image-search-camera-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
+                    <button id="cancel-image-search-camera-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-sm sm:text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                         Cancelar
                     </button>
-                    <button id="search-captured-image-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200 hidden">
+                    <button id="search-captured-image-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm sm:text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200 hidden">
                         Buscar Imagen Capturada
                     </button>
                 </div>
@@ -548,27 +584,27 @@
 
     <!-- NEW: Modal for Item History -->
     <div id="item-history-modal" class="modal">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-3xl">
-            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Historial de Movimientos para: <span id="history-item-name" class="text-blue-600"></span></h3>
+        <div class="bg-white p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-xl sm:max-w-3xl">
+            <h3 class="text-xl sm:text-2xl font-bold text-blue-800 mb-4 border-b pb-2">Historial de Movimientos para: <span id="history-item-name" class="text-blue-600"></span></h3>
             <div class="overflow-x-auto rounded-lg shadow-md mb-4">
                 <table class="min-w-full bg-white border border-gray-200">
                     <thead class="bg-gray-200">
                         <tr>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Fecha/Hora</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Tipo Movimiento</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Cantidad</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Fuente/Destino</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Responsable</th>
+                            <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Fecha/Hora</th>
+                            <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tipo Movimiento</th>
+                            <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Cantidad</th>
+                            <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Fuente/Destino</th>
+                            <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Responsable</th>
                         </tr>
                     </thead>
                     <tbody id="specific-item-history-list" class="divide-y divide-gray-200">
                         <!-- History entries for the specific item will be loaded here -->
                     </tbody>
                 </table>
-                <p id="no-specific-history-items" class="text-gray-600 text-center py-4 hidden">No hay historial de movimientos para este artículo.</p>
+                <p id="no-specific-history-items" class="text-gray-600 text-center py-4 hidden text-sm">No hay historial de movimientos para este artículo.</p>
             </div>
             <div class="flex justify-end">
-                <button id="close-item-history-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                <button id="close-item-history-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-sm sm:text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                     Cerrar
                 </button>
             </div>
@@ -576,104 +612,104 @@
     </div>
 
 
-    <header class="bg-gradient-to-r from-blue-700 to-blue-900 text-white p-6 shadow-md rounded-b-lg relative">
+    <header class="bg-gradient-to-r from-blue-700 to-blue-900 text-white p-4 sm:p-6 shadow-md rounded-b-lg relative">
         <div class="container mx-auto text-center flex flex-col items-center justify-center">
             <!-- New Logo (left) -->
-            <img src="https://placehold.co/100x100/blue/white?text=LOGO_IZQUIERDA" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="absolute left-6 top-6 h-24 w-24 object-contain rounded-full shadow-lg">
+            <img src="https://placehold.co/100x100/blue/white?text=LOGO_IZQUIERDA" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_LEFT'" alt="Escudo de Honduras" class="absolute left-2 top-2 sm:left-6 sm:top-6 h-16 w-16 sm:h-24 sm:w-24 object-contain rounded-full shadow-lg">
             
-            <h1 class="text-4xl font-bold mb-2">Sistema de Gestión de Inventario Logístico A-4 HAM</h1>
+            <h1 class="text-2xl sm:text-4xl font-bold mb-1 sm:mb-2">Sistema de Gestión de Inventario Logístico A-4 HAM</h1>
             <!-- Adjusted for proper positioning and custom font -->
-            <p class="created-by-text">CREADO POR EL COMANDO 2 HERNANDEZ SOZA EL 16-JUN-25</p>
+            <p class="created-by-text text-xs sm:text-sm">CREADO POR EL COMANDO 2 HERNANDEZ SOZA EL 16-JUN-25</p>
             
             <!-- Original Logo (right) -->
-            <img src="https://placehold.co/100x100/blue/white?text=LOGO_DERECHA" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="absolute right-6 top-6 h-24 w-24 object-contain rounded-full shadow-lg">
+            <img src="https://placehold.co/100x100/blue/white?text=LOGO_DERECHA" onerror="this.onerror=null; this.src='https://placehold.co/100x100/blue/white?text=LOGO_ERROR_RIGHT'" alt="Logo de la Fuerza Aérea Hondureña" class="absolute right-2 top-2 sm:right-6 sm:top-6 h-16 w-16 sm:h-24 sm:w-24 object-contain rounded-full shadow-lg">
         </div>
     </header>
 
     <nav class="bg-blue-800 text-white p-3 shadow-sm rounded-t-lg mt-4 mx-auto w-11/12 md:w-4/5 lg:w-3/4">
-        <div class="container mx-auto flex flex-wrap justify-center space-x-4">
-            <a href="#vision-general" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Visión General</a>
-            <a href="#inventario-actual" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Inventario Actual</a>
-            <a href="#analisis-inventario" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Análisis del Inventario</a>
-            <a href="#historial-movimientos" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Historial de Movimientos</a>
-            <a href="#historial-facturas" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Historial de Facturas</a>
-            <a href="#ordenes-reabastecimiento" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Órdenes de Reabastecimiento</a>
-            <a href="#anadir-articulo" class="hover:underline py-1 px-3 rounded-md hover:bg-blue-700 transition-colors duration-200">Añadir Artículo</a>
+        <div class="container mx-auto flex flex-wrap justify-center space-x-2 sm:space-x-4 text-sm sm:text-base">
+            <a href="#vision-general" class="hover:underline py-1 px-2 sm:px-3 rounded-md hover:bg-blue-700 transition-colors duration-200 whitespace-nowrap">Visión General</a>
+            <a href="#inventario-actual" class="hover:underline py-1 px-2 sm:px-3 rounded-md hover:bg-blue-700 transition-colors duration-200 whitespace-nowrap">Inventario Actual</a>
+            <a href="#analisis-inventario" class="hover:underline py-1 px-2 sm:px-3 rounded-md hover:bg-blue-700 transition-colors duration-200 whitespace-nowrap">Análisis del Inventario</a>
+            <a href="#historial-movimientos" class="hover:underline py-1 px-2 sm:px-3 rounded-md hover:bg-blue-700 transition-colors duration-200 whitespace-nowrap">Historial de Movimientos</a>
+            <a href="#historial-facturas" class="hover:underline py-1 px-2 sm:px-3 rounded-md hover:bg-blue-700 transition-colors duration-200 whitespace-nowrap">Historial de Facturas</a>
+            <a href="#ordenes-reabastecimiento" class="hover:underline py-1 px-2 sm:px-3 rounded-md hover:bg-blue-700 transition-colors duration-200 whitespace-nowrap">Órdenes de Reabastecimiento</a>
+            <a href="#anadir-articulo" class="hover:underline py-1 px-2 sm:px-3 rounded-md hover:bg-blue-700 transition-colors duration-200 whitespace-nowrap">Añadir Artículo</a>
         </div>
     </nav>
 
-    <main class="container mx-auto p-6 bg-white shadow-xl rounded-lg mt-6 mb-8 w-11/12 md:w-4/5 lg:w-3/4">
+    <main class="container mx-auto p-4 sm:p-6 bg-white shadow-xl rounded-lg mt-4 sm:mt-6 mb-6 sm:mb-8 w-11/12 md:w-4/5 lg:w-3/4">
         <!-- Authentication Section -->
-        <section id="auth-section" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
-            <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Acceso de Usuario</h2>
+        <section id="auth-section" class="mb-6 sm:mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg shadow-inner">
+            <h2 class="text-2xl sm:text-3xl font-semibold text-blue-800 mb-3 sm:mb-4 border-b-2 border-blue-300 pb-2">Acceso de Usuario</h2>
             <div id="logged-out-view">
-                <p class="text-lg text-gray-700 mb-4">Inicia sesión o regístrate para acceder y gestionar tu inventario persistente en cualquier dispositivo.</p>
-                <div class="flex flex-col space-y-4 items-center">
-                    <input type="email" id="auth-email" placeholder="Correo electrónico" class="w-full max-w-sm px-4 py-2 border rounded-md">
-                    <input type="password" id="auth-password" placeholder="Contraseña" class="w-full max-w-sm px-4 py-2 border rounded-md">
-                    <div class="flex space-x-4">
-                        <button id="login-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Iniciar Sesión</button>
-                        <button id="register-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Registrarse</button>
+                <p class="text-sm sm:text-lg text-gray-700 mb-3 sm:mb-4">Inicia sesión o regístrate para acceder y gestionar tu inventario persistente en cualquier dispositivo.</p>
+                <div class="flex flex-col space-y-3 items-center">
+                    <input type="email" id="auth-email" placeholder="Correo electrónico" class="w-full max-w-sm px-3 py-2 text-sm border rounded-md">
+                    <input type="password" id="auth-password" placeholder="Contraseña" class="w-full max-w-sm px-3 py-2 text-sm border rounded-md">
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                        <button id="login-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 text-sm">Iniciar Sesión</button>
+                        <button id="register-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 text-sm">Registrarse</button>
                     </div>
                 </div>
             </div>
             <div id="logged-in-view" class="hidden text-center">
-                <p class="text-lg text-gray-700 mb-4">Has iniciado sesión como: <span id="current-user-email" class="font-semibold text-blue-700"></span></p>
-                <button id="logout-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Cerrar Sesión</button>
+                <p class="text-sm sm:text-lg text-gray-700 mb-3 sm:mb-4">Has iniciado sesión como: <span id="current-user-email" class="font-semibold text-blue-700"></span></p>
+                <button id="logout-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 text-sm">Cerrar Sesión</button>
             </div>
         </section>
 
         <!-- Sección de Visión General (Now visible by default) -->
-        <section id="vision-general" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
-            <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Visión General del Inventario</h2>
-            <p class="text-lg text-gray-700 leading-relaxed mb-4">Este sistema permite una gestión detallada y eficiente de todos los componentes, partes, herramientas y otros materiales necesarios para tus operaciones. Mantén un control preciso sobre las existencias, optimiza los flujos de trabajo y minimiza los costos de almacenamiento.</p>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
-                <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
-                    <p class="text-sm text-gray-500">Artículos en stock</p>
-                    <p id="total-items" class="text-4xl font-bold text-green-600">0</p>
+        <section id="vision-general" class="mb-6 sm:mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg shadow-inner">
+            <h2 class="text-2xl sm:text-3xl font-semibold text-blue-800 mb-3 sm:mb-4 border-b-2 border-blue-300 pb-2">Visión General del Inventario</h2>
+            <p class="text-sm sm:text-lg text-gray-700 leading-relaxed mb-3 sm:mb-4">Este sistema permite una gestión detallada y eficiente de todos los componentes, partes, herramientas y otros materiales necesarios para tus operaciones. Mantén un control preciso sobre las existencias, optimiza los flujos de trabajo y minimiza los costos de almacenamiento.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-center">
+                <div class="bg-white p-3 sm:p-4 rounded-lg shadow-md border border-gray-200">
+                    <p class="text-xs sm:text-sm text-gray-500">Artículos en stock</p>
+                    <p id="total-items" class="text-3xl sm:text-4xl font-bold text-green-600">0</p>
                 </div>
-                <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
-                    <p class="text-sm text-gray-500">Total de Stock</p>
-                    <p id="total-stock" class="text-4xl font-bold text-blue-600">0</p>
+                <div class="bg-white p-3 sm:p-4 rounded-lg shadow-md border border-gray-200">
+                    <p class="text-xs sm:text-sm text-gray-500">Total de Stock</p>
+                    <p id="total-stock" class="text-3xl sm:text-4xl font-bold text-blue-600">0</p>
                 </div>
-                <div id="critical-items-card" class="bg-white p-4 rounded-lg shadow-md border border-gray-200 cursor-pointer hover:bg-red-50 transition-colors duration-200">
-                    <p class="text-sm text-gray-500">Artículos críticos (bajo stock)</p>
-                    <p id="critical-items" class="text-4xl font-bold text-red-600">0</p>
+                <div id="critical-items-card" class="bg-white p-3 sm:p-4 rounded-lg shadow-md border border-gray-200 cursor-pointer hover:bg-red-50 transition-colors duration-200">
+                    <p class="text-xs sm:text-sm text-gray-500">Artículos críticos (bajo stock)</p>
+                    <p id="critical-items" class="text-3xl sm:text-4xl font-bold text-red-600">0</p>
                 </div>
-                <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
-                    <p class="text-sm text-gray-500">Última actualización</p>
-                    <p id="last-update" class="text-lg font-medium text-gray-700"></p>
+                <div class="bg-white p-3 sm:p-4 rounded-lg shadow-md border border-gray-200">
+                    <p class="text-xs sm:text-sm text-gray-500">Última actualización</p>
+                    <p id="last-update" class="text-sm sm:text-lg font-medium text-gray-700"></p>
                 </div>
             </div>
         </section>
 
-        <hr class="my-8 border-gray-300 main-content-divider">
+        <hr class="my-6 sm:my-8 border-gray-300 main-content-divider">
 
         <!-- Sección de Inventario Actual (Now visible by default) -->
-        <section id="inventario-actual" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
-            <div class="flex justify-between items-center mb-4 border-b-2 border-blue-300 pb-2">
-                <h2 class="text-3xl font-semibold text-blue-800">Inventario Actual de Componentes y Partes</h2>
-                <button id="toggle-inventory-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center">
+        <section id="inventario-actual" class="mb-6 sm:mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg shadow-inner">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-3 sm:mb-4 border-b-2 border-blue-300 pb-2">
+                <h2 class="text-2xl sm:text-3xl font-semibold text-blue-800 mb-2 sm:mb-0">Inventario Actual de Componentes y Partes</h2>
+                <button id="toggle-inventory-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-md transition-colors duration-200 flex items-center text-sm">
                     Desplegar/Plegar
                     <!-- Lucide chevron-down icon for toggle -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-2 chevron-icon"></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-2 chevron-icon"></svg>
                 </button>
             </div>
             
             <div id="inventory-content" class="collapsible-content">
                 <!-- Barra de búsqueda y botones de acción -->
-                <div class="flex flex-col md:flex-row items-center justify-between mb-6 space-y-3 md:space-y-0 md:space-x-4">
+                <div class="flex flex-col md:flex-row items-center justify-between mb-4 sm:mb-6 space-y-3 md:space-y-0 md:space-x-4">
                     <div class="flex w-full md:w-auto flex-grow space-x-2">
-                        <input type="text" id="search-input" placeholder="Buscar por Número de Parte, nombre, categoría..." class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                        <button id="search-button" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                        <input type="text" id="search-input" placeholder="Buscar por Número de Parte, nombre, categoría..." class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <button id="search-button" class="inline-flex justify-center py-2 px-3 text-sm border border-transparent shadow-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                             <!-- Lucide refresh-cw icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw mr-1"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw mr-1"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
                             Todo
                         </button>
                         <!-- Button to open Image Search Modal -->
-                        <button id="open-image-search-modal-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-gray-500 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors duration-200 whitespace-nowrap">
+                        <button id="open-image-search-modal-btn" class="inline-flex justify-center py-2 px-3 text-sm border border-transparent shadow-sm font-medium rounded-md text-white bg-gray-500 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors duration-200 whitespace-nowrap">
                             <!-- Lucide image icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image mr-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image mr-1">
                                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
                                 <circle cx="9" cy="9" r="2"/>
                                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
@@ -681,15 +717,15 @@
                             Buscar por Imagen
                         </button>
                     </div>
-                    <div class="flex space-x-2">
-                        <button id="print-inventory-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors duration-200 whitespace-nowrap">
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-3 md:mt-0">
+                        <button id="print-inventory-btn" class="inline-flex justify-center py-2 px-3 text-sm border border-transparent shadow-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors duration-200 whitespace-nowrap">
                             <!-- Lucide printer icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer mr-2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer mr-1"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
                             Imprimir Inventario
                         </button>
-                        <button id="open-delivery-invoice-modal-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200 whitespace-nowrap">
+                        <button id="open-delivery-invoice-modal-btn" class="inline-flex justify-center py-2 px-3 text-sm border border-transparent shadow-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200 whitespace-nowrap">
                             <!-- Lucide file-text icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text mr-2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text mr-1"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
                             Crear Factura de Entrega
                         </button>
                     </div>
@@ -700,15 +736,15 @@
                     <table class="min-w-full bg-white border border-gray-200">
                         <thead class="bg-gray-200 sticky top-0"> <!-- Sticky header -->
                             <tr>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Número de Parte</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Nombre del Artículo</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Imagen</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Categoría</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Cantidad</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Unidad</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Ubicación</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Stock Mínimo</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Acciones</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Número de Parte</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nombre del Artículo</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Imagen</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Categoría</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Cantidad</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Unidad</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Ubicación</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Stock Mínimo</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="inventory-list" class="divide-y divide-gray-200">
@@ -719,38 +755,38 @@
             </div>
         </section>
 
-        <hr class="my-8 border-gray-300 main-content-divider">
+        <hr class="my-6 sm:my-8 border-gray-300 main-content-divider">
 
         <!-- Nueva Sección: Análisis del Inventario (Gráficos) -->
-        <section id="analisis-inventario" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
-            <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Análisis del Inventario</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <section id="analisis-inventario" class="mb-6 sm:mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg shadow-inner">
+            <h2 class="text-2xl sm:text-3xl font-semibold text-blue-800 mb-3 sm:mb-4 border-b-2 border-blue-300 pb-2">Análisis del Inventario</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                    <h3 class="text-xl font-semibold text-gray-700 mb-3">Inventario por Categoría</h3>
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-700 mb-2 sm:mb-3">Inventario por Categoría</h3>
                     <canvas id="inventoryByCategoryChart"></canvas>
                 </div>
                 <!-- You can add more charts here -->
             </div>
         </section>
 
-        <hr class="my-8 border-gray-300 main-content-divider">
+        <hr class="my-6 sm:my-8 border-gray-300 main-content-divider">
 
         <!-- Sección de Historial de Movimientos -->
-        <section id="historial-movimientos" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
-            <div class="flex justify-between items-center mb-4 border-b-2 border-blue-300 pb-2">
-                <h2 class="text-3xl font-semibold text-blue-800">Historial de Movimientos Recientes</h2>
-                <button id="toggle-history-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center">
+        <section id="historial-movimientos" class="mb-6 sm:mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg shadow-inner">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-3 sm:mb-4 border-b-2 border-blue-300 pb-2">
+                <h2 class="text-2xl sm:text-3xl font-semibold text-blue-800 mb-2 sm:mb-0">Historial de Movimientos Recientes</h2>
+                <button id="toggle-history-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-md transition-colors duration-200 flex items-center text-sm">
                     Desplegar/Plegar
                     <!-- Lucide chevron-down icon for toggle -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-2 chevron-icon"></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-2 chevron-icon"></svg>
                 </button>
             </div>
             
             <div id="history-content" class="collapsible-content">
                 <div class="flex justify-end mb-4 space-x-2">
-                    <button id="clear-history-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-colors duration-200">
+                    <button id="clear-history-btn" class="inline-flex justify-center py-2 px-3 text-sm border border-transparent shadow-sm font-medium rounded-md text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-colors duration-200">
                         <!-- Lucide trash icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash mr-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash mr-1"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                         Borrar Historial
                     </button>
                 </div>
@@ -758,13 +794,13 @@
                     <table class="min-w-full bg-white border border-gray-200">
                         <thead class="bg-gray-200">
                             <tr>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Fecha/Hora</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Número de Parte</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Nombre Artículo</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Tipo Movimiento</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Cantidad</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Fuente/Destino</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Responsable</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Fecha/Hora</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Número de Parte</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nombre Artículo</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tipo Movimiento</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Cantidad</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Fuente/Destino</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Responsable</th>
                             </tr>
                         </thead>
                         <tbody id="movement-history-list" class="divide-y divide-gray-200">
@@ -775,24 +811,24 @@
             </div>
         </section>
 
-        <hr class="my-8 border-gray-300 main-content-divider">
+        <hr class="my-6 sm:my-8 border-gray-300 main-content-divider">
 
         <!-- Nueva Sección: Historial de Facturas -->
-        <section id="historial-facturas" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
-            <div class="flex justify-between items-center mb-4 border-b-2 border-blue-300 pb-2">
-                <h2 class="text-3xl font-semibold text-blue-800">Historial de Facturas de Entrega</h2>
-                <button id="toggle-invoice-history-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center">
+        <section id="historial-facturas" class="mb-6 sm:mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg shadow-inner">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-3 sm:mb-4 border-b-2 border-blue-300 pb-2">
+                <h2 class="text-2xl sm:text-3xl font-semibold text-blue-800 mb-2 sm:mb-0">Historial de Facturas de Entrega</h2>
+                <button id="toggle-invoice-history-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-md transition-colors duration-200 flex items-center text-sm">
                     Desplegar/Plegar
                     <!-- Lucide chevron-down icon for toggle -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-2 chevron-icon"></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-2 chevron-icon"></svg>
                 </button>
             </div>
             
             <div id="invoice-history-content" class="collapsible-content">
                 <div class="flex justify-end mb-4 space-x-2">
-                    <button id="clear-invoice-history-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-colors duration-200">
+                    <button id="clear-invoice-history-btn" class="inline-flex justify-center py-2 px-3 text-sm border border-transparent shadow-sm font-medium rounded-md text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-colors duration-200">
                         <!-- Lucide trash icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash mr-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash mr-1"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                         Borrar Historial de Facturas
                     </button>
                 </div>
@@ -800,11 +836,11 @@
                     <table class="min-w-full bg-white border border-gray-200">
                         <thead class="bg-gray-200">
                             <tr>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Número de Factura</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Fecha/Hora</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Responsable</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Artículos</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Acción</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Número de Factura</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Fecha/Hora</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Responsable</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Artículos</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Acción</th>
                             </tr>
                         </thead>
                         <tbody id="invoice-history-list" class="divide-y divide-gray-200">
@@ -815,25 +851,25 @@
             </div>
         </section>
 
-        <hr class="my-8 border-gray-300 main-content-divider">
+        <hr class="my-6 sm:my-8 border-gray-300 main-content-divider">
 
         <!-- Nueva Sección: Artículos para Reabastecer (Sugerencias) -->
-        <section id="ordenes-reabastecimiento" class="mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
-            <div class="flex justify-between items-center mb-4 border-b-2 border-blue-300 pb-2">
-                <h2 class="text-3xl font-semibold text-blue-800">Artículos para Reabastecer</h2>
-                <button id="toggle-reorder-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-colors duration-200 flex items-center">
+        <section id="ordenes-reabastecimiento" class="mb-6 sm:mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg shadow-inner">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-3 sm:mb-4 border-b-2 border-blue-300 pb-2">
+                <h2 class="text-2xl sm:text-3xl font-semibold text-blue-800 mb-2 sm:mb-0">Artículos para Reabastecer</h2>
+                <button id="toggle-reorder-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-md transition-colors duration-200 flex items-center text-sm">
                     Desplegar/Plegar
                     <!-- Lucide chevron-down icon for toggle -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-2 chevron-icon"></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-2 chevron-icon"></svg>
                 </button>
             </div>
             
             <div id="reorder-content" class="collapsible-content">
-                <p class="text-lg text-gray-700 leading-relaxed mb-4">Los siguientes artículos están en o por debajo de su stock mínimo y pueden requerir reabastecimiento.</p>
+                <p class="text-sm sm:text-lg text-gray-700 leading-relaxed mb-3 sm:mb-4">Los siguientes artículos están en o por debajo de su stock mínimo y pueden requerir reabastecimiento.</p>
                 <div class="flex justify-end mb-4 space-x-2">
-                    <button id="print-reorder-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors duration-200 whitespace-nowrap">
+                    <button id="print-reorder-btn" class="inline-flex justify-center py-2 px-3 text-sm border border-transparent shadow-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors duration-200 whitespace-nowrap">
                         <!-- Lucide printer icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer mr-2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer mr-1"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
                         Imprimir Sugerencias
                     </button>
                 </div>
@@ -841,51 +877,51 @@
                     <table class="min-w-full bg-white border border-gray-200">
                         <thead class="bg-gray-200">
                             <tr>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Número de Parte</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Nombre del Artículo</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Cantidad Actual</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Stock Mínimo</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Cantidad Sugerida</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider rounded-tl-lg">Número de Parte</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nombre del Artículo</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Cantidad Actual</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Stock Mínimo</th>
+                                <th class="py-2 px-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider rounded-tr-lg">Cantidad Sugerida</th>
                             </tr>
                         </thead>
                         <tbody id="reorder-list" class="divide-y divide-gray-200">
                             <!-- Los artículos para reabastecer se cargarán aquí -->
                         </tbody>
                     </table>
-                    <p id="no-reorder-items" class="text-gray-600 text-center py-4 hidden">No hay artículos que requieran reabastecimiento en este momento. ¡Buen trabajo!</p>
+                    <p id="no-reorder-items" class="text-gray-600 text-center py-4 hidden text-sm">No hay artículos que requieran reabastecimiento en este momento. ¡Buen trabajo!</p>
                 </div>
             </div>
         </section>
 
-        <hr class="my-8 border-gray-300 main-content-divider">
+        <hr class="my-6 sm:my-8 border-gray-300 main-content-divider">
 
         <!-- Sección para Añadir Nuevo Artículo (Now visible by default) -->
-        <section id="anadir-articulo" class="p-6 bg-gray-50 rounded-lg shadow-inner">
-            <h2 class="text-3xl font-semibold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">Añadir Nuevo Artículo al Inventario</h2>
-            <form id="add-item-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <section id="anadir-articulo" class="p-4 sm:p-6 bg-gray-50 rounded-lg shadow-inner">
+            <h2 class="text-2xl sm:text-3xl font-semibold text-blue-800 mb-3 sm:mb-4 border-b-2 border-blue-300 pb-2">Añadir Nuevo Artículo al Inventario</h2>
+            <form id="add-item-form" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                     <label for="item-id" class="block text-sm font-medium text-gray-700 mb-1">Número de Parte del Artículo:</label>
-                    <input type="text" id="item-id" name="itemId" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="text" id="item-id" name="itemId" required class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div>
                     <label for="item-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Artículo:</label>
-                    <input type="text" id="item-name" name="itemName" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="text" id="item-name" name="itemName" required class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div>
                     <label for="item-category" class="block text-sm font-medium text-gray-700 mb-1">Categoría:</label>
-                    <input type="text" id="item-category" name="itemCategory" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="text" id="item-category" name="itemCategory" required class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div>
                     <label for="item-quantity" class="block text-sm font-medium text-gray-700 mb-1">Cantidad:</label>
-                    <input type="number" id="item-quantity" name="itemQuantity" min="0" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="number" id="item-quantity" name="itemQuantity" min="0" required class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div>
                     <label for="item-unit" class="block text-sm font-medium text-gray-700 mb-1">Unidad de Medida:</label>
-                    <select id="item-unit" name="itemUnit" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <select id="item-unit" name="itemUnit" required class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Seleccione una unidad</option>
                         <option value="unidades">Unidades</option>
                         <option value="litros">Litros</option>
@@ -903,18 +939,18 @@
                 <!-- Modificación aquí: Campo de texto para ubicación -->
                 <div>
                     <label for="item-location" class="block text-sm font-medium text-gray-700 mb-1">Ubicación (Ej. Estante A1, Pasillo 2):</label>
-                    <input type="text" id="item-location" name="itemLocation" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="text" id="item-location" name="itemLocation" required class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div>
                     <label for="item-min-stock" class="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo:</label>
-                    <input type="number" id="item-min-stock" name="itemMinStock" min="0" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="number" id="item-min-stock" name="itemMinStock" min="0" required class="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div class="md:col-span-2 text-center mt-4">
-                    <button type="submit" class="inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-lg font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:scale-105">
+                    <button type="submit" class="inline-flex justify-center py-2.5 px-5 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:scale-105">
                         <!-- Lucide plus icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus mr-2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus mr-2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                         Añadir Artículo
                     </button>
                 </div>
@@ -923,8 +959,8 @@
 
     </main>
 
-    <footer class="bg-gray-800 text-white p-6 text-center rounded-t-lg mt-8 shadow-inner">
-        <p class="text-sm">
+    <footer class="bg-gray-800 text-white p-4 sm:p-6 text-center rounded-t-lg mt-6 sm:mt-8 shadow-inner">
+        <p class="text-xs sm:text-sm">
             &copy; 2025 Sistema de Logística de Inventario. Todos los derechos reservados.
             <br>
             <span id="user-id-display"></span>
@@ -1435,7 +1471,7 @@
                 imageSearchButton.classList.add('bg-gray-200', 'hover:bg-gray-300', 'text-gray-800', 'py-1', 'px-2', 'rounded-full', 'text-xs', 'transition-colors', 'duration-200');
                 imageSearchButton.title = `Buscar imagen de ${item.itemId}`;
                 imageSearchButton.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image">
                         <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
                         <circle cx="9" cy="9" r="2"/>
                         <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
@@ -1796,7 +1832,7 @@
                 quantityInput.type = 'number';
                 quantityInput.min = '1';
                 quantityInput.value = item.quantityToWithdraw;
-                quantityInput.classList.add('w-24', 'px-2', 'py-1', 'border', 'rounded-md', 'text-sm');
+                quantityInput.classList.add('w-20', 'px-2', 'py-1', 'border', 'rounded-md', 'text-xs'); /* Smaller input for mobile */
                 quantityInput.onchange = (e) => {
                     const newQty = parseInt(e.target.value);
                     if (isNaN(newQty) || newQty <= 0) {
@@ -1819,7 +1855,7 @@
                 const actionCell = row.insertCell();
                 const removeButton = document.createElement('button');
                 removeButton.textContent = 'Remover';
-                removeButton.classList.add('bg-gray-400', 'hover:bg-gray-500', 'text-white', 'font-bold', 'py-1', 'px-3', 'rounded-full', 'text-xs');
+                removeButton.classList.add('bg-gray-400', 'hover:bg-gray-500', 'text-white', 'font-bold', 'py-1', 'px-2', 'rounded-full', 'text-xs');
                 removeButton.onclick = () => {
                     deliveryItems.splice(index, 1);
                     renderDeliveryItems();
