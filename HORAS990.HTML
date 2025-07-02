@@ -1124,15 +1124,11 @@
                     // Determinar si la fila actual maneja valores de tiempo (basado en el nombre de la fila)
                     const esTiempo = nombresFilas[filaIndex].includes("HRS");
 
-                    // Definir las filas específicas para la fórmula "MES TOTAL = GENERAL - VIENEN"
-                    // y "GENERAL = MAX(días)"
+                    // Definir las filas específicas para la fórmula "GENERAL = MAX(días)" y "MES TOTAL = GENERAL - VIENEN"
+                    // Ahora solo incluye las filas CREEP
                     const rowsForSpecialCalculation = [
-                        nombresFilas.indexOf("ENGINE N1 CYCLES 1"),
-                        nombresFilas.indexOf("ENGINE N2 CYCLES 1"),
-                        nombresFilas.indexOf("ENGINE N1 CYCLES 2"),
-                        nombresFilas.indexOf("ENGINE N2 CYCLES 2"),
-                        nombresFilas.indexOf("CREEP 1"), // Agregado CREEP 1
-                        nombresFilas.indexOf("CREEP 2")  // Agregado CREEP 2
+                        nombresFilas.indexOf("CREEP 1"),
+                        nombresFilas.indexOf("CREEP 2")
                     ];
 
                     if (esTiempo) {
@@ -1153,13 +1149,13 @@
                         let mesTotalDisplayValue;
 
                         if (rowsForSpecialCalculation.includes(filaIndex)) {
-                            // Para estas filas, GENERAL es el valor máximo de los días
+                            // Para las filas CREEP: GENERAL es el valor máximo de los días, MES TOTAL = GENERAL - VIENEN
                             general = valoresNumericos.length > 0 ? Math.max(...valoresNumericos) : 0;
-                            // MES TOTAL = GENERAL - VIENEN
                             let calculatedMesTotal = general - vienen;
                             mesTotalDisplayValue = calculatedMesTotal > 0 ? (Number.isInteger(calculatedMesTotal) ? calculatedMesTotal : calculatedMesTotal.toFixed(1)) : "";
                         } else {
-                            // Para otras filas numéricas, GENERAL es la suma de VIENEN + TOTAL de días
+                            // Para otras filas numéricas (incluyendo ENGINE N1/N2 CYCLES):
+                            // GENERAL es la suma de VIENEN + TOTAL de días
                             general = total + vienen;
                             // MES TOTAL es la suma de los valores diarios
                             mesTotalDisplayValue = total > 0 ? (Number.isInteger(total) ? total : total.toFixed(1)) : "";
