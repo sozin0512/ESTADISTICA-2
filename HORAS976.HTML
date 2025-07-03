@@ -1,459 +1,1904 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Datos de Vuelo</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos de Vuelo FAH-976</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos generales del cuerpo y fondo */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to bottom, #87CEEB 0%, #ADD8E6 100%); /* Azul cielo a azul claro */
+            overflow-x: hidden; /* Evita el scroll horizontal */
+            position: relative; /* Para posicionar elementos absolutos */
+        }
 
-    h2 {
-      text-align: center;
-      font-weight: bold;
-      font-size: 24px;
-      margin-bottom: 20px;
-    }
+        h2 {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.875rem; /* 30px */
+            margin-bottom: 1.25rem; /* 20px */
+            color: #2c3e50;
+        }
 
-    .year-container {
-      text-align: center;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
+        /* Contenedor de autenticación */
+        #auth-container {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 2.5rem; /* Más padding */
+            border: 1px solid #d1d5db; /* Borde más sutil */
+            border-radius: 0.75rem; /* 12px, más redondeado */
+            max-width: 400px;
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            background: linear-gradient(135deg, #fdfefe 0%, #ffffff 100%); /* Gradiente suave */
+            box-shadow: 0 20px 30px -8px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* Sombra pronunciada */
+            animation: fadeInScale 1s ease-out forwards; /* Animación de aparición */
+            position: relative;
+            z-index: 10;
+        }
 
-    .tab-container {
-      text-align: center;
-      margin-bottom: 10px;
-    }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
 
-    .tab-button {
-      padding: 5px 10px;
-      margin: 0 2px;
-      background-color: #ddd;
-      border: 1px solid #999;
-      cursor: pointer;
-    }
+        #auth-container h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.75rem; /* 28px */
+            margin-bottom: 1.75rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+        }
 
-    .tab-button.active {
-      background-color: #b0c4de;
-      font-weight: bold;
-    }
+        #auth-container input {
+            width: calc(100% - 22px);
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        #auth-container input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.25);
+            outline: none;
+        }
 
-    .button-container {
-      text-align: center;
-      margin: 15px 0;
-    }
+        #auth-container button {
+            padding: 12px 25px;
+            margin: 8px 5px;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 700;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
 
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      font-size: 11px;
-    }
+        #auth-container button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: skewX(-20deg);
+            transition: all 0.4s ease;
+        }
+        #auth-container button:hover::before {
+            left: 100%;
+        }
 
-    th,
-    td {
-      border: 1px solid #000;
-      padding: 3px;
-      text-align: center;
-      min-width: 25px;
-    }
+        #auth-container button:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+        #auth-container button:hover {
+            box-shadow: 0 8px 15px rgba(0,0,0,0.25);
+        }
 
-    th {
-      background-color: #b0c4de;
-    }
+        /* Colores de botones de autenticación */
+        #login-btn { background: linear-gradient(to right, #22c55e, #10b981); color: white; }
+        #login-btn:hover { background: linear-gradient(to right, #16a34a, #059669); }
+        #signup-btn { background: linear-gradient(to right, #3b82f6, #2563eb); color: white; }
+        #signup-btn:hover { background: linear-gradient(to right, #2563eb, #1d4ed8); }
+        #forgot-password-btn { background: linear-gradient(to right, #f59e0b, #eab308); color: white; }
+        #forgot-password-btn:hover { background: linear-gradient(to right, #d97706, #ca8a04); }
+        #logout-btn { background: linear-gradient(to right, #ef4444, #dc2626); color: white; }
+        #logout-btn:hover { background: linear-gradient(to right, #dc2626, #b91c1c); }
 
-    .nomenclatura {
-      background-color: #d9d9d9;
-      font-weight: bold;
-    }
+        #auth-status {
+            color: #dc2626;
+            margin-top: 1.25rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
 
-    .highlight-blue {
-      background-color: #99ccff;
-    }
+        /* Contenedor principal de la aplicación */
+        #main-app-content {
+            display: none; /* Oculto por defecto */
+            width: 100%;
+        }
+        #main-app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        #main-app-header h2 {
+            margin-bottom: 0;
+        }
 
-    .highlight-green {
-      background-color: #c6efce;
-    }
+        /* Estilos de la tabla y elementos relacionados */
+        .user-id-container {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: #555;
+        }
+        .year-container, .tab-container, .button-container {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        .tab-button {
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            background-color: #ddd;
+            border: 1px solid #999;
+            cursor: pointer;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s ease;
+        }
+        .tab-button:hover { background-color: #d0d0d0; }
+        .tab-button.active {
+            background-color: #b0c4de;
+            font-weight: bold;
+            border-color: #90a4b0;
+        }
 
-    .highlight-orange {
-      background-color: #ffc000;
-    }
+        table {
+            border-collapse: collapse;
+            width: auto; /* Ajustar ancho automáticamente */
+            font-size: 0.6875rem; /* 11px */
+            margin: 0 auto; /* Centrar tabla */
+            margin-top: 1.25rem;
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        th, td {
+            border: 1px solid #dcdcdc;
+            padding: 0.375rem;
+            text-align: center;
+            min-width: 25px;
+            white-space: nowrap;
+        }
+        th {
+            background-color: #b0c4de;
+            color: #333;
+            font-weight: bold;
+        }
+        .nomenclatura {
+            background-color: #e9e9e9;
+            font-weight: bold;
+            text-align: left;
+            padding-left: 5px;
+            min-width: 150px;
+        }
+        .motor-header {
+            background-color: #ffc000;
+            font-weight: bold;
+            text-align: center;
+        }
 
-    .totales {
-      background-color: #e0e0e0;
-      font-weight: bold;
-    }
+        /* Estilos para celdas editables y de solo lectura */
+        td.editable-cell {
+            background-color: #fefefe;
+            cursor: text;
+        }
+        td.editable-cell:focus {
+            outline: 2px solid #6cb2eb;
+            background-color: #e6f7ff;
+        }
+        td.read-only-cell {
+            background-color: #f9f9f9;
+            cursor: not-allowed;
+        }
 
-    td[contenteditable="true"] {
-      background-color: #fefefe;
-    }
+        /* Estilos para el efecto LED */
+        .led-persistente {
+            background-color: #f8f7f7 !important;
+            color: #0e0f0e;
+            animation: resplandor 2s infinite;
+            font-weight: bold;
+        }
+        @keyframes resplandor {
+            0% { box-shadow: 0 0 5px rgba(0,0,0,0.2); }
+            50% { box-shadow: 0 0 15px rgba(0,0,0,0.4); }
+            100% { box-shadow: 0 0 5px rgba(0,0,0,0.2); }
+        }
+        .celda-modificada {
+            animation: ledFlash 1s ease-in-out;
+        }
+        @keyframes ledFlash {
+            0% { background-color: #39ff14; }
+            50% { background-color: #f8f7f7; }
+            100% { background-color: #f8f7f7; }
+        }
 
-    /* Estilos para impresión mejorados */
-    @media print {
-      body {
-        margin: 0;
-        padding: 10mm;
-        font-size: 10px;
-      }
+        /* Estilos para el texto de RESTANTE */
+        .restante-verde { color: green; font-weight: bold; }
+        .restante-amarillo { color: orange; font-weight: bold; }
+        .restante-rojo { color: red; font-weight: bold; }
 
-      .button-container,
-      .tab-container,
-      .year-container {
-        display: none;
-      }
+        /* Nuevos estilos para las etiquetas y el parpadeo */
+        .label-yellow { background-color: #FFFF00; font-weight: bold; }
+        .label-red { background-color: #FF0000; color: white; font-weight: bold; }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .blinking { animation: blink 1s infinite; }
 
-      table {
-        page-break-inside: avoid;
-        width: 100%;
-        border-collapse: collapse;
-      }
+        /* Contenedor para el cuadro de recordatorio global */
+        .recordatorio-global-container {
+            margin-top: 15px;
+            width: 100%;
+            border: 1px solid #000;
+            background-color: #e0e0e0;
+            padding: 5px;
+            box-sizing: border-box;
+            max-width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 8px;
+        }
+        #recordatorio-textarea {
+            width: 100%;
+            min-height: 80px;
+            border: 1px solid #aaa;
+            background-color: #e0e0e0;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            padding: 5px;
+            box-sizing: border-box;
+            border-radius: 5px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        #recordatorio-textarea::placeholder { color: #666; }
 
-      tr,
-      td,
-      th {
-        page-break-inside: avoid;
-        page-break-after: auto;
-        border: 1px solid #000 !important;
-      }
+        /* Contenedor para las opciones de impresión */
+        .print-options-container {
+            text-align: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            max-width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .print-options-container label {
+            margin: 0 10px;
+            font-weight: normal;
+        }
 
-      th,
-      td {
-        padding: 2px;
-        font-size: 10px;
-      }
+        /* Estilos del helicóptero */
+        #helicopter-svg {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: auto;
+            filter: drop-shadow(3px 5px 2px rgba(0, 0, 0, 0.2));
+            z-index: 20;
+            animation: flyInHeli 2s ease-out forwards, hover 3s ease-in-out infinite alternate 2s;
+        }
+        @keyframes flyInHeli {
+            from { top: -150px; opacity: 0; transform: translateX(-50%) rotate(-15deg); }
+            to { top: 20px; opacity: 1; transform: translateX(-50%) rotate(0deg); }
+        }
+        @keyframes hover {
+            0% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+            100% { transform: translateX(-50%) translateY(0px); }
+        }
 
-      @page {
-        size: A4 landscape;
-        margin: 10mm;
-      }
-    }
-  </style>
+        /* Estilos de la careta de Anonymous */
+        #anonymous-mask-img {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            width: 60px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(3px 5px 2px rgba(0, 0, 0, 0.2));
+            z-index: 15;
+            opacity: 0;
+            pointer-events: none;
+            animation: dropAndRiseMask 4s ease-in-out forwards 2.5s;
+        }
+        @keyframes dropAndRiseMask {
+            0% { opacity: 0; transform: translateX(-50%) translateY(-100%); }
+            10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            35% { transform: translateX(-50%) translateY(var(--mask-drop-distance)); }
+            65% { transform: translateX(-50%) translateY(var(--mask-drop-distance)); }
+            90% { transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-100%); }
+        }
 
-  <!-- Firebase modular -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        /* Estilos del efecto de revelación (círculo blanco) */
+        #reveal-circle {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 12;
+            pointer-events: none;
+            animation: revealEffect 1s ease-out forwards 3.9s;
+        }
+        @keyframes revealEffect {
+            0% { opacity: 0; transform: translateX(-50%) scale(0); }
+            50% { opacity: 0.8; transform: translateX(-50%) scale(1); }
+            100% { opacity: 0; transform: translateX(-50%) scale(1.5); }
+        }
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAS5gh5eSwzAyl_1LiDOH1ALC72B9g7K04",
-        authDomain: "datavase-133d9.firebaseapp.com",
-        databaseURL: "https://datavase-133d9-default-rtdb.firebaseio.com",
-        projectId: "datavase-133d9",
-        storageBucket: "datavase-133d9.appspot.com",
-        messagingSenderId: "453323331569",
-        appId: "1:453323331569:web:47144b220ce99ad09f1650"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const años = [2024, 2025, 2026];
-    let añoActual = 2025;
-    let mesActual = 0; // índice del mes activo
-
-    const meses = [
-      "Enero",
-      "Febrero",
-      "Marzo",
-      "Abril",
-      "Mayo",
-      "Junio",
-      "Julio",
-      "Agosto",
-      "Septiembre",
-      "Octubre",
-      "Noviembre",
-      "Diciembre",
-    ];
-
-    const nombresFilas = [
-  "AC HRS",
-  "ENGINE HRS",
-  "ENGINE STARTS",
-  "LANDINGS",
-  "INT-TIME",
-  "AUTOROTATION",
-  "FLIGHTS",
-  "HELIER",
-  "COMPRESSOR",
-  "GAS PROD",
-  "POWER TURB",
-];
-
-
-    const contenedorTablas = document.getElementById("contenedor-tablas");
-    const contenedorMeses = document.getElementById("meses");
-    const selectYear = document.getElementById("select-year");
-
-    // Cargar años en el select
-    function cargarAños() {
-      años.forEach((año) => {
-        const option = document.createElement("option");
-        option.value = año;
-        option.textContent = año;
-        selectYear.appendChild(option);
-      });
-      selectYear.value = añoActual;
-    }
-
-    // Crear botones de meses (pestañas)
-    function crearBotonesMeses() {
-      contenedorMeses.innerHTML = ""; // limpiar botones previos
-
-      meses.forEach((mes, i) => {
-        const btn = document.createElement("button");
-        btn.className = "tab-button";
-        btn.textContent = mes;
-        btn.onclick = () => {
-          mesActual = i;
-          mostrarTabla(i);
-          cargarDatosDeFirebase(añoActual, meses[mesActual]);
-        };
-        contenedorMeses.appendChild(btn);
-      });
-
-      // Activa el mesActual
-      mostrarTabla(mesActual);
-    }
-
-    // Crear tablas para el año seleccionado (solo crea contenedor para 12 meses, solo se muestra 1)
-    function crearTablasParaAño(año) {
-  contenedorTablas.innerHTML = ""; // limpiar tablas previas
-
-  meses.forEach((mes, i) => {
-    const div = document.createElement("div");
-    div.className = "tabla-mes";
-    div.style.display = i === mesActual ? "block" : "none";
-
-    const tabla = document.createElement("table");
-    tabla.className = "tabla-vuelo";
-
-    const thead = document.createElement("thead");
-    const encabezado = document.createElement("tr");
-    encabezado.innerHTML =
-      `<th>NOMENCLATURA</th><th contenteditable="true">VIENEN</th>`;
-    for (let d = 1; d <= 31; d++) {
-      encabezado.innerHTML += `<th>${d}</th>`;
-    }
-    encabezado.innerHTML += `<th>MET TOTAL</th><th>GENERAL</th>`;
-    thead.appendChild(encabezado);
-    tabla.appendChild(thead);
-
-    const tbody = document.createElement("tbody");
-
-    // Aquí se generan filas según nombresFilas (incluye ENGINE #2 STARTS)
-    nombresFilas.forEach((nombre) => {
-      const fila = document.createElement("tr");
-      fila.innerHTML =
-        `<td class="nomenclatura" contenteditable="true">${nombre}</td><td contenteditable="true">0</td>`;
-      for (let d = 1; d <= 31; d++) {
-        fila.innerHTML += `<td contenteditable="true">0</td>`;
-      }
-      fila.innerHTML += `<td class="fila-total">0</td><td class="fila-general">0</td>`;
-      tbody.appendChild(fila);
-    });
-
-    tabla.appendChild(tbody);
-    div.appendChild(tabla);
-    contenedorTablas.appendChild(div);
-  });
-}
-
-
-    // Mostrar solo la tabla del mes activo
-    function mostrarTabla(index) {
-      mesActual = index;
-      document.querySelectorAll(".tabla-mes").forEach((div, i) => {
-        div.style.display = i === index ? "block" : "none";
-      });
-      document.querySelectorAll(".tab-button").forEach((btn, i) => {
-        btn.classList.toggle("active", i === index);
-      });
-      document.title = `Datos de Vuelo - ${meses[index]} ${añoActual}`;
-    }
-
-    // Actualizar totales en las tablas
-    function actualizarTotales() {
-      document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
-        const filas = tabla.querySelectorAll("tbody tr");
-        filas.forEach((fila) => {
-          const celdas = fila.querySelectorAll("td");
-          const vienen = celdas[1].textContent.trim();
-          const valores = [...celdas]
-            .slice(2, 33)
-            .map((td) => parseFloat(td.textContent.trim()) || 0);
-          const total = valores.reduce((acc, val) => acc + val, 0);
-          const general = total + (parseFloat(vienen) || 0);
-
-          const esDecimal =
-            vienen.includes(".") || valores.some((v) => !Number.isInteger(v));
-          celdas[33].textContent = esDecimal ? total.toFixed(1) : Math.round(total);
-          celdas[34].textContent = esDecimal ? general.toFixed(1) : Math.round(general);
-        });
-      });
-    }
-
-    // Convierte la tabla HTML a objeto JSON para guardar en Firebase
-    function tablaAJSON(tabla) {
-      const filas = tabla.querySelectorAll("tbody tr");
-      const datos = [];
-
-      filas.forEach((fila) => {
-        const celdas = fila.querySelectorAll("td");
-        const filaDatos = [];
-        celdas.forEach((td) => {
-          filaDatos.push(td.textContent.trim());
-        });
-        datos.push(filaDatos);
-      });
-
-      return datos;
-    }
-
-    // Rellena la tabla HTML con datos JSON desde Firebase
-    function jsonATabla(tabla, datos) {
-  const filas = tabla.querySelectorAll("tbody tr");
-
-  nombresFilas.forEach((nombre, i) => {
-    const fila = filas[i];
-    const celdas = fila.querySelectorAll("td");
-    const filaDatos = datos?.[i];
-
-    celdas[0].textContent = nombre;
-
-    if (filaDatos) {
-      filaDatos.forEach((valor, j) => {
-        if (celdas[j]) celdas[j].textContent = valor;
-      });
-    } else {
-      // Si no existe en Firebase, inicializamos con ceros
-      for (let j = 1; j < celdas.length; j++) {
-        celdas[j].textContent = "0";
-      }
-    }
-  });
-}
-
-
-
-    // Guardar datos en Firebase Realtime Database
-    async function guardarDatosEnFirebase(año, mes) {
-      try {
-        const tabla = document.querySelector(".tabla-mes[style*='block'] .tabla-vuelo");
-        if (!tabla) return;
-
-        const datos = tablaAJSON(tabla);
-
-        const datosRef = ref(db, `datos_vuelo/${año}_${mes}`);
-        await set(datosRef, {
-          año,
-          mes,
-          datos,
-          actualizado: Date.now()
-        });
-
-        console.log(`Datos guardados para ${mes} ${año}`);
-      } catch (error) {
-        console.error("Error guardando en Firebase:", error);
-      }
-    }
-
-    // Cargar datos desde Firebase Realtime Database
-    async function cargarDatosDeFirebase(año, mes) {
-      try {
-        const datosRef = ref(db, `datos_vuelo/${año}_${mes}`);
-
-        onValue(datosRef, (snapshot) => {
-          const data = snapshot.val();
-          const tabla = document.querySelector(".tabla-mes[style*='block'] .tabla-vuelo");
-          if (data && data.datos && tabla) {
-            jsonATabla(tabla, data.datos);
-            actualizarTotales();
-            console.log(`Datos cargados para ${mes} ${año}`);
-          } else {
-            // Si no hay datos, limpia tabla a valores iniciales
-            if (tabla) {
-              nombresFilas.forEach((nombre, i) => {
-                const fila = tabla.querySelectorAll("tbody tr")[i];
-                const celdas = fila.querySelectorAll("td");
-                celdas[0].textContent = nombre;
-                celdas[1].textContent = "0";
-                for(let j=2; j<=32; j++){
-                  celdas[j].textContent = "0";
-                }
-                celdas[33].textContent = "0"; // total
-                celdas[34].textContent = "0"; // general
-              });
-              actualizarTotales();
+        /* Estilos de impresión */
+        @media print {
+            body {
+                margin: 0;
+                padding: 10mm;
+                font-size: 10px;
             }
-            console.log(`No hay datos guardados para ${mes} ${año}, tabla inicializada`);
-          }
-        }, {
-          onlyOnce: true
-        });
-      } catch (error) {
-        console.error("Error cargando de Firebase:", error);
-      }
-    }
+            .button-container, .tab-container, .year-container, 
+            #auth-container, #helicopter-svg, #anonymous-mask-img, #reveal-circle,
+            #main-app-header, .print-options-container, .user-id-container,
+            #motorStatusModal { /* Ocultar el modal de estado del motor en la impresión principal */
+                display: none !important; 
+            }
+            .print-header { display: block !important; }
+            table {
+                page-break-inside: avoid;
+                width: 100%; 
+                border-collapse: collapse;
+            }
+            th, td {
+                page-break-inside: avoid;
+                page-break-after: auto;
+                border: 1px solid #000 !important;
+                padding: 2px;
+                font-size: 9px; 
+            }
+            .nomenclatura {
+                text-align: left !important;
+                padding-left: 2px !important;
+                min-width: 120px !important; 
+            }
+            .restante-verde, .restante-amarillo, .restante-rojo,
+            .label-yellow, .label-red {
+                -webkit-print-color-adjust: exact !important; 
+                color-adjust: exact !important;
+            }
+            .recordatorio-global-container, #recordatorio-textarea {
+                display: block !important; 
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                background-color: #e0e0e0 !important;
+                border: 1px solid #000 !important;
+            }
+            #recordatorio-textarea::placeholder {
+                text-shadow: none !important; 
+                color: #000 !important;
+            }
+            .blinking {
+                animation: none !important;
+                opacity: 1 !important;
+            }
+            /* Reglas específicas para ocultar elementos según la clase del body */
+            body.print-no-reminders .recordatorio-global-container {
+                display: none !important;
+            }
+            body.print-no-yellow-labels .recordatorio-global-container,
+            body.print-no-yellow-labels .label-yellow,
+            body.print-no-yellow-labels .restante-label,
+            body.print-no-yellow-labels .limite-celda,
+            body.print-no-yellow-labels .abbrd-celda,
+            body.print-no-yellow-labels .extd-celda,
+            body.print-no-yellow-labels .flight-count-factor-celda,
+            body.print-no-yellow-labels .fila-restante {
+                display: none !important;
+            }
+            @page {
+                size: A4 landscape;
+                margin: 10mm;
+            }
+        }
 
-    // Escuchar cambios en tabla para guardado automático
-    function activarGuardadoAutomatico() {
-      document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
-        tabla.addEventListener("input", () => {
-          // Guardar tras 500ms debounce para no saturar peticiones
-          if (window._timeoutGuardar) clearTimeout(window._timeoutGuardar);
-          window._timeoutGuardar = setTimeout(() => {
-            guardarDatosEnFirebase(añoActual, meses[mesActual]);
-          }, 500);
-          actualizarTotales();
-        });
-      });
-    }
+        /* Estilos del modal de estado de motores */
+        #motorStatusModal {
+            /* Estilos ya definidos en Tailwind: fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden z-50 p-4 */
+        }
+        #motorStatusModal > div { /* Contenido interno del modal */
+            /* Estilos ya definidos en Tailwind: bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl overflow-y-auto */
+            max-height: 90vh;
+        }
+        #motorStatusModal h3 {
+            color: #2c3e50;
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+        }
+        #motorStatusContent {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Columnas responsivas */
+            gap: 1rem;
+        }
+        .component-status-item {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .component-status-item h4 {
+            font-weight: bold;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 0.25rem;
+            height: 20px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 0.25rem;
+            transition: width 0.5s ease-in-out;
+        }
+        .progress-text {
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            text-align: center;
+        }
+        /* Colores para las barras de progreso */
+        .progress-red { background-color: #ef4444; } /* Rojo */
+        .progress-orange { background-color: #f97316; } /* Naranja */
+        .progress-green { background-color: #22c55e; } /* Verde */
 
-    // Evento cambio año
-    selectYear.addEventListener("change", () => {
-      añoActual = parseInt(selectYear.value);
-      crearTablasParaAño(añoActual);
-      crearBotonesMeses();
-      cargarDatosDeFirebase(añoActual, meses[mesActual]);
-      activarGuardadoAutomatico();
-    });
-
-    // Botón imprimir
-    function imprimirTabla() {
-      window.print();
-    }
-
-    // Iniciar app
-    function iniciar() {
-      cargarAños();
-      crearTablasParaAño(añoActual);
-      crearBotonesMeses();
-      cargarDatosDeFirebase(añoActual, meses[mesActual]);
-      activarGuardadoAutomatico();
-    }
-
-    
-    window.addEventListener("load", iniciar);
-    window.imprimirTabla = imprimirTabla; // para acceso en HTML
-
-  </script>
+        /* Estilos de impresión para el modal de estado de motores */
+        @media print {
+            body.print-motor-status #main-app-content,
+            body.print-motor-status #auth-container,
+            body.print-motor-status #helicopter-svg,
+            body.print-motor-status #anonymous-mask-img,
+            body.print-motor-status #reveal-circle,
+            body.print-motor-status .button-container,
+            body.print-motor-status .tab-container,
+            body.print-motor-status .year-container,
+            body.print-motor-status .user-id-container {
+                display: none !important;
+            }
+            body.print-motor-status #motorStatusModal {
+                position: static !important; /* Elimina el posicionamiento fijo */
+                display: block !important; /* Asegura que se muestre */
+                background-color: transparent !important; /* Fondo transparente */
+                box-shadow: none !important; /* Sin sombra */
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+            }
+            body.print-motor-status #motorStatusModal > div {
+                width: auto !important;
+                max-width: none !important;
+                max-height: none !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                background-color: transparent !important;
+            }
+            body.print-motor-status #motorStatusModal .flex.justify-between.items-center.mb-4,
+            body.print-motor-status #motorStatusModal .print-options-container,
+            body.print-motor-status #motorStatusModal #btnPrintMotorStatus {
+                display: none !important; /* Oculta controles del modal en la impresión */
+            }
+            body.print-motor-status #motorStatusContent {
+                display: block !important; /* Asegura que los elementos se apilen para imprimir */
+                grid-template-columns: 1fr !important; /* Una columna para impresión */
+                gap: 0.5rem !important;
+            }
+            body.print-motor-status .component-status-item {
+                border: 1px solid #ccc !important;
+                padding: 0.5rem !important;
+                margin-bottom: 0.5rem !important;
+                background-color: #fff !important;
+                box-shadow: none !important;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            body.print-motor-status .progress-bar-fill {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h2>DATOS DE VUELO</h2>
+    <svg id="helicopter-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+        <g id="SVGRepo_iconCarrier">
+            <path d="M16 13.5C16 15.433 13.3137 17 10 17C6.68629 17 4 15.433 4 13.5C4 11.567 6.68629 10 10 10C13.3137 10 16 11.567 16 13.5Z" fill="#3498db" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M12 12.5C12 13.0523 11.5523 13.5 11 13.5H9C8.44772 13.5 8 13.0523 8 12.5C8 11.9477 8.44772 11.5 9 11.5H11C11.5523 11.5 12 11.9477 12 12.5Z" fill="#ecf0f1"></path>
+            <path d="M16 13.5H20C20.5523 13.5 21 13.0523 21 12.5C21 11.9477 20.5523 11.5 20 11.5H16" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M5 16.5L4 18.5M15 16.5L16 18.5" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M4 18.5H16" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M10 10V4C10 3.44772 10.4477 3 11 3H13C13.5523 3 14 3.44772 14 4V10" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M12 2V1C12 0.447715 11.5523 0 11 0H9C8.44772 0 8 0.447715 8 1V2" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M12 2H18C18.5523 2 19 2.44772 19 3V5C19 5.55228 18.5523 6 18 6H12" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M20 11.5V9.5C20 8.94772 20.4477 8.5 21 8.5H23C23.5523 8.5 24 8.94772 24 9.5V11.5" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M20 11.5H22C22.5523 11.5 23 11.9477 23 12.5V14.5C23 15.0523 22.5523 15.5 22 15.5H20" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </g>
+    </svg>
 
-  <div class="year-container">
-    Año:
-    <select id="select-year"></select>
-  </div>
+    <img id="anonymous-mask-img" src="https://wallpapercrafter.com/desktop/340779-Technology-Anonymous-Phone-Wallpaper.jpg" alt="Anonymous Mask">
 
-  <div class="tab-container" id="meses"></div>
+    <div id="reveal-circle"></div>
 
-  <div id="contenedor-tablas"></div>
+    <div id="auth-container" class="rounded-lg shadow-md p-6 bg-white">
+        <h3 class="text-xl font-semibold mb-4">Acceso de Usuario</h3>
+        <input type="email" id="email" placeholder="Correo electrónico" class="w-full p-2 mb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <input type="password" id="password" placeholder="Contraseña" class="w-full p-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="flex flex-col sm:flex-row justify-center gap-2">
+            <button id="login-btn" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">Iniciar Sesión</button>
+            <button id="signup-btn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Registrarse</button>
+        </div>
+        <button id="forgot-password-btn" class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors mt-4">Olvidé mi contraseña</button>
+        <p id="auth-status" class="text-red-600 mt-3 text-sm"></p>
+    </div>
 
-  <div class="button-container">
-    <button onclick="imprimirTabla()">Imprimir Tabla</button>
-  </div>
+    <div id="main-app-content">
+        <div id="main-app-header" class="flex justify-between items-center mb-4">
+            <h2 class="flex-grow text-center sm:text-left">DATOS DE VUELO FAH-976</h2>
+            <button id="logout-btn" class="px-4 py-2 bg-red-500 text-white rounded-md shadow-md hover:bg-red-600 transition-colors">Cerrar Sesión</button>
+        </div>
+
+        <div class="user-id-container">
+            ID de Usuario: <span id="user-id">Cargando...</span>
+        </div>
+        <div class="year-container">
+            Año: <select id="select-year" class="p-2 border border-gray-300 rounded-md"></select>
+        </div>
+        <div class="tab-container" id="meses"></div>
+
+        <div class="print-header" id="print-month-header"></div>
+
+        <div id="contenedor-tablas" class="overflow-x-auto"></div>
+        
+        <div class="recordatorio-global-container">
+            <strong>Recordatorios del Mes:</strong>
+            <textarea id="recordatorio-textarea" placeholder="Escribe tus recordatorios aquí"></textarea>
+        </div>
+
+        <div class="print-options-container">
+            <strong>Opciones de Impresión:</strong>
+            <label><input type="radio" name="printOption" value="full" checked> Tabla Completa</label>
+            <label><input type="radio" name="printOption" value="no-reminders"> Sin Recordatorios</label>
+            <label><input type="radio" name="printOption" value="no-yellow-labels"> Sin Columnas Amarillas</label>
+        </div>
+
+        <div class="button-container flex justify-center gap-4 mt-4">
+            <button id="btnImprimir" class="px-6 py-2 bg-gray-700 text-white rounded-md shadow-md hover:bg-gray-800 transition-colors">Imprimir Tabla</button>
+            <button id="btnMotorStatus" class="px-6 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition-colors">Estado de Motores</button>
+            <button id="btnComponentStatus" class="px-6 py-2 bg-purple-500 text-white rounded-md shadow-md hover:bg-purple-600 transition-colors">Estado de Componentes</button>
+        </div>
+    </div>
+
+    <div id="motorStatusModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl overflow-y-auto" style="max-height: 90vh;">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold">Estado de Componentes de Motores</h3>
+                <button id="closeMotorStatusModal" class="text-gray-500 hover:text-gray-700 text-3xl leading-none">&times;</button>
+            </div>
+            <div id="motorStatusContent" class="space-y-4">
+                </div>
+            <div class="print-options-container mt-6">
+                <strong>Opciones de Impresión:</strong>
+                <label><input type="radio" name="motorStatusPrintOption" value="full" checked> Completo</label>
+                <label><input type="radio" name="motorStatusPrintOption" value="critical-only"> Solo Críticos</label>
+            </div>
+            <button id="btnPrintMotorStatus" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Imprimir Estado</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importa las funciones necesarias de Firebase SDK
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { getDatabase, ref, set, onValue, get } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js';
+
+        // Tu configuración de Firebase (actualizada con la que proporcionaste)
+       const firebaseConfig = {
+            apiKey: "AIzaSyASg6fgH-Lo6PXLnnw_p8LzHl-WNDiuHrU",
+            authDomain: "fah-901-ba5f4.firebaseapp.com",
+            databaseURL: "https://fah-901-ba5f4-default-rtdb.firebaseio.com",
+            projectId: "fah-901-ba5f4",
+            storageBucket: "fah-901-ba5f4.firebasestorage.app",
+            messagingSenderId: "630831139898",
+            appId: "1:630831139898:web:1771a16e1ad4bfb8ca3903",
+            measurementId: "G-WNZJ1VEH9H"
+        };
+        // Inicializa Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app); // Opcional, si no lo usas puedes quitarlo
+        const database = getDatabase(app); // Obtiene la instancia de Realtime Database
+        const auth = getAuth(app); // Obtiene la instancia de Autenticación
+
+        // Define __app_id con un valor por defecto si no está definida
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        console.log("App ID utilizada:", appId); // Log para depuración
+
+        // Variables globales
+        let añoActual = new Date().getFullYear(); // Inicia con el año actual
+        let mesActual = new Date().getMonth(); // Inicia con el mes actual (0-11)
+        let userId = "anonimo"; // Valor por defecto, se actualizará con el UID de Firebase Auth
+        let currentUserRole = null; // Rol del usuario actual
+
+        const años = [2024, 2025, 2026, 2027, 2028];
+        const meses = [
+            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ];
+
+        // Definición de todas las filas en el ORDEN FINAL DESEADO
+        const nombresFilasOrdenadas = [
+            "AC HRS",
+            "ATERRIZAJES",
+            "RINS",
+            "CONTINGENCY EXCURSIONS 1",
+            "HUB COMPRESOR 1.1",
+            "HUB COMPRESOR 1.2",
+            "2ND STAGE COMPRESOR DISK 1",
+            "3RD STAGE COMPRESOR DISK 1",
+            "IMPELLER 1",
+            "COMPRESSOR TURBINE DISK 1",
+            "POWER TURBINE DISK 1.1",
+            "POWER TURBINE DISK 1.2",
+            "CONTINGENCY EXCURSIONS 2", 
+            "HUB COMPRESOR 2.1",
+            "HUB COMPRESOR 2.2",
+            "2ND STAGE COMPRESOR DISK 2",
+            "3RD STAGE COMPRESOR DISK 2",
+            "IMPELLER 2",
+            "COMPRESSOR TURBINE DISK 2",
+            "POWER TURBINE DISK 2.1",
+            "POWER TURBINE DISK 2.2",
+        ];
+
+        // Nomenclaturas EXACTAS de las filas que deben tener las 5 columnas adicionales (editable)
+        const filasConColumnasAdicionalesEditables = [
+            "HUB COMPRESOR 1.1", "HUB COMPRESOR 1.2",
+            "2ND STAGE COMPRESOR DISK 1", "3RD STAGE COMPRESOR DISK 1", "IMPELLER 1",
+            "COMPRESSOR TURBINE DISK 1",
+            "POWER TURBINE DISK 1.1", "POWER TURBINE DISK 1.2",
+            "HUB COMPRESOR 2.1", "HUB COMPRESOR 2.2",
+            "2ND STAGE COMPRESOR DISK 2", "3RD STAGE COMPRESOR DISK 2", "IMPELLER 2",
+            "COMPRESSOR TURBINE DISK 2",
+            "POWER TURBINE DISK 2.1", "POWER TURBINE DISK 2.2"
+        ];
+        
+        // Nomenclaturas EXACTAS de las filas que deben tener las 5 columnas adicionales (solo etiquetas, como CICLOS)
+        const filasConColumnasAdicionalesSoloEtiquetas = [
+            "CICLOS 1", "CICLOS 2"
+        ];
+
+        // Definición de límites y factores fijos
+        const limitesConfig = {
+            "HUB COMPRESOR": {
+                "1.1": { abbreviated: 2, extended: 0, flightCount: 3.0, limitCycles: 110000 },
+                "1.2": { abbreviated: 2, extended: 0, flightCount: 1.0, limitCycles: 35000 },
+                "2.1": { abbreviated: 2, extended: 0, flightCount: 3.0, limitCycles: 110000 },
+                "2.2": { abbreviated: 2, extended: 0, flightCount: 1.0, limitCycles: 35000 }
+            },
+            "2ND STAGE COMPRESOR DISK": { abbreviated: 2, extended: 0, flightCount: 1.0, limitCycles: 29000 },
+            "3RD STAGE COMPRESOR DISK": { abbreviated: 2, extended: 0, flightCount: 1.0, limitCycles: 29000 },
+            "IMPELLER": { abbreviated: 2, extended: 0, flightCount: 1.0, limitCycles: 29000 },
+            "COMPRESSOR TURBINE DISK": { abbreviated: 4, extended: 15, flightCount: 0.9, limitCycles: 7200 },
+            "POWER TURBINE DISK": {
+                "1.1": { abbreviated: 10, extended: 3, flightCount: 4.0, limitCycles: 57000 },
+                "1.2": { abbreviated: 10, extended: 3, flightCount: 1.0, limitCycles: 15000 },
+                "2.1": { abbreviated: 10, extended: 3, flightCount: 4.0, limitCycles: 57000 },
+                "2.2": { abbreviated: 10, extended: 3, flightCount: 1.0, limitCycles: 15000 }
+            }
+        };
+
+        // Referencias a elementos del DOM
+        const contenedorTablas = document.getElementById("contenedor-tablas");
+        const contenedorMeses = document.getElementById("meses");
+        const selectYear = document.getElementById("select-year");
+        const printMonthHeader = document.getElementById("print-month-header");
+        const recordatorioTextarea = document.getElementById("recordatorio-textarea");
+        const userIdDisplay = document.getElementById("user-id");
+
+        // Elementos de autenticación
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const forgotPasswordBtn = document.getElementById('forgot-password-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const authStatus = document.getElementById('auth-status');
+        const authContainer = document.getElementById('auth-container');
+        const mainAppContent = document.getElementById('main-app-content');
+        const btnImprimir = document.getElementById('btnImprimir');
+
+        // Nuevos elementos para el estado de motores
+        const btnMotorStatus = document.getElementById('btnMotorStatus');
+        const motorStatusModal = document.getElementById('motorStatusModal');
+        const closeMotorStatusModal = document.getElementById('closeMotorStatusModal');
+        const motorStatusContent = document.getElementById('motorStatusContent');
+        const btnPrintMotorStatus = document.getElementById('btnPrintMotorStatus');
+        // Nuevo botón de estado de componentes
+        const btnComponentStatus = document.getElementById('btnComponentStatus');
+
+
+        // Helper para extraer la nomenclatura base y la variante (ej. "HUB COMPRESOR" y "1.1")
+        function parseNomenclatura(nombreCompleto) {
+            let nomenclaturaBase = '';
+            let varianteClave = ''; 
+            const matchNumericPart = nombreCompleto.match(/(\d+(?:\.\d+)?)$/);
+            if (matchNumericPart) {
+                varianteClave = matchNumericPart[1];
+                nomenclaturaBase = nombreCompleto.substring(0, nombreCompleto.length - varianteClave.length).trim();
+            } else {
+                nomenclaturaBase = nombreCompleto;
+            }
+            return { nomenclaturaBase, varianteClave };
+        }
+
+        /**
+         * Formatea un número para mostrarlo sin decimales si es un entero,
+         * o con decimales si tiene parte fraccionaria.
+         * @param {number|string} value El valor a formatear.
+         * @returns {string} El valor formateado como string.
+         */
+        function formatNumber(value) {
+            const num = parseFloat(value);
+            if (isNaN(num)) {
+                return '';
+            }
+            // Si el número es un entero (no tiene parte decimal), lo devuelve como entero.
+            // De lo contrario, lo devuelve con sus decimales originales.
+            if (num % 1 === 0) {
+                return num.toString();
+            } else {
+                return num.toString();
+            }
+        }
+
+        // -----------------------------------------------------------
+        // Funciones de Autenticación
+        // -----------------------------------------------------------
+
+        signupBtn.addEventListener('click', async () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            if (!email || !password) { authStatus.textContent = 'Por favor, introduce un correo y una contraseña.'; return; }
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                console.log('Usuario registrado:', user.email);
+                authStatus.textContent = 'Registro exitoso. ¡Bienvenido!';
+                authStatus.style.color = 'green';
+                emailInput.value = '';
+                passwordInput.value = '';
+                await set(ref(database, `user_roles/${user.uid}`), 'viewer');
+                console.log('Rol de usuario asignado como viewer.');
+            } catch (error) {
+                console.error('Error al registrar:', error.message);
+                authStatus.textContent = `Error al registrar: ${error.message}`;
+                authStatus.style.color = 'red';
+            }
+        });
+
+        loginBtn.addEventListener('click', async () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            if (!email || !password) { authStatus.textContent = 'Por favor, introduce un correo y una contraseña.'; return; }
+            try {
+                console.log('Intentando iniciar sesión con:', email);
+                await setPersistence(auth, browserLocalPersistence);
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log('Inicio de sesión exitoso:', userCredential.user.email);
+                authStatus.textContent = 'Sesión iniciada. ¡Bienvenido!';
+                authStatus.style.color = 'green';
+                emailInput.value = '';
+                passwordInput.value = '';
+            } catch (error) {
+                console.error('Error al iniciar sesión:', error.code, error.message);
+                authStatus.textContent = `Error al iniciar sesión: ${error.message}`;
+                authStatus.style.color = 'red';
+            }
+        });
+
+        forgotPasswordBtn.addEventListener('click', async () => {
+            const email = emailInput.value;
+            if (!email) { authStatus.textContent = 'Por favor, introduce tu correo electrónico para restablecer la contraseña.'; authStatus.style.color = 'red'; return; }
+            try {
+                console.log('Intentando enviar correo de restablecimiento a:', email);
+                await sendPasswordResetEmail(auth, email);
+                authStatus.textContent = 'Se ha enviado un correo de restablecimiento de contraseña a tu dirección.';
+                authStatus.style.color = 'green';
+            } catch (error) {
+                console.error('Error al enviar correo de restablecimiento:', error.code, error.message);
+                authStatus.textContent = `Error al restablecer contraseña: ${error.message}`;
+                authStatus.style.color = 'red';
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                console.log('Intentando cerrar sesión...');
+                await signOut(auth);
+                console.log('Sesión cerrada');
+                authStatus.textContent = 'Sesión cerrada.';
+                authStatus.style.color = 'red';
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error.code, error.message);
+                authStatus.textContent = `Error al cerrar sesión: ${error.message}`;
+                authStatus.style.color = 'red';
+            }
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            console.log('onAuthStateChanged disparado. Usuario:', user ? user.email : 'null');
+            if (user) {
+                userId = user.uid;
+                userIdDisplay.textContent = userId;
+                console.log('Usuario actual:', user.email, 'UID:', userId);
+                
+                authContainer.style.display = 'none';
+                mainAppContent.style.display = 'block';
+                authStatus.textContent = '';
+
+                try {
+                    const rolePath = `user_roles/${userId}`;
+                    console.log("Ruta de rol de usuario:", rolePath);
+                    const snapshot = await get(ref(database, rolePath));
+                    currentUserRole = snapshot.val() || 'viewer';
+                    console.log('Rol del usuario (obtenido de DB):', currentUserRole); 
+                    
+                    if (!snapshot.exists()) {
+                        console.log('Asignando rol por defecto "viewer" al nuevo usuario:', userId);
+                        await set(ref(database, rolePath), 'viewer');
+                        console.log('Rol "viewer" asignado exitosamente.');
+                    }
+                    
+                    applyRolePermissions(currentUserRole);
+                    await cargarDatosDeFirebase();
+                    agregarEventosDeEdicion();
+                } catch (error) {
+                    console.error("Error en onAuthStateChanged al obtener o asignar el rol del usuario o cargar datos:", error.code, error.message);
+                    authStatus.textContent = `Error crítico: ${error.message}. Por favor, recarga.`;
+                    authStatus.style.color = 'red';
+                    currentUserRole = 'viewer';
+                    applyRolePermissions(currentUserRole);
+                    await cargarDatosDeFirebase();
+                    agregarEventosDeEdicion();
+                }
+
+            } else {
+                userId = "anonimo";
+                userIdDisplay.textContent = userId;
+                console.log('No hay usuario logueado');
+                
+                authContainer.style.display = 'block';
+                mainAppContent.style.display = 'none';
+                authStatus.textContent = 'Por favor, inicia sesión o regístrate para acceder.';
+                authStatus.style.color = 'red';
+                currentUserRole = null;
+                applyRolePermissions(null);
+            }
+        });
+
+        /**
+         * Aplica los permisos de la interfaz de usuario basados en el rol del usuario.
+         * @param {string|null} role - El rol del usuario ('admin', 'viewer' o null si no está autenticado).
+         */
+        function applyRolePermissions(role) {
+            const isAdministrator = (role === 'admin');
+            const isAuthenticated = (role !== null);
+
+            document.querySelectorAll('.tabla-vuelo tbody tr').forEach(fila => {
+                fila.querySelectorAll('td').forEach((celda, indexCelda) => {
+                    const isNomenclatura = celda.classList.contains('nomenclatura');
+                    const isTotalCell = celda.classList.contains('fila-total') || celda.classList.contains('fila-general');
+                    const isRestanteCell = celda.classList.contains('fila-restante');
+                    const isMotorHeader = celda.classList.contains('motor-header');
+                    const isLabelCell = celda.classList.contains('limite-label') || celda.classList.contains('abbrd-label') || 
+                                        celda.classList.contains('extd-label') || celda.classList.contains('flight-count-factor-label') || 
+                                        celda.classList.contains('restante-label');
+
+                    if (isNomenclatura || isTotalCell || isRestanteCell || isMotorHeader || isLabelCell) {
+                        celda.contentEditable = 'false';
+                        celda.classList.add('read-only-cell');
+                        celda.classList.remove('editable-cell');
+                    } else {
+                        celda.contentEditable = isAdministrator ? 'true' : 'false';
+                        if (isAdministrator) {
+                            celda.classList.add('editable-cell');
+                            celda.classList.remove('read-only-cell');
+                        } else {
+                            celda.classList.add('read-only-cell');
+                            celda.classList.remove('editable-cell');
+                        }
+                    }
+                });
+            });
+
+            selectYear.disabled = !isAuthenticated; 
+            document.querySelectorAll('.tab-button').forEach(btn => { btn.disabled = !isAuthenticated; });
+            recordatorioTextarea.readOnly = !isAdministrator;
+            btnImprimir.disabled = !isAuthenticated;
+            btnMotorStatus.disabled = !isAuthenticated;
+            // Deshabilitar el nuevo botón si no está autenticado
+            btnComponentStatus.disabled = !isAuthenticated; 
+            btnPrintMotorStatus.disabled = !isAuthenticated;
+
+            if (role === 'viewer') {
+                authStatus.textContent = 'Has iniciado sesión como Visualizador. Puedes ver todos los datos, pero no puedes editar.';
+                authStatus.style.color = 'blue';
+            } else if (role === 'admin') {
+                authStatus.textContent = 'Has iniciado sesión como Administrador. Puedes editar todos los datos.';
+                authStatus.style.color = 'green';
+            } else {
+                authStatus.textContent = 'Por favor, inicia sesión o regístrate para acceder.';
+                authStatus.style.color = 'red';
+            }
+        }
+
+
+        // -----------------------------------------------------------
+        // Funciones de Base de Datos (Firebase Realtime Database)
+        // -----------------------------------------------------------
+
+        async function guardarDatosEnFirebase(año, mesIndex, datosTabla, recordatorio) {
+            if (currentUserRole !== 'admin') {
+                console.warn('Acceso denegado: Solo los administradores pueden guardar datos.');
+                authStatus.textContent = 'Acceso denegado: Solo los administradores pueden guardar datos.';
+                authStatus.style.color = 'orange';
+                return;
+            }
+
+            const rutaDatosMes = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesIndex}`;
+            const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${año}/${mesIndex}`;
+            const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-976-Overall`; // Nueva ruta para totales generales
+
+            try {
+                // Guardar datos de tabla del mes actual
+                await set(ref(database, rutaDatosMes), datosTabla);
+                // Guardar recordatorio del mes actual
+                await set(ref(database, rutaRecordatorio), recordatorio);
+
+                // Calcular y guardar los totales generales acumulados
+                await calcularYGuardarTotalesGenerales();
+
+                console.log(`Datos y recordatorio guardados correctamente para ${meses[mesIndex]} de ${año}`);
+                authStatus.textContent = `Datos guardados para ${meses[mesIndex]} de ${año}.`;
+                authStatus.style.color = 'green';
+            } catch (error) {
+                console.error("Error al guardar los datos:", error.code, error.message);
+                authStatus.textContent = `Error al guardar los datos: ${error.message}`;
+                authStatus.style.color = 'red';
+            }
+        }
+
+        // Nueva función para calcular y guardar los totales generales acumulados
+        async function calcularYGuardarTotalesGenerales() {
+            const allYearsDataRef = ref(database, `artifacts/${appId}/public_data/datos_vuelo`);
+            let allMonthsData = {};
+
+            try {
+                const snapshot = await get(allYearsDataRef);
+                if (snapshot.exists()) {
+                    allMonthsData = snapshot.val();
+                }
+
+                let newCumulativeTotals = {
+                    'AC HRS': 0,
+                    'ATERRIZAJES': 0,
+                    'RINS': 0
+                };
+
+                // Iterar sobre todos los años y meses para calcular el total general
+                for (const yearKey in allMonthsData) {
+                    if (Object.hasOwnProperty.call(allMonthsData, yearKey)) {
+                        const yearData = allMonthsData[yearKey];
+                        for (const monthKey in yearData) {
+                            if (Object.hasOwnProperty.call(yearData, monthKey)) {
+                                const monthData = yearData[monthKey];
+                                // Asegurarse de que los datos de la fila existan antes de intentar acceder a ellos
+                                // Y que la columna 34 (GENERAL) exista y sea numérica
+                                if (monthData && Array.isArray(monthData) && monthData[0] && !isNaN(parseFloat(monthData[0][34]))) { // AC HRS
+                                    newCumulativeTotals['AC HRS'] += parseFloat(monthData[0][34]) || 0; 
+                                }
+                                if (monthData && Array.isArray(monthData) && monthData[1] && !isNaN(parseFloat(monthData[1][34]))) { // ATERRIZAJES
+                                    newCumulativeTotals['ATERRIZAJES'] += parseFloat(monthData[1][34]) || 0; 
+                                }
+                                if (monthData && Array.isArray(monthData) && monthData[2] && !isNaN(parseFloat(monthData[2][34]))) { // RINS
+                                    newCumulativeTotals['RINS'] += parseFloat(monthData[2][34]) || 0; 
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Guardar los totales generales acumulados en su propia ubicación
+                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-976-Overall`;
+                await set(ref(database, rutaTotalesGenerales), newCumulativeTotals);
+                console.log("Totales generales acumulados guardados:", newCumulativeTotals);
+
+            } catch (error) {
+                console.error("Error al calcular y guardar totales generales:", error);
+            }
+        }
+
+
+        async function cargarDatosDeFirebase() {
+            if (!userId || userId === "anonimo") {
+                console.warn("No se pueden cargar datos: Usuario no autenticado.");
+                return;
+            }
+
+            const rutaDatosMes = `artifacts/${appId}/public_data/datos_vuelo/${añoActual}/${mesActual}`;
+            const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${añoActual}/${mesActual}`;
+
+            try {
+                console.log(`Cargando datos de: ${rutaDatosMes}`);
+                const datosSnapshot = await get(ref(database, rutaDatosMes));
+                const datos = datosSnapshot.val();
+                // *** NUEVO LOG PARA DEPURACIÓN ***
+                console.log(`Datos de tabla cargados de Firebase para ${meses[mesActual]} de ${añoActual}:`, datos);
+
+                if (datos) {
+                    cargarDatosEnTablaHTML(datos, mesActual);
+                    console.log(`Datos de tabla cargados para ${meses[mesActual]} de ${añoActual}`);
+                } else {
+                    console.log(`No hay datos de tabla guardados para ${meses[mesActual]} de ${añoActual}. Limpiando tabla.`);
+                    limpiarTablaHTML(mesActual);
+                }
+
+                console.log(`Cargando recordatorio de: ${rutaRecordatorio}`);
+                const recordatorioSnapshot = await get(ref(database, rutaRecordatorio));
+                const recordatorio = recordatorioSnapshot.val();
+                if (recordatorio !== null) {
+                    recordatorioTextarea.value = recordatorio;
+                    console.log(`Recordatorio cargado para ${meses[mesActual]} de ${añoActual}`);
+                } else {
+                    recordatorioTextarea.value = "";
+                    console.log(`No hay recordatorio guardado para ${meses[mesActual]} de ${añoActual}.`);
+                }
+                actualizarTotales(); // Asegurarse de que los totales se actualicen después de cargar
+            } catch (error) {
+                console.error("Error al cargar los datos de Firebase:", error.code, error.message);
+                authStatus.textContent = `Error al cargar los datos: ${error.message}`;
+                authStatus.style.color = 'red';
+            }
+        }
+
+        function limpiarTablaHTML(indiceTabla) {
+            const tabla = document.querySelectorAll(".tabla-vuelo")[indiceTabla];
+            if (tabla) {
+                tabla.querySelectorAll('tbody tr').forEach(fila => {
+                    const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
+                    const isEditableComponentRow = filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta);
+                    const isLabelRow = filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta);
+
+                    fila.querySelectorAll('td').forEach((celda, indexCelda) => {
+                        const isNomenclatura = celda.classList.contains('nomenclatura');
+                        const isTotalCell = celda.classList.contains('fila-total') || celda.classList.contains('fila-general');
+                        const isRestanteCell = celda.classList.contains('fila-restante');
+                        const isMotorHeader = celda.classList.contains('motor-header');
+                        
+                        const isSpecificLabelCell = celda.classList.contains('limite-label') || celda.classList.contains('abbrd-label') || 
+                                                    celda.classList.contains('extd-label') || celda.classList.contains('flight-count-factor-label') || 
+                                                    celda.classList.contains('restante-label');
+
+                        if (isMotorHeader || isNomenclatura || isTotalCell || isRestanteCell || isSpecificLabelCell) {
+                            if (isSpecificLabelCell) {
+                                if (celda.classList.contains('limite-label')) {
+                                    celda.textContent = 'LIMITE';
+                                    celda.classList.add('label-yellow');
+                                }
+                                if (celda.classList.contains('abbrd-label')) {
+                                    celda.textContent = 'ABBR\'D';
+                                    celda.classList.add('label-yellow');
+                                }
+                                if (celda.classList.contains('extd-label')) {
+                                    celda.textContent = 'EXT\'D';
+                                    celda.classList.add('label-yellow');
+                                }
+                                if (celda.classList.contains('flight-count-factor-label')) {
+                                    celda.textContent = 'FLIGHT COUNT FACTOR';
+                                    celda.classList.add('label-yellow');
+                                }
+                                if (celda.classList.contains('restante-label')) {
+                                    celda.textContent = 'RESTANTE';
+                                    celda.classList.add('label-red', 'blinking');
+                                }
+                            }
+                            return; 
+                        }
+
+                        if (isEditableComponentRow) {
+                            const { nomenclaturaBase, varianteClave } = parseNomenclatura(nomenclaturaCompleta);
+                            let config = limitesConfig[nomenclaturaBase];
+                            if (varianteClave && config && config[varianteClave]) { 
+                                config = config[varianteClave];
+                            } else if (!config) {
+                                config = {};
+                            }
+
+                            if (celda.classList.contains('limite-celda')) {
+                                celda.textContent = config?.limitCycles !== undefined ? formatNumber(config.limitCycles) : '';
+                                celda.classList.remove("led-persistente");
+                            } else if (celda.classList.contains('abbrd-celda')) {
+                                celda.textContent = config?.abbreviated !== undefined ? formatNumber(config.abbreviated) : '';
+                                celda.classList.remove("led-persistente");
+                            } else if (celda.classList.contains('extd-celda')) {
+                                celda.textContent = config?.extended !== undefined ? formatNumber(config.extended) : '';
+                                celda.classList.remove("led-persistente");
+                            } else if (celda.classList.contains('flight-count-factor-celda')) {
+                                celda.textContent = config?.flightCount !== undefined ? formatNumber(config.flightCount) : '';
+                                celda.classList.remove("led-persistente");
+                            } else {
+                                celda.textContent = "";
+                                celda.classList.remove("led-persistente");
+                            }
+                        } else {
+                            celda.textContent = "";
+                            celda.classList.remove("led-persistente");
+                        }
+                    });
+                    if (isEditableComponentRow) {
+                        const restanteCelda = fila.querySelector('.fila-restante');
+                        const limiteCelda = fila.querySelector('.limite-celda');
+                        const limite = parseFloat(limiteCelda?.textContent.trim()) || 0;
+                        aplicarEstiloRestante(restanteCelda, limite, limite); 
+                    }
+                });
+                actualizarTotales();
+            }
+        }
+
+        function cargarDatosEnTablaHTML(datos, indiceTabla) {
+            const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
+            if (tabla) {
+                const filasHTML = Array.from(tabla.querySelectorAll('tr'));
+                let datosIndex = 0; 
+
+                filasHTML.forEach((filaHTML) => {
+                    // Si es una fila de encabezado de motor, no tiene datos para cargar de Firebase directamente en esta iteración
+                    if (filaHTML.querySelector('.motor-header')) {
+                        return;
+                    }
+
+                    const datosFila = datos[datosIndex];
+                    if (datosFila) {
+                        filaHTML.querySelectorAll('td').forEach((celda, indexCelda) => {
+                            const isNomenclatura = celda.classList.contains('nomenclatura');
+                            const isLabelCell = celda.classList.contains('limite-label') || celda.classList.contains('abbrd-label') || 
+                                                celda.classList.contains('extd-label') || celda.classList.contains('flight-count-factor-label') || 
+                                                celda.classList.contains('restante-label');
+
+                            if (celda && !isNomenclatura && !isLabelCell && datosFila[indexCelda] !== undefined) {
+                                // Usar formatNumber para aplicar el formato deseado
+                                celda.textContent = formatNumber(datosFila[indexCelda]);
+                                if (celda.textContent.trim() !== "") {
+                                    celda.classList.add("led-persistente");
+                                } else {
+                                    celda.classList.remove("led-persistente");
+                                }
+                            } else if (isLabelCell) {
+                                if (celda.classList.contains('limite-label')) {
+                                    celda.textContent = 'LIMITE';
+                                    celda.classList.add('label-yellow');
+                                }
+                                if (celda.classList.contains('abbrd-label')) {
+                                    celda.textContent = 'ABBR\'D';
+                                    celda.classList.add('label-yellow');
+                                }
+                                if (celda.classList.contains('extd-label')) {
+                                    celda.textContent = 'EXT\'D';
+                                    celda.classList.add('label-yellow');
+                                }
+                                if (celda.classList.contains('flight-count-factor-label')) {
+                                    celda.textContent = 'FLIGHT COUNT FACTOR';
+                                    celda.classList.add('label-yellow');
+                                }
+                                if (celda.classList.contains('restante-label')) {
+                                    celda.textContent = 'RESTANTE';
+                                    celda.classList.add('label-red', 'blinking');
+                                }
+                            }
+                        });
+                    }
+                    datosIndex++; 
+                });
+            }
+        }
+
+        function obtenerDatosTabla(indiceTabla) {
+            const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
+            const datos = [];
+            if (tabla) {
+                tabla.querySelectorAll('tr').forEach(fila => {
+                    // Solo incluir filas que no sean encabezados de motor en los datos a guardar
+                    if (fila.querySelector('.motor-header')) {
+                        // Si es un encabezado de motor, lo ignoramos para los datos de la tabla
+                        // pero necesitamos mantener la consistencia del índice si se procesa el HTML
+                        return; 
+                    }
+                    const filaData = [];
+                    fila.querySelectorAll('td').forEach(celda => {
+                        filaData.push(celda.textContent);
+                    });
+                    datos.push(filaData);
+                });
+            }
+            // *** NUEVO LOG PARA DEPURACIÓN ***
+            console.log("Datos de tabla a guardar:", datos);
+            return datos;
+        }
+
+        // -----------------------------------------------------------
+        // Funciones de Interfaz de Usuario y Lógica de Tabla
+        // -----------------------------------------------------------
+
+        function cargarAños() {
+            selectYear.innerHTML = "";
+            años.forEach((año) => {
+                const option = document.createElement("option");
+                option.value = año;
+                option.textContent = año;
+                selectYear.appendChild(option);
+            });
+            selectYear.value = añoActual;
+            selectYear.onchange = async () => {
+                añoActual = parseInt(selectYear.value);
+                crearTablasParaAño(añoActual);
+                await cargarDatosDeFirebase();
+                agregarEventosDeEdicion();
+                applyRolePermissions(currentUserRole);
+            };
+        }
+
+        function crearBotonesMeses() {
+            contenedorMeses.innerHTML = "";
+            meses.forEach((mes, i) => {
+                const btn = document.createElement("button");
+                btn.className = "tab-button";
+                btn.textContent = mes;
+                btn.onclick = async () => {
+                    mesActual = i;
+                    mostrarTabla(i);
+                    await cargarDatosDeFirebase();
+                    agregarEventosDeEdicion();
+                    applyRolePermissions(currentUserRole);
+                };
+                contenedorMeses.appendChild(btn);
+            });
+            mostrarTabla(mesActual);
+        }
+
+        function crearTablasParaAño(año) {
+            contenedorTablas.innerHTML = "";
+            meses.forEach((mes, i) => {
+                const div = document.createElement("div");
+                div.className = "tabla-mes";
+                div.style.display = i === mesActual ? "block" : "none";
+
+                const tabla = document.createElement("table");
+                tabla.className = "tabla-vuelo";
+
+                const thead = document.createElement("thead");
+                const encabezado = document.createElement("tr");
+                encabezado.innerHTML = `
+                    <th>NOMENCLATURA</th>
+                    <th>VIENEN</th>
+                `;
+                for (let d = 1; d <= 31; d++) {
+                    encabezado.innerHTML += `<th>${d}</th>`;
+                }
+                encabezado.innerHTML += `
+                    <th>MES TOTAL</th>
+                    <th>GENERAL</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                `;
+                thead.appendChild(encabezado);
+                tabla.appendChild(thead);
+
+                const tbody = document.createElement("tbody");
+                
+                nombresFilasOrdenadas.forEach((nombre) => {
+                    const totalColsInHeader = 35 + 5;
+                    
+                    if (nombre === "HUB COMPRESOR 1.1") {
+                        const separador1 = document.createElement("tr");
+                        separador1.innerHTML = `<td colspan="${totalColsInHeader}" class="motor-header" contenteditable="false">MOTOR # 1</td>`;
+                        tbody.appendChild(separador1);
+                        
+                        ['ENGINE HRS 1', 'ENGINE STARTS 1', 'FLIGHTS 1', 'CICLOS 1'].forEach(motorRowName => {
+                            const filaMotor = crearFilaTabla(motorRowName);
+                            tbody.appendChild(filaMotor);
+                        });
+                    }
+
+                    if (nombre === "HUB COMPRESOR 2.1") {
+                        const separador2 = document.createElement("tr");
+                        separador2.innerHTML = `<td colspan="${totalColsInHeader}" class="motor-header" contenteditable="false">MOTOR # 2</td>`;
+                        tbody.appendChild(separador2);
+                        
+                        ['ENGINE HRS 2', 'ENGINE STARTS 2', 'FLIGHTS 2', 'CICLOS 2'].forEach(motorRowName => {
+                            const filaMotor = crearFilaTabla(motorRowName);
+                            tbody.appendChild(filaMotor);
+                        });
+                    }
+                    
+                    const fila = crearFilaTabla(nombre);
+                    tbody.appendChild(fila);
+                });
+
+                tabla.appendChild(tbody);
+                div.appendChild(tabla);
+                contenedorTablas.appendChild(div);
+            });
+        }
+
+        function crearFilaTabla(nombre) {
+            const fila = document.createElement("tr");
+            let limiteVal = '';
+            let abbrdVal = '';
+            let extdVal = '';
+            let flightCountFactorVal = '';
+
+            const isEditableComponentRow = filasConColumnasAdicionalesEditables.includes(nombre);
+            const isLabelRow = filasConColumnasAdicionalesSoloEtiquetas.includes(nombre);
+
+            let rowHtml = `
+                <td class="nomenclatura" contenteditable="false">${nombre}</td>
+                <td contenteditable="true" class="viene-celda"></td>
+                ${Array.from({ length: 31 }, (_, d) => `<td contenteditable="true"></td>`).join('')}
+                <td class="fila-total" contenteditable="false">0.0</td>
+                <td class="fila-general" contenteditable="false">0.0</td>
+            `;
+
+            if (isEditableComponentRow) {
+                const { nomenclaturaBase, varianteClave } = parseNomenclatura(nombre);
+                if (limitesConfig[nomenclaturaBase]) {
+                    let config = limitesConfig[nomenclaturaBase];
+                    if (varianteClave && config && config[varianteClave]) { 
+                        config = config[varianteClave];
+                    }
+                    limiteVal = config?.limitCycles !== undefined ? formatNumber(config.limitCycles) : '';
+                    abbrdVal = config?.abbreviated !== undefined ? formatNumber(config.abbreviated) : '';
+                    extdVal = config?.extended !== undefined ? formatNumber(config.extended) : '';
+                    flightCountFactorVal = config?.flightCount !== undefined ? formatNumber(config.flightCount) : '';
+                }
+                rowHtml += `
+                    <td contenteditable="true" class="limite-celda">${limiteVal}</td>
+                    <td contenteditable="true" class="abbrd-celda">${abbrdVal}</td>
+                    <td contenteditable="true" class="extd-celda">${extdVal}</td>
+                    <td contenteditable="true" class="flight-count-factor-celda">${flightCountFactorVal}</td>
+                    <td class="fila-restante" contenteditable="false">0.0</td>
+                `;
+            } else if (isLabelRow) {
+                rowHtml += `
+                    <td class="limite-label label-yellow" contenteditable="false">LIMITE</td>
+                    <td class="abbrd-label label-yellow" contenteditable="false">ABBR\'D</td>
+                    <td class="extd-label label-yellow" contenteditable="false">EXT\'D</td>
+                    <td class="flight-count-factor-label label-yellow" contenteditable="false">FLIGHT COUNT FACTOR</td>
+                    <td class="restante-label label-red blinking" contenteditable="false">RESTANTE</td>
+                `;
+            } else {
+                rowHtml += `
+                    <td contenteditable="false"></td>
+                    <td contenteditable="false"></td>
+                    <td contenteditable="false"></td>
+                    <td contenteditable="false"></td>
+                    <td contenteditable="false"></td>
+                `;
+            }
+
+            fila.innerHTML = rowHtml;
+            return fila;
+        }
+
+        async function mostrarTabla(index) {
+            mesActual = index;
+            document.querySelectorAll(".tabla-mes").forEach((div, i) => {
+                div.style.display = i === index ? "block" : "none";
+            });
+            document.querySelectorAll(".tab-button").forEach((btn, i) => {
+                btn.classList.toggle("active", i === index);
+            });
+            document.title = `Datos de Vuelo - ${meses[index]} ${añoActual}`;
+            printMonthHeader.textContent = `DATOS DE VUELO - ${meses[index].toUpperCase()} ${añoActual}`;
+
+            if (mesActual > 0 && auth.currentUser) {
+                await copiarValorGeneralAMesSiguiente(añoActual, mesActual - 1, mesActual);
+            }
+        }
+
+        async function copiarValorGeneralAMesSiguiente(año, mesOrigenIndex, mesDestinoIndex) {
+            if (!userId || userId === "anonimo") return;
+
+            const rutaOrigen = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesOrigenIndex}`; 
+            try {
+                const snapshot = await get(ref(database, rutaOrigen));
+                const datosOrigen = snapshot.val();
+                if (datosOrigen) {
+                    const tablaDestino = document.querySelectorAll(".tabla-vuelo")[mesDestinoIndex];
+                    if (tablaDestino) {
+                        const nombresFilasEnTabla = Array.from(tablaDestino.querySelectorAll('.nomenclatura')).map(td => td.textContent.trim());
+
+                        datosOrigen.forEach((filaDatosOrigen, indexFilaOrigen) => {
+                            // Asegúrate de que el índice de la fila de origen sea válido para nombresFilasOrdenadas
+                            if (indexFilaOrigen < nombresFilasOrdenadas.length) {
+                                const nomenclaturaOrigen = nombresFilasOrdenadas[indexFilaOrigen];
+                                
+                                const indexFilaDestino = nombresFilasEnTabla.indexOf(nomenclaturaOrigen);
+
+                                if (indexFilaDestino !== -1) {
+                                    // La columna 34 es la columna "GENERAL" en la estructura de datos de la tabla
+                                    const valorGeneral = filaDatosOrigen[34]; 
+                                    if (valorGeneral !== undefined && valorGeneral !== null && valorGeneral.toString().trim() !== "") {
+                                        const filaDestino = tablaDestino.querySelectorAll("tbody tr")[indexFilaDestino];
+                                        if (filaDestino) {
+                                            const celdaVienen = filaDestino.querySelector(".viene-celda");
+                                            if (celdaVienen) {
+                                                celdaVienen.textContent = formatNumber(valorGeneral); // Usar formatNumber
+                                                if (celdaVienen.textContent.trim() !== "") {
+                                                    celdaVienen.classList.add("led-persistente");
+                                                } else {
+                                                    celdaVienen.classList.remove("led-persistente");
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        actualizarTotales();
+                        await guardarDatosEnFirebase(añoActual, mesDestinoIndex, obtenerDatosTabla(mesDestinoIndex), recordatorioTextarea.value);
+                    }
+                }
+            } catch (error) {
+                console.error("Error al copiar datos entre meses:", error.code, error.message);
+            }
+        }
+
+        function aplicarEstiloRestante(celdaRestante, restante, limite) {
+            if (!celdaRestante) return; 
+
+            celdaRestante.classList.remove('restante-verde', 'restante-amarillo', 'restante-rojo');
+            celdaRestante.style.color = '';
+
+            const numericRestante = parseFloat(restante);
+            const numericLimite = parseFloat(limite);
+
+            if (isNaN(numericLimite) || numericLimite <= 0 || isNaN(numericRestante)) {
+                celdaRestante.textContent = isNaN(numericRestante) ? '' : formatNumber(numericRestante); // Usar formatNumber
+                return;
+            }
+
+            celdaRestante.textContent = formatNumber(numericRestante); // Usar formatNumber
+
+            if (numericRestante < 0) {
+                celdaRestante.classList.add('restante-rojo');
+            } else if (numericRestante <= (numericLimite * 0.10)) {
+                celdaRestante.classList.add('restante-rojo');
+            } else if (numericRestante <= (numericLimite * 0.20)) {
+                celdaRestante.classList.add('restante-amarillo');
+            } else {
+                celdaRestante.classList.add('restante-verde');
+            }
+        }
+
+        // Calcula y actualiza todos los totales en la tabla
+        function actualizarTotales() {
+            document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
+                const filas = Array.from(tabla.querySelectorAll("tbody tr"));
+                const generalValuesMap = new Map();
+
+                // PASO 1: Calcular totales para filas básicas (AC HRS, ATERRIZAJES, RINS, ENGINE HRS, STARTS, FLIGHTS, CONTINGENCY EXCURSIONS)
+                filas.forEach((fila) => {
+                    const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
+                    if (!nomenclaturaCompleta || fila.querySelector('.motor-header')) {
+                        return;
+                    }
+
+                    // Solo procesar filas que no son componentes de motor ni etiquetas
+                    if (!filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta) && !filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta)) {
+                        const vieneCelda = fila.querySelector('.viene-celda');
+                        const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
+                        const mesTotalCelda = fila.querySelector('.fila-total');
+                        const generalCelda = fila.querySelector('.fila-general');
+                        
+                        const viene = parseFloat(vieneCelda?.textContent.trim()) || 0;
+                        const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
+                        
+                        const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
+                        let totalGeneral = totalMes + viene; // El total general de la fila actual es la suma del mes y el "vienen"
+                        
+                        mesTotalCelda.textContent = formatNumber(totalMes); // Usar formatNumber
+                        generalCelda.textContent = formatNumber(totalGeneral); // Usar formatNumber
+
+                        generalValuesMap.set(nomenclaturaCompleta, totalGeneral);
+                    }
+                });
+
+                // PASO 2: Calcular totales y restantes para filas de componentes de motor
+                filas.forEach((fila) => {
+                    const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
+                    if (!nomenclaturaCompleta || fila.querySelector('.motor-header')) {
+                        return;
+                    }
+
+                    if (filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta)) {
+                        const vieneCelda = fila.querySelector('.viene-celda');
+                        const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
+                        const mesTotalCelda = fila.querySelector('.fila-total');
+                        const generalCelda = fila.querySelector('.fila-general'); // Esta celda mostrará el total de ciclos calculado
+                        const limiteCelda = fila.querySelector('.limite-celda');
+                        const abbrdCelda = fila.querySelector('.abbrd-celda');
+                        const extdCelda = fila.querySelector('.extd-celda');
+                        const flightCountFactorCelda = fila.querySelector('.flight-count-factor-celda');
+                        const restanteCelda = fila.querySelector('.fila-restante');
+
+                        const viene = parseFloat(vieneCelda?.textContent.trim()) || 0;
+                        const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
+
+                        const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
+
+                        mesTotalCelda.textContent = formatNumber(totalMes); // Usar formatNumber
+                        
+                        const ABBREVIATED_CYCLE_FACTOR = parseFloat(abbrdCelda?.textContent.trim()) || 0;
+                        const EXTENDED_CYCLE_FACTOR = parseFloat(extdCelda?.textContent.trim()) || 0;
+                        const FLIGHT_COUNT_FACTOR = parseFloat(flightCountFactorCelda?.textContent.trim()) || 0;
+                        const limite = parseFloat(limiteCelda?.textContent.trim()) || 0;
+
+                        let motorNumero = null;
+                        const motorMatch = nomenclaturaCompleta.match(/\s(\d)(?:\.\d)?$/);
+                        if (motorMatch) {
+                            motorNumero = parseInt(motorMatch[1]);
+                        }
+                        
+                        let accumulatedTotalCycles = 0;
+                        if (motorNumero !== null) {
+                            const noOfStarts = generalValuesMap.get(`ENGINE STARTS ${motorNumero}`) || 0;
+                            const noOfFlights = generalValuesMap.get(`FLIGHTS ${motorNumero}`) || 0;
+                            const noOfContingencyExcursions = generalValuesMap.get(`CONTINGENCY EXCURSIONS ${motorNumero}`) || 0;
+
+                            const termStarts = noOfStarts;
+                            let termFlightsStarts = 0;
+                            if (ABBREVIATED_CYCLE_FACTOR !== 0) {
+                                termFlightsStarts = (noOfFlights - noOfStarts) / ABBREVIATED_CYCLE_FACTOR;
+                            }
+                            const termContingency = noOfContingencyExcursions * EXTENDED_CYCLE_FACTOR;
+                            const sumOfTerms = termStarts + termFlightsStarts + termContingency;
+                            accumulatedTotalCycles = sumOfTerms * FLIGHT_COUNT_FACTOR;
+                        }
+
+                        generalCelda.textContent = formatNumber(accumulatedTotalCycles); // Usar formatNumber
+
+                        const restante = limite - accumulatedTotalCycles;
+                        aplicarEstiloRestante(restanteCelda, restante, limite);
+                    }
+                });
+            });
+            // Después de actualizar todos los totales en la tabla, guardar los totales generales en Firebase
+            calcularYGuardarTotalesGenerales();
+        }
+
+        function agregarEventosDeEdicion() {
+            document.querySelectorAll(".tabla-vuelo td[contenteditable='true']").forEach((celda) => {
+                celda.removeEventListener("input", handleTableCellInput);
+                celda.addEventListener("input", handleTableCellInput);
+                celda.dataset.originalContent = celda.textContent;
+            });
+
+            recordatorioTextarea.removeEventListener("input", handleRecordatorioInput);
+            recordatorioTextarea.addEventListener("input", handleRecordatorioInput);
+        }
+
+        async function handleTableCellInput(e) {
+            const celda = e.target;
+            if (celda.contentEditable === 'true') {
+                if (currentUserRole !== 'admin') {
+                    console.warn('Acceso denegado: Solo los administradores pueden editar datos.');
+                    authStatus.textContent = 'Acceso denegado: Solo los administradores pueden editar datos.';
+                    authStatus.style.color = 'orange';
+                    celda.textContent = celda.dataset.originalContent || '';
+                    return;
+                }
+
+                // Al guardar, simplemente guardamos el texto tal cual para preservar el punto decimal si existe.
+                celda.dataset.originalContent = celda.textContent; // Actualiza el contenido original
+
+                if (celda.textContent.trim() !== "") {
+                    celda.classList.add("led-persistente");
+                } else {
+                    celda.classList.remove("led-persistente");
+                }
+
+                actualizarTotales(); // Esto también llamará a calcularYGuardarTotalesGenerales()
+                await guardarDatosEnFirebase(añoActual, mesActual, obtenerDatosTabla(mesActual), recordatorioTextarea.value);
+            }
+        }
+
+        async function handleRecordatorioInput() {
+            if (currentUserRole !== 'admin') {
+                console.warn('Acceso denegado: Solo los administradores pueden editar recordatorios.');
+                authStatus.textContent = 'Acceso denegado: Solo los administradores pueden editar recordatorios.';
+                authStatus.style.color = 'orange';
+                return;
+            }
+            await guardarDatosEnFirebase(añoActual, mesActual, obtenerDatosTabla(mesActual), recordatorioTextarea.value);
+        }
+
+        document.querySelectorAll('input[name="printOption"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                document.body.classList.remove('print-no-reminders', 'print-no-yellow-labels');
+                if (radio.value === 'no-reminders') {
+                    document.body.classList.add('print-no-reminders');
+                } else if (radio.value === 'no-yellow-labels') {
+                    document.body.classList.add('print-no-yellow-labels');
+                }
+            });
+        });
+
+        btnImprimir.addEventListener('click', () => {
+            window.print();
+        });
+
+        // --- FUNCIONES PARA EL MODAL DE ESTADO DE MOTORES ---
+
+        function showMotorStatusModal() {
+            if (!auth.currentUser) {
+                // Usar un modal personalizado en lugar de alert()
+                showCustomAlert('Debes iniciar sesión para ver el estado de los motores.');
+                return;
+            }
+            motorStatusModal.classList.remove('hidden');
+            renderMotorStatus(); // Renderiza el contenido del modal cada vez que se abre
+        }
+
+        function hideMotorStatusModal() {
+            motorStatusModal.classList.add('hidden');
+        }
+
+        function renderMotorStatus() {
+            motorStatusContent.innerHTML = ''; // Limpiar contenido anterior
+
+            const tablaActual = document.querySelectorAll(".tabla-vuelo")[mesActual];
+            if (!tablaActual) {
+                motorStatusContent.innerHTML = '<p class="text-center text-gray-600">No hay datos de tabla activos para mostrar el estado de los componentes.</p>';
+                return;
+            }
+
+            const componentsToDisplay = [];
+
+            // Recopilar datos de todos los componentes editables
+            tablaActual.querySelectorAll('tbody tr').forEach(row => {
+                const nomenclaturaCell = row.querySelector('.nomenclatura');
+                if (nomenclaturaCell) {
+                    const componentName = nomenclaturaCell.textContent.trim();
+                    if (filasConColumnasAdicionalesEditables.includes(componentName)) {
+                        const restanteCelda = row.querySelector('.fila-restante');
+                        const limiteCelda = row.querySelector('.limite-celda');
+                        const generalCelda = row.querySelector('.fila-general');
+
+                        const remaining = parseFloat(restanteCelda?.textContent.trim()) || 0;
+                        const limit = parseFloat(limiteCelda?.textContent.trim()) || 0;
+                        const current = parseFloat(generalCelda?.textContent.trim()) || 0;
+                        
+                        let statusColorClass = 'progress-green';
+                        if (remaining <= 0) {
+                            statusColorClass = 'progress-red';
+                        } else if (remaining < limit * 0.2) {
+                            statusColorClass = 'progress-orange';
+                        }
+
+                        componentsToDisplay.push({
+                            name: componentName,
+                            remaining: remaining,
+                            limit: limit,
+                            current: current,
+                            statusColorClass: statusColorClass
+                        });
+                    }
+                }
+            });
+
+            const printOption = document.querySelector('input[name="motorStatusPrintOption"]:checked').value;
+
+            componentsToDisplay.forEach(component => {
+                if (printOption === 'critical-only' && component.statusColorClass === 'progress-green') {
+                    return; // Saltar componentes no críticos si la opción es "Solo Críticos"
+                }
+
+                const componentDiv = document.createElement('div');
+                componentDiv.className = 'component-status-item';
+
+                const percentUsed = (component.current / component.limit) * 100;
+                const progressBarFillWidth = Math.min(100, Math.max(0, percentUsed)); // Asegurar entre 0 y 100
+
+                componentDiv.innerHTML = `
+                    <h4>${component.name}</h4>
+                    <p>Límite: ${formatNumber(component.limit)} | Actual: ${formatNumber(component.current)}</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill ${component.statusColorClass}" style="width: ${progressBarFillWidth}%;"></div>
+                    </div>
+                    <p class="progress-text">Restantes: ${formatNumber(component.remaining)}</p>
+                `;
+                motorStatusContent.appendChild(componentDiv);
+            });
+
+            if (componentsToDisplay.length === 0 || (printOption === 'critical-only' && motorStatusContent.children.length === 0)) {
+                 motorStatusContent.innerHTML = '<p class="text-center text-gray-600">No hay componentes para mostrar con los filtros actuales.</p>';
+            }
+        }
+
+        function printMotorStatus() {
+            const originalDisplay = motorStatusModal.style.display;
+            motorStatusModal.style.display = 'block'; // Asegurarse de que el modal esté visible para la impresión
+
+            renderMotorStatus(); 
+
+            document.body.classList.add('print-motor-status');
+
+            window.print();
+
+            document.body.classList.remove('print-motor-status');
+            motorStatusModal.style.display = originalDisplay;
+        }
+
+        // Función para mostrar un mensaje personalizado en lugar de alert()
+        function showCustomAlert(message) {
+            const alertModal = document.createElement('div');
+            alertModal.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4';
+            alertModal.innerHTML = `
+                <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center">
+                    <p class="text-lg mb-4">${message}</p>
+                    <button id="closeCustomAlert" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Aceptar</button>
+                </div>
+            `;
+            document.body.appendChild(alertModal);
+
+            document.getElementById('closeCustomAlert').addEventListener('click', () => {
+                document.body.removeChild(alertModal);
+            });
+        }
+
+
+        // --- Función de inicialización de la aplicación ---
+        async function iniciar() {
+            cargarAños();
+            crearTablasParaAño(añoActual);
+            crearBotonesMeses();
+
+            // Event listeners para el nuevo botón de estado de motores
+            btnMotorStatus.addEventListener('click', showMotorStatusModal);
+            closeMotorStatusModal.addEventListener('click', hideMotorStatusModal);
+            btnPrintMotorStatus.addEventListener('click', printMotorStatus);
+
+            // Listener para las opciones de impresión del modal
+            document.querySelectorAll('input[name="motorStatusPrintOption"]').forEach(radio => {
+                radio.addEventListener('change', renderMotorStatus);
+            });
+
+            // Event listener para el nuevo botón "Estado de Componentes"
+            btnComponentStatus.addEventListener('click', async () => {
+                if (!auth.currentUser) {
+                    showCustomAlert('Debes iniciar sesión para ver el estado de los componentes.');
+                    return;
+                }
+
+                // Obtener los totales generales directamente de Firebase Realtime Database
+                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-976-Overall`;
+                try {
+                    const snapshot = await get(ref(database, rutaTotalesGenerales));
+                    let generalTotals = { 'AC HRS': 0, 'ATERRIZAJES': 0, 'RINS': 0 };
+                    if (snapshot.exists()) {
+                        generalTotals = snapshot.val();
+                    }
+
+                    const componentsData = [
+                        { name: "AC HRS", current: generalTotals['AC HRS'] || 0, type: "general_total" },
+                        { name: "ATERRIZAJES", current: generalTotals['ATERRIZAJES'] || 0, type: "general_total" },
+                        { name: "RINS", current: generalTotals['RINS'] || 0, type: "general_total" }
+                    ];
+                    
+                    // Guardar los datos en localStorage (para compatibilidad si COMPONENTES976.HTML aún lo usa)
+                    // Aunque ahora COMPONENTES976.HTML leerá directamente de Firebase, mantener esto
+                    // por si acaso o para otros usos futuros.
+                    localStorage.setItem('componentStatusData', JSON.stringify(componentsData));
+                    
+                    window.location.href = 'COMPONENTES976.HTML'; // Redirige a la nueva página
+
+                } catch (error) {
+                    console.error("Error al obtener los totales generales para COMPONENTES976.HTML:", error);
+                    showCustomAlert(`Error al cargar datos para la página de componentes: ${error.message}`);
+                }
+            });
+        }
+
+        // Configura la posición y la distancia de caída de la careta de Anonymous.
+        function animateIntroElements() {
+            const helicopter = document.getElementById('helicopter-svg');
+            const authContainer = document.getElementById('auth-container');
+            const anonymousMask = document.getElementById('anonymous-mask-img');
+            const revealCircle = document.getElementById('reveal-circle');
+
+            if (!helicopter || !authContainer || !anonymousMask || !revealCircle) {
+                console.warn("Algunos elementos de la interfaz de usuario no se encontraron.");
+                return;
+            }
+
+            const heliRect = helicopter.getBoundingClientRect();
+            const authRect = authContainer.getBoundingClientRect();
+            
+            const maskDropDistance = authRect.top - heliRect.bottom - (anonymousMask.offsetHeight / 2);
+
+            document.documentElement.style.setProperty('--mask-drop-distance', `${maskDropDistance}px`);
+
+            revealCircle.style.top = `${authRect.top + (authRect.height / 2)}px`;
+            revealCircle.style.left = `50%`;
+        }
+
+        // Iniciar la aplicación cuando la ventana esté completamente cargada
+        window.addEventListener("load", () => {
+            iniciar();
+            setTimeout(animateIntroElements, 100);
+        });
+    </script>
 </body>
 </html>
