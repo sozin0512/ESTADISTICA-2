@@ -4,6 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Datos de Vuelo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Incluir Chart.js -->
     <style>
         /* Estilos personalizados para la aplicación */
         body {
@@ -245,6 +246,11 @@
             background-color: #f9f9f9; /* Un color ligeramente diferente para indicar que no es editable */
             cursor: not-allowed;
         }
+        /* Estilo para celdas con entrada inválida */
+        td.invalid-input {
+            border: 2px solid #ef4444; /* Borde rojo */
+            background-color: #fee2e2; /* Fondo rojo claro */
+        }
 
         /* Ocultar contenido principal por defecto */
         #main-app-content {
@@ -349,8 +355,32 @@
             #main-app-header,
             .button-container,
             .tab-container,
-            .year-container {
+            .year-container,
+            #loading-overlay, /* Oculta el overlay de carga en la impresión */
+            #confirm-modal-overlay /* Oculta el modal de confirmación en la impresión */ {
                 display: none;
+            }
+            /* Mostrar el reporte estadístico y el botón de toggle en la impresión */
+            #statistical-report,
+            #statistical-report-toggle-btn,
+            #report-type-selection { /* Asegurar que los selectores de reporte también se muestren */
+                display: block !important;
+            }
+
+            #statistical-report {
+                margin-top: 0;
+                box-shadow: none;
+                border: 1px solid #ccc; /* Borde simple para impresión */
+                padding: 10px;
+            }
+
+            #myChart {
+                height: 300px; /* Ajustar altura para impresión */
+                margin-bottom: 10px;
+            }
+
+            #summary-table {
+                font-size: 0.7rem; /* Tamaño de fuente más pequeño para la tabla en impresión */
             }
 
             h2 {
@@ -375,8 +405,9 @@
 
             th,
             td {
-                padding: 2px;
-                font-size: 10px;
+                padding: 1px; /* Reducido para impresión */
+                font-size: 8px; /* Reducido para impresión */
+                min-width: 15px; /* Reducido para impresión */
             }
 
             @page {
@@ -431,6 +462,196 @@
                 top: 10px; /* Ajuste para móvil */
             }
         }
+
+        /* Estilos para el overlay de carga */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+            font-size: 1.5rem;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .spinner {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Estilos para el modal de confirmación */
+        #confirm-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001; /* Mayor que el loading overlay */
+        }
+
+        #confirm-modal {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            animation: modalFadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #confirm-modal h4 {
+            margin-top: 0;
+            font-size: 1.25rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #confirm-modal .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        #confirm-modal button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+
+        #confirm-modal #confirm-yes {
+            background-color: #ef4444; /* Rojo */
+            color: white;
+        }
+        #confirm-modal #confirm-yes:hover {
+            background-color: #dc2626;
+        }
+
+        #confirm-modal #confirm-no {
+            background-color: #d1d5db; /* Gris */
+            color: #333;
+        }
+        #confirm-modal #confirm-no:hover {
+            background-color: #a1a1aa;
+        }
+
+        /* Estilos para los botones de navegación de mes */
+        .month-nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        .month-nav-buttons button {
+            padding: 0.5rem 1rem;
+            background-color: #60a5fa; /* Azul claro */
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .month-nav-buttons button:hover {
+            background-color: #3b82f6; /* Azul más oscuro */
+        }
+        .month-nav-buttons button:disabled {
+            background-color: #9ca3af; /* Gris deshabilitado */
+            cursor: not-allowed;
+        }
+        /* Asegura que la clase hidden siempre oculte el elemento */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Estilos para el reporte estadístico */
+        #statistical-report {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-top: 20px;
+            width: 100%; /* Eliminar max-width para que ocupe todo el ancho */
+        }
+
+        #statistical-report h3 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        #myChart {
+            max-width: 100%;
+            height: 100%; /* Altura fluida */
+            min-height: 300px; /* Altura mínima para legibilidad */
+            margin-bottom: 20px;
+        }
+
+        #summary-table-container {
+            overflow-x: auto; /* Scroll horizontal para la tabla de resumen si es necesario */
+        }
+
+        #summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+
+        #summary-table th, #summary-table td {
+            border: 1px solid #dcdcdc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        #summary-table th {
+            background-color: #e0e0e0;
+            font-weight: bold;
+        }
+
+        #summary-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .increment-positive {
+            color: #22c55e; /* Verde */
+            font-weight: bold;
+        }
+        .increment-negative {
+            color: #ef4444; /* Rojo */
+            font-weight: bold;
+        }
+        .increment-zero {
+            color: #6b7280; /* Gris */
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -479,7 +700,7 @@
 
     <div id="main-app-content">
         <div id="main-app-header" class="flex justify-between items-center mb-4">
-            <h2 class="flex-grow text-center sm:text-left">DATOS DE VUELO FAH-990</h2>
+            <h2 class="flex-grow text-center sm:text-left">DATOS DE VUELO FAH-991</h2>
             <button id="logout-btn" class="px-4 py-2 bg-red-500 text-white rounded-md shadow-md hover:bg-red-600 transition-colors">Cerrar Sesión</button>
         </div>
 
@@ -488,18 +709,76 @@
             <select id="select-year" class="p-2 border border-gray-300 rounded-md"></select>
         </div>
 
-        <div class="tab-container" id="meses"></div>
+        <div class="month-nav-buttons">
+            <button id="prev-month-btn">&lt; Mes Anterior</button>
+            <div class="tab-container" id="meses"></div>
+            <button id="next-month-btn">Mes Siguiente &gt;</button>
+        </div>
 
         <div id="contenedor-tablas" class="overflow-x-auto"></div>
 
-        <div class="button-container">
+        <div class="button-container flex justify-center gap-4 mt-4">
             <button onclick="imprimirTabla()" class="px-6 py-2 bg-gray-700 text-white rounded-md shadow-md hover:bg-gray-800 transition-colors">Imprimir Tabla</button>
+            <button id="export-csv-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition-colors">Exportar a CSV</button>
+            <button id="statistical-report-toggle-btn" class="px-6 py-2 bg-purple-600 text-white rounded-md shadow-md hover:bg-purple-700 transition-colors">Ver Reporte Estadístico</button>
+        </div>
+
+        <!-- Controles de selección de tipo de reporte -->
+        <div id="report-type-selection" class="flex justify-center gap-4 mt-4 hidden">
+            <label class="inline-flex items-center">
+                <input type="radio" name="reportType" value="annual" class="form-radio" checked>
+                <span class="ml-2">Reporte Anual</span>
+            </label>
+            <label class="inline-flex items-center">
+                <input type="radio" name="reportType" value="monthly" class="form-radio">
+                <span class="ml-2">Reporte Mensual</span>
+            </label>
+        </div>
+
+        <!-- Sección del Reporte Estadístico -->
+        <div id="statistical-report" class="hidden">
+            <h3 id="report-title" class="text-xl font-semibold mb-4"></h3>
+            <div style="position: relative; height:40vh; width:80vw; max-width: 800px; margin: 0 auto;">
+                <canvas id="myChart"></canvas>
+            </div>
+            <div id="no-report-data-message" class="text-center text-gray-600 mt-4 hidden">
+                No hay datos suficientes para generar este reporte. Por favor, introduce algunos datos en la tabla.
+            </div>
+            <div id="summary-table-container">
+                <table id="summary-table">
+                    <thead>
+                        <tr>
+                            <!-- Los encabezados se añadirán dinámicamente aquí -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Las filas de datos se añadirán dinámicamente aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay de Carga -->
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+        <p>Cargando datos...</p>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirm-modal-overlay" class="hidden">
+        <div id="confirm-modal">
+            <h4 id="confirm-message">¿Estás seguro?</h4>
+            <div class="button-group">
+                <button id="confirm-yes">Sí</button>
+                <button id="confirm-no">No</button>
+            </div>
         </div>
     </div>
 
     <script>
         // Configuración de Firebase (asegúrate de que estas credenciales sean correctas para tu proyecto)
-  const firebaseConfig = {
+     const firebaseConfig = {
             apiKey: "AIzaSyBeeYu08yGHmd9rX0q4jtUOz-DRufRYp-Q",
             authDomain: "fah-991.firebaseapp.com",
             databaseURL: "https://fah-991-default-rtdb.firebaseio.com",
@@ -521,11 +800,21 @@
         const passwordInput = document.getElementById('password');
         const loginBtn = document.getElementById('login-btn');
         const signupBtn = document.getElementById('signup-btn');
-        const forgotPasswordBtn = document.getElementById('forgot-password-btn'); // Nuevo botón
-        const logoutBtn = document.getElementById('logout-btn'); // Ahora está en main-app-content
+        const forgotPasswordBtn = document.getElementById('forgot-password-btn'); 
+        const logoutBtn = document.getElementById('logout-btn'); 
         const authStatus = document.getElementById('auth-status');
         const authContainer = document.getElementById('auth-container');
-        const mainAppContent = document.getElementById('main-app-content'); // El contenedor principal de la aplicación de vuelo
+        const mainAppContent = document.getElementById('main-app-content'); 
+
+        // Referencias a elementos del overlay de carga
+        const loadingOverlay = document.getElementById('loading-overlay');
+
+        // Referencias a elementos del modal de confirmación
+        const confirmModalOverlay = document.getElementById('confirm-modal-overlay');
+        const confirmMessage = document.getElementById('confirm-message');
+        const confirmYesBtn = document.getElementById('confirm-yes');
+        const confirmNoBtn = document.getElementById('confirm-no');
+        let onConfirmCallback = null; // Variable para almacenar la función a ejecutar al confirmar
 
         // Variable global para el rol del usuario actual
         let currentUserRole = null;
@@ -568,72 +857,173 @@
         const contenedorTablas = document.getElementById("contenedor-tablas");
         const contenedorMeses = document.getElementById("meses");
         const selectYear = document.getElementById("select-year");
+        const prevMonthBtn = document.getElementById('prev-month-btn');
+        const nextMonthBtn = document.getElementById('next-month-btn');
+        const exportCsvBtn = document.getElementById('export-csv-btn');
+        const statisticalReportToggleBtn = document.getElementById('statistical-report-toggle-btn');
+        const statisticalReport = document.getElementById('statistical-report');
+        const myChartCanvas = document.getElementById('myChart');
+        const summaryTable = document.getElementById('summary-table');
+        const reportTypeSelection = document.getElementById('report-type-selection');
+        const reportTypeRadios = document.querySelectorAll('input[name="reportType"]');
+        const reportTitle = document.getElementById('report-title');
+        const noReportDataMessage = document.getElementById('no-report-data-message');
+
+
+        let myChartInstance = null; // Para almacenar la instancia del gráfico Chart.js
+        let currentReportType = 'annual'; // Tipo de reporte actual: 'annual' o 'monthly'
+
+        // -----------------------------------------------------------
+        // Funciones de Utilidad (Validación, Carga, Modal)
+        // -----------------------------------------------------------
+
+        /**
+         * Muestra el overlay de carga.
+         */
+        function showLoading() {
+            loadingOverlay.classList.remove('hidden');
+        }
+
+        /**
+         * Oculta el overlay de carga.
+         */
+        function hideLoading() {
+            loadingOverlay.classList.add('hidden');
+        }
+
+        /**
+         * Muestra un modal de confirmación.
+         * @param {string} message - El mensaje a mostrar en el modal.
+         * @param {function} onConfirm - La función a ejecutar si el usuario confirma.
+         */
+        function showConfirmModal(message, onConfirm) {
+            confirmMessage.textContent = message;
+            onConfirmCallback = onConfirm;
+            confirmModalOverlay.classList.remove('hidden');
+        }
+
+        /**
+         * Oculta el modal de confirmación.
+         */
+        function hideConfirmModal() {
+            console.log('Ocultando modal de confirmación.'); // Log para depuración
+            confirmModalOverlay.classList.add('hidden');
+            onConfirmCallback = null;
+        }
+
+        // Event listeners para el modal de confirmación
+        confirmYesBtn.addEventListener('click', () => {
+            console.log('Botón "Sí" clickeado.'); // Log para depuración
+            if (onConfirmCallback) {
+                onConfirmCallback();
+            }
+            hideConfirmModal();
+        });
+
+        confirmNoBtn.addEventListener('click', () => {
+            console.log('Botón "No" clickeado.'); // Log para depuración
+            hideConfirmModal();
+        });
+
+        /**
+         * Valida el formato de tiempo HH:MM o numérico.
+         * @param {string} value - El valor a validar.
+         * @returns {boolean} True si el formato es válido, false en caso contrario.
+         */
+        function isValidTimeOrNumber(value) {
+            if (value === "") return true; // Permitir celdas vacías
+
+            // Formato HH:MM
+            if (value.includes(":")) {
+                const parts = value.split(":");
+                if (parts.length !== 2) return false;
+                const h = parseInt(parts[0]);
+                const m = parseInt(parts[1]);
+                return !isNaN(h) && !isNaN(m) && h >= 0 && m >= 0 && m < 60;
+            } else {
+                // Formato numérico (entero o decimal)
+                const num = parseFloat(value.replace(",", "."));
+                return !isNaN(num) && num >= 0;
+            }
+        }
+
+        /**
+         * Valida el formato numérico (entero o decimal).
+         * @param {string} value - El valor a validar.
+         * @returns {boolean} True si el formato es válido, false en caso contrario.
+         */
+        function isValidNumber(value) {
+            if (value === "") return true; // Permitir celdas vacías
+            const num = parseFloat(value.replace(",", "."));
+            return !isNaN(num) && num >= 0;
+        }
 
         // -----------------------------------------------------------
         // Funciones de Autenticación
         // -----------------------------------------------------------
 
         // Event listener para el botón de registro
-        signupBtn.addEventListener('click', () => {
+        signupBtn.addEventListener('click', async () => {
             const email = emailInput.value;
             const password = passwordInput.value;
 
             if (!email || !password) {
                 authStatus.textContent = 'Por favor, introduce un correo y una contraseña.';
+                authStatus.style.color = 'red';
                 return;
             }
 
-            // Crea un nuevo usuario con correo y contraseña en Firebase Authentication
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    console.log('Usuario registrado:', user.email);
-                    authStatus.textContent = 'Registro exitoso. ¡Bienvenido!';
-                    authStatus.style.color = 'green';
-                    emailInput.value = ''; // Limpiar campos de entrada
-                    passwordInput.value = '';
+            showLoading();
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                console.log('Usuario registrado:', user.email);
+                authStatus.textContent = 'Registro exitoso. ¡Bienvenido!';
+                authStatus.style.color = 'green';
+                emailInput.value = ''; 
+                passwordInput.value = '';
 
-                    // Asignar rol por defecto 'viewer' al nuevo usuario
-                    return userRolesRef.child(user.uid).set('viewer');
-                })
-                .then(() => {
-                    console.log('Rol de usuario asignado como viewer.');
-                })
-                .catch((error) => {
-                    console.error('Error al registrar:', error.message);
-                    authStatus.textContent = `Error al registrar: ${error.message}`;
-                    authStatus.style.color = 'red';
-                });
+                await userRolesRef.child(user.uid).set('viewer');
+                console.log('Rol de usuario asignado como viewer.');
+            } catch (error) {
+                console.error('Error al registrar:', error.message);
+                authStatus.textContent = `Error al registrar: ${error.message}`;
+                authStatus.style.color = 'red';
+            } finally {
+                hideLoading();
+            }
         });
 
         // Event listener para el botón de inicio de sesión
-        loginBtn.addEventListener('click', () => {
+        loginBtn.addEventListener('click', async () => {
             const email = emailInput.value;
             const password = passwordInput.value;
 
             if (!email || !password) {
                 authStatus.textContent = 'Por favor, introduce un correo y una contraseña.';
+                authStatus.style.color = 'red';
                 return;
             }
 
-            // Inicia sesión con correo y contraseña en Firebase Authentication
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    console.log('Usuario ha iniciado sesión:', userCredential.user.email);
-                    authStatus.textContent = 'Sesión iniciada. ¡Bienvenido!';
-                    authStatus.style.color = 'green';
-                    emailInput.value = ''; // Limpiar campos de entrada
-                    passwordInput.value = '';
-                })
-                .catch((error) => {
-                    console.error('Error al iniciar sesión:', error.message);
-                    authStatus.textContent = `Error al iniciar sesión: ${error.message}`;
-                    authStatus.style.color = 'red';
-                });
+            showLoading();
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                console.log('Usuario ha iniciado sesión:', userCredential.user.email);
+                authStatus.textContent = 'Sesión iniciada. ¡Bienvenido!';
+                authStatus.style.color = 'green';
+                emailInput.value = ''; 
+                passwordInput.value = '';
+            } catch (error) {
+                console.error('Error al iniciar sesión:', error.message);
+                authStatus.textContent = `Error al iniciar sesión: ${error.message}`;
+                authStatus.style.color = 'red';
+            } finally {
+                hideLoading();
+            }
         });
 
         // Event listener para el botón de "Olvidé mi contraseña"
-        forgotPasswordBtn.addEventListener('click', () => {
+        forgotPasswordBtn.addEventListener('click', async () => {
             const email = emailInput.value;
 
             if (!email) {
@@ -642,88 +1032,74 @@
                 return;
             }
 
-            auth.sendPasswordResetEmail(email)
-                .then(() => {
-                    authStatus.textContent = 'Se ha enviado un correo de restablecimiento de contraseña a tu dirección.';
-                    authStatus.style.color = 'green'; // Mensaje de éxito
-                })
-                .catch((error) => {
-                    console.error('Error al enviar correo de restablecimiento:', error.message);
-                    authStatus.textContent = `Error al restablecer contraseña: ${error.message}`;
-                    authStatus.style.color = 'red'; // Mensaje de error
-                });
+            showLoading();
+            try {
+                await auth.sendPasswordResetEmail(email);
+                authStatus.textContent = 'Se ha enviado un correo de restablecimiento de contraseña a tu dirección.';
+                authStatus.style.color = 'green'; 
+            } catch (error) {
+                console.error('Error al enviar correo de restablecimiento:', error.message);
+                authStatus.textContent = `Error al restablecer contraseña: ${error.message}`;
+                authStatus.style.color = 'red'; 
+            } finally {
+                hideLoading();
+            }
         });
 
         // Event listener para el botón de cierre de sesión
         logoutBtn.addEventListener('click', () => {
-            // Cierra la sesión actual de Firebase Authentication
-            auth.signOut()
-                .then(() => {
+            showConfirmModal('¿Estás seguro de que quieres cerrar sesión?', async () => {
+                showLoading();
+                try {
+                    await auth.signOut();
                     console.log('Sesión cerrada');
                     authStatus.textContent = 'Sesión cerrada.';
                     authStatus.style.color = 'red';
-                })
-                .catch((error) => {
+                } catch (error) {
                     console.error('Error al cerrar sesión:', error.message);
                     authStatus.textContent = `Error al cerrar sesión: ${error.message}`;
                     authStatus.style.color = 'red';
-                });
+                } finally {
+                    hideLoading();
+                }
+            });
         });
 
         // Observador del estado de autenticación de Firebase
-        // Se ejecuta cada vez que el estado de autenticación del usuario cambia (inicia sesión, cierra sesión, etc.)
-        auth.onAuthStateChanged((user) => {
+        auth.onAuthStateChanged(async (user) => {
             if (user) {
-                // Si hay un usuario autenticado
                 console.log('Usuario actual:', user.email, 'UID:', user.uid);
-                authContainer.style.display = 'none'; // Oculta el contenedor de login/registro
-                mainAppContent.style.display = 'block'; // Muestra el contenido principal de la aplicación
-                // El botón de logout ya está dentro de mainAppContent y se muestra con él
+                authContainer.style.display = 'none'; 
+                mainAppContent.style.display = 'block'; 
 
-                authStatus.textContent = ''; // Limpia el mensaje de estado de autenticación
+                authStatus.textContent = ''; 
 
-                // Obtener el rol del usuario desde la Realtime Database
-                userRolesRef.child(user.uid).once('value')
-                    .then(snapshot => {
-                        currentUserRole = snapshot.val() || 'viewer'; // Por defecto 'viewer' si no se encuentra
-                        console.log('Rol del usuario:', currentUserRole);
-                        
-                        // Si el rol no existe (snapshot.val() es null), créalo como 'viewer'
-                        if (!snapshot.exists()) {
-                            console.log('Asignando rol por defecto "viewer" al usuario:', user.uid);
-                            userRolesRef.child(user.uid).set('viewer')
-                                .then(() => {
-                                    console.log('Rol "viewer" asignado exitosamente.');
-                                    applyRolePermissions(currentUserRole); // Aplicar permisos después de asegurar el rol
-                                    cargarDatosDesdeFirebase(añoActual, meses[mesActual]); // Cargar datos
-                                })
-                                .catch(error => {
-                                    console.error('Error al asignar rol "viewer":', error);
-                                    applyRolePermissions(currentUserRole); // Intentar aplicar permisos de todos modos
-                                    cargarDatosDesdeFirebase(añoActual, meses[mesActual]); // Cargar datos
-                                });
-                        } else {
-                            applyRolePermissions(currentUserRole); // Aplicar permisos basados en el rol existente
-                            cargarDatosDesdeFirebase(añoActual, meses[mesActual]); // Cargar datos
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error al obtener el rol del usuario:", error);
-                        currentUserRole = 'viewer'; // Fallback a 'viewer' en caso de error
-                        applyRolePermissions(currentUserRole);
-                        cargarDatosDesdeFirebase(añoActual, meses[mesActual]);
-                    });
+                try {
+                    const snapshot = await userRolesRef.child(user.uid).once('value');
+                    currentUserRole = snapshot.val() || 'viewer'; 
+                    console.log('Rol del usuario:', currentUserRole);
+                    
+                    if (!snapshot.exists()) {
+                        console.log('Asignando rol por defecto "viewer" al usuario:', user.uid);
+                        await userRolesRef.child(user.uid).set('viewer');
+                        console.log('Rol "viewer" asignado exitosamente.');
+                    }
+                } catch (error) {
+                    console.error("Error al obtener el rol del usuario:", error);
+                    currentUserRole = 'viewer'; 
+                } finally {
+                    applyRolePermissions(currentUserRole);
+                    cargarDatosDesdeFirebase(añoActual, meses[mesActual]);
+                }
 
             } else {
-                // Si no hay un usuario autenticado
                 console.log('No hay usuario logueado');
-                authContainer.style.display = 'block'; // Muestra el contenedor de login/registro
-                mainAppContent.style.display = 'none'; // Oculta el contenido principal de la aplicación
-                // El botón de logout se oculta con mainAppContent
+                authContainer.style.display = 'block'; 
+                mainAppContent.style.display = 'none'; 
                 authStatus.textContent = 'Por favor, inicia sesión o regístrate para acceder.';
-                authStatus.style.color = 'red'; // Color por defecto para mensajes de error/estado
-                currentUserRole = null; // Limpiar el rol al cerrar sesión
-                applyRolePermissions(null); // Asegurar que los elementos estén deshabilitados
+                authStatus.style.color = 'red'; 
+                currentUserRole = null; 
+                applyRolePermissions(null); 
             }
         });
 
@@ -739,27 +1115,28 @@
          * @param {string} mesNombre - El nombre del mes (ej. "Enero").
          * @param {Array<Array<string>>} datosTabla - Los datos de la tabla a guardar.
          */
-        function guardarDatosEnFirebase(año, mesNombre, datosTabla) {
+        async function guardarDatosEnFirebase(año, mesNombre, datosTabla) {
             if (currentUserRole !== 'admin') {
                 console.warn('Acceso denegado: Solo los administradores pueden guardar datos.');
                 authStatus.textContent = 'Acceso denegado: Solo los administradores pueden guardar datos.';
-                authStatus.style.color = 'orange'; // Indicar advertencia
-                return; // Prevenir el guardado
+                authStatus.style.color = 'orange'; 
+                return; 
             }
 
-            // Cambiar la ruta para usar el índice numérico del mes
-            const ruta = `${año}/${meses.indexOf(mesNombre)}`; // Ruta en la base de datos: año/indiceDelMes
-            dbRef.child(ruta).set(datosTabla)
-                .then(() => {
-                    console.log(`Datos guardados correctamente para ${mesNombre} (${ruta}) de ${año}`);
-                    authStatus.textContent = `Datos guardados para ${mesNombre} de ${año}.`;
-                    authStatus.style.color = 'green'; // Mensaje de éxito
-                })
-                .catch((error) => {
-                    console.error("Error al guardar los datos:", error);
-                    authStatus.textContent = `Error al guardar los datos: ${error.message}`;
-                    authStatus.style.color = 'red'; // Mensaje de error
-                });
+            showLoading();
+            const ruta = `${año}/${meses.indexOf(mesNombre)}`; 
+            try {
+                await dbRef.child(ruta).set(datosTabla);
+                console.log(`Datos guardados correctamente para ${mesNombre} (${ruta}) de ${año}`);
+                authStatus.textContent = `Datos guardados para ${mesNombre} de ${año}.`;
+                authStatus.style.color = 'green'; 
+            } catch (error) {
+                console.error("Error al guardar los datos:", error);
+                authStatus.textContent = `Error al guardar los datos: ${error.message}`;
+                authStatus.style.color = 'red'; 
+            } finally {
+                hideLoading();
+            }
         }
 
         /**
@@ -767,47 +1144,44 @@
          * @param {number} año - El año de los datos a cargar.
          * @param {string} mesNombre - El nombre del mes a cargar.
          */
-        function cargarDatosDesdeFirebase(año, mesNombre) {
-            // Cambiar la ruta para usar el índice numérico del mes
-            const ruta = `${año}/${meses.indexOf(mesNombre)}`; // Ruta en la base de datos: año/indiceDelMes
+        async function cargarDatosDesdeFirebase(año, mesNombre) {
+            showLoading();
+            const ruta = `${año}/${meses.indexOf(mesNombre)}`; 
             
-            console.log('DEBUG: Intentando cargar datos de la ruta:', ruta); // Agregado para depuración
-            dbRef.child(ruta).once('value') // Obtiene los datos una sola vez
-                .then((snapshot) => {
-                    const datos = snapshot.val(); // Obtiene el valor de los datos
-                    console.log('DEBUG: Datos recibidos de Firebase para', ruta, ':', datos); // Agregado para depuración
+            console.log('DEBUG: Intentando cargar datos de la ruta:', ruta); 
+            try {
+                const snapshot = await dbRef.child(ruta).once('value'); 
+                const datos = snapshot.val(); 
+                console.log('DEBUG: Datos recibidos de Firebase para', ruta, ':', datos); 
 
-                    const tablaIndex = meses.indexOf(mesNombre); // Obtiene el índice numérico del mes
-                    if (datos && tablaIndex !== -1) {
-                        console.log('DEBUG: Datos existen y se cargarán en la tabla con índice:', tablaIndex); // Agregado para depuración
-                        cargarDatosEnTablaHTML(datos, tablaIndex); // Carga los datos en la tabla HTML
-                        console.log(`Datos cargados correctamente para ${mesNombre} de ${año}`);
-                    } else {
-                        console.log(`DEBUG: No hay datos guardados para ${mesNombre} (${ruta}) de ${año} o tabla no encontrada. Limpiando tabla.`); // Actualizado para depuración
-                        // Si no hay datos guardados, limpiar la tabla correspondiente
-                        const tabla = document.querySelectorAll(".tabla-vuelo")[tablaIndex];
-                        if (tabla) {
-                            tabla.querySelectorAll('tbody tr').forEach(fila => {
-                                // Limpiar solo las celdas editables (excepto la de nomenclatura)
-                                fila.querySelectorAll('td[contenteditable="true"]').forEach((celda) => {
-                                    // Limpiar solo las celdas de datos, no la primera de nomenclatura
-                                    if (celda.parentNode.querySelector('.nomenclatura') !== celda) { // Asegura que no es la celda de nomenclatura
-                                        celda.textContent = "";
-                                        celda.classList.remove("led-persistente");
-                                    }
-                                });
+                const tablaIndex = meses.indexOf(mesNombre); 
+                if (datos && tablaIndex !== -1) {
+                    console.log('DEBUG: Datos existen y se cargarán en la tabla con índice:', tablaIndex); 
+                    cargarDatosEnTablaHTML(datos, tablaIndex); 
+                    console.log(`Datos cargados correctamente para ${mesNombre} de ${año}`);
+                } else {
+                    console.log(`DEBUG: No hay datos guardados para ${mesNombre} (${ruta}) de ${año} o tabla no encontrada. Limpiando tabla.`); 
+                    const tabla = document.querySelectorAll(".tabla-vuelo")[tablaIndex];
+                    if (tabla) {
+                        tabla.querySelectorAll('tbody tr').forEach(fila => {
+                            fila.querySelectorAll('td[contenteditable="true"]').forEach((celda) => {
+                                if (celda.parentNode.querySelector('.nomenclatura') !== celda) { 
+                                    celda.textContent = "";
+                                    celda.classList.remove("led-persistente");
+                                }
                             });
-                            actualizarTotales(); // Recalcular totales después de limpiar
-                        }
+                        });
+                        actualizarTotales(); 
                     }
-                    // Aplicar permisos después de cargar/limpiar los datos, para asegurar el estado correcto
-                    applyRolePermissions(currentUserRole);
-                })
-                .catch((error) => {
-                    console.error("DEBUG: Error al cargar los datos:", error); // Agregado para depuración
-                    authStatus.textContent = `Error al cargar los datos: ${error.message}`;
-                    authStatus.style.color = 'red';
-                });
+                }
+                applyRolePermissions(currentUserRole);
+            } catch (error) {
+                console.error("DEBUG: Error al cargar los datos:", error); 
+                authStatus.textContent = `Error al cargar los datos: ${error.message}`;
+                authStatus.style.color = 'red';
+            } finally {
+                hideLoading();
+            }
         }
 
         /**
@@ -817,27 +1191,26 @@
          */
         function cargarDatosEnTablaHTML(datos, indiceTabla) {
             const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
-            console.log('DEBUG: Elemento de tabla HTML encontrado para cargar datos:', tabla); // Agregado para depuración
+            console.log('DEBUG: Elemento de tabla HTML encontrado para cargar datos:', tabla); 
             if (tabla) {
                 tabla.querySelectorAll('tr').forEach((fila, indexFila) => {
                     const datosFila = datos[indexFila];
                     if (datosFila) {
                         fila.querySelectorAll('td').forEach((celda, indexCelda) => {
-                            // Asegurarse de que no estamos escribiendo en la celda de nomenclatura (índice 0)
-                            // y que el dato existe para esa celda
                             if (indexCelda !== 0 && datosFila[indexCelda] !== undefined) {
                                 celda.textContent = datosFila[indexCelda];
-                                // Añadir/quitar clase 'led-persistente' si la celda tiene contenido
                                 if (celda.textContent.trim() !== "") {
                                     celda.classList.add("led-persistente");
                                 } else {
                                     celda.classList.remove("led-persistente");
                                 }
+                                // Asegurarse de quitar la clase de invalidación si el dato es válido al cargar
+                                celda.classList.remove('invalid-input');
                             }
                         });
                     }
                 });
-                actualizarTotales(); // Recalcular los totales después de cargar los datos
+                actualizarTotales(); 
             }
         }
 
@@ -871,18 +1244,15 @@
          */
         function applyRolePermissions(role) {
             const isAdministrator = (role === 'admin');
-            const isAuthenticated = (role !== null); // Un usuario está autenticado si tiene un rol
+            const isAuthenticated = (role !== null); 
 
-            // Controlar la editabilidad de las celdas de la tabla
             document.querySelectorAll('.tabla-vuelo tbody tr').forEach(fila => {
                 fila.querySelectorAll('td').forEach((celda, indexCelda) => {
-                    // Celdas de nomenclatura (0), MES TOTAL (33), GENERAL (34) siempre no editables
                     if (indexCelda === 0 || indexCelda === 33 || indexCelda === 34) {
                         celda.contentEditable = 'false';
                         celda.classList.add('read-only-cell');
                         celda.classList.remove('editable-cell');
                     } else {
-                        // Celdas de VIENEN (1) y días (2-32) editables solo para administradores
                         celda.contentEditable = isAdministrator ? 'true' : 'false';
                         if (isAdministrator) {
                             celda.classList.add('editable-cell');
@@ -895,14 +1265,17 @@
                 });
             });
 
-            // Habilitar el selector de año y los botones de mes si está autenticado
             selectYear.disabled = !isAuthenticated; 
             document.querySelectorAll('.tab-button').forEach(btn => {
                 btn.disabled = !isAuthenticated; 
             });
+            prevMonthBtn.disabled = !isAuthenticated || mesActual === 0;
+            nextMonthBtn.disabled = !isAuthenticated || mesActual === meses.length - 1;
+            exportCsvBtn.disabled = !isAuthenticated;
+            statisticalReportToggleBtn.disabled = !isAuthenticated;
+            reportTypeSelection.classList.toggle('hidden', !isAuthenticated);
 
 
-            // Mostrar un mensaje de estado
             if (role === 'viewer') {
                 authStatus.textContent = 'Has iniciado sesión como Visualizador. Puedes ver todos los datos, pero no puedes editar.';
                 authStatus.style.color = 'blue';
@@ -920,34 +1293,33 @@
          * Carga las opciones de año en el selector.
          */
         function cargarAños() {
-            selectYear.innerHTML = ""; // Limpiar opciones existentes
+            selectYear.innerHTML = ""; 
             años.forEach((año) => {
                 const option = document.createElement("option");
                 option.value = año;
                 option.textContent = año;
                 selectYear.appendChild(option);
             });
-            selectYear.value = añoActual; // Seleccionar el año actual por defecto
+            selectYear.value = añoActual; 
         }
 
         /**
          * Crea los botones para cada mes.
          */
         function crearBotonesMeses() {
-            contenedorMeses.innerHTML = ""; // Limpiar botones existentes
+            contenedorMeses.innerHTML = ""; 
 
             meses.forEach((mes, i) => {
                 const btn = document.createElement("button");
                 btn.className = "tab-button";
                 btn.textContent = mes;
                 btn.onclick = () => {
-                    mesActual = i; // Actualiza el mes actual
-                    mostrarTabla(i); // Muestra la tabla del mes seleccionado
+                    mesActual = i; 
+                    mostrarTabla(i); 
                 };
                 contenedorMeses.appendChild(btn);
             });
 
-            // Mostrar la tabla del mes actual al cargar los botones
             mostrarTabla(mesActual);
         }
 
@@ -956,19 +1328,18 @@
          * @param {number} año - El año para el que se crean las tablas.
          */
         function crearTablasParaAño(año) {
-            contenedorTablas.innerHTML = ""; // Limpiar tablas existentes
+            contenedorTablas.innerHTML = ""; 
 
             meses.forEach((mes, i) => {
                 const div = document.createElement("div");
                 div.className = "tabla-mes";
-                div.style.display = i === mesActual ? "block" : "none"; // Ocultar/mostrar según el mes actual
+                div.style.display = i === mesActual ? "block" : "none"; 
 
                 const tabla = document.createElement("table");
                 tabla.className = "tabla-vuelo";
 
                 const thead = document.createElement("thead");
                 const encabezado = document.createElement("tr");
-                // Encabezados de la tabla: Nomenclatura, Vienen, Días del mes (1-31), Mes Total, General
                 encabezado.innerHTML = `<th>NOMENCLATURA</th><th contenteditable="true">VIENEN</th>`;
                 for (let d = 1; d <= 31; d++) {
                     encabezado.innerHTML += `<th>${d}</th>`;
@@ -979,10 +1350,8 @@
 
                 const tbody = document.createElement("tbody");
 
-                // Crear filas para cada nombre de fila (AC HRS, LANDINGS, etc.)
                 nombresFilas.forEach((nombre) => {
                     const fila = document.createElement("tr");
-                    // Nomenclatura (columna 0) y Totales (columnas 33, 34) no son editables directamente
                     fila.innerHTML = `<td class="nomenclatura" contenteditable="false">${nombre}</td><td contenteditable="true"></td>`;
                     for (let d = 1; d <= 31; d++) {
                         fila.innerHTML += `<td contenteditable="true"></td>`;
@@ -1002,30 +1371,35 @@
          * También carga los datos de Firebase para el mes seleccionado y maneja la copia de datos del mes anterior.
          * @param {number} index - El índice del mes a mostrar.
          */
-        function mostrarTabla(index) {
+        async function mostrarTabla(index) {
             mesActual = index;
-            // Oculta todas las tablas de mes y muestra solo la seleccionada
             document.querySelectorAll(".tabla-mes").forEach((div, i) => {
                 div.style.display = i === index ? "block" : "none";
             });
-            // Actualiza la clase 'active' en los botones de mes
             document.querySelectorAll(".tab-button").forEach((btn, i) => {
                 btn.classList.toggle("active", i === index);
             });
-            // Actualiza el título de la página
             document.title = `Datos de Vuelo - ${meses[index]} ${añoActual}`;
 
-            // Cargar los datos del mes seleccionado desde Firebase
-            // Solo si un usuario está autenticado
+            // Actualizar estado de los botones de navegación de mes
+            prevMonthBtn.disabled = mesActual === 0;
+            nextMonthBtn.disabled = mesActual === meses.length - 1;
+
+            // Ocultar reporte estadístico al cambiar de mes
+            statisticalReport.classList.add('hidden');
+            noReportDataMessage.classList.add('hidden'); // Asegurarse de ocultar el mensaje de no datos
+            reportTypeSelection.classList.add('hidden'); // Ocultar los selectores de tipo de reporte
+            statisticalReportToggleBtn.textContent = 'Ver Reporte Estadístico';
+
+
             if (auth.currentUser) {
-                cargarDatosDesdeFirebase(añoActual, meses[mesActual]);
+                await cargarDatosDesdeFirebase(añoActual, meses[mesActual]);
             }
 
-            // Traspasar valores de GENERAL del mes anterior al siguiente mes en VIENEN
-            // Solo si el mes actual no es enero (mes 0) y el usuario está autenticado
             if (mesActual > 0 && auth.currentUser) {
-                copiarValorGeneralAMesSiguiente(añoActual, mesActual - 1, mesActual);
+                await copiarValorGeneralAMesSiguiente(añoActual, mesActual - 1, mesActual);
             }
+            applyRolePermissions(currentUserRole); // Re-aplicar permisos después de cargar/copiar
         }
 
         /**
@@ -1035,39 +1409,36 @@
          * @param {number} mesOrigenIndex - El índice del mes de donde se copian los datos.
          * @param {number} mesDestinoIndex - El índice del mes a donde se copian los datos.
          */
-        function copiarValorGeneralAMesSiguiente(año, mesOrigenIndex, mesDestinoIndex) {
-            // Usar el índice numérico para la ruta de origen
+        async function copiarValorGeneralAMesSiguiente(año, mesOrigenIndex, mesDestinoIndex) {
             const rutaOrigen = `${año}/${mesOrigenIndex}`; 
-            dbRef.child(rutaOrigen).once('value')
-                .then(snapshot => {
-                    const datosOrigen = snapshot.val();
-                    if (datosOrigen) {
-                        const tablaDestino = document.querySelectorAll(".tabla-vuelo")[mesDestinoIndex];
-                        if (tablaDestino) {
-                            datosOrigen.forEach((filaDatos, indexFila) => {
-                                // La columna GENERAL es la última, índice 34 (contando desde 0)
-                                const valorGeneral = filaDatos[34];
-                                if (valorGeneral !== undefined && valorGeneral !== null && valorGeneral.toString().trim() !== "") {
-                                    const filaDestino = tablaDestino.querySelectorAll("tbody tr")[indexFila];
-                                    if (filaDestino) {
-                                        // La columna VIENEN es la segunda, índice 1
-                                        const celdaVienen = filaDestino.querySelectorAll("td")[1];
-                                        if (celdaVienen) {
-                                            celdaVienen.textContent = valorGeneral;
-                                        }
+            try {
+                const snapshot = await dbRef.child(rutaOrigen).once('value');
+                const datosOrigen = snapshot.val();
+                if (datosOrigen) {
+                    const tablaDestino = document.querySelectorAll(".tabla-vuelo")[mesDestinoIndex];
+                    if (tablaDestino) {
+                        datosOrigen.forEach((filaDatos, indexFila) => {
+                            const valorGeneral = filaDatos[34];
+                            if (valorGeneral !== undefined && valorGeneral !== null && valorGeneral.toString().trim() !== "") {
+                                const filaDestino = tablaDestino.querySelectorAll("tbody tr")[indexFila];
+                                if (filaDestino) {
+                                    const celdaVienen = filaDestino.querySelectorAll("td")[1];
+                                    if (celdaVienen) {
+                                        celdaVienen.textContent = valorGeneral;
                                     }
                                 }
-                            });
-                            // Actualizar totales del mes destino después de copiar valores
-                            actualizarTotales();
-                            // Guardar los datos del mes destino en Firebase después de la copia
-                            guardarDatosEnFirebase(añoActual, meses[mesDestinoIndex], obtenerDatosTabla(mesDestinoIndex));
+                            }
+                        });
+                        actualizarTotales();
+                        // Guardar los datos del mes destino en Firebase después de la copia si el usuario es admin
+                        if (currentUserRole === 'admin') {
+                            await guardarDatosEnFirebase(añoActual, meses[mesDestinoIndex], obtenerDatosTabla(mesDestinoIndex));
                         }
                     }
-                })
-                .catch(error => {
-                    console.error("Error al copiar datos entre meses:", error);
-                });
+                }
+            } catch (error) {
+                console.error("Error al copiar datos entre meses:", error);
+            }
         }
 
         /**
@@ -1079,15 +1450,13 @@
                 const filas = tabla.querySelectorAll("tbody tr");
                 filas.forEach((fila, filaIndex) => {
                     const celdas = fila.querySelectorAll("td");
-                    const vienenStr = celdas[1].textContent.trim(); // Valor de la columna "VIENEN"
-                    // Obtener los valores de los días (columnas 2 a 32)
+                    const vienenStr = celdas[1].textContent.trim(); 
                     const valoresCeldas = [...celdas].slice(2, 33).map(td => td.textContent.trim());
 
-                    // Si todas las celdas (incluyendo "VIENEN" y los días) están vacías, limpiar totales
                     const todasVacias = [vienenStr, ...valoresCeldas].every(val => val === "");
                     if (todasVacias) {
-                        celdas[33].textContent = ""; // MES TOTAL
-                        celdas[34].textContent = ""; // GENERAL
+                        celdas[33].textContent = ""; 
+                        celdas[34].textContent = ""; 
                         return;
                     }
 
@@ -1103,8 +1472,6 @@
                         } else {
                             const num = parseFloat(val.replace(",", "."));
                             if (isNaN(num)) return 0;
-                            // Si es un número entero, se asume que ya son minutos o unidades directas
-                            // Si es un decimal, se asume que son horas y se convierte a minutos
                             return num % 1 === 0 ? num : num * 60;
                         }
                     };
@@ -1121,50 +1488,45 @@
                         return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
                     };
 
-                    // Determinar si la fila actual maneja valores de tiempo (basado en el nombre de la fila)
                     const esTiempo = nombresFilas[filaIndex].includes("HRS");
 
-                    // Definir las filas específicas para la fórmula "GENERAL = MAX(días)" y "MES TOTAL = GENERAL - VIENEN"
-                    // Ahora solo incluye las filas CREEP
                     const rowsForSpecialCalculation = [
                         nombresFilas.indexOf("CREEP 1"),
-                        nombresFilas.indexOf("CREEP 2")
+                        nombresFilas.indexOf("CREEP 2"),
+                        nombresFilas.indexOf("ENGINE N1 CYCLES 1"), 
+                        nombresFilas.indexOf("ENGINE N2 CYCLES 1"), 
+                        nombresFilas.indexOf("ENGINE N1 CYCLES 2"), 
+                        nombresFilas.indexOf("ENGINE N2 CYCLES 2")  
                     ];
 
                     if (esTiempo) {
-                        // Cálculo para valores de tiempo
                         const vienenMin = vienenStr ? aMinutos(vienenStr) : 0;
                         const totalMin = valoresCeldas.reduce((acc, val) => acc + (val ? aMinutos(val) : 0), 0);
                         const generalMin = vienenMin + totalMin;
 
-                        celdas[33].textContent = aHora(totalMin); // MES TOTAL
-                        celdas[34].textContent = aHora(generalMin); // GENERAL
+                        celdas[33].textContent = aHora(totalMin); 
+                        celdas[34].textContent = aHora(generalMin); 
                     } else {
-                        // Cálculo para valores numéricos
                         const vienen = vienenStr ? parseFloat(vienenStr.replace(",", ".")) : 0;
                         const valoresNumericos = valoresCeldas.map(v => parseFloat(v.replace(",", "."))).filter(num => !isNaN(num));
-                        const total = valoresNumericos.reduce((acc, val) => acc + val, 0);
                         
                         let general;
                         let mesTotalDisplayValue;
 
                         if (rowsForSpecialCalculation.includes(filaIndex)) {
-                            // Para las filas CREEP: GENERAL es el valor máximo de los días, MES TOTAL = GENERAL - VIENEN
                             general = valoresNumericos.length > 0 ? Math.max(...valoresNumericos) : 0;
                             let calculatedMesTotal = general - vienen;
                             mesTotalDisplayValue = calculatedMesTotal > 0 ? (Number.isInteger(calculatedMesTotal) ? calculatedMesTotal : calculatedMesTotal.toFixed(1)) : "";
                         } else {
-                            // Para otras filas numéricas (incluyendo ENGINE N1/N2 CYCLES):
-                            // GENERAL es la suma de VIENEN + TOTAL de días
+                            const total = valoresNumericos.reduce((acc, val) => acc + val, 0);
                             general = total + vienen;
-                            // MES TOTAL es la suma de los valores diarios
                             mesTotalDisplayValue = total > 0 ? (Number.isInteger(total) ? total : total.toFixed(1)) : "";
                         }
 
                         const mostrarGeneral = general > 0 ? (Number.isInteger(general) ? general : general.toFixed(1)) : "";
 
-                        celdas[33].textContent = mesTotalDisplayValue; // MES TOTAL
-                        celdas[34].textContent = mostrarGeneral; // GENERAL
+                        celdas[33].textContent = mesTotalDisplayValue; 
+                        celdas[34].textContent = mostrarGeneral; 
                     }
                 });
             });
@@ -1176,9 +1538,7 @@
          */
         function activarActualizacion() {
             document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
-                // Eliminar el event listener existente para evitar duplicados al llamar a iniciar() múltiples veces
                 tabla.removeEventListener("input", handleTableInput);
-                // Añadir el event listener para el evento 'input'
                 tabla.addEventListener("input", handleTableInput);
             });
         }
@@ -1190,44 +1550,54 @@
          */
         function handleTableInput(e) {
             const celda = e.target;
-            // Asegurarse de que el evento proviene de una celda editable (TD)
             if (celda.tagName === 'TD' && celda.contentEditable === 'true') {
-                // Si el usuario no es administrador, revertir el cambio y mostrar advertencia
                 if (currentUserRole !== 'admin') {
                     console.warn('Acceso denegado: Solo los administradores pueden editar datos.');
                     authStatus.textContent = 'Acceso denegado: Solo los administradores pueden editar datos.';
                     authStatus.style.color = 'orange';
-                    // Revertir el contenido de la celda si no es admin (opcional, pero útil)
                     celda.textContent = celda.dataset.originalContent || '';
-                    return; // Detener el procesamiento
+                    return; 
                 }
 
-                // Guardar el contenido original antes de la edición para posible reversión
+                const fila = celda.parentElement;
+                const filaIndex = Array.from(fila.parentNode.children).indexOf(fila);
+                const celdaIndex = Array.from(celda.parentNode.children).indexOf(celda);
+                const nombreFila = nombresFilas[filaIndex];
+
+                // Validación de entrada
+                let isValid = true;
+                if (nombreFila.includes("HRS")) {
+                    isValid = isValidTimeOrNumber(celda.textContent.trim());
+                } else {
+                    isValid = isValidNumber(celda.textContent.trim());
+                }
+
+                if (!isValid) {
+                    celda.classList.add('invalid-input');
+                    authStatus.textContent = `Error: Entrada inválida en la celda (${nombreFila}, día ${celdaIndex - 1}). Formato esperado: HH:MM o número para HRS, solo número para otros.`;
+                    authStatus.style.color = 'red';
+                    return; // Detener el procesamiento si es inválido
+                } else {
+                    celda.classList.remove('invalid-input');
+                    authStatus.textContent = ''; // Limpiar mensaje de error si la entrada es válida
+                }
+
                 celda.dataset.originalContent = celda.textContent;
 
-                const fila = celda.parentElement;
-                const celdas = Array.from(fila.children);
-                const index = celdas.indexOf(celda);
-
-                // No hacer nada si la celda editada es la de nomenclatura (índice 0),
-                // MES TOTAL (índice 33) o GENERAL (índice 34), ya que estas no se editan directamente.
-                if (index === 0 || index === 33 || index === 34) {
-                    actualizarTotales(); // Asegurarse de que los totales se actualicen si se manipula "VIENEN"
+                if (celdaIndex === 0 || celdaIndex === 33 || celdaIndex === 34) {
+                    actualizarTotales(); 
                     return;
                 }
 
-                // Aplicar/quitar la clase 'led-persistente' para el efecto visual
                 if (celda.textContent.trim() !== "") {
                     celda.classList.add("led-persistente");
                 } else {
                     celda.classList.remove("led-persistente");
                 }
 
-                actualizarTotales(); // Recalcular los totales después de la edición
+                actualizarTotales(); 
 
-                // Guardar automáticamente los datos en Firebase
-                // Se obtiene el índice del mes actual para guardar en la ruta correcta
-                const tablaIndex = meses.indexOf(meses[mesActual]); // Esto es solo el mesActual
+                const tablaIndex = meses.indexOf(meses[mesActual]); 
                 const datosActualizados = obtenerDatosTabla(tablaIndex);
                 guardarDatosEnFirebase(añoActual, meses[mesActual], datosActualizados);
             }
@@ -1241,17 +1611,401 @@
         }
 
         /**
-         * Función de inicialización de la aplicación.
-         * Se ejecuta al cargar la ventana.
+         * Exporta los datos de la tabla actual a un archivo CSV.
          */
-        function iniciar() {
-            cargarAños(); // Carga las opciones de año
-            crearTablasParaAño(añoActual); // Crea las estructuras de tabla para el año actual
-            crearBotonesMeses(); // Crea los botones de mes y muestra la tabla inicial
-            activarActualizacion(); // Configura los listeners para la actualización y guardado de datos
-            // La función 'onAuthStateChanged' de Firebase se encargará de mostrar/ocultar
-            // el contenido principal y de cargar los datos iniciales si el usuario ya está logueado.
+        function exportTableToCSV() {
+            const currentMonthName = meses[mesActual];
+            const filename = `Datos_Vuelo_${currentMonthName}_${añoActual}.csv`;
+            const tableData = obtenerDatosTabla(mesActual);
+
+            // Obtener encabezados de la tabla
+            const currentTable = document.querySelectorAll(`#contenedor-tablas > div`)[mesActual]?.querySelector('table');
+            let headers = [];
+            if (currentTable) {
+                headers = Array.from(currentTable.querySelectorAll('thead th')).map(th => th.textContent.trim());
+            }
+
+            // Unir encabezados y datos
+            const csvRows = [];
+            if (headers.length > 0) {
+                csvRows.push(headers.join(','));
+            }
+            tableData.forEach(row => {
+                csvRows.push(row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')); // Escapar comillas dobles
+            });
+
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) { // Feature detection
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert('Tu navegador no soporta la descarga directa de archivos CSV.');
+            }
         }
+
+        // -----------------------------------------------------------
+        // Funciones de Reporte Estadístico
+        // -----------------------------------------------------------
+
+        /**
+         * Convierte un valor de tiempo (HH:MM) a un número decimal de horas.
+         * @param {string} timeStr - El valor de tiempo en formato HH:MM.
+         * @returns {number} El valor en horas decimales.
+         */
+        function timeToDecimalHours(timeStr) {
+            if (!timeStr || timeStr === "") return 0;
+            const parts = timeStr.split(':');
+            if (parts.length === 2) {
+                const hours = parseInt(parts[0]);
+                const minutes = parseInt(parts[1]);
+                if (!isNaN(hours) && !isNaN(minutes)) {
+                    return hours + (minutes / 60);
+                }
+            }
+            // Si no es HH:MM, intentar parsear como número directamente
+            const num = parseFloat(timeStr.replace(",", "."));
+            return isNaN(num) ? 0 : num;
+        }
+
+        /**
+         * Convierte un número decimal de horas a formato HH:MM.
+         * @param {number} decimalHours - El valor en horas decimales.
+         * @returns {string} El tiempo en formato HH:MM.
+         */
+        function decimalHoursToTime(decimalHours) {
+            if (decimalHours === 0) return "00:00";
+            const totalMinutes = Math.round(decimalHours * 60);
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+
+        /**
+         * Agrega los datos mensuales totales para el reporte anual.
+         * @returns {Object} Un objeto con los datos agregados por mes para cada métrica.
+         */
+        async function fetchAnnualAggregatedData() {
+            showLoading();
+            const aggregatedData = {};
+
+            for (const rowName of nombresFilas) {
+                aggregatedData[rowName] = [];
+            }
+
+            for (let i = 0; i < meses.length; i++) {
+                const mesNombre = meses[i];
+                const ruta = `${añoActual}/${i}`;
+                
+                try {
+                    const snapshot = await dbRef.child(ruta).once('value');
+                    const datosMes = snapshot.val();
+
+                    if (datosMes) {
+                        nombresFilas.forEach((rowName, rowIndex) => {
+                            const rowData = datosMes[rowIndex];
+                            if (rowData) {
+                                const mesTotalValue = rowData[33]; // Columna "MES TOTAL"
+                                if (rowName.includes("HRS")) {
+                                    aggregatedData[rowName].push(timeToDecimalHours(mesTotalValue));
+                                } else {
+                                    const numValue = parseFloat(mesTotalValue.replace(",", "."));
+                                    aggregatedData[rowName].push(isNaN(numValue) ? 0 : numValue);
+                                }
+                            } else {
+                                aggregatedData[rowName].push(0); 
+                            }
+                        });
+                    } else {
+                        nombresFilas.forEach(rowName => {
+                            aggregatedData[rowName].push(0);
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Error al cargar datos para el reporte anual del mes ${mesNombre}:`, error);
+                    nombresFilas.forEach(rowName => {
+                        aggregatedData[rowName].push(0);
+                    });
+                }
+            }
+            hideLoading();
+            return aggregatedData;
+        }
+
+        /**
+         * Agrega los datos diarios para el reporte mensual del mes actual.
+         * @returns {Object} Un objeto con los datos agregados por día para cada métrica.
+         */
+        async function fetchMonthlyDailyData(year, monthIndex) {
+            showLoading();
+            const dailyData = {};
+            const daysInMonth = new Date(year, monthIndex + 1, 0).getDate(); // Obtener el número de días en el mes
+
+            for (const rowName of nombresFilas) {
+                dailyData[rowName] = new Array(daysInMonth).fill(0); // Inicializar con ceros para cada día
+            }
+
+            const ruta = `${year}/${monthIndex}`;
+            try {
+                const snapshot = await dbRef.child(ruta).once('value');
+                const datosMes = snapshot.val();
+
+                if (datosMes) {
+                    nombresFilas.forEach((rowName, rowIndex) => {
+                        const rowData = datosMes[rowIndex];
+                        if (rowData) {
+                            for (let day = 1; day <= daysInMonth; day++) {
+                                const dailyValue = rowData[day + 1]; // +1 porque la columna 0 es Nomenclatura, 1 es Vienen
+                                if (dailyValue !== undefined && dailyValue !== null && dailyValue.toString().trim() !== "") {
+                                    if (rowName.includes("HRS")) {
+                                        dailyData[rowName][day - 1] = timeToDecimalHours(dailyValue);
+                                    } else {
+                                        const numValue = parseFloat(dailyValue.replace(",", "."));
+                                        dailyData[rowName][day - 1] = isNaN(numValue) ? 0 : numValue;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error(`Error al cargar datos diarios para el reporte mensual del mes ${meses[monthIndex]}:`, error);
+            }
+            hideLoading();
+            return dailyData;
+        }
+
+        /**
+         * Renderiza el gráfico y la tabla de resumen para el reporte anual.
+         * @param {Object} aggregatedData - Los datos agregados por mes.
+         */
+        function renderAnnualReport(aggregatedData) {
+            reportTitle.textContent = `Reporte Anual para el Año ${añoActual}`;
+
+            const hasData = nombresFilas.some(rowName => aggregatedData[rowName] && aggregatedData[rowName].some(val => val > 0));
+
+            if (!hasData) {
+                myChartCanvas.classList.add('hidden');
+                summaryTable.classList.add('hidden');
+                noReportDataMessage.classList.remove('hidden');
+                if (myChartInstance) {
+                    myChartInstance.destroy(); // Destroy chart if no data
+                    myChartInstance = null;
+                }
+                return;
+            } else {
+                myChartCanvas.classList.remove('hidden');
+                summaryTable.classList.remove('hidden');
+                noReportDataMessage.classList.add('hidden');
+            }
+
+            // Encabezados de la tabla de resumen anual
+            summaryTable.querySelector('thead tr').innerHTML = '<th>Métrica</th>';
+            meses.forEach(mes => {
+                summaryTable.querySelector('thead tr').innerHTML += `<th>${mes}</th>`;
+            });
+            summaryTable.querySelector('thead tr').innerHTML += '<th>Incremento Anual</th>';
+            summaryTable.querySelector('tbody').innerHTML = '';
+
+            const chartLabels = meses;
+            const chartDatasets = [];
+
+            nombresFilas.forEach((rowName, index) => {
+                const data = aggregatedData[rowName];
+                const isTimeMetric = rowName.includes("HRS");
+
+                let firstValue = data[0];
+                let lastValue = data[data.length - 1];
+                let annualIncrement = lastValue - firstValue;
+                
+                let annualIncrementDisplay = "";
+                let incrementClass = "";
+
+                if (annualIncrement > 0) {
+                    incrementClass = "increment-positive";
+                    annualIncrementDisplay = isTimeMetric ? `+${decimalHoursToTime(annualIncrement)}` : `+${annualIncrement.toFixed(1)}`;
+                } else if (annualIncrement < 0) {
+                    incrementClass = "increment-negative";
+                    annualIncrementDisplay = isTimeMetric ? `-${decimalHoursToTime(Math.abs(annualIncrement))}` : `${annualIncrement.toFixed(1)}`;
+                } else {
+                    incrementClass = "increment-zero";
+                    annualIncrementDisplay = isTimeMetric ? "00:00" : "0";
+                }
+
+                // Añadir datos a la tabla de resumen
+                let rowHtml = `<tr><td class="nomenclatura">${rowName}</td>`;
+                data.forEach(val => {
+                    rowHtml += `<td>${isTimeMetric ? decimalHoursToTime(val) : (val % 1 === 0 ? val : val.toFixed(1))}</td>`;
+                });
+                rowHtml += `<td class="${incrementClass}">${annualIncrementDisplay}</td></tr>`;
+                summaryTable.querySelector('tbody').innerHTML += rowHtml;
+
+                // Añadir dataset para el gráfico (solo para algunas métricas principales)
+                if (rowName === "AC HRS" || rowName === "LANDINGS" || rowName.includes("ENGINE HRS")) {
+                    chartDatasets.push({
+                        label: rowName,
+                        data: data,
+                        borderColor: getRandomColor(),
+                        fill: false,
+                        tension: 0.1
+                    });
+                }
+            });
+
+            // Destruir instancia de gráfico anterior si existe
+            if (myChartInstance) {
+                myChartInstance.destroy();
+            }
+
+            // Renderizar el nuevo gráfico
+            myChartInstance = new Chart(myChartCanvas, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: chartDatasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Totales Mensuales para el Año ${añoActual}`
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Renderiza el gráfico y la tabla de resumen para el reporte mensual.
+         * @param {Object} dailyData - Los datos agregados por día.
+         */
+        function renderMonthlyReport(dailyData) {
+            reportTitle.textContent = `Reporte Mensual: ${meses[mesActual]} ${añoActual}`;
+
+            const hasData = nombresFilas.some(rowName => dailyData[rowName] && dailyData[rowName].some(val => val > 0));
+
+            if (!hasData) {
+                myChartCanvas.classList.add('hidden');
+                summaryTable.classList.add('hidden');
+                noReportDataMessage.classList.remove('hidden');
+                if (myChartInstance) {
+                    myChartInstance.destroy(); // Destroy chart if no data
+                    myChartInstance = null;
+                }
+                return;
+            } else {
+                myChartCanvas.classList.remove('hidden');
+                summaryTable.classList.remove('hidden');
+                noReportDataMessage.classList.add('hidden');
+            }
+
+            const daysInMonth = new Date(añoActual, mesActual + 1, 0).getDate();
+            const chartLabels = Array.from({ length: daysInMonth }, (_, i) => i + 1); // Días del mes
+
+            // Encabezados de la tabla de resumen mensual
+            summaryTable.querySelector('thead tr').innerHTML = '<th>Métrica</th>';
+            chartLabels.forEach(day => {
+                summaryTable.querySelector('thead tr').innerHTML += `<th>Día ${day}</th>`;
+            });
+            summaryTable.querySelector('tbody').innerHTML = '';
+
+            const chartDatasets = [];
+
+            nombresFilas.forEach((rowName, index) => {
+                const data = dailyData[rowName];
+                const isTimeMetric = rowName.includes("HRS");
+
+                // Añadir datos a la tabla de resumen
+                let rowHtml = `<tr><td class="nomenclatura">${rowName}</td>`;
+                data.forEach(val => {
+                    rowHtml += `<td>${isTimeMetric ? decimalHoursToTime(val) : (val % 1 === 0 ? val : val.toFixed(1))}</td>`;
+                });
+                rowHtml += `</tr>`;
+                summaryTable.querySelector('tbody').innerHTML += rowHtml;
+
+                // Añadir dataset para el gráfico (solo para algunas métricas principales)
+                if (rowName === "AC HRS" || rowName === "LANDINGS" || rowName.includes("ENGINE HRS")) {
+                    chartDatasets.push({
+                        label: rowName,
+                        data: data,
+                        borderColor: getRandomColor(),
+                        fill: false,
+                        tension: 0.1
+                    });
+                }
+            });
+
+            // Destruir instancia de gráfico anterior si existe
+            if (myChartInstance) {
+                myChartInstance.destroy();
+            }
+
+            // Renderizar el nuevo gráfico
+            myChartInstance = new Chart(myChartCanvas, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: chartDatasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Valores Diarios para ${meses[mesActual]} ${añoActual}`
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Función principal para renderizar el reporte estadístico basado en el tipo seleccionado.
+         */
+        async function updateStatisticalReport() {
+            if (currentReportType === 'annual') {
+                const aggregatedData = await fetchAnnualAggregatedData();
+                renderAnnualReport(aggregatedData);
+            } else if (currentReportType === 'monthly') {
+                const dailyData = await fetchMonthlyDailyData(añoActual, mesActual);
+                renderMonthlyReport(dailyData);
+            }
+        }
+
+        /**
+         * Genera un color hexadecimal aleatorio.
+         */
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // -----------------------------------------------------------
+        // Inicialización y Event Listeners Globales
+        // -----------------------------------------------------------
 
         /**
          * Configura la posición y la distancia de caída de la careta de Anonymous.
@@ -1286,24 +2040,76 @@
             revealCircle.style.left = `50%`; // Centrar horizontalmente
         }
 
+        /**
+         * Función de inicialización de la aplicación.
+         * Se ejecuta al cargar la ventana.
+         */
+        function iniciar() {
+            cargarAños(); 
+            crearTablasParaAño(añoActual); 
+            crearBotonesMeses(); 
+            activarActualizacion(); 
+            // onAuthStateChanged se encarga de la carga inicial de datos y permisos
+        }
 
         // Event listener para el cambio de año en el selector
-        selectYear.addEventListener("change", () => {
-            añoActual = parseInt(selectYear.value); // Actualiza el año actual
-            crearTablasParaAño(añoActual); // Vuelve a crear las tablas para el nuevo año
-            crearBotonesMeses(); // Vuelve a crear los botones de mes
-            activarActualizacion(); // Re-activa los listeners
-            // Cargar los datos para el nuevo año y el mes actual después de cambiar de año
+        selectYear.addEventListener("change", async () => {
+            añoActual = parseInt(selectYear.value); 
+            crearTablasParaAño(añoActual); 
+            crearBotonesMeses(); 
+            activarActualizacion(); 
             if (auth.currentUser) {
-                cargarDatosDesdeFirebase(añoActual, meses[mesActual]);
+                await cargarDatosDesdeFirebase(añoActual, meses[mesActual]);
             }
+            applyRolePermissions(currentUserRole); // Re-aplicar permisos después de cambiar de año
+        });
+
+        // Event listeners para los botones de navegación de mes
+        prevMonthBtn.addEventListener('click', () => {
+            if (mesActual > 0) {
+                mostrarTabla(mesActual - 1);
+            }
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            if (mesActual < meses.length - 1) {
+                mostrarTabla(mesActual + 1);
+            }
+        });
+
+        // Event listener para el botón de exportar CSV
+        exportCsvBtn.addEventListener('click', exportTableToCSV);
+
+        // Event listener para el botón de reporte estadístico
+        statisticalReportToggleBtn.addEventListener('click', async () => {
+            if (statisticalReport.classList.contains('hidden')) {
+                // Mostrar reporte y controles de tipo
+                statisticalReport.classList.remove('hidden');
+                reportTypeSelection.classList.remove('hidden');
+                contenedorTablas.classList.add('hidden'); // Ocultar la tabla principal
+                statisticalReportToggleBtn.textContent = 'Ocultar Reporte Estadístico';
+                await updateStatisticalReport(); // Renderizar el reporte inicial
+            } else {
+                // Ocultar reporte y controles de tipo
+                statisticalReport.classList.add('hidden');
+                reportTypeSelection.classList.add('hidden');
+                contenedorTablas.classList.remove('hidden'); // Mostrar la tabla principal
+                statisticalReportToggleBtn.textContent = 'Ver Reporte Estadístico';
+            }
+        });
+
+        // Event listeners para los radio buttons de tipo de reporte
+        reportTypeRadios.forEach(radio => {
+            radio.addEventListener('change', async (event) => {
+                currentReportType = event.target.value;
+                await updateStatisticalReport();
+            });
         });
 
         // Iniciar la aplicación cuando la ventana esté completamente cargada
         window.addEventListener("load", () => {
             iniciar();
-            // Pequeño retraso para asegurar que los elementos estén renderizados antes de calcular posiciones
-            setTimeout(animateIntroElements, 100); // Llamar a la función de animación de elementos de introducción
+            setTimeout(animateIntroElements, 100); 
         });
 
         // Hacer la función imprimirTabla accesible globalmente
