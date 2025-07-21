@@ -390,24 +390,28 @@
             }
 
             table {
-                page-break-inside: avoid;
-                width: 100%;
                 border-collapse: collapse;
+                width: 100%;
+                page-break-inside: avoid;
+                table-layout: fixed; /* Añadido para mejor control del ancho de columna */
             }
 
             tr,
             td,
             th {
+                border: 1px solid #000 !important;
                 page-break-inside: avoid;
                 page-break-after: auto;
-                border: 1px solid #000 !important;
+                padding: 0.5px; /* Reducido para impresión */
+                font-size: 6px; /* Reducido para impresión */
+                white-space: normal; /* Permite que el texto se ajuste */
+                word-wrap: break-word; /* Permite que las palabras largas se rompan */
+                min-width: unset; /* Elimina la restricción de ancho mínimo */
             }
 
-            th,
-            td {
-                padding: 1px; /* Reducido para impresión */
-                font-size: 8px; /* Reducido para impresión */
-                min-width: 15px; /* Reducido para impresión */
+            /* Asegurar que el contenedor de la tabla no oculte el contenido */
+            #contenedor-tablas {
+                overflow-x: visible !important;
             }
 
             @page {
@@ -778,7 +782,7 @@
 
     <script>
         // Configuración de Firebase (asegúrate de que estas credenciales sean correctas para tu proyecto)
-     const firebaseConfig = {
+      const firebaseConfig = {
             apiKey: "AIzaSyBeeYu08yGHmd9rX0q4jtUOz-DRufRYp-Q",
             authDomain: "fah-991.firebaseapp.com",
             databaseURL: "https://fah-991-default-rtdb.firebaseio.com",
@@ -1089,7 +1093,9 @@
                     currentUserRole = 'viewer'; 
                 } finally {
                     applyRolePermissions(currentUserRole);
-                    cargarDatosDesdeFirebase(añoActual, meses[mesActual]);
+                    // No mostrar loading para la carga inicial de datos de tabla
+                    const currentMonthData = await dbRef.child(`${añoActual}/${meses.indexOf(meses[mesActual])}`).once('value');
+                    cargarDatosEnTablaHTML(currentMonthData.val(), mesActual);
                 }
 
             } else {
@@ -1123,7 +1129,6 @@
                 return; 
             }
 
-            showLoading();
             const ruta = `${año}/${meses.indexOf(mesNombre)}`; 
             try {
                 await dbRef.child(ruta).set(datosTabla);
@@ -1134,9 +1139,8 @@
                 console.error("Error al guardar los datos:", error);
                 authStatus.textContent = `Error al guardar los datos: ${error.message}`;
                 authStatus.style.color = 'red'; 
-            } finally {
-                hideLoading();
             }
+            // No se llama a hideLoading() aquí, ya que no se muestra showLoading() para cada edición de celda
         }
 
         /**
@@ -1145,7 +1149,6 @@
          * @param {string} mesNombre - El nombre del mes a cargar.
          */
         async function cargarDatosDesdeFirebase(año, mesNombre) {
-            showLoading();
             const ruta = `${año}/${meses.indexOf(mesNombre)}`; 
             
             console.log('DEBUG: Intentando cargar datos de la ruta:', ruta); 
@@ -1179,9 +1182,8 @@
                 console.error("DEBUG: Error al cargar los datos:", error); 
                 authStatus.textContent = `Error al cargar los datos: ${error.message}`;
                 authStatus.style.color = 'red';
-            } finally {
-                hideLoading();
             }
+            // No se llama a hideLoading() aquí, ya que no se muestra showLoading() para cada carga de mes
         }
 
         /**
@@ -1393,7 +1395,9 @@
 
 
             if (auth.currentUser) {
-                await cargarDatosDesdeFirebase(añoActual, meses[mesActual]);
+                // No mostrar loading para la carga de datos de tabla al cambiar de mes
+                const currentMonthData = await dbRef.child(`${añoActual}/${meses.indexOf(meses[mesActual])}`).once('value');
+                cargarDatosEnTablaHTML(currentMonthData.val(), mesActual);
             }
 
             if (mesActual > 0 && auth.currentUser) {
@@ -1450,70 +1454,75 @@
                 const filas = tabla.querySelectorAll("tbody tr");
                 filas.forEach((fila, filaIndex) => {
                     const celdas = fila.querySelectorAll("td");
-                    const vienenStr = celdas[1].textContent.trim(); 
+                    const vienenStr = celdas[1].textContent.trim();
                     const valoresCeldas = [...celdas].slice(2, 33).map(td => td.textContent.trim());
 
                     const todasVacias = [vienenStr, ...valoresCeldas].every(val => val === "");
                     if (todasVacias) {
-                        celdas[33].textContent = ""; 
-                        celdas[34].textContent = ""; 
+                        celdas[33].textContent = "";
+                        celdas[34].textContent = "";
                         return;
                     }
 
-                    /**
-                     * Convierte un valor de tiempo (HH:MM o número) a minutos.
-                     * @param {string} val - El valor a convertir.
-                     * @returns {number} El valor en minutos.
-                     */
-                    const aMinutos = (val) => {
+                    // Helper to convert HH:MM string to minutes
+                    const timeToMinutes = (val) => {
                         if (val.includes(":")) {
                             const [h, m] = val.split(":").map(Number);
                             return h * 60 + m;
-                        } else {
-                            const num = parseFloat(val.replace(",", "."));
-                            if (isNaN(num)) return 0;
-                            return num % 1 === 0 ? num : num * 60;
                         }
+                        return 0; // Should not happen if used correctly
                     };
 
-                    /**
-                     * Convierte un total de minutos a formato HH:MM.
-                     * @param {number} minutos - El total de minutos.
-                     * @returns {string} El tiempo en formato HH:MM o cadena vacía si es 0.
-                     */
-                    const aHora = (minutos) => {
+                    // Helper to convert minutes to HH:MM string
+                    const minutesToTime = (minutos) => {
                         if (minutos === 0) return "";
                         const h = Math.floor(minutos / 60);
                         const m = Math.round(minutos % 60);
                         return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
                     };
 
-                    const esTiempo = nombresFilas[filaIndex].includes("HRS");
-
-                    const rowsForSpecialCalculation = [
+                    const rowName = nombresFilas[filaIndex];
+                    const isTimeRow = rowName.includes("HRS"); // General check for time rows
+                    const isSpecialCalculationRow = [
                         nombresFilas.indexOf("CREEP 1"),
                         nombresFilas.indexOf("CREEP 2"),
-                        nombresFilas.indexOf("ENGINE N1 CYCLES 1"), 
-                        nombresFilas.indexOf("ENGINE N2 CYCLES 1"), 
-                        nombresFilas.indexOf("ENGINE N1 CYCLES 2"), 
-                        nombresFilas.indexOf("ENGINE N2 CYCLES 2")  
+                        nombresFilas.indexOf("ENGINE N1 CYCLES 1"),
+                        nombresFilas.indexOf("ENGINE N2 CYCLES 1"),
+                        nombresFilas.indexOf("ENGINE N1 CYCLES 2"),
+                        nombresFilas.indexOf("ENGINE N2 CYCLES 2")
+                    ].includes(filaIndex);
+
+                    // Rows that should always be treated as decimal numbers, regardless of "HRS" in name
+                    const forceDecimalDisplayRows = [
+                        nombresFilas.indexOf("HOIST RESCUE OP HRS"),
+                        nombresFilas.indexOf("HOIST RESCUE CYCLE")
                     ];
 
-                    if (esTiempo) {
-                        const vienenMin = vienenStr ? aMinutos(vienenStr) : 0;
-                        const totalMin = valoresCeldas.reduce((acc, val) => acc + (val ? aMinutos(val) : 0), 0);
-                        const generalMin = vienenMin + totalMin;
-
-                        celdas[33].textContent = aHora(totalMin); 
-                        celdas[34].textContent = aHora(generalMin); 
-                    } else {
+                    if (forceDecimalDisplayRows.includes(filaIndex)) {
                         const vienen = vienenStr ? parseFloat(vienenStr.replace(",", ".")) : 0;
                         const valoresNumericos = valoresCeldas.map(v => parseFloat(v.replace(",", "."))).filter(num => !isNaN(num));
-                        
+                        const total = valoresNumericos.reduce((acc, val) => acc + val, 0);
+                        const general = total + vienen;
+
+                        celdas[33].textContent = total > 0 ? total.toFixed(1) : "";
+                        celdas[34].textContent = general > 0 ? general.toFixed(1) : "";
+                    } else if (isTimeRow) {
+                        // Handle standard time rows (e.g., AC HRS, ENGINE HRS)
+                        const vienenMin = vienenStr ? timeToMinutes(vienenStr) : 0;
+                        const totalMin = valoresCeldas.reduce((acc, val) => acc + (val ? timeToMinutes(val) : 0), 0);
+                        const generalMin = vienenMin + totalMin;
+
+                        celdas[33].textContent = minutesToTime(totalMin);
+                        celdas[34].textContent = minutesToTime(generalMin);
+                    } else {
+                        // Handle standard numerical rows (e.g., LANDINGS, CARGO HOOK CYCLE, etc.)
+                        const vienen = vienenStr ? parseFloat(vienenStr.replace(",", ".")) : 0;
+                        const valoresNumericos = valoresCeldas.map(v => parseFloat(v.replace(",", "."))).filter(num => !isNaN(num));
+
                         let general;
                         let mesTotalDisplayValue;
 
-                        if (rowsForSpecialCalculation.includes(filaIndex)) {
+                        if (isSpecialCalculationRow) {
                             general = valoresNumericos.length > 0 ? Math.max(...valoresNumericos) : 0;
                             let calculatedMesTotal = general - vienen;
                             mesTotalDisplayValue = calculatedMesTotal > 0 ? (Number.isInteger(calculatedMesTotal) ? calculatedMesTotal : calculatedMesTotal.toFixed(1)) : "";
@@ -1525,8 +1534,8 @@
 
                         const mostrarGeneral = general > 0 ? (Number.isInteger(general) ? general : general.toFixed(1)) : "";
 
-                        celdas[33].textContent = mesTotalDisplayValue; 
-                        celdas[34].textContent = mostrarGeneral; 
+                        celdas[33].textContent = mesTotalDisplayValue;
+                        celdas[34].textContent = mostrarGeneral;
                     }
                 });
             });
@@ -1548,7 +1557,7 @@
          * Actualiza el estado visual de la celda, recalcula totales y guarda en Firebase.
          * @param {Event} e - El objeto de evento.
          */
-        function handleTableInput(e) {
+        async function handleTableInput(e) { 
             const celda = e.target;
             if (celda.tagName === 'TD' && celda.contentEditable === 'true') {
                 if (currentUserRole !== 'admin') {
@@ -1564,9 +1573,16 @@
                 const celdaIndex = Array.from(celda.parentNode.children).indexOf(celda);
                 const nombreFila = nombresFilas[filaIndex];
 
-                // Validación de entrada
+                // Define rows that should always be treated as decimal numbers for validation
+                const forceDecimalValidationRows = [
+                    nombresFilas.indexOf("HOIST RESCUE OP HRS"),
+                    nombresFilas.indexOf("HOIST RESCUE CYCLE")
+                ];
+
                 let isValid = true;
-                if (nombreFila.includes("HRS")) {
+                if (forceDecimalValidationRows.includes(filaIndex)) {
+                    isValid = isValidNumber(celda.textContent.trim());
+                } else if (nombreFila.includes("HRS")) {
                     isValid = isValidTimeOrNumber(celda.textContent.trim());
                 } else {
                     isValid = isValidNumber(celda.textContent.trim());
@@ -1574,12 +1590,12 @@
 
                 if (!isValid) {
                     celda.classList.add('invalid-input');
-                    authStatus.textContent = `Error: Entrada inválida en la celda (${nombreFila}, día ${celdaIndex - 1}). Formato esperado: HH:MM o número para HRS, solo número para otros.`;
+                    authStatus.textContent = `Error: Entrada inválida en la celda (${nombreFila}, día ${celdaIndex - 1}). Formato esperado: ${forceDecimalValidationRows.includes(filaIndex) || !nombreFila.includes("HRS") ? 'número (decimal permitido)' : 'HH:MM o número para HRS'}.`;
                     authStatus.style.color = 'red';
-                    return; // Detener el procesamiento si es inválido
+                    return; 
                 } else {
                     celda.classList.remove('invalid-input');
-                    authStatus.textContent = ''; // Limpiar mensaje de error si la entrada es válida
+                    authStatus.textContent = ''; 
                 }
 
                 celda.dataset.originalContent = celda.textContent;
@@ -1599,7 +1615,7 @@
 
                 const tablaIndex = meses.indexOf(meses[mesActual]); 
                 const datosActualizados = obtenerDatosTabla(tablaIndex);
-                guardarDatosEnFirebase(añoActual, meses[mesActual], datosActualizados);
+                await guardarDatosEnFirebase(añoActual, meses[mesActual], datosActualizados); 
             }
         }
 
@@ -1692,7 +1708,7 @@
          * @returns {Object} Un objeto con los datos agregados por mes para cada métrica.
          */
         async function fetchAnnualAggregatedData() {
-            showLoading();
+            showLoading(); // Mostrar loading para la generación de reportes
             const aggregatedData = {};
 
             for (const rowName of nombresFilas) {
@@ -1734,7 +1750,7 @@
                     });
                 }
             }
-            hideLoading();
+            hideLoading(); // Ocultar loading después de la generación de reportes
             return aggregatedData;
         }
 
@@ -1743,7 +1759,7 @@
          * @returns {Object} Un objeto con los datos agregados por día para cada métrica.
          */
         async function fetchMonthlyDailyData(year, monthIndex) {
-            showLoading();
+            // No se muestra showLoading/hideLoading aquí, ya que se maneja en la función que llama (renderMonthlyReport)
             const dailyData = {};
             const daysInMonth = new Date(year, monthIndex + 1, 0).getDate(); // Obtener el número de días en el mes
 
@@ -1777,7 +1793,6 @@
             } catch (error) {
                 console.error(`Error al cargar datos diarios para el reporte mensual del mes ${meses[monthIndex]}:`, error);
             }
-            hideLoading();
             return dailyData;
         }
 
@@ -1890,19 +1905,31 @@
 
         /**
          * Renderiza el gráfico y la tabla de resumen para el reporte mensual.
-         * @param {Object} dailyData - Los datos agregados por día.
+         * @param {Object} dailyData - Los datos agregados por día para el mes actual.
          */
-        function renderMonthlyReport(dailyData) {
+        async function renderMonthlyReport(dailyData) {
             reportTitle.textContent = `Reporte Mensual: ${meses[mesActual]} ${añoActual}`;
 
-            const hasData = nombresFilas.some(rowName => dailyData[rowName] && dailyData[rowName].some(val => val > 0));
+            // Fetch previous month's data for comparison
+            let previousMonthDailyData = null;
+            if (mesActual > 0) {
+                showLoading(); // Show loading for fetching previous month's data
+                previousMonthDailyData = await fetchMonthlyDailyData(añoActual, mesActual - 1);
+                hideLoading(); // Hide loading after fetching
+            }
 
-            if (!hasData) {
+            const hasCurrentMonthData = nombresFilas.some(rowName => dailyData[rowName] && dailyData[rowName].some(val => val > 0));
+            let hasPreviousMonthData = false;
+            if (previousMonthDailyData) {
+                hasPreviousMonthData = nombresFilas.some(rowName => previousMonthDailyData[rowName] && previousMonthDailyData[rowName].some(val => val > 0));
+            }
+
+            if (!hasCurrentMonthData && !hasPreviousMonthData) {
                 myChartCanvas.classList.add('hidden');
                 summaryTable.classList.add('hidden');
                 noReportDataMessage.classList.remove('hidden');
                 if (myChartInstance) {
-                    myChartInstance.destroy(); // Destroy chart if no data
+                    myChartInstance.destroy();
                     myChartInstance = null;
                 }
                 return;
@@ -1920,23 +1947,58 @@
             chartLabels.forEach(day => {
                 summaryTable.querySelector('thead tr').innerHTML += `<th>Día ${day}</th>`;
             });
+            // Add the new column for monthly increment
+            summaryTable.querySelector('thead tr').innerHTML += '<th>Incremento Mensual</th>';
             summaryTable.querySelector('tbody').innerHTML = '';
 
             const chartDatasets = [];
 
             nombresFilas.forEach((rowName, index) => {
-                const data = dailyData[rowName];
+                const data = dailyData[rowName]; // Current month's daily data
                 const isTimeMetric = rowName.includes("HRS");
 
-                // Añadir datos a la tabla de resumen
+                // Calculate current month's total
+                const currentMonthTotal = data.reduce((sum, val) => sum + val, 0);
+
+                // Calculate previous month's total
+                let previousMonthTotal = 0;
+                if (previousMonthDailyData) {
+                    previousMonthTotal = previousMonthDailyData[rowName].reduce((sum, val) => sum + val, 0);
+                }
+
+                // Calculate monthly increment
+                const monthlyIncrement = currentMonthTotal - previousMonthTotal;
+
+                let monthlyIncrementDisplay = "";
+                let incrementClass = "";
+
+                // Only show increment if there was a previous month to compare
+                if (mesActual > 0) {
+                    if (monthlyIncrement > 0) {
+                        incrementClass = "increment-positive";
+                        monthlyIncrementDisplay = isTimeMetric ? `+${decimalHoursToTime(monthlyIncrement)}` : `+${monthlyIncrement.toFixed(1)}`;
+                    } else if (monthlyIncrement < 0) {
+                        incrementClass = "increment-negative";
+                        monthlyIncrementDisplay = isTimeMetric ? `-${decimalHoursToTime(Math.abs(monthlyIncrement))}` : `${monthlyIncrement.toFixed(1)}`;
+                    } else {
+                        incrementClass = "increment-zero";
+                        monthlyIncrementDisplay = isTimeMetric ? "00:00" : "0";
+                    }
+                } else {
+                    monthlyIncrementDisplay = "N/A"; // Not Applicable for the first month
+                    incrementClass = "increment-zero";
+                }
+
+                // Add data to the summary table
                 let rowHtml = `<tr><td class="nomenclatura">${rowName}</td>`;
                 data.forEach(val => {
                     rowHtml += `<td>${isTimeMetric ? decimalHoursToTime(val) : (val % 1 === 0 ? val : val.toFixed(1))}</td>`;
                 });
-                rowHtml += `</tr>`;
+                // Add the monthly increment cell
+                rowHtml += `<td class="${incrementClass}">${monthlyIncrementDisplay}</td></tr>`;
                 summaryTable.querySelector('tbody').innerHTML += rowHtml;
 
-                // Añadir dataset para el gráfico (solo para algunas métricas principales)
+                // Add dataset for the chart (only for some main metrics)
                 if (rowName === "AC HRS" || rowName === "LANDINGS" || rowName.includes("ENGINE HRS")) {
                     chartDatasets.push({
                         label: rowName,
@@ -1948,12 +2010,12 @@
                 }
             });
 
-            // Destruir instancia de gráfico anterior si existe
+            // Destroy previous chart instance if exists
             if (myChartInstance) {
                 myChartInstance.destroy();
             }
 
-            // Renderizar el nuevo gráfico
+            // Render the new chart
             myChartInstance = new Chart(myChartCanvas, {
                 type: 'line',
                 data: {
@@ -1986,8 +2048,9 @@
                 const aggregatedData = await fetchAnnualAggregatedData();
                 renderAnnualReport(aggregatedData);
             } else if (currentReportType === 'monthly') {
+                // Fetch current month's data first
                 const dailyData = await fetchMonthlyDailyData(añoActual, mesActual);
-                renderMonthlyReport(dailyData);
+                await renderMonthlyReport(dailyData); // Await renderMonthlyReport as it now fetches previous month data
             }
         }
 
@@ -2059,7 +2122,9 @@
             crearBotonesMeses(); 
             activarActualizacion(); 
             if (auth.currentUser) {
-                await cargarDatosDesdeFirebase(añoActual, meses[mesActual]);
+                // No mostrar loading para la carga de datos de tabla al cambiar de año
+                const currentMonthData = await dbRef.child(`${añoActual}/${meses.indexOf(meses[mesActual])}`).once('value');
+                cargarDatosEnTablaHTML(currentMonthData.val(), mesActual);
             }
             applyRolePermissions(currentUserRole); // Re-aplicar permisos después de cambiar de año
         });
