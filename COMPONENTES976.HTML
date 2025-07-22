@@ -1,0 +1,2995 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado de Componentes FAH-980</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            background: linear-gradient(to bottom, #87CEEB 0%, #ADD8E6 100%);
+            padding-top: 40px;
+            overflow-x: hidden;
+        }
+
+        h2 {
+            text-align: center;
+            font-weight: bold;
+            font-size: 2.25rem;
+            color: #2c3e50;
+            margin-bottom: 2rem;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            width: 95%;
+            max-width: 1400px;
+            margin-bottom: 20px;
+            overflow-x: hidden;
+        }
+
+        .top-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            justify-content: center;
+            width: 100%;
+            max-width: 1400px;
+            flex-wrap: wrap; /* Añadido para mejor responsividad en botones */
+        }
+
+        .back-button, .print-all-button, .add-component-button, .program-inspection-button {
+            padding: 0.75rem 1.5rem;
+            background-color: #4f46e5;
+            color: white;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: none;
+            cursor: pointer;
+        }
+
+        .back-button:hover, .print-all-button:hover, .add-component-button:hover, .program-inspection-button:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+        }
+
+        .summary-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+
+        .summary-card {
+            background-color: #fefefe;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s ease;
+        }
+        .summary-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .summary-card h4 {
+            font-weight: bold;
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .summary-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4f46e5;
+        }
+
+        .component-detail-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .component-card {
+            background-color: #fefefe;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+        }
+
+        .component-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Estilos para la cabecera de la tarjeta con título y botones */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* Alinea los botones arriba si el título es largo */
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0.75rem;
+            gap: 0.5rem; /* Espacio entre título y botones */
+            flex-wrap: wrap; /* Permite que el header se envuelva si el espacio es muy pequeño */
+        }
+
+        .card-header .title-container {
+            flex-grow: 1; /* Permite que el título ocupe el espacio restante */
+            flex-shrink: 1; /* Permite que el título se encoja */
+            overflow: hidden; /* Esto es clave para que el texto se envuelva */
+            text-align: left;
+        }
+
+        .card-header h4 {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 0; /* Elimina el margen inferior del h4 ya que el contenedor lo maneja */
+            overflow-wrap: break-word; /* Rompe palabras largas si es necesario */
+            word-wrap: break-word; /* Fallback para word-break */
+            word-break: break-word; /* Para navegadores más modernos */
+            white-space: normal; /* Asegura que el texto se envuelva */
+        }
+
+        .card-buttons {
+            display: flex;
+            gap: 0.5rem; /* Espacio entre los botones */
+            flex-shrink: 0; /* Evita que los botones se encojan */
+        }
+
+
+        .edit-button, .print-single-button, .history-button, .retire-button, .restore-button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.375rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border: none;
+            white-space: nowrap; /* Evita que el texto del botón se rompa */
+        }
+        .edit-button:hover, .print-single-button:hover, .history-button:hover, .restore-button:hover {
+            background-color: #2563eb;
+        }
+        .retire-button {
+            background-color: #ef4444; /* Rojo para el botón de retirar */
+        }
+        .retire-button:hover {
+            background-color: #dc2626;
+        }
+        .restore-button {
+            background-color: #10B981; /* Verde para restaurar */
+        }
+        .restore-button:hover {
+            background-color: #059669;
+        }
+
+
+        /* Estilos para la estructura de la información del componente dentro de las tarjetas (para vista normal y print) */
+        .component-info-grid,
+        .log-entry-card .component-sections-print {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center; /* Centrar los bloques dentro de su contenedor */
+            width: 100%; /* Asegura que el contenedor de las secciones ocupe todo el ancho */
+        }
+        
+        .component-info-grid p {
+            flex: 1 1 calc(50% - 0.5rem); /* Por defecto, 2 columnas */
+            max-width: calc(50% - 0.5rem);
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+            line-height: 1.4;
+            color: #555;
+        }
+        .component-info-grid p strong {
+            color: #333;
+        }
+        
+        /* New: Styles for inspection remnant display */
+        .inspection-remnant-section {
+            background-color: #f0f8ff; /* Light blue background */
+            border: 1px solid #c7e0f0; /* Light blue border */
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            font-size: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 0.5rem;
+        }
+        .inspection-remnant-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-weight: bold;
+        }
+        .inspection-remnant-item span {
+            font-size: 1.1rem;
+        }
+
+
+        .log-entry-card .section-block-print {
+            flex: 1 1 calc(50% - 0.5rem); /* Por defecto, 2 columnas */
+            max-width: calc(50% - 0.5rem);
+            background-color: #fcfdff;
+            border: 1px solid #e9eef2;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            page-break-inside: avoid; /* Asegura que no se rompa la página dentro del bloque */
+        }
+
+        /* La primera sección siempre es full width en las tarjetas de log */
+        .log-entry-card .section-block-print:first-child {
+            flex: 1 1 100%;
+            max-width: 100%;
+        }
+
+        .log-entry-card .section-title-print {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #4f46e5;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px dashed #d1d5db;
+            padding-bottom: 0.5rem;
+        }
+
+        .log-entry-card .section-block-print p {
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+            line-height: 1.4;
+            color: #555;
+        }
+        .log-entry-card .section-block-print p strong {
+            color: #333;
+        }
+
+
+        .remaining-life-section {
+            background-color: #eef2ff;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-top: auto;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #c7d2fe;
+        }
+
+        .remaining-red { color: #dc2626; }
+        .remaining-orange { color: #ea580c; }
+        .remaining-green { color: #16a34a; }
+        .remaining-blue { color: #3b82f6; } /* Nuevo estilo para "Condición" */
+
+        .month-year-selector, .search-area {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .month-year-selector label, .search-area label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .month-year-selector select, .search-area input {
+            padding: 0.6rem 1rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 0.5rem;
+            background-color: #f8fafc;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .month-year-selector select:focus, .search-area input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        dialog {
+            border: none;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            max-width: 600px;
+            width: 90%;
+            background-color: #ffffff;
+            z-index: 1000;
+        }
+        /* New dialog style for the uninstallation reason */
+        #uninstallationReasonDialog {
+            max-width: 450px;
+        }
+        #uninstallationReasonDialog textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 0.6rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 0.375rem;
+            font-size: 0.95rem;
+            background-color: #f8fafc;
+            resize: vertical;
+        }
+        #uninstallationReasonDialog textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+
+        /* Nuevo estilo para el diálogo de programación de inspecciones */
+        #scheduleInspectionDialog {
+            max-width: 550px; /* Ancho ajustado para más campos */
+        }
+        #scheduleInspectionDialog form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        #scheduleInspectionDialog form div {
+            display: flex;
+            flex-direction: column;
+        }
+        #scheduleInspectionDialog form input[type="date"],
+        #scheduleInspectionDialog form input[type="number"], /* Para las horas */
+        #scheduleInspectionDialog form select,
+        #scheduleInspectionDialog form textarea {
+            padding: 0.6rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 0.375rem;
+            font-size: 0.95rem;
+            background-color: #f8fafc;
+        }
+        #scheduleInspectionDialog form input:focus,
+        #scheduleInspectionDialog form select:focus,
+        #scheduleInspectionDialog form textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+        #scheduleInspectionDialog form textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        /* Estilos específicos para ocultar/mostrar campos */
+        .hidden-field {
+            display: none;
+        }
+
+
+        dialog::backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(3px);
+        }
+
+        dialog h3 {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        dialog form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        dialog form div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        dialog form label {
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+            color: #444;
+            font-size: 0.9rem;
+        }
+
+        dialog form input[type="text"],
+        dialog form input[type="number"],
+        dialog form input[type="date"],
+        dialog form select {
+            padding: 0.6rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 0.375rem;
+            font-size: 0.95rem;
+            background-color: #f8fafc;
+        }
+
+        dialog form input:focus,
+        dialog form select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+
+        dialog .form-buttons {
+            grid-column: span 2;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        dialog .form-buttons button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        dialog .form-buttons .save-button {
+            background-color: #22c55e;
+            color: white;
+            border: none;
+        }
+        dialog .form-buttons .save-button:hover {
+            background-color: #16a34a;
+            transform: translateY(-1px);
+        }
+
+        dialog .form-buttons .cancel-button {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+        }
+        dialog .form-buttons .cancel-button:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+        }
+        dialog .form-buttons .print-history-button { /* Nuevo estilo para botón de imprimir historial */
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+        }
+        dialog .form-buttons .print-history-button:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        /* Estilos para el botón de borrar historial */
+        dialog .form-buttons .delete-history-button {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        dialog .form-buttons .delete-history-button:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+        }
+
+
+        @media (max-width: 640px) {
+            dialog form {
+                grid-template-columns: 1fr;
+            }
+            dialog .form-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .top-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .top-buttons button, .top-buttons a {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 0.5rem;
+            height: 1.2rem;
+            overflow: hidden;
+            margin-top: 1rem;
+            border: 1px solid #ccc;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 0.5rem;
+            transition: width 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            background-size: 200% 100%;
+            animation: flow 0.8s linear infinite;
+        }
+
+        /* Colores para la barra de progreso */
+        .progress-red { 
+            background-image: linear-gradient(90deg, #dc2626 0%, #ef4444 50%, #dc2626 100%);
+        }
+        .progress-orange { 
+            background-image: linear-gradient(90deg, #ea580c 0%, #f97316 50%, #ea580c 100%);
+        }
+        .progress-green { 
+            background-image: linear-gradient(90deg, #16a34a 0%, #22c55e 50%, #16a34a 100%);
+        }
+        .progress-blue { /* Nueva clase para la barra de progreso azul */
+            background-image: linear-gradient(90deg, #3b82f6 0%, #60a5fa 50%, #3b82f6 100%);
+        }
+
+        @keyframes flow {
+            0% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: -100% 0%;
+            }
+        }
+
+        /* Estilos para el diálogo de historial de cambios */
+        #changeLogDialog {
+            max-width: 700px;
+        }
+        #changeLogContent {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            background-color: #f8fafc;
+        }
+        /* Oculta el estilo base de log-entry que ya no se usa */
+        .log-entry { 
+            display: none; 
+        }
+
+        /* Nuevo estilo para la tarjeta de entrada de log (el "sticker") */
+        .log-entry-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.75rem; /* Bordes más redondeados */
+            padding: 1.5rem; /* Más padding para una sensación de "sticker" */
+            margin-bottom: 1.5rem; /* Más espacio entre "stickers" */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Sombra para profundidad */
+            position: relative;
+            page-break-inside: avoid; /* Evita que la tarjeta se rompa en la impresión */
+        }
+        .log-entry-card h4 {
+            font-size: 1.4rem; /* Título más grande */
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0.75rem;
+        }
+        .log-entry-card p {
+            font-size: 0.95rem; /* Texto ligeramente más grande */
+            color: #555;
+            margin-bottom: 0.3rem; /* Espaciado entre párrafos */
+            line-height: 1.5; /* Mejor legibilidad */
+        }
+        .log-entry-card p strong {
+            color: #333;
+        }
+        /* Contenedor para la información estructurada dentro del log-entry-card */
+        .log-entry-card .change-details-container {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #d1d5db; /* Separador antes de los detalles estructurados */
+        }
+
+        /* Styling for "Inspección Realizada" log entries */
+        .log-entry-card.inspection-log {
+            background-color: #e6ffe6; /* Light green for inspections */
+            border-color: #a3e0a3;
+            box-shadow: 0 4px 12px rgba(0,128,0,0.1);
+        }
+        .log-entry-card.inspection-log h4 {
+            color: #006400; /* Darker green title */
+        }
+        .log-entry-card.inspection-log .change-details-container {
+            border-top: 1px dashed #7bc97b;
+        }
+        .log-entry-card.inspection-log .change-details-list p {
+            font-size: 0.9rem; /* Smaller font for individual changes */
+            margin-bottom: 0.1rem;
+        }
+
+
+        .delete-log-entry-button { /* Botón de borrar entrada de log */
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%; /* Hace el botón redondo */
+            width: 24px; /* Tamaño fijo */
+            height: 24px; /* Tamaño fijo */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .delete-log-entry-button:hover {
+            background-color: #dc2626;
+        }
+
+
+        /* Nuevo estilo para componentes retirados */
+        .component-card.retired {
+            opacity: 0.7;
+            background-color: #fcfcfc;
+            border-color: #e0e0e0;
+            box-shadow: none;
+            transition: opacity 0.3s ease;
+        }
+        .component-card.retired:hover {
+            opacity: 1; /* Al pasar el ratón, se hace más visible */
+            transform: none; /* No hay efecto de elevación */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        /* Se ha eliminado .component-card.retired:hover .card-buttons para que los botones siempre sean visibles */
+
+        /* Estilos de impresión mejorados */
+        @media print {
+            body {
+                background: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                color: black !important;
+                -webkit-print-color-adjust: exact !important; /* Para Chrome/Safari */
+                print-color-adjust: exact !important; /* Estándar */
+            }
+
+            /* Oculta todos los elementos de la interfaz de usuario que no son de impresión */
+            .top-buttons, .month-year-selector, .search-area,
+            .edit-button, .history-button,
+            .print-single-button, .retire-button, .restore-button, .add-component-button, .program-inspection-button, /* Incluye los nuevos botones */
+            /* Oculta el título principal de la página a menos que se especifique lo contrario */
+            h2,
+            /* Oculta todos los diálogos por defecto, y luego los mostramos selectivamente */
+            dialog {
+                display: none !important;
+            }
+
+            /* --- Modos de impresión específicos --- */
+
+            /* Modo: Imprimir historial de cambios */
+            body.print-change-log-mode {
+                /* Asegura que solo el historial sea visible */
+                display: block !important;
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+            }
+            body.print-change-log-mode .container, /* Oculta el contenedor principal de la UI */
+            body.print-change-log-mode h2 { /* Oculta el título principal de la página */
+                display: none !important;
+            }
+
+            body.print-change-log-mode #changeLogDialog {
+                display: block !important; /* Muestra el diálogo de historial */
+                position: static !important; /* Elimina el posicionamiento fijo */
+                margin: 0 auto !important; /* Centra en la página impresa */
+                padding: 1rem !important;
+                width: 100% !important;
+                max-width: 1100px !important; /* Ancho legible para impresión horizontal */
+                box-shadow: none !important; /* Sin sombra en impresión */
+                background-color: transparent !important; /* Fondo transparente */
+                overflow: visible !important; /* Asegura que todo el contenido sea visible */
+                page-break-inside: avoid; /* Evita que el diálogo se rompa a la mitad de una página */
+            }
+            body.print-change-log-mode #changeLogDialog::backdrop {
+                display: none !important;
+            }
+            body.print-change-log-mode #changeLogDialog h3 {
+                color: black !important;
+                text-align: left;
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            body.print-change-log-mode #changeLogContent {
+                max-height: none !important;
+                overflow-y: visible !important;
+                border: 1px solid #ccc !important;
+                background-color: #fff !important;
+                padding: 1rem !important;
+            }
+            body.print-change-log-mode .log-entry-card { /* Usar la nueva clase para impresión */
+                border: 1px solid #eee;
+                page-break-inside: avoid;
+                margin-bottom: 1rem !important; /* Más espacio entre stickers impresos */
+                padding: 1rem !important;
+                box-shadow: none;
+                width: 100% !important; /* El sticker ocupa todo el ancho disponible */
+            }
+            body.print-change-log-mode .log-entry-card.inspection-log {
+                background-color: #f0fdf0 !important; /* Un verde más claro para impresión */
+            }
+
+
+            body.print-change-log-mode .log-entry-card h4 {
+                font-size: 1.2rem !important;
+                margin-bottom: 0.75rem !important;
+                padding-bottom: 0.5rem !important;
+            }
+            body.print-change-log-mode .log-entry-card p {
+                font-size: 0.9rem !important;
+                margin-bottom: 0.2rem !important;
+            }
+
+            body.print-change-log-mode .log-entry-card .component-sections-print {
+                gap: 0.75rem !important; /* Ajustar el gap para que quepan 4 columnas */
+            }
+
+            body.print-change-log-mode .log-entry-card .section-block-print {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important; /* Borde más sutil para impresión */
+                padding: 0.75rem !important; /* Ajustar padding */
+            }
+
+            body.print-change-log-mode .log-entry-card .section-block-print:first-child {
+                flex: 1 1 100% !important;
+                max-width: 100% !important;
+            }
+
+            body.print-change-log-mode .log-entry-card .section-block-print:not(:first-child) {
+                /* Los 4 bloques restantes se distribuyen en 4 columnas */
+                flex: 1 1 calc(25% - 0.5625rem) !important; /* Calcula para 4 columnas con 0.75rem de gap (3 gaps, entonces 100% - 2.25rem / 4) */
+                max-width: calc(25% - 0.5625rem) !important;
+            }
+            body.print-change-log-mode .log-entry-card .section-title-print {
+                font-size: 0.9rem !important; /* Títulos de sección más pequeños para caber */
+                margin-bottom: 0.5rem !important;
+                padding-bottom: 0.3rem !important;
+            }
+            body.print-change-log-mode .log-entry-card .section-block-print p {
+                font-size: 0.8rem !important; /* Texto de detalles aún más pequeño */
+                margin-bottom: 0.1rem !important;
+            }
+            body.print-change-log-mode .log-entry-card .change-details-list p { /* Specific for inspection changes */
+                font-size: 0.8rem !important;
+            }
+
+
+            body.print-change-log-mode #changeLogDialog .form-buttons,
+            body.print-change-log-mode .delete-log-entry-button {
+                display: none !important; /* Oculta botones dentro del diálogo de historial */
+            }
+
+            /* Modo: Imprimir un solo componente */
+            body.print-single-component {
+                display: block !important; /* Restablece el display para el body */
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+            }
+            body.print-single-component .component-card:not(.print-this-one) {
+                display: none !important; /* Oculta todos los componentes excepto el seleccionado */
+            }
+            body.print-single-component .component-card.print-this-one {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 auto !important;
+                border: 1px solid #ccc !important;
+                box-shadow: none !important;
+                page-break-inside: avoid !important;
+                padding: 1rem !important;
+            }
+            body.print-single-component .container {
+                display: block !important; /* Asegura que el contenedor principal esté visible */
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+            }
+            body.print-single-component .container h3 {
+                display: none !important; /* Oculta el título del resumen si aparece */
+            }
+            body.print-single-component .component-info-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.75rem 1rem !important; /* Mantener la disposición de 2 columnas */
+            }
+            body.print-single-component .component-info-grid p {
+                padding: 2px 0;
+                font-size: 0.9rem;
+            }
+            body.print-single-component .remaining-life-section,
+            body.print-single-component .inspection-remnant-section, /* Include the new section */
+            body.print-single-component .progress-bar-container {
+                margin-top: 0.5rem;
+                border: 1px solid #e0e0e0;
+                padding: 0.5rem;
+                background-color: #f8fafc;
+            }
+            body.print-single-component .progress-bar-fill {
+                background-image: none !important;
+                background-color: #d0d0d0 !important;
+                color: #333 !important;
+                animation: none !important;
+                box-shadow: none !important;
+            }
+            body.print-single-component .component-card h4 {
+                font-size: 1.2rem;
+                margin-bottom: 0.5rem;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 0.5rem;
+            }
+            body.print-single-component .component-card.retired {
+                opacity: 1 !important;
+            }
+            /* Mostrar el título de la página en la impresión de un solo componente */
+            body.print-single-component h2 {
+                display: block !important;
+                text-align: center;
+                margin-top: 1rem;
+                font-size: 1.8rem;
+                color: black;
+            }
+            /* Ocultar el input de búsqueda en la impresión de todos los componentes */
+            body.print-all-components-mode .search-area,
+            body.print-all-components-mode .month-year-selector {
+                display: none !important;
+            }
+
+            /* Modo: Imprimir todos los componentes */
+            body.print-all-components-mode .component-detail-section {
+                display: grid !important;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+                gap: 1.5rem !important;
+                margin-top: 1rem !important;
+            }
+            body.print-all-components-mode .component-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin-bottom: 1rem;
+            }
+            body.print-all-components-mode .container {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+            }
+            body.print-all-components-mode h2 {
+                display: block !important;
+                text-align: center;
+                margin-top: 1rem;
+                font-size: 1.8rem;
+                color: black;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-buttons">
+        <a href="HORAS976.HTML" class="back-button">Volver a Datos de Vuelo</a>
+        <button id="printAllComponentsButton" class="print-all-button">Imprimir Todos los Componentes</button>
+        <button id="addComponentButton" class="add-component-button">Agregar Componente</button>
+        <button id="programInspectionButton" class="program-inspection-button">Programar Inspecciones</button>
+    </div>
+    <h2 class="mt-8">Estado de Componentes</h2>
+
+    <div class="container">
+        <h3 class="text-xl font-semibold mb-4 text-center" id="summaryHeading">Resumen de Totales del Mes (desde Datos de Vuelo)</h3>
+        
+        <div class="month-year-selector">
+            <label for="monthSelect">Mes:</label>
+            <select id="monthSelect"></select>
+            <label for="yearSelect">Año:</label>
+            <select id="yearSelect"></select>
+        </div>
+
+        <div id="generalSummary" class="summary-section">
+            <p class="text-center text-gray-600 col-span-full">Cargando resumen del mes...</p>
+        </div>
+
+        <h3 class="text-xl font-semibold mb-4 mt-8 text-center">Detalle de Componentes Principales</h3>
+        
+        <div class="search-area">
+            <input type="text" id="componentSearchInput" placeholder="Buscar componente por nombre, serie o parte..." class="rounded-md">
+        </div>
+
+        <div id="activeComponentsSection" class="component-detail-section">
+            <p class="text-center text-gray-600 col-span-full">Cargando componentes activos...</p>
+        </div>
+
+        <h3 class="text-xl font-semibold mb-4 mt-8 text-center">Componentes Retirados</h3>
+        <div id="retiredComponentsSection" class="component-detail-section">
+            <p class="text-center text-gray-600 col-span-full">Cargando componentes retirados...</p>
+        </div>
+    </div>
+
+    <!-- Diálogo de Edición de Componente -->
+    <dialog id="editComponentDialog">
+        <h3>Editar Componente</h3>
+        <form id="editComponentForm">
+            <input type="hidden" id="edit-serialNumber-hidden">
+
+            <div>
+                <label for="edit-name">Descripción:</label>
+                <input type="text" id="edit-name" name="name">
+            </div>
+            <div>
+                <label for="edit-partNumber">N° de Parte:</label>
+                <input type="text" id="edit-partNumber" name="partNumber">
+            </div>
+            <div>
+
+                <label for="edit-serialNumber">N° de Serie:</label>
+                <input type="text" id="edit-serialNumber" name="serialNumber">
+            </div>
+            <div>
+                <label for="edit-installationDate">Instalado (Fecha):</label>
+                <input type="date" id="edit-installationDate" name="installationDate">
+            </div>
+            <div>
+                <label for="edit-location">Ubicación:</label>
+                <input type="text" id="edit-location" name="location">
+            </div>
+            <div>
+                <label for="edit-type">Tipo de Vida:</label>
+                <select id="edit-type" name="type">
+                    <option value="hours">Horas</option>
+                    <option value="cycles">Ciclos</option>
+                    <option value="months">Meses</option>
+                    <option value="condition">Condición</option>
+                </select>
+            </div>
+
+            <div class="col-span-2 grid grid-cols-3 gap-4">
+                <div>
+                    <label for="edit-initialTSNHours">TSN Inicial Componente (Hrs):</label>
+                    <input type="number" id="edit-initialTSNHours" name="initialTSNHours" step="0.1">
+                </div>
+                <div>
+                    <label for="edit-initialTSNCycles">TSN Inicial Componente (Ciclos):</label>
+                    <input type="number" id="edit-initialTSNCycles" name="initialTSNCycles" step="0.1">
+                </div>
+                <div>
+                    <label for="edit-initialTSNDays">TSN Inicial Componente (Días):</label>
+                    <input type="number" id="edit-initialTSNDays" name="initialTSNDays" step="0.1">
+                </div>
+            </div>
+
+            <div class="col-span-2 grid grid-cols-2 gap-4">
+                <div>
+                    <label for="edit-aircraftHrsAtInstallation">Horas AC al Instalar:</label>
+                    <input type="number" id="edit-aircraftHrsAtInstallation" name="aircraftHrsAtInstallation" step="0.1" readonly>
+                </div>
+                <div>
+                    <label for="edit-aircraftRinsAtInstallation">RINS AC al Instalar:</label>
+                    <input type="number" id="edit-aircraftRinsAtInstallation" name="aircraftRinsAtInstallation" step="0.1" readonly>
+                </div>
+            </div>
+
+            <div class="col-span-2 grid grid-cols-3 gap-4">
+                <div>
+                    <label for="edit-initialTSOHours">TSO Inicial Componente (Hrs):</label>
+                    <input type="number" id="edit-initialTSOHours" name="initialTSOHours" step="0.1">
+                </div>
+                <div>
+                    <label for="edit-initialTSOCycles">TSO Inicial Componente (Ciclos):</label>
+                    <input type="number" id="edit-initialTSOCycles" name="initialTSOCycles" step="0.1">
+                </div>
+                <div>
+                    <label for="edit-initialTSODays">TSO Inicial Componente (Días/Meses):</label>
+                    <input type="number" id="edit-initialTSODays" name="initialTSODays" step="0.1">
+                </div>
+            </div>
+
+            <div class="col-span-2 grid grid-cols-3 gap-4">
+                <div>
+                    <label for="edit-lifeLimitHours">Vida Límite (Hrs):</label>
+                    <input type="number" id="edit-lifeLimitHours" name="lifeLimitHours" step="0.1">
+                </div>
+                <div>
+                    <label for="edit-lifeLimitCycles">Vida Límite (Ciclos):</label>
+                    <input type="number" id="edit-lifeLimitCycles" name="lifeLimitCycles" step="0.1">
+                </div>
+                <div>
+                    <label for="edit-lifeLimitDays">Vida Límite (Días/Meses):</label>
+                    <input type="number" id="edit-lifeLimitDays" name="lifeLimitDays" step="0.1">
+                </div>
+            </div>
+
+            <div>
+                <label for="edit-dueDateTT">Vencimiento (A LAS TT):</label>
+                <input type="text" id="edit-dueDateTT" name="dueDateTT">
+            </div>
+            <div>
+                <label for="edit-status">Estado:</label>
+                <input type="text" id="edit-status" name="status">
+            </div>
+            <div>
+                <label for="edit-lastInspectionDate">Última Inspección (Fecha):</label>
+                <input type="date" id="edit-lastInspectionDate" name="lastInspectionDate">
+            </div>
+            <div>
+                <label for="edit-nextInspectionDue">Próxima Inspección (Fecha):</label>
+                <input type="date" id="edit-nextInspectionDue" name="nextInspectionDue">
+            </div>
+            <div>
+                <label for="edit-lastInspectionHours">Última Inspección (Horas AC):</label>
+                <input type="number" id="edit-lastInspectionHours" name="lastInspectionHours" step="0.1">
+            </div>
+            <div>
+                <label for="edit-nextInspectionHoursDue">Próxima Inspección (Horas AC):</label>
+                <input type="number" id="edit-nextInspectionHoursDue" name="nextInspectionHoursDue" step="0.1">
+            </div>
+
+            <div class="form-buttons">
+                <button type="button" class="cancel-button" id="cancelEditButton">Cancelar</button>
+                <button type="submit" class="save-button">Guardar Cambios</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Nuevo Diálogo para Historial de Cambios -->
+    <dialog id="changeLogDialog">
+        <h3 id="changeLogTitle">Historial de Cambios para Componente: </h3>
+        <div id="changeLogContent" class="text-left">
+            <!-- Los registros de cambios se cargarán aquí -->
+        </div>
+        <div class="form-buttons">
+            <button type="button" class="print-history-button" id="printChangeLogButton">Imprimir Historial</button>
+            <button type="button" class="delete-history-button" id="deleteAllHistoryButton">Borrar Historial</button>
+            <button type="button" class="cancel-button" id="closeChangeLogButton">Cerrar</button>
+        </div>
+    </dialog>
+
+    <!-- Diálogo de Confirmación Genérico -->
+    <dialog id="confirmDialog">
+        <h3>Confirmar Acción</h3>
+        <p id="confirmMessage" class="text-center my-4">¿Estás seguro de que quieres realizar esta acción?</p>
+        <div class="form-buttons justify-center">
+            <button type="button" class="cancel-button" id="cancelConfirmButton">Cancelar</button>
+            <button type="button" class="save-button" id="proceedConfirmButton">Confirmar</button>
+        </div>
+    </dialog>
+
+    <!-- Nuevo Diálogo para Motivo de Desinstalación -->
+    <dialog id="uninstallationReasonDialog">
+        <h3>Motivo de Desinstalación</h3>
+        <p class="mb-4">Por favor, especifica el motivo de la desinstalación del componente con el Número de Serie: <strong id="uninstallationSerialNumber"></strong></p>
+        <textarea id="uninstallationReasonTextarea" class="w-full p-2 border rounded-md" placeholder="Escribe el motivo aquí..."></textarea>
+        <div class="form-buttons mt-4 justify-end">
+            <button type="button" class="cancel-button" id="cancelUninstallationReasonButton">Cancelar</button>
+            <button type="button" class="save-button" id="confirmUninstallationReasonButton">Confirmar</button>
+        </div>
+    </dialog>
+
+    <!-- Nuevo Diálogo para Programar Inspecciones -->
+    <dialog id="scheduleInspectionDialog">
+        <h3>Programar Inspección</h3>
+        <form id="scheduleInspectionForm">
+            <div class="col-span-2">
+                <label for="inspectionTypeSelect">Tipo de Inspección:</label>
+                <select id="inspectionTypeSelect" name="inspectionType">
+                    <option value="date">Por Fecha</option>
+                    <option value="hours">Por Horas</option>
+                </select>
+            </div>
+
+            <div class="col-span-2">
+                <label for="inspectionComponentSearch">Buscar Componente:</label>
+                <input type="text" id="inspectionComponentSearch" placeholder="Escribe para buscar...">
+            </div>
+            <div class="col-span-2">
+                <label for="inspectionComponentSelect">Componente:</label>
+                <select id="inspectionComponentSelect" name="componentSerial"></select>
+            </div>
+
+            <div id="dateFields" class="col-span-2 grid grid-cols-2 gap-4">
+                <div>
+                    <label for="inspectionPerformedDate">Fecha de Inspección Realizada:</label>
+                    <input type="date" id="inspectionPerformedDate" name="performedDate">
+                </div>
+                <div>
+                    <label for="inspectionNextDueDate">Próxima Inspección Vencimiento (Fecha):</label>
+                    <input type="date" id="inspectionNextDueDate" name="nextDueDate">
+                </div>
+                <div class="col-span-2">
+                    <label for="inspectionIntervalDays">Intervalo de Inspección (Días):</label>
+                    <input type="number" id="inspectionIntervalDays" name="intervalDays" step="1" min="1" value="365">
+                </div>
+            </div>
+
+            <div id="hoursFields" class="col-span-2 grid grid-cols-2 gap-4 hidden-field">
+                <div>
+                    <label for="inspectionPerformedHours">Horas AC al Realizar Inspección:</label>
+                    <input type="number" id="inspectionPerformedHours" name="performedHours" step="0.1">
+                </div>
+                <div>
+                    <label for="inspectionNextHoursDue">Próx. Vencimiento (Horas AC):</label>
+                    <input type="number" id="inspectionNextHoursDue" name="nextHoursDue" step="0.1">
+                </div>
+                <div class="col-span-2">
+                    <label for="inspectionIntervalHours">Intervalo de Inspección (Horas):</label>
+                    <input type="number" id="inspectionIntervalHours" name="intervalHours" step="0.1" min="0.1" value="100">
+                </div>
+            </div>
+
+            <div class="col-span-2">
+                <label for="inspectionDescription">Descripción de la Inspección:</label>
+                <textarea id="inspectionDescription" name="description" placeholder="Detalles de la inspección realizada..."></textarea>
+            </div>
+            <div class="form-buttons">
+                <button type="button" class="cancel-button" id="cancelScheduleInspectionButton">Cancelar</button>
+                <button type="submit" class="save-button">Guardar Inspección</button>
+            </div>
+        </form>
+    </dialog>
+
+
+    <script type="module">
+        // Importa las funciones necesarias de Firebase SDK
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { getDatabase, ref, onValue, set, get, remove, child } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+        // Define __app_id con un valor por defecto si no está definida
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+       
+
+        // Asegúrate de que las propiedades mínimas estén presentes para evitar errores de inicialización.
+        // Utiliza los valores de la última configuración de seguridad de Firebase proporcionada por el usuario.
+       const firebaseConfig = {
+            apiKey: "AIzaSyASg6fgH-Lo6PXLnnw_p8LzHl-WNDiuHrU",
+            authDomain: "fah-901-ba5f4.firebaseapp.com",
+            databaseURL: "https://fah-901-ba5f4-default-rtdb.firebaseio.com",
+            projectId: "fah-901-ba5f4",
+            storageBucket: "fah-901-ba5f4.firebasestorage.app",
+            messagingSenderId: "630831139898",
+            appId: "1:630831139898:web:1771a16e1ad4bfb8ca3903",
+            measurementId: "G-WNZJ1VEH9H"
+        };
+        console.log("Firebase Config utilizada:", firebaseConfig);
+
+        // Inicializa Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+
+        const generalSummaryDiv = document.getElementById('generalSummary');
+        const monthSelect = document.getElementById('monthSelect');
+        const yearSelect = document.getElementById('yearSelect');
+        const activeComponentsSection = document.getElementById('activeComponentsSection');
+        const retiredComponentsSection = document.getElementById('retiredComponentsSection');
+
+        const componentSearchInput = document.getElementById('componentSearchInput');
+        const printAllComponentsButton = document.getElementById('printAllComponentsButton');
+        const addComponentButton = document.getElementById('addComponentButton');
+        const programInspectionButton = document.getElementById('programInspectionButton');
+
+        const editComponentDialog = document.getElementById('editComponentDialog');
+        const editComponentForm = document.getElementById('editComponentForm');
+        const cancelEditButton = document.getElementById('cancelEditButton');
+
+        const changeLogDialog = document.getElementById('changeLogDialog');
+        const changeLogTitle = document.getElementById('changeLogTitle');
+        const changeLogContent = document.getElementById('changeLogContent');
+        const closeChangeLogButton = document.getElementById('closeChangeLogButton');
+        const printChangeLogButton = document.getElementById('printChangeLogButton');
+        const deleteAllHistoryButton = document.getElementById('deleteAllHistoryButton');
+
+        const confirmDialog = document.getElementById('confirmDialog');
+        const confirmMessage = document.getElementById('confirmMessage');
+        const cancelConfirmButton = document.getElementById('cancelConfirmButton');
+        const proceedConfirmButton = document.getElementById('proceedConfirmButton');
+
+        let confirmActionResolve = null;
+
+        const uninstallationReasonDialog = document.getElementById('uninstallationReasonDialog');
+        const uninstallationSerialNumberSpan = document.getElementById('uninstallationSerialNumber');
+        const uninstallationReasonTextarea = document.getElementById('uninstallationReasonTextarea');
+        const cancelUninstallationReasonButton = document.getElementById('cancelUninstallationReasonButton');
+        const confirmUninstallationReasonButton = document.getElementById('confirmUninstallationReasonButton');
+
+        let uninstallationReasonResolve = null;
+
+        const scheduleInspectionDialog = document.getElementById('scheduleInspectionDialog');
+        const scheduleInspectionForm = document.getElementById('scheduleInspectionForm');
+        const inspectionComponentSelect = document.getElementById('inspectionComponentSelect');
+        const inspectionComponentSearch = document.getElementById('inspectionComponentSearch');
+        const inspectionTypeSelect = document.getElementById('inspectionTypeSelect');
+        const inspectionPerformedDate = document.getElementById('inspectionPerformedDate');
+        const inspectionNextDueDate = document.getElementById('inspectionNextDueDate');
+        const inspectionIntervalDays = document.getElementById('inspectionIntervalDays');
+        const inspectionPerformedHours = document.getElementById('inspectionPerformedHours');
+        const inspectionNextHoursDue = document.getElementById('inspectionNextHoursDue');
+        const inspectionIntervalHours = document.getElementById('inspectionIntervalHours');
+        const inspectionDescription = document.getElementById('inspectionDescription');
+        const cancelScheduleInspectionButton = document.getElementById('cancelScheduleInspectionButton');
+        const dateFieldsDiv = document.getElementById('dateFields');
+        const hoursFieldsDiv = document.getElementById('hoursFields');
+
+
+        const editInputs = {
+            serialNumberHidden: document.getElementById('edit-serialNumber-hidden'),
+            name: document.getElementById('edit-name'),
+            partNumber: document.getElementById('edit-partNumber'),
+            serialNumber: document.getElementById('edit-serialNumber'),
+            installationDate: document.getElementById('edit-installationDate'),
+            location: document.getElementById('edit-location'),
+            type: document.getElementById('edit-type'),
+            initialTSNHours: document.getElementById('edit-initialTSNHours'),
+            initialTSNCycles: document.getElementById('edit-initialTSNCycles'),
+            initialTSNDays: document.getElementById('edit-initialTSNDays'),
+            aircraftHrsAtInstallation: document.getElementById('edit-aircraftHrsAtInstallation'),
+            aircraftRinsAtInstallation: document.getElementById('edit-aircraftRinsAtInstallation'),
+            initialTSOHours: document.getElementById('edit-initialTSOHours'),
+            initialTSOCycles: document.getElementById('edit-initialTSOCycles'),
+            initialTSODays: document.getElementById('edit-initialTSODays'),
+            lifeLimitHours: document.getElementById('edit-lifeLimitHours'),
+            lifeLimitCycles: document.getElementById('edit-lifeLimitCycles'),
+            lifeLimitDays: document.getElementById('edit-lifeLimitDays'),
+            dueDateTT: document.getElementById('edit-dueDateTT'),
+            status: document.getElementById('edit-status'),
+            lastInspectionDate: document.getElementById('edit-lastInspectionDate'),
+            nextInspectionDue: document.getElementById('edit-nextInspectionDue'),
+            lastInspectionHours: document.getElementById('edit-lastInspectionHours'), // Added back
+            nextInspectionHoursDue: document.getElementById('edit-nextInspectionHoursDue'), // Added back
+        };
+
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        let currentAcHrs = 0; 
+        let currentRins = 0;
+        let monthlyTotalsLoaded = false;
+        let componentsLoaded = false;
+
+        const months = [
+            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ];
+        const years = Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i);
+
+        let globalSerialCounter = 1;
+        let principalComponents = [];
+
+        /**
+         * Función unificada para ejecutar después de que todos los datos necesarios
+         * (totales mensuales y componentes) se hayan cargado al menos una vez.
+         */
+        function onAllDataLoaded() {
+            if (monthlyTotalsLoaded && componentsLoaded) {
+                console.log("Ambos conjuntos de datos (totales y componentes) cargados. Actualizando la UI.");
+                filterAndRenderComponents();
+            }
+        }
+
+
+        /**
+         * Calcula la vida restante de un componente basándose en su tipo principal.
+         * @param {object} component - El objeto del componente.
+         * @returns {number|string} Vida restante calculada o un marcador para "condicion".
+         */
+        function calculateRemainingLife(component) {
+            if (!component) return 0;
+
+            if (component.type === "condition") {
+                return "CONDICION_TYPE";
+            }
+
+            let totalLife = 0;
+            let currentLifeEffective = 0;
+
+            const initialTSNHours = parseFloat(component.initialTSNHours) || 0;
+            const initialTSNCycles = parseFloat(component.initialTSNCycles) || 0;
+            const initialTSNDays = parseFloat(component.initialTSNDays) || 0;
+
+            const aircraftHrsAtInstallation = parseFloat(component.aircraftHrsAtInstallation) || 0;
+            const aircraftRinsAtInstallation = parseFloat(component.aircraftRinsAtInstallation) || 0;
+
+
+            if (component.type === "hours") {
+                totalLife = parseFloat(component.lifeLimitHours) || 0;
+                currentLifeEffective = (currentAcHrs - aircraftHrsAtInstallation) + initialTSNHours; 
+            } else if (component.type === "cycles") {
+                totalLife = parseFloat(component.lifeLimitCycles) || 0;
+                currentLifeEffective = (currentRins - aircraftRinsAtInstallation) + initialTSNCycles; 
+            } else if (component.type === "months") { 
+                totalLife = parseFloat(component.lifeLimitDays) || 0; 
+                let daysSinceInstallation = 0;
+                if (component.installationDate) {
+                    const today = new Date();
+                    const installationDate = new Date(component.installationDate);
+                    const timeDiff = today.getTime() - installationDate.getTime();
+                    daysSinceInstallation = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1));
+                }
+                currentLifeEffective = daysSinceInstallation + initialTSNDays; 
+            }
+            return parseFloat((totalLife - currentLifeEffective).toFixed(1)); 
+        }
+
+        /**
+         * Determina la clase de color para el valor restante.
+         * @param {number|string} remaining - Vida restante actual o el marcador "CONDICION_TYPE".
+         * @param {number} totalLife - Vida útil total del componente.
+         * @returns {string} Clase CSS para el color.
+         */
+        function getRemainingColorClass(remaining, totalLife) {
+            if (remaining === "CONDICION_TYPE") {
+                return 'remaining-blue';
+            }
+            if (totalLife === 0) return '';
+
+            if (remaining <= 0) { 
+                return 'remaining-red';
+            } else {
+                const percentageOfTotalLifeRemaining = (remaining / totalLife) * 100; 
+                if (percentageOfTotalLifeRemaining < 20) {
+                    return 'remaining-orange';
+                } else {
+                    return 'remaining-green';
+                }
+            }
+        }
+
+        /**
+         * Calcula el porcentaje de vida consumida para la barra de progreso.
+         * @param {object} component - El objeto del componente.
+         * @returns {number} Porcentaje de vida consumida (0-100).
+         */
+        function calculateConsumedLifePercentage(component) {
+            if (!component) return 0;
+
+            if (component.type === "condition") {
+                return 100; 
+            }
+
+            let totalLife = 0;
+            let currentConsumedEffective = 0;
+
+            const initialTSNHours = parseFloat(component.initialTSNHours) || 0;
+            const initialTSNCycles = parseFloat(component.initialTSNCycles) || 0;
+            const initialTSNDays = parseFloat(component.initialTSNDays) || 0;
+
+            const aircraftHrsAtInstallation = parseFloat(component.aircraftHrsAtInstallation) || 0;
+            const aircraftRinsAtInstallation = parseFloat(component.aircraftRinsAtInstallation) || 0;
+
+            if (component.type === "hours") {
+                totalLife = parseFloat(component.lifeLimitHours) || 0;
+                currentConsumedEffective = (currentAcHrs - aircraftHrsAtInstallation) + initialTSNHours;
+            } else if (component.type === "cycles") {
+                totalLife = parseFloat(component.lifeLimitCycles) || 0;
+                currentConsumedEffective = (currentRins - aircraftRinsAtInstallation) + initialTSNCycles;
+            } else if (component.type === "months") {
+                totalLife = parseFloat(component.lifeLimitDays) || 0;
+                let daysSinceInstallation = 0;
+                if (component.installationDate) {
+                    const today = new Date();
+                    const installationDate = new Date(component.installationDate);
+                    const timeDiff = today.getTime() - installationDate.getTime();
+                    daysSinceInstallation = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1)); 
+                }
+                currentConsumedEffective = daysSinceInstallation + initialTSNDays; 
+            }
+
+            if (totalLife === 0) return 0;
+            return Math.min(100, Math.max(0, (currentConsumedEffective / totalLife) * 100));
+        }
+
+        // Función para poblar los selectores de mes y año
+        function populateMonthYearSelectors() {
+            monthSelect.innerHTML = '';
+            months.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = month;
+                if (index === currentMonth) {
+                    option.selected = true;
+                }
+                monthSelect.appendChild(option);
+            });
+
+            yearSelect.innerHTML = '';
+            years.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) {
+                    option.selected = true;
+                }
+                yearSelect.appendChild(option);
+            });
+
+            monthSelect.addEventListener('change', (event) => {
+                currentMonth = parseInt(event.target.value);
+                loadMonthlyTotalsFromFirebase();
+            });
+            yearSelect.addEventListener('change', (event) => {
+                currentYear = parseInt(event.target.value);
+                loadMonthlyTotalsFromFirebase();
+            });
+        }
+
+        // Función para cargar los totales mensuales desde Firebase Realtime Database
+        function loadMonthlyTotalsFromFirebase() {
+            const rutaDatosMes = `artifacts/${appId}/public_data/datos_vuelo/${currentYear}/${currentMonth}`;
+
+            onValue(ref(database, rutaDatosMes), (snapshot) => {
+                let monthlyTotals = { 'AC HRS': "0", 'ATERRIZAJES': "0", 'RINS': "0" };
+
+                if (snapshot.exists()) {
+                    const fetchedData = snapshot.val();
+                    console.log(`Datos brutos de Firebase para ${months[currentMonth]} ${currentYear} (desde ${rutaDatosMes}):`, fetchedData);
+
+                    if (Array.isArray(fetchedData) && fetchedData[0] && fetchedData[0][34] !== undefined) {
+                        currentAcHrs = parseFloat(fetchedData[0][34]) || 0;
+                        monthlyTotals['AC HRS'] = fetchedData[0][34];
+                    } else {
+                        console.warn("Datos para AC HRS no encontrados o en formato inesperado.");
+                        currentAcHrs = 0;
+                    }
+                    if (Array.isArray(fetchedData) && fetchedData[1] && fetchedData[1][34] !== undefined) {
+                        monthlyTotals['ATERRIZAJES'] = fetchedData[1][34];
+                    } else {
+                        console.warn("Datos para ATERRIZAJES no encontrados o en formato inesperado.");
+                    }
+                    if (Array.isArray(fetchedData) && fetchedData[2] && fetchedData[2][34] !== undefined) {
+                        currentRins = parseFloat(fetchedData[2][34]) || 0;
+                        monthlyTotals['RINS'] = fetchedData[2][34];
+                    } else {
+                        console.warn("Datos para RINS no encontrados o en formato inesperado.");
+                        currentRins = 0;
+                    }
+                } else {
+                    console.log(`No se encontraron datos para ${months[currentMonth]} ${currentYear} en Firebase Realtime Database.`);
+                    currentAcHrs = 0;
+                    currentRins = 0;
+                }
+
+                const totalsToRender = [
+                    { name: "AC HRS", current: monthlyTotals['AC HRS'], type: "monthly_total" },
+                    { name: "ATERRIZAJES", current: monthlyTotals['ATERRIZAJES'], type: "monthly_total" },
+                    { name: "RINS", current: monthlyTotals['RINS'], type: "monthly_total" },
+                    { name: "FECHA ACTUAL", current: new Date().toLocaleDateString('es-ES'), type: "current_date" }
+                ];
+                renderSummary(totalsToRender);
+                monthlyTotalsLoaded = true;
+                onAllDataLoaded();
+            }, (error) => {
+                console.error("Error al cargar los totales del mes desde Firebase Realtime Database:", error);
+                generalSummaryDiv.innerHTML = `<p class="text-center text-red-600 col-span-full">Error al cargar los datos: ${error.message}</p>`;
+            });
+        }
+
+        // Función para renderizar el resumen
+        function renderSummary(data) {
+            if (data.length === 0) {
+                generalSummaryDiv.innerHTML = '<p class="text-center text-gray-600 col-span-full">No hay datos disponibles para el resumen.</p>';
+                return;
+            }
+
+            generalSummaryDiv.innerHTML = '';
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'summary-card';
+                card.innerHTML = `
+                    <h4>${item.name}</h4>
+                    <p class="value">${item.current}</p>
+                `;
+                generalSummaryDiv.appendChild(card);
+            });
+        }
+
+        // Función para cargar los componentes desde Firebase
+        function loadComponentsFromFirebase() {
+            const componentsRef = ref(database, `artifacts/${appId}/public_data/components`);
+            
+            onValue(componentsRef, (snapshot) => {
+                let fetchedComponents = [];
+                if (snapshot.exists()) {
+                    const componentsObject = snapshot.val();
+                    if (typeof componentsObject === 'object' && componentsObject !== null && !Array.isArray(componentsObject)) {
+                        fetchedComponents = Object.keys(componentsObject)
+                                                  .map(key => componentsObject[key])
+                                                  .filter(component => component && component.serialNumber);
+                    } else {
+                        console.warn("Datos de componentes en Firebase en formato inesperado o vacío:", componentsObject);
+                    }
+                }
+
+                if (fetchedComponents.length > 0) {
+                    principalComponents = fetchedComponents;
+                    console.log("Componentes cargados desde Firebase:", principalComponents.length);
+                    const maxSerial = principalComponents.reduce((max, comp) => {
+                        const serialNumMatch = comp.serialNumber ? comp.serialNumber.match(/FAH-(\d+)/) : null;
+                        return serialNumMatch ? Math.max(max, parseInt(serialNumMatch[1])) : max;
+                    }, 0);
+                    globalSerialCounter = maxSerial + 1;
+                } else {
+                    console.log("No se encontraron componentes válidos en Firebase. Comienza agregando nuevos componentes.");
+                    activeComponentsSection.innerHTML = '<p class="text-center text-gray-600 col-span-full">No hay componentes en la base de datos. ¡Agrega uno para empezar!</p>';
+                    retiredComponentsSection.innerHTML = '<p class="text-center text-gray-600 col-span-full">No hay componentes retirados.</p>';
+                    principalComponents = [];
+                    globalSerialCounter = 1;
+                }
+                componentsLoaded = true;
+                onAllDataLoaded();
+            }, (error) => {
+                console.error("Error al cargar los componentes desde Firebase:", error);
+                activeComponentsSection.innerHTML = `<p class="text-center text-red-600 col-span-full">Error al cargar componentes: ${error.message}</p>`;
+                retiredComponentsSection.innerHTML = `<p class="text-center text-red-600 col-span-full">Error al cargar componentes retirados: ${error.message}</p>`;
+            });
+        }
+
+
+        /**
+         * Abre el diálogo de edición y precarga los datos del componente.
+         * @param {object} component - El objeto del componente a editar.
+         */
+        function openEditDialog(component = null) {
+            editComponentForm.reset(); 
+            editInputs.serialNumberHidden.value = '';
+
+            if (component) {
+                editInputs.serialNumberHidden.value = component.serialNumber || '';
+                editInputs.name.value = component.name || '';
+                editInputs.partNumber.value = component.partNumber || '';
+                editInputs.serialNumber.value = component.serialNumber || '';
+                editInputs.installationDate.value = component.installationDate || '';
+                editInputs.location.value = component.location || '';
+                editInputs.type.value = component.type || 'hours';
+
+                editInputs.initialTSNHours.value = parseFloat(component.initialTSNHours) || 0;
+                editInputs.initialTSNCycles.value = parseFloat(component.initialTSNCycles) || 0;
+                editInputs.initialTSNDays.value = parseFloat(component.initialTSNDays) || 0;
+                
+                editInputs.aircraftHrsAtInstallation.value = parseFloat(component.aircraftHrsAtInstallation) || 0;
+                editInputs.aircraftRinsAtInstallation.value = parseFloat(component.aircraftRinsAtInstallation) || 0;
+
+                editInputs.initialTSOHours.value = parseFloat(component.initialTSOHours) || 0;
+                editInputs.initialTSOCycles.value = parseFloat(component.initialTSOCycles) || 0;
+                editInputs.initialTSODays.value = parseFloat(component.initialTSODays) || 0;
+
+                editInputs.lifeLimitHours.value = parseFloat(component.lifeLimitHours) || 0;
+                editInputs.lifeLimitCycles.value = parseFloat(component.lifeLimitCycles) || 0;
+                editInputs.lifeLimitDays.value = parseFloat(component.lifeLimitDays) || 0;
+
+                editInputs.dueDateTT.value = component.dueDateTT || '';
+                editInputs.status.value = component.status || '';
+                editInputs.lastInspectionDate.value = component.lastInspectionDate || '';
+                editInputs.nextInspectionDue.value = component.nextInspectionDue || '';
+                editInputs.lastInspectionHours.value = parseFloat(component.lastInspectionHours) || 0; // Populate new field
+                editInputs.nextInspectionHoursDue.value = parseFloat(component.nextInspectionHoursDue) || 0; // Populate new field
+
+
+                editComponentDialog.querySelector('h3').textContent = 'Editar Componente';
+
+                toggleNumericFields(component.type === 'condition');
+            } else {
+                editComponentDialog.querySelector('h3').textContent = 'Agregar Nuevo Componente';
+                editInputs.type.value = 'hours';
+                editInputs.serialNumber.value = `FAH-${String(globalSerialCounter).padStart(4, '0')}`;
+                editInputs.installationDate.valueAsDate = new Date();
+                editInputs.lastInspectionDate.valueAsDate = new Date();
+                editInputs.nextInspectionDue.valueAsDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+                editInputs.lastInspectionHours.value = currentAcHrs.toFixed(1); // Pre-fill with current AC hours
+                editInputs.nextInspectionHoursDue.value = (currentAcHrs + 100).toFixed(1); // Default to 100 hrs from current
+
+
+                editInputs.initialTSNHours.value = 0;
+                editInputs.initialTSNCycles.value = 0;
+                editInputs.initialTSNDays.value = 0;
+
+                editInputs.aircraftHrsAtInstallation.value = currentAcHrs.toFixed(1);
+                editInputs.aircraftRinsAtInstallation.value = currentRins.toFixed(1);
+
+                editInputs.initialTSOHours.value = 0;
+                editInputs.initialTSOCycles.value = 0;
+                editInputs.initialTSODays.value = 0;
+                editInputs.lifeLimitHours.value = 0;
+                editInputs.lifeLimitCycles.value = 0;
+                editInputs.lifeLimitDays.value = 0;
+
+
+                toggleNumericFields(false);
+                editInputs.dueDateTT.value = "";
+            }
+
+            editComponentDialog.showModal();
+        }
+
+        /**
+         * Habilita o deshabilita los campos numéricos del formulario.
+         * @param {boolean} disable - Si es true, los campos se deshabilitan; si es false, se habilitan.
+         */
+        function toggleNumericFields(disable) {
+            const fieldsToToggle = [
+                'initialTSNHours', 'initialTSNCycles', 'initialTSNDays',
+                'initialTSOHours', 'initialTSOCycles', 'initialTSODays',
+                'lifeLimitHours', 'lifeLimitCycles', 'lifeLimitDays'
+            ];
+
+            fieldsToToggle.forEach(field => {
+                editInputs[field].disabled = disable;
+                if (disable) {
+                    editInputs[field].value = 0;
+                }
+            });
+
+            if (disable) {
+                editInputs.aircraftHrsAtInstallation.readOnly = true;
+                editInputs.aircraftRinsAtInstallation.readOnly = true;
+            } else {
+                editInputs.aircraftHrsAtInstallation.readOnly = false;
+                editInputs.aircraftRinsAtInstallation.readOnly = false;
+            }
+
+
+            editInputs.dueDateTT.disabled = disable;
+            if (disable) {
+                editInputs.dueDateTT.value = "CONDICIÓN";
+            } else {
+                if (!editInputs.serialNumberHidden.value) {
+                    editInputs.dueDateTT.value = "";
+                } else {
+                    const currentComponent = principalComponents.find(comp => comp.serialNumber === editInputs.serialNumberHidden.value);
+                    if (currentComponent && currentComponent.type !== 'condition') {
+                        editInputs.dueDateTT.value = currentComponent.dueDateTT || '';
+                    } else {
+                        editInputs.dueDateTT.value = "";
+                    }
+                }
+            }
+        }
+
+        /**
+         * Registra un cambio en la base de datos de Firebase.
+         * @param {object} changeData - Los datos del componente (estado actual, después del cambio).
+         * @param {string} changeType - El tipo de cambio (e.g., 'Instalación', 'Edición', 'Retiro', 'Eliminación', 'Inspección Realizada').
+         * @param {object|null} oldComponent - Los datos del componente antes del cambio (para 'Edición' y 'Retiro').
+         * @param {string|null} replacesSerialNumber - El serial del componente que este reemplaza (para 'Instalación').
+         * @param {string|null} replacedBySerialNumber - El serial del componente que reemplaza a este (para 'Retiro').
+         * @param {string|null} uninstallationReasonOrDescription - El motivo de desinstalación (para 'Retiro') o la descripción de la inspección (para 'Inspección Realizada').
+         */
+        async function recordComponentChange(changeData, changeType, oldComponent = null, replacesSerialNumber = null, replacedBySerialNumber = null, uninstallationReasonOrDescription = null) {
+            const changeRecord = {
+                timestamp: new Date().toISOString(),
+                serialNumber: changeData.serialNumber || (oldComponent ? oldComponent.serialNumber : 'N/A'),
+                changeType: changeType,
+                oldValues: oldComponent ? JSON.parse(JSON.stringify(oldComponent)) : null,
+                newValues: changeData ? JSON.parse(JSON.stringify(changeData)) : null,
+            };
+
+            if (replacesSerialNumber) {
+                changeRecord.replacesSerialNumber = replacesSerialNumber;
+            }
+            if (replacedBySerialNumber) {
+                changeRecord.replacedBySerialNumber = replacedBySerialNumber;
+            }
+            if (changeType === 'Retiro' && uninstallationReasonOrDescription) {
+                changeRecord.uninstallationReason = uninstallationReasonOrDescription;
+            } else if (changeType === 'Inspección Realizada' && uninstallationReasonOrDescription) {
+                changeRecord.inspectionDescription = uninstallationReasonOrDescription;
+            }
+
+            if (changeType === 'Edición' && oldComponent) {
+                const keysToCheck = [
+                    'name', 'partNumber', 'location', 'type',
+                    'initialTSNHours', 'initialTSNCycles', 'initialTSNDays',
+                    'aircraftHrsAtInstallation', 'aircraftRinsAtInstallation',
+                    'initialTSOHours', 'initialTSOCycles', 'initialTSODays',
+                    'lifeLimitHours', 'lifeLimitCycles', 'lifeLimitDays',
+                    'dueDateTT', 'status', 'lastInspectionDate', 'nextInspectionDue',
+                    'lastInspectionHours', 'nextInspectionHoursDue' // Added these two fields
+                ];
+                let changesDetected = false;
+                for (const key of keysToCheck) {
+                    if (String(oldComponent[key] || '') !== String(changeData[key] || '')) {
+                        changesDetected = true;
+                        break;
+                    }
+                }
+                if (!changesDetected) {
+                    console.log("No se detectaron cambios significativos para 'Edición'. No se guardará el registro de cambio.");
+                    return;
+                }
+            }
+
+            const changesRef = ref(database, `artifacts/${appId}/public_data/component_changes/${changeRecord.serialNumber}_${Date.now()}`);
+            try {
+                await set(changesRef, changeRecord);
+                console.log(`Registro de cambio '${changeType}' guardado para ${changeRecord.serialNumber}`);
+            } catch (error) {
+                console.error("Error al guardar el registro de cambio:", error);
+            }
+        }
+
+
+        /**
+         * Maneja el envío del formulario de edición para guardar los cambios en Firebase.
+         * @param {Event} event - El evento de envío del formulario.
+         */
+        async function saveEditedComponent(event) {
+            event.preventDefault();
+
+            const oldSerialNumber = editInputs.serialNumberHidden.value;
+            let newSerialNumber = editInputs.serialNumber.value.trim(); 
+
+            if (!newSerialNumber) {
+                console.error("Error: El número de serie no puede estar vacío. Por favor, introduce un valor.");
+                return; 
+            }
+
+            if (!oldSerialNumber && principalComponents.some(comp => comp.serialNumber === newSerialNumber)) {
+                console.error("Error: El número de serie ya existe. Por favor, elige uno diferente.");
+                return;
+            }
+
+            const selectedType = editInputs.type.value;
+
+            const updatedComponentData = {
+                name: editInputs.name.value.trim() || '', 
+                partNumber: editInputs.partNumber.value.trim() || '',
+                serialNumber: newSerialNumber, 
+                installationDate: editInputs.installationDate.value || '',
+                location: editInputs.location.value.trim() || '',
+                type: selectedType,
+                status: editInputs.status.value.trim() || 'Activo',
+                
+                initialTSNHours: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSNHours.value) || 0),
+                initialTSNCycles: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSNCycles.value) || 0),
+                initialTSNDays: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSNDays.value) || 0),
+
+                aircraftHrsAtInstallation: (selectedType === 'condition' ? 0 : parseFloat(editInputs.aircraftHrsAtInstallation.value) || 0),
+                aircraftRinsAtInstallation: (selectedType === 'condition' ? 0 : parseFloat(editInputs.aircraftRinsAtInstallation.value) || 0),
+
+                initialTSOHours: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSOHours.value) || 0), 
+                initialTSOCycles: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSOCycles.value) || 0),
+                initialTSODays: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSODays.value) || 0),
+
+                lifeLimitHours: (selectedType === 'condition' ? 0 : parseFloat(editInputs.lifeLimitHours.value) || 0),
+                lifeLimitCycles: (selectedType === 'condition' ? 0 : parseFloat(editInputs.lifeLimitCycles.value) || 0),
+                lifeLimitDays: (selectedType === 'condition' ? 0 : parseFloat(editInputs.lifeLimitDays.value) || 0),
+
+                dueDateTT: (selectedType === 'condition' ? 'CONDICIÓN' : editInputs.dueDateTT.value.trim() || ''),
+                lastInspectionDate: editInputs.lastInspectionDate.value || '',
+                nextInspectionDue: editInputs.nextInspectionDue.value || '',
+                lastInspectionHours: parseFloat(editInputs.lastInspectionHours.value) || 0, // Store new field
+                nextInspectionHoursDue: parseFloat(editInputs.nextInspectionHoursDue.value) || 0, // Store new field
+            };
+
+            try {
+                let oldComponentData = null;
+                if (oldSerialNumber) {
+                    const existingCompRef = ref(database, `artifacts/${appId}/public_data/components/${oldSerialNumber}`);
+                    const snapshot = await get(existingCompRef);
+                    if (snapshot.exists()) {
+                        oldComponentData = snapshot.val();
+                    }
+                }
+
+                let uninstallationReason = '';
+                const oldPartNumber = oldComponentData ? oldComponentData.partNumber : '';
+                const newPartNumber = updatedComponentData.partNumber;
+
+                if (oldSerialNumber && (oldSerialNumber !== newSerialNumber || oldPartNumber !== newPartNumber)) {
+                    uninstallationReason = await openUninstallationReasonDialog(oldSerialNumber);
+                    if (uninstallationReason === null) {
+                        console.log("Actualización cancelada por el usuario (motivo de desinstalación no proporcionado).");
+                        return;
+                    }
+                }
+
+
+                if (oldSerialNumber && oldSerialNumber !== newSerialNumber) {
+                    const oldComponentRef = ref(database, `artifacts/${appId}/public_data/components/${oldSerialNumber}`);
+                    
+                    if (oldComponentData) {
+                        oldComponentData.status = 'Retirado';
+                        oldComponentData.replacedBy = newSerialNumber;
+                        if (uninstallationReason) {
+                            oldComponentData.uninstallationReason = uninstallationReason;
+                        }
+                        await set(oldComponentRef, oldComponentData);
+                        console.log(`Componente con serial antiguo ${oldSerialNumber} marcado como 'Retirado' y actualizado.`);
+                        await recordComponentChange(oldComponentData, 'Retiro', oldComponentData, null, newSerialNumber, uninstallationReason);
+                    } else {
+                        await recordComponentChange({ serialNumber: oldSerialNumber, status: 'Retirado' }, 'Retiro', null, null, newSerialNumber, uninstallationReason);
+                    }
+                    
+                    const newComponentRef = ref(database, `artifacts/${appId}/public_data/components/${newSerialNumber}`);
+                    await set(newComponentRef, updatedComponentData);
+                    console.log("Nuevo componente agregado en Firebase:", updatedComponentData);
+                    await recordComponentChange(updatedComponentData, 'Instalación', null, oldSerialNumber, null);
+
+                } else if (!oldSerialNumber) {
+                    const newComponentRef = ref(database, `artifacts/${appId}/public_data/components/${newSerialNumber}`);
+                    await set(newComponentRef, updatedComponentData);
+                    console.log("Nuevo componente agregado en Firebase:", updatedComponentData);
+                    await recordComponentChange(updatedComponentData, 'Instalación');
+
+                } else {
+                    const componentRef = ref(database, `artifacts/${appId}/public_data/components/${newSerialNumber}`);
+                    await set(componentRef, updatedComponentData);
+                    console.log("Componente actualizado en Firebase:", updatedComponentData);
+                    await recordComponentChange(updatedComponentData, 'Edición', oldComponentData);
+                }
+
+                editComponentDialog.close();
+            } catch (error) {
+                console.error("Error al guardar el componente en Firebase:", error);
+            }
+        }
+
+        /**
+         * Calcula el TSO actual de un componente.
+         * @param {object} component - El objeto del componente.
+         * @param {string} type - Tipo de vida ('hours', 'cycles', 'months').
+         * @returns {number} El valor TSO actual calculado.
+         */
+        function calculateCurrentTSO(component, type) {
+            let initialTSO = 0;
+            let aircraftValueAtInstallation = 0;
+            let currentAircraftValue = 0;
+            let accruedTime = 0;
+
+            if (type === 'hours') {
+                initialTSO = parseFloat(component.initialTSOHours) || 0;
+                aircraftValueAtInstallation = parseFloat(component.aircraftHrsAtInstallation) || 0;
+                currentAircraftValue = currentAcHrs;
+            } else if (type === 'cycles') {
+                initialTSO = parseFloat(component.initialTSOCycles) || 0;
+                aircraftValueAtInstallation = parseFloat(component.aircraftRinsAtInstallation) || 0;
+                currentAircraftValue = currentRins;
+            } else if (type === 'months') {
+                initialTSO = parseFloat(component.initialTSODays) || 0;
+                if (component.installationDate) {
+                    const today = new Date();
+                    const installationDate = new Date(component.installationDate);
+                    const timeDiff = today.getTime() - installationDate.getTime();
+                    accruedTime = parseFloat(((today.getTime() - installationDate.getTime()) / (1000 * 60 * 60 * 24)).toFixed(1));
+                }
+            }
+
+            if (initialTSO === 0) {
+                return 0;
+            }
+
+            if (type === 'hours' || type === 'cycles') {
+                accruedTime = (currentAircraftValue - aircraftValueAtInstallation) + initialTSO;
+            } else if (type === 'months') {
+                accruedTime += initialTSO;
+            }
+            
+            return parseFloat(accruedTime.toFixed(1));
+        }
+
+
+        /**
+         * Renderiza los detalles de los componentes en una sección específica.
+         * @param {Array<object>} componentsToDisplay - Array de componentes a renderizar.
+         * @param {HTMLElement} targetElement - El elemento DOM donde se renderizarán los componentes.
+         * @param {boolean} isRetiredSection - True si es la sección de componentes retirados.
+         */
+        function renderComponentCards(componentsToDisplay, targetElement, isRetiredSection = false) {
+            targetElement.innerHTML = '';
+
+            if (componentsToDisplay.length === 0) {
+                targetElement.innerHTML = `<p class="text-center text-gray-600 col-span-full">No se encontraron componentes ${isRetiredSection ? 'retirados' : 'activos'} que coincidan con la búsqueda.</p>`;
+                return;
+            }
+
+            const today = new Date();
+
+            componentsToDisplay.forEach(component => {
+                if (!component || !component.serialNumber) { 
+                    console.warn("Componente mal formado encontrado y omitido:", component);
+                    return;
+                }
+
+                const lifeLimitHours = parseFloat(component.lifeLimitHours) || 0;
+                const lifeLimitCycles = parseFloat(component.lifeLimitCycles) || 0;
+                const lifeLimitDays = parseFloat(component.lifeLimitDays) || 0;
+
+                const remainingLife = calculateRemainingLife(component);
+                const totalLifeForColor = component.type === "hours" ? lifeLimitHours : 
+                                          component.type === "cycles" ? lifeLimitCycles : 
+                                          lifeLimitDays;
+                
+                let colorClass = getRemainingColorClass(remainingLife, totalLifeForColor);
+                let progressBarColorClass = '';
+
+                let unit = "unidades";
+                let remainingLifeDisplay = ""; 
+                let progressBarText = "";
+
+                let displayedTSNHours = "N/A";
+                let displayedTSNCycles = "N/A";
+                let displayedTSNDays = "N/A";
+
+                if (component.type === "hours") {
+                    const aircraftHrsDiff = currentAcHrs - (parseFloat(component.aircraftHrsAtInstallation) || 0);
+                    displayedTSNHours = (aircraftHrsDiff + (parseFloat(component.initialTSNHours) || 0)).toFixed(1);
+                    unit = "hrs";
+                } else if (component.type === "cycles") {
+                    const aircraftRinsDiff = currentRins - (parseFloat(component.aircraftRinsAtInstallation) || 0);
+                    displayedTSNCycles = (aircraftRinsDiff + (parseFloat(component.initialTSNCycles) || 0)).toFixed(1);
+                    unit = "ciclos";
+                } else if (component.type === "months" && component.installationDate) {
+                    const installationDate = new Date(component.installationDate);
+                    const timeDiff = today.getTime() - installationDate.getTime();
+                    const daysSinceInstallation = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1));
+                    displayedTSNDays = (daysSinceInstallation + (parseFloat(component.initialTSNDays) || 0)).toFixed(1);
+                    unit = "días";
+                }
+
+
+                if (component.type === "condition") {
+                    remainingLifeDisplay = "CONDICIÓN";
+                    unit = "";
+                    colorClass = 'remaining-blue';
+                    progressBarColorClass = 'progress-blue';
+                    progressBarText = "CONDICIÓN";
+                    displayedTSNHours = "N/A";
+                    displayedTSNCycles = "N/A";
+                    displayedTSNDays = "N/A";
+                } else {
+                    remainingLifeDisplay = remainingLife.toFixed(1);
+                    if (remainingLife <= 0) {
+                        progressBarColorClass = 'progress-red';
+                    } else {
+                        const percentageOfTotalLifeRemaining = (remainingLife / totalLifeForColor) * 100;
+                        if (percentageOfTotalLifeRemaining < 20) {
+                            progressBarColorClass = 'progress-orange';
+                        } else {
+                            progressBarColorClass = 'progress-green';
+                        }
+                    }
+                    progressBarText = `${calculateConsumedLifePercentage(component).toFixed(0)}% Consumido`;
+                }
+
+                const displayedTSOHours = calculateCurrentTSO(component, 'hours');
+                const displayedTSOCycles = calculateCurrentTSO(component, 'cycles'); 
+                const displayedTSODays = calculateCurrentTSO(component, 'months');
+
+                // --- Remanente de Inspecciones (NUEVO) ---
+                let inspectionRemnantHoursText = 'N/A';
+                let inspectionRemnantHoursColorClass = '';
+                const nextHoursDue = parseFloat(component.nextInspectionHoursDue) || 0;
+                if (nextHoursDue > 0) {
+                    const hoursRemnantValue = (nextHoursDue - currentAcHrs);
+                    inspectionRemnantHoursText = `${hoursRemnantValue.toFixed(1)} hrs`;
+                    if (hoursRemnantValue <= 0) {
+                        inspectionRemnantHoursColorClass = 'remaining-red';
+                    } else if (hoursRemnantValue <= 10) { // Menos de 10 horas para la alerta
+                        inspectionRemnantHoursColorClass = 'remaining-orange';
+                    } else {
+                        inspectionRemnantHoursColorClass = 'remaining-green';
+                    }
+                }
+
+                let inspectionRemnantDateText = 'N/A';
+                let inspectionRemnantDateColorClass = '';
+                const nextDueDate = component.nextInspectionDue ? new Date(component.nextInspectionDue) : null;
+                if (nextDueDate) {
+                    const diffTime = nextDueDate.getTime() - today.getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    inspectionRemnantDateText = `${diffDays} días`;
+                    if (diffDays <= 0) {
+                        inspectionRemnantDateColorClass = 'remaining-red';
+                    } else if (diffDays <= 30) { // Menos de 30 días para la alerta
+                        inspectionRemnantDateColorClass = 'remaining-orange';
+                    } else {
+                        inspectionRemnantDateColorClass = 'remaining-green';
+                    }
+                }
+                // --- FIN Remanente de Inspecciones ---
+
+
+                const cardClass = `${isRetiredSection ? 'component-card retired' : 'component-card'}`;
+
+                const card = document.createElement('div');
+                card.className = cardClass;
+                card.id = `component-${component.serialNumber}`; 
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="title-container">
+                            <h4>${component.name || 'Sin Descripción'} ${isRetiredSection ? '(Retirado)' : ''}</h4>
+                        </div>
+                        <div class="card-buttons">
+                            ${isRetiredSection ? 
+                                `<button class="restore-button" data-serial="${component.serialNumber}">Restaurar</button>` :
+                                `<button class="edit-button" data-serial="${component.serialNumber}">Editar</button>
+                                <button class="history-button" data-serial="${component.serialNumber}">Historial</button>
+                                <button class="print-single-button" data-serial="${component.serialNumber}">Imprimir</button>
+                                <button class="retire-button" data-serial="${component.serialNumber}">Retirar</button>`
+                            }
+                        </div>
+                    </div>
+                    <div class="component-info-grid">
+                        <p><strong>No. Parte:</strong> ${component.partNumber || 'N/A'}</p>
+                        <p><strong>No. Serie:</strong> ${component.serialNumber || 'N/A'}</p>
+                        <p><strong>Instalado (Fecha):</strong> ${component.installationDate || 'N/A'}</p>
+                        <p><strong>Ubicación:</strong> ${component.location || 'N/A'}</p>
+                        
+                        <p><strong>Vida Límite (Hrs):</strong> ${lifeLimitHours.toFixed(1)}</p>
+                        <p><strong>Vida Límite (Ciclos):</strong> ${lifeLimitCycles.toFixed(1)}</p>
+                        <p><strong>Vida Límite (Días):</strong> ${lifeLimitDays.toFixed(1)}</p>
+                        <p><strong>Tipo de Vida:</strong> ${component.type || 'N/A'}</p>
+
+                        <p><strong>TSN (Hrs):</strong> ${displayedTSNHours}</p>
+                        <p><strong>TSN (Ciclos):</strong> ${displayedTSNCycles}</p>
+                        <p><strong>TSN (Días):</strong> ${displayedTSNDays}</p>
+                        <p><strong>TSN Inicial Componente (Hrs):</strong> ${(parseFloat(component.initialTSNHours) || 0).toFixed(1)}</p>
+                        <p><strong>TSN Inicial Componente (Ciclos):</strong> ${(parseFloat(component.initialTSNCycles) || 0).toFixed(1)}</p>
+                        <p><strong>TSN Inicial Componente (Días):</strong> ${(parseFloat(component.initialTSNDays) || 0).toFixed(1)}</p>
+                        <p><strong>Horas AC al Instalar:</strong> ${(parseFloat(component.aircraftHrsAtInstallation) || 0).toFixed(1)}</p>
+                        <p><strong>RINS AC al Instalar:</strong> ${(parseFloat(component.aircraftRinsAtInstallation) || 0).toFixed(1)}</p>
+                        <p><strong>TSO (Hrs):</strong> ${displayedTSOHours.toFixed(1)}</p>
+                        <p><strong>TSO (Ciclos):</strong> ${displayedTSOCycles.toFixed(1)}</p>
+                        <p><strong>TSO (Días):</strong> ${displayedTSODays.toFixed(1)}</p>
+
+                        <p><strong>Última Inspección (Fecha):</strong> ${component.lastInspectionDate || 'N/A'}</p>
+                        <p><strong>Próxima Inspección (Fecha):</strong> ${component.nextInspectionDue || 'N/A'}</p>
+                        <p><strong>Última Inspección (Horas AC):</strong> ${((parseFloat(component.lastInspectionHours) || 0)).toFixed(1)}</p>
+                        <p><strong>Próxima Inspección (Horas AC):</strong> ${((parseFloat(component.nextInspectionHoursDue) || 0)).toFixed(1)}</p>
+                        <p><strong>Vencimiento (A LAS TT):</strong> ${component.dueDateTT || 'N/A'}</p>
+                        <p><strong>Estado:</strong> ${component.status || 'N/A'}</p>
+                        ${component.uninstallationReason ? `<p class="col-span-full"><strong>Motivo Retiro:</strong> ${component.uninstallationReason}</p>` : ''}
+                    </div>
+                    <div class="remaining-life-section">
+                        <span>Remanente Vida:</span>
+                        <span class="${colorClass}">${remainingLifeDisplay} ${unit}</span>
+                    </div>
+                    <!-- Nueva sección para remanente de inspecciones -->
+                    <div class="inspection-remnant-section">
+                        <div class="inspection-remnant-item">
+                            <span>Remanente Insp. (Hrs):</span>
+                            <span class="${inspectionRemnantHoursColorClass}">${inspectionRemnantHoursText}</span>
+                        </div>
+                        <div class="inspection-remnant-item">
+                            <span>Remanente Insp. (Fecha):</span>
+                            <span class="${inspectionRemnantDateColorClass}">${inspectionRemnantDateText}</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill ${progressBarColorClass}" style="width: ${calculateConsumedLifePercentage(component)}%;">
+                            ${progressBarText}
+                        </div>
+                    </div>
+                `;
+                targetElement.appendChild(card);
+
+                // Asignar listeners a los botones
+                if (isRetiredSection) {
+                    const restoreButton = card.querySelector('.restore-button');
+                    if (restoreButton) {
+                        restoreButton.addEventListener('click', () => {
+                            restoreComponent(component.serialNumber);
+                        });
+                    }
+                } else {
+                    const editButton = card.querySelector('.edit-button');
+                    if (editButton) {
+                        editButton.addEventListener('click', () => {
+                            const selectedComponent = principalComponents.find(comp => comp && comp.serialNumber === editButton.dataset.serial);
+                            if (selectedComponent) {
+                                openEditDialog(selectedComponent);
+                            }
+                        });
+                    }
+                    const historyButton = card.querySelector('.history-button');
+                    if (historyButton) {
+                        historyButton.addEventListener('click', () => {
+                            const serial = historyButton.dataset.serial;
+                            changeLogTitle.textContent = `Historial de Cambios para Componente: ${serial}`;
+                            fetchAndDisplayChangeLogs(serial);
+                            changeLogDialog.showModal();
+                        });
+                    }
+                    const printSingleButton = card.querySelector('.print-single-button');
+                    if (printSingleButton) {
+                        printSingleButton.addEventListener('click', () => {
+                            printComponents(component.serialNumber);
+                        });
+                    }
+                    const retireButton = card.querySelector('.retire-button');
+                    if (retireButton) {
+                        retireButton.addEventListener('click', () => {
+                            retireComponent(component.serialNumber);
+                        });
+                    }
+                }
+            });
+        }
+
+
+        /**
+         * Generates structured HTML for component details.
+         * @param {object} component - The component data to display.
+         * @returns {string} HTML string with structured details.
+         */
+        function generateStructuredComponentDetailsHtml(component) {
+            if (!component) return '<p>No hay datos disponibles.</p>';
+
+            const lifeLimitHours = parseFloat(component.lifeLimitHours) || 0;
+            const lifeLimitCycles = parseFloat(component.lifeLimitCycles) || 0;
+            const lifeLimitDays = parseFloat(component.lifeLimitDays) || 0;
+
+            let html = `
+                <div class="component-sections-print">
+                    <div class="section-block-print">
+                        <h5 class="section-title-print">Información del Componente</h5>
+                        <p><strong>Descripción:</strong> ${component.name || 'N/A'}</p>
+                        <p><strong>N° de Parte:</strong> ${component.partNumber || 'N/A'}</p>
+                        <p><strong>N° de Serie:</strong> ${component.serialNumber || 'N/A'}</p>
+                        <p><strong>Ubicación:</strong> ${component.location || 'N/A'}</p>
+                        <p><strong>Tipo de Vida:</strong> ${component.type || 'N/A'}</p>
+                    </div>
+
+                    <div class="section-block-print">
+                        <h5 class="section-title-print">Detalles de TSN</h5>
+                        <p><strong>TSN Inicial (Hrs):</strong> ${(parseFloat(component.initialTSNHours) || 0).toFixed(1)}</p>
+                        <p><strong>TSN Inicial (Ciclos):</strong> ${(parseFloat(component.initialTSNCycles) || 0).toFixed(1)}</p>
+                        <p><strong>TSN Inicial (Días):</strong> ${(parseFloat(component.initialTSNDays) || 0).toFixed(1)}</p>
+                        <p><strong>Horas AC al Instalar:</strong> ${(parseFloat(component.aircraftHrsAtInstallation) || 0).toFixed(1)}</p>
+                        <p><strong>RINS AC al Instalar:</strong> ${(parseFloat(component.aircraftRinsAtInstallation) || 0).toFixed(1)}</p>
+                    </div>
+
+                    <div class="section-block-print">
+                        <h5 class="section-title-print">Detalles de TSO</h5>
+                        <p><strong>TSO Inicial (Hrs):</strong> ${(parseFloat(component.initialTSOHours) || 0).toFixed(1)}</p>
+                        <p><strong>TSO Inicial (Ciclos):</strong> ${(parseFloat(component.initialTSOCycles) || 0).toFixed(1)}</p>
+                        <p><strong>TSO Inicial (Días/Meses):</strong> ${(parseFloat(component.initialTSODays) || 0).toFixed(1)}</p>
+                    </div>
+
+                    <div class="section-block-print">
+                        <h5 class="section-title-print">Límites de Vida</h5>
+                        <p><strong>Vida Límite (Hrs):</strong> ${lifeLimitHours.toFixed(1)}</p>
+                        <p><strong>Vida Límite (Ciclos):</strong> ${lifeLimitCycles.toFixed(1)}</p>
+                        <p><strong>Vida Límite (Días/Meses):</strong> ${lifeLimitDays.toFixed(1)}</p>
+                    </div>
+
+                    <div class="section-block-print">
+                        <h5 class="section-title-print">Fechas y Estado</h5>
+                        <p><strong>Instalado (Fecha):</strong> ${component.installationDate || 'N/A'}</p>
+                        <p><strong>Vencimiento (A LAS TT):</strong> ${component.dueDateTT || 'N/A'}</p>
+                        <p><strong>Estado:</strong> ${component.status || 'N/A'}</p>
+                        <p><strong>Última Inspección (Fecha):</strong> ${component.lastInspectionDate || 'N/A'}</p>
+                        <p><strong>Próxima Inspección (Fecha):</strong> ${component.nextInspectionDue || 'N/A'}</p>
+                        <p><strong>Última Inspección (Horas AC):</strong> ${((parseFloat(component.lastInspectionHours) || 0)).toFixed(1)}</p>
+                        <p><strong>Próxima Inspección (Horas AC):</strong> ${((parseFloat(component.nextInspectionHoursDue) || 0)).toFixed(1)}</p>
+                        ${component.uninstallationReason ? `<p><strong>Motivo Retiro:</strong> ${component.uninstallationReason}</p>` : ''}
+                    </div>
+                </div>
+            `;
+            return html;
+        }
+
+        /**
+         * Fetches and displays change logs for a specific component.
+         * @param {string} serialNumber - The serial number of the component.
+         */
+        async function fetchAndDisplayChangeLogs(serialNumber) {
+            changeLogContent.innerHTML = '<p class="text-center text-gray-600">Cargando historial...</p>';
+            const logsRef = ref(database, `artifacts/${appId}/public_data/component_changes/`);
+            const componentsRef = ref(database, `artifacts/${appId}/public_data/components/`);
+
+            try {
+                const snapshot = await get(logsRef);
+                const allLogs = snapshot.exists() ? snapshot.val() : {};
+                let componentLogs = [];
+
+                for (const key in allLogs) {
+                    if (allLogs.hasOwnProperty(key)) {
+                        const log = allLogs[key];
+                        // Filter logs relevant to this component (its own logs, or logs where it was replaced/replaced by another)
+                        if (log.serialNumber === serialNumber || 
+                            (log.changeType === 'Retiro' && log.replacedBySerialNumber === serialNumber) ||
+                            (log.changeType === 'Instalación' && log.replacesSerialNumber === serialNumber)
+                           ) {
+                            componentLogs.push(log);
+                        } else if (log.changeType === 'Inspección Realizada' && log.serialNumber === serialNumber) { // Explicitly add inspection logs for this component
+                            componentLogs.push(log);
+                        }
+                    }
+                }
+                
+                componentLogs.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+                changeLogContent.innerHTML = '';
+                if (componentLogs.length === 0) {
+                    changeLogContent.innerHTML = '<p class="text-center text-gray-600">No hay registros de cambios para este componente.</p>';
+                    return;
+                }
+
+                for (const log of componentLogs) {
+                    const logEntryCard = document.createElement('div');
+                    
+                    const timestamp = new Date(log.timestamp).toLocaleString('es-ES', { dateStyle: 'full', timeStyle: 'medium' });
+                    
+                    let detailsHtml = '';
+                    let cardTypeClass = ''; // Class for different log entry types
+
+                    if (log.changeType === 'Instalación') {
+                        detailsHtml += `<p>Componente **instalado**.</p>`;
+                        if (log.replacesSerialNumber) {
+                            const replacedCompSnapshot = await get(child(componentsRef, log.replacesSerialNumber));
+                            let replacedInfo = ``;
+                            if (replacedCompSnapshot.exists()) {
+                                const replacedComp = replacedCompSnapshot.val();
+                                replacedInfo = `Descripción: ${replacedComp.name || 'N/A'}, N° Parte: ${replacedComp.partNumber || 'N/A'}, N° Serie: ${replacedComp.serialNumber || 'N/A'}`;
+                            } else {
+                                replacedInfo = `N° Serie: ${log.replacesSerialNumber} (Componente ya no existe)`
+                            }
+                            detailsHtml += `<p>Este componente **reemplaza a**: <strong>${replacedInfo}</strong></p>`;
+                        }
+                        if (log.newValues) {
+                            detailsHtml += `<div class="change-details-container"><strong>Valores Iniciales:</strong>`;
+                            detailsHtml += generateStructuredComponentDetailsHtml(log.newValues);
+                            detailsHtml += `</div>`;
+                        }
+                        cardTypeClass = '';
+                    } else if (log.changeType === 'Edición') {
+                        detailsHtml += `<p>Componente **editado**.</p>`;
+                        detailsHtml += `<div class="change-details-container">`;
+                        detailsHtml += `<strong>Valores Antes:</strong>`;
+                        detailsHtml += generateStructuredComponentDetailsHtml(log.oldValues);
+                        detailsHtml += `<strong>Valores Después:</strong>`;
+                        detailsHtml += generateStructuredComponentDetailsHtml(log.newValues);
+                        detailsHtml += `</div>`;
+                        cardTypeClass = '';
+                    } else if (log.changeType === 'Retiro') {
+                        detailsHtml += `<p>Componente **retirado**.</p>`;
+                        if (log.replacedBySerialNumber) {
+                            const replacedByCompSnapshot = await get(child(componentsRef, log.replacedBySerialNumber));
+                            let replacedByInfo = ``;
+                            if (replacedByCompSnapshot.exists()) {
+                                const replacedByComp = replacedByCompSnapshot.val();
+                                replacedByInfo = `Descripción: ${replacedByComp.name || 'N/A'}, N° Parte: ${replacedByComp.partNumber || 'N/A'}, N° Serie: ${replacedByComp.serialNumber || 'N/A'}`;
+                            } else {
+                                replacedByInfo = `N° Serie: ${log.replacedBySerialNumber} (Componente ya no existe)`
+                            }
+                            detailsHtml += `<p>Este componente fue **reemplazado por**: <strong>${replacedByInfo}</strong></p>`;
+                        }
+                        if (log.uninstallationReason) {
+                            detailsHtml += `<p><strong>Motivo de Desinstalación:</strong> ${log.uninstallationReason}</p>`;
+                        }
+                        if (log.oldValues) {
+                            detailsHtml += `<div class="change-details-container"><strong>Valores al Retirar:</strong>`;
+                            detailsHtml += generateStructuredComponentDetailsHtml(log.oldValues);
+                            detailsHtml += `</div>`;
+                        }
+                        cardTypeClass = '';
+                    } else if (log.changeType === 'Inspección Realizada') {
+                        cardTypeClass = 'inspection-log'; // Add a distinct class for inspection logs
+                        detailsHtml += `<p>Componente: **Inspección Realizada**.</p>`;
+                        if (log.inspectionDescription) {
+                            detailsHtml += `<p><strong>Descripción de la Inspección:</strong> ${log.inspectionDescription}</p>`;
+                        }
+                        if (log.oldValues && log.newValues) {
+                             detailsHtml += `<div class="change-details-container change-details-list">`;
+                             detailsHtml += `<strong>Cambios de la Inspección:</strong>`;
+                             
+                             // Helper to compare and display changes for a field
+                             const displayChange = (label, oldVal, newVal, unit = '') => {
+                                 const formattedOldVal = (oldVal !== undefined && oldVal !== null && oldVal !== '') ? (typeof oldVal === 'number' ? oldVal.toFixed(1) : oldVal) : 'N/A';
+                                 const formattedNewVal = (newVal !== undefined && newVal !== null && newVal !== '') ? (typeof newVal === 'number' ? newVal.toFixed(1) : newVal) : 'N/A';
+                                 
+                                 // Only display if there's an actual change in string representation
+                                 if (String(formattedOldVal) !== String(formattedNewVal)) {
+                                     detailsHtml += `<p>${label}: <strong>${formattedOldVal} ${unit}</strong> &rarr; <strong>${formattedNewVal} ${unit}</strong></p>`;
+                                 }
+                             };
+
+                             displayChange('Última Insp. (Fecha)', log.oldValues.lastInspectionDate, log.newValues.lastInspectionDate);
+                             displayChange('Próxima Insp. (Fecha)', log.oldValues.nextInspectionDue, log.newValues.nextInspectionDue);
+                             displayChange('Última Insp. (Horas AC)', parseFloat(log.oldValues.lastInspectionHours), parseFloat(log.newValues.lastInspectionHours), 'hrs');
+                             displayChange('Próxima Insp. (Horas AC)', parseFloat(log.oldValues.nextInspectionHoursDue), parseFloat(log.newValues.nextInspectionHoursDue), 'hrs');
+                             
+                             detailsHtml += `</div>`;
+                        }
+                    } else if (log.changeType === 'Eliminación') {
+                        detailsHtml += `<p>Componente **eliminado permanentemente**.</p>`;
+                         if (log.oldValues) {
+                            detailsHtml += `<div class="change-details-container"><strong>Valores al Eliminar:</strong>`;
+                            detailsHtml += generateStructuredComponentDetailsHtml(log.oldValues);
+                            detailsHtml += `</div>`;
+                        }
+                        cardTypeClass = '';
+                    }
+
+                    logEntryCard.className = `log-entry-card ${cardTypeClass}`;
+                    logEntryCard.innerHTML = `
+                        <h4>Tipo de Cambio: ${log.changeType}</h4>
+                        <p><strong>Número de Serie:</strong> ${log.serialNumber || 'N/A'}</p>
+                        <p><strong>Fecha/Hora:</strong> ${timestamp}</p>
+                        ${detailsHtml}
+                        <button class="delete-log-entry-button" data-log-id="${log.serialNumber}_${new Date(log.timestamp).getTime()}">X</button>
+                    `;
+                    changeLogContent.appendChild(logEntryCard);
+                }
+
+                changeLogContent.querySelectorAll('.delete-log-entry-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const logId = e.target.dataset.logId;
+                        deleteChangeLogEntry(logId, serialNumber);
+                    });
+                });
+
+            } catch (error) {
+                console.error("Error al cargar registros de cambios:", error);
+                changeLogContent.innerHTML = `<p class="text-center text-red-600">Error al cargar el historial: ${error.message}</p>`;
+            }
+        }
+
+
+        /**
+         * Función para filtrar y renderizar componentes en sus respectivas secciones.
+         */
+        function filterAndRenderComponents() {
+            const searchTerm = componentSearchInput.value.toLowerCase();
+            const activeComponents = [];
+            const retiredComponents = [];
+
+            principalComponents.forEach(component => {
+                if (!component) return;
+                const nameMatch = (component.name || '').toLowerCase().includes(searchTerm);
+                const serialMatch = (component.serialNumber || '').toLowerCase().includes(searchTerm);
+                const partMatch = (component.partNumber || '').toLowerCase().includes(searchTerm);
+
+                const matchesSearch = nameMatch || serialMatch || partMatch;
+
+                if (matchesSearch) {
+                    if (component.status === 'Retirado') {
+                        retiredComponents.push(component);
+                    } else {
+                        activeComponents.push(component);
+                    }
+                }
+            });
+
+            activeComponents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            retiredComponents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+
+            renderComponentCards(activeComponents, activeComponentsSection, false);
+            renderComponentCards(retiredComponents, retiredComponentsSection, true);
+        }
+
+        /**
+         * Función para manejar la impresión de componentes.
+         * @param {string|null} serialNumber - El número de serie del componente a imprimir, o null para imprimir todos.
+         */
+        function printComponents(serialNumber = null) {
+            const body = document.body;
+            
+            body.classList.remove('print-single-component', 'print-change-log-mode', 'print-all-components-mode');
+
+            if (serialNumber) {
+                body.classList.add('print-single-component');
+                const componentToPrint = document.getElementById(`component-${serialNumber}`);
+                if (componentToPrint) {
+                    componentToPrint.classList.add('print-this-one');
+                }
+            } else {
+                body.classList.add('print-all-components-mode');
+            }
+
+            window.print();
+
+            setTimeout(() => {
+                body.classList.remove('print-single-component', 'print-all-components-mode');
+                if (serialNumber) {
+                    const componentToPrint = document.getElementById(`component-${serialNumber}`);
+                    if (componentToPrint) {
+                        componentToPrint.classList.remove('print-this-one');
+                    }
+                }
+            }, 500);
+        }
+
+        /**
+         * Función para imprimir el contenido del diálogo de historial de cambios.
+         */
+        function printChangeLog() {
+            const body = document.body;
+            body.classList.remove('print-single-component', 'print-all-components-mode');
+            body.classList.add('print-change-log-mode'); 
+
+            window.print();
+
+            setTimeout(() => {
+                body.classList.remove('print-change-log-mode');
+            }, 500);
+        }
+
+        /**
+         * Opens a generic confirmation dialog.
+         * @param {string} message - The message to display in the confirmation dialog.
+         * @returns {Promise<boolean>} A promise that resolves to true if confirmed, false otherwise.
+         */
+        function openConfirmDialog(message) {
+            confirmMessage.textContent = message;
+            confirmDialog.showModal();
+            return new Promise(resolve => {
+                confirmActionResolve = resolve;
+            });
+        }
+
+        cancelConfirmButton.addEventListener('click', () => {
+            confirmDialog.close();
+            if (confirmActionResolve) {
+                confirmActionResolve(false);
+                confirmActionResolve = null;
+            }
+        });
+
+        proceedConfirmButton.addEventListener('click', () => {
+            confirmDialog.close();
+            if (confirmActionResolve) {
+                confirmActionResolve(true);
+                confirmActionResolve = null;
+            }
+        });
+
+        /**
+         * Opens the uninstallation reason dialog.
+         * @param {string} serialNumber - The serial number of the component being uninstalled.
+         * @returns {Promise<string|null>} A promise that resolves with the reason string or null if cancelled.
+         */
+        function openUninstallationReasonDialog(serialNumber) {
+            uninstallationSerialNumberSpan.textContent = serialNumber;
+            uninstallationReasonTextarea.value = '';
+            uninstallationReasonDialog.showModal();
+
+            return new Promise(resolve => {
+                uninstallationReasonResolve = resolve;
+            });
+        }
+
+        cancelUninstallationReasonButton.addEventListener('click', () => {
+            uninstallationReasonDialog.close();
+            if (uninstallationReasonResolve) {
+                uninstallationReasonResolve(null);
+                uninstallationReasonResolve = null;
+            }
+        });
+
+        confirmUninstallationReasonButton.addEventListener('click', () => {
+            const reason = uninstallationReasonTextarea.value.trim();
+            uninstallationReasonDialog.close();
+            if (uninstallationReasonResolve) {
+                uninstallationReasonResolve(reason);
+                uninstallationReasonResolve = null;
+            }
+        });
+
+        /**
+         * Función para retirar (desinstalar) un componente.
+         * Muestra un diálogo de confirmación y luego pide el motivo de desinstalación.
+         * @param {string} serialNumberToRetire - El número de serie del componente a retirar.
+         */
+        async function retireComponent(serialNumberToRetire) {
+            const componentToRetire = principalComponents.find(comp => comp.serialNumber === serialNumberToRetire);
+            if (!componentToRetire) {
+                console.error("Componente no encontrado para retirar:", serialNumberToRetire);
+                return;
+            }
+
+            const confirmed = await openConfirmDialog(`¿Estás seguro de que quieres **retirar** el componente "${componentToRetire.name}" (N° Serie: ${serialNumberToRetire})?`);
+
+            if (confirmed) {
+                const uninstallationReason = await openUninstallationReasonDialog(serialNumberToRetire);
+                if (uninstallationReason === null) {
+                    console.log("Retiro de componente cancelado por el usuario (motivo no proporcionado).");
+                    return;
+                }
+
+                try {
+                    const componentRef = ref(database, `artifacts/${appId}/public_data/components/${serialNumberToRetire}`);
+                    const updatedData = { ...componentToRetire, status: 'Retirado', uninstallationReason: uninstallationReason };
+                    await set(componentRef, updatedData);
+                    console.log(`Componente ${serialNumberToRetire} marcado como 'Retirado' en Firebase.`);
+
+                    await recordComponentChange(updatedData, 'Retiro', componentToRetire, null, null, uninstallationReason); 
+                    
+                    filterAndRenderComponents();
+                } catch (error) {
+                    console.error("Error al retirar el componente de Firebase:", error);
+                }
+            } else {
+                console.log("Retiro de componente cancelado.");
+            }
+        }
+
+        /**
+         * Función para restaurar un componente de la papelera de reciclaje a activo.
+         * @param {string} serialNumberToRestore - El número de serie del componente a restaurar.
+         */
+        async function restoreComponent(serialNumberToRestore) {
+            const componentToRestore = principalComponents.find(comp => comp.serialNumber === serialNumberToRestore);
+            if (!componentToRestore) {
+                console.error("Componente no encontrado para restaurar:", serialNumberToRestore);
+                return;
+            }
+
+            const confirmed = await openConfirmDialog(`¿Estás seguro de que quieres **restaurar** el componente "${componentToRestore.name}" (N° Serie: ${serialNumberToRestore}) a la lista de componentes activos?`);
+
+            if (confirmed) {
+                try {
+                    const componentRef = ref(database, `artifacts/${appId}/public_data/components/${serialNumberToRestore}`);
+                    const updatedData = { ...componentToRestore, status: 'Activo' };
+                    delete updatedData.uninstallationReason; 
+                    await set(componentRef, updatedData);
+                    console.log(`Componente ${serialNumberToRestore} restaurado a 'Activo' en Firebase.`);
+
+                    await recordComponentChange(updatedData, 'Instalación', componentToRestore);
+                    
+                    filterAndRenderComponents();
+                } catch (error) {
+                    console.error("Error al restaurar el componente en Firebase:", error);
+                }
+            } else {
+                console.log("Restauración de componente cancelada.");
+            }
+        }
+
+
+        /**
+         * Elimina una entrada de historial de cambios específica de Firebase.
+         * @param {string} logId - El ID del registro de historial a eliminar (e.g., "SERIAL_TIMESTAMP").
+         * @param {string} componentSerialNumber - El número de serie del componente al que pertenece el historial (para recargar).
+         */
+        async function deleteChangeLogEntry(logId, componentSerialNumber) {
+            const confirmed = await openConfirmDialog(`¿Estás seguro de que quieres eliminar esta entrada del historial de cambios? Esta acción no se puede deshacer.`);
+            if (confirmed) {
+                try {
+                    const logRef = ref(database, `artifacts/${appId}/public_data/component_changes/${logId}`);
+                    await remove(logRef);
+                    console.log(`Entrada de historial ${logId} eliminada.`);
+                    fetchAndDisplayChangeLogs(componentSerialNumber);
+                } catch (error) {
+                    console.error("Error al eliminar la entrada del historial:", error);
+                }
+            } else {
+                console.log("Eliminación de entrada de historial cancelada.");
+            }
+        }
+
+        /**
+         * Elimina todo el historial de cambios para un componente específico.
+         * @param {string} componentSerialNumber - El número de serie del componente cuyo historial se borrará.
+         */
+        async function deleteAllHistoryForComponent(componentSerialNumber) {
+            const confirmed = await openConfirmDialog(`¿Estás seguro de que quieres eliminar **TODO** el historial de cambios para el componente "${componentSerialNumber}"? Esta acción no se puede deshacer.`);
+            if (confirmed) {
+                try {
+                    const logsRef = ref(database, `artifacts/${appId}/public_data/component_changes/`);
+                    const snapshot = await get(logsRef);
+                    const allLogs = snapshot.exists() ? snapshot.val() : {};
+
+                    const updates = {};
+                    for (const key in allLogs) {
+                        if (allLogs.hasOwnProperty(key)) {
+                            const log = allLogs[key];
+                            if (log.serialNumber === componentSerialNumber ||
+                                (log.changeType === 'Retiro' && log.replacedBySerialNumber === componentSerialNumber) ||
+                                (log.changeType === 'Instalación' && log.replacesSerialNumber === componentSerialNumber) ||
+                                (log.changeType === 'Inspección Realizada' && log.serialNumber === componentSerialNumber)) {
+                                updates[`${key}`] = null;
+                            }
+                        }
+                    }
+
+                    if (Object.keys(updates).length > 0) {
+                        await set(logsRef, updates);
+                        console.log(`Todo el historial para el componente ${componentSerialNumber} ha sido eliminado.`);
+                        changeLogContent.innerHTML = '<p class="text-center text-green-600">Historial eliminado con éxito.</p>';
+                    } else {
+                        console.log(`No se encontró historial para el componente ${componentSerialNumber}.`);
+                        changeLogContent.innerHTML = '<p class="text-center text-gray-600">No hay historial para borrar para este componente.</p>';
+                    }
+
+                } catch (error) {
+                    console.error("Error al eliminar todo el historial:", error);
+                    changeLogContent.innerHTML = `<p class="text-center text-red-600">Error al eliminar el historial: ${error.message}</p>`;
+                }
+            } else {
+                console.log("Borrado de historial cancelado.");
+            }
+        }
+
+        /**
+         * Abre el diálogo para programar/registrar una inspección.
+         * @param {string|null} preselectedSerial - Número de serie del componente a preseleccionar.
+         */
+        function openScheduleInspectionDialog(preselectedSerial = null) {
+            scheduleInspectionForm.reset();
+            dateFieldsDiv.classList.remove('hidden-field');
+            hoursFieldsDiv.classList.add('hidden-field');
+            inspectionTypeSelect.value = 'date';
+
+            populateInspectionComponentSelect('');
+            if (preselectedSerial) {
+                inspectionComponentSelect.value = preselectedSerial;
+            }
+            inspectionComponentSearch.value = '';
+
+            const today = new Date();
+            inspectionPerformedDate.valueAsDate = today;
+            const oneYearFromNow = new Date();
+            oneYearFromNow.setFullYear(today.getFullYear() + 1);
+            inspectionNextDueDate.valueAsDate = oneYearFromNow;
+            inspectionIntervalDays.value = 365;
+
+            inspectionPerformedHours.value = currentAcHrs.toFixed(1);
+            inspectionNextHoursDue.value = (currentAcHrs + 100).toFixed(1);
+            inspectionIntervalHours.value = 100;
+
+            scheduleInspectionDialog.showModal();
+        }
+
+        /**
+         * Popula el select de componentes en el diálogo de inspecciones, aplicando un filtro opcional.
+         * @param {string} searchTerm - Término de búsqueda para filtrar componentes.
+         */
+        function populateInspectionComponentSelect(searchTerm = '') {
+            inspectionComponentSelect.innerHTML = '';
+            const activeComponents = principalComponents.filter(c => c.status !== 'Retirado');
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+
+            const filteredComponents = activeComponents.filter(component => 
+                (component.name || '').toLowerCase().includes(lowerCaseSearchTerm) ||
+                (component.serialNumber || '').toLowerCase().includes(lowerCaseSearchTerm) ||
+                (component.partNumber || '').toLowerCase().includes(lowerCaseSearchTerm)
+            );
+
+            if (filteredComponents.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No hay componentes activos';
+                option.disabled = true;
+                inspectionComponentSelect.appendChild(option);
+                scheduleInspectionForm.querySelector('.save-button').disabled = true;
+            } else {
+                filteredComponents.forEach(component => {
+                    const option = document.createElement('option');
+                    option.value = component.serialNumber;
+                    option.textContent = `${component.name} (Serie: ${component.serialNumber})`;
+                    inspectionComponentSelect.appendChild(option);
+                });
+                if (filteredComponents.length > 0) {
+                    inspectionComponentSelect.value = filteredComponents[0].serialNumber;
+                }
+                scheduleInspectionForm.querySelector('.save-button').disabled = false;
+            }
+        }
+
+
+        /**
+         * Maneja el envío del formulario de programación de inspecciones.
+         * @param {Event} event - El evento de envío del formulario.
+         */
+        async function saveInspection(event) {
+            event.preventDefault();
+
+            const serialNumber = inspectionComponentSelect.value;
+            const inspectionType = inspectionTypeSelect.value;
+            const description = inspectionDescription.value.trim();
+
+            if (!serialNumber) {
+                console.error("Error: Debes seleccionar un componente.");
+                return;
+            }
+
+            const componentToUpdate = principalComponents.find(comp => comp.serialNumber === serialNumber);
+
+            if (!componentToUpdate) {
+                console.error("Componente no encontrado para actualizar inspección:", serialNumber);
+                return;
+            }
+
+            // Create a deep copy of the component's old data before modifying it
+            const oldComponentData = JSON.parse(JSON.stringify(componentToUpdate));
+            
+            let confirmed = false;
+            if (inspectionType === 'date') {
+                const performedDate = inspectionPerformedDate.value;
+                const nextDueDate = inspectionNextDueDate.value;
+                if (!performedDate || !nextDueDate) {
+                    console.error("Error: Debes ingresar la fecha de inspección realizada y la próxima fecha de vencimiento.");
+                    return;
+                }
+                confirmed = await openConfirmDialog(`¿Estás seguro de registrar la inspección por fecha para "${componentToUpdate.name}" (N° Serie: ${serialNumber})?`);
+                if (confirmed) {
+                    componentToUpdate.lastInspectionDate = performedDate;
+                    componentToUpdate.nextInspectionDue = nextDueDate;
+                    // Reset hours-based inspection fields if updating by date
+                    componentToUpdate.lastInspectionHours = 0; 
+                    componentToUpdate.nextInspectionHoursDue = 0; 
+                }
+            } else { // type is 'hours'
+                const performedHours = parseFloat(inspectionPerformedHours.value);
+                const nextHoursDue = parseFloat(inspectionNextHoursDue.value);
+                if (isNaN(performedHours) || isNaN(nextHoursDue) || performedHours < 0 || nextHoursDue < 0) {
+                    console.error("Error: Debes ingresar horas válidas para la inspección.");
+                    return;
+                }
+                confirmed = await openConfirmDialog(`¿Estás seguro de registrar la inspección por horas para "${componentToUpdate.name}" (N° Serie: ${serialNumber})?`);
+                if (confirmed) {
+                    componentToUpdate.lastInspectionHours = performedHours;
+                    componentToUpdate.nextInspectionHoursDue = nextHoursDue;
+                    // Reset date-based inspection fields if updating by hours
+                    componentToUpdate.lastInspectionDate = ''; 
+                    componentToUpdate.nextInspectionDue = ''; 
+                }
+            }
+            
+            if (confirmed) {
+                try {
+                    // Update status if it was overdue/pending
+                    if (componentToUpdate.status === 'Vencido' || componentToUpdate.status === 'Pendiente') {
+                        componentToUpdate.status = 'Activo';
+                    }
+
+                    const componentRef = ref(database, `artifacts/${appId}/public_data/components/${serialNumber}`);
+                    await set(componentRef, componentToUpdate);
+
+                    console.log(`Inspección registrada para el componente ${serialNumber}.`);
+
+                    // Record the change in log, passing old data for comparison
+                    await recordComponentChange(componentToUpdate, 'Inspección Realizada', oldComponentData, null, null, description);
+
+                    scheduleInspectionDialog.close();
+                    filterAndRenderComponents(); // Re-render to update component cards
+                } catch (error) {
+                    console.error("Error al guardar la inspección en Firebase:", error);
+                }
+            } else {
+                console.log("Registro de inspección cancelado.");
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.clear();
+
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    console.log("Usuario autenticado en COMPONENTES980.HTML:", user.uid);
+                    populateMonthYearSelectors();
+                    loadMonthlyTotalsFromFirebase(); 
+                    loadComponentsFromFirebase();
+
+                    componentSearchInput.addEventListener('input', filterAndRenderComponents);
+                    editComponentForm.addEventListener('submit', saveEditedComponent);
+                    cancelEditButton.addEventListener('click', () => editComponentDialog.close());
+                    closeChangeLogButton.addEventListener('click', () => changeLogDialog.close());
+                    printAllComponentsButton.addEventListener('click', () => printComponents());
+                    addComponentButton.addEventListener('click', () => openEditDialog());
+                    printChangeLogButton.addEventListener('click', printChangeLog);
+                    
+                    deleteAllHistoryButton.addEventListener('click', () => {
+                        const serialNumber = changeLogTitle.textContent.replace('Historial de Cambios para Componente: ', '');
+                        deleteAllHistoryForComponent(serialNumber);
+                    });
+
+                    editInputs.type.addEventListener('change', (event) => {
+                        const isConditionType = event.target.value === 'condition';
+                        toggleNumericFields(isConditionType);
+                    });
+
+                    programInspectionButton.addEventListener('click', () => openScheduleInspectionDialog());
+                    scheduleInspectionForm.addEventListener('submit', saveInspection);
+                    cancelScheduleInspectionButton.addEventListener('click', () => scheduleInspectionDialog.close());
+
+                    inspectionTypeSelect.addEventListener('change', (event) => {
+                        if (event.target.value === 'date') {
+                            dateFieldsDiv.classList.remove('hidden-field');
+                            hoursFieldsDiv.classList.add('hidden-field');
+                        } else {
+                            dateFieldsDiv.classList.add('hidden-field');
+                            hoursFieldsDiv.classList.remove('hidden-field');
+                            // Pre-fill hours fields when switching to hours type
+                            inspectionPerformedHours.value = currentAcHrs.toFixed(1);
+                            inspectionNextHoursDue.value = (currentAcHrs + (parseFloat(inspectionIntervalHours.value) || 100)).toFixed(1);
+                        }
+                    });
+
+                    // Event listeners for automatic next due date/hours calculation
+                    inspectionPerformedDate.addEventListener('change', () => {
+                        const performedDate = new Date(inspectionPerformedDate.value);
+                        const intervalDays = parseFloat(inspectionIntervalDays.value) || 0;
+                        if (performedDate && intervalDays > 0) {
+                            const nextDate = new Date(performedDate);
+                            nextDate.setDate(performedDate.getDate() + intervalDays);
+                            inspectionNextDueDate.valueAsDate = nextDate;
+                        }
+                    });
+                    inspectionIntervalDays.addEventListener('input', () => {
+                        const performedDate = new Date(inspectionPerformedDate.value);
+                        const intervalDays = parseFloat(inspectionIntervalDays.value) || 0;
+                        if (performedDate && intervalDays > 0) {
+                            const nextDate = new Date(performedDate);
+                            nextDate.setDate(performedDate.getDate() + intervalDays);
+                            inspectionNextDueDate.valueAsDate = nextDate;
+                        }
+                    });
+
+                    inspectionPerformedHours.addEventListener('input', () => {
+                        const performedHours = parseFloat(inspectionPerformedHours.value) || 0;
+                        const intervalHours = parseFloat(inspectionIntervalHours.value) || 0;
+                        if (performedHours >= 0 && intervalHours > 0) {
+                            inspectionNextHoursDue.value = (performedHours + intervalHours).toFixed(1);
+                        }
+                    });
+                    inspectionIntervalHours.addEventListener('input', () => {
+                        const performedHours = parseFloat(inspectionPerformedHours.value) || 0;
+                        const intervalHours = parseFloat(inspectionIntervalHours.value) || 0;
+                        if (performedHours >= 0 && intervalHours > 0) {
+                            inspectionNextHoursDue.value = (performedHours + intervalHours).toFixed(1);
+                        }
+                    });
+
+                    inspectionComponentSearch.addEventListener('input', (event) => {
+                        populateInspectionComponentSelect(event.target.value);
+                    });
+
+                } else {
+                    console.log("No hay usuario autenticado en COMPONENTES980.HTML. Intentando autenticación anónima...");
+                    try {
+                        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                            console.log("Autenticación con token inicial exitosa.");
+                        } else {
+                            await signInAnonymously(auth);
+                            console.log("Autenticación anónima exitosa.");
+                        }
+                        populateMonthYearSelectors();
+                        loadMonthlyTotalsFromFirebase(); 
+                        loadComponentsFromFirebase();
+
+                        componentSearchInput.addEventListener('input', filterAndRenderComponents);
+                        editComponentForm.addEventListener('submit', saveEditedComponent);
+                        cancelEditButton.addEventListener('click', () => editComponentDialog.close());
+                        closeChangeLogButton.addEventListener('click', () => changeLogDialog.close());
+                        printAllComponentsButton.addEventListener('click', () => printComponents());
+                        addComponentButton.addEventListener('click', () => openEditDialog());
+                        printChangeLogButton.addEventListener('click', printChangeLog);
+
+                        deleteAllHistoryButton.addEventListener('click', () => {
+                            const serialNumber = changeLogTitle.textContent.replace('Historial de Cambios para Componente: ', '');
+                            deleteAllHistoryForComponent(serialNumber);
+                        });
+
+                        editInputs.type.addEventListener('change', (event) => {
+                            const isConditionType = event.target.value === 'condition';
+                            toggleNumericFields(isConditionType);
+                        });
+                        
+                        programInspectionButton.addEventListener('click', () => openScheduleInspectionDialog());
+                        scheduleInspectionForm.addEventListener('submit', saveInspection);
+                        cancelScheduleInspectionButton.addEventListener('click', () => scheduleInspectionDialog.close());
+
+                        inspectionTypeSelect.addEventListener('change', (event) => {
+                            if (event.target.value === 'date') {
+                                dateFieldsDiv.classList.remove('hidden-field');
+                                hoursFieldsDiv.classList.add('hidden-field');
+                            } else {
+                                dateFieldsDiv.classList.add('hidden-field');
+                                hoursFieldsDiv.classList.remove('hidden-field');
+                                inspectionPerformedHours.value = currentAcHrs.toFixed(1);
+                                inspectionNextHoursDue.value = (currentAcHrs + (parseFloat(inspectionIntervalHours.value) || 100)).toFixed(1);
+                            }
+                        });
+
+                        inspectionPerformedDate.addEventListener('change', () => {
+                            const performedDate = new Date(inspectionPerformedDate.value);
+                            const intervalDays = parseFloat(inspectionIntervalDays.value) || 0;
+                            if (performedDate && intervalDays > 0) {
+                                const nextDate = new Date(performedDate);
+                                nextDate.setDate(performedDate.getDate() + intervalDays);
+                                inspectionNextDueDate.valueAsDate = nextDate;
+                            }
+                        });
+                        inspectionIntervalDays.addEventListener('input', () => {
+                            const performedDate = new Date(inspectionPerformedDate.value);
+                            const intervalDays = parseFloat(inspectionIntervalDays.value) || 0;
+                            if (performedDate && intervalDays > 0) {
+                                const nextDate = new Date(performedDate);
+                                nextDate.setDate(performedDate.getDate() + intervalDays);
+                                inspectionNextDueDate.valueAsDate = nextDate;
+                            }
+                        });
+
+                        inspectionPerformedHours.addEventListener('input', () => {
+                            const performedHours = parseFloat(inspectionPerformedHours.value) || 0;
+                            const intervalHours = parseFloat(inspectionIntervalHours.value) || 0;
+                            if (performedHours >= 0 && intervalHours > 0) {
+                                inspectionNextHoursDue.value = (performedHours + intervalHours).toFixed(1);
+                            }
+                        });
+                        inspectionIntervalHours.addEventListener('input', () => {
+                            const performedHours = parseFloat(inspectionPerformedHours.value) || 0;
+                            const intervalHours = parseFloat(inspectionIntervalHours.value) || 0;
+                            if (performedHours >= 0 && intervalHours > 0) {
+                                inspectionNextHoursDue.value = (performedHours + intervalHours).toFixed(1);
+                            }
+                        });
+
+                        inspectionComponentSearch.addEventListener('input', (event) => {
+                            populateInspectionComponentSelect(event.target.value);
+                        });
+
+                    } catch (error) {
+                        console.error("Error en la autenticación (después del intento anónimo/con token):", error);
+                        generalSummaryDiv.innerHTML = '<p class="text-center text-red-600 col-span-full">Error de autenticación. Por favor, intenta de nuevo.</p>';
+                        activeComponentsSection.innerHTML = '<p class="text-center text-red-600 col-span-full">Error de autenticación. No se pueden cargar los componentes activos.</p>';
+                        retiredComponentsSection.innerHTML = '<p class="text-center text-red-600 col-span-full">Error de autenticación. No se pueden cargar los componentes retirados.</p>';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
