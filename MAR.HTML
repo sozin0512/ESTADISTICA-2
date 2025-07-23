@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FELIZ CUMPLEAÑOS MAR</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(270deg, #0a011d, #2a003a, #0a011d);
+            background-size: 600% 600%;
+            animation: gradientAnimation 15s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            position: relative;
+            color: #ffffff;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .heart-rain-container, .te-amo-rain-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .heart, .te-amo {
+            position: absolute;
+            font-size: 1.5em;
+            opacity: 0;
+            animation: fall linear infinite;
+            text-shadow: 0 0 5px #ff007f, 0 0 10px #ff007f;
+            will-change: transform, opacity;
+        }
+
+        .heart {
+            color: #ff007f;
+        }
+
+        .te-amo {
+            color: #b3b3b2;
+            font-size: 2em;
+            text-shadow: 0 0 5px #ffff00, 0 0 10px #babab6;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) scale(0.5);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(100vh) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        .message-overlay {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 0, 127, 0.5);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            animation: fadeInScale 2s forwards;
+            max-width: 90%; /* Ajustado para móviles */
+            box-sizing: border-box;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .message-overlay h1,
+        .message-overlay p,
+        .message-overlay .date-highlight,
+        .message-overlay .signature {
+            opacity: 0;
+            text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f;
+        }
+
+        .message-overlay h1 {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .message-overlay p {
+            font-size: 1.4em;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            color: #f0f0f0;
+        }
+
+        .message-overlay .date-highlight {
+            color: #ffcc00;
+            font-size: 1.1em;
+            margin-top: -10px;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ffcc00;
+        }
+
+        .message-overlay .signature {
+            color: #ffccff;
+            font-size: 1.1em;
+            font-style: italic;
+            margin-top: 30px;
+        }
+
+        /* MEDIA QUERIES PARA PANTALLAS PEQUEÑAS */
+        @media (max-width: 768px) {
+            .message-overlay {
+                padding: 20px 25px; /* Reducir padding */
+                min-height: auto; /* Permitir que el alto se ajuste al contenido */
+            }
+            .message-overlay h1 {
+                font-size: 2em; /* Tamaño más pequeño para el título */
+                margin-bottom: 10px;
+            }
+            .message-overlay p {
+                font-size: 1em; /* Tamaño más pequeño para el párrafo */
+                line-height: 1.6; /* Ajustar interlineado */
+                margin-bottom: 15px;
+            }
+            .message-overlay .date-highlight,
+            .message-overlay .signature {
+                font-size: 0.9em; /* Ajustar el tamaño de la fecha y la firma */
+            }
+
+            /* Ajustar tamaño de lluvia de corazones/texto para móviles */
+            .heart {
+                font-size: 1em; /* Corazones un poco más pequeños */
+            }
+            .te-amo {
+                font-size: 1.5em; /* "TE AMO" un poco más pequeño */
+            }
+
+            /* Ajustar botón de música y flecha */
+            .music-control {
+                bottom: 15px;
+                left: 15px;
+                padding: 8px 12px;
+                font-size: 0.8em;
+            }
+            .arrow-indicator {
+                bottom: 55px; /* Ajustar posición para apuntar al botón en móvil */
+                left: 40px; /* Ajustar posición horizontal */
+                border-left: 10px solid transparent;
+                border-right: 10px solid transparent;
+                border-top: 20px solid red;
+            }
+            .arrow-indicator::after {
+                top: -25px;
+                left: -3px;
+                width: 6px;
+                height: 25px;
+            }
+             /* Ocultar la flecha si es demasiado pequeña o no necesaria en algunos móviles */
+            .arrow-indicator.hidden-on-mobile {
+                display: none;
+            }
+        }
+
+        .music-control {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(255,255,255,0.2);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 0.9em;
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            transition: background-color 0.3s ease;
+        }
+
+        .music-control:hover {
+            background-color: rgba(255,255,255,0.4);
+        }
+
+        .arrow-indicator {
+            position: absolute;
+            bottom: 65px;
+            left: 50px;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid red;
+            z-index: 11;
+            animation: bounceArrow 1s infinite alternate;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .arrow-indicator::after {
+            content: '';
+            position: absolute;
+            top: -30px;
+            left: -5px;
+            width: 10px;
+            height: 30px;
+            background-color: red;
+        }
+
+        .arrow-indicator.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes bounceArrow {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+
+        .image-slideshow-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0,0,0,0.5);
+            /* Asegúrate de que este contenedor sea responsive */
+            padding: 10px; /* Pequeño padding para que las imágenes no toquen los bordes */
+            box-sizing: border-box;
+        }
+
+        .slideshow-image {
+            position: absolute;
+            width: 90%; /* Más ancho para ocupar más espacio en móvil */
+            height: auto; /* Altura automática para mantener la proporción */
+            max-width: 90%; /* Ajuste el máximo para evitar imágenes gigantes */
+            max-height: 80vh; /* Limitar la altura máxima a un porcentaje de la altura de la vista */
+            object-fit: contain; /* Asegura que la imagen se vea completa sin recortarse */
+            opacity: 0;
+            transition: opacity 1.2s ease-in-out, transform 1.2s ease-in-out, filter 1.2s ease-in-out;
+            transform: scale(0.8) translateY(-50px);
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(255,255,255,0.2), 0 0 50px rgba(255,0,127,0.4);
+        }
+
+        .slideshow-image.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        /* Efectos de imagen (se mantienen igual, ya que son transformaciones) */
+        .slideshow-image.effect-1 { animation: explodeFadeIn 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
+        @keyframes explodeFadeIn {
+            0% { opacity: 0; transform: scale(0) rotate(0deg); filter: blur(10px); }
+            50% { opacity: 1; transform: scale(1.1) rotate(5deg); filter: blur(0px); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+
+        .slideshow-image.effect-2 {
+            animation: magicDoor 1.8s ease-out forwards;
+            transform-origin: left center;
+        }
+        @keyframes magicDoor {
+            0% { opacity: 0; transform: perspective(1000px) rotateY(90deg) translateX(-100px); }
+            100% { opacity: 1; transform: perspective(1000px) rotateY(0deg) translateX(0); }
+        }
+
+        .slideshow-image.effect-3 { animation: fallBounce 2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes fallBounce {
+            0% { opacity: 0; transform: translateY(-200%) scale(0.5); }
+            60% { opacity: 1; transform: translateY(10%) scale(1.1); }
+            80% { transform: translateY(-5%) scale(0.95); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        .slideshow-image.effect-4 { animation: rippleReveal 2s ease-out forwards; }
+        @keyframes rippleReveal {
+            0% { opacity: 0; transform: scale(0.5); filter: brightness(0.5); }
+            50% { opacity: 0.8; transform: scale(1.05); filter: brightness(1.5); }
+            100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+        }
+
+        .slideshow-image.effect-5 {
+            animation: blurAndShine 2s ease-in-out forwards;
+            filter: blur(15px) brightness(0.5);
+        }
+        @keyframes blurAndShine {
+            0% { opacity: 0; filter: blur(20px) brightness(0.2); transform: scale(0.9); }
+            50% { opacity: 0.7; filter: blur(5px) brightness(1.2); transform: scale(1.05); }
+            100% { opacity: 1; filter: blur(0) brightness(1); transform: scale(1); }
+        }
+
+        .message-overlay.hidden {
+            opacity: 0 !important;
+            pointer-events: none;
+            transition: opacity 1s ease-out;
+        }
+
+        /* Estilos para la letra de la canción */
+        .lyrics-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            text-align: center;
+            color: #ffffff;
+            font-size: 1.1em; /* Ajustado para móviles */
+            line-height: 1.6; /* Ajustado para móviles */
+            opacity: 0;
+            animation: fadeIn 2s forwards;
+            text-shadow: 0 0 10px #00bfff, 0 0 20px #00bfff;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            max-width: 90%; /* Ajustado para móviles */
+            box-sizing: border-box;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="heart-rain-container"></div>
+    <div class="te-amo-rain-container"></div>
+
+    <div class="image-slideshow-container" id="imageSlideshow">
+    </div>
+
+    <div class="message-overlay" id="messageBox">
+        <h1 id="mainTitle"></h1>
+        <p class="date-highlight" id="specialDate"></p>
+        <p id="firstParagraph"></p>
+        <p id="secondParagraph"></p>
+        <p class="signature" id="signatureText"></p>
+    </div>
+
+    <audio id="myAudio" loop>
+        <source src="mp3.mp3" type="audio/mpeg">
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+    <button class="music-control" onclick="togglePlayPause()">
+        ▶️ Reproducir Música
+    </button>
+    <div class="arrow-indicator" id="musicArrow"></div>
+
+    <div class="lyrics-container" id="lyricsDisplay" style="display: none;">
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <script>
+        // --- Lluvia de Corazones (JavaScript) ---
+        const heartContainer = document.querySelector('.heart-rain-container');
+        const numHearts = 70;
+        const hearts = [];
+
+        for (let i = 0; i < numHearts; i++) {
+            const heart = document.createElement('span');
+            heart.classList.add('heart');
+            heart.innerHTML = '❤️';
+            heartContainer.appendChild(heart);
+            hearts.push(heart);
+
+            heart.style.left = `${Math.random() * 100}vw`;
+            heart.style.animationDelay = `${Math.random() * 10}s`;
+            heart.style.animationDuration = `${5 + Math.random() * 5}s`;
+            heart.style.fontSize = `${1 + Math.random() * 1.5}em`;
+        }
+
+        // --- Lluvia de "TE AMO" (JavaScript) ---
+        const teAmoContainer = document.querySelector('.te-amo-rain-container');
+        const numTeAmo = 50;
+        const teAmoElements = [];
+
+        for (let i = 0; i < numTeAmo; i++) {
+            const teAmo = document.createElement('span');
+            teAmo.classList.add('te-amo');
+            teAmo.innerHTML = 'TE AMO';
+            teAmoContainer.appendChild(teAmo);
+            teAmoElements.push(teAmo);
+
+            teAmo.style.left = `${Math.random() * 100}vw`;
+            teAmo.style.animationDelay = `${Math.random() * 12}s`;
+            teAmo.style.animationDuration = `${7 + Math.random() * 6}s`;
+            teAmo.style.fontSize = `${2 + Math.random() * 1}em`;
+        }
+
+
+        // --- Efecto de Escritura (JavaScript) ---
+        const messageBox = document.getElementById('messageBox');
+        const mainTitle = document.getElementById('mainTitle');
+        const specialDate = document.getElementById('specialDate');
+        const firstParagraph = document.getElementById('firstParagraph');
+        const secondParagraph = document.getElementById('secondParagraph');
+        const signatureText = document.getElementById('signatureText');
+
+        const originalTitle = "¡PARA MI HERMOSA [MAR]"; // <-- ¡PERSONALIZA AQUÍ!
+        const originalDate = "FELIZ CUMPLEAÑOS BONITA MIA ✨"; // <-- ¡PERSONALIZA AQUÍ!
+        const originalFirstParagraph = "En este universo lleno de posibilidades, mi corazón siempre te elige a ti. Eres mi constante, mi alegría, mi más hermosa melodía.";
+        const originalSecondParagraph = "Que esta doble lluvia de amor te recuerde lo mucho que significas para mí, hoy y siempre, DALE CLICK A LA PANTALLA ";
+        const originalSignature = "- Con todo mi amor ATT: SOZA";
+
+        let textIndex = 0;
+        let elementsToType = [
+            { element: mainTitle, text: originalTitle, delay: 1000 },
+            { element: specialDate, text: originalDate, delay: 500 },
+            { element: firstParagraph, text: originalFirstParagraph, delay: 800 },
+            { element: secondParagraph, text: originalSecondParagraph, delay: 800 },
+            { element: signatureText, text: originalSignature, delay: 1000 }
+        ];
+
+        function typeWriter() {
+            if (textIndex < elementsToType.length) {
+                const item = elementsToType[textIndex];
+                let currentElement = item.element;
+                let currentText = item.text;
+                let charIndex = 0;
+
+                setTimeout(() => {
+                    currentElement.style.opacity = 1;
+                    const typingInterval = setInterval(() => {
+                        if (charIndex < currentText.length) {
+                            currentElement.textContent += currentText.charAt(charIndex);
+                            charIndex++;
+                        } else {
+                            clearInterval(typingInterval);
+                            textIndex++;
+                            typeWriter();
+                        }
+                    }, 50);
+                }, item.delay);
+            } else {
+                setTimeout(startImageSlideshow, 2000);
+            }
+        }
+
+        messageBox.addEventListener('animationend', () => {
+            if (!messageBox.dataset.typed) {
+                messageBox.dataset.typed = 'true';
+                typeWriter();
+            }
+        }, { once: true });
+
+
+        // --- Control de Música (JavaScript) ---
+        const myAudio = document.getElementById("myAudio");
+        const musicArrow = document.getElementById("musicArrow");
+        const musicButton = document.querySelector('.music-control');
+
+        myAudio.addEventListener('canplaythrough', () => {
+            console.log('El archivo de audio mp3.mp3 se ha cargado correctamente y está listo para reproducir.');
+        });
+
+        myAudio.addEventListener('error', (e) => {
+            console.error('Error al cargar o reproducir el archivo de audio:', e);
+            console.error('Código de error de audio:', myAudio.error.code);
+            switch (myAudio.error.code) {
+                case 1:
+                    console.error('MEDIA_ERR_ABORTED - La obtención de recursos fue abortada por el usuario.');
+                    break;
+                case 2:
+                    console.error('MEDIA_ERR_NETWORK - Se produjo un error de red durante la descarga del medio.');
+                    break;
+                case 3:
+                    console.error('MEDIA_ERR_DECODE - La reproducción del medio se abortó debido a un problema de corrupción o características no soportadas.');
+                    break;
+                case 4:
+                    console.error('MEDIA_ERR_SRC_NOT_SUPPORTED - El recurso no se pudo cargar, ya sea porque el formato no es compatible o hubo un problema de servidor/red.');
+                    break;
+                default:
+                    console.error('Error de audio desconocido.');
+                    break;
+            }
+            alert('Error al cargar la música. Asegúrate de que "mp3.mp3" está en la misma carpeta y es un archivo válido.');
+        });
+
+        function togglePlayPause() {
+            if (myAudio.paused) {
+                myAudio.play().then(() => {
+                    musicButton.textContent = '⏸️ Pausar Música';
+                    musicArrow.classList.add('hidden');
+                }).catch(e => {
+                    console.error("Error al reproducir el audio (después de .play()):", e);
+                    alert("No se pudo iniciar la reproducción de música. Esto puede ser por restricciones del navegador. Por favor, asegúrate de que el audio no esté bloqueado.");
+                });
+            } else {
+                myAudio.pause();
+                musicButton.textContent = '▶️ Reproducir Música';
+            }
+        }
+
+        // --- Efecto de Confeti y Fuegos Artificiales ---
+        messageBox.addEventListener('click', () => {
+            confetti({
+                particleCount: 180,
+                spread: 120,
+                origin: { y: 0.6 },
+                colors: ['#ff007f', '#ffccff', '#ffffff', '#ff66b2', '#ffff00']
+            });
+
+            const duration = 5 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        });
+
+        // --- Secuencia de Imágenes con Efectos (JavaScript) ---
+        const imageSlideshow = document.getElementById('imageSlideshow');
+        const imagePaths = [
+            '1.jpg',
+            '2.jpg',
+            '3.jpg',
+            '4.jpg',
+            '5.jpg'
+            // ¡Asegúrate de que estas imágenes existan en la misma carpeta!
+        ];
+        const effects = [
+            'effect-1', // Explosión y Fade In
+            'effect-2', // Puerta mágica
+            'effect-3', // Caída y rebote
+            'effect-4', // Ondulación y revelación
+            'effect-5'  // Desenfoque y brillo sorpresa
+        ];
+        let currentImageIndex = 0;
+        let slideshowInterval;
+        const imageDisplayDuration = 6000; // Duración de cada imagen en ms
+
+        function showNextImage() {
+            const allImages = imageSlideshow.querySelectorAll('.slideshow-image');
+            allImages.forEach(img => {
+                img.style.opacity = 0;
+                img.style.animation = 'none';
+                void img.offsetWidth;
+                img.classList.remove('active');
+                effects.forEach(effect => img.classList.remove(effect));
+            });
+
+            // Si ya no quedan imágenes, muestra la letra y termina
+            if (currentImageIndex >= imagePaths.length) {
+                clearInterval(slideshowInterval); // Detiene el intervalo de las fotos
+                setTimeout(showLyrics, 1000); // Muestra la letra después de un breve retraso
+                return;
+            }
+
+            let currentImageElement = allImages[currentImageIndex];
+            if (!currentImageElement) {
+                currentImageElement = document.createElement('img');
+                currentImageElement.classList.add('slideshow-image');
+                imageSlideshow.appendChild(currentImageElement);
+            }
+
+            currentImageElement.src = imagePaths[currentImageIndex];
+            currentImageElement.alt = `Momento ${currentImageIndex + 1}`;
+
+            const currentEffect = effects[currentImageIndex % effects.length];
+            currentImageElement.classList.add('active', currentEffect);
+
+            currentImageIndex++; // Incrementa para la próxima imagen
+        }
+
+        function startImageSlideshow() {
+            messageBox.classList.add('hidden');
+            imageSlideshow.style.display = 'flex';
+            showNextImage();
+            slideshowInterval = setInterval(showNextImage, imageDisplayDuration);
+        }
+
+        // --- Mostrar la Letra de la Canción ---
+        const lyricsContainer = document.getElementById('lyricsDisplay');
+        const songLyrics = `
+            <p>En cada latido de mi corazón, tu nombre resuena,</p>
+            <p>Eres la melodía que mi alma serena.</p>
+            <p>Tu sonrisa ilumina mis días oscuros,</p>
+            <p>En tus ojos encuentro mis sueños más puros.</p>
+            <p>...</p>
+            <p>Y así, mi amor, en este dulce compás,</p>
+            <p>Te entrego mi vida, mi eterno jamás.</p>
+            <p>Porque en ti encontré mi razón de ser,</p>
+            <p>Y SI TALVEZ FUE TARDE PERO LO SIENTO, PENSE QUE NO TE GUSTARIA.</p>
+              <p>TENGO OTRO REGALO TAMBINEN.......</p>
+            `;
+
+        function showLyrics() {
+            imageSlideshow.style.display = 'none';
+            lyricsContainer.innerHTML = songLyrics;
+            lyricsContainer.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
