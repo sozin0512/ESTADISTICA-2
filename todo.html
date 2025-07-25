@@ -39,6 +39,9 @@
       z-index: 1; /* Asegura que el contenido esté por encima del fondo de video */
       padding-top: 20px; /* Espaciado para que no se superponga con el fondo */
       text-align: center;
+      display: flex; /* Usar flexbox para organizar los elementos */
+      flex-direction: column; /* Apilar elementos verticalmente */
+      align-items: center; /* Centrar horizontalmente */
     }
 
     .titulo {
@@ -83,6 +86,7 @@
       animation: pulsar 2s infinite alternate; /* Agregamos una animación al contador */
       text-transform: uppercase; /* Convierte el texto a mayúsculas */
       font-weight: bold; /* Texto en negrita */
+      margin-bottom: 20px; /* Espacio debajo del contador */
     }
 
     @keyframes pulsar {
@@ -123,6 +127,41 @@
       font-size: 1.5em;
       margin-left: 10px;
     }
+
+    /* Nuevo estilo para la visualización de la fecha actual */
+    .current-date-display {
+      font-size: 1.8em;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    /* Nuevo estilo para la visualización de eventos especiales */
+    .special-event-display {
+      font-size: 1.5em;
+      color: #FFD700; /* Color dorado para eventos especiales */
+      background-color: rgba(128, 0, 128, 0.7); /* Fondo morado semitransparente */
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      display: none; /* Oculto por defecto, se muestra con JS */
+      animation: pulse-glow 1.5s infinite alternate; /* Animación para días especiales */
+    }
+
+    @keyframes pulse-glow {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+      }
+      100% {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+      }
+    }
   </style>
 </head>
 <body>
@@ -133,16 +172,24 @@
 
   <div class="contenedor">
     <div class="dashboard">
-      <div class="contador"><span id="dias-contador"></span></div>
+      <div class="dias-sin-accidentes" id="dias-sin-accidentes">
+        DÍAS SIN ACCIDENTES: <span id="contador-dias">719</span>
+      </div>
       
+      <!-- Contenedor para la fecha actual -->
+      <div class="current-date-display" id="current-date-display"></div>
+      
+      <!-- Contenedor para el evento especial (oculto por defecto) -->
+      <div class="special-event-display" id="special-event-display"></div>
+
       <!-- Botón de menú mejorado -->
       <button class="menu-boton" id="menu-toggle">Mostrar Menú</button>
 
       <!-- Contenedor de los botones dentro del dashboard -->
       <div class="botones-principales" id="menu">
         <a href="ESTADISTICA.HTML" class="boton-principal">ESTADISTICA</a>
-         <a href="a-4.html" class="boton-principal">ABASTOS</a>
-          <a href="indexx.html" class="boton-principal">HORAS CICLOS Y ATERRIZAJES</a>
+        <a href="a-4.html" class="boton-principal">ABASTOS</a>
+        <a href="indexx.html" class="boton-principal">HORAS CICLOS Y ATERRIZAJES</a>
         <a href="https://www.bellhelicopter.net/tp/" class="boton-principal">MANUALES BELL</a>
         <a href="https://www.prattwhitney.com/" class="boton-principal">MANUALES MOTORES</a>
         <a href="estado.html" class="boton-principal">ACTUALIZAR ESTADO DIARIO</a>
@@ -152,10 +199,6 @@
         <a href="OFICINA.HTML" class="boton-principal">OFICINA</a>
         <a href="https://airbusworld.helicopters.airbus.com/web/guest/home#/home" class="boton-principal">MANUALES AIRBUS</a>
         <a href="PRINCIPIOOO.HTML" class="boton-principal">BUSCADOR DE INSPECIONES H-145</a>
-      </div>
-      
-      <div class="dias-sin-accidentes" id="dias-sin-accidentes">
-        DÍAS SIN ACCIDENTES: <span id="contador-dias">719</span>
       </div>
     </div>
   </div>
@@ -206,6 +249,88 @@
         menuToggle.textContent = 'Ocultar Menú'; // Cambiar el texto del botón
       }
     });
+
+    // --- Lógica para la fecha actual y fechas especiales ---
+    const currentDateDisplay = document.getElementById('current-date-display');
+    const specialEventDisplay = document.getElementById('special-event-display');
+
+    const specialDates = [
+        // Fechas especiales de Honduras
+        { month: 0, day: 1, name: "Año Nuevo", emoji: "🎆" }, // Enero (0)
+        { month: 3, day: 14, name: "Día de las Américas", emoji: "🌎" }, // Abril (3)
+        { month: 4, day: 1, name: "Día del Trabajo", emoji: "👨‍🏭" }, // Mayo (4)
+        { month: 8, day: 15, name: "Día de la Independencia de Honduras", emoji: "🇭🇳" }, // Septiembre (8)
+        { month: 9, day: 3, name: "Día del Soldado", emoji: "🎖️" }, // Octubre (9)
+        { month: 9, day: 12, name: "Día de la Raza", emoji: "🤝" }, // Octubre (9)
+        { month: 9, day: 21, name: "Día de las Fuerzas Armadas", emoji: "✈️" }, // Octubre (9)
+        { month: 11, day: 25, name: "Navidad", emoji: "🎄" }, // Diciembre (11)
+
+        // Fechas especiales globales
+        { month: 1, day: 14, name: "Día de San Valentín", emoji: "❤️" }, // Febrero (1)
+        { month: 2, day: 8, name: "Día Internacional de la Mujer", emoji: "♀️" }, // Marzo (2)
+        { month: 3, day: 22, name: "Día de la Tierra", emoji: "🌍" }, // Abril (3)
+        { month: 5, day: 21, name: "Día Mundial de la Diversidad Cultural", emoji: "🤝" }, // Junio (5)
+        { month: 6, day: 4, name: "Día de la Independencia de EE. UU.", emoji: "🇺🇸" }, // Julio (6)
+        { month: 7, day: 30, name: "Día Internacional de la Amistad", emoji: "🫂" }, // Agosto (7)
+        { month: 9, day: 31, name: "Halloween", emoji: "🎃" }, // Octubre (9)
+        { month: 10, day: 1, name: "Día de Todos los Santos", emoji: "🕯️" }, // Noviembre (10)
+        { month: 10, day: 11, name: "Día de los Veteranos", emoji: "🎗️" }, // Noviembre (10)
+        { month: 11, day: 31, name: "Nochevieja", emoji: "🎉" }, // Diciembre (11)
+
+        // Fechas importantes de la Aviación Mundial
+        { month: 6, day: 25, name: "Día de la Aviación Civil", emoji: "✈️" }, // Julio 25 (aunque OACI es Dic 7, a veces se celebra este día)
+        { month: 6, day: 20, name: "Primer Alunizaje (Apollo 11)", emoji: "🚀" }, // Julio 20
+        { month: 11, day: 17, name: "Primer Vuelo de los Hermanos Wright", emoji: "🛩️" }, // Diciembre 17
+        { month: 11, day: 7, name: "Día Internacional de la Aviación Civil (OACI)", emoji: "🌐✈️" }, // Diciembre 7
+        { month: 7, day: 19, name: "Día Mundial de la Aviación Humanitaria", emoji: "🕊️" }, // Agosto 19
+
+        // Fechas importantes de la Aviación Hondureña
+        { month: 4, day: 14, name: "Día de la Aviación Hondureña (Fundación FAH)", emoji: "🇭🇳✈️" }, // Mayo 14
+        { month: 1, day: 18, name: "Fundación de Aerolíneas Sosa", emoji: "✈️" }, // Febrero 18
+        { month: 9, day: 1, name: "Fundación de SAHSA", emoji: "✈️" }, // Octubre 1
+
+        // Fechas importantes de la Milicia Hondureña
+        { month: 1, day: 1, name: "Día del Ejército de Honduras", emoji: "🪖" }, // Febrero 1
+        { month: 2, day: 28, name: "Día del Ejercito de Honduras", emoji: "🪖" }, // Marzo 28
+        { month: 5, day: 15, name: "Día del Cadete (Academia Militar)", emoji: "🎓🪖" }, // Junio 15
+        { month: 8, day: 6, name: "Día de la Fuerza Naval de Honduras", emoji: "⚓" }, // Septiembre 6
+        { month: 10, day: 10, name: "Día de la Policía Nacional de Honduras", emoji: "👮" }, // Noviembre 10
+
+        // Nuevas fechas importantes de la Fuerza Aérea Hondureña (adicionales)
+        { month: 3, day: 12, name: "Día de la Aviación Militar Hondureña", emoji: "🎖️✈️" }, // Abril 12 (ejemplo, si hay una fecha específica)
+        { month: 6, day: 1, name: "Día del Piloto de Combate FAH", emoji: "👨‍✈️🔥" }, // Julio 1 (ejemplo)
+        { month: 9, day: 25, name: "Aniversario de la Academia Militar de Aviación", emoji: "🏫✈️" } // Octubre 25 (ejemplo)
+    ];
+
+    function actualizarFechaYEventos() {
+        const today = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = today.toLocaleDateString('es-ES', options);
+        currentDateDisplay.textContent = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1); // Capitalizar la primera letra
+
+        // Reiniciar el estado del evento especial
+        specialEventDisplay.style.display = 'none';
+        specialEventDisplay.textContent = '';
+
+        const currentMonth = today.getMonth(); // 0-11
+        const currentDay = today.getDate(); // 1-31
+
+        let isSpecialDay = false;
+        for (const event of specialDates) {
+            if (event.month === currentMonth && event.day === currentDay) {
+                specialEventDisplay.textContent = `${event.emoji} ¡Feliz ${event.name}! ${event.emoji}`;
+                specialEventDisplay.style.display = 'block'; // Mostrar el evento especial
+                isSpecialDay = true;
+                break; // Salir del bucle una vez que se encuentra una coincidencia
+            }
+        }
+    }
+
+    // Actualizar la fecha y eventos al cargar la página
+    actualizarFechaYEventos();
+
+    // Opcional: Actualizar la fecha y eventos cada minuto para reflejar cambios de día
+    setInterval(actualizarFechaYEventos, 60 * 1000); // Cada minuto
   </script>
 </body>
 </html>
