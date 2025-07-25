@@ -378,7 +378,7 @@
   <div class="contenedor">
     <div class="dashboard" id="dashboard">
       <!-- Nuevo título de bienvenida con emoji de palmera -->
-      <h1 class="welcome-title">🌴 BIENVENIDOS A LA ISLA 🌴</h1>
+      <h1 class="welcome-title" id="welcome-title">🌴 BIENVENIDOS A LA ISLA 🌴</h1>
 
       <div class="dias-sin-accidentes" id="dias-sin-accidentes">
         DÍAS SIN ACCIDENTES: <span id="contador-dias">0</span>
@@ -459,21 +459,39 @@
     const menuToggle = document.getElementById('menu-toggle');
     const menu = document.getElementById('menu');
 
+    // Referencias a los elementos que deben ocultarse/mostrar
+    const welcomeTitle = document.getElementById('welcome-title');
+    const diasSinAccidentes = document.getElementById('dias-sin-accidentes');
+    const currentDateDisplay = document.getElementById('current-date-display');
+    const specialEventDisplay = document.getElementById('special-event-display');
+
+
     menuToggle.addEventListener('click', function() {
       // Alternar la visibilidad del menú
       if (menu.classList.contains('show')) {
         menu.classList.remove('show');
         menuToggle.textContent = 'Mostrar Menú'; // Cambiar el texto del botón
+        
+        // Mostrar los elementos principales cuando el menú se oculta
+        welcomeTitle.style.display = 'block';
+        diasSinAccidentes.style.display = 'block';
+        currentDateDisplay.style.display = 'block';
+        // Para specialEventDisplay, necesitamos re-evaluar si debe mostrarse
+        actualizarFechaYEventos(); 
+
       } else {
         menu.classList.add('show');
         menuToggle.textContent = 'Ocultar Menú'; // Cambiar el texto del botón
+
+        // Ocultar los elementos principales cuando el menú se despliega
+        welcomeTitle.style.display = 'none';
+        diasSinAccidentes.style.display = 'none';
+        currentDateDisplay.style.display = 'none';
+        specialEventDisplay.style.display = 'none'; // Siempre ocultar cuando el menú está abierto
       }
     });
 
     // --- Lógica para la fecha actual y fechas especiales ---
-    const currentDateDisplay = document.getElementById('current-date-display');
-    const specialEventDisplay = document.getElementById('special-event-display');
-
     const specialDates = [
         // Fechas especiales de Honduras
         { month: 0, day: 1, name: "Año Nuevo", emoji: "🎆" }, // Enero (0)
@@ -532,16 +550,17 @@
         specialEventDisplay.style.display = 'none';
         specialEventDisplay.textContent = '';
 
-        const currentMonth = today.getMonth(); // 0-11
-        const currentDay = today.getDate(); // 1-31
+        // Solo mostrar el evento especial si el menú NO está desplegado
+        if (!menu.classList.contains('show')) {
+            const currentMonth = today.getMonth(); // 0-11
+            const currentDay = today.getDate(); // 1-31
 
-        let isSpecialDay = false;
-        for (const event of specialDates) {
-            if (event.month === currentMonth && event.day === currentDay) {
-                specialEventDisplay.textContent = `${event.emoji} ¡Feliz ${event.name}! ${event.emoji}`;
-                specialEventDisplay.style.display = 'block'; // Mostrar el evento especial
-                isSpecialDay = true;
-                break; // Salir del bucle una vez que se encuentra una coincidencia
+            for (const event of specialDates) {
+                if (event.month === currentMonth && event.day === currentDay) {
+                    specialEventDisplay.textContent = `${event.emoji} ¡Feliz ${event.name}! ${event.emoji}`;
+                    specialEventDisplay.style.display = 'block'; // Mostrar el evento especial
+                    break; // Salir del bucle una vez que se encuentra una coincidencia
+                }
             }
         }
     }
@@ -596,17 +615,23 @@
     const tiltAmount = 15; // Grados máximos de inclinación
 
     dashboard.addEventListener('mousemove', (e) => {
-        const rect = dashboard.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
+        // Solo aplicar el tilt si el menú NO está desplegado
+        if (!menu.classList.contains('show')) {
+            const rect = dashboard.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
 
-        const mouseX = e.clientX;
-        const mouseY = e.clientY;
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
 
-        const rotateX = (mouseY - centerY) / (rect.height / 2) * -tiltAmount;
-        const rotateY = (mouseX - centerX) / (rect.width / 2) * tiltAmount;
+            const rotateX = (mouseY - centerY) / (rect.height / 2) * -tiltAmount;
+            const rotateY = (mouseX - centerX) / (rect.width / 2) * tiltAmount;
 
-        dashboard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            dashboard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        } else {
+            // Si el menú está desplegado, asegurar que no haya inclinación
+            dashboard.style.transform = `rotateX(0deg) rotateY(0deg)`;
+        }
     });
 
     dashboard.addEventListener('mouseleave', () => {
