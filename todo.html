@@ -7,6 +7,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
 
   <style>
+    /* Reset básico y box-sizing para mejor control del layout */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
     /* Variables CSS para colores y transiciones */
     :root {
       --primary-color: rgba(255, 0, 0, 0.7); /* Rojo vibrante semitransparente */
@@ -309,10 +314,12 @@
       .welcome-title {
         font-size: 3.5em;
         margin-bottom: 30px;
+        letter-spacing: 3px; /* Ajuste de espaciado para pantallas más pequeñas */
       }
       .dias-sin-accidentes {
         font-size: 3em;
         padding: 25px 40px;
+        letter-spacing: 2px; /* Ajuste de espaciado */
       }
       .current-date-display, .special-event-display {
         font-size: 1.4em;
@@ -336,24 +343,25 @@
 
     @media (max-width: 480px) {
       .welcome-title {
-        font-size: 2.5em;
-        margin-bottom: 25px;
-        letter-spacing: 3px;
+        font-size: 2.2em; /* Reducción adicional para móviles pequeños */
+        margin-bottom: 20px; /* Menos margen */
+        letter-spacing: 2px; /* Ajuste de espaciado */
       }
       .dias-sin-accidentes {
-        font-size: 2.2em;
-        padding: 20px 30px;
-        margin-bottom: 25px;
+        font-size: 1.8em; /* Reducción adicional */
+        padding: 18px 25px;
+        margin-bottom: 20px;
+        letter-spacing: 1px; /* Ajuste de espaciado */
       }
       .current-date-display, .special-event-display {
-        font-size: 1.1em;
-        padding: 10px 20px;
-        margin-bottom: 20px;
+        font-size: 1em;
+        padding: 10px 18px;
+        margin-bottom: 15px;
       }
       .menu-boton {
-        font-size: 1.8em;
+        font-size: 1.6em;
         padding: 15px 30px;
-        margin-bottom: 30px;
+        margin-bottom: 25px;
       }
       .botones-principales {
         grid-template-columns: 1fr; /* Una columna en pantallas muy pequeñas */
@@ -361,7 +369,7 @@
         padding: 15px;
       }
       .boton-principal {
-        font-size: 1.2em;
+        font-size: 1.1em;
         padding: 12px 15px;
         min-height: 60px;
       }
