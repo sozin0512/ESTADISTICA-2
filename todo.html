@@ -83,6 +83,7 @@
       max-width: 90%; /* Ancho máximo para el contenido */
       box-sizing: border-box;
       perspective: 1000px; /* Para efectos 3D */
+      height: 100vh; /* Asegura que el contenedor tome la altura completa de la ventana */
     }
 
     .dashboard {
@@ -95,6 +96,9 @@
       animation: fadeIn 1.5s ease-out forwards;
       transform-style: preserve-3d; /* Para efectos 3D en los hijos */
       transition: transform 0.5s ease-out; /* Transición para el tilt */
+      flex-grow: 1; /* Permite que el dashboard crezca para llenar el espacio disponible */
+      height: 100%; /* Toma la altura completa de su padre (contenedor) */
+      justify-content: center; /* Centra el contenido verticalmente */
     }
 
     @keyframes fadeIn {
@@ -276,7 +280,7 @@
       transform-style: preserve-3d;
 
       /* Propiedades para desplazamiento en el menú */
-      max-height: 80vh; /* Limita la altura del menú a un porcentaje de la ventana */
+      max-height: 100%; /* Permite que tome la altura completa del dashboard */
       overflow-y: auto; /* Permite desplazamiento vertical si el contenido excede max-height */
       -webkit-overflow-scrolling: touch; /* Suaviza el desplazamiento en iOS */
     }
@@ -356,7 +360,7 @@
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* Min-width ligeramente menor */
         gap: 15px; /* Espaciado reducido */
         padding: 15px; /* Relleno reducido */
-        max-height: 75vh; /* Ajuste para pantallas más pequeñas */
+        max-height: 90vh; /* Ajuste para pantallas más pequeñas, permitiendo más espacio para el scroll */
       }
       .boton-principal {
         font-size: 1.3em; /* Fuente ligeramente menor */
@@ -391,7 +395,7 @@
         grid-template-columns: 1fr; /* Una columna para pantallas muy pequeñas */
         gap: 10px; /* Espaciado aún más reducido */
         padding: 10px; /* Relleno aún más reducido */
-        max-height: 70vh; /* Ajuste para pantallas muy pequeñas */
+        max-height: 85vh; /* Ajuste para pantallas muy pequeñas, permitiendo más espacio para el scroll */
       }
       .boton-principal {
         font-size: 1em; /* Fuente aún más pequeña */
