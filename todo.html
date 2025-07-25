@@ -2,26 +2,47 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TODO SOBRE HELICOPTEROS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
 
   <style>
+    /* Variables CSS para colores y transiciones */
+    :root {
+      --primary-color: rgba(255, 0, 0, 0.7); /* Rojo vibrante semitransparente */
+      --secondary-color: rgba(46, 216, 30, 0.7); /* Verde vibrante semitransparente */
+      --text-light: #f0f0f0;
+      --text-dark: #333;
+      --glass-bg: rgba(255, 255, 255, 0.1); /* Fondo de cristal más sutil */
+      --glass-border: rgba(255, 255, 255, 0.2); /* Borde de cristal */
+      --dark-overlay: rgba(0, 0, 0, 0.7); /* Superposición oscura para el video */
+      --transition-speed: 0.4s;
+      --border-radius-large: 20px; /* Más redondeado */
+      --border-radius-medium: 12px;
+    }
+
     body {
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', sans-serif;
       overflow: hidden; /* Oculta las barras de desplazamiento */
-    }
-
-    .contenedor {
-      position: relative;
-      width: 100%;
-      height: 100vh; /* Altura total de la ventana */
+      background-color: #1a1a2e; /* Color de fondo de respaldo */
+      color: var(--text-light);
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      color: rgb(3, 3, 3); /* Color del texto */
-      text-align: center;
+      min-height: 100vh;
+      position: relative;
+      /* Animación de fondo sutil */
+      background: linear-gradient(135deg, #1a1a2e, #0f0f1a, #1a1a2e);
+      background-size: 200% 200%;
+      animation: gradientBackground 15s ease infinite;
+    }
+
+    @keyframes gradientBackground {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .fondo-video {
@@ -31,135 +52,318 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      z-index: -2; /* Detrás de la superposición */
+    }
+
+    /* Superposición para mejorar la legibilidad del texto sobre el video */
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--dark-overlay);
       z-index: -1;
     }
 
-    .dashboard {
+    .contenedor {
       position: relative;
-      z-index: 1; /* Asegura que el contenido esté por encima del fondo de video */
-      padding-top: 20px; /* Espaciado para que no se superponga con el fondo */
-      text-align: center;
-      display: flex; /* Usar flexbox para organizar los elementos */
-      flex-direction: column; /* Apilar elementos verticalmente */
-      align-items: center; /* Centrar horizontalmente */
-    }
-
-    .titulo {
-      font-size: 2.5em;
-      margin-bottom: 20px;
-    }
-
-    .botones-principales {
-      display: none; /* El menú está oculto inicialmente */
+      z-index: 1; /* Asegura que el contenido esté por encima del fondo */
+      display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      flex-wrap: wrap; /* Permite que los botones se envuelvan en líneas */
-      z-index: 1; /* Asegura que los botones estén por encima del fondo */
-      margin-top: 20px; /* Un poco de espacio desde el botón de menú */
+      padding: 20px;
+      width: 100%;
+      max-width: 90%; /* Ancho máximo para el contenido */
+      box-sizing: border-box;
+      perspective: 1000px; /* Para efectos 3D */
     }
 
-    .boton-principal {
-      margin: 10px; /* Espaciado entre los botones */
-      font-size: 2em;
-      padding: 10px 20px;
-      background-color: rgba(255, 0, 0, 0.5); /* Color de fondo semitransparente */
-      color: rgb(10, 0, 0);
-      text-decoration: none;
-      border-radius: 5px;
-      transition: background-color 0.3s, transform 0.3s;
-      font-weight: bold; /* Texto en negrita */
+    .dashboard {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+      max-width: 800px; /* Ancho máximo del dashboard */
+      animation: fadeIn 1.5s ease-out forwards;
+      transform-style: preserve-3d; /* Para efectos 3D en los hijos */
+      transition: transform 0.5s ease-out; /* Transición para el tilt */
     }
 
-    .boton-principal:hover {
-      background-color: rgba(100, 253, 11, 0.7); /* Cambia el color de fondo al pasar el mouse */
-      transform: scale(1.1); /* Animación de escala */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Estilo del título de bienvenida (modificado) */
+    .welcome-title {
+      font-size: 4.5em; /* Tamaño grande para el título */
+      font-weight: 900; /* Extra bold */
+      color: #FFD700; /* Color dorado para un aspecto cálido de isla */
+      text-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 215, 0, 0.6); /* Sombra brillante dorada */
+      margin-bottom: 40px; /* Espacio debajo del título */
+      animation: neonGlowGold 1.5s infinite alternate, slideInFromTop 1s ease-out; /* Animación de brillo dorado */
+      transform: translateZ(25px); /* Profundidad para el título */
+      letter-spacing: 5px; /* Espaciado entre letras */
+      text-transform: uppercase;
+    }
+
+    @keyframes neonGlowGold { /* Nueva animación para el brillo dorado */
+      0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7), 0 0 20px rgba(255, 215, 0, 0.5); }
+      100% { text-shadow: 0 0 20px rgba(255, 215, 0, 1), 0 0 40px rgba(255, 215, 0, 0.8); }
+    }
+
+
+    /* Estilo del contador de días sin accidentes */
     .dias-sin-accidentes {
-      margin-top: 40px;
-      font-size: 2em;
-      color: rgb(255, 255, 255);
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 20px 40px;
-      border-radius: 10px;
-      animation: pulsar 2s infinite alternate; /* Agregamos una animación al contador */
-      text-transform: uppercase; /* Convierte el texto a mayúsculas */
-      font-weight: bold; /* Texto en negrita */
-      margin-bottom: 20px; /* Espacio debajo del contador */
+      font-size: 4em; /* Aún más grande */
+      font-weight: 900;
+      color: #FFD700; /* Texto dorado para un aspecto de advertencia */
+      /* Nuevo fondo y borde para un aspecto de "warning" */
+      background: linear-gradient(145deg, #2c2c2c, #1a1a1a); /* Fondo oscuro metálico */
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 69, 0, 0.5); /* Borde naranja-rojo */
+      padding: 30px 60px;
+      border-radius: var(--border-radius-large);
+      margin-bottom: 35px;
+      /* Sombra más pronunciada y con un brillo naranja-rojo */
+      box-shadow: 0 0 30px rgba(255, 69, 0, 0.7), /* Brillo exterior */
+                  0 0 15px rgba(255, 69, 0, 0.4) inset; /* Brillo interior */
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      animation: pulsar 2s infinite alternate, slideInFromTop 1s ease-out;
+      position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      transition: all 0.3s ease-out;
     }
 
+    /* Efecto de brillo sutil en el contador (siempre activo) */
+    .dias-sin-accidentes::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%); /* Brillo más fuerte */
+      transform: rotate(45deg);
+      animation: shine 1.5s infinite; /* Siempre animando */
+      opacity: 1; /* Siempre visible */
+    }
+    /* Eliminado: .dias-sin-accidentes:hover::before */
+
+    @keyframes shine {
+      0% { transform: rotate(45deg) translate(-100%, -100%); }
+      100% { transform: rotate(45deg) translate(100%, 100%); }
+    }
+
+    /* Ajuste de la animación pulsar para complementar el nuevo estilo */
     @keyframes pulsar {
-      0% {
-        transform: scale(1);
-      }
-      100% {
-        transform: scale(1.1);
-      }
+      0% { transform: scale(1) translateZ(0); box-shadow: 0 0 30px rgba(255, 69, 0, 0.7), 0 0 15px rgba(255, 69, 0, 0.4) inset; }
+      100% { transform: scale(1.02) translateZ(10px); box-shadow: 0 0 45px rgba(255, 69, 0, 0.9), 0 0 20px rgba(255, 69, 0, 0.6) inset; } /* Brillo más intenso al pulsar */
+    }
+    @keyframes slideInFromTop {
+        from { opacity: 0; transform: translateY(-100px) rotateX(-30deg); }
+        to { opacity: 1; transform: translateY(0) rotateX(0deg); }
     }
 
-    /* Estilo del botón de menú */
-    .menu-boton {
-      font-size: 2.5em;
+    .current-date-display,
+    .special-event-display {
+      background: var(--glass-bg);
+      backdrop-filter: blur(15px); /* Mayor blur */
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.4); /* Sombra más pronunciada */
+      position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d; /* Para que los hijos también se beneficien de 3D */
+      transition: all 0.3s ease-out; /* Transición suave para cualquier cambio */
+    }
+
+    .current-date-display {
+      font-size: 1.8em;
+      font-weight: 700;
+      color: var(--text-light);
       padding: 15px 30px;
-      background-color: #f00b0b; /* Un color llamativo */
+      border-radius: var(--border-radius-medium);
+      margin-bottom: 30px;
+      animation: fadeIn 1.2s ease-out forwards;
+      transform: translateZ(5px); /* Ligera profundidad */
+    }
+
+    .special-event-display {
+      font-size: 2em;
+      color: #FFD700; /* Dorado */
+      background: rgba(128, 0, 128, 0.8);
+      border: 1px solid rgba(255, 215, 0, 0.6);
+      padding: 20px 40px;
+      border-radius: var(--border-radius-large);
+      margin-bottom: 40px;
+      font-weight: bold;
+      display: none;
+      animation: pulse-glow 1.5s infinite alternate, fadeInScale 0.8s ease-out forwards;
+      box-shadow: 0 0 35px rgba(255, 215, 0, 0.8); /* Sombra más intensa */
+      transform: translateZ(15px); /* Mayor profundidad */
+    }
+
+    @keyframes pulse-glow {
+      0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.4) inset; }
+      100% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.9), 0 0 50px rgba(255, 215, 0, 0.6) inset; }
+    }
+    @keyframes fadeInScale {
+        from { opacity: 0; transform: scale(0.7) translateZ(0); }
+        to { opacity: 1; transform: scale(1) translateZ(15px); }
+    }
+
+    .menu-boton {
+      font-size: 2.5em; /* Más grande */
+      padding: 20px 45px;
+      background: linear-gradient(135deg, #f00b0b 0%, #d00a0a 100%);
       color: white;
       text-decoration: none;
       border: none;
-      border-radius: 10px;
+      border-radius: 60px; /* Más redondeado */
       cursor: pointer;
-      transition: background-color 0.3s, transform 0.3s;
       font-weight: bold;
-      margin-bottom: 20px; /* Espacio inferior */
+      letter-spacing: 2px;
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5); /* Sombra más grande */
+      transition: all var(--transition-speed) cubic-bezier(0.25, 0.8, 0.25, 1); /* Curva de animación más suave */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px; /* Más espacio */
+      margin-bottom: 50px; /* Más espacio */
+      transform: translateZ(20px); /* Profundidad inicial */
     }
 
     .menu-boton:hover {
-      background-color: #2ed81e; /* Color más oscuro cuando pasa el ratón */
-      transform: scale(1.1); /* Efecto de agrandar el botón */
+      background: linear-gradient(135deg, #2ed81e 0%, #1e9e14 100%);
+      transform: translateY(-8px) scale(1.05) translateZ(30px); /* Más elevación y escala */
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.5); /* Borde al pasar el mouse */
     }
 
-    .menu-boton:focus {
-      outline: none; /* Elimina el borde de enfoque por defecto */
+    .menu-boton:active {
+      transform: translateY(0) scale(1) translateZ(20px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
     }
 
     .menu-boton:after {
       content: "☰"; /* Ícono de menú (hamburguesa) */
-      font-size: 1.5em;
-      margin-left: 10px;
+      font-size: 1.4em; /* Ícono más grande */
     }
 
-    /* Nuevo estilo para la visualización de la fecha actual */
-    .current-date-display {
-      font-size: 1.8em;
-      color: white;
-      background-color: rgba(0, 0, 0, 0.6);
-      padding: 10px 20px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      font-weight: bold;
+    .botones-principales {
+      display: none;
+      width: 100%;
+      max-width: 1000px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Botones más grandes */
+      gap: 25px; /* Más espacio entre botones */
+      padding: 30px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(18px); /* Mayor blur */
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius-large);
+      box-shadow: 0 15px 50px 0 rgba(0, 0, 0, 0.5); /* Sombra más grande */
+      animation: slideInFromBottom 0.8s ease-out forwards;
+      transform-style: preserve-3d;
     }
 
-    /* Nuevo estilo para la visualización de eventos especiales */
-    .special-event-display {
-      font-size: 1.5em;
-      color: #FFD700; /* Color dorado para eventos especiales */
-      background-color: rgba(128, 0, 128, 0.7); /* Fondo morado semitransparente */
-      padding: 10px 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      font-weight: bold;
-      display: none; /* Oculto por defecto, se muestra con JS */
-      animation: pulse-glow 1.5s infinite alternate; /* Animación para días especiales */
+    @keyframes slideInFromBottom {
+        from { opacity: 0; transform: translateY(150px) rotateX(-10deg); }
+        to { opacity: 1; transform: translateY(0) rotateX(0deg); }
     }
 
-    @keyframes pulse-glow {
-      0% {
-        transform: scale(1);
-        box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    .botones-principales.show {
+        display: grid;
+    }
+
+    .boton-principal {
+      font-size: 1.6em; /* Ajuste para el grid */
+      padding: 20px 25px;
+      background: rgba(255, 255, 255, 0.08); /* Fondo más sutil */
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-light);
+      border-radius: var(--border-radius-medium);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease-in-out;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 90px; /* Altura mínima para los botones */
+      transform: translateZ(0); /* Base para 3D */
+    }
+
+    .boton-principal:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-5px) scale(1.02) translateZ(10px); /* Más elevación y profundidad */
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Media queries para responsividad */
+    @media (max-width: 768px) {
+      .welcome-title {
+        font-size: 3.5em;
+        margin-bottom: 30px;
       }
-      100% {
-        transform: scale(1.05);
-        box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+      .dias-sin-accidentes {
+        font-size: 3em;
+        padding: 25px 40px;
+      }
+      .current-date-display, .special-event-display {
+        font-size: 1.4em;
+        padding: 12px 25px;
+      }
+      .menu-boton {
+        font-size: 2em;
+        padding: 18px 35px;
+      }
+      .botones-principales {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 20px;
+        padding: 20px;
+      }
+      .boton-principal {
+        font-size: 1.4em;
+        padding: 15px 20px;
+        min-height: 70px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .welcome-title {
+        font-size: 2.5em;
+        margin-bottom: 25px;
+        letter-spacing: 3px;
+      }
+      .dias-sin-accidentes {
+        font-size: 2.2em;
+        padding: 20px 30px;
+        margin-bottom: 25px;
+      }
+      .current-date-display, .special-event-display {
+        font-size: 1.1em;
+        padding: 10px 20px;
+        margin-bottom: 20px;
+      }
+      .menu-boton {
+        font-size: 1.8em;
+        padding: 15px 30px;
+        margin-bottom: 30px;
+      }
+      .botones-principales {
+        grid-template-columns: 1fr; /* Una columna en pantallas muy pequeñas */
+        gap: 15px;
+        padding: 15px;
+      }
+      .boton-principal {
+        font-size: 1.2em;
+        padding: 12px 15px;
+        min-height: 60px;
       }
     }
   </style>
@@ -169,11 +373,15 @@
     <source src="video.mp4" type="video/mp4">
     Tu navegador no soporta la etiqueta de video.
   </video>
+  <div class="video-overlay"></div> <!-- Superposición para el video -->
 
   <div class="contenedor">
-    <div class="dashboard">
+    <div class="dashboard" id="dashboard">
+      <!-- Nuevo título de bienvenida con emoji de palmera -->
+      <h1 class="welcome-title">🌴 BIENVENIDOS A LA ISLA 🌴</h1>
+
       <div class="dias-sin-accidentes" id="dias-sin-accidentes">
-        DÍAS SIN ACCIDENTES: <span id="contador-dias">719</span>
+        DÍAS SIN ACCIDENTES: <span id="contador-dias">0</span>
       </div>
       
       <!-- Contenedor para la fecha actual -->
@@ -204,13 +412,25 @@
   </div>
 
   <script>
-    // Función para calcular la cantidad de días desde una fecha hasta ahora
+    // Función para calcular la cantidad de días desde la última fecha de accidente
     function calcularDias() {
-      var fechaInicio = new Date('2024-03-04T06:00:00'); // Fecha de inicio a las 6 AM
+      let lastAccidentDateStr = localStorage.getItem('lastAccidentDate');
+      let fechaInicio;
+
+      if (!lastAccidentDateStr) {
+          // Si no hay fecha de último accidente guardada, se establece 90 días atrás desde hoy.
+          // Esto hace que el contador inicie en 90 días la primera vez.
+          fechaInicio = new Date();
+          fechaInicio.setDate(fechaInicio.getDate() - 90);
+          localStorage.setItem('lastAccidentDate', fechaInicio.toISOString());
+      } else {
+          fechaInicio = new Date(lastAccidentDateStr);
+      }
+
       var fechaActual = new Date();
       var diferenciaTiempo = fechaActual.getTime() - fechaInicio.getTime();
       var dias = Math.floor(diferenciaTiempo / (1000 * 3600 * 24));
-      return dias + 719; // Sumamos 719 días iniciales
+      return dias;
     }
 
     // Función para actualizar el contador de días sin accidentes
@@ -241,11 +461,11 @@
 
     menuToggle.addEventListener('click', function() {
       // Alternar la visibilidad del menú
-      if (menu.style.display === 'flex') {
-        menu.style.display = 'none';
+      if (menu.classList.contains('show')) {
+        menu.classList.remove('show');
         menuToggle.textContent = 'Mostrar Menú'; // Cambiar el texto del botón
       } else {
-        menu.style.display = 'flex';
+        menu.classList.add('show');
         menuToggle.textContent = 'Ocultar Menú'; // Cambiar el texto del botón
       }
     });
@@ -296,7 +516,7 @@
         { month: 8, day: 6, name: "Día de la Fuerza Naval de Honduras", emoji: "⚓" }, // Septiembre 6
         { month: 10, day: 10, name: "Día de la Policía Nacional de Honduras", emoji: "👮" }, // Noviembre 10
 
-        // Nuevas fechas importantes de la Fuerza Aérea Hondureña (adicionales)
+        // Fechas importantes de la Fuerza Aérea Hondureña (adicionales)
         { month: 3, day: 12, name: "Día de la Aviación Militar Hondureña", emoji: "🎖️✈️" }, // Abril 12 (ejemplo, si hay una fecha específica)
         { month: 6, day: 1, name: "Día del Piloto de Combate FAH", emoji: "👨‍✈️🔥" }, // Julio 1 (ejemplo)
         { month: 9, day: 25, name: "Aniversario de la Academia Militar de Aviación", emoji: "🏫✈️" } // Octubre 25 (ejemplo)
@@ -326,11 +546,72 @@
         }
     }
 
+    // Función para mostrar un mensaje personalizado (similar a alert/confirm)
+    function showCustomAlert(message, callback = null, isConfirm = false) {
+        const alertModal = document.createElement('div');
+        alertModal.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4';
+        
+        let buttonsHtml = `<button id="closeCustomAlert" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Aceptar</button>`;
+        if (isConfirm) {
+            buttonsHtml = `
+                <button id="confirmCustomAlert" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors mr-2">Confirmar</button>
+                <button id="cancelCustomAlert" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">Cancelar</button>
+            `;
+        }
+
+        alertModal.innerHTML = `
+            <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center">
+                <p class="text-lg mb-4">${message}</p>
+                <div class="flex justify-center">${buttonsHtml}</div>
+            </div>
+        `;
+        document.body.appendChild(alertModal);
+
+        if (isConfirm) {
+            document.getElementById('confirmCustomAlert').addEventListener('click', () => {
+                document.body.removeChild(alertModal);
+                if (callback) callback(true);
+            });
+            document.getElementById('cancelCustomAlert').addEventListener('click', () => {
+                document.body.removeChild(alertModal);
+                if (callback) callback(false);
+            });
+        } else {
+            document.getElementById('closeCustomAlert').addEventListener('click', () => {
+                document.body.removeChild(alertModal);
+                if (callback) callback();
+            });
+        }
+    }
+
+
     // Actualizar la fecha y eventos al cargar la página
     actualizarFechaYEventos();
 
     // Opcional: Actualizar la fecha y eventos cada minuto para reflejar cambios de día
     setInterval(actualizarFechaYEventos, 60 * 1000); // Cada minuto
+
+    // Lógica para el efecto de inclinación (tilt)
+    const dashboard = document.getElementById('dashboard');
+    const tiltAmount = 15; // Grados máximos de inclinación
+
+    dashboard.addEventListener('mousemove', (e) => {
+        const rect = dashboard.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+
+        const rotateX = (mouseY - centerY) / (rect.height / 2) * -tiltAmount;
+        const rotateY = (mouseX - centerX) / (rect.width / 2) * tiltAmount;
+
+        dashboard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+
+    dashboard.addEventListener('mouseleave', () => {
+        dashboard.style.transform = `rotateX(0deg) rotateY(0deg)`;
+    });
   </script>
 </body>
 </html>
