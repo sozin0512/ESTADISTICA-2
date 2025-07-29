@@ -388,22 +388,41 @@
             }
             .print-header { display: block !important; }
             table {
-                page-break-inside: avoid;
-                width: 100%; 
                 border-collapse: collapse;
+                width: 100%; /* Asegura que la tabla ocupe todo el ancho disponible */
+                table-layout: fixed; /* Distribuye el ancho de las columnas de manera uniforme */
+                font-size: 8px; /* Reducir aún más la fuente para que quepa más contenido */
             }
             th, td {
-                page-break-inside: avoid;
-                page-break-after: auto;
                 border: 1px solid #000 !important;
-                padding: 2px;
-                font-size: 9px; 
+                padding: 1px; /* Reducir el padding para que las celdas sean más pequeñas */
+                text-align: center;
+                white-space: nowrap; /* Evita que el texto se envuelva, puede causar desbordamiento si el texto es muy largo */
+                overflow: hidden; /* Oculta el contenido que desborda la celda */
+                text-overflow: ellipsis; /* Añade puntos suspensivos si el texto se corta */
             }
             .nomenclatura {
                 text-align: left !important;
                 padding-left: 2px !important;
-                min-width: 120px !important; 
+                min-width: 80px !important; /* Ajustar min-width para nomenclatura */
+                width: 15%; /* Darle un porcentaje del ancho total */
             }
+            /* Ajustar el ancho de las celdas de días para que sean más pequeñas */
+            table th:nth-child(n+3):nth-child(-n+33),
+            table td:nth-child(n+3):nth-child(-n+33) {
+                width: 2%; /* Cada día ocupa un 2% del ancho */
+            }
+            /* Ajustar ancho de las columnas de totales y generales */
+            table th:nth-child(34), table td:nth-child(34), /* MES TOTAL */
+            table th:nth-child(35), table td:nth-child(35) { /* GENERAL */
+                width: 5%; /* Ajustar el ancho */
+            }
+            /* Ajustar ancho de las 5 columnas adicionales */
+            table th:nth-child(n+36):nth-child(-n+40),
+            table td:nth-child(n+36):nth-child(-n+40) {
+                width: 6%; /* Ajustar el ancho para las columnas adicionales */
+            }
+
             .restante-verde, .restante-amarillo, .restante-rojo,
             .label-yellow, .label-red {
                 -webkit-print-color-adjust: exact !important; 
@@ -440,7 +459,11 @@
             }
             @page {
                 size: A4 landscape;
-                margin: 10mm;
+                margin: 5mm; /* Reducir aún más los márgenes de la página */
+            }
+            /* Asegurarse de que el contenedor de la tabla no tenga overflow-x */
+            #contenedor-tablas {
+                overflow-x: visible !important;
             }
         }
 
@@ -1037,11 +1060,18 @@
                     allMonthsData = snapshot.val();
                 }
 
-                let newCumulativeTotals = {
-                    'AC HRS': 0,
-                    'ATERRIZAJES': 0,
-                    'RINS': 0
-                };
+                let newCumulativeTotals = {};
+                // Inicializar newCumulativeTotals con todas las filas en nombresFilasOrdenadas
+                // y sanear las claves para Firebase
+                nombresFilasOrdenadas.forEach(name => {
+                    const sanitizedName = name.replace(/\./g, '_');
+                    newCumulativeTotals[sanitizedName] = 0;
+                });
+
+                const nomenclatureToIndexMap = new Map();
+                nombresFilasOrdenadas.forEach((name, index) => {
+                    nomenclatureToIndexMap.set(name, index);
+                });
 
                 // Iterar sobre todos los años y meses para calcular el total general
                 for (const yearKey in allMonthsData) {
@@ -1050,16 +1080,23 @@
                         for (const monthKey in yearData) {
                             if (Object.hasOwnProperty.call(yearData, monthKey)) {
                                 const monthData = yearData[monthKey];
-                                // Asegurarse de que los datos de la fila existan antes de intentar acceder a ellos
-                                // Y que la columna 34 (GENERAL) exista y sea numérica
-                                if (monthData && Array.isArray(monthData) && monthData[0] && !isNaN(parseFloat(monthData[0][34]))) { // AC HRS
-                                    newCumulativeTotals['AC HRS'] += parseFloat(monthData[0][34]) || 0; 
-                                }
-                                if (monthData && Array.isArray(monthData) && monthData[1] && !isNaN(parseFloat(monthData[1][34]))) { // ATERRIZAJES
-                                    newCumulativeTotals['ATERRIZAJES'] += parseFloat(monthData[1][34]) || 0; 
-                                }
-                                if (monthData && Array.isArray(monthData) && monthData[2] && !isNaN(parseFloat(monthData[2][34]))) { // RINS
-                                    newCumulativeTotals['RINS'] += parseFloat(monthData[2][34]) || 0; 
+                                
+                                for (const originalKey in newCumulativeTotals) {
+                                    if (Object.hasOwnProperty.call(newCumulativeTotals, originalKey)) {
+                                        const index = nomenclatureToIndexMap.get(originalKey);
+                                        let value = 0;
+
+                                        // Acceder de forma segura a monthData[index] y su columna 34 (GENERAL)
+                                        if (index !== undefined && monthData && Array.isArray(monthData) && monthData[index] && Array.isArray(monthData[index])) {
+                                            const cellValue = monthData[index][34]; // La columna 34 es "GENERAL"
+                                            const numValue = parseFloat(cellValue);
+                                            if (!isNaN(numValue)) {
+                                                value = numValue;
+                                            }
+                                        }
+                                        const sanitizedKey = originalKey.replace(/\./g, '_');
+                                        newCumulativeTotals[sanitizedKey] += value;
+                                    }
                                 }
                             }
                         }
@@ -1357,25 +1394,31 @@
 
                 const tbody = document.createElement("tbody");
                 
+                // Las filas se añaden en el orden de nombresFilasOrdenadas,
+                // con los encabezados de motor insertados dinámicamente.
                 nombresFilasOrdenadas.forEach((nombre) => {
-                    const totalColsInHeader = 35 + 5;
-                    
-                    if (nombre === "HUB COMPRESOR 1.1") {
+                    const totalColsInHeader = 35 + 5; // Total de columnas incluyendo las 5 adicionales
+
+                    // Insertar encabezado MOTOR # 1 y sus filas específicas
+                    if (nombre === "HUB COMPRESOR 1.1") { 
                         const separador1 = document.createElement("tr");
                         separador1.innerHTML = `<td colspan="${totalColsInHeader}" class="motor-header" contenteditable="false">MOTOR # 1</td>`;
                         tbody.appendChild(separador1);
                         
+                        // Añadir las filas de motor específicas justo después del encabezado
                         ['ENGINE HRS 1', 'ENGINE STARTS 1', 'FLIGHTS 1', 'CICLOS 1'].forEach(motorRowName => {
                             const filaMotor = crearFilaTabla(motorRowName);
                             tbody.appendChild(filaMotor);
                         });
                     }
 
-                    if (nombre === "HUB COMPRESOR 2.1") {
+                    // Insertar encabezado MOTOR # 2 y sus filas específicas
+                    if (nombre === "HUB COMPRESOR 2.1") { 
                         const separador2 = document.createElement("tr");
                         separador2.innerHTML = `<td colspan="${totalColsInHeader}" class="motor-header" contenteditable="false">MOTOR # 2</td>`;
                         tbody.appendChild(separador2);
                         
+                        // Añadir las filas de motor específicas justo después del encabezado
                         ['ENGINE HRS 2', 'ENGINE STARTS 2', 'FLIGHTS 2', 'CICLOS 2'].forEach(motorRowName => {
                             const filaMotor = crearFilaTabla(motorRowName);
                             tbody.appendChild(filaMotor);
@@ -1477,29 +1520,29 @@
                 if (datosOrigen) {
                     const tablaDestino = document.querySelectorAll(".tabla-vuelo")[mesDestinoIndex];
                     if (tablaDestino) {
-                        const nombresFilasEnTabla = Array.from(tablaDestino.querySelectorAll('.nomenclatura')).map(td => td.textContent.trim());
+                        // Crear un mapa de los datos de origen para una búsqueda más eficiente por nomenclatura
+                        const datosOrigenMap = new Map();
+                        nombresFilasOrdenadas.forEach((nomenclatura, idx) => {
+                            if (datosOrigen[idx]) {
+                                datosOrigenMap.set(nomenclatura, datosOrigen[idx]);
+                            }
+                        });
 
-                        datosOrigen.forEach((filaDatosOrigen, indexFilaOrigen) => {
-                            // Asegúrate de que el índice de la fila de origen sea válido para nombresFilasOrdenadas
-                            if (indexFilaOrigen < nombresFilasOrdenadas.length) {
-                                const nomenclaturaOrigen = nombresFilasOrdenadas[indexFilaOrigen];
-                                
-                                const indexFilaDestino = nombresFilasEnTabla.indexOf(nomenclaturaOrigen);
-
-                                if (indexFilaDestino !== -1) {
+                        tablaDestino.querySelectorAll("tbody tr").forEach(filaDestino => {
+                            const nomenclaturaDestino = filaDestino.querySelector('.nomenclatura')?.textContent.trim();
+                            if (nomenclaturaDestino && !filaDestino.querySelector('.motor-header')) {
+                                const filaDatosOrigen = datosOrigenMap.get(nomenclaturaDestino);
+                                if (filaDatosOrigen) {
                                     // La columna 34 es la columna "GENERAL" en la estructura de datos de la tabla
                                     const valorGeneral = filaDatosOrigen[34]; 
                                     if (valorGeneral !== undefined && valorGeneral !== null && valorGeneral.toString().trim() !== "") {
-                                        const filaDestino = tablaDestino.querySelectorAll("tbody tr")[indexFilaDestino];
-                                        if (filaDestino) {
-                                            const celdaVienen = filaDestino.querySelector(".viene-celda");
-                                            if (celdaVienen) {
-                                                celdaVienen.textContent = formatNumber(valorGeneral); // Usar formatNumber
-                                                if (celdaVienen.textContent.trim() !== "") {
-                                                    celdaVienen.classList.add("led-persistente");
-                                                } else {
-                                                    celdaVienen.classList.remove("led-persistente");
-                                                }
+                                        const celdaVienen = filaDestino.querySelector(".viene-celda");
+                                        if (celdaVienen) {
+                                            celdaVienen.textContent = formatNumber(valorGeneral); // Usar formatNumber
+                                            if (celdaVienen.textContent.trim() !== "") {
+                                                celdaVienen.classList.add("led-persistente");
+                                            } else {
+                                                celdaVienen.classList.remove("led-persistente");
                                             }
                                         }
                                     }
@@ -1582,7 +1625,7 @@
                         return;
                     }
 
-                    if (filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta)) {
+                    if (filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta) || filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta)) {
                         const vieneCelda = fila.querySelector('.viene-celda');
                         const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
                         const mesTotalCelda = fila.querySelector('.fila-total');
@@ -1594,43 +1637,49 @@
                         const restanteCelda = fila.querySelector('.fila-restante');
 
                         const viene = parseFloat(vieneCelda?.textContent.trim()) || 0;
-                        const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
-
-                        const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
-
-                        mesTotalCelda.textContent = formatNumber(totalMes); // Usar formatNumber
                         
-                        const ABBREVIATED_CYCLE_FACTOR = parseFloat(abbrdCelda?.textContent.trim()) || 0;
-                        const EXTENDED_CYCLE_FACTOR = parseFloat(extdCelda?.textContent.trim()) || 0;
-                        const FLIGHT_COUNT_FACTOR = parseFloat(flightCountFactorCelda?.textContent.trim()) || 0;
-                        const limite = parseFloat(limiteCelda?.textContent.trim()) || 0;
+                        let currentMonthCalculatedCycles = 0;
 
-                        let motorNumero = null;
-                        const motorMatch = nomenclaturaCompleta.match(/\s(\d)(?:\.\d)?$/);
-                        if (motorMatch) {
-                            motorNumero = parseInt(motorMatch[1]);
-                        }
-                        
-                        let accumulatedTotalCycles = 0;
-                        if (motorNumero !== null) {
-                            const noOfStarts = generalValuesMap.get(`ENGINE STARTS ${motorNumero}`) || 0;
-                            const noOfFlights = generalValuesMap.get(`FLIGHTS ${motorNumero}`) || 0;
-                            const noOfContingencyExcursions = generalValuesMap.get(`CONTINGENCY EXCURSIONS ${motorNumero}`) || 0;
+                        // Lógica específica para CICLOS 1 y CICLOS 2 (sumar días)
+                        if (nomenclaturaCompleta === "CICLOS 1" || nomenclaturaCompleta === "CICLOS 2") {
+                            const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
+                            currentMonthCalculatedCycles = valoresDiarios.reduce((acc, val) => acc + val, 0);
+                        } else { // Lógica para componentes de motor (cálculo de ciclos basado en otras filas)
+                            const ABBREVIATED_CYCLE_FACTOR = parseFloat(abbrdCelda?.textContent.trim()) || 0;
+                            const EXTENDED_CYCLE_FACTOR = parseFloat(extdCelda?.textContent.trim()) || 0;
+                            const FLIGHT_COUNT_FACTOR = parseFloat(flightCountFactorCelda?.textContent.trim()) || 0;
+                            const limite = parseFloat(limiteCelda?.textContent.trim()) || 0;
 
-                            const termStarts = noOfStarts;
-                            let termFlightsStarts = 0;
-                            if (ABBREVIATED_CYCLE_FACTOR !== 0) {
-                                termFlightsStarts = (noOfFlights - noOfStarts) / ABBREVIATED_CYCLE_FACTOR;
+                            let motorNumero = null;
+                            const motorMatch = nomenclaturaCompleta.match(/\s(\d)(?:\.\d)?$/);
+                            if (motorMatch) {
+                                motorNumero = parseInt(motorMatch[1]);
                             }
-                            const termContingency = noOfContingencyExcursions * EXTENDED_CYCLE_FACTOR;
-                            const sumOfTerms = termStarts + termFlightsStarts + termContingency;
-                            accumulatedTotalCycles = sumOfTerms * FLIGHT_COUNT_FACTOR;
+                            
+                            if (motorNumero !== null) {
+                                const noOfStarts = generalValuesMap.get(`ENGINE STARTS ${motorNumero}`) || 0;
+                                const noOfFlights = generalValuesMap.get(`FLIGHTS ${motorNumero}`) || 0;
+                                const noOfContingencyExcursions = generalValuesMap.get(`CONTINGENCY EXCURSIONS ${motorNumero}`) || 0;
+
+                                const termStarts = noOfStarts;
+                                let termFlightsStarts = 0;
+                                if (ABBREVIATED_CYCLE_FACTOR !== 0) {
+                                    termFlightsStarts = (noOfFlights - noOfStarts) / ABBREVIATED_CYCLE_FACTOR;
+                                }
+                                const termContingency = noOfContingencyExcursions * EXTENDED_CYCLE_FACTOR;
+                                const sumOfTerms = termStarts + termFlightsStarts + termContingency;
+                                currentMonthCalculatedCycles = sumOfTerms * FLIGHT_COUNT_FACTOR;
+                            }
                         }
 
-                        generalCelda.textContent = formatNumber(accumulatedTotalCycles); // Usar formatNumber
+                        mesTotalCelda.textContent = formatNumber(currentMonthCalculatedCycles); // MES TOTAL es el cálculo de ciclos del mes actual
+                        const totalGeneral = viene + currentMonthCalculatedCycles; // GENERAL es (VIENEN + MES TOTAL)
+                        generalCelda.textContent = formatNumber(totalGeneral); // Usar formatNumber
 
-                        const restante = limite - accumulatedTotalCycles;
-                        aplicarEstiloRestante(restanteCelda, restante, limite);
+                        if (filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta)) {
+                            const restante = limite - totalGeneral;
+                            aplicarEstiloRestante(restanteCelda, restante, limite);
+                        }
                     }
                 });
             });
@@ -1846,13 +1895,13 @@
                 const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-976-Overall`;
                 try {
                     const snapshot = await get(ref(database, rutaTotalesGenerales));
-                    let generalTotals = { 'AC HRS': 0, 'ATERRIZAJES': 0, 'RINS': 0 };
+                    let generalTotals = {};
                     if (snapshot.exists()) {
                         generalTotals = snapshot.val();
                     }
 
                     const componentsData = [
-                        { name: "AC HRS", current: generalTotals['AC HRS'] || 0, type: "general_total" },
+                        { name: "AC HRS", current: generalTotals['AC_HRS'] || 0, type: "general_total" },
                         { name: "ATERRIZAJES", current: generalTotals['ATERRIZAJES'] || 0, type: "general_total" },
                         { name: "RINS", current: generalTotals['RINS'] || 0, type: "general_total" }
                     ];
