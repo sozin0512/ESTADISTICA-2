@@ -362,22 +362,26 @@
         }
 
         /* Nuevo estilo para el diálogo de programación de inspecciones */
-        #scheduleInspectionDialog {
+        #scheduleInspectionDialog, #editScheduledInspectionDialog {
             max-width: 550px; /* Ancho ajustado para más campos */
         }
-        #scheduleInspectionDialog form {
+        #scheduleInspectionDialog form, #editScheduledInspectionDialog form {
             display: flex;
             flex-direction: column;
             gap: 1rem;
         }
-        #scheduleInspectionDialog form div {
+        #scheduleInspectionDialog form div, #editScheduledInspectionDialog form div {
             display: flex;
             flex-direction: column;
         }
         #scheduleInspectionDialog form input[type="date"],
         #scheduleInspectionDialog form input[type="number"], /* Para las horas */
         #scheduleInspectionDialog form select,
-        #scheduleInspectionDialog form textarea {
+        #scheduleInspectionDialog form textarea,
+        #editScheduledInspectionDialog form input[type="date"],
+        #editScheduledInspectionDialog form input[type="number"],
+        #editScheduledInspectionDialog form select,
+        #editScheduledInspectionDialog form textarea {
             padding: 0.6rem;
             border: 1px solid #cbd5e0;
             border-radius: 0.375rem;
@@ -386,12 +390,15 @@
         }
         #scheduleInspectionDialog form input:focus,
         #scheduleInspectionDialog form select:focus,
-        #scheduleInspectionDialog form textarea:focus {
+        #scheduleInspectionDialog form textarea:focus,
+        #editScheduledInspectionDialog form input:focus,
+        #editScheduledInspectionDialog form select:focus,
+        #editScheduledInspectionDialog form textarea:focus {
             outline: none;
             border-color: #4f46e5;
             box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
         }
-        #scheduleInspectionDialog form textarea {
+        #scheduleInspectionDialog form textarea, #editScheduledInspectionDialog form textarea {
             min-height: 100px;
             resize: vertical;
         }
@@ -536,7 +543,7 @@
             border-radius: 0.5rem;
             height: 1.2rem;
             overflow: hidden;
-            margin-top: 1rem;
+            margin-top: 0.5rem; /* Ajustado para estar más cerca del texto */
             border: 1px solid #ccc;
         }
 
@@ -566,7 +573,7 @@
         .progress-green { 
             background-image: linear-gradient(90deg, #16a34a 0%, #22c55e 50%, #16a34a 100%);
         }
-        .progress-blue { /* Nueva clase para la barra de progreso azul */
+        .progress-blue { /* Nueva clase para la barra de progreso azul (para "Condición" o N/A) */
             background-image: linear-gradient(90deg, #3b82f6 0%, #60a5fa 50%, #3b82f6 100%);
         }
 
@@ -599,7 +606,7 @@
         /* Nuevo estilo para la tarjeta de entrada de log (el "sticker") */
         .log-entry-card {
             background-color: #ffffff;
-            border: 1px solid #e0e0e0;
+            border: 1.5px solid #e0e0e0; /* Borde ligeramente más grueso */
             border-radius: 0.75rem; /* Bordes más redondeados */
             padding: 1.5rem; /* Más padding para una sensación de "sticker" */
             margin-bottom: 1.5rem; /* Más espacio entre "stickers" */
@@ -672,6 +679,49 @@
             background-color: #dc2626;
         }
 
+        /* Botón para eliminar inspecciones programadas individuales */
+        .remove-scheduled-inspection-button {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            flex-shrink: 0; /* Evita que se encoja */
+            margin-left: 5px; /* Espacio entre el botón de editar y este */
+        }
+        .remove-scheduled-inspection-button:hover {
+            background-color: #dc2626;
+        }
+
+        /* Botón para editar inspecciones programadas individuales */
+        .edit-scheduled-inspection-button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            flex-shrink: 0; /* Evita que se encoja */
+        }
+        .edit-scheduled-inspection-button:hover {
+            background-color: #2563eb;
+        }
+
 
         /* Nuevo estilo para componentes retirados */
         .component-card.retired {
@@ -687,6 +737,84 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         /* Se ha eliminado .component-card.retired:hover .card-buttons para que los botones siempre sean visibles */
+
+        /* Estilos para la sección de inspecciones programadas */
+        .scheduled-inspections-section {
+            background-color: #f8faff; /* Fondo ligeramente azulado */
+            border: 1px solid #e0e7ff; /* Borde suave */
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        .scheduled-inspections-section h5 {
+            font-weight: bold;
+            color: #4f46e5; /* Azul índigo */
+            margin-bottom: 0.5rem;
+            border-bottom: 1px dashed #c7d2fe;
+            padding-bottom: 0.3rem;
+        }
+        .scheduled-inspections-section ul {
+            list-style: none; /* Elimina los puntos de la lista */
+            padding: 0;
+            margin: 0;
+        }
+        .scheduled-inspections-section li {
+            margin-bottom: 0.75rem; /* Más espacio entre elementos de lista para la barra de progreso */
+            color: #555;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px dotted #e0e0e0; /* Separador suave */
+        }
+        .scheduled-inspections-section li:last-child {
+            border-bottom: none; /* Elimina el borde del último elemento */
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .scheduled-inspections-section li strong {
+            color: #333;
+        }
+
+        /* Estilos para el nuevo diálogo de programación masiva (ahora con checkboxes de nuevo) */
+        #bulkScheduleInspectionsDialog {
+            max-width: 600px;
+        }
+        #predefinedInspectionsList {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Columnas responsivas */
+            gap: 0.75rem;
+            max-height: 300px; /* Limita la altura para el scroll */
+            overflow-y: auto;
+            padding-right: 10px; /* Para la barra de desplazamiento */
+        }
+        #predefinedInspectionsList div {
+            display: flex;
+            align-items: center;
+            background-color: #f0f4f8; /* Fondo suave para cada opción */
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid #d1d5db;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        #predefinedInspectionsList div:hover {
+            background-color: #e2e8f0;
+            border-color: #9ca3af;
+        }
+        #predefinedInspectionsList input[type="checkbox"] {
+            margin-right: 0.5rem;
+            cursor: pointer;
+        }
+        #predefinedInspectionsList label {
+            font-weight: normal; /* No negrita para las etiquetas */
+            color: #333;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* Clase para ocultar campos específicos en el formulario de edición */
+        .form-field-aircraft-hidden {
+            display: none;
+        }
+
 
         /* Estilos de impresión mejorados */
         @media print {
@@ -780,18 +908,18 @@
                 gap: 0.75rem !important; /* Ajustar el gap para que quepan 4 columnas */
             }
 
-            body.print-change-log-mode .log-entry-card .section-block-print {
+            body.print-change-log-mode .section-block-print {
                 box-shadow: none !important;
                 border: 1px solid #ddd !important; /* Borde más sutil para impresión */
                 padding: 0.75rem !important; /* Ajustar padding */
             }
 
-            body.print-change-log-mode .log-entry-card .section-block-print:first-child {
+            body.print-change-log-mode .section-block-print:first-child {
                 flex: 1 1 100% !important;
                 max-width: 100% !important;
             }
 
-            body.print-change-log-mode .log-entry-card .section-block-print:not(:first-child) {
+            body.print-change-log-mode .section-block-print:not(:first-child) {
                 /* Los 4 bloques restantes se distribuyen en 4 columnas */
                 flex: 1 1 calc(25% - 0.5625rem) !important; /* Calcula para 4 columnas con 0.75rem de gap (3 gaps, entonces 100% - 2.25rem / 4) */
                 max-width: calc(25% - 0.5625rem) !important;
@@ -980,7 +1108,7 @@
                 <label for="edit-serialNumber">N° de Serie:</label>
                 <input type="text" id="edit-serialNumber" name="serialNumber">
             </div>
-            <div>
+            <div class="form-field-aircraft-hidden" id="installationDateContainer">
                 <label for="edit-installationDate">Instalado (Fecha):</label>
                 <input type="date" id="edit-installationDate" name="installationDate">
             </div>
@@ -988,17 +1116,17 @@
                 <label for="edit-location">Ubicación:</label>
                 <input type="text" id="edit-location" name="location">
             </div>
-            <div>
+            <div class="form-field-aircraft-hidden" id="typeContainer">
                 <label for="edit-type">Tipo de Vida:</label>
                 <select id="edit-type" name="type">
                     <option value="hours">Horas</option>
                     <option value="cycles">Ciclos</option>
-                    <option value="months">Meses</option>
                     <option value="condition">Condición</option>
+                    <option value="months">Meses</option>
                 </select>
             </div>
 
-            <div class="col-span-2 grid grid-cols-3 gap-4">
+            <div class="col-span-2 grid grid-cols-3 gap-4 form-field-aircraft-hidden" id="initialTSNContainer">
                 <div>
                     <label for="edit-initialTSNHours">TSN Inicial Componente (Hrs):</label>
                     <input type="number" id="edit-initialTSNHours" name="initialTSNHours" step="0.1">
@@ -1013,7 +1141,7 @@
                 </div>
             </div>
 
-            <div class="col-span-2 grid grid-cols-2 gap-4">
+            <div class="col-span-2 grid grid-cols-2 gap-4 form-field-aircraft-hidden" id="aircraftAtInstallationContainer">
                 <div>
                     <label for="edit-aircraftHrsAtInstallation">Horas AC al Instalar:</label>
                     <input type="number" id="edit-aircraftHrsAtInstallation" name="aircraftHrsAtInstallation" step="0.1" readonly>
@@ -1024,7 +1152,7 @@
                 </div>
             </div>
 
-            <div class="col-span-2 grid grid-cols-3 gap-4">
+            <div class="col-span-2 grid grid-cols-3 gap-4 form-field-aircraft-hidden" id="initialTSOContainer">
                 <div>
                     <label for="edit-initialTSOHours">TSO Inicial Componente (Hrs):</label>
                     <input type="number" id="edit-initialTSOHours" name="initialTSOHours" step="0.1">
@@ -1039,7 +1167,7 @@
                 </div>
             </div>
 
-            <div class="col-span-2 grid grid-cols-3 gap-4">
+            <div class="col-span-2 grid grid-cols-3 gap-4 form-field-aircraft-hidden" id="lifeLimitContainer">
                 <div>
                     <label for="edit-lifeLimitHours">Vida Límite (Hrs):</label>
                     <input type="number" id="edit-lifeLimitHours" name="lifeLimitHours" step="0.1">
@@ -1054,7 +1182,7 @@
                 </div>
             </div>
 
-            <div>
+            <div class="form-field-aircraft-hidden" id="dueDateTTContainer">
                 <label for="edit-dueDateTT">Vencimiento (A LAS TT):</label>
                 <input type="text" id="edit-dueDateTT" name="dueDateTT">
             </div>
@@ -1062,19 +1190,19 @@
                 <label for="edit-status">Estado:</label>
                 <input type="text" id="edit-status" name="status">
             </div>
-            <div>
+            <div class="form-field-aircraft-hidden" id="lastInspectionDateContainer">
                 <label for="edit-lastInspectionDate">Última Inspección (Fecha):</label>
                 <input type="date" id="edit-lastInspectionDate" name="lastInspectionDate">
             </div>
-            <div>
+            <div class="form-field-aircraft-hidden" id="nextInspectionDueContainer">
                 <label for="edit-nextInspectionDue">Próxima Inspección (Fecha):</label>
                 <input type="date" id="edit-nextInspectionDue" name="nextInspectionDue">
             </div>
-            <div>
+            <div class="form-field-aircraft-hidden" id="lastInspectionHoursContainer">
                 <label for="edit-lastInspectionHours">Última Inspección (Horas AC):</label>
                 <input type="number" id="edit-lastInspectionHours" name="lastInspectionHours" step="0.1">
             </div>
-            <div>
+            <div class="form-field-aircraft-hidden" id="nextInspectionHoursDueContainer">
                 <label for="edit-nextInspectionHoursDue">Próxima Inspección (Horas AC):</label>
                 <input type="number" id="edit-nextInspectionHoursDue" name="nextInspectionHoursDue" step="0.1">
             </div>
@@ -1182,6 +1310,76 @@
         </form>
     </dialog>
 
+    <!-- Nuevo Diálogo para Programación Masiva de Inspecciones (ahora con checkboxes de nuevo) -->
+    <dialog id="bulkScheduleInspectionsDialog">
+        <h3>Programar Inspecciones Automáticas</h3>
+        <p class="mb-4">Selecciona las inspecciones que deseas programar para el componente <strong id="bulkScheduleComponentName"></strong> (N° Serie: <strong id="bulkScheduleComponentSerial"></strong>):</p>
+        <div id="predefinedInspectionsList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-4">
+            <!-- Checkboxes para las inspecciones se poblarán aquí -->
+        </div>
+        <div class="form-buttons justify-end">
+            <button type="button" class="cancel-button" id="cancelBulkScheduleButton">Cancelar</button>
+            <button type="button" class="save-button" id="confirmBulkScheduleButton">Programar Seleccionadas</button>
+        </div>
+    </dialog>
+
+    <!-- Nuevo Diálogo para Editar Inspección Programada -->
+    <dialog id="editScheduledInspectionDialog">
+        <h3>Editar Inspección Programada</h3>
+        <form id="editScheduledInspectionForm">
+            <input type="hidden" id="edit-scheduled-componentSerial">
+            <input type="hidden" id="edit-scheduled-inspectionId">
+
+            <div class="col-span-2">
+                <label for="edit-scheduled-inspectionName">Nombre de la Inspección:</label>
+                <input type="text" id="edit-scheduled-inspectionName" name="inspectionName">
+            </div>
+
+            <div class="col-span-2">
+                <label for="edit-scheduled-type">Tipo de Inspección:</label>
+                <input type="text" id="edit-scheduled-type" name="type" readonly class="bg-gray-100 cursor-not-allowed">
+            </div>
+
+            <div id="editScheduledDateFields" class="col-span-2 grid grid-cols-2 gap-4">
+                <div>
+                    <label for="edit-scheduled-dueDate">Próxima Fecha de Vencimiento:</label>
+                    <input type="date" id="edit-scheduled-dueDate" name="dueDate">
+                </div>
+                <div>
+                    <label for="edit-scheduled-intervalMonths">Intervalo (Meses):</label>
+                    <input type="number" id="edit-scheduled-intervalMonths" name="intervalMonths" step="0.1" min="0">
+                </div>
+            </div>
+
+            <div id="editScheduledHoursFields" class="col-span-2 grid grid-cols-2 gap-4">
+                <div>
+                    <label for="edit-scheduled-dueHours">Próximas Horas de Vencimiento:</label>
+                    <input type="number" id="edit-scheduled-dueHours" name="dueHours" step="0.1" min="0">
+                </div>
+                <div>
+                    <label for="edit-scheduled-intervalHours">Intervalo (Horas):</label>
+                    <input type="number" id="edit-scheduled-intervalHours" name="intervalHours" step="0.1" min="0">
+                </div>
+            </div>
+
+            <div id="editScheduledCyclesFields" class="col-span-2 grid grid-cols-2 gap-4">
+                <div>
+                    <label for="edit-scheduled-dueCycles">Próximos Ciclos de Vencimiento:</label>
+                    <input type="number" id="edit-scheduled-dueCycles" name="dueCycles" step="0.1" min="0">
+                </div>
+                <div>
+                    <label for="edit-scheduled-intervalCycles">Intervalo (Ciclos):</label>
+                    <input type="number" id="edit-scheduled-intervalCycles" name="intervalCycles" step="0.1" min="0">
+                </div>
+            </div>
+            
+            <div class="form-buttons">
+                <button type="button" class="cancel-button" id="cancelEditScheduledInspectionButton">Cancelar</button>
+                <button type="submit" class="save-button">Guardar Cambios</button>
+            </div>
+        </form>
+    </dialog>
+
 
     <script type="module">
         // Importa las funciones necesarias de Firebase SDK
@@ -1266,6 +1464,34 @@
         const dateFieldsDiv = document.getElementById('dateFields');
         const hoursFieldsDiv = document.getElementById('hoursFields');
 
+        // New dialog elements references for bulk scheduling (reverted to original names)
+        const bulkScheduleInspectionsDialog = document.getElementById('bulkScheduleInspectionsDialog');
+        const bulkScheduleComponentNameSpan = document.getElementById('bulkScheduleComponentName');
+        const bulkScheduleComponentSerialSpan = document.getElementById('bulkScheduleComponentSerial');
+        const predefinedInspectionsListDiv = document.getElementById('predefinedInspectionsList'); // Reverted to listDiv
+        const cancelBulkScheduleButton = document.getElementById('cancelBulkScheduleButton');
+        const confirmBulkScheduleButton = document.getElementById('confirmBulkScheduleButton'); // Reverted to confirm button
+
+        let currentComponentForBulkScheduling = null; // To hold the component being processed for bulk scheduling
+
+        // New elements for editing scheduled inspections
+        const editScheduledInspectionDialog = document.getElementById('editScheduledInspectionDialog');
+        const editScheduledInspectionForm = document.getElementById('editScheduledInspectionForm');
+        const editScheduledComponentSerial = document.getElementById('edit-scheduled-componentSerial');
+        const editScheduledInspectionId = document.getElementById('edit-scheduled-inspectionId');
+        const editScheduledInspectionName = document.getElementById('edit-scheduled-inspectionName');
+        const editScheduledType = document.getElementById('edit-scheduled-type');
+        const editScheduledDueDate = document.getElementById('edit-scheduled-dueDate');
+        const editScheduledIntervalMonths = document.getElementById('edit-scheduled-intervalMonths');
+        const editScheduledDueHours = document.getElementById('edit-scheduled-dueHours');
+        const editScheduledIntervalHours = document.getElementById('edit-scheduled-intervalHours');
+        const editScheduledDueCycles = document.getElementById('edit-scheduled-dueCycles');
+        const editScheduledIntervalCycles = document.getElementById('edit-scheduled-intervalCycles');
+        const cancelEditScheduledInspectionButton = document.getElementById('cancelEditScheduledInspectionButton');
+        const editScheduledDateFields = document.getElementById('editScheduledDateFields');
+        const editScheduledHoursFields = document.getElementById('editScheduledHoursFields');
+        const editScheduledCyclesFields = document.getElementById('editScheduledCyclesFields');
+
 
         const editInputs = {
             serialNumberHidden: document.getElementById('edit-serialNumber-hidden'),
@@ -1294,6 +1520,22 @@
             nextInspectionHoursDue: document.getElementById('edit-nextInspectionHoursDue'), // Added back
         };
 
+        // References to the parent divs for hiding/showing
+        const aircraftSpecificFields = [
+            document.getElementById('installationDateContainer'),
+            document.getElementById('typeContainer'),
+            document.getElementById('initialTSNContainer'),
+            document.getElementById('aircraftAtInstallationContainer'),
+            document.getElementById('initialTSOContainer'),
+            document.getElementById('lifeLimitContainer'),
+            document.getElementById('dueDateTTContainer'),
+            document.getElementById('lastInspectionDateContainer'),
+            document.getElementById('nextInspectionDueContainer'),
+            document.getElementById('lastInspectionHoursContainer'),
+            document.getElementById('nextInspectionHoursDueContainer')
+        ];
+
+
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
 
@@ -1310,6 +1552,48 @@
 
         let globalSerialCounter = 1;
         let principalComponents = [];
+
+        // Global array for predefined inspections
+        const predefinedInspections = [
+            { id: "daily_a", label: "Daily Inspection - Part A", type: "hours", intervalHours: 24, description: "Daily Inspection - Part A" }, // Assuming daily is ~24 hrs
+            { id: "100h_12m_a", label: "100 Hour/12 Month Inspection - Part A", type: "mixed", intervalHours: 100, intervalMonths: 12, description: "100 Hour/12 Month Inspection - Part A" },
+            { id: "1000h_a", label: "1000 Hour Inspection - Part A", type: "hours", intervalHours: 1000, description: "1000 Hour Inspection - Part A" },
+            { id: "5000h_5y_a", label: "5000 Hour/5 Year Inspection - Part A", type: "mixed", intervalHours: 5000, intervalMonths: 60, description: "5000 Hour/5 Year Inspection - Part A" },
+            { id: "25h_first_250", label: "25 Hour Whichever Occurs First Until 250 Hours", type: "hours", intervalHours: 25, description: "25 Hour Whichever Occurs First Until 250 Hours" },
+            { id: "1_5h_main_rotor", label: "Between 1 and 5 Flight Hours After Main Rotor Hub Installation", type: "hours", intervalHours: 5, description: "Between 1 and 5 Flight Hours After Main Rotor Hub Installation" },
+            { id: "1_5h_tailboom_installation", label: "Between 1 and 5 Flight Hours After Tailboom installation or Attachment Bolt Replacement", type: "hours", intervalHours: 5, description: "Between 1 and 5 Flight Hours After Tailboom installation or Attachment Bolt Replacement" },
+            { id: "1_5h_gearbox_installation", label: "Between 1 and 5 Flight Hours After Tail Rotor Gearbox or Intermediate Gearbox Installation", type: "hours", intervalHours: 5, description: "Between 1 and 5 Flight Hours After Tail Rotor Gearbox or Intermediate Gearbox Installation" },
+            { id: "1_25h_expandable_bolt", label: "Between 1 and 25 Flight Hours After Expandable Bolt Installation", type: "hours", intervalHours: 25, description: "Between 1 and 25 Flight Hours After Expandable Bolt Installation" },
+            { id: "5_10h_tail_rotor_hub", label: "Between 5 and 10 Hours of Flight After Tail Rotor Hub and Blade Assembly Installation", type: "hours", intervalHours: 10, description: "Between 5 and 10 Hours of Flight After Tail Rotor Hub and Blade Assembly Installation" },
+            { id: "25h_next_four", label: "25 Hours For The Next Four Inspections", type: "hours", intervalHours: 25, description: "25 Hours For The Next Four Inspections" },
+            { id: "25h_main_rotor_operation", label: "25 Hours of Main Rotor Operation", type: "hours", intervalHours: 25, description: "25 Hours of Main Rotor Operation" },
+            { id: "25h_tailboom_attachment", label: "25 Hours Tailboom Attachment Inspection", type: "hours", intervalHours: 25, description: "25 Hours Tailboom Attachment Inspection" },
+            { id: "50h_after_installation", label: "50 Hours After Installation of Components", type: "hours", intervalHours: 50, description: "50 Hours After Installation of Components" },
+            { id: "50h_tailboom_attachment", label: "50 Hours Tailboom Attachment Inspection", type: "hours", intervalHours: 50, description: "50 Hours Tailboom Attachment Inspection" },
+            { id: "100h_tailboom_fin_cap", label: "100 Hours Tailboom Vertical Fin Spar Cap Inspection", type: "hours", intervalHours: 100, description: "100 Hours Tailboom Vertical Fin Spar Cap Inspection" },
+            { id: "100h_collective_lever", label: "100 Hours of Collective Lever Operation", type: "hours", intervalHours: 100, description: "100 Hours of Collective Lever Operation" },
+            { id: "150h_starter_generator", label: "150 Hours of Starter Generator (200SG119G) Operation", type: "hours", intervalHours: 150, description: "150 Hours of Starter Generator (200SG119G) Operation" },
+            { id: "300h_6m_expandable_bolt", label: "300 Hours or 6 Months of Expandable Blade Bolt Operation", type: "mixed", intervalHours: 300, intervalMonths: 6, description: "300 Hours or 6 Months of Expandable Blade Bolt Operation" },
+            { id: "300h_12m_tail_rotor_driveshaft", label: "300 Hours or 12 Months Tail Rotor Driveshaft Operation or 12 Months", type: "mixed", intervalHours: 300, intervalMonths: 12, description: "300 Hours or 12 Months Tail Rotor Driveshaft Operation or 12 Months" },
+            { id: "300h_12m_tailboom_attachment_bolts", label: "300 Hours or 12 Months Inspection of Tailboom Attachment Bolts", type: "mixed", intervalHours: 300, intervalMonths: 12, description: "300 Hours or 12 Months Inspection of Tailboom Attachment Bolts" },
+            { id: "600h_12m_main_driveshaft", label: "600 Hours or 12 Months of Main Driveshaft Operation or 12 Months", type: "mixed", intervalHours: 600, intervalMonths: 12, description: "600 Hours or 12 Months of Main Driveshaft Operation or 12 Months" },
+            { id: "600h_12m_magnetic_brake", label: "600 Hours or 12 Months Inspection Of Magnetic Brake Assembly", type: "mixed", intervalHours: 600, intervalMonths: 12, description: "600 Hours or 12 Months Inspection Of Magnetic Brake Assembly" },
+            { id: "1000h_component_operation", label: "1000 Hours of Component Operation", type: "hours", intervalHours: 1000, description: "1000 Hours of Component Operation" },
+            { id: "12m_landings_aft_crosstube", label: "12 Months or 2500 Landings of Aft High Crosstube Operation", type: "mixed", intervalMonths: 12, intervalCycles: 2500, description: "12 Months or 2500 Landings of Aft High Crosstube Operation" },
+            { id: "24m_control_bolt_operation", label: "24 Months of Control Bolt Operation", type: "months", intervalMonths: 24, description: "24 Months of Control Bolt Operation" },
+            { id: "24m_main_rotor_mast", label: "24 Months of Main Rotor Mast Operation", type: "months", intervalMonths: 24, description: "24 Months of Main Rotor Mast Operation" },
+            { id: "2500h_main_rotor_hub_assembly", label: "2500 Hours of Main Rotor Hub Assembly Operation", type: "hours", intervalHours: 2500, description: "2500 Hours of Main Rotor Hub Assembly Operation" },
+            { id: "2500h_main_rotor_blade", label: "2500 Hours of Main Rotor Blade Operation", type: "hours", intervalHours: 2500, description: "2500 Hours of Main Rotor Blade Operation" },
+            { id: "2500h_5y_main_rotor_mast", label: "2500 Hours or 5 Years of Main Rotor Mast (412-040-366-109 and Subsequent) Operation", type: "mixed", intervalHours: 2500, intervalMonths: 60, description: "2500 Hours or 5 Years of Main Rotor Mast (412-040-366-109 and Subsequent) Operation" },
+            { id: "2500h_tail_rotor_drive_system", label: "2500 Hours of Tail Rotor Drive System Operation", type: "hours", intervalHours: 2500, description: "2500 Hours of Tail Rotor Drive System Operation" },
+            { id: "3000h_5y_main_rotor_mast", label: "3000 Hours or 5 Years of Main Rotor Mast (412-040-366-103 and -105) Operation", type: "mixed", intervalHours: 3000, intervalMonths: 60, description: "3000 Hours or 5 Years of Main Rotor Mast (412-040-366-103 and -105) Operation" },
+            { id: "3600h_transmission_002", label: "3600 Hours of Transmission (412-040-002) Operation", type: "hours", intervalHours: 3600, description: "3600 Hours of Transmission (412-040-002) Operation" },
+            { id: "3000h_transmission_802", label: "3000 Hours of Transmission (412-040-004/412-040-007/412-040-802) Operation", type: "hours", intervalHours: 3000, description: "3000 Hours of Transmission (412-040-004/412-040-007/412-040-802) Operation" },
+            { id: "2000h_300h_12m", label: "2000 Hours Total Airframe Time and Each 300 Hours/12 Months Inspection", type: "mixed", intervalHours: 300, intervalMonths: 12, description: "2000 Hours Total Airframe Time and Each 300 Hours/12 Months Inspection" }, // This one is tricky, interval is 300h/12m after 2000h total
+            { id: "2000h_5y_transmission_mount", label: "2000 Hours or 5 Years Of Transmission Mount Assembly (204-031-927) And Friction Damper Assembly (204-031-020) Operation", type: "mixed", intervalHours: 2000, intervalMonths: 60, description: "2000 Hours or 5 Years Of Transmission Mount Assembly (204-031-927) And Friction Damper Assembly (204-031-020) Operation" },
+            { id: "2500h_collective_stick_tube", label: "2500 Hours of Inspection Of Collective Stick Tube", type: "hours", intervalHours: 2500, description: "2500 Hours of Inspection Of Collective Stick Tube" }
+        ];
+
 
         /**
          * Función unificada para ejecutar después de que todos los datos necesarios
@@ -1329,6 +1613,11 @@
          * @returns {number|string} Vida restante calculada o un marcador para "condicion".
          */
         function calculateRemainingLife(component) {
+            // For "AERONAVE" component, life limits are not applicable
+            if (component.name && component.name.toUpperCase() === 'AERONAVE') {
+                return "NO_APLICA";
+            }
+
             if (!component) return 0;
 
             if (component.type === "condition") {
@@ -1373,7 +1662,7 @@
          * @returns {string} Clase CSS para el color.
          */
         function getRemainingColorClass(remaining, totalLife) {
-            if (remaining === "CONDICION_TYPE") {
+            if (remaining === "CONDICION_TYPE" || remaining === "NO_APLICA") {
                 return 'remaining-blue';
             }
             if (totalLife === 0) return '';
@@ -1396,6 +1685,11 @@
          * @returns {number} Porcentaje de vida consumida (0-100).
          */
         function calculateConsumedLifePercentage(component) {
+            // For "AERONAVE" component, progress bar is not applicable
+            if (component.name && component.name.toUpperCase() === 'AERONAVE') {
+                return 0; // Or a special value to indicate "not applicable"
+            }
+
             if (!component) return 0;
 
             if (component.type === "condition") {
@@ -1623,6 +1917,8 @@
                 editComponentDialog.querySelector('h3').textContent = 'Editar Componente';
 
                 toggleNumericFields(component.type === 'condition');
+                toggleAircraftFields(component.name && component.name.toUpperCase() === 'AERONAVE');
+
             } else {
                 editComponentDialog.querySelector('h3').textContent = 'Agregar Nuevo Componente';
                 editInputs.type.value = 'hours';
@@ -1650,6 +1946,7 @@
 
 
                 toggleNumericFields(false);
+                toggleAircraftFields(false); // Default to not aircraft
                 editInputs.dueDateTT.value = "";
             }
 
@@ -1701,15 +1998,53 @@
         }
 
         /**
+         * Habilita o deshabilita/oculta campos específicos del formulario para el tipo "AERONAVE".
+         * @param {boolean} isAircraft - Si es true, oculta y deshabilita los campos; si es false, los muestra y habilita.
+         */
+        function toggleAircraftFields(isAircraft) {
+            aircraftSpecificFields.forEach(container => {
+                if (container) { // Ensure the container exists
+                    if (isAircraft) {
+                        container.classList.add('form-field-aircraft-hidden');
+                        // Also reset values for these hidden fields
+                        const input = container.querySelector('input, select, textarea');
+                        if (input) {
+                            input.value = '';
+                            if (input.type === 'number') input.value = 0;
+                            if (input.tagName === 'SELECT') input.value = 'hours'; // Default for type select
+                        }
+                    } else {
+                        container.classList.remove('form-field-aircraft-hidden');
+                    }
+                }
+            });
+
+            // Specific handling for dueDateTT as it has a special "CONDICIÓN" value
+            if (isAircraft) {
+                editInputs.dueDateTT.value = "NO APLICA";
+                editInputs.dueDateTT.disabled = true;
+                editInputs.type.value = "condition"; // Force type to condition for AERONAVE
+                editInputs.type.disabled = true;
+                toggleNumericFields(true); // Also disable numeric fields for AERONAVE
+            } else {
+                editInputs.dueDateTT.disabled = false;
+                editInputs.type.disabled = false;
+                // Re-apply normal condition logic if not aircraft
+                toggleNumericFields(editInputs.type.value === 'condition');
+            }
+        }
+
+
+        /**
          * Registra un cambio en la base de datos de Firebase.
          * @param {object} changeData - Los datos del componente (estado actual, después del cambio).
-         * @param {string} changeType - El tipo de cambio (e.g., 'Instalación', 'Edición', 'Retiro', 'Eliminación', 'Inspección Realizada').
+         * @param {string} changeType - El tipo de cambio (e.g., 'Instalación', 'Edición', 'Retiro', 'Eliminación', 'Inspección Realizada', 'Inspecciones Programadas', 'Inspección Eliminada', 'Inspección Programada Editada').
          * @param {object|null} oldComponent - Los datos del componente antes del cambio (para 'Edición' y 'Retiro').
          * @param {string|null} replacesSerialNumber - El serial del componente que este reemplaza (para 'Instalación').
          * @param {string|null} replacedBySerialNumber - El serial del componente que reemplaza a este (para 'Retiro').
-         * @param {string|null} uninstallationReasonOrDescription - El motivo de desinstalación (para 'Retiro') o la descripción de la inspección (para 'Inspección Realizada').
+         * @param {string|object|null} reasonOrDescription - El motivo de desinstalación (para 'Retiro') o la descripción/detalles de la inspección (para 'Inspección Realizada', 'Inspecciones Programadas', 'Inspección Eliminada', 'Inspección Programada Editada').
          */
-        async function recordComponentChange(changeData, changeType, oldComponent = null, replacesSerialNumber = null, replacedBySerialNumber = null, uninstallationReasonOrDescription = null) {
+        async function recordComponentChange(changeData, changeType, oldComponent = null, replacesSerialNumber = null, replacedBySerialNumber = null, reasonOrDescription = null) {
             const changeRecord = {
                 timestamp: new Date().toISOString(),
                 serialNumber: changeData.serialNumber || (oldComponent ? oldComponent.serialNumber : 'N/A'),
@@ -1724,11 +2059,18 @@
             if (replacedBySerialNumber) {
                 changeRecord.replacedBySerialNumber = replacedBySerialNumber;
             }
-            if (changeType === 'Retiro' && uninstallationReasonOrDescription) {
-                changeRecord.uninstallationReason = uninstallationReasonOrDescription;
-            } else if (changeType === 'Inspección Realizada' && uninstallationReasonOrDescription) {
-                changeRecord.inspectionDescription = uninstallationReasonOrDescription;
+            if (changeType === 'Retiro' && reasonOrDescription) {
+                changeRecord.uninstallationReason = reasonOrDescription;
+            } else if (changeType === 'Inspección Realizada' && reasonOrDescription) {
+                changeRecord.inspectionDescription = reasonOrDescription;
+            } else if (changeType === 'Inspecciones Programadas' && reasonOrDescription) {
+                changeRecord.programmedInspections = reasonOrDescription; // This will be an array of programmed inspection names
+            } else if (changeType === 'Inspección Eliminada' && reasonOrDescription) {
+                changeRecord.deletedInspection = reasonOrDescription; // Name or ID of the deleted inspection
+            } else if (changeType === 'Inspección Programada Editada' && reasonOrDescription) {
+                changeRecord.editedInspectionDetails = reasonOrDescription; // Object with old and new inspection details
             }
+
 
             if (changeType === 'Edición' && oldComponent) {
                 const keysToCheck = [
@@ -1738,11 +2080,27 @@
                     'initialTSOHours', 'initialTSOCycles', 'initialTSODays',
                     'lifeLimitHours', 'lifeLimitCycles', 'lifeLimitDays',
                     'dueDateTT', 'status', 'lastInspectionDate', 'nextInspectionDue',
-                    'lastInspectionHours', 'nextInspectionHoursDue' // Added these two fields
+                    'lastInspectionHours', 'nextInspectionHoursDue',
+                    'scheduledInspections' // Also check for changes in scheduledInspections
                 ];
                 let changesDetected = false;
                 for (const key of keysToCheck) {
-                    if (String(oldComponent[key] || '') !== String(changeData[key] || '')) {
+                    // Deep comparison for scheduledInspections array
+                    if (key === 'scheduledInspections') {
+                        const oldScheduled = oldComponent[key] || [];
+                        const newScheduled = changeData[key] || [];
+                        if (oldScheduled.length !== newScheduled.length) {
+                            changesDetected = true;
+                            break;
+                        }
+                        for (let i = 0; i < oldScheduled.length; i++) {
+                            if (JSON.stringify(oldScheduled[i]) !== JSON.stringify(newScheduled[i])) {
+                                changesDetected = true;
+                                break;
+                            }
+                        }
+                        if (changesDetected) break;
+                    } else if (String(oldComponent[key] || '') !== String(changeData[key] || '')) {
                         changesDetected = true;
                         break;
                     }
@@ -1772,6 +2130,7 @@
 
             const oldSerialNumber = editInputs.serialNumberHidden.value;
             let newSerialNumber = editInputs.serialNumber.value.trim(); 
+            const componentName = editInputs.name.value.trim().toUpperCase(); // Get name and normalize for check
 
             if (!newSerialNumber) {
                 console.error("Error: El número de serie no puede estar vacío. Por favor, introduce un valor.");
@@ -1783,37 +2142,39 @@
                 return;
             }
 
-            const selectedType = editInputs.type.value;
+            const isAircraft = componentName === 'AERONAVE';
+            const selectedType = isAircraft ? 'condition' : editInputs.type.value; // Force type to 'condition' for AERONAVE
 
             const updatedComponentData = {
                 name: editInputs.name.value.trim() || '', 
                 partNumber: editInputs.partNumber.value.trim() || '',
                 serialNumber: newSerialNumber, 
-                installationDate: editInputs.installationDate.value || '',
+                installationDate: isAircraft ? '' : (editInputs.installationDate.value || ''),
                 location: editInputs.location.value.trim() || '',
                 type: selectedType,
                 status: editInputs.status.value.trim() || 'Activo',
                 
-                initialTSNHours: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSNHours.value) || 0),
-                initialTSNCycles: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSNCycles.value) || 0),
-                initialTSNDays: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSNDays.value) || 0),
+                initialTSNHours: isAircraft ? 0 : (parseFloat(editInputs.initialTSNHours.value) || 0),
+                initialTSNCycles: isAircraft ? 0 : (parseFloat(editInputs.initialTSNCycles.value) || 0),
+                initialTSNDays: isAircraft ? 0 : (parseFloat(editInputs.initialTSNDays.value) || 0),
 
-                aircraftHrsAtInstallation: (selectedType === 'condition' ? 0 : parseFloat(editInputs.aircraftHrsAtInstallation.value) || 0),
-                aircraftRinsAtInstallation: (selectedType === 'condition' ? 0 : parseFloat(editInputs.aircraftRinsAtInstallation.value) || 0),
+                aircraftHrsAtInstallation: isAircraft ? 0 : (parseFloat(editInputs.aircraftHrsAtInstallation.value) || 0),
+                aircraftRinsAtInstallation: isAircraft ? 0 : (parseFloat(editInputs.aircraftRinsAtInstallation.value) || 0),
 
-                initialTSOHours: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSOHours.value) || 0), 
-                initialTSOCycles: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSOCycles.value) || 0),
-                initialTSODays: (selectedType === 'condition' ? 0 : parseFloat(editInputs.initialTSODays.value) || 0),
+                initialTSOHours: isAircraft ? 0 : (parseFloat(editInputs.initialTSOHours.value) || 0), 
+                initialTSOCycles: isAircraft ? 0 : (parseFloat(editInputs.initialTSOCycles.value) || 0),
+                initialTSODays: isAircraft ? 0 : (parseFloat(editInputs.initialTSODays.value) || 0),
 
-                lifeLimitHours: (selectedType === 'condition' ? 0 : parseFloat(editInputs.lifeLimitHours.value) || 0),
-                lifeLimitCycles: (selectedType === 'condition' ? 0 : parseFloat(editInputs.lifeLimitCycles.value) || 0),
-                lifeLimitDays: (selectedType === 'condition' ? 0 : parseFloat(editInputs.lifeLimitDays.value) || 0),
+                lifeLimitHours: isAircraft ? 0 : (parseFloat(editInputs.lifeLimitHours.value) || 0),
+                lifeLimitCycles: isAircraft ? 0 : (parseFloat(editInputs.lifeLimitCycles.value) || 0),
+                lifeLimitDays: isAircraft ? 0 : (parseFloat(editInputs.lifeLimitDays.value) || 0),
 
-                dueDateTT: (selectedType === 'condition' ? 'CONDICIÓN' : editInputs.dueDateTT.value.trim() || ''),
-                lastInspectionDate: editInputs.lastInspectionDate.value || '',
-                nextInspectionDue: editInputs.nextInspectionDue.value || '',
-                lastInspectionHours: parseFloat(editInputs.lastInspectionHours.value) || 0, // Store new field
-                nextInspectionHoursDue: parseFloat(editInputs.nextInspectionHoursDue.value) || 0, // Store new field
+                dueDateTT: isAircraft ? 'NO APLICA' : (editInputs.dueDateTT.value.trim() || ''),
+                lastInspectionDate: isAircraft ? '' : (editInputs.lastInspectionDate.value || ''),
+                nextInspectionDue: isAircraft ? '' : (editInputs.nextInspectionDue.value || ''),
+                lastInspectionHours: isAircraft ? 0 : (parseFloat(editInputs.lastInspectionHours.value) || 0), 
+                nextInspectionHoursDue: isAircraft ? 0 : (parseFloat(editInputs.nextInspectionHoursDue.value) || 0), 
+                scheduledInspections: [] // Initialize scheduledInspections array
             };
 
             try {
@@ -1823,6 +2184,8 @@
                     const snapshot = await get(existingCompRef);
                     if (snapshot.exists()) {
                         oldComponentData = snapshot.val();
+                        // Preserve existing scheduledInspections if updating an old component
+                        updatedComponentData.scheduledInspections = oldComponentData.scheduledInspections || [];
                     }
                 }
 
@@ -1847,6 +2210,14 @@
                         oldComponentData.replacedBy = newSerialNumber;
                         if (uninstallationReason) {
                             oldComponentData.uninstallationReason = uninstallationReason;
+                        }
+                        // Mark scheduled inspections as cancelled when component is retired
+                        if (oldComponentData.scheduledInspections) {
+                            oldComponentData.scheduledInspections.forEach(insp => {
+                                if (insp.status === "Programada") {
+                                    insp.status = "Cancelada (Retiro)";
+                                }
+                            });
                         }
                         await set(oldComponentRef, oldComponentData);
                         console.log(`Componente con serial antiguo ${oldSerialNumber} marcado como 'Retirado' y actualizado.`);
@@ -1874,6 +2245,13 @@
                 }
 
                 editComponentDialog.close();
+
+                // Check if the component is of type AERONAVE, ENGINE, ENGINE 1, ENGINE 2, or C BOX
+                const componentsForBulkScheduling = ['AERONAVE', 'ENGINE', 'ENGINE 1', 'ENGINE 2', 'C BOX'];
+                if (componentsForBulkScheduling.includes(componentName)) {
+                    openBulkScheduleInspectionsDialog(updatedComponentData);
+                }
+
             } catch (error) {
                 console.error("Error al guardar el componente en Firebase:", error);
             }
@@ -1886,6 +2264,11 @@
          * @returns {number} El valor TSO actual calculado.
          */
         function calculateCurrentTSO(component, type) {
+            // For "AERONAVE" component, TSO is not applicable
+            if (component.name && component.name.toUpperCase() === 'AERONAVE') {
+                return 0;
+            }
+
             let initialTSO = 0;
             let aircraftValueAtInstallation = 0;
             let currentAircraftValue = 0;
@@ -1922,6 +2305,32 @@
             return parseFloat(accruedTime.toFixed(1));
         }
 
+        /**
+         * Generates HTML for a progress bar based on percentage.
+         * @param {number} percentage - The percentage remaining (0-100).
+         * @param {string} label - The label for the progress bar (e.g., "Hrs Restantes").
+         * @returns {string} HTML string for the progress bar.
+         */
+        function getProgressBarHtml(percentage, label) {
+            let colorClass = 'progress-green';
+            if (percentage < 20) {
+                colorClass = 'progress-red';
+            } else if (percentage < 40) {
+                colorClass = 'progress-orange';
+            }
+
+            // Ensure percentage is between 0 and 100 for display
+            const displayPercentage = Math.max(0, Math.min(100, percentage));
+
+            return `
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill ${colorClass}" style="width: ${100 - displayPercentage}%;">
+                        ${displayPercentage.toFixed(0)}% Restante
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 text-right mt-1">${label}</p>
+            `;
+        }
 
         /**
          * Renderiza los detalles de los componentes en una sección específica.
@@ -1944,6 +2353,8 @@
                     console.warn("Componente mal formado encontrado y omitido:", component);
                     return;
                 }
+
+                const isAircraftComponent = component.name && component.name.toUpperCase() === 'AERONAVE';
 
                 const lifeLimitHours = parseFloat(component.lifeLimitHours) || 0;
                 const lifeLimitCycles = parseFloat(component.lifeLimitCycles) || 0;
@@ -1991,7 +2402,7 @@
                     displayedTSNHours = "N/A";
                     displayedTSNCycles = "N/A";
                     displayedTSNDays = "N/A";
-                } else {
+                } else { // Only calculate for non-condition types
                     remainingLifeDisplay = remainingLife.toFixed(1);
                     if (remainingLife <= 0) {
                         progressBarColorClass = 'progress-red';
@@ -2010,45 +2421,114 @@
                 const displayedTSOCycles = calculateCurrentTSO(component, 'cycles'); 
                 const displayedTSODays = calculateCurrentTSO(component, 'months');
 
-                // --- Remanente de Inspecciones (NUEVO) ---
+                // --- Remanente de Inspecciones ---
                 let inspectionRemnantHoursText = 'N/A';
                 let inspectionRemnantHoursColorClass = '';
-                const nextHoursDue = parseFloat(component.nextInspectionHoursDue) || 0;
-                if (nextHoursDue > 0) {
-                    const hoursRemnantValue = (nextHoursDue - currentAcHrs);
+                let inspectionRemnantDateText = 'N/A';
+                let inspectionRemnantDateColorClass = '';
+                let inspectionRemnantCyclesText = 'N/A'; // New for cycles
+                let inspectionRemnantCyclesColorClass = ''; // New for cycles
+
+
+                let soonestDueHoursInspection = null;
+                let soonestDueDateInspection = null;
+                let soonestDueCyclesInspection = null; // New for cycles
+
+                if (component.scheduledInspections && component.scheduledInspections.length > 0) {
+                    const activeScheduledInspections = component.scheduledInspections.filter(insp => insp.status === "Programada");
+
+                    soonestDueHoursInspection = activeScheduledInspections
+                        .filter(insp => (insp.type === 'hours' || (insp.type === 'mixed' && insp.dueHours !== undefined)) && parseFloat(insp.dueHours) > currentAcHrs)
+                        .sort((a, b) => parseFloat(a.dueHours || Infinity) - parseFloat(b.dueHours || Infinity))
+                        [0];
+
+                    soonestDueDateInspection = activeScheduledInspections
+                        .filter(insp => (insp.type === 'months' || (insp.type === 'mixed' && insp.dueDate !== undefined)) && new Date(insp.dueDate) > today)
+                        .sort((a, b) => new Date(a.dueDate || '9999-12-31').getTime() - new Date(b.dueDate || '9999-12-31').getTime())
+                        [0];
+                    
+                    soonestDueCyclesInspection = activeScheduledInspections
+                        .filter(insp => (insp.type === 'cycles' || (insp.type === 'mixed' && insp.dueCycles !== undefined)) && parseFloat(insp.dueCycles) > currentRins)
+                        .sort((a, b) => parseFloat(a.dueCycles || Infinity) - parseFloat(b.dueCycles || Infinity))
+                        [0];
+                }
+
+                if (soonestDueHoursInspection) {
+                    const hoursRemnantValue = (parseFloat(soonestDueHoursInspection.dueHours) - currentAcHrs);
                     inspectionRemnantHoursText = `${hoursRemnantValue.toFixed(1)} hrs`;
                     if (hoursRemnantValue <= 0) {
                         inspectionRemnantHoursColorClass = 'remaining-red';
-                    } else if (hoursRemnantValue <= 10) { // Menos de 10 horas para la alerta
+                    } else if (hoursRemnantValue <= 10) {
                         inspectionRemnantHoursColorClass = 'remaining-orange';
                     } else {
                         inspectionRemnantHoursColorClass = 'remaining-green';
                     }
+                } else {
+                    // Fallback to component.nextInspectionHoursDue if no scheduled hours inspection is found
+                    const nextHoursDue = parseFloat(component.nextInspectionHoursDue) || 0;
+                    if (nextHoursDue > 0) {
+                        const hoursRemnantValue = (nextHoursDue - currentAcHrs);
+                        inspectionRemnantHoursText = `${hoursRemnantValue.toFixed(1)} hrs`;
+                        if (hoursRemnantValue <= 0) {
+                            inspectionRemnantHoursColorClass = 'remaining-red';
+                        } else if (hoursRemnantValue <= 10) { // Menos de 10 horas para la alerta
+                            inspectionRemnantHoursColorClass = 'remaining-orange';
+                        } else {
+                            inspectionRemnantHoursColorClass = 'remaining-green';
+                        }
+                    }
                 }
 
-                let inspectionRemnantDateText = 'N/A';
-                let inspectionRemnantDateColorClass = '';
-                const nextDueDate = component.nextInspectionDue ? new Date(component.nextInspectionDue) : null;
-                if (nextDueDate) {
+                if (soonestDueDateInspection) {
+                    const nextDueDate = new Date(soonestDueDateInspection.dueDate);
                     const diffTime = nextDueDate.getTime() - today.getTime();
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     inspectionRemnantDateText = `${diffDays} días`;
                     if (diffDays <= 0) {
                         inspectionRemnantDateColorClass = 'remaining-red';
-                    } else if (diffDays <= 30) { // Menos de 30 días para la alerta
+                    } else if (diffDays <= 30) {
                         inspectionRemnantDateColorClass = 'remaining-orange';
                     } else {
                         inspectionRemnantDateColorClass = 'remaining-green';
                     }
+                } else {
+                    // Fallback to component.nextInspectionDue if no scheduled date inspection is found
+                    const nextDueDate = component.nextInspectionDue ? new Date(component.nextInspectionDue) : null;
+                    if (nextDueDate) {
+                        const diffTime = nextDueDate.getTime() - today.getTime();
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        inspectionRemnantDateText = `${diffDays} días`;
+                        if (diffDays <= 0) {
+                            inspectionRemnantDateColorClass = 'remaining-red';
+                        } else if (diffDays <= 30) { // Menos de 30 días para la alerta
+                            inspectionRemnantDateColorClass = 'remaining-orange';
+                        } else {
+                            inspectionRemnantDateColorClass = 'remaining-green';
+                        }
+                    }
+                }
+
+                if (soonestDueCyclesInspection) { // New: Handle cycles remnant
+                    const cyclesRemnantValue = (parseFloat(soonestDueCyclesInspection.dueCycles) - currentRins);
+                    inspectionRemnantCyclesText = `${cyclesRemnantValue.toFixed(1)} ciclos`;
+                    if (cyclesRemnantValue <= 0) {
+                        inspectionRemnantCyclesColorClass = 'remaining-red';
+                    } else if (cyclesRemnantValue <= 50) { // Example threshold for cycles
+                        inspectionRemnantCyclesColorClass = 'remaining-orange';
+                    } else {
+                        inspectionRemnantCyclesColorClass = 'remaining-green';
+                    }
                 }
                 // --- FIN Remanente de Inspecciones ---
 
+                // Sanitize serial number for use in HTML ID (replace non-alphanumeric with underscore)
+                const sanitizedSerialNumber = component.serialNumber.replace(/[^a-zA-Z0-9-_]/g, '_');
 
                 const cardClass = `${isRetiredSection ? 'component-card retired' : 'component-card'}`;
 
                 const card = document.createElement('div');
                 card.className = cardClass;
-                card.id = `component-${component.serialNumber}`; 
+                card.id = `component-${sanitizedSerialNumber}`; 
                 card.innerHTML = `
                     <div class="card-header">
                         <div class="title-container">
@@ -2067,39 +2547,41 @@
                     <div class="component-info-grid">
                         <p><strong>No. Parte:</strong> ${component.partNumber || 'N/A'}</p>
                         <p><strong>No. Serie:</strong> ${component.serialNumber || 'N/A'}</p>
-                        <p><strong>Instalado (Fecha):</strong> ${component.installationDate || 'N/A'}</p>
                         <p><strong>Ubicación:</strong> ${component.location || 'N/A'}</p>
+                        ${!isAircraftComponent ? `<p><strong>Instalado (Fecha):</strong> ${component.installationDate || 'N/A'}</p>` : ''}
                         
-                        <p><strong>Vida Límite (Hrs):</strong> ${lifeLimitHours.toFixed(1)}</p>
-                        <p><strong>Vida Límite (Ciclos):</strong> ${lifeLimitCycles.toFixed(1)}</p>
-                        <p><strong>Vida Límite (Días):</strong> ${lifeLimitDays.toFixed(1)}</p>
-                        <p><strong>Tipo de Vida:</strong> ${component.type || 'N/A'}</p>
+                        ${!isAircraftComponent ? `<p><strong>Vida Límite (Hrs):</strong> ${lifeLimitHours.toFixed(1)}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>Vida Límite (Ciclos):</strong> ${lifeLimitCycles.toFixed(1)}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>Vida Límite (Días):</strong> ${lifeLimitDays.toFixed(1)}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>Tipo de Vida:</strong> ${component.type || 'N/A'}</p>` : ''}
 
-                        <p><strong>TSN (Hrs):</strong> ${displayedTSNHours}</p>
-                        <p><strong>TSN (Ciclos):</strong> ${displayedTSNCycles}</p>
-                        <p><strong>TSN (Días):</strong> ${displayedTSNDays}</p>
-                        <p><strong>TSN Inicial Componente (Hrs):</strong> ${(parseFloat(component.initialTSNHours) || 0).toFixed(1)}</p>
-                        <p><strong>TSN Inicial Componente (Ciclos):</strong> ${(parseFloat(component.initialTSNCycles) || 0).toFixed(1)}</p>
-                        <p><strong>TSN Inicial Componente (Días):</strong> ${(parseFloat(component.initialTSNDays) || 0).toFixed(1)}</p>
-                        <p><strong>Horas AC al Instalar:</strong> ${(parseFloat(component.aircraftHrsAtInstallation) || 0).toFixed(1)}</p>
-                        <p><strong>RINS AC al Instalar:</strong> ${(parseFloat(component.aircraftRinsAtInstallation) || 0).toFixed(1)}</p>
-                        <p><strong>TSO (Hrs):</strong> ${displayedTSOHours.toFixed(1)}</p>
-                        <p><strong>TSO (Ciclos):</strong> ${displayedTSOCycles.toFixed(1)}</p>
-                        <p><strong>TSO (Días):</strong> ${displayedTSODays.toFixed(1)}</p>
+                        ${!isAircraftComponent ? `<p><strong>TSN (Hrs):</strong> ${displayedTSNHours}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>TSN (Ciclos):</strong> ${displayedTSNCycles}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>TSN (Días):</strong> ${displayedTSNDays}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>TSN Inicial Componente (Hrs):</strong> ${((parseFloat(component.initialTSNHours) || 0).toFixed(1))}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>TSN Inicial Componente (Ciclos):</strong> ${((parseFloat(component.initialTSNCycles) || 0).toFixed(1))}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>TSN Inicial Componente (Días):</strong> ${((parseFloat(component.initialTSNDays) || 0).toFixed(1))}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>Horas AC al Instalar:</strong> ${((parseFloat(component.aircraftHrsAtInstallation) || 0).toFixed(1))}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>RINS AC al Instalar:</strong> ${((parseFloat(component.aircraftRinsAtInstallation) || 0).toFixed(1))}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>TSO (Hrs):</strong> ${displayedTSOHours.toFixed(1)}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>TSO (Ciclos):</strong> ${displayedTSOCycles.toFixed(1)}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>TSO (Días):</strong> ${displayedTSODays.toFixed(1)}</p>` : ''}
 
-                        <p><strong>Última Inspección (Fecha):</strong> ${component.lastInspectionDate || 'N/A'}</p>
-                        <p><strong>Próxima Inspección (Fecha):</strong> ${component.nextInspectionDue || 'N/A'}</p>
-                        <p><strong>Última Inspección (Horas AC):</strong> ${((parseFloat(component.lastInspectionHours) || 0)).toFixed(1)}</p>
-                        <p><strong>Próxima Inspección (Horas AC):</strong> ${((parseFloat(component.nextInspectionHoursDue) || 0)).toFixed(1)}</p>
-                        <p><strong>Vencimiento (A LAS TT):</strong> ${component.dueDateTT || 'N/A'}</p>
+                        ${!isAircraftComponent ? `<p><strong>Última Inspección (Fecha):</strong> ${component.lastInspectionDate || 'N/A'}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>Próxima Inspección (Fecha):</strong> ${component.nextInspectionDue || 'N/A'}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>Última Inspección (Horas AC):</strong> ${((parseFloat(component.lastInspectionHours) || 0)).toFixed(1)}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>Próxima Inspección (Horas AC):</strong> ${((parseFloat(component.nextInspectionHoursDue) || 0)).toFixed(1)}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>Vencimiento (A LAS TT):</strong> ${component.dueDateTT || 'N/A'}</p>` : ''}
                         <p><strong>Estado:</strong> ${component.status || 'N/A'}</p>
                         ${component.uninstallationReason ? `<p class="col-span-full"><strong>Motivo Retiro:</strong> ${component.uninstallationReason}</p>` : ''}
                     </div>
-                    <div class="remaining-life-section">
-                        <span>Remanente Vida:</span>
-                        <span class="${colorClass}">${remainingLifeDisplay} ${unit}</span>
-                    </div>
-                    <!-- Nueva sección para remanente de inspecciones -->
+                    ${!isAircraftComponent ? `
+                        <div class="remaining-life-section">
+                            <span>Remanente Vida:</span>
+                            <span class="${colorClass}">${remainingLifeDisplay} ${unit}</span>
+                        </div>
+                    ` : ''}
+                    <!-- Nueva sección para remanente de inspecciones (ahora visible para AERONAVE también) -->
                     <div class="inspection-remnant-section">
                         <div class="inspection-remnant-item">
                             <span>Remanente Insp. (Hrs):</span>
@@ -2109,14 +2591,112 @@
                             <span>Remanente Insp. (Fecha):</span>
                             <span class="${inspectionRemnantDateColorClass}">${inspectionRemnantDateText}</span>
                         </div>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill ${progressBarColorClass}" style="width: ${calculateConsumedLifePercentage(component)}%;">
-                            ${progressBarText}
+                        <div class="inspection-remnant-item">
+                            <span>Remanente Insp. (Ciclos):</span>
+                            <span class="${inspectionRemnantCyclesColorClass}">${inspectionRemnantCyclesText}</span>
                         </div>
+                    </div>
+                    <!-- Sección de Inspecciones Programadas (ahora con details/summary para ocultar/mostrar) -->
+                    <div class="scheduled-inspections-section">
+                        <details ${ (component.scheduledInspections && component.scheduledInspections.length > 3) ? '' : 'open'}>
+                            <summary class="font-bold text-indigo-700 cursor-pointer">Inspecciones Programadas:</summary>
+                            <ul id="scheduledInspectionsList-${sanitizedSerialNumber}" class="mt-2">
+                                <!-- Las inspecciones programadas se cargarán aquí -->
+                            </ul>
+                        </details>
                     </div>
                 `;
                 targetElement.appendChild(card);
+
+                // Populate scheduled inspections list (now for all components, including aircraft)
+                const scheduledInspectionsListElement = card.querySelector(`#scheduledInspectionsList-${sanitizedSerialNumber}`);
+                if (scheduledInspectionsListElement) {
+                    scheduledInspectionsListElement.innerHTML = ''; // Clear existing
+                    if (component.scheduledInspections && component.scheduledInspections.length > 0) {
+                        component.scheduledInspections.forEach(scheduledInsp => {
+                            // Assign a unique ID if it doesn't have one (for new inspections or old ones without ID)
+                            if (!scheduledInsp.id) {
+                                scheduledInsp.id = Date.now() + Math.random().toString(36).substring(2, 9); // Simple unique ID
+                            }
+
+                            let displayValue = '';
+                            let progressBarHtml = '';
+                            let relevantInterval = 0;
+                            let currentProgressValue = 0;
+                            let totalProgressValue = 0;
+                            let percentageRemaining = 0;
+                            let progressBarLabel = '';
+
+                            // Determine the primary progress metric for display
+                            if (scheduledInsp.type === 'hours' || (scheduledInsp.type === 'mixed' && scheduledInsp.intervalHours !== undefined)) {
+                                relevantInterval = parseFloat(scheduledInsp.intervalHours) || 0;
+                                currentProgressValue = currentAcHrs - (parseFloat(scheduledInsp.lastKnownHours) || 0);
+                                totalProgressValue = relevantInterval;
+                                progressBarLabel = 'Hrs Restantes';
+                                displayValue = `Vencimiento: ${scheduledInsp.dueHours} hrs (Programada a ${scheduledInsp.lastKnownHours} hrs)`;
+                            } else if (scheduledInsp.type === 'cycles' || (scheduledInsp.type === 'mixed' && scheduledInsp.intervalCycles !== undefined)) {
+                                relevantInterval = parseFloat(scheduledInsp.intervalCycles) || 0;
+                                currentProgressValue = currentRins - (parseFloat(scheduledInsp.lastKnownCycles) || 0);
+                                totalProgressValue = relevantInterval;
+                                progressBarLabel = 'Ciclos Restantes';
+                                displayValue = `Vencimiento: ${scheduledInsp.dueCycles} ciclos (Programada a ${scheduledInsp.lastKnownCycles} ciclos)`;
+                            } else if (scheduledInsp.type === 'months' || (scheduledInsp.type === 'mixed' && scheduledInsp.intervalMonths !== undefined)) {
+                                relevantInterval = parseFloat(scheduledInsp.intervalMonths) || 0; // in months
+                                const lastDate = new Date(scheduledInsp.lastKnownDate);
+                                const daysPassed = (today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
+                                currentProgressValue = daysPassed;
+                                totalProgressValue = relevantInterval * (365.25 / 12); // Average days per month
+                                progressBarLabel = 'Días Restantes';
+                                displayValue = `Vencimiento: ${scheduledInsp.dueDate} (Programada el ${scheduledInsp.lastKnownDate})`;
+                            }
+
+                            if (totalProgressValue > 0) {
+                                const consumedPercentage = Math.min(100, Math.max(0, (currentProgressValue / totalProgressValue) * 100));
+                                percentageRemaining = 100 - consumedPercentage;
+                                progressBarHtml = getProgressBarHtml(percentageRemaining, progressBarLabel);
+                            } else if (scheduledInsp.type === 'condition') {
+                                progressBarHtml = getProgressBarHtml(100, 'Condición'); // Full green for condition type
+                            } else {
+                                progressBarHtml = getProgressBarHtml(100, 'N/A'); // Default for no interval
+                            }
+
+
+                            const listItem = document.createElement('li');
+                            listItem.innerHTML = `
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-bold">${scheduledInsp.inspectionName}</span>
+                                    <div>
+                                        <button class="edit-scheduled-inspection-button" data-serial="${component.serialNumber}" data-inspection-id="${scheduledInsp.id}">&#9998;</button>
+                                        <button class="remove-scheduled-inspection-button" data-serial="${component.serialNumber}" data-inspection-id="${scheduledInsp.id}">X</button>
+                                    </div>
+                                </div>
+                                <p>${displayValue} - Estado: <span class="font-bold text-${scheduledInsp.status === 'Programada' ? 'blue-600' : (scheduledInsp.status === 'Realizada' ? 'green-600' : 'red-600')}">${scheduledInsp.status}</span></p>
+                                ${progressBarHtml}
+                            `;
+                            scheduledInspectionsListElement.appendChild(listItem);
+                        });
+
+                        // Attach event listeners for remove buttons
+                        scheduledInspectionsListElement.querySelectorAll('.remove-scheduled-inspection-button').forEach(button => {
+                            button.addEventListener('click', (e) => {
+                                const serial = e.target.dataset.serial;
+                                const inspectionId = e.target.dataset.inspectionId;
+                                removeScheduledInspection(serial, inspectionId);
+                            });
+                        });
+                        // Attach event listeners for edit buttons
+                        scheduledInspectionsListElement.querySelectorAll('.edit-scheduled-inspection-button').forEach(button => {
+                            button.addEventListener('click', (e) => {
+                                const serial = e.target.dataset.serial;
+                                const inspectionId = e.target.dataset.inspectionId;
+                                openEditScheduledInspectionDialog(serial, inspectionId);
+                            });
+                        });
+                    } else {
+                        scheduledInspectionsListElement.innerHTML = '<p class="text-xs text-gray-500">No hay inspecciones programadas.</p>';
+                    }
+                }
+
 
                 // Asignar listeners a los botones
                 if (isRetiredSection) {
@@ -2130,9 +2710,14 @@
                     const editButton = card.querySelector('.edit-button');
                     if (editButton) {
                         editButton.addEventListener('click', () => {
-                            const selectedComponent = principalComponents.find(comp => comp && comp.serialNumber === editButton.dataset.serial);
+                            const serial = editButton.dataset.serial;
+                            console.log("Edit button clicked for serial:", serial); // Debug log
+                            const selectedComponent = principalComponents.find(comp => comp && comp.serialNumber === serial);
                             if (selectedComponent) {
+                                console.log("Component found for editing:", selectedComponent); // Debug log
                                 openEditDialog(selectedComponent);
+                            } else {
+                                console.error("Component not found for editing with serial:", serial); // Debug log
                             }
                         });
                     }
@@ -2140,6 +2725,7 @@
                     if (historyButton) {
                         historyButton.addEventListener('click', () => {
                             const serial = historyButton.dataset.serial;
+                            console.log("History button clicked for serial:", serial); // Debug log
                             changeLogTitle.textContent = `Historial de Cambios para Componente: ${serial}`;
                             fetchAndDisplayChangeLogs(serial);
                             changeLogDialog.showModal();
@@ -2148,17 +2734,55 @@
                     const printSingleButton = card.querySelector('.print-single-button');
                     if (printSingleButton) {
                         printSingleButton.addEventListener('click', () => {
-                            printComponents(component.serialNumber);
+                            const serial = printSingleButton.dataset.serial;
+                            console.log("Print single button clicked for serial:", serial); // Debug log
+                            printComponents(serial);
                         });
                     }
                     const retireButton = card.querySelector('.retire-button');
                     if (retireButton) {
                         retireButton.addEventListener('click', () => {
-                            retireComponent(component.serialNumber);
+                            const serial = retireButton.dataset.serial;
+                            console.log("Retire button clicked for serial:", serial); // Debug log
+                            retireComponent(serial);
                         });
                     }
                 }
             });
+        }
+
+        /**
+         * New function to remove a scheduled inspection from a component.
+         * @param {string} serialNumber - The serial number of the component.
+         * @param {string} inspectionIdToRemove - The unique ID of the inspection to remove.
+         */
+        async function removeScheduledInspection(serialNumber, inspectionIdToRemove) {
+            const confirmed = await openConfirmDialog(`¿Estás seguro de que quieres eliminar esta inspección programada? Esta acción no se puede deshacer.`);
+            if (!confirmed) return;
+
+            const component = principalComponents.find(comp => comp.serialNumber === serialNumber);
+            if (!component) {
+                console.error("Componente no encontrado para eliminar inspección:", serialNumber);
+                return;
+            }
+
+            const oldComponentData = JSON.parse(JSON.stringify(component)); // Deep copy for old values
+            const inspectionRemovedName = (component.scheduledInspections || []).find(insp => insp.id === inspectionIdToRemove)?.inspectionName || inspectionIdToRemove;
+
+            component.scheduledInspections = (component.scheduledInspections || []).filter(insp => insp.id !== inspectionIdToRemove);
+
+            try {
+                const componentRef = ref(database, `artifacts/${appId}/public_data/components/${serialNumber}`);
+                await set(componentRef, component);
+                console.log(`Inspección programada ${inspectionIdToRemove} (${inspectionRemovedName}) eliminada del componente ${serialNumber}.`);
+
+                // Record change log for removal
+                await recordComponentChange(component, 'Inspección Eliminada', oldComponentData, null, null, inspectionRemovedName);
+
+                filterAndRenderComponents(); // Re-render to update UI
+            } catch (error) {
+                console.error("Error al eliminar la inspección programada:", error);
+            }
         }
 
 
@@ -2169,6 +2793,8 @@
          */
         function generateStructuredComponentDetailsHtml(component) {
             if (!component) return '<p>No hay datos disponibles.</p>';
+
+            const isAircraftComponent = component.name && component.name.toUpperCase() === 'AERONAVE';
 
             const lifeLimitHours = parseFloat(component.lifeLimitHours) || 0;
             const lifeLimitCycles = parseFloat(component.lifeLimitCycles) || 0;
@@ -2182,9 +2808,10 @@
                         <p><strong>N° de Parte:</strong> ${component.partNumber || 'N/A'}</p>
                         <p><strong>N° de Serie:</strong> ${component.serialNumber || 'N/A'}</p>
                         <p><strong>Ubicación:</strong> ${component.location || 'N/A'}</p>
-                        <p><strong>Tipo de Vida:</strong> ${component.type || 'N/A'}</p>
+                        ${!isAircraftComponent ? `<p><strong>Tipo de Vida:</strong> ${component.type || 'N/A'}</p>` : ''}
                     </div>
 
+                    ${!isAircraftComponent ? `
                     <div class="section-block-print">
                         <h5 class="section-title-print">Detalles de TSN</h5>
                         <p><strong>TSN Inicial (Hrs):</strong> ${(parseFloat(component.initialTSNHours) || 0).toFixed(1)}</p>
@@ -2207,16 +2834,17 @@
                         <p><strong>Vida Límite (Ciclos):</strong> ${lifeLimitCycles.toFixed(1)}</p>
                         <p><strong>Vida Límite (Días/Meses):</strong> ${lifeLimitDays.toFixed(1)}</p>
                     </div>
+                    ` : ''}
 
                     <div class="section-block-print">
                         <h5 class="section-title-print">Fechas y Estado</h5>
-                        <p><strong>Instalado (Fecha):</strong> ${component.installationDate || 'N/A'}</p>
-                        <p><strong>Vencimiento (A LAS TT):</strong> ${component.dueDateTT || 'N/A'}</p>
+                        ${!isAircraftComponent ? `<p><strong>Instalado (Fecha):</strong> ${component.installationDate || 'N/A'}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>Vencimiento (A LAS TT):</strong> ${component.dueDateTT || 'N/A'}</p>` : ''}
                         <p><strong>Estado:</strong> ${component.status || 'N/A'}</p>
-                        <p><strong>Última Inspección (Fecha):</strong> ${component.lastInspectionDate || 'N/A'}</p>
-                        <p><strong>Próxima Inspección (Fecha):</strong> ${component.nextInspectionDue || 'N/A'}</p>
-                        <p><strong>Última Inspección (Horas AC):</strong> ${((parseFloat(component.lastInspectionHours) || 0)).toFixed(1)}</p>
-                        <p><strong>Próxima Inspección (Horas AC):</strong> ${((parseFloat(component.nextInspectionHoursDue) || 0)).toFixed(1)}</p>
+                        ${!isAircraftComponent ? `<p><strong>Última Inspección (Fecha):</strong> ${component.lastInspectionDate || 'N/A'}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>Próxima Inspección (Fecha):</strong> ${component.nextInspectionDue || 'N/A'}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>Última Inspección (Horas AC):</strong> ${((parseFloat(component.lastInspectionHours) || 0)).toFixed(1)}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>Próxima Inspección (Horas AC):</strong> ${((parseFloat(component.nextInspectionHoursDue) || 0)).toFixed(1)}</p>` : ''}
                         ${component.uninstallationReason ? `<p><strong>Motivo Retiro:</strong> ${component.uninstallationReason}</p>` : ''}
                     </div>
                 </div>
@@ -2244,10 +2872,11 @@
                         // Filter logs relevant to this component (its own logs, or logs where it was replaced/replaced by another)
                         if (log.serialNumber === serialNumber || 
                             (log.changeType === 'Retiro' && log.replacedBySerialNumber === serialNumber) ||
-                            (log.changeType === 'Instalación' && log.replacesSerialNumber === serialNumber)
-                           ) {
-                            componentLogs.push(log);
-                        } else if (log.changeType === 'Inspección Realizada' && log.serialNumber === serialNumber) { // Explicitly add inspection logs for this component
+                            (log.changeType === 'Instalación' && log.replacesSerialNumber === serialNumber) ||
+                            (log.changeType === 'Inspección Realizada' && log.serialNumber === serialNumber) ||
+                            (log.changeType === 'Inspecciones Programadas' && log.serialNumber === serialNumber) ||
+                            (log.changeType === 'Inspección Eliminada' && log.serialNumber === serialNumber) ||
+                            (log.changeType === 'Inspección Programada Editada' && log.serialNumber === serialNumber)) {
                             componentLogs.push(log);
                         }
                     }
@@ -2347,7 +2976,52 @@
                              
                              detailsHtml += `</div>`;
                         }
-                    } else if (log.changeType === 'Eliminación') {
+                    } else if (log.changeType === 'Inspecciones Programadas') {
+                        cardTypeClass = 'inspection-log'; // Use the same style as regular inspections
+                        detailsHtml += `<p>Se programaron las siguientes inspecciones automáticas:</p>`;
+                        if (log.programmedInspections && Array.isArray(log.programmedInspections)) {
+                            detailsHtml += `<ul class="list-disc ml-4">`;
+                            log.programmedInspections.forEach(inspName => {
+                                detailsHtml += `<li>${inspName}</li>`;
+                            });
+                            detailsHtml += `</ul>`;
+                        }
+                    } else if (log.changeType === 'Inspección Eliminada') {
+                        detailsHtml += `<p>Se eliminó la inspección programada: **${log.deletedInspection || 'N/A'}**.</p>`;
+                        if (log.oldValues && log.newValues) {
+                            detailsHtml += `<div class="change-details-container change-details-list">`;
+                            detailsHtml += `<strong>Estado del componente después de la eliminación:</strong>`;
+                            detailsHtml += generateStructuredComponentDetailsHtml(log.newValues);
+                            detailsHtml += `</div>`;
+                        }
+                        cardTypeClass = '';
+                    } else if (log.changeType === 'Inspección Programada Editada') {
+                        cardTypeClass = 'inspection-log'; // Use the same style as regular inspections
+                        detailsHtml += `<p>Inspección programada **editada**.</p>`;
+                        if (log.editedInspectionDetails) {
+                            const oldInsp = log.editedInspectionDetails.old;
+                            const newInsp = log.editedInspectionDetails.new;
+                            detailsHtml += `<div class="change-details-container change-details-list">`;
+                            detailsHtml += `<strong>Detalles de la Inspección Editada:</strong>`;
+                            detailsHtml += `<p>Nombre: <strong>${oldInsp.inspectionName || 'N/A'}</strong> &rarr; <strong>${newInsp.inspectionName || 'N/A'}</strong></p>`;
+                            detailsHtml += `<p>Tipo: <strong>${oldInsp.type || 'N/A'}</strong></p>`; // Type is read-only in edit dialog
+                            
+                            if (oldInsp.type === 'hours' || (oldInsp.type === 'mixed' && oldInsp.dueHours !== undefined)) {
+                                detailsHtml += `<p>Horas de Vencimiento: <strong>${(parseFloat(oldInsp.dueHours) || 0).toFixed(1)} hrs</strong> &rarr; <strong>${(parseFloat(newInsp.dueHours) || 0).toFixed(1)} hrs</strong></p>`;
+                                detailsHtml += `<p>Intervalo (Horas): <strong>${(parseFloat(oldInsp.intervalHours) || 0).toFixed(1)} hrs</strong> &rarr; <strong>${(parseFloat(newInsp.intervalHours) || 0).toFixed(1)} hrs</strong></p>`;
+                            }
+                            if (oldInsp.type === 'months' || (oldInsp.type === 'mixed' && oldInsp.dueDate !== undefined)) {
+                                detailsHtml += `<p>Fecha de Vencimiento: <strong>${oldInsp.dueDate || 'N/A'}</strong> &rarr; <strong>${newInsp.dueDate || 'N/A'}</strong></p>`;
+                                detailsHtml += `<p>Intervalo (Meses): <strong>${(parseFloat(oldInsp.intervalMonths) || 0).toFixed(1)} meses</strong> &rarr; <strong>${(parseFloat(newInsp.intervalMonths) || 0).toFixed(1)} meses</strong></p>`;
+                            }
+                            if (oldInsp.type === 'cycles' || (oldInsp.type === 'mixed' && oldInsp.dueCycles !== undefined)) {
+                                detailsHtml += `<p>Ciclos de Vencimiento: <strong>${(parseFloat(oldInsp.dueCycles) || 0).toFixed(1)} ciclos</strong> &rarr; <strong>${(parseFloat(newInsp.dueCycles) || 0).toFixed(1)} ciclos</strong></p>`;
+                                detailsHtml += `<p>Intervalo (Ciclos): <strong>${(parseFloat(oldInsp.intervalCycles) || 0).toFixed(1)} ciclos</strong> &rarr; <strong>${(parseFloat(newInsp.intervalCycles) || 0).toFixed(1)} ciclos</strong></p>`;
+                            }
+                            detailsHtml += `</div>`;
+                        }
+                    }
+                    else if (log.changeType === 'Eliminación') {
                         detailsHtml += `<p>Componente **eliminado permanentemente**.</p>`;
                          if (log.oldValues) {
                             detailsHtml += `<div class="change-details-container"><strong>Valores al Eliminar:</strong>`;
@@ -2426,7 +3100,9 @@
 
             if (serialNumber) {
                 body.classList.add('print-single-component');
-                const componentToPrint = document.getElementById(`component-${serialNumber}`);
+                // Use the sanitized serial number to find the element
+                const sanitizedSerialNumber = serialNumber.replace(/[^a-zA-Z0-9-_]/g, '_');
+                const componentToPrint = document.getElementById(`component-${sanitizedSerialNumber}`);
                 if (componentToPrint) {
                     componentToPrint.classList.add('print-this-one');
                 }
@@ -2439,7 +3115,8 @@
             setTimeout(() => {
                 body.classList.remove('print-single-component', 'print-all-components-mode');
                 if (serialNumber) {
-                    const componentToPrint = document.getElementById(`component-${serialNumber}`);
+                    const sanitizedSerialNumber = serialNumber.replace(/[^a-zA-Z0-9-_]/g, '_');
+                    const componentToPrint = document.getElementById(`component-${sanitizedSerialNumber}`);
                     if (componentToPrint) {
                         componentToPrint.classList.remove('print-this-one');
                     }
@@ -2547,6 +3224,14 @@
                 try {
                     const componentRef = ref(database, `artifacts/${appId}/public_data/components/${serialNumberToRetire}`);
                     const updatedData = { ...componentToRetire, status: 'Retirado', uninstallationReason: uninstallationReason };
+                    // Mark all scheduled inspections as cancelled when component is retired
+                    if (updatedData.scheduledInspections) {
+                        updatedData.scheduledInspections.forEach(insp => {
+                            if (insp.status === "Programada") {
+                                insp.status = "Cancelada (Retiro)";
+                            }
+                        });
+                    }
                     await set(componentRef, updatedData);
                     console.log(`Componente ${serialNumberToRetire} marcado como 'Retirado' en Firebase.`);
 
@@ -2579,6 +3264,14 @@
                     const componentRef = ref(database, `artifacts/${appId}/public_data/components/${serialNumberToRestore}`);
                     const updatedData = { ...componentToRestore, status: 'Activo' };
                     delete updatedData.uninstallationReason; 
+                    // Re-activate scheduled inspections that were cancelled due to retirement
+                    if (updatedData.scheduledInspections) {
+                        updatedData.scheduledInspections.forEach(insp => {
+                            if (insp.status === "Cancelada (Retiro)") {
+                                insp.status = "Programada";
+                            }
+                        });
+                    }
                     await set(componentRef, updatedData);
                     console.log(`Componente ${serialNumberToRestore} restaurado a 'Activo' en Firebase.`);
 
@@ -2634,7 +3327,10 @@
                             if (log.serialNumber === componentSerialNumber ||
                                 (log.changeType === 'Retiro' && log.replacedBySerialNumber === componentSerialNumber) ||
                                 (log.changeType === 'Instalación' && log.replacesSerialNumber === componentSerialNumber) ||
-                                (log.changeType === 'Inspección Realizada' && log.serialNumber === componentSerialNumber)) {
+                                (log.changeType === 'Inspección Realizada' && log.serialNumber === componentSerialNumber) ||
+                                (log.changeType === 'Inspecciones Programadas' && log.serialNumber === componentSerialNumber) ||
+                                (log.changeType === 'Inspección Eliminada' && log.serialNumber === componentSerialNumber) ||
+                                (log.changeType === 'Inspección Programada Editada' && log.serialNumber === componentSerialNumber)) {
                                 updates[`${key}`] = null;
                             }
                         }
@@ -2694,7 +3390,8 @@
          */
         function populateInspectionComponentSelect(searchTerm = '') {
             inspectionComponentSelect.innerHTML = '';
-            const activeComponents = principalComponents.filter(c => c.status !== 'Retirado');
+            // Filter out "AERONAVE" components from the inspection scheduling list
+            const activeComponents = principalComponents.filter(c => c.status !== 'Retirado' && c.name.toUpperCase() !== 'AERONAVE');
             const lowerCaseSearchTerm = searchTerm.toLowerCase();
 
             const filteredComponents = activeComponents.filter(component => 
@@ -2706,7 +3403,7 @@
             if (filteredComponents.length === 0) {
                 const option = document.createElement('option');
                 option.value = '';
-                option.textContent = 'No hay componentes activos';
+                option.textContent = 'No hay componentes activos para inspeccionar';
                 option.disabled = true;
                 inspectionComponentSelect.appendChild(option);
                 scheduleInspectionForm.querySelector('.save-button').disabled = true;
@@ -2791,13 +3488,41 @@
                         componentToUpdate.status = 'Activo';
                     }
 
+                    // Prepare the inspection entry for scheduledInspections array
+                    const newInspectionEntry = {
+                        id: Date.now() + Math.random().toString(36).substring(2, 9), // Unique ID for this specific scheduled instance
+                        inspectionName: description || `Inspección Manual (${inspectionType === 'date' ? 'Fecha' : 'Horas'})`,
+                        type: inspectionType,
+                        status: "Realizada",
+                        performedAt: new Date().toISOString() // Timestamp of completion
+                    };
+
+                    if (inspectionType === 'date') {
+                        newInspectionEntry.performedDate = inspectionPerformedDate.value;
+                        newInspectionEntry.nextDueDate = inspectionNextDueDate.value;
+                        newInspectionEntry.intervalMonths = parseFloat(inspectionIntervalDays.value) / (365.25 / 12); // Store interval in months for consistency
+                        newInspectionEntry.lastKnownDate = inspectionPerformedDate.value;
+                    } else { // type is 'hours'
+                        newInspectionEntry.performedHours = parseFloat(inspectionPerformedHours.value);
+                        newInspectionEntry.nextDueHours = parseFloat(inspectionNextHoursDue.value);
+                        newInspectionEntry.intervalHours = parseFloat(inspectionIntervalHours.value);
+                        newInspectionEntry.lastKnownHours = parseFloat(inspectionPerformedHours.value);
+                    }
+
+                    // Ensure scheduledInspections array exists and add the new entry
+                    if (!componentToUpdate.scheduledInspections) {
+                        componentToUpdate.scheduledInspections = [];
+                    }
+                    componentToUpdate.scheduledInspections.push(newInspectionEntry);
+
                     const componentRef = ref(database, `artifacts/${appId}/public_data/components/${serialNumber}`);
                     await set(componentRef, componentToUpdate);
 
                     console.log(`Inspección registrada para el componente ${serialNumber}.`);
 
                     // Record the change in log, passing old data for comparison
-                    await recordComponentChange(componentToUpdate, 'Inspección Realizada', oldComponentData, null, null, description);
+                    // The description for the log entry should be the inspection name/description
+                    await recordComponentChange(componentToUpdate, 'Inspección Realizada', oldComponentData, null, null, newInspectionEntry.inspectionName);
 
                     scheduleInspectionDialog.close();
                     filterAndRenderComponents(); // Re-render to update component cards
@@ -2808,6 +3533,248 @@
                 console.log("Registro de inspección cancelado.");
             }
         }
+
+        /**
+         * Abre el diálogo para la programación masiva de inspecciones.
+         * @param {object} component - El objeto del componente para el cual se programarán las inspecciones.
+         */
+        function openBulkScheduleInspectionsDialog(component) {
+            currentComponentForBulkScheduling = component;
+            bulkScheduleComponentNameSpan.textContent = component.name || 'N/A';
+            bulkScheduleComponentSerialSpan.textContent = component.serialNumber || 'N/A';
+            predefinedInspectionsListDiv.innerHTML = ''; // Clear previous checkboxes
+
+            // Filter inspections based on component type if needed, but for AERONAVE, all apply
+            const inspectionsToDisplay = predefinedInspections;
+
+            inspectionsToDisplay.forEach(inspection => {
+                const checkboxDiv = document.createElement('div');
+                const isChecked = (component.scheduledInspections || []).some(
+                    (scheduled) => scheduled.inspectionName === inspection.label && scheduled.status === "Programada"
+                );
+                checkboxDiv.className = 'flex items-center';
+                checkboxDiv.innerHTML = `
+                    <input type="checkbox" id="bulk-inspection-${inspection.id}" value="${inspection.id}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${isChecked ? 'checked' : ''}>
+                    <label for="bulk-inspection-${inspection.id}" class="ml-2 text-sm font-medium text-gray-700">${inspection.label}</label>
+                `;
+                predefinedInspectionsListDiv.appendChild(checkboxDiv);
+            });
+
+            bulkScheduleInspectionsDialog.showModal();
+        }
+
+        // Event listener for the "Programar Seleccionadas" button in bulk scheduling
+        confirmBulkScheduleButton.addEventListener('click', async () => {
+            if (!currentComponentForBulkScheduling) {
+                console.error("No hay componente seleccionado para programación masiva.");
+                bulkScheduleInspectionsDialog.close();
+                return;
+            }
+
+            const selectedCheckboxes = predefinedInspectionsListDiv.querySelectorAll('input[type="checkbox"]:checked');
+            const inspectionsToProgram = [];
+            const programmedInspectionNames = []; // For logging
+
+            selectedCheckboxes.forEach(checkbox => {
+                const inspectionId = checkbox.value;
+                const selectedInspection = predefinedInspections.find(insp => insp.id === inspectionId);
+                if (selectedInspection) {
+                    inspectionsToProgram.push(selectedInspection);
+                    programmedInspectionNames.push(selectedInspection.label);
+                }
+            });
+
+            if (inspectionsToProgram.length === 0) {
+                openConfirmDialog("Por favor, selecciona al menos una inspección para programar.");
+                return;
+            }
+
+            const component = currentComponentForBulkScheduling;
+            const latestComponentData = principalComponents.find(comp => comp.serialNumber === component.serialNumber);
+            if (!latestComponentData) {
+                console.error("No se encontraron los últimos datos del componente para la programación.");
+                bulkScheduleInspectionsDialog.close();
+                return;
+            }
+            
+            // Deep copy to avoid modifying the original during iteration
+            const componentCopy = JSON.parse(JSON.stringify(latestComponentData)); 
+
+            for (const insp of inspectionsToProgram) {
+                // Check if this specific inspection (by name) is already programmed and active
+                const isAlreadyScheduled = (componentCopy.scheduledInspections || []).some(
+                    scheduled => scheduled.inspectionName === insp.label && scheduled.status === "Programada"
+                );
+
+                if (!isAlreadyScheduled) {
+                    let scheduledInspection = {
+                        id: Date.now() + Math.random().toString(36).substring(2, 9), // Unique ID for this specific scheduled instance
+                        inspectionName: insp.label,
+                        type: insp.type,
+                        status: "Programada", // Initial status
+                        scheduledAt: new Date().toISOString() // When this inspection was scheduled
+                    };
+
+                    // Store all relevant interval and due properties based on the original predefined inspection
+                    if (insp.intervalHours !== undefined) {
+                        scheduledInspection.intervalHours = insp.intervalHours;
+                        scheduledInspection.dueHours = (currentAcHrs + insp.intervalHours).toFixed(1);
+                        scheduledInspection.lastKnownHours = currentAcHrs.toFixed(1);
+                    }
+                    if (insp.intervalMonths !== undefined) {
+                        scheduledInspection.intervalMonths = insp.intervalMonths;
+                        const dueDate = new Date();
+                        dueDate.setMonth(dueDate.getMonth() + insp.intervalMonths);
+                        scheduledInspection.dueDate = dueDate.toISOString().split('T')[0];
+                        scheduledInspection.lastKnownDate = new Date().toISOString().split('T')[0];
+                    }
+                    if (insp.intervalCycles !== undefined) {
+                        scheduledInspection.intervalCycles = insp.intervalCycles;
+                        scheduledInspection.dueCycles = (currentRins + insp.intervalCycles).toFixed(1);
+                        scheduledInspection.lastKnownCycles = currentRins.toFixed(1);
+                    }
+                    // Add to the component's scheduledInspections array
+                    if (!componentCopy.scheduledInspections) {
+                        componentCopy.scheduledInspections = [];
+                    }
+                    componentCopy.scheduledInspections.push(scheduledInspection);
+                }
+            }
+
+            try {
+                // Update the component in Firebase with all new scheduled inspections
+                const componentRef = ref(database, `artifacts/${appId}/public_data/components/${componentCopy.serialNumber}`);
+                await set(componentRef, componentCopy);
+                console.log(`Inspecciones seleccionadas programadas para ${componentCopy.serialNumber}.`);
+
+                // Record a single log entry for all programmed inspections
+                await recordComponentChange(componentCopy, 'Inspecciones Programadas', latestComponentData, null, null, programmedInspectionNames);
+
+            } catch (error) {
+                console.error(`Error al guardar las inspecciones programadas para ${componentCopy.serialNumber}:`, error);
+            } finally {
+                bulkScheduleInspectionsDialog.close();
+                filterAndRenderComponents(); // Re-render to show updated component cards with new scheduled inspections
+            }
+        });
+
+        cancelBulkScheduleButton.addEventListener('click', () => {
+            bulkScheduleInspectionsDialog.close();
+        });
+
+        /**
+         * Opens the dialog to edit a scheduled inspection.
+         * @param {string} componentSerial - The serial number of the component.
+         * @param {string} inspectionId - The ID of the scheduled inspection to edit.
+         */
+        function openEditScheduledInspectionDialog(componentSerial, inspectionId) {
+            editScheduledInspectionForm.reset();
+            editScheduledComponentSerial.value = componentSerial;
+            editScheduledInspectionId.value = inspectionId;
+
+            const component = principalComponents.find(c => c.serialNumber === componentSerial);
+            if (!component) {
+                console.error("Componente no encontrado para editar inspección programada.");
+                return;
+            }
+            const scheduledInspection = (component.scheduledInspections || []).find(insp => insp.id === inspectionId);
+            if (!scheduledInspection) {
+                console.error("Inspección programada no encontrada.");
+                return;
+            }
+
+            editScheduledInspectionName.value = scheduledInspection.inspectionName || '';
+            editScheduledType.value = scheduledInspection.type || '';
+
+            // Hide all fields initially
+            editScheduledDateFields.classList.add('hidden-field');
+            editScheduledHoursFields.classList.add('hidden-field');
+            editScheduledCyclesFields.classList.add('hidden-field');
+
+            // Show and populate fields based on inspection type
+            if (scheduledInspection.type === 'date' || scheduledInspection.type === 'months' || scheduledInspection.type === 'mixed') {
+                editScheduledDateFields.classList.remove('hidden-field');
+                editScheduledDueDate.value = scheduledInspection.dueDate || '';
+                editScheduledIntervalMonths.value = parseFloat(scheduledInspection.intervalMonths) || 0;
+            }
+            if (scheduledInspection.type === 'hours' || scheduledInspection.type === 'mixed') {
+                editScheduledHoursFields.classList.remove('hidden-field');
+                editScheduledDueHours.value = parseFloat(scheduledInspection.dueHours) || 0;
+                editScheduledIntervalHours.value = parseFloat(scheduledInspection.intervalHours) || 0;
+            }
+            if (scheduledInspection.type === 'cycles' || scheduledInspection.type === 'mixed') {
+                editScheduledCyclesFields.classList.remove('hidden-field');
+                editScheduledDueCycles.value = parseFloat(scheduledInspection.dueCycles) || 0;
+                editScheduledIntervalCycles.value = parseFloat(scheduledInspection.intervalCycles) || 0;
+            }
+
+            editScheduledInspectionDialog.showModal();
+        }
+
+        /**
+         * Handles the submission of the edit scheduled inspection form.
+         * @param {Event} event - The form submission event.
+         */
+        async function saveEditedScheduledInspection(event) {
+            event.preventDefault();
+
+            const componentSerial = editScheduledComponentSerial.value;
+            const inspectionId = editScheduledInspectionId.value;
+
+            const component = principalComponents.find(c => c.serialNumber === componentSerial);
+            if (!component) {
+                console.error("Componente no encontrado para guardar inspección programada editada.");
+                return;
+            }
+
+            const oldComponentData = JSON.parse(JSON.stringify(component)); // Deep copy for old values
+
+            const scheduledInspectionIndex = (component.scheduledInspections || []).findIndex(insp => insp.id === inspectionId);
+            if (scheduledInspectionIndex === -1) {
+                console.error("Inspección programada no encontrada para editar.");
+                return;
+            }
+
+            const oldScheduledInspection = JSON.parse(JSON.stringify(component.scheduledInspections[scheduledInspectionIndex])); // Deep copy of the specific inspection
+
+            // Update the scheduled inspection object with new values
+            const updatedInspection = { ...oldScheduledInspection };
+            updatedInspection.inspectionName = editScheduledInspectionName.value.trim() || oldScheduledInspection.inspectionName;
+
+            if (updatedInspection.type === 'date' || updatedInspection.type === 'months' || updatedInspection.type === 'mixed') {
+                updatedInspection.dueDate = editScheduledDueDate.value || oldScheduledInspection.dueDate;
+                updatedInspection.intervalMonths = parseFloat(editScheduledIntervalMonths.value) || 0;
+            }
+            if (updatedInspection.type === 'hours' || updatedInspection.type === 'mixed') {
+                updatedInspection.dueHours = parseFloat(editScheduledDueHours.value) || 0;
+                updatedInspection.intervalHours = parseFloat(editScheduledIntervalHours.value) || 0;
+            }
+            if (updatedInspection.type === 'cycles' || updatedInspection.type === 'mixed') {
+                updatedInspection.dueCycles = parseFloat(editScheduledDueCycles.value) || 0;
+                updatedInspection.intervalCycles = parseFloat(editScheduledIntervalCycles.value) || 0;
+            }
+
+            // Update the component's scheduledInspections array
+            component.scheduledInspections[scheduledInspectionIndex] = updatedInspection;
+
+            try {
+                const componentRef = ref(database, `artifacts/${appId}/public_data/components/${componentSerial}`);
+                await set(componentRef, component);
+                console.log(`Inspección programada ${inspectionId} editada para el componente ${componentSerial}.`);
+
+                // Record change log for the edited inspection
+                await recordComponentChange(component, 'Inspección Programada Editada', oldComponentData, null, null, { old: oldScheduledInspection, new: updatedInspection });
+
+                editScheduledInspectionDialog.close();
+                filterAndRenderComponents(); // Re-render to update UI
+            } catch (error) {
+                console.error("Error al guardar la inspección programada editada:", error);
+            }
+        }
+
+        // Event listeners for the new edit scheduled inspection dialog
+        cancelEditScheduledInspectionButton.addEventListener('click', () => editScheduledInspectionDialog.close());
+        editScheduledInspectionForm.addEventListener('submit', saveEditedScheduledInspection);
 
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -2837,6 +3804,13 @@
                         const isConditionType = event.target.value === 'condition';
                         toggleNumericFields(isConditionType);
                     });
+
+                    // New event listener for name input to toggle aircraft-specific fields
+                    editInputs.name.addEventListener('input', (event) => {
+                        const isAircraft = event.target.value.toUpperCase() === 'AERONAVE';
+                        toggleAircraftFields(isAircraft);
+                    });
+
 
                     programInspectionButton.addEventListener('click', () => openScheduleInspectionDialog());
                     scheduleInspectionForm.addEventListener('submit', saveInspection);
@@ -2927,6 +3901,12 @@
                             toggleNumericFields(isConditionType);
                         });
                         
+                        // New event listener for name input to toggle aircraft-specific fields
+                        editInputs.name.addEventListener('input', (event) => {
+                            const isAircraft = event.target.value.toUpperCase() === 'AERONAVE';
+                            toggleAircraftFields(isAircraft);
+                        });
+
                         programInspectionButton.addEventListener('click', () => openScheduleInspectionDialog());
                         scheduleInspectionForm.addEventListener('submit', saveInspection);
                         cancelScheduleInspectionButton.addEventListener('click', () => scheduleInspectionDialog.close());
@@ -2970,12 +3950,13 @@
                             }
                         });
                         inspectionIntervalHours.addEventListener('input', () => {
-                            const performedHours = parseFloat(inspectionPerformedHours.value) || 0;
-                            const intervalHours = parseFloat(inspectionIntervalHours.value) || 0;
+                            const performedHours = parseFloat(performedHours.value) || 0;
+                            const intervalHours = parseFloat(intervalHours.value) || 0;
                             if (performedHours >= 0 && intervalHours > 0) {
                                 inspectionNextHoursDue.value = (performedHours + intervalHours).toFixed(1);
                             }
-                        });
+                        }
+                    );
 
                         inspectionComponentSearch.addEventListener('input', (event) => {
                             populateInspectionComponentSelect(event.target.value);
