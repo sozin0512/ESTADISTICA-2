@@ -650,7 +650,7 @@
         import { getDatabase, ref, set, onValue, get } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
         import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js';
 
-        // Tu configuración de Firebase (actualizada con la que proporcionaste)
+         // Tu configuración de Firebase (actualizada con la que proporcionaste)
        const firebaseConfig = {
             apiKey: "AIzaSyASg6fgH-Lo6PXLnnw_p8LzHl-WNDiuHrU",
             authDomain: "fah-901-ba5f4.firebaseapp.com",
@@ -1067,7 +1067,7 @@
                 }
                 
                 // Guardar los totales generales acumulados en su propia ubicación
-                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-976-Overall`;
+                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-980-Overall`;
                 await set(ref(database, rutaTotalesGenerales), newCumulativeTotals);
                 console.log("Totales generales acumulados guardados:", newCumulativeTotals);
 
@@ -1843,7 +1843,7 @@
                 }
 
                 // Obtener los totales generales directamente de Firebase Realtime Database
-                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-976-Overall`;
+                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-980-Overall`;
                 try {
                     const snapshot = await get(ref(database, rutaTotalesGenerales));
                     let generalTotals = { 'AC HRS': 0, 'ATERRIZAJES': 0, 'RINS': 0 };
@@ -1857,12 +1857,12 @@
                         { name: "RINS", current: generalTotals['RINS'] || 0, type: "general_total" }
                     ];
                     
-                    // Guardar los datos en localStorage (para compatibilidad si COMPONENTES976.HTML aún lo usa)
-                    // Aunque ahora COMPONENTES976.HTML leerá directamente de Firebase, mantener esto
+                    // Guardar los datos en localStorage (para compatibilidad si COMPONENTES980.HTML aún lo usa)
+                    // Aunque ahora COMPONENTES980.HTML leerá directamente de Firebase, mantener esto
                     // por si acaso o para otros usos futuros.
                     localStorage.setItem('componentStatusData', JSON.stringify(componentsData));
                     
-                    window.location.href = 'COMPONENTES976.HTML'; // Redirige a la nueva página
+                    window.location.href = 'COMPONENTES980.HTML'; // Redirige a la nueva página
 
                 } catch (error) {
                     console.error("Error al obtener los totales generales para COMPONENTES976.HTML:", error);
