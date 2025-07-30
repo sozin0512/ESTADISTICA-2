@@ -377,8 +377,9 @@
         @media print {
             body {
                 margin: 0;
-                padding: 10mm;
-                font-size: 10px;
+                padding: 5mm; /* Reducir el padding general */
+                font-size: 9px; /* Reducir el tamaño de la fuente para que quepa más */
+                overflow: visible !important; /* Asegurar que no haya scroll oculto */
             }
             .button-container, .tab-container, .year-container, 
             #auth-container, #helicopter-svg, #anonymous-mask-img, #reveal-circle,
@@ -386,23 +387,56 @@
             #motorStatusModal { /* Ocultar el modal de estado del motor en la impresión principal */
                 display: none !important; 
             }
-            .print-header { display: block !important; }
+            .print-header { 
+                display: block !important; 
+                text-align: center;
+                margin-bottom: 5mm;
+                font-size: 14px; /* Un poco más grande para el encabezado de impresión */
+                font-weight: bold;
+            }
             table {
                 page-break-inside: avoid;
-                width: 100%; 
+                width: 100% !important; /* Forzar el 100% de ancho */
+                table-layout: fixed; /* Ayuda a que las columnas se ajusten */
                 border-collapse: collapse;
             }
             th, td {
                 page-break-inside: avoid;
                 page-break-after: auto;
                 border: 1px solid #000 !important;
-                padding: 2px;
-                font-size: 9px; 
+                padding: 1px 2px; /* Reducir el padding de las celdas */
+                text-align: center;
+                font-size: 8px; /* Tamaño de fuente aún más pequeño para las celdas */
+                white-space: normal; /* Permitir que el texto se envuelva */
+                word-break: break-all; /* Romper palabras largas si es necesario */
             }
+            th:nth-child(1), td:nth-child(1) { /* Columna de Nomenclatura */
+                min-width: 80px !important; /* Ajustar el ancho mínimo para Nomenclatura */
+                width: 15% !important; /* Darle un porcentaje de ancho */
+                text-align: left !important;
+                padding-left: 2px !important;
+            }
+            th:nth-child(2), td:nth-child(2) { /* Columna de Vienen */
+                width: 5% !important;
+            }
+            th:nth-child(n+3):nth-child(-n+33), td:nth-child(n+3):nth-child(-n+33) { /* Columnas de días (1-31) */
+                width: 2.2% !important; /* Ajustar el ancho para los 31 días */
+            }
+            th:nth-child(34), td:nth-child(34) { /* Columna MES TOTAL */
+                width: 7% !important;
+            }
+            th:nth-child(35), td:nth-child(35) { /* Columna GENERAL */
+                width: 7% !important;
+            }
+            th:nth-child(n+36), td:nth-child(n+36) { /* Columnas adicionales (LIMITE, etc.) */
+                width: 7% !important; /* Ajustar el ancho de las columnas adicionales */
+            }
+
+
             .nomenclatura {
                 text-align: left !important;
                 padding-left: 2px !important;
-                min-width: 120px !important; 
+                min-width: 80px !important; /* Ajustado para impresión */
             }
             .restante-verde, .restante-amarillo, .restante-rojo,
             .label-yellow, .label-red {
@@ -439,8 +473,8 @@
                 display: none !important;
             }
             @page {
-                size: A4 landscape;
-                margin: 10mm;
+                size: A4 landscape; /* Orientación horizontal para más espacio */
+                margin: 5mm; /* Márgenes más pequeños para aprovechar el espacio */
             }
         }
 
@@ -1033,7 +1067,7 @@
             let allMonthsData = {};
 
             try {
-                const snapshot = await get(allYearsDataRef); // Usar ref(database, ...)
+                const snapshot = await get(ref(database, allYearsDataRef)); // Usar ref(database, ...)
                 if (snapshot.exists()) {
                     allMonthsData = snapshot.val();
                 }
@@ -1608,7 +1642,7 @@
                     }
                 });
 
-                // PASO 2: Calcular totales y restantes para filas de componentes de motor
+                // PASO 2: Calcular totales y restantes para filas de componentes de motor y filas de etiquetas (CICLOS)
                 filas.forEach((fila) => {
                     const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
                     if (!nomenclaturaCompleta || fila.querySelector('.motor-header')) {
@@ -1664,6 +1698,29 @@
 
                         const restante = limite - accumulatedTotalCycles;
                         aplicarEstiloRestante(restanteCelda, restante, limite);
+                    } else if (filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta)) {
+                        // Lógica específica para filas como "CICLOS 1" y "CICLOS 2"
+                        const vieneCelda = fila.querySelector('.viene-celda');
+                        const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
+                        const mesTotalCelda = fila.querySelector('.fila-total');
+                        const generalCelda = fila.querySelector('.fila-general');
+
+                        const viene = parseFloat(vieneCelda?.textContent.trim()) || 0;
+                        const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
+                        const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
+                        mesTotalCelda.textContent = formatNumber(totalMes);
+
+                        let motorNumero = null;
+                        const motorMatch = nomenclaturaCompleta.match(/\s(\d)$/);
+                        if (motorMatch) {
+                            motorNumero = parseInt(motorMatch[1]);
+                        }
+
+                        if (nomenclaturaCompleta.startsWith("CICLOS") && motorNumero !== null) {
+                            const noOfStarts = generalValuesMap.get(`ENGINE STARTS ${motorNumero}`) || 0;
+                            generalCelda.textContent = formatNumber(noOfStarts); // Establece el valor GENERAL de CICLOS al de ENGINE STARTS
+                        }
+                        // Las filas de CICLOS no tienen celda 'restante', así que no se llama a aplicarEstiloRestante aquí.
                     }
                 });
             });
