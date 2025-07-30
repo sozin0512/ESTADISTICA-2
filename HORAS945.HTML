@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Datos de Vuelo FAH-980</title>
+    <title>Datos de Vuelo FAH-945</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Chosen Palette: Warm Neutrals with Subtle Accents */
@@ -445,7 +445,7 @@
         - Goal: Registrar y visualizar las horas de vuelo, aterrizajes, RINS y el estado de los componentes del motor a lo largo del tiempo.
         - Viz/Presentation Method:
             - **Tabla interactiva (HTML table):** Para los datos de vuelo diarios y totales. Permite la entrada directa de datos y la visualización organizada de grandes conjuntos de números.
-            - **Área de texto (HTML textarea):** Para los "Recordatorios del Mes". Facilita la entrada de notas cualitativas.
+            - **Área de texto (HTML textarea):** Para los "Recordatorios del Mes". Facilita la entrada de notas cualitativa.
         - Interaction:
             - **Edición directa en celdas:** Los usuarios autenticados pueden modificar los valores numéricos directamente en la tabla, lo que activa el guardado automático en Firebase.
             - **Pestañas (HTML buttons + JS):** Para cambiar entre los meses. Proporciona una navegación clara y rápida entre los períodos de datos.
@@ -489,7 +489,7 @@
 
     <div id="main-app-content">
         <div id="main-app-header" class="flex justify-between items-center mb-4">
-            <h2 class="flex-grow text-center sm:text-left">DATOS DE VUELO FAH-980</h2>
+            <h2 class="flex-grow text-center sm:text-left">DATOS DE VUELO FAH-945</h2>
             <button id="logout-btn" class="px-4 py-2 bg-red-500 text-white rounded-md shadow-md hover:bg-red-600 transition-colors">Cerrar Sesión</button>
         </div>
 
@@ -539,7 +539,7 @@
             authDomain: "fah-945.firebaseapp.com",
             databaseURL: "https://fah-945-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "fah-945",
-            storageBucket: "fah-945.firebasestorage.app",
+            storageBucket: "fah-945.firebase-storage.app",
             messagingSenderId: "789748725591",
             appId: "1:789748725591:web:f7f551a77be0092531f012",
             measurementId: "G-3JW0YYE2QQ"
@@ -556,7 +556,8 @@
 
         // Variables globales
         let añoActual = new Date().getFullYear();
-        let mesActual = new Date().getMonth();
+        // Cargar mesActual desde localStorage, o usar el mes actual del sistema si no está guardado
+        let mesActual = parseInt(localStorage.getItem('lastActiveMonth')) || new Date().getMonth();
         let userId = "anonimo";
         let currentUserRole = null;
 
@@ -572,17 +573,14 @@
             "ATERRIZAJES",
             "RINS",
             "CONTINGENCY EXCURSIONS 1",
-            "HUB COMPRESOR 1.1",
-            "IMPELLER", /* Renombrado de "HUB COMPRESOR 1.2" */
-            "GAS TURBINE", /* Renombrado de "2ND STAGE COMPRESOR DISK 1" */
-            "GAS PRODUCER", /* Renombrado de "3RD STAGE COMPRESOR DISK 1" */
+            "ENGINE HRS 1", 
+            "ENGINE STARTS 1", 
+            "FLIGHTS 1", 
+            "IMPELLER",
+            "COMPRESOR COMPONENTS", 
+            "GAS PRODUCER COMPONENTS", 
+            "POWER TURBINE COMPONENTS", 
         ];
-
-        // Eliminadas las listas de filas con columnas adicionales editables/solo etiquetas
-        // ya que estas columnas se eliminan por completo.
-        
-        // Eliminada la definición de límites y factores fijos
-        // ya que estas columnas se eliminan por completo.
 
         // Referencias a elementos del DOM
         const contenedorTablas = document.getElementById("contenedor-tablas");
@@ -604,12 +602,6 @@
         const mainAppContent = document.getElementById('main-app-content');
         const btnImprimir = document.getElementById('btnImprimir');
 
-        // Eliminados elementos del modal de estado de motores
-        // const btnMotorStatus = document.getElementById('btnMotorStatus');
-        // const motorStatusModal = document.getElementById('motorStatusModal');
-        // const closeMotorStatusModal = document.getElementById('closeMotorStatusModal');
-        // const motorStatusContent = document.getElementById('motorStatusContent');
-        // const btnPrintMotorStatus = document.getElementById('btnPrintMotorStatus');
         // Nuevo botón de estado de componentes
         const btnComponentStatus = document.getElementById('btnComponentStatus');
 
@@ -789,9 +781,7 @@
             document.querySelectorAll('.tab-button').forEach(btn => { btn.disabled = !isAuthenticated; });
             recordatorioTextarea.readOnly = !isAuthenticated;
             btnImprimir.disabled = !isAuthenticated;
-            // btnMotorStatus.disabled = !isAuthenticated; // Eliminado
             btnComponentStatus.disabled = !isAuthenticated; 
-            // btnPrintMotorStatus.disabled = !isAuthenticated; // Eliminado
 
             if (isAuthenticated) {
                 authStatus.textContent = `Has iniciado sesión. Puedes ver y editar todos los datos.`;
@@ -816,7 +806,11 @@
 
             const rutaDatosMes = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesIndex}`;
             const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${año}/${mesIndex}`;
-            const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-980-Overall`;
+            const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-945-Overall`;
+
+            console.log(`Intentando guardar datos para el año: ${año}, mes: ${meses[mesIndex]}`);
+            console.log("Datos a guardar:", datosTabla);
+            console.log("Recordatorio a guardar:", recordatorio);
 
             try {
                 await set(ref(database, rutaDatosMes), datosTabla);
@@ -826,9 +820,11 @@
 
                 authStatus.textContent = `Datos guardados para ${meses[mesIndex]} de ${año}.`;
                 authStatus.style.color = 'green';
+                console.log(`Guardado exitoso para ${meses[mesIndex]} de ${año}.`);
             } catch (error) {
                 authStatus.textContent = `Error al guardar los datos: ${error.message}`;
                 authStatus.style.color = 'red';
+                console.error(`Error al guardar los datos para ${meses[mesIndex]} de ${año}:`, error);
             }
         }
 
@@ -870,7 +866,7 @@
                     }
                 }
                 
-                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-980-Overall`;
+                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-945-Overall`;
                 await set(ref(database, rutaTotalesGenerales), newCumulativeTotals);
 
             } catch (error) {
@@ -887,14 +883,30 @@
             const rutaDatosMes = `artifacts/${appId}/public_data/datos_vuelo/${añoActual}/${mesActual}`;
             const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${añoActual}/${mesActual}`;
 
+            console.log(`Cargando datos para el año: ${añoActual}, mes: ${meses[mesActual]}`);
+
             try {
                 const datosSnapshot = await get(ref(database, rutaDatosMes));
                 const datos = datosSnapshot.val();
 
+                console.log("Datos recuperados de Firebase para el mes actual:", datos);
+
+                // Siempre limpiar la tabla para el mes actual, para asegurar un estado fresco
+                limpiarTablaHTML(mesActual);
+
                 if (datos) {
+                    // Si existen datos para el mes actual, cargarlos en la tabla.
                     cargarDatosEnTablaHTML(datos, mesActual);
                 } else {
-                    limpiarTablaHTML(mesActual);
+                    // Si no existen datos para el mes actual,
+                    // Y si no es el primer mes (Enero, índice 0),
+                    // intentar copiar "GENERAL" del mes anterior a "VIENEN" del mes actual.
+                    if (mesActual > 0) {
+                        console.log(`No hay datos guardados para ${meses[mesActual]}, intentando copiar de ${meses[mesActual - 1]}.`);
+                        await copiarValorGeneralAMesSiguiente(añoActual, mesActual - 1, mesActual);
+                    } else {
+                        console.log(`No hay datos guardados para ${meses[mesActual]} (primer mes).`);
+                    }
                 }
 
                 const recordatorioSnapshot = await get(ref(database, rutaRecordatorio));
@@ -904,10 +916,11 @@
                 } else {
                     recordatorioTextarea.value = "";
                 }
-                actualizarTotales();
+                actualizarTotales(); // Recalcular totales después de la posible carga/copia de datos
             } catch (error) {
                 authStatus.textContent = `Error al cargar los datos: ${error.message}`;
                 authStatus.style.color = 'red';
+                console.error(`Error al cargar los datos para ${meses[mesActual]} de ${añoActual}:`, error);
             }
         }
 
@@ -935,12 +948,14 @@
         }
 
         function cargarDatosEnTablaHTML(datos, indiceTabla) {
+            console.log(`Cargando estos datos en la tabla HTML para el mes ${meses[indiceTabla]}:`, datos);
             const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
             if (tabla) {
                 const filasHTML = Array.from(tabla.querySelectorAll('tr'));
                 let datosIndex = 0; 
 
                 filasHTML.forEach((filaHTML) => {
+                    // Solo procesar filas que no sean encabezados de motor
                     if (filaHTML.querySelector('.motor-header')) {
                         return;
                     }
@@ -949,7 +964,6 @@
                     if (datosFila) {
                         filaHTML.querySelectorAll('td').forEach((celda, indexCelda) => {
                             const isNomenclatura = celda.classList.contains('nomenclatura');
-                            // Ya no hay isLabelCell, isRestanteCell, etc.
                             if (celda && !isNomenclatura && datosFila[indexCelda] !== undefined) {
                                 celda.textContent = formatNumber(datosFila[indexCelda]);
                                 if (celda.textContent.trim() !== "") {
@@ -970,6 +984,7 @@
             const datos = [];
             if (tabla) {
                 tabla.querySelectorAll('tr').forEach(fila => {
+                    // Ignorar filas de encabezado de motor al obtener datos para guardar
                     if (fila.querySelector('.motor-header')) {
                         return; 
                     }
@@ -997,6 +1012,13 @@
             });
             selectYear.value = añoActual;
             selectYear.onchange = async () => {
+                // Guardar datos del mes actual antes de cambiar de año
+                if (auth.currentUser && userId !== "anonimo") {
+                    const currentMonthData = obtenerDatosTabla(mesActual);
+                    const currentMonthRecordatorio = recordatorioTextarea.value;
+                    await guardarDatosEnFirebase(añoActual, mesActual, currentMonthData, currentMonthRecordatorio);
+                }
+
                 añoActual = parseInt(selectYear.value);
                 crearTablasParaAño(añoActual);
                 await cargarDatosDeFirebase();
@@ -1012,9 +1034,17 @@
                 btn.className = "tab-button";
                 btn.textContent = mes;
                 btn.onclick = async () => {
+                    // Guardar datos del mes ACTUALMENTE activo (mesActual) antes de cambiar
+                    if (auth.currentUser && userId !== "anonimo") {
+                        const currentMonthData = obtenerDatosTabla(mesActual);
+                        const currentMonthRecordatorio = recordatorioTextarea.value;
+                        await guardarDatosEnFirebase(añoActual, mesActual, currentMonthData, currentMonthRecordatorio);
+                    }
+
+                    // Ahora cambia al nuevo mes
                     mesActual = i;
-                    mostrarTabla(i);
-                    await cargarDatosDeFirebase();
+                    mostrarTabla(i); 
+                    await cargarDatosDeFirebase(); // Esto cargará los datos para el nuevo mesActual
                     agregarEventosDeEdicion();
                     applyRolePermissions(currentUserRole);
                 };
@@ -1052,18 +1082,12 @@
                 const tbody = document.createElement("tbody");
                 
                 nombresFilasOrdenadas.forEach((nombre) => {
-                    const totalColsInHeader = 35; /* Actualizado: 2 (nomenclatura, vienen) + 31 (días) + 2 (totales) = 35 */
+                    const totalColsInHeader = 35; 
                     
-                    if (nombre === "HUB COMPRESOR 1.1") {
+                    if (nombre === "ENGINE HRS 1") { // Cambiado a ENGINE HRS 1 para que aparezca después de RINS
                         const separador1 = document.createElement("tr");
                         separador1.innerHTML = `<td colspan="${totalColsInHeader}" class="motor-header" contenteditable="false">MOTOR # 1</td>`;
                         tbody.appendChild(separador1);
-                        
-                        ['ENGINE HRS 1', 'ENGINE STARTS 1', 'FLIGHTS 1'].forEach(motorRowName => {
-                            const filaMotor = crearFilaTabla(motorRowName);
-                            tbody.appendChild(filaMotor);
-                        });
-                        // CICLOS 1 eliminado ya que estaba ligado a las columnas de factores.
                     }
                     
                     const fila = crearFilaTabla(nombre);
@@ -1079,7 +1103,6 @@
         function crearFilaTabla(nombre) {
             const fila = document.createElement("tr");
             
-            // Todas las filas se crearán con la misma estructura simplificada
             let rowHtml = `
                 <td class="nomenclatura" contenteditable="false">${nombre}</td>
                 <td contenteditable="true" class="viene-celda"></td>
@@ -1094,6 +1117,8 @@
 
         async function mostrarTabla(index) {
             mesActual = index;
+            // Guardar el mes activo en localStorage
+            localStorage.setItem('lastActiveMonth', index); 
             document.querySelectorAll(".tabla-mes").forEach((div, i) => {
                 div.style.display = i === index ? "block" : "none";
             });
@@ -1102,10 +1127,6 @@
             });
             document.title = `Datos de Vuelo - ${meses[index]} ${añoActual}`;
             printMonthHeader.textContent = `DATOS DE VUELO - ${meses[index].toUpperCase()} ${añoActual}`;
-
-            if (mesActual > 0 && auth.currentUser) {
-                await copiarValorGeneralAMesSiguiente(añoActual, mesActual - 1, mesActual);
-            }
         }
 
         async function copiarValorGeneralAMesSiguiente(año, mesOrigenIndex, mesDestinoIndex) {
@@ -1146,7 +1167,9 @@
                             }
                         });
                         actualizarTotales();
-                        await guardarDatosEnFirebase(añoActual, mesDestinoIndex, obtenerDatosTabla(mesDestinoIndex), recordatorioTextarea.value);
+                        // No llamar a guardarDatosEnFirebase aquí, ya que cargarDatosDeFirebase
+                        // es quien decide si se cargan datos existentes o se copian del mes anterior.
+                        // Si se copian, se guardarán cuando el usuario edite la tabla.
                     }
                 }
             } catch (error) {
@@ -1154,13 +1177,10 @@
             }
         }
 
-        // Eliminada la función aplicarEstiloRestante()
-
         // Calcula y actualiza todos los totales en la tabla (ahora simplificado para todas las filas)
         function actualizarTotales() {
             document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
                 const filas = Array.from(tabla.querySelectorAll("tbody tr"));
-                // generalValuesMap ya no se necesita para cálculos entre filas, pero puede usarse para la página de componentes
                 const generalValuesMap = new Map(); 
 
                 filas.forEach((fila) => {
@@ -1241,16 +1261,12 @@
                 if (radio.value === 'no-reminders') {
                     document.body.classList.add('print-no-reminders');
                 }
-                // La opción 'no-yellow-labels' ha sido eliminada
             });
         });
 
         btnImprimir.addEventListener('click', () => {
             window.print();
         });
-
-        // --- FUNCIONES PARA EL MODAL DE ESTADO DE MOTORES (ahora eliminado) ---
-        // showMotorStatusModal, hideMotorStatusModal, renderMotorStatus, printMotorStatus han sido eliminadas.
         
         // Función para mostrar un mensaje personalizado en lugar de alert()
         function showCustomAlert(message) {
@@ -1276,16 +1292,6 @@
             crearTablasParaAño(añoActual);
             crearBotonesMeses();
 
-            // Eliminados los event listeners para el modal de estado de motores
-            // btnMotorStatus.addEventListener('click', showMotorStatusModal);
-            // closeMotorStatusModal.addEventListener('click', hideMotorStatusModal);
-            // btnPrintMotorStatus.addEventListener('click', printMotorStatus);
-
-            // Eliminado el listener para las opciones de impresión del modal
-            // document.querySelectorAll('input[name="motorStatusPrintOption"]').forEach(radio => {
-            //     radio.addEventListener('change', renderMotorStatus);
-            // });
-
             // Event listener para el botón "Estado de Componentes"
             btnComponentStatus.addEventListener('click', async () => {
                 if (!auth.currentUser) {
@@ -1294,7 +1300,7 @@
                 }
 
                 // Obtener los totales generales directamente de Firebase Realtime Database
-                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-980-Overall`;
+                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-94-Overall`;
                 try {
                     const snapshot = await get(ref(database, rutaTotalesGenerales));
                     let generalTotals = { 'AC HRS': 0, 'ATERRIZAJES': 0, 'RINS': 0 };
