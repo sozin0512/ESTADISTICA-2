@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
@@ -1494,9 +1495,10 @@
 
                     // Rows that should always be treated as decimal numbers, regardless of "HRS" in name
                     const forceDecimalDisplayRows = [
-                        nombresFilas.indexOf("HOIST RESCUE OP HRS"),
-                        nombresFilas.indexOf("HOIST RESCUE CYCLE")
+                        nombresFilas.indexOf("HOIST RESCUE OP HRS")
                     ];
+
+                    const hoistRescueCycleIndex = nombresFilas.indexOf("HOIST RESCUE CYCLE");
 
                     if (forceDecimalDisplayRows.includes(filaIndex)) {
                         const vienen = vienenStr ? parseFloat(vienenStr.replace(",", ".")) : 0;
@@ -1529,10 +1531,20 @@
                         } else {
                             const total = valoresNumericos.reduce((acc, val) => acc + val, 0);
                             general = total + vienen;
-                            mesTotalDisplayValue = total > 0 ? (Number.isInteger(total) ? total : total.toFixed(1)) : "";
+
+                            if (filaIndex === hoistRescueCycleIndex) {
+                                // Specific handling for HOIST RESCUE CYCLE: round to nearest integer
+                                mesTotalDisplayValue = total > 0 ? Math.round(total).toString() : "";
+                                general = Math.round(general); // Round general here
+                            } else {
+                                mesTotalDisplayValue = total > 0 ? (Number.isInteger(total) ? total : total.toFixed(1)) : "";
+                            }
                         }
 
-                        const mostrarGeneral = general > 0 ? (Number.isInteger(general) ? general : general.toFixed(1)) : "";
+                        // Ensure general is also rounded for display if it's HOIST RESCUE CYCLE
+                        const mostrarGeneral = (filaIndex === hoistRescueCycleIndex) ?
+                                               (general > 0 ? Math.round(general).toString() : "") :
+                                               (general > 0 ? (Number.isInteger(general) ? general : general.toFixed(1)) : "");
 
                         celdas[33].textContent = mesTotalDisplayValue;
                         celdas[34].textContent = mostrarGeneral;
@@ -1575,8 +1587,7 @@
 
                 // Define rows that should always be treated as decimal numbers for validation
                 const forceDecimalValidationRows = [
-                    nombresFilas.indexOf("HOIST RESCUE OP HRS"),
-                    nombresFilas.indexOf("HOIST RESCUE CYCLE")
+                    nombresFilas.indexOf("HOIST RESCUE OP HRS")
                 ];
 
                 let isValid = true;
