@@ -924,16 +924,16 @@
                 flex: 1 1 calc(25% - 0.5625rem) !important; /* Calcula para 4 columnas con 0.75rem de gap (3 gaps, entonces 100% - 2.25rem / 4) */
                 max-width: calc(25% - 0.5625rem) !important;
             }
-            body.print-change-log-mode .log-entry-card .section-title-print {
+            body.print-change-log-mode .section-title-print {
                 font-size: 0.9rem !important; /* Títulos de sección más pequeños para caber */
                 margin-bottom: 0.5rem !important;
                 padding-bottom: 0.3rem !important;
             }
-            body.print-change-log-mode .log-entry-card .section-block-print p {
+            body.print-change-log-mode .section-block-print p {
                 font-size: 0.8rem !important; /* Texto de detalles aún más pequeño */
                 margin-bottom: 0.1rem !important;
             }
-            body.print-change-log-mode .log-entry-card .change-details-list p { /* Specific for inspection changes */
+            body.print-change-log-mode .change-details-list p { /* Specific for inspection changes */
                 font-size: 0.8rem !important;
             }
 
@@ -1608,7 +1608,7 @@
 
 
         /**
-         * Calcula la vida restante de un componente basándose en su tipo principal.
+         * Calcula la vida restante de un componente basándose en su tipo principal y priorizando TSO sobre TSN.
          * @param {object} component - El objeto del componente.
          * @returns {number|string} Vida restante calculada o un marcador para "condicion".
          */
@@ -1631,16 +1631,31 @@
             const initialTSNCycles = parseFloat(component.initialTSNCycles) || 0;
             const initialTSNDays = parseFloat(component.initialTSNDays) || 0;
 
+            const initialTSOHours = parseFloat(component.initialTSOHours) || 0;
+            const initialTSOCycles = parseFloat(component.initialTSOCycles) || 0;
+            const initialTSODays = parseFloat(component.initialTSODays) || 0;
+
             const aircraftHrsAtInstallation = parseFloat(component.aircraftHrsAtInstallation) || 0;
             const aircraftRinsAtInstallation = parseFloat(component.aircraftRinsAtInstallation) || 0;
 
-
             if (component.type === "hours") {
                 totalLife = parseFloat(component.lifeLimitHours) || 0;
-                currentLifeEffective = (currentAcHrs - aircraftHrsAtInstallation) + initialTSNHours; 
+                if (initialTSOHours > 0) {
+                    // Use TSO if available
+                    currentLifeEffective = (currentAcHrs - aircraftHrsAtInstallation) + initialTSOHours;
+                } else {
+                    // Fallback to TSN
+                    currentLifeEffective = (currentAcHrs - aircraftHrsAtInstallation) + initialTSNHours;
+                }
             } else if (component.type === "cycles") {
                 totalLife = parseFloat(component.lifeLimitCycles) || 0;
-                currentLifeEffective = (currentRins - aircraftRinsAtInstallation) + initialTSNCycles; 
+                if (initialTSOCycles > 0) {
+                    // Use TSO if available
+                    currentLifeEffective = (currentRins - aircraftRinsAtInstallation) + initialTSOCycles;
+                } else {
+                    // Fallback to TSN
+                    currentLifeEffective = (currentRins - aircraftRinsAtInstallation) + initialTSNCycles;
+                }
             } else if (component.type === "months") { 
                 totalLife = parseFloat(component.lifeLimitDays) || 0; 
                 let daysSinceInstallation = 0;
@@ -1650,7 +1665,13 @@
                     const timeDiff = today.getTime() - installationDate.getTime();
                     daysSinceInstallation = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1));
                 }
-                currentLifeEffective = daysSinceInstallation + initialTSNDays; 
+                if (initialTSODays > 0) {
+                    // Use TSO if available
+                    currentLifeEffective = daysSinceInstallation + initialTSODays;
+                } else {
+                    // Fallback to TSN
+                    currentLifeEffective = daysSinceInstallation + initialTSNDays;
+                }
             }
             return parseFloat((totalLife - currentLifeEffective).toFixed(1)); 
         }
@@ -1680,7 +1701,7 @@
         }
 
         /**
-         * Calcula el porcentaje de vida consumida para la barra de progreso.
+         * Calcula el porcentaje de vida consumida para la barra de progreso, priorizando TSO sobre TSN.
          * @param {object} component - El objeto del componente.
          * @returns {number} Porcentaje de vida consumida (0-100).
          */
@@ -1703,15 +1724,31 @@
             const initialTSNCycles = parseFloat(component.initialTSNCycles) || 0;
             const initialTSNDays = parseFloat(component.initialTSNDays) || 0;
 
+            const initialTSOHours = parseFloat(component.initialTSOHours) || 0;
+            const initialTSOCycles = parseFloat(component.initialTSOCycles) || 0;
+            const initialTSODays = parseFloat(component.initialTSODays) || 0;
+
             const aircraftHrsAtInstallation = parseFloat(component.aircraftHrsAtInstallation) || 0;
             const aircraftRinsAtInstallation = parseFloat(component.aircraftRinsAtInstallation) || 0;
 
             if (component.type === "hours") {
                 totalLife = parseFloat(component.lifeLimitHours) || 0;
-                currentConsumedEffective = (currentAcHrs - aircraftHrsAtInstallation) + initialTSNHours;
+                if (initialTSOHours > 0) {
+                    // Use TSO if available
+                    currentConsumedEffective = (currentAcHrs - aircraftHrsAtInstallation) + initialTSOHours;
+                } else {
+                    // Fallback to TSN
+                    currentConsumedEffective = (currentAcHrs - aircraftHrsAtInstallation) + initialTSNHours;
+                }
             } else if (component.type === "cycles") {
                 totalLife = parseFloat(component.lifeLimitCycles) || 0;
-                currentConsumedEffective = (currentRins - aircraftRinsAtInstallation) + initialTSNCycles;
+                if (initialTSOCycles > 0) {
+                    // Use TSO if available
+                    currentConsumedEffective = (currentRins - aircraftRinsAtInstallation) + initialTSOCycles;
+                } else {
+                    // Fallback to TSN
+                    currentConsumedEffective = (currentRins - aircraftRinsAtInstallation) + initialTSNCycles;
+                }
             } else if (component.type === "months") {
                 totalLife = parseFloat(component.lifeLimitDays) || 0;
                 let daysSinceInstallation = 0;
@@ -1721,7 +1758,13 @@
                     const timeDiff = today.getTime() - installationDate.getTime();
                     daysSinceInstallation = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1)); 
                 }
-                currentConsumedEffective = daysSinceInstallation + initialTSNDays; 
+                if (initialTSODays > 0) {
+                    // Use TSO if available
+                    currentConsumedEffective = daysSinceInstallation + initialTSODays;
+                } else {
+                    // Fallback to TSN
+                    currentConsumedEffective = daysSinceInstallation + initialTSNDays;
+                }
             }
 
             if (totalLife === 0) return 0;
@@ -2376,19 +2419,34 @@
                 let displayedTSNCycles = "N/A";
                 let displayedTSNDays = "N/A";
 
-                if (component.type === "hours") {
-                    const aircraftHrsDiff = currentAcHrs - (parseFloat(component.aircraftHrsAtInstallation) || 0);
-                    displayedTSNHours = (aircraftHrsDiff + (parseFloat(component.initialTSNHours) || 0)).toFixed(1);
-                    unit = "hrs";
-                } else if (component.type === "cycles") {
-                    const aircraftRinsDiff = currentRins - (parseFloat(component.aircraftRinsAtInstallation) || 0);
-                    displayedTSNCycles = (aircraftRinsDiff + (parseFloat(component.initialTSNCycles) || 0)).toFixed(1);
-                    unit = "ciclos";
-                } else if (component.type === "months" && component.installationDate) {
+                // Determine which value to display for TSN/TSO
+                const currentTSNHours = (currentAcHrs - (parseFloat(component.aircraftHrsAtInstallation) || 0)) + (parseFloat(component.initialTSNHours) || 0);
+                const currentTSNCycles = (currentRins - (parseFloat(component.aircraftRinsAtInstallation) || 0)) + (parseFloat(component.initialTSNCycles) || 0);
+                let currentTSNDays = 0;
+                if (component.installationDate) {
                     const installationDate = new Date(component.installationDate);
                     const timeDiff = today.getTime() - installationDate.getTime();
-                    const daysSinceInstallation = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1));
-                    displayedTSNDays = (daysSinceInstallation + (parseFloat(component.initialTSNDays) || 0)).toFixed(1);
+                    currentTSNDays = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1)) + (parseFloat(component.initialTSNDays) || 0);
+                }
+
+                const currentTSOHours = (currentAcHrs - (parseFloat(component.aircraftHrsAtInstallation) || 0)) + (parseFloat(component.initialTSOHours) || 0);
+                const currentTSOCycles = (currentRins - (parseFloat(component.aircraftRinsAtInstallation) || 0)) + (parseFloat(component.initialTSOCycles) || 0);
+                let currentTSODays = 0;
+                if (component.installationDate) {
+                    const installationDate = new Date(component.installationDate);
+                    const timeDiff = today.getTime() - installationDate.getTime();
+                    currentTSODays = parseFloat((timeDiff / (1000 * 60 * 60 * 24)).toFixed(1)) + (parseFloat(component.initialTSODays) || 0);
+                }
+
+
+                if (component.type === "hours") {
+                    displayedTSNHours = (parseFloat(component.initialTSOHours) > 0 ? currentTSOHours : currentTSNHours).toFixed(1);
+                    unit = "hrs";
+                } else if (component.type === "cycles") {
+                    displayedTSNCycles = (parseFloat(component.initialTSOCycles) > 0 ? currentTSOCycles : currentTSNCycles).toFixed(1);
+                    unit = "ciclos";
+                } else if (component.type === "months") {
+                    displayedTSNDays = (parseFloat(component.initialTSODays) > 0 ? currentTSODays : currentTSNDays).toFixed(1);
                     unit = "días";
                 }
 
@@ -2555,9 +2613,9 @@
                         ${!isAircraftComponent ? `<p><strong>Vida Límite (Días):</strong> ${lifeLimitDays.toFixed(1)}</p>` : ''}
                         ${!isAircraftComponent ? `<p><strong>Tipo de Vida:</strong> ${component.type || 'N/A'}</p>` : ''}
 
-                        ${!isAircraftComponent ? `<p><strong>TSN (Hrs):</strong> ${displayedTSNHours}</p>` : ''}
-                        ${!isAircraftComponent ? `<p><strong>TSN (Ciclos):</strong> ${displayedTSNCycles}</p>` : ''}
-                        ${!isAircraftComponent ? `<p><strong>TSN (Días):</strong> ${displayedTSNDays}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>TSN (Hrs):</strong> ${currentTSNHours.toFixed(1)}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>TSN (Ciclos):</strong> ${currentTSNCycles.toFixed(1)}</p>` : ''}
+                        ${!isAircraftComponent ? `<p><strong>TSN (Días):</strong> ${currentTSNDays.toFixed(1)}</p>` : ''}
                         ${!isAircraftComponent ? `<p><strong>TSN Inicial Componente (Hrs):</strong> ${((parseFloat(component.initialTSNHours) || 0).toFixed(1))}</p>` : ''}
                         ${!isAircraftComponent ? `<p><strong>TSN Inicial Componente (Ciclos):</strong> ${((parseFloat(component.initialTSNCycles) || 0).toFixed(1))}</p>` : ''}
                         ${!isAircraftComponent ? `<p><strong>TSN Inicial Componente (Días):</strong> ${((parseFloat(component.initialTSNDays) || 0).toFixed(1))}</p>` : ''}
@@ -3016,7 +3074,7 @@
                             }
                             if (oldInsp.type === 'cycles' || (oldInsp.type === 'mixed' && oldInsp.dueCycles !== undefined)) {
                                 detailsHtml += `<p>Ciclos de Vencimiento: <strong>${(parseFloat(oldInsp.dueCycles) || 0).toFixed(1)} ciclos</strong> &rarr; <strong>${(parseFloat(newInsp.dueCycles) || 0).toFixed(1)} ciclos</strong></p>`;
-                                detailsHtml += `<p>Intervalo (Ciclos): <strong>${(parseFloat(oldInsp.intervalCycles) || 0).toFixed(1)} ciclos</strong> &rarr; <strong>${(parseFloat(newInsp.intervalCycles) || 0).toFixed(1)} ciclos</strong></p>`;
+                                detailsHtml += `<p>Intervalo (Ciclos): <strong>${(parseFloat(newInsp.intervalCycles) || 0).toFixed(1)} ciclos</strong> &rarr; <strong>${(parseFloat(newInsp.intervalCycles) || 0).toFixed(1)} ciclos</strong></p>`;
                             }
                             detailsHtml += `</div>`;
                         }
@@ -3862,7 +3920,8 @@
                         if (performedHours >= 0 && intervalHours > 0) {
                             inspectionNextHoursDue.value = (performedHours + intervalHours).toFixed(1);
                         }
-                    });
+                    }
+                    );
 
                     inspectionComponentSearch.addEventListener('input', (event) => {
                         populateInspectionComponentSelect(event.target.value);
