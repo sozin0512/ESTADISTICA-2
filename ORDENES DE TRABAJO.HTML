@@ -425,6 +425,38 @@
             height: 25px; /* Altura más pequeña para línea vacía */
         }
 
+        /* Estilos para el mensaje de impresión móvil */
+        .mobile-print-tip {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #3498db; /* Azul para un consejo */
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 999; /* Menos que el modal, más que otros elementos */
+            display: none; /* Oculto por defecto, JS lo mostrará */
+            font-size: 0.9em;
+            text-align: center;
+            max-width: 90%;
+            box-sizing: border-box;
+        }
+        .mobile-print-tip button {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background-color: #2980b9; /* Un azul más oscuro */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .mobile-print-tip button:hover {
+            background-color: #2c3e50;
+        }
+
 
         /* Estilos para impresión */
         @media print {
@@ -535,6 +567,10 @@
             .modal-overlay {
                 display: none !important;
             }
+            /* Oculta el mensaje de impresión móvil en la impresión */
+            .mobile-print-tip {
+                display: none !important;
+            }
             /* Estilos para las órdenes guardadas en impresión */
             .saved-orders-section {
                 box-shadow: none;
@@ -632,6 +668,10 @@
                 width: 100%; /* Ocupa todo el ancho */
                 align-items: flex-start; /* Alinea los checkboxes al inicio */
                 margin-top: 10px; /* Espacio encima del grupo de checkboxes */
+            }
+            /* Mostrar el mensaje de impresión móvil en pantallas pequeñas */
+            .mobile-print-tip {
+                display: block;
             }
         }
     </style>
@@ -944,6 +984,11 @@
         </div>
     </div>
 
+    <div id="mobilePrintTip" class="mobile-print-tip hidden">
+        <p>En dispositivos móviles, si el botón de imprimir no funciona, por favor usa la función de "Compartir" o "Imprimir" de tu navegador.</p>
+        <button id="dismissMobilePrintTip">Entendido</button>
+    </div>
+
     <script type="module">
         // Importar las funciones necesarias de Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -978,6 +1023,10 @@
         // Referencias a los nuevos botones de impresión
         const printActiveFormsButton = document.getElementById('printActiveFormsButton');
         const printSavedOrdersButton = document.getElementById('printSavedOrdersButton');
+
+        // Elementos para el mensaje de impresión móvil
+        const mobilePrintTip = document.getElementById('mobilePrintTip');
+        const dismissMobilePrintTipButton = document.getElementById('dismissMobilePrintTip');
 
 
         // Función para mostrar mensajes
@@ -1504,6 +1553,21 @@
             document.body.classList.remove('print-saved-orders-only');
         });
 
+        // Función para verificar y mostrar el mensaje de impresión móvil
+        function checkAndShowMobilePrintTip() {
+            // Check if it's a mobile device (simple check based on screen width)
+            const isMobile = window.innerWidth <= 768; // Consistent with CSS media query
+
+            // Check if the tip has been dismissed before (using localStorage)
+            const hasDismissedTip = localStorage.getItem('mobilePrintTipDismissed') === 'true';
+
+            if (isMobile && !hasDismissedTip) {
+                mobilePrintTip.classList.remove('hidden');
+            } else {
+                mobilePrintTip.classList.add('hidden');
+            }
+        }
+
         // Configurar la interacción de las líneas de firma
         document.addEventListener('DOMContentLoaded', function() {
             // Inicializar Firebase cuando el DOM esté listo
@@ -1518,6 +1582,19 @@
             // Asignar eventos a los botones de impresión
             printActiveFormsButton.addEventListener('click', printActiveForms);
             printSavedOrdersButton.addEventListener('click', printSavedOrders);
+
+            // Event listener para el botón de "Entendido" del mensaje móvil
+            if (dismissMobilePrintTipButton) {
+                dismissMobilePrintTipButton.addEventListener('click', () => {
+                    localStorage.setItem('mobilePrintTipDismissed', 'true'); // Guardar que se ha ocultado
+                    mobilePrintTip.classList.add('hidden');
+                });
+            }
+
+            // Llamar a la función para verificar y mostrar el mensaje móvil al cargar y al redimensionar
+            checkAndShowMobilePrintTip();
+            window.addEventListener('resize', checkAndShowMobilePrintTip);
+
 
             // --- Sincronización de campos de texto y checkboxes existentes ---
             const inputs1 = form1.querySelectorAll('input[type="text"], input[type="date"], textarea');
