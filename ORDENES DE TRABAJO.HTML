@@ -18,7 +18,7 @@
         }
         .container {
             width: 48%; /* Cada contenedor ocupa casi la mitad del ancho disponible */
-            min-width: 380px; /* Ancho mínimo para evitar que se encojan demasiado */
+            min-width: 380px; /* Ancho mínimo para evitar que se encojan demasiado en escritorio */
             background-color: #fff;
             border: 1px solid #ccc;
             padding: 20px;
@@ -83,15 +83,29 @@
             width: calc(100% - 10px); /* Asegura que los inputs ocupen el 100% del espacio disponible menos el margen */
         }
 
-        .checkbox-cell {
+        /* Estilos para el contenedor del checkbox/radio y el custom-box */
+        .checkbox-col {
+            position: relative; /* Para posicionar el input y el custom-box */
+            width: 25px; /* Ancho fijo para la columna del checkbox */
+            height: 25px; /* Altura fija para la columna del checkbox */
+            padding: 0; /* Elimina el padding de la celda */
+        }
+
+        /* Estilo para el input de checkbox nativo */
+        .checkbox-col input[type="checkbox"] {
             width: 25px;
             height: 25px;
-            display: inline-block;
-            border: 1px solid #000;
+            margin: 0;
             vertical-align: middle;
-            text-align: center;
-            line-height: 23px; /* Centra la 'X' */
+            cursor: pointer;
+            /* Opcional: para que se vea el checkmark nativo */
+            -webkit-appearance: checkbox;
+            -moz-appearance: checkbox;
+            appearance: checkbox;
+            /* Estilo para el color del checkmark */
+            accent-color: #4CAF50; /* Color verde para el checkmark */
         }
+
         .empty-row td {
             height: 25px; /* Altura para filas vacías */
         }
@@ -112,7 +126,7 @@
             padding: 5px; /* Pequeño padding dentro del contenedor */
             box-sizing: border-box;
             height: 150px; /* Altura fija para el área con líneas */
-            overflow-y: auto; /* Permite scroll si el texto excede la altura */
+            overflow-y: hidden; /* ¡Cambiado a hidden para ocultar la barra de desplazamiento del contenedor! */
 
             /* Renglones usando background-image en el contenedor */
             background-image: linear-gradient(to bottom, #ccc 1px, transparent 1px);
@@ -132,6 +146,7 @@
             font-family: monospace; /* Fuente monoespaciada para mejor alineación de caracteres */
             line-height: 1.4em; /* Asegura que la altura de línea coincida con el background-size */
             outline: none; /* Elimina el borde de enfoque */
+            overflow-y: hidden; /* Oculta la barra de desplazamiento del textarea */
         }
 
         /* Estilos para el área de firma */
@@ -181,13 +196,12 @@
         .footer-section {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
-            margin-top: 20px;
+            align-items: center; /* Alinea los elementos verticalmente */
+            margin-top: 10px; /* Ajusta el margen superior para más espacio */
         }
         .footer-item {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
         }
         .footer-label {
             font-weight: bold;
@@ -196,16 +210,24 @@
         }
         .footer-checkbox-group {
             display: flex;
+            flex-direction: column; /* Apila las etiquetas y los checkboxes */
+            align-items: flex-end; /* Alinea los elementos del grupo a la derecha */
+        }
+        .footer-checkbox-item {
+            display: flex;
             align-items: center;
-            margin-left: auto; /* Empuja este grupo a la derecha */
+            margin-bottom: 5px; /* Espacio entre los elementos del grupo */
         }
-        .footer-checkbox-group .checkbox-cell {
-            margin-left: 5px; /* Espacio entre el texto y el checkbox */
+        .footer-checkbox-item:last-child {
+            margin-bottom: 0;
         }
-        .footer-line-small {
-            border-bottom: 1px solid #000;
-            width: 100px; /* Longitud de la línea para RUTINA/URGENTE */
-            display: inline-block;
+        .footer-checkbox-item .checkbox-label {
+            font-weight: bold;
+            margin-right: 5px; /* Espacio entre el texto y el checkbox */
+        }
+        .footer-checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
         }
 
         /* Estilos para el botón de imprimir y guardar */
@@ -232,6 +254,12 @@
         }
         .save-button:hover {
             background-color: #0056b3;
+        }
+        .print-saved-button {
+            background-color: #17a2b8; /* Un color diferente para el botón de imprimir guardadas */
+        }
+        .print-saved-button:hover {
+            background-color: #138496;
         }
         .message-box {
             position: fixed;
@@ -341,6 +369,62 @@
             margin: 0 auto;
             border-bottom: 1px solid #000; /* Línea debajo de la firma */
         }
+        /* Estilos específicos para la tabla dentro de las órdenes guardadas */
+        .saved-order-card table {
+            border: 1px solid #000; /* Borde para la tabla principal */
+            margin-bottom: 10px;
+        }
+        .saved-order-card table td {
+            border: 1px solid #000; /* Borde para todas las celdas */
+            padding: 8px;
+            vertical-align: top;
+        }
+        .saved-order-card .section-title {
+            background-color: #A9CCE3;
+            font-weight: bold;
+            text-align: center;
+        }
+        .saved-order-card .input-cell {
+            background-color: #EBF5FB;
+            padding: 8px; /* Restaurar padding para la visualización */
+        }
+        .saved-order-card .discrepancy-content {
+            background-color: #EBF5FB;
+            border: 1px solid #ccc;
+            padding: 5px;
+            min-height: 100px; /* Altura mínima para mostrar el contenido */
+            white-space: pre-wrap; /* Para respetar saltos de línea del textarea */
+            word-wrap: break-word; /* Para evitar desbordamiento de palabras largas */
+        }
+        .saved-order-card .signature-display-area {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; /* Alinea el label a la izquierda */
+            padding: 5px 0;
+        }
+        .saved-order-card .signature-display-area .footer-label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .saved-order-card .signature-image-container {
+            border-bottom: 1px solid #000; /* Línea debajo de la firma */
+            width: 250px; /* Ancho fijo para la firma */
+            height: 50px; /* Altura fija para la firma */
+            display: flex; /* Para centrar la imagen si es más pequeña */
+            justify-content: center;
+            align-items: center;
+            background-color: #fff; /* Fondo blanco para la firma */
+        }
+        .saved-order-card .signature-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* Asegura que la imagen se ajuste sin distorsión */
+        }
+        .saved-order-card .signature-image-container.empty {
+            border-bottom: 1px solid #000; /* Línea para firmas vacías */
+            height: 25px; /* Altura más pequeña para línea vacía */
+        }
+
 
         /* Estilos para impresión */
         @media print {
@@ -349,7 +433,9 @@
                 background-color: #fff; /* Fondo blanco para impresión */
                 display: block; /* Asegura el flujo normal de bloques */
             }
-            .container {
+            /* Oculta los contenedores principales y la sección de órdenes guardadas por defecto en impresión */
+            .container, .saved-orders-section {
+                display: none;
                 box-shadow: none; /* Elimina la sombra */
                 border: 1px solid #000; /* Mantiene el borde para cada formulario individual */
                 width: 100%; /* Cada formulario ocupa el 100% del ancho de la página */
@@ -359,6 +445,18 @@
                 border-radius: 0; /* Elimina el redondeo para impresión */
                 box-sizing: border-box; /* Asegura que padding y border se incluyan en el width */
             }
+
+            /* Muestra solo los formularios activos cuando body tiene la clase print-active-forms */
+            body.print-active-forms #mainFormContainer1,
+            body.print-active-forms #mainFormContainer2 {
+                display: block !important;
+            }
+
+            /* Muestra solo la sección de órdenes guardadas cuando body tiene la clase print-saved-orders-only */
+            body.print-saved-orders-only #savedOrdersSection {
+                display: block !important;
+            }
+
             /* Asegura que los fondos de color se MANTENGAN al imprimir */
             .section-title {
                 background-color: #A9CCE3 !important; /* Color azul medio claro - ¡Ahora con !important! */
@@ -456,11 +554,90 @@
             .saved-order-card .signature-display img {
                 border-bottom: 1px solid #000; /* Asegura la línea en impresión */
             }
+            .saved-order-card .signature-image-container {
+                border-bottom: 1px solid #000 !important;
+                background-color: #fff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .saved-order-card .discrepancy-content {
+                background-color: #EBF5FB !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            /* Nuevos estilos de impresión para el pie de página */
+            .footer-section {
+                flex-direction: row !important; /* Vuelve a la fila para impresión */
+                align-items: center !important; /* Alinea los elementos verticalmente */
+                justify-content: space-between !important; /* Espacio entre los elementos */
+                margin-top: 10px !important; /* Espacio superior */
+            }
+            .footer-item {
+                display: flex !important;
+                align-items: center !important;
+                margin-bottom: 0 !important; /* No hay margen inferior si están en la misma fila */
+            }
+            .footer-checkbox-group {
+                flex-direction: column !important; /* Apila los checkboxes para impresión */
+                align-items: flex-end !important; /* Alinea el grupo a la derecha */
+                margin-left: auto !important; /* Mantiene el grupo a la derecha */
+            }
+            .footer-checkbox-item {
+                display: flex !important;
+                align-items: center !important;
+                margin-bottom: 5px !important;
+            }
+        }
+
+        /* Media query para pantallas más pequeñas (móviles y tabletas) */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%; /* Ocupa casi todo el ancho en pantallas pequeñas */
+                min-width: unset; /* Permite que el contenedor se encoja más allá de 380px */
+                margin: 10px auto; /* Centra los contenedores individualmente */
+            }
+
+            /* Ajustar elementos con ancho fijo para que sean fluidos */
+            .signature-line-placeholder,
+            .signature-canvas {
+                width: 100%; /* Ocupa el 100% del ancho disponible */
+                max-width: 250px; /* Mantiene un ancho máximo si el contenedor es muy grande */
+                margin-left: 0; /* Elimina el margen izquierdo si se apila */
+            }
+            
+            /* Ajustar el layout del área de firma para apilar elementos */
+            .signature-area {
+                flex-direction: column; /* Apila los elementos verticalmente */
+                align-items: flex-start; /* Alinea los elementos al inicio */
+            }
+
+            /* Ajustar el botón de borrar firma */
+            .clear-signature-button {
+                margin-left: 0; /* Elimina el margen izquierdo */
+                margin-top: 5px; /* Añade un pequeño margen superior */
+            }
+
+            /* Ajustar el layout del pie de página para apilar elementos */
+            .footer-section {
+                flex-direction: column; /* Apila el label y el área de firma */
+                align-items: flex-start;
+            }
+            .footer-item {
+                flex-direction: column; /* Apila el label y el área de firma */
+                align-items: flex-start;
+                width: 100%;
+            }
+            .footer-checkbox-group {
+                margin-left: 0; /* Elimina el margen automático */
+                width: 100%; /* Ocupa todo el ancho */
+                align-items: flex-start; /* Alinea los checkboxes al inicio */
+                margin-top: 10px; /* Espacio encima del grupo de checkboxes */
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container" id="form1">
+    <div class="container" id="mainFormContainer1">
         <div class="header-title">
             <div>FUERZA AEREA HONDUREÑA</div>
             <div>BASE AEREA "CNEL HERNAN ACOSTA MEJIA"</div>
@@ -482,19 +659,19 @@
                         <tr>
                             <td class="section-title left-col">W.O</td>
                             <td class="input-cell right-col">
-                                <input type="text" value="945 25 07 17 001" class="text-input sync-input" data-sync-group="wo">
+                                <input type="text" value="" class="text-input sync-input" data-sync-group="wo" id="woInput1">
                             </td>
                         </tr>
                         <tr>
                             <td class="section-title left-col">FECHA</td>
                             <td class="input-cell right-col">
-                                <input type="text" value="2025 JUL 17" class="text-input sync-input" data-sync-group="fecha">
+                                <input type="date" value="2025-07-17" class="text-input sync-input" data-sync-group="fecha">
                             </td>
                         </tr>
                         <tr>
                             <td class="section-title left-col">HORA</td>
                             <td class="input-cell right-col">
-                                <input type="text" class="text-input sync-input" data-sync-group="hora">
+                                <input type="text" class="text-input sync-input" data-sync-group="hora" id="horaInput1">
                             </td>
                         </tr>
                         <tr>
@@ -512,33 +689,53 @@
                         </tr>
                         <tr>
                             <td class="label-col">RADIO</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-radio"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-radio">
+                            </td>
                             <td class="label-col">BATERIA</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-bateria"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-bateria">
+                            </td>
                         </tr>
                         <tr>
                             <td class="label-col">INSTRUMENTOS</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-instrumentos"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-instrumentos">
+                            </td>
                             <td class="label-col">MOTORES</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-motores"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-motores">
+                            </td>
                         </tr>
                         <tr>
                             <td class="label-col">HYD</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-hyd"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-hyd">
+                            </td>
                             <td class="label-col">ESTRUCTURAS</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-estructuras"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-estructuras">
+                            </td>
                         </tr>
                         <tr>
                             <td class="label-col">HELICES</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-helices"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-helices">
+                            </td>
                             <td class="label-col">ARMAMENTO</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-armamento"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-armamento">
+                            </td>
                         </tr>
                         <tr>
                             <td class="label-col">ELECTRICIDAD</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-electricidad"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-electricidad">
+                            </td>
                             <td class="label-col">HELICOPTEROS</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-helicopteros" checked></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-helicopteros" checked>
+                            </td>
                         </tr>
                     </table>
                 </td>
@@ -560,11 +757,17 @@
                 </div>
             </div>
             <div class="footer-checkbox-group">
-                <span class="footer-label">RUTINA</span>
-                <input type="checkbox" class="sync-checkbox" data-sync-group="rutina">
+                <div class="footer-checkbox-item">
+                    <span class="checkbox-label">RUTINA</span>
+                    <input type="checkbox" class="sync-checkbox" data-sync-group="rutina">
+                </div>
+                <div class="footer-checkbox-item">
+                    <span class="checkbox-label">URGENTE</span>
+                    <input type="checkbox" class="sync-checkbox" data-sync-group="urgente">
+                </div>
             </div>
         </div>
-        <div class="footer-section" style="margin-top: 0;">
+        <div class="footer-section">
             <div class="footer-item">
                 <span class="footer-label">RECIBIDO POR:</span>
                 <div class="signature-area">
@@ -573,14 +776,10 @@
                     <button type="button" class="clear-signature-button hidden" data-clear-target="firma-recibido">Borrar</button>
                 </div>
             </div>
-            <div class="footer-checkbox-group">
-                <span class="footer-label">URGENTE</span>
-                <input type="checkbox" class="sync-checkbox" data-sync-group="urgente" checked>
-            </div>
         </div>
     </div>
 
-    <div class="container" id="form2">
+    <div class="container" id="mainFormContainer2">
         <div class="header-title">
             <div>FUERZA AEREA HONDUREÑA</div>
             <div>BASE AEREA "CNEL HERNAN ACOSTA MEJIA"</div>
@@ -602,19 +801,19 @@
                         <tr>
                             <td class="section-title left-col">W.O</td>
                             <td class="input-cell right-col">
-                                <input type="text" class="text-input sync-input" data-sync-group="wo">
+                                <input type="text" class="text-input sync-input" data-sync-group="wo" id="woInput2">
                             </td>
                         </tr>
                         <tr>
                             <td class="section-title left-col">FECHA</td>
                             <td class="input-cell right-col">
-                                <input type="text" class="text-input sync-input" data-sync-group="fecha">
+                                <input type="date" class="text-input sync-input" data-sync-group="fecha">
                             </td>
                         </tr>
                         <tr>
                             <td class="section-title left-col">HORA</td>
                             <td class="input-cell right-col">
-                                <input type="text" class="text-input sync-input" data-sync-group="hora">
+                                <input type="text" class="text-input sync-input" data-sync-group="hora" id="horaInput2">
                             </td>
                         </tr>
                         <tr>
@@ -632,33 +831,53 @@
                         </tr>
                         <tr>
                             <td class="label-col">RADIO</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-radio"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-radio">
+                            </td>
                             <td class="label-col">BATERIA</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-bateria"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-bateria">
+                            </td>
                         </tr>
                         <tr>
                             <td class="label-col">INSTRUMENTOS</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-instrumentos"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-instrumentos">
+                            </td>
                             <td class="label-col">MOTORES</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-motores"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-motores">
+                            </td>
                         </tr>
                         <tr>
                             <td class="label-col">HYD</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-hyd"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-hyd">
+                            </td>
                             <td class="label-col">ESTRUCTURAS</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-estructuras"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-estructuras">
+                            </td>
                         </tr>
                         <tr>
                             <td class="label-col">HELICES</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-helices"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-helices">
+                            </td>
                             <td class="label-col">ARMAMENTO</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-armamento"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-armamento">
+                            </td>
                         </tr>
                         <tr>
                             <td class="label-col">ELECTRICIDAD</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-electricidad"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-electricidad">
+                            </td>
                             <td class="label-col">HELICOPTEROS</td>
-                            <td class="checkbox-col"><input type="checkbox" class="sync-checkbox" data-sync-group="taller-helicopteros"></td>
+                            <td class="checkbox-col">
+                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-helicopteros">
+                            </td>
                         </tr>
                     </table>
                 </td>
@@ -680,11 +899,17 @@
                 </div>
             </div>
             <div class="footer-checkbox-group">
-                <span class="footer-label">RUTINA</span>
-                <input type="checkbox" class="sync-checkbox" data-sync-group="rutina">
+                <div class="footer-checkbox-item">
+                    <span class="checkbox-label">RUTINA</span>
+                    <input type="checkbox" class="sync-checkbox" data-sync-group="rutina">
+                </div>
+                <div class="footer-checkbox-item">
+                    <span class="checkbox-label">URGENTE</span>
+                    <input type="checkbox" class="sync-checkbox" data-sync-group="urgente">
+                </div>
             </div>
         </div>
-        <div class="footer-section" style="margin-top: 0;">
+        <div class="footer-section">
             <div class="footer-item">
                 <span class="footer-label">RECIBIDO POR:</span>
                 <div class="signature-area">
@@ -693,15 +918,12 @@
                     <button type="button" class="clear-signature-button hidden" data-clear-target="firma-recibido">Borrar</button>
                 </div>
             </div>
-            <div class="footer-checkbox-group">
-                <span class="footer-label">URGENTE</span>
-                <input type="checkbox" class="sync-checkbox" data-sync-group="urgente">
-            </div>
         </div>
     </div>
 
-    <button class="action-button" onclick="window.print()">Imprimir Orden</button>
+    <button class="action-button" id="printActiveFormsButton">Imprimir Orden</button>
     <button class="action-button save-button" id="saveOrderButton">Guardar Orden</button>
+    <button class="action-button print-saved-button" id="printSavedOrdersButton">Imprimir Órdenes Guardadas</button>
 
     <div id="messageBox" class="message-box"></div>
     <div id="userIdDisplay" class="user-id-display"></div>
@@ -714,8 +936,9 @@
         </div>
     </div>
 
-    <div class="saved-orders-section">
+    <div class="saved-orders-section" id="savedOrdersSection">
         <h2>Órdenes Guardadas</h2>
+        <input type="text" id="searchOrdersInput" class="text-input" placeholder="Buscar por W.O., Discrepancia o Aeronave..." style="width: calc(100% - 20px); margin-bottom: 15px;">
         <div id="savedOrdersList">
             <p style="text-align: center; color: #6c757d;">Cargando órdenes...</p>
         </div>
@@ -730,7 +953,8 @@
         let db;
         let auth;
         let currentUserId = 'anonymous'; // Valor por defecto
-        let globalAppId = 'default-app-id'; // Variable global para el appId
+        // Obtener el ID de la aplicación del entorno de Canvas
+        const globalAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         let userName = ''; // Variable para almacenar el nombre del usuario
 
         // Elementos de UI
@@ -741,6 +965,20 @@
         const userNameInput = document.getElementById('userNameInput');
         const confirmUserNameButton = document.getElementById('confirmUserNameButton');
         const savedOrdersList = document.getElementById('savedOrdersList');
+        const woInput1 = document.getElementById('woInput1');
+        const woInput2 = document.getElementById('woInput2');
+        const searchInput = document.getElementById('searchOrdersInput');
+        const horaInput1 = document.getElementById('horaInput1'); // Obtener el input de hora del formulario 1
+        const horaInput2 = document.getElementById('horaInput2'); // Obtener el input de hora del formulario 2
+
+        const mainFormContainer1 = document.getElementById('mainFormContainer1');
+        const mainFormContainer2 = document.getElementById('mainFormContainer2');
+        const savedOrdersSection = document.getElementById('savedOrdersSection');
+
+        // Referencias a los nuevos botones de impresión
+        const printActiveFormsButton = document.getElementById('printActiveFormsButton');
+        const printSavedOrdersButton = document.getElementById('printSavedOrdersButton');
+
 
         // Función para mostrar mensajes
         function showMessage(message, type = 'info') {
@@ -750,6 +988,20 @@
             setTimeout(() => {
                 messageBox.style.display = 'none';
             }, 3000);
+        }
+
+        // Función para establecer la hora actual en los campos de hora
+        function setCurrentTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const currentTime = `${hours}:${minutes}`;
+            if (horaInput1) {
+                horaInput1.value = currentTime;
+            }
+            if (horaInput2) {
+                horaInput2.value = currentTime;
+            }
         }
 
         // Inicializar Firebase y autenticación
@@ -770,9 +1022,6 @@
                     measurementId: "G-TS2MJF4QCX"
                 };
 
-                // Asignar el appId de la configuración proporcionada a la variable global
-                globalAppId = firebaseConfig.appId;
-
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
@@ -782,8 +1031,9 @@
                         currentUserId = user.uid;
                         userIdDisplay.textContent = `ID de Usuario: ${currentUserId}`;
                         console.log("Usuario autenticado:", currentUserId);
-                        // Cargar órdenes una vez que el usuario esté autenticado
+                        // Cargar órdenes y generar WO una vez que el usuario esté autenticado
                         loadSavedOrders();
+                        generateAndSetNextWorkOrderNumber();
                     } else {
                         // Si no hay token inicial, inicia sesión anónimamente
                         if (!initialAuthToken) {
@@ -792,6 +1042,7 @@
                             userIdDisplay.textContent = `ID de Usuario (Anónimo): ${currentUserId}`;
                             console.log("Sesión anónima iniciada:", currentUserId);
                             loadSavedOrders(); // Cargar órdenes también para usuarios anónimos
+                            generateAndSetNextWorkOrderNumber();
                         } else {
                             // Si hay un token inicial, pero no se ha autenticado, intenta con el token
                             try {
@@ -800,6 +1051,7 @@
                                 userIdDisplay.textContent = `ID de Usuario: ${currentUserId}`;
                                 console.log("Sesión iniciada con token personalizado:", currentUserId);
                                 loadSavedOrders(); // Cargar órdenes
+                                generateAndSetNextWorkOrderNumber();
                             } catch (error) {
                                 console.error("Error al iniciar sesión con token personalizado:", error);
                                 // Fallback a anónimo si el token falla
@@ -808,6 +1060,7 @@
                                 userIdDisplay.textContent = `ID de Usuario (Anónimo - Fallo de Token): ${currentUserId}`;
                                 showMessage("Error de autenticación. Sesión anónima iniciada.", "error");
                                 loadSavedOrders(); // Cargar órdenes
+                                generateAndSetNextWorkOrderNumber();
                             }
                         }
                     }
@@ -816,6 +1069,38 @@
             } catch (error) {
                 console.error("Error al inicializar Firebase o autenticar:", error);
                 showMessage("Error al iniciar la aplicación. Consulta la consola.", "error");
+            }
+        }
+
+        // Función para generar el siguiente número de Orden de Trabajo
+        async function generateAndSetNextWorkOrderNumber() {
+            if (!db) {
+                console.error("Firestore DB no inicializado para el contador.");
+                woInput1.value = "H-ERROR";
+                woInput2.value = "H-ERROR";
+                return;
+            }
+
+            const countersDocRef = doc(db, `artifacts/${globalAppId}/public/data/counters/workOrder`);
+            let nextNumber = 1; // Número inicial por defecto
+
+            try {
+                const docSnap = await getDoc(countersDocRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.lastNumber && typeof data.lastNumber === 'number') {
+                        nextNumber = data.lastNumber + 1;
+                    }
+                }
+                // Formatear el número con ceros iniciales (ej. H-00001)
+                const formattedNumber = `H-${String(nextNumber).padStart(5, '0')}`;
+                woInput1.value = formattedNumber;
+                woInput2.value = formattedNumber; // Sincronizar con el segundo formulario
+            } catch (error) {
+                console.error("Error al obtener el siguiente número de orden de trabajo:", error);
+                showMessage("Error al generar número de W.O.", "error");
+                woInput1.value = "H-ERROR";
+                woInput2.value = "H-ERROR";
             }
         }
 
@@ -844,17 +1129,17 @@
                 showMessage("Guardando orden...", "info");
 
                 try {
-                    const formElement = document.getElementById('form1'); // Siempre guardamos la data del primer formulario
+                    const formElement = document.getElementById('mainFormContainer1'); // Siempre guardamos la data del primer formulario
                     const orderData = {};
 
                     // Recolectar datos de inputs de texto y textareas
-                    formElement.querySelectorAll('input[type="text"].sync-input, textarea.sync-input').forEach(input => {
+                    formElement.querySelectorAll('input[type="text"].sync-input, input[type="date"].sync-input, textarea.sync-input').forEach(input => {
                         orderData[input.dataset.syncGroup] = input.value;
                     });
 
-                    // Recolectar datos de checkboxes
-                    formElement.querySelectorAll('input[type="checkbox"].sync-checkbox').forEach(checkbox => {
-                        orderData[checkbox.dataset.syncGroup] = checkbox.checked;
+                    // Recolectar datos de checkboxes y radio buttons
+                    formElement.querySelectorAll('input[type="checkbox"].sync-checkbox, input[type="radio"].sync-checkbox').forEach(input => {
+                        orderData[input.dataset.syncGroup] = input.checked;
                     });
 
                     // Recolectar firmas de los canvas como Base64
@@ -871,9 +1156,35 @@
                     // Añadir el nombre del usuario que guarda la orden
                     orderData.savedBy = userName;
 
-                    // Ruta de la colección para datos privados del usuario, usando globalAppId
-                    const userOrdersCollectionRef = collection(db, `artifacts/${globalAppId}/users/${currentUserId}/orders`);
-                    await addDoc(userOrdersCollectionRef, {
+                    // --- Lógica para actualizar el contador de W.O. ---
+                    const woNumberString = orderData.wo; // Ej. "H-00005"
+                    // Extraer la parte numérica del WO y convertirla a entero
+                    const numericPart = parseInt(woNumberString.substring(2), 10);
+
+                    if (!isNaN(numericPart)) {
+                        const countersDocRef = doc(db, `artifacts/${globalAppId}/public/data/counters/workOrder`);
+                        try {
+                            const docSnap = await getDoc(countersDocRef);
+                            let currentLastNumber = 0;
+                            if (docSnap.exists()) {
+                                currentLastNumber = docSnap.data().lastNumber || 0;
+                            }
+
+                            // Si el número de WO de la orden actual es mayor que el último registrado, actualiza el contador
+                            if (numericPart > currentLastNumber) {
+                                await setDoc(countersDocRef, { lastNumber: numericPart });
+                                console.log(`Contador de W.O. actualizado a: ${numericPart}`);
+                            }
+                        } catch (error) {
+                            console.error("Error al actualizar el contador de W.O.:", error);
+                            // No mostrar error al usuario, ya que la orden aún puede guardarse
+                        }
+                    }
+                    // --- Fin de la lógica del contador ---
+
+                    // Ruta de la colección para datos públicos, visible para todos los usuarios
+                    const publicOrdersCollectionRef = collection(db, `artifacts/${globalAppId}/public/data/orders`);
+                    await addDoc(publicOrdersCollectionRef, {
                         ...orderData,
                         timestamp: new Date() // Añadir una marca de tiempo
                     });
@@ -881,7 +1192,7 @@
                     showMessage("Orden guardada exitosamente!", "success");
                     console.log("Orden guardada:", orderData);
                     loadSavedOrders(); // Recargar la lista de órdenes guardadas
-
+                    generateAndSetNextWorkOrderNumber(); // Generar el siguiente WO para el formulario
                 } catch (error) {
                     console.error("Error al guardar la orden:", error);
                     showMessage(`Error al guardar: ${error.message}`, "error");
@@ -902,71 +1213,166 @@
             savedOrdersList.innerHTML = '<p style="text-align: center; color: #6c757d;">Cargando órdenes...</p>';
 
             try {
-                const userOrdersCollectionRef = collection(db, `artifacts/${globalAppId}/users/${currentUserId}/orders`);
+                // Ruta de la colección para datos públicos, visible para todos los usuarios
+                const publicOrdersCollectionRef = collection(db, `artifacts/${globalAppId}/public/data/orders`);
                 // Usamos onSnapshot para escuchar cambios en tiempo real
-                onSnapshot(userOrdersCollectionRef, (snapshot) => {
+                onSnapshot(publicOrdersCollectionRef, (snapshot) => {
+                    // Obtener el valor del campo de búsqueda y convertirlo a minúsculas
+                    const searchQuery = searchInput.value.toLowerCase();
+
                     if (snapshot.empty) {
                         savedOrdersList.innerHTML = '<p style="text-align: center; color: #6c757d;">No hay órdenes guardadas aún.</p>';
                         return;
                     }
 
                     savedOrdersList.innerHTML = ''; // Limpiar la lista antes de añadir las nuevas órdenes
+                    let ordersFound = false;
+
                     snapshot.forEach((doc) => {
                         const order = doc.data();
-                        const orderId = doc.id; // Este es el ID de Firestore
+                        const orderId = doc.id;
 
-                        // Construir la lista de talleres enviados
-                        const talleresEnviados = [];
-                        if (order['taller-radio']) talleresEnviados.push('RADIO');
-                        if (order['taller-bateria']) talleresEnviados.push('BATERIA');
-                        if (order['taller-instrumentos']) talleresEnviados.push('INSTRUMENTOS');
-                        if (order['taller-motores']) talleresEnviados.push('MOTORES');
-                        if (order['taller-hyd']) talleresEnviados.push('HYD');
-                        if (order['taller-estructuras']) talleresEnviados.push('ESTRUCTURAS');
-                        if (order['taller-helices']) talleresEnviados.push('HELICES');
-                        if (order['taller-armamento']) talleresEnviados.push('ARMAMENTO');
-                        if (order['taller-electricidad']) talleresEnviados.push('ELECTRICIDAD');
-                        if (order['taller-helicopteros']) talleresEnviados.push('HELICOPTEROS');
+                        // Convertir los campos relevantes a minúsculas para la búsqueda
+                        const wo = order.wo ? order.wo.toLowerCase() : '';
+                        const discrepancia = order.discrepancia ? order.discrepancia.toLowerCase() : '';
+                        const aeronave = order.aeronave ? order.aeronave.toLowerCase() : ''; // Nuevo campo para búsqueda
 
-                        const talleresHtml = talleresEnviados.length > 0 ? talleresEnviados.join(', ') : 'N/A';
+                        // Filtrar las órdenes según el campo de búsqueda
+                        if (searchQuery === '' || wo.includes(searchQuery) || discrepancia.includes(searchQuery) || aeronave.includes(searchQuery)) {
+                            ordersFound = true;
+                            
+                            // Construir la lista de talleres enviados (solo uno ahora)
+                            let selectedTaller = 'N/A';
+                            const tallerOptions = ['radio', 'bateria', 'instrumentos', 'motores', 'hyd', 'estructuras', 'helices', 'armamento', 'electricidad', 'helicopteros'];
+                            for (const option of tallerOptions) {
+                                if (order[`taller-${option}`]) {
+                                    selectedTaller = option.toUpperCase();
+                                    break; // Solo uno puede ser seleccionado
+                                }
+                            }
 
+                            const card = document.createElement('div');
+                            card.classList.add('saved-order-card');
 
-                        const card = document.createElement('div');
-                        card.classList.add('saved-order-card');
+                            // Construir el HTML de la orden guardada con la estructura de tabla
+                            card.innerHTML = `
+                                <div class="header-title">
+                                    <div>FUERZA AEREA HONDUREÑA</div>
+                                    <div>BASE AEREA "CNEL HERNAN ACOSTA MEJIA"</div>
+                                </div>
 
-                        let signatureEntregadoHtml = '';
-                        if (order['firma-entregado']) {
-                            signatureEntregadoHtml = `<div class="signature-display"><img src="${order['firma-entregado']}" alt="Firma Entregado"></div>`;
-                        } else {
-                            signatureEntregadoHtml = `<div class="signature-display" style="height: 25px; border-bottom: 1px solid #000;"></div>`; // Línea vacía
+                                <table>
+                                    <tr>
+                                        <td class="section-title" colspan="2">LINEA DE VUELO ALA ROTATORIA</td>
+                                        <td style="width: 20px; text-align: center;">${order['linea-vuelo-rotatoria'] ? '&#10003;' : ''}</td>
+                                        <td class="section-title" colspan="2">LINEA DE VUELO ALA FIJA</td>
+                                        <td style="width: 20px;">${order['linea-vuelo-fija'] ? '&#10003;' : ''}</td>
+                                    </tr>
+                                </table>
+
+                                <table>
+                                    <tr>
+                                        <td style="width: 150px;">
+                                            <table class="main-table">
+                                                <tr>
+                                                    <td class="section-title left-col">W.O</td>
+                                                    <td class="input-cell right-col">${order.wo || 'N/A'}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="section-title left-col">FECHA</td>
+                                                    <td class="input-cell right-col">${order.fecha || 'N/A'}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="section-title left-col">HORA</td>
+                                                    <td class="input-cell right-col">${order.hora || 'N/A'}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="section-title left-col">AERONAVE</td>
+                                                    <td class="input-cell right-col">${order.aeronave || 'N/A'}</td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                        <td style="width: 10px;">&nbsp;</td>
+                                        <td style="width: 300px;">
+                                            <table class="order-table">
+                                                <tr>
+                                                    <td class="section-title" colspan="2">ORDEN DE TRABAJO PARA EL TALLER DE:</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="label-col">RADIO</td>
+                                                    <td class="checkbox-col">${order['taller-radio'] ? '&#10003;' : ''}</td>
+                                                    <td class="label-col">BATERIA</td>
+                                                    <td class="checkbox-col">${order['taller-bateria'] ? '&#10003;' : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="label-col">INSTRUMENTOS</td>
+                                                    <td class="checkbox-col">${order['taller-instrumentos'] ? '&#10003;' : ''}</td>
+                                                    <td class="label-col">MOTORES</td>
+                                                    <td class="checkbox-col">${order['taller-motores'] ? '&#10003;' : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="label-col">HYD</td>
+                                                    <td class="checkbox-col">${order['taller-hyd'] ? '&#10003;' : ''}</td>
+                                                    <td class="label-col">ESTRUCTURAS</td>
+                                                    <td class="checkbox-col">${order['taller-estructuras'] ? '&#10003;' : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="label-col">HELICES</td>
+                                                    <td class="checkbox-col">${order['taller-helices'] ? '&#10003;' : ''}</td>
+                                                    <td class="label-col">ARMAMENTO</td>
+                                                    <td class="checkbox-col">${order['taller-armamento'] ? '&#10003;' : ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="label-col">ELECTRICIDAD</td>
+                                                    <td class="checkbox-col">${order['taller-electricidad'] ? '&#10003;' : ''}</td>
+                                                    <td class="label-col">HELICOPTEROS</td>
+                                                    <td class="checkbox-col">${order['taller-helicopteros'] ? '&#10003;' : ''}</td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <div class="discrepancy-label">Discrepancia:</div>
+                                <div class="discrepancy-content">${order.discrepancia || 'N/A'}</div>
+
+                                <div class="footer-section">
+                                    <div class="footer-item">
+                                        <span class="footer-label">ENTREGADO POR:</span>
+                                        <div class="signature-image-container ${order['firma-entregado'] ? '' : 'empty'}">
+                                            ${order['firma-entregado'] ? `<img src="${order['firma-entregado']}" alt="Firma Entregado">` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="footer-checkbox-group">
+                                        <div class="footer-checkbox-item">
+                                            <span class="checkbox-label">RUTINA</span>
+                                            ${order.rutina ? '&#10003;' : ''}
+                                        </div>
+                                        <div class="footer-checkbox-item">
+                                            <span class="checkbox-label">URGENTE</span>
+                                            ${order.urgente ? '&#10003;' : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="footer-section">
+                                    <div class="footer-item">
+                                        <span class="footer-label">RECIBIDO POR:</span>
+                                        <div class="signature-image-container ${order['firma-recibido'] ? '' : 'empty'}">
+                                            ${order['firma-recibido'] ? `<img src="${order['firma-recibido']}" alt="Firma Recibido">` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr style="margin-top: 15px; border-color: #eee;">
+                                <p style="text-align: center; font-size: 0.8em; color: #6c757d;">Guardado por: ${order.savedBy || 'Desconocido'} el ${order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleString() : 'N/A'}</p>
+                            `;
+                            savedOrdersList.appendChild(card);
                         }
-
-                        let signatureRecibidoHtml = '';
-                        if (order['firma-recibido']) {
-                            signatureRecibidoHtml = `<div class="signature-display"><img src="${order['firma-recibido']}" alt="Firma Recibido"></div>`;
-                        } else {
-                            signatureRecibidoHtml = `<div class="signature-display" style="height: 25px; border-bottom: 1px solid #000;"></div>`; // Línea vacía
-                        }
-
-                        // Modificado para mostrar el nombre del usuario primero y añadir los talleres
-                        card.innerHTML = `
-                            <h3>Orden de ${order.savedBy || 'Usuario Desconocido'}</h3>
-                            <p><strong>ID de Orden:</strong> ${orderId}</p>
-                            <p><strong>Fecha de Guardado:</strong> ${order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleString() : 'N/A'}</p>
-                            <p><strong>W.O:</strong> ${order.wo || 'N/A'}</p>
-                            <p><strong>Fecha:</strong> ${order.fecha || 'N/A'}</p>
-                            <p><strong>Hora:</strong> ${order.hora || 'N/A'}</p>
-                            <p><strong>Aeronave:</strong> ${order.aeronave || 'N/A'}</p>
-                            <p><strong>Talleres Enviados:</strong> ${talleresHtml}</p>
-                            <p><strong>Discrepancia:</strong> ${order.discrepancia || 'N/A'}</p>
-                            <p><strong>Entregado por Firma:</strong></p>
-                            ${signatureEntregadoHtml}
-                            <p><strong>Recibido por Firma:</strong></p>
-                            ${signatureRecibidoHtml}
-                            <hr style="margin-top: 15px; border-color: #eee;">
-                        `;
-                        savedOrdersList.appendChild(card);
                     });
+
+                    if (!ordersFound && searchQuery !== '') {
+                        savedOrdersList.innerHTML = '<p style="text-align: center; color: #6c757d;">No se encontraron órdenes que coincidan con su búsqueda.</p>';
+                    }
+
                 }, (error) => {
                     console.error("Error al escuchar órdenes en tiempo real:", error);
                     savedOrdersList.innerHTML = `<p style="text-align: center; color: #dc3545;">Error al cargar órdenes: ${error.message}</p>`;
@@ -1060,7 +1466,7 @@
             const destCtx = destCanvas.getContext('2d');
             const img = new Image();
             img.onload = function() {
-                destCtx.clearRect(0, 0, destCanvas.width, destCanvas.height); // Limpia el canvas de destino
+                destCtx.clearRect(0, 0, destCanvas.width, destCtx.canvas.height); // Limpia el canvas de destino
                 destCtx.drawImage(img, 0, 0, destCtx.canvas.width, destCtx.canvas.height); // Dibuja la imagen en el canvas de destino
             };
             img.src = imgData;
@@ -1077,21 +1483,46 @@
             if (signatureArea) {
                 signatureArea.querySelector('.signature-line-placeholder').classList.remove('hidden');
                 canvas.classList.add('hidden');
-                signatureArea.querySelector('.clear-signature-button').classList.add('hidden');
+                signatureArea.querySelector('button.clear-signature-button').classList.add('hidden'); // Asegurarse de seleccionar el botón correcto
             }
         }
+
+        // Funciones de impresión específicas
+        function printActiveForms() {
+            document.body.classList.add('print-active-forms');
+            window.print();
+        }
+
+        function printSavedOrders() {
+            document.body.classList.add('print-saved-orders-only');
+            window.print();
+        }
+
+        // Listener para limpiar las clases después de imprimir
+        window.addEventListener('afterprint', () => {
+            document.body.classList.remove('print-active-forms');
+            document.body.classList.remove('print-saved-orders-only');
+        });
 
         // Configurar la interacción de las líneas de firma
         document.addEventListener('DOMContentLoaded', function() {
             // Inicializar Firebase cuando el DOM esté listo
             initializeFirebase();
 
-            const form1 = document.getElementById('form1');
-            const form2 = document.getElementById('form2');
+            // Establecer la hora actual al cargar la página
+            setCurrentTime();
+
+            const form1 = document.getElementById('mainFormContainer1');
+            const form2 = document.getElementById('mainFormContainer2');
+
+            // Asignar eventos a los botones de impresión
+            printActiveFormsButton.addEventListener('click', printActiveForms);
+            printSavedOrdersButton.addEventListener('click', printSavedOrders);
 
             // --- Sincronización de campos de texto y checkboxes existentes ---
-            const inputs1 = form1.querySelectorAll('input[type="text"], textarea');
-            const checkboxes1 = form1.querySelectorAll('input[type="checkbox"]');
+            const inputs1 = form1.querySelectorAll('input[type="text"], input[type="date"], textarea');
+            // Modificado para seleccionar tanto checkboxes como radio buttons
+            const form1CheckboxesAndRadios = form1.querySelectorAll('input[type="checkbox"], input[type="radio"]');
 
             inputs1.forEach(input1 => {
                 const syncGroup = input1.dataset.syncGroup;
@@ -1105,13 +1536,25 @@
                 }
             });
 
-            checkboxes1.forEach(checkbox1 => {
-                const syncGroup = checkbox1.dataset.syncGroup;
+            form1CheckboxesAndRadios.forEach(input1 => {
+                const syncGroup = input1.dataset.syncGroup;
                 if (syncGroup) {
-                    checkbox1.addEventListener('change', function() {
-                        const checkbox2 = form2.querySelector(`.sync-checkbox[data-sync-group="${syncGroup}"]`);
-                        if (checkbox2) {
-                            checkbox2.checked = this.checked;
+                    input1.addEventListener('change', function() {
+                        // Si es un checkbox, deseleccionar los otros checkboxes en el mismo grupo de nombre
+                        if (this.type === 'checkbox' && this.name === 'taller-selection') {
+                            form1.querySelectorAll(`input[type="checkbox"][name="taller-selection"]`).forEach(checkbox1 => {
+                                if (checkbox1 !== this) {
+                                    checkbox1.checked = false;
+                                }
+                            });
+                            form2.querySelectorAll(`input[type="checkbox"][name="taller-selection"]`).forEach(checkbox2 => {
+                                checkbox2.checked = false;
+                            });
+                        }
+                        // Luego, sincronizar el estado del input actual
+                        const input2 = form2.querySelector(`input[data-sync-group="${syncGroup}"]`);
+                        if (input2) {
+                            input2.checked = this.checked;
                         }
                     });
                 }
@@ -1128,12 +1571,12 @@
                 }
             });
 
-            checkboxes1.forEach(checkbox1 => {
-                const syncGroup = checkbox1.dataset.syncGroup;
+            form1CheckboxesAndRadios.forEach(input1 => {
+                const syncGroup = input1.dataset.syncGroup;
                 if (syncGroup) {
-                    const checkbox2 = form2.querySelector(`.sync-checkbox[data-sync-group="${syncGroup}"]`);
-                    if (checkbox2) {
-                        checkbox2.checked = checkbox1.checked;
+                    const input2 = form2.querySelector(`input[data-sync-group="${syncGroup}"]`);
+                    if (input2) {
+                        input2.checked = input1.checked;
                     }
                 }
             });
@@ -1146,7 +1589,7 @@
                 const clearButton = area.querySelector('.clear-signature-button');
 
                 // Asignar IDs únicos a los canvas para el seguimiento de inicialización
-                canvas.id = 'canvas-' + canvas.dataset.syncGroup + '-' + (area.closest('#form1') ? '1' : '2');
+                canvas.id = 'canvas-' + canvas.dataset.syncGroup + '-' + (area.closest('#mainFormContainer1') ? '1' : '2');
 
                 placeholder.addEventListener('click', () => {
                     placeholder.classList.add('hidden');
@@ -1159,7 +1602,7 @@
                     // Encontrar el canvas de sincronización correspondiente
                     const syncGroup = canvas.dataset.syncGroup;
                     let targetCanvas = null;
-                    if (area.closest('#form1')) {
+                    if (area.closest('#mainFormContainer1')) {
                         targetCanvas = form2.querySelector(`.signature-canvas[data-sync-group="${syncGroup}"]`);
                     } else {
                         targetCanvas = form1.querySelector(`.signature-canvas[data-sync-group="${syncGroup}"]`);
@@ -1172,7 +1615,7 @@
                     // Encontrar el canvas de sincronización correspondiente
                     const syncGroup = canvas.dataset.syncGroup;
                     let targetCanvas = null;
-                    if (area.closest('#form1')) {
+                    if (area.closest('#mainFormContainer1')) {
                         targetCanvas = form2.querySelector(`.signature-canvas[data-sync-group="${syncGroup}"]`);
                     } else {
                         targetCanvas = form1.querySelector(`.signature-canvas[data-sync-group="${syncGroup}"]`);
@@ -1183,6 +1626,9 @@
 
             // Asignar el evento al botón de guardar
             saveOrderButton.addEventListener('click', saveOrder);
+
+            // Añadir el listener para el campo de búsqueda
+            searchInput.addEventListener('input', loadSavedOrders);
         });
     </script>
 </body>
