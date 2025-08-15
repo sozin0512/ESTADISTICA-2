@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parte Principal de Personal </title>
+    <!-- Tailwind CSS CDN para un estilo moderno y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Animación de fondo sutil para un toque moderno */
+        @keyframes backgroundPan {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background: linear-gradient(135deg, #e0f2fe, #f0f8ff, #e0f2fe); /* Degradado suave */
+            background-size: 200% 200%; /* Tamaño más grande para la animación */
+            animation: backgroundPan 20s ease infinite; /* Animación de movimiento lento */
+            color: #334155;
+            min-height: 100vh; /* Asegura que la animación ocupe toda la altura */
+            display: flex; /* Para centrar el contenido verticalmente si es más pequeño */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Contenedor principal estilizado como una tarjeta con neumorfismo suave */
+        .container {
+            max-width: 980px; /* Un poco más ancho */
+            margin: 2rem auto; /* Ajuste el margen ya que el body es flex */
+            padding: 2.8rem; /* Más padding interno */
+            background-color: #ffffff;
+            border-radius: 1.8rem; /* Bordes muy redondeados */
+            /* Sombras tipo neumorfismo suave */
+            box-shadow: 10px 10px 30px rgba(174, 174, 192, 0.4), 
+                        -10px -10px 30px rgba(255, 255, 255, 0.7);
+            border: none; /* Elimina el borde anterior */
+            transition: transform 0.3s ease-in-out; /* Transición para un ligero hover */
+        }
+        .container:hover {
+            transform: translateY(-5px); /* Efecto de elevación al pasar el ratón */
+        }
+
+        /* Estilos para inputs numéricos (se mantienen por si se reutiliza el modal o se añade otra lógica, aunque no se usan directamente en esta vista principal) */
+        input[type="number"] {
+            border-radius: 0.8rem; /* Más redondeado */
+            padding: 0.9rem 1.3rem; /* Más padding */
+            border: 1px solid #e2e8f0; /* Borde más claro */
+            background-color: #f7fafc; /* Fondo ligeramente grisáceo */
+            text-align: center;
+            width: 120px; /* Un poco más ancho */
+            -moz-appearance: textfield;
+            transition: all 0.3s ease-in-out; /* Transición más suave y larga */
+            font-weight: 500;
+            color: #1f2937;
+            /* Sombra interna sutil para un efecto "hundido" */
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.8);
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #6366f1; /* Morado/índigo al enfocar */
+            box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.3), /* Anillo de enfoque más pronunciado */
+                        inset 2px 2px 5px rgba(0, 0, 0, 0.05); /* Mantener sombra interna */
+            background-color: #ffffff; /* Fondo blanco al enfocar */
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Estilos de tabla generales */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 1.5rem; /* Bordes muy redondeados para toda la tabla */
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.07); /* Sombra más pronunciada para la tabla */
+            background-color: #ffffff; /* Asegurar fondo blanco */
+        }
+        th, td {
+            text-align: left;
+            padding: 1.4rem 1.7rem; /* Más padding para celdas */
+            border-bottom: 1px solid #edf2f7; /* Línea divisoria muy suave */
+        }
+        th {
+            background: linear-gradient(45deg, #4f46e5, #6366f1); /* Degradado índigo para encabezados */
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra de texto más fuerte */
+            font-size: 1rem; /* Tamaño de fuente ligeramente ajustado */
+            letter-spacing: 0.06em; /* Espaciado de letras */
+            text-transform: uppercase;
+        }
+        /* Bordes redondeados para las esquinas del thead */
+        thead tr:first-child th:first-child { border-top-left-radius: 1.5rem; }
+        thead tr:first-child th:last-child { border-top-right-radius: 1.5rem; }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr {
+            transition: all 0.25s ease-in-out; /* Transición para hover de fila */
+        }
+        tbody tr:hover {
+            background-color: #f0f4f8; /* Fondo más oscuro al pasar el ratón */
+            transform: scale(1.01); /* Ligerísimo zoom */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); /* Sombra al pasar el ratón */
+        }
+        tbody tr:nth-child(even) { /* Cebra para filas, ligeramente más oscuro */
+            background-color: #f7f9fb;
+        }
+
+        /* Estilos para la fila del total general (pie de tabla) */
+        tfoot tr {
+            background: linear-gradient(45deg, #10b981, #34d399); /* Degradado verde esmeralda para el total */
+            font-weight: bold;
+            color: #ffffff;
+            font-size: 1.35rem; /* Fuente más grande */
+            box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.15); /* Sombra más fuerte hacia arriba */
+        }
+        /* Bordes redondeados para las esquinas del tfoot */
+        tfoot tr:last-child td:first-child { border-bottom-left-radius: 1.5rem; }
+        tfoot tr:last-child td:last-child { border-bottom-right-radius: 1.5rem; }
+
+        /* Estilos para el modal personalizado */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75); /* Fondo más oscuro y opaco */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.4s ease-in-out; /* Transición más larga para el overlay */
+        }
+        .modal-overlay.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 3.5rem; /* Más padding */
+            border-radius: 2rem; /* Bordes muy redondeados */
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35); /* Sombra muy dramática */
+            max-width: 650px; /* Un poco más ancho */
+            width: 90%;
+            text-align: center;
+            transform: translateY(-50px) scale(0.9); /* Efecto de entrada más pronunciado y ligeramente encogido */
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease-out; /* Rebote y opacidad */
+        }
+        .modal-overlay.visible .modal-content {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+        .modal-content h3 {
+            font-size: 2.5rem; /* Título de modal más grande */
+            color: #4f46e5;
+            margin-bottom: 1.8rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .modal-content textarea {
+            min-height: 160px; /* Mayor altura */
+            resize: vertical;
+            transition: all 0.3s ease-in-out;
+            border-color: #e2e8f0; /* Borde más claro */
+            border-radius: 1rem; /* Más redondeado */
+            font-size: 1.05rem; /* Tamaño de fuente ligeramente más grande */
+            line-height: 1.6;
+            padding: 1.2rem; /* Más padding */
+            background-color: #f7fafc; /* Fondo ligeramente grisáceo */
+            box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.03); /* Sombra interna sutil */
+        }
+        .modal-content textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.3);
+            background-color: #ffffff;
+        }
+        .modal-content button {
+            border-radius: 1rem; /* Botones muy redondeados */
+            font-weight: 700;
+            padding: 1.1rem 2.5rem; /* Más padding */
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efecto de rebote en botones */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Sombra en botones */
+            font-size: 1.1rem; /* Botón de texto ligeramente más grande */
+        }
+        .modal-content button:hover {
+            transform: translateY(-5px); /* Efecto de elevación más notorio */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Sombra más fuerte al pasar el ratón */
+        }
+        .modal-content button.bg-indigo-600:hover {
+            background-color: #4338ca;
+        }
+        .modal-content button.bg-gray-300:hover {
+            background-color: #9ca3af; /* Gris un poco más oscuro y saturado */
+        }
+
+        /* Estilos para el área de notas en la tabla (no se usa directamente en esta vista, pero se mantiene para el modal) */
+        .note-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #ffffff; /* Fondo blanco */
+            border-radius: 1rem; /* Más redondeado */
+            padding: 0.9rem 1.2rem;
+            min-height: 58px; /* Mayor altura mínima */
+            border: 1px solid #eef2f7;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05), -2px -2px 8px rgba(255, 255, 255, 0.8); /* Sombra ligera tipo neumorfismo */
+        }
+        .note-display:hover {
+            background-color: #f8fafc; /* Color de fondo al pasar el ratón */
+            border-color: #e2e8f0; /* Borde más oscuro al pasar el ratón */
+            transform: translateY(-3px); /* Efecto de elevación más notorio */
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.08), -5px -5px 15px rgba(255, 255, 255, 0.6); /* Sombra al pasar el ratón */
+        }
+        .note-display span {
+            color: #475569;
+            font-size: 1rem; /* Tamaño de fuente ligeramente más grande para la nota */
+            line-height: 1.4;
+        }
+        .edit-pencil-icon {
+            width: 22px; /* Icono más grande */
+            height: 22px;
+            fill: #94a3b8; /* Color de icono gris más suave */
+            transition: fill 0.3s ease-in-out;
+        }
+        .note-display:hover .edit-pencil-icon {
+            fill: #4f46e5; /* Icono se vuelve índigo al pasar el ratón */
+        }
+
+        /* Mensaje de "no hay datos" */
+        #no-consolidated-data-message { /* Ajustado de nuevo a este ID para el mensaje del consolidado */
+            font-style: italic;
+            color: #94a3b8; /* Gris más claro */
+            margin-top: 2rem;
+            font-size: 1.2rem; /* Más grande */
+        }
+
+        /* Estilos para los botones de las partes */
+        .part-button {
+            @apply flex-1 px-6 py-4 rounded-xl text-white font-bold text-lg shadow-md transition duration-300 ease-in-out transform;
+            background: linear-gradient(45deg, #4f46e5, #8b5cf6); /* Degradado índigo/púrpura */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+        .part-button:hover {
+            @apply scale-105;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            background: linear-gradient(45deg, #6366f1, #a78bfa);
+        }
+        .part-button:active {
+            @apply scale-95;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Estilos para los botones de acción */
+        .action-button {
+            @apply flex-1 px-8 py-4 rounded-xl text-white font-bold text-lg shadow-md transition duration-300 ease-in-out transform;
+            min-width: 200px; /* Asegurar un ancho mínimo para los botones */
+        }
+        .action-button:hover {
+            @apply scale-105;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+        }
+        .action-button:active {
+            @apply scale-95;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .bg-green-600 { background-color: #059669; }
+        .hover\:bg-green-700:hover { background-color: #047857; }
+        .bg-blue-600 { background-color: #2563eb; }
+        .hover\:bg-blue-700:hover { background-color: #1d4ed8; }
+
+
+        /* --- ESTILOS ESPECÍFICOS PARA IMPRESIÓN --- */
+        @media print {
+            body {
+                background: none; /* Elimina el fondo degradado en la impresión */
+                animation: none; /* Elimina la animación de fondo */
+                display: block; /* Desactiva flexbox para el cuerpo */
+                margin: 0;
+                padding: 0;
+                font-size: 10pt; /* Ajusta el tamaño de fuente para impresión */
+                color: #000; /* Asegura texto negro para mejor contraste en papel */
+                width: 100%; /* Asegura que el cuerpo ocupe todo el ancho disponible */
+            }
+
+            .container {
+                max-width: 100%; /* Permite que el contenedor use todo el ancho de la página */
+                margin: 0 auto; /* Centra el contenedor en la página impresa */
+                padding: 1cm; /* Añade un margen alrededor del contenido */
+                box-shadow: none; /* Elimina las sombras */
+                border-radius: 0; /* Elimina bordes redondeados */
+                background-color: transparent; /* Fondo transparente */
+                box-sizing: border-box; /* Incluye padding en el ancho/alto total */
+            }
+
+            h1, h2 {
+                color: #000 !important; /* Asegura que los títulos sean negros */
+                text-shadow: none !important; /* Elimina la sombra del texto */
+                margin-top: 1em; /* Espacio superior para títulos */
+                margin-bottom: 0.5em; /* Espacio inferior para títulos */
+                text-align: center; /* Centra los títulos para impresión */
+            }
+            
+            p {
+                color: #333 !important; /* Asegura que los párrafos sean más oscuros */
+                margin-bottom: 0.5em;
+                max-width: 100%; /* Permite que el párrafo ocupe todo el ancho */
+                text-align: center; /* Centra los párrafos */
+            }
+
+            /* Ocultar elementos no necesarios para la impresión */
+            .part-button,
+            .action-button,
+            .mb-10.p-6.bg-gradient-to-br, /* Sección de botones de partes */
+            .mb-10.p-6.bg-gradient-to-br + .text-center, /* Sección de acciones del reporte (la que tiene los botones de impresión/exportación) */
+            .text-center.text-gray-500.text-sm.mt-8, /* ID de usuario */
+            .modal-overlay {
+                display: none !important;
+            }
+
+            /* Ajustar la tabla para impresión */
+            .p-8.bg-white.rounded-xl.shadow-lg.border.border-gray-100.mb-10 { /* Contenedor de la tabla consolidada */
+                padding: 0 !important; /* Elimina el padding del contenedor para que la tabla use todo el espacio */
+                box-shadow: none !important;
+                border: none !important;
+            }
+
+            table {
+                width: 100%; /* La tabla ocupa todo el ancho disponible */
+                box-shadow: none; /* Elimina sombras de la tabla */
+                border-radius: 0; /* Elimina bordes redondeados */
+                background-color: #fff; /* Fondo blanco explícito */
+                border-collapse: collapse; /* Asegura que los bordes se vean correctamente */
+            }
+
+            th, td {
+                padding: 0.6em 0.8em !important; /* Ajusta el padding para que quepa más contenido y sea más compacto */
+                border: 1px solid #ddd; /* Añade bordes a las celdas */
+                color: #000 !important; /* Asegura texto negro */
+                font-size: 9pt; /* Reduce un poco más el tamaño de la fuente en las celdas */
+                vertical-align: top; /* Alinea el contenido de la celda en la parte superior */
+            }
+
+            th {
+                background: #f0f0f0 !important; /* Fondo gris claro para encabezados */
+                color: #000 !important;
+                text-shadow: none !important;
+                -webkit-print-color-adjust: exact; /* Para que el navegador imprima los colores de fondo */
+                color-adjust: exact;
+            }
+            
+            tfoot tr {
+                background: #e0e0e0 !important; /* Fondo gris para el pie de tabla */
+                color: #000 !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+                font-size: 10pt !important; /* Ajusta el tamaño de la fuente para el total general */
+            }
+
+            tbody tr:nth-child(even) {
+                background-color: #f9f9f9 !important; /* Fondo blanco para filas pares */
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+
+            /* Estilos para las notas en impresión */
+            .text-xs.text-gray-600.mb-1.last\:mb-0.p-2.bg-blue-50.rounded-md.border.border-blue-100.shadow-sm {
+                background-color: #f0f8ff !important; /* Fondo más claro para las notas */
+                border: 1px solid #cfe2f3 !important; /* Borde más claro */
+                box-shadow: none !important; /* Elimina sombras de las notas individuales */
+                color: #333 !important; /* Texto más oscuro */
+                padding: 0.4em 0.6em !important; /* Padding más pequeño para las notas */
+                border-radius: 0.2em !important; /* Bordes menos redondeados */
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+                white-space: normal !important; /* Asegura que el texto de la nota se ajuste y no se corte */
+                word-wrap: break-word !important; /* Permite saltos de línea dentro de palabras largas */
+            }
+            .text-xs.text-gray-600.mb-1.last\:mb-0.p-2.bg-blue-50.rounded-md.border.border-blue-100.shadow-sm span {
+                color: #000 !important; /* Asegura que el nombre de la parte en la nota sea negro */
+            }
+            .text-gray-400.text-sm {
+                color: #666 !important; /* Texto más oscuro para "Sin notas." */
+            }
+            
+            /* Asegura que el contenido se extienda a lo largo del ancho de la página */
+            .overflow-x-auto {
+                overflow-x: visible !important; /* Deshabilita el scroll horizontal en impresión */
+            }
+        }
+
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="container">
+        <h1 class="text-5xl font-extrabold text-center mb-10 text-gray-800 tracking-tight">
+            📊 Parte de Personal A-1 <span class="text-indigo-600">Base Ham</span>
+        </h1>
+        <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
+            Este es el **Parte Principal** que consolida el total del personal de todas las secciones.
+        </p>
+
+        <!-- Sección de Botones de Partes -->
+        <div class="mb-10 p-6 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl shadow-inner border border-blue-200">
+            <h2 class="text-2xl font-bold mb-6 text-indigo-700 text-center">Gestionar Partes Individuales</h2>
+            <div class="flex flex-wrap justify-center gap-4">
+                <button class="part-button" data-part-id="helicopteros">🚁 Parte Helicópteros</button>
+                <button class="part-button" data-part-id="especialista">🛠️ Parte Especialista</button>
+                <button class="part-button" data-part-id="oficiales">🎖️ Parte Oficiales</button>
+                <button class="part-button" data-part-id="alafija">✈️ Parte Ala Fija</button>
+                <button class="part-button" data-part-id="auxiliares">🧑‍✈️ Parte Auxiliares</button> <!-- Nuevo botón -->
+            </div>
+            <p class="text-center text-gray-500 text-sm mt-4">
+                (Haz clic en cada botón para ir a la página de entrada de datos de la parte correspondiente.)
+            </p>
+        </div>
+
+        <!-- Sección de Resumen Consolidado (Total General de TODAS las partes) -->
+        <div class="p-8 bg-white rounded-xl shadow-lg border border-gray-100 mb-10">
+            <h2 class="text-3xl font-bold mb-8 text-gray-700 text-center">Resumen Consolidado de Todo el Personal</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-indigo-600">
+                        <tr>
+                            <th class="px-6 py-4">Estado</th>
+                            <th class="px-6 py-4 text-center">Total Consolidado</th>
+                            <th class="px-6 py-4">Notas Consolidadas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="consolidated-summary-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Las filas con los totales consolidados se insertarán aquí con JavaScript -->
+                    </tbody>
+                    <tfoot class="bg-emerald-500">
+                        <tr>
+                            <td class="px-6 py-4">Total General (Consolidado)</td>
+                            <td id="overall-total" class="px-6 py-4 text-center">0</td>
+                            <td class="px-6 py-4"></td> <!-- Celda vacía -->
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <p id="no-consolidated-data-message" class="text-center mt-8 text-xl">
+                ✨ ¡Cargando datos consolidados... o ingresa cantidades en las partes!
+            </p>
+        </div>
+
+        <!-- Nueva Sección de Acciones del Reporte -->
+        <div class="mb-10 p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-inner border border-purple-200">
+            <h2 class="text-2xl font-bold mb-6 text-purple-700 text-center">Acciones del Reporte</h2>
+            <div class="flex flex-wrap justify-center gap-4">
+                <button id="print-button" class="action-button bg-green-600 hover:bg-green-700">🖨️ Imprimir Reporte</button>
+                <button id="export-excel-button" class="action-button bg-blue-600 hover:bg-blue-700">📄 Exportar a Excel</button>
+            </div>
+        </div>
+
+        <!-- Sección para mostrar el ID de Usuario (para depuración y pruebas de múltiples usuarios) -->
+        <div class="text-center text-gray-500 text-sm mt-8">
+            ID de Usuario (para depuración): <span id="user-id-display" class="font-mono text-gray-700 break-all">Cargando...</span>
+        </div>
+    </div>
+
+    <!-- Modal personalizado para edición de notas (se mantiene por si se necesita para otras funcionalidades futuras) -->
+    <div id="custom-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-title" class="font-extrabold"></h3>
+            
+            <textarea id="modal-input-note" placeholder="Escribe aquí tu nota..." class="w-full"></textarea>
+
+            <div class="flex justify-center mt-6">
+                <button id="modal-confirm-button" class="bg-indigo-600 text-white mr-4">Guardar Nota</button>
+                <button id="modal-cancel-button" class="bg-gray-300 text-gray-800">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
+        // *** CONFIGURACIÓN DE FIREBASE PROPORCIONADA POR EL USUARIO ***
+        const firebaseConfig = {
+            apiKey: "AIzaSyBisvGozOBQ88dfY5KPC2mYlYc-qmZfSB4",
+            authDomain: "parte-dca91.firebaseapp.com",
+            projectId: "parte-dca91",
+            storageBucket: "parte-dca91.firebasestorage.app",
+            messagingSenderId: "267969738051",
+            appId: "1:267969738051:web:1cbf9f6b907fc787782bf6",
+            measurementId: "G-3938E048HW"
+        };
+        const appId = firebaseConfig.appId; // Usamos el appId de tu configuración
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // ***************************************************************
+
+        let db;
+        let auth;
+        let userId; // El UID del usuario autenticado
+        let currentConsolidatedData = {}; // Variable global para almacenar los datos consolidados
+
+        // Definición de los estados del personal
+        const staffStatuses = [
+            { value: "disponible", label: "Disponible" },
+            { value: "estudiando en el pais", label: "Estudiando en el País" },
+            { value: "estudiando en el extranjero", label: "Estudiando en el Extranjero" },
+            { value: "vacaciones", label: "Vacaciones" },
+            { value: "asignado", label: "Asignado" },
+            { value: "servicio", label: "Servicio" },
+            { value: "pendiente de vuelo", label: "Pendiente de Vuelo" },
+            { value: "mision pais", label: "Misión País" },
+            { value: "mision ciudad", label: "Misión Ciudad" },
+            { value: "clinica", label: "Clínica" },
+            { value: "hospital militar", label: "Hospital Militar" },
+            { value: "libre", label: "Libre" },
+            { value: "faltistas", label: "Faltistas" },
+            { value: "desertor", label: "Desertor" }
+        ];
+
+        // --- Elementos del DOM ---
+        const consolidatedSummaryTableBody = document.getElementById('consolidated-summary-table-body');
+        const overallTotal = document.getElementById('overall-total');
+        const noConsolidatedDataMessage = document.getElementById('no-consolidated-data-message');
+        const userIdDisplay = document.getElementById('user-id-display');
+
+        // Modal elements (se mantienen por si se necesitan, aunque no se usan directamente para esta vista)
+        const customModalOverlay = document.getElementById('custom-modal-overlay');
+        const modalTitle = document.getElementById('modal-title');
+        const modalInputNote = document.getElementById('modal-input-note');
+        const modalConfirmButton = document.getElementById('modal-confirm-button');
+        const modalCancelButton = document.getElementById('modal-cancel-button');
+
+        // Buttons for new actions
+        const printButton = document.getElementById('print-button');
+        const exportExcelButton = document.getElementById('export-excel-button');
+
+
+        /**
+         * Muestra el modal personalizado en modo de edición de nota.
+         * En esta página principal, este modal no se usará, pero la función se mantiene
+         * para evitar errores si otras partes la llaman por error o para futura expansión.
+         * @param {string} title - Título del modal.
+         * @param {Object} [initialValues={}] - Objeto con valores iniciales (e.g., { note: '...' }).
+         * @returns {Promise<string|boolean>} - Promesa que resuelve con la nota editada o false si se cancela.
+         */
+        function showNoteModal(title, initialValues = {}) {
+            return new Promise((resolve) => {
+                console.log("showNoteModal llamado en la página principal (no funcional para esta vista).");
+                modalTitle.textContent = title;
+                modalInputNote.value = initialValues.note || '';
+                modalInputNote.classList.remove('hidden'); 
+                customModalOverlay.classList.add('visible');
+                modalInputNote.focus();
+
+                const confirmHandler = () => {
+                    hideCustomModal();
+                    resolve(modalInputNote.value);
+                    modalConfirmButton.removeEventListener('click', confirmHandler);
+                    modalCancelButton.removeEventListener('click', cancelHandler);
+                };
+
+                const cancelHandler = () => {
+                    hideCustomModal();
+                    resolve(false);
+                    modalConfirmButton.removeEventListener('click', confirmHandler);
+                    modalCancelButton.removeEventListener('click', cancelHandler);
+                };
+
+                modalConfirmButton.addEventListener('click', confirmHandler);
+                modalCancelButton.addEventListener('click', cancelHandler);
+            });
+        }
+
+        /** Oculta el modal personalizado. */
+        function hideCustomModal() {
+            customModalOverlay.classList.remove('visible');
+        }
+
+        /**
+         * Renderiza la tabla de resumen consolidado de TODAS las partes, incluyendo notas.
+         * @param {Object} consolidatedData - Objeto con los conteos sumados y notas de todos los estados.
+         * Ej: { "disponible": { total: 50, notes: [{ part: "Helicópteros", note: "..." }] } }
+         */
+        function renderConsolidatedSummaryTable(consolidatedData) {
+            consolidatedSummaryTableBody.innerHTML = '';
+            let overallTotalValue = 0;
+
+            staffStatuses.forEach(status => {
+                const totalCountForStatus = consolidatedData[status.value]?.total || 0;
+                const notesForStatus = consolidatedData[status.value]?.notes || [];
+                overallTotalValue += totalCountForStatus;
+
+                // Crear HTML para las notas
+                let notesHtml = '';
+                if (notesForStatus.length > 0) {
+                    notesHtml = notesForStatus.map(noteObj => `
+                        <div class="text-xs text-gray-600 mb-1 last:mb-0 p-2 bg-blue-50 rounded-md border border-blue-100 shadow-sm">
+                            <span class="font-semibold text-blue-800">${noteObj.part}:</span> ${noteObj.note}
+                        </div>
+                    `).join('');
+                } else {
+                    notesHtml = `<span class="text-gray-400 text-sm">Sin notas.</span>`;
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-base font-medium text-gray-800">${status.label}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-base text-center">${totalCountForStatus}</td>
+                    <td class="px-6 py-4 text-left align-top">
+                        <div class="flex flex-col gap-2">
+                            ${notesHtml}
+                        </div>
+                    </td>
+                `;
+                consolidatedSummaryTableBody.appendChild(row);
+            });
+
+            overallTotal.textContent = overallTotalValue;
+
+            if (overallTotalValue === 0 && Object.values(consolidatedData).every(s => s.total === 0 && s.notes.length === 0)) {
+                noConsolidatedDataMessage.classList.remove('hidden');
+            } else {
+                noConsolidatedDataMessage.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Imprime el contenido de la página.
+         */
+        function printConsolidatedReport() {
+            window.print();
+        }
+
+        /**
+         * Exporta los datos consolidados a un archivo CSV (compatible con Excel).
+         */
+        function exportConsolidatedToExcel() {
+            if (Object.keys(currentConsolidatedData).length === 0 || staffStatuses.every(s => currentConsolidatedData[s.value]?.total === 0 && currentConsolidatedData[s.value]?.notes.length === 0)) {
+                alert("No hay datos para exportar.");
+                return;
+            }
+
+            // Usar \uFEFF para el Byte Order Mark (BOM) para asegurar la correcta codificación UTF-8 en Excel
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
+            let header = ["Estado", "Total Consolidado", "Notas Consolidadas"];
+            csvContent += header.map(h => `"${h.replace(/"/g, '""')}"`).join(";") + "\n"; // Usar punto y coma como separador y asegurar comillas
+
+            staffStatuses.forEach(status => {
+                const totalCount = currentConsolidatedData[status.value]?.total || 0;
+                const notes = currentConsolidatedData[status.value]?.notes || [];
+
+                // Formatear las notas para una sola celda CSV, separadas por salto de línea y entrecomilladas.
+                let formattedNotes = notes.map(noteObj => `${noteObj.part}: ${noteObj.note}`).join("\n");
+                
+                // Si la nota contiene comas, punto y comas, saltos de línea o comillas, se debe encerrar en comillas dobles y escapar las comillas dobles internas
+                if (formattedNotes.includes(",") || formattedNotes.includes(";") || formattedNotes.includes("\n") || formattedNotes.includes('"')) {
+                    formattedNotes = `"${formattedNotes.replace(/"/g, '""')}"`; 
+                } else {
+                    formattedNotes = `"${formattedNotes}"`; // Siempre entrecomillar para consistencia, incluso si está vacío o no contiene caracteres especiales
+                }
+               
+                const row = [
+                    `"${status.label.replace(/"/g, '""')}"`, // Escapar comillas en el label del estado
+                    totalCount,
+                    formattedNotes
+                ].join(";");
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "reporte_personal_consolidado.csv");
+            document.body.appendChild(link); // Requerido para Firefox
+            link.click();
+            document.body.removeChild(link); // Limpiar el DOM
+        }
+
+
+        // --- Inicialización de Firebase y Listener de Datos ---
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            // Authentication
+            if (initialAuthToken) {
+                try {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("Autenticación con token personalizada exitosa.");
+                } catch (error) {
+                    console.error("Error al autenticar con token personalizada:", error);
+                    await signInAnonymously(auth);
+                }
+            } else {
+                await signInAnonymously(auth);
+                console.log("Inicio de sesión anónimo exitoso.");
+            }
+
+            // Once authenticated, get the user ID and listen for changes
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                    userIdDisplay.textContent = userId;
+                    console.log("Usuario autenticado. UID:", userId);
+
+                    // --- Escuchar la colección de reportes públicos ---
+                    const reportsCollectionRef = collection(db, `artifacts/${appId}/public/data/reports`);
+
+                    onSnapshot(reportsCollectionRef, (querySnapshot) => {
+                        let tempConsolidatedData = {}; // Objeto temporal para almacenar totales y notas por estado
+
+                        // Inicializar tempConsolidatedData para todos los estados
+                        staffStatuses.forEach(status => {
+                            tempConsolidatedData[status.value] = {
+                                total: 0,
+                                notes: [] // Array para almacenar objetos { partName: string, note: string }
+                            };
+                        });
+
+                        querySnapshot.forEach((docSnap) => {
+                            const partId = docSnap.id; 
+                            const partData = docSnap.data();
+                            
+                            // Mapear partId a un nombre legible
+                            let displayPartName = partId.replace('_report', '').replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                            // Casos especiales para nombres de partes si los necesitas
+                            if (partId === 'main_office_report') {
+                                displayPartName = 'Oficina Principal';
+                            } else if (partId === 'helicopteros_report') { // Asegurarse de que coincida con el ID real del documento
+                                displayPartName = 'Helicópteros';
+                            } else if (partId === 'especialista_report') {
+                                displayPartName = 'Especialista';
+                            } else if (partId === 'oficiales_report') {
+                                displayPartName = 'Oficiales';
+                            } else if (partId === 'alafija_report') {
+                                displayPartName = 'Ala Fija';
+                            } else if (partId === 'auxiliares_report') { // Nuevo caso para auxiliares
+                                displayPartName = 'Auxiliares';
+                            }
+
+
+                            staffStatuses.forEach(status => {
+                                const count = partData[status.value]?.count || 0;
+                                const note = partData[status.value]?.note || '';
+
+                                tempConsolidatedData[status.value].total += count;
+
+                                if (note.trim() !== '') {
+                                    tempConsolidatedData[status.value].notes.push({
+                                        part: displayPartName,
+                                        note: note.trim()
+                                    });
+                                }
+                            });
+                        });
+                        
+                        // Actualizar la variable global
+                        currentConsolidatedData = tempConsolidatedData;
+
+                        // Renderizar la tabla de resumen consolidado (total de todas las partes)
+                        renderConsolidatedSummaryTable(currentConsolidatedData);
+
+                    }, (error) => {
+                        console.error("Error al escuchar la colección de reportes de Firestore:", error);
+                    });
+
+                } else {
+                    console.log("Usuario no autenticado.");
+                    userIdDisplay.textContent = "No autenticado";
+                }
+            });
+
+            // Añadir funcionalidad a los botones de acción
+            printButton.addEventListener('click', printConsolidatedReport);
+            exportExcelButton.addEventListener('click', exportConsolidatedToExcel);
+
+            // Añadir funcionalidad a los botones de partes
+            document.querySelectorAll('.part-button').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const partId = button.dataset.partId;
+                    let pageName = '';
+                    switch (partId) {
+                        case 'helicopteros': pageName = 'partehelicoteros.html'; break; 
+                        case 'especialista': pageName = 'parteespe.html'; break;
+                        case 'oficiales': pageName = 'parteofi.html'; break;
+                        case 'alafija': pageName = 'partealafi.html'; break;
+                        case 'auxiliares': pageName = 'pareteauxiliares.html'; break; // Nueva ruta para el botón de auxiliares
+                        default: return; // No hacer nada si el partId no coincide
+                    }
+                    if (pageName) { // Solo redirigir si se encontró una página válida
+                        window.location.href = pageName; 
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parte de Personal: Auxiliares</title>
+    <!-- Tailwind CSS CDN para un estilo moderno y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Animación de fondo sutil para un toque moderno */
+        @keyframes backgroundPan {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background: linear-gradient(135deg, #e0f2fe, #f0f8ff, #e0f2fe); /* Degradado suave */
+            background-size: 200% 200%; /* Tamaño más grande para la animación */
+            animation: backgroundPan 20s ease infinite; /* Animación de movimiento lento */
+            color: #334155;
+            min-height: 100vh; /* Asegura que la animación ocupe toda la altura */
+            display: flex; /* Para centrar el contenido verticalmente si es más pequeño */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Contenedor principal estilizado como una tarjeta con neumorfismo suave */
+        .container {
+            max-width: 800px; /* Ancho ajustado para la página de entrada de datos */
+            margin: 2rem auto; /* Ajuste el margen ya que el body es flex */
+            padding: 2.8rem; /* Más padding interno */
+            background-color: #ffffff;
+            border-radius: 1.8rem; /* Bordes muy redondeados */
+            /* Sombras tipo neumorfismo suave */
+            box-shadow: 10px 10px 30px rgba(174, 174, 192, 0.4), 
+                        -10px -10px 30px rgba(255, 255, 255, 0.7);
+            border: none; /* Elimina el borde anterior */
+            transition: transform 0.3s ease-in-out; /* Transición para un ligero hover */
+        }
+        .container:hover {
+            transform: translateY(-5px); /* Efecto de elevación al pasar el ratón */
+        }
+
+        /* Estilos para inputs numéricos */
+        input[type="number"] {
+            border-radius: 0.8rem; /* Más redondeado */
+            padding: 0.9rem 1.3rem; /* Más padding */
+            border: 1px solid #e2e8f0; /* Borde más claro */
+            background-color: #f7fafc; /* Fondo ligeramente grisáceo */
+            text-align: center;
+            width: 120px; /* Ancho ajustable */
+            -moz-appearance: textfield;
+            transition: all 0.3s ease-in-out; /* Transición más suave y larga */
+            font-weight: 500;
+            color: #1f2937;
+            /* Sombra interna sutil para un efecto "hundido" */
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.8);
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #6366f1; /* Morado/índigo al enfocar */
+            box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.3), /* Anillo de enfoque más pronunciado */
+                        inset 2px 2px 5px rgba(0, 0, 0, 0.05); /* Mantener sombra interna */
+            background-color: #ffffff; /* Fondo blanco al enfocar */
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Estilos de tabla */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 1.5rem; /* Bordes muy redondeados para toda la tabla */
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.07); /* Sombra más pronunciada para la tabla */
+            background-color: #ffffff; /* Asegurar fondo blanco */
+        }
+        th, td {
+            text-align: left;
+            padding: 1.4rem 1.7rem; /* Más padding para celdas */
+            border-bottom: 1px solid #edf2f7; /* Línea divisoria muy suave */
+        }
+        th {
+            background: linear-gradient(45deg, #4f46e5, #6366f1); /* Degradado índigo para encabezados */
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra de texto más fuerte */
+            font-size: 1rem; /* Tamaño de fuente ligeramente ajustado */
+            letter-spacing: 0.06em; /* Espaciado de letras */
+            text-transform: uppercase;
+        }
+        /* Bordes redondeados para las esquinas del thead */
+        thead tr:first-child th:first-child { border-top-left-radius: 1.5rem; }
+        thead tr:first-child th:last-child { border-top-right-radius: 1.5rem; }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr {
+            transition: all 0.25s ease-in-out; /* Transición para hover de fila */
+        }
+        tbody tr:hover {
+            background-color: #f0f4f8; /* Fondo más oscuro al pasar el ratón */
+            transform: scale(1.01); /* Ligerísimo zoom */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); /* Sombra al pasar el ratón */
+        }
+        tbody tr:nth-child(even) { /* Cebra para filas, ligeramente más oscuro */
+            background-color: #f7f9fb;
+        }
+
+        /* Estilos para la fila del total */
+        tfoot tr {
+            background: linear-gradient(45deg, #10b981, #34d399); /* Degradado verde esmeralda para el total */
+            font-weight: bold;
+            color: #ffffff;
+            font-size: 1.35rem; /* Fuente más grande */
+            box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.15); /* Sombra más fuerte hacia arriba */
+        }
+        /* Bordes redondeados para las esquinas del tfoot */
+        tfoot tr:last-child td:first-child { border-bottom-left-radius: 1.5rem; }
+        tfoot tr:last-child td:last-child { border-bottom-right-radius: 1.5rem; }
+
+        /* Mensaje de "no hay datos" */
+        #no-data-message {
+            font-style: italic;
+            color: #94a3b8; /* Gris más claro */
+            margin-top: 2rem;
+            font-size: 1.2rem; /* Más grande */
+            text-align: center;
+        }
+
+        /* Botones generales */
+        button {
+            border-radius: 1rem; /* Botones muy redondeados */
+            font-weight: 700;
+            padding: 1.1rem 2.5rem; /* Más padding */
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efecto de rebote en botones */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Sombra en botones */
+            font-size: 1.1rem; /* Botón de texto ligeramente más grande */
+        }
+        button:hover {
+            transform: translateY(-5px); /* Efecto de elevación más notorio */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Sombra más fuerte al pasar el ratón */
+        }
+        button.bg-indigo-600:hover {
+            background-color: #4338ca;
+        }
+        button.bg-gray-300:hover {
+            background-color: #9ca3af; /* Gris un poco más oscuro y saturado */
+        }
+        .bg-indigo-600 { background-color: #4f46e5; }
+        .text-white { color: #ffffff; }
+        .bg-gray-300 { background-color: #d1d5db; }
+        .text-gray-800 { color: #1f2937; }
+
+        /* Estilos para el modal personalizado */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75); /* Fondo más oscuro y opaco */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.4s ease-in-out; /* Transición más larga para el overlay */
+        }
+        .modal-overlay.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 3.5rem; /* Más padding */
+            border-radius: 2rem; /* Bordes muy redondeados */
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35); /* Sombra muy dramática */
+            max-width: 650px; /* Un poco más ancho */
+            width: 90%;
+            text-align: center;
+            transform: translateY(-50px) scale(0.9); /* Efecto de entrada más pronunciado y ligeramente encogido */
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease-out; /* Rebote y opacidad */
+        }
+        .modal-overlay.visible .modal-content {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+        .modal-content h3 {
+            font-size: 2.5rem; /* Título de modal más grande */
+            color: #4f46e5;
+            margin-bottom: 1.8rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .modal-content textarea {
+            min-height: 160px; /* Mayor altura */
+            resize: vertical;
+            transition: all 0.3s ease-in-out;
+            border-color: #e2e8f0; /* Borde más claro */
+            border-radius: 1rem; /* Más redondeado */
+            font-size: 1.05rem; /* Tamaño de fuente ligeramente más grande */
+            line-height: 1.6;
+            padding: 1.2rem; /* Más padding */
+            background-color: #f7fafc; /* Fondo ligeramente grisáceo */
+            box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.03); /* Sombra interna sutil */
+        }
+        .modal-content textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.3);
+            background-color: #ffffff;
+        }
+        .modal-content button {
+            border-radius: 1rem; /* Botones muy redondeados */
+            font-weight: 700;
+            padding: 1.1rem 2.5rem; /* Más padding */
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efecto de rebote en botones */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Sombra en botones */
+            font-size: 1.1rem; /* Botón de texto ligeramente más grande */
+        }
+        .modal-content button:hover {
+            transform: translateY(-5px); /* Efecto de elevación más notorio */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Sombra más fuerte al pasar el ratón */
+        }
+        .modal-content button.bg-indigo-600:hover {
+            background-color: #4338ca;
+        }
+        .modal-content button.bg-gray-300:hover {
+            background-color: #9ca3af; /* Gris un poco más oscuro y saturado */
+        }
+
+        /* Estilos para el área de notas en la tabla */
+        .note-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #ffffff; /* Fondo blanco */
+            border-radius: 1rem; /* Más redondeado */
+            padding: 0.9rem 1.2rem;
+            min-height: 58px; /* Mayor altura mínima */
+            border: 1px solid #eef2f7;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05), -2px -2px 8px rgba(255, 255, 255, 0.8); /* Sombra ligera tipo neumorfismo */
+        }
+        .note-display:hover {
+            background-color: #f8fafc; /* Color de fondo al pasar el ratón */
+            border-color: #e2e8f0; /* Borde más oscuro al pasar el ratón */
+            transform: translateY(-3px); /* Efecto de elevación más notorio */
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.08), -5px -5px 15px rgba(255, 255, 255, 0.6); /* Sombra al pasar el ratón */
+        }
+        .note-display span {
+            color: #475569;
+            font-size: 1rem; /* Tamaño de fuente ligeramente más grande para la nota */
+            line-height: 1.4;
+        }
+        .edit-pencil-icon {
+            width: 22px; /* Icono más grande */
+            height: 22px;
+            fill: #94a3b8; /* Color de icono gris más suave */
+            transition: fill 0.3s ease-in-out;
+        }
+        .note-display:hover .edit-pencil-icon {
+            fill: #4f46e5; /* Icono se vuelve índigo al pasar el ratón */
+        }
+        
+        /* Botón para volver a la página principal */
+        .back-button {
+            @apply flex items-center justify-center px-6 py-3 rounded-xl bg-gray-200 text-gray-700 font-bold shadow-md transition duration-300 ease-in-out transform;
+            width: fit-content;
+            margin-top: 2rem;
+        }
+        .back-button:hover {
+            @apply bg-gray-300 scale-105;
+        }
+
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-center mb-8 text-gray-800 tracking-tight">
+            🧑‍✈️ Parte de Personal: <span class="text-indigo-600">Auxiliares</span>
+        </h1>
+        <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
+            Utiliza esta sección para reportar la cantidad de personal y notas específicas para la **Parte Auxiliares**.
+        </p>
+
+        <!-- Formulario de Entrada de Datos -->
+        <div class="p-8 bg-white rounded-xl shadow-lg border border-gray-100 mb-10">
+            <h2 class="text-2xl font-bold mb-6 text-gray-700 text-center">Entrada de Datos del Personal</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-indigo-600">
+                        <tr>
+                            <th class="px-6 py-4">Estado</th>
+                            <th class="px-6 py-4 text-center">Cantidad</th>
+                            <th class="px-6 py-4">Notas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auxiliares-part-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Filas de entrada de datos se insertarán aquí con JavaScript -->
+                    </tbody>
+                    <tfoot class="bg-emerald-500">
+                        <tr>
+                            <td class="px-6 py-4">Total de Auxiliares</td>
+                            <td id="auxiliares-total" class="px-6 py-4 text-center">0</td>
+                            <td class="px-6 py-4"></td> <!-- Celda vacía -->
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <p id="no-data-message" class="text-center mt-8 hidden">
+                ¡No hay datos para esta parte aún!
+            </p>
+            <!-- Eliminado el botón de guardar -->
+        </div>
+
+        <!-- Sección para mostrar el ID de Usuario (para depuración y pruebas de múltiples usuarios) -->
+        <div class="text-center text-gray-500 text-sm mt-8">
+            ID de Usuario (para depuración): <span id="user-id-display" class="font-mono text-gray-700 break-all">Cargando...</span>
+        </div>
+
+        <!-- Eliminado el botón para volver a la página principal -->
+    </div>
+
+    <!-- Modal personalizado para edición de notas -->
+    <div id="custom-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-title" class="font-extrabold"></h3>
+            
+            <textarea id="modal-input-note" placeholder="Escribe aquí tu nota..." class="w-full"></textarea>
+
+            <div class="flex justify-center mt-6">
+                <button id="modal-confirm-button" class="bg-indigo-600 text-white mr-4">Guardar Nota</button>
+                <button id="modal-cancel-button" class="bg-gray-300 text-gray-800">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
+        // *** CONFIGURACIÓN DE FIREBASE PROPORCIONADA POR EL USUARIO ***
+        const firebaseConfig = {
+            apiKey: "AIzaSyBisvGozOBQ88dfY5KPC2mYlYc-qmZfSB4",
+            authDomain: "parte-dca91.firebaseapp.com",
+            projectId: "parte-dca91",
+            storageBucket: "parte-dca91.firebasestorage.app",
+            messagingSenderId: "267969738051",
+            appId: "1:267969738051:web:1cbf9f6b907fc787782bf6",
+            measurementId: "G-3938E048HW"
+        };
+        const appId = firebaseConfig.appId; // Usamos el appId de tu configuración
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // ***************************************************************
+
+        let db;
+        let auth;
+        let userId; 
+
+        // ID único para este reporte de parte de auxiliares
+        const MY_PART_REPORT_ID = "auxiliares_report"; 
+
+        // Definición de los estados del personal
+        const staffStatuses = [
+            { value: "disponible", label: "Disponible" },
+            { value: "estudiando en el pais", label: "Estudiando en el País" },
+            { value: "estudiando en el extranjero", label: "Estudiando en el Extranjero" },
+            { value: "vacaciones", label: "Vacaciones" },
+            { value: "asignado", label: "Asignado" },
+            { value: "servicio", label: "Servicio" },
+            { value: "pendiente de vuelo", label: "Pendiente de Vuelo" },
+            { value: "mision pais", label: "Misión País" },
+            { value: "mision ciudad", label: "Misión Ciudad" },
+            { value: "clinica", label: "Clínica" },
+            { value: "hospital militar", label: "Hospital Militar" },
+            { value: "libre", label: "Libre" },
+            { value: "faltistas", label: "Faltistas" },
+            { value: "desertor", label: "Desertor" }
+        ];
+
+        // --- Elementos del DOM ---
+        const auxiliaresPartTableBody = document.getElementById('auxiliares-part-table-body');
+        const auxiliaresTotal = document.getElementById('auxiliares-total');
+        const noDataMessage = document.getElementById('no-data-message');
+        // Eliminada la referencia a saveButton
+        const userIdDisplay = document.getElementById('user-id-display');
+        // Eliminada la referencia a backToMainButton
+
+        // Modal elements
+        const customModalOverlay = document.getElementById('custom-modal-overlay');
+        const modalTitle = document.getElementById('modal-title');
+        const modalInputNote = document.getElementById('modal-input-note');
+        const modalConfirmButton = document.getElementById('modal-confirm-button');
+        const modalCancelButton = document.getElementById('modal-cancel-button');
+
+        // Estado actual de los conteos y notas de esta parte
+        let currentPartData = {};
+
+        /**
+         * Muestra el modal personalizado para edición de nota.
+         * @param {string} title - Título del modal.
+         * @param {Object} [initialValues={}] - Objeto con valores iniciales (e.g., { note: '...' }).
+         * @returns {Promise<string|boolean>} - Promesa que resuelve con la nota editada o false si se cancela.
+         */
+        function showNoteModal(title, initialValues = {}) {
+            return new Promise((resolve) => {
+                modalTitle.textContent = title;
+                modalInputNote.value = initialValues.note || '';
+                customModalOverlay.classList.add('visible');
+                modalInputNote.focus();
+
+                const confirmHandler = () => {
+                    hideCustomModal();
+                    resolve(modalInputNote.value);
+                    modalConfirmButton.removeEventListener('click', confirmHandler);
+                    modalCancelButton.removeEventListener('click', cancelHandler);
+                };
+
+                const cancelHandler = () => {
+                    hideCustomModal();
+                    resolve(false);
+                    modalConfirmButton.removeEventListener('click', confirmHandler);
+                    modalCancelButton.removeEventListener('click', cancelHandler);
+                };
+
+                modalConfirmButton.addEventListener('click', confirmHandler);
+                modalCancelButton.addEventListener('click', cancelHandler);
+            });
+        }
+
+        /** Oculta el modal personalizado. */
+        function hideCustomModal() {
+            customModalOverlay.classList.remove('visible');
+        }
+
+        /**
+         * Renderiza la tabla de entrada de datos de la parte de auxiliares.
+         * @param {Object} partData - Objeto con los conteos y notas de cada estado.
+         */
+        function renderAuxiliaresPartTable(partData) {
+            auxiliaresPartTableBody.innerHTML = '';
+            let totalAuxiliares = 0;
+
+            staffStatuses.forEach(status => {
+                const count = partData[status.value]?.count || 0;
+                const note = partData[status.value]?.note || '';
+                totalAuxiliares += count;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-base font-medium text-gray-800">${status.label}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-base text-center">
+                        <input type="number" 
+                                class="w-24 text-center rounded-lg border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                                value="${count}" 
+                                min="0" 
+                                data-status="${status.value}">
+                    </td>
+                    <td class="px-6 py-4 text-left">
+                        <div class="note-display" data-status="${status.value}" data-note="${note}">
+                            <span class="truncate">${note || 'Añadir nota...'}</span>
+                            <svg class="edit-pencil-icon ml-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M14.06 9.06L9 14.12l-1.63-1.63a.75.75 0 00-1.06 1.06l2.16 2.16c.29.29.77.29 1.06 0L15.12 10.12a.75.75 0 00-1.06-1.06zM17.5 4.75a2.25 2.25 0 00-2.25 2.25v2.25a.75.75 0 001.5 0V7a.75.75 0 01.75-.75h2.25a.75.75 0 000-1.5H17.5zM6.75 4.75a.75.75 0 000 1.5h2.25a.75.75 0 01.75.75v2.25a.75.75 0 001.5 0V7a2.25 2.25 0 00-2.25-2.25H6.75zM17.5 17.25a.75.75 0 000 1.5h-2.25a.75.75 0 01-.75-.75v-2.25a.75.75 0 00-1.5 0V17a2.25 2.25 0 002.25 2.25h2.25a.75.75 0 000-1.5H17.5zM6.75 17.25a2.25 2.25 0 002.25 2.25h2.25a.75.75 0 000-1.5h-2.25a.75.75 0 01-.75-.75v-2.25a.75.75 0 00-1.5 0V17.25zM12 10.25a.75.75 0 00-.75.75v2.25a.75.75 0 001.5 0V11a.75.75 0 00-.75-.75z" />
+                            </svg>
+                        </div>
+                    </td>
+                `;
+                auxiliaresPartTableBody.appendChild(row);
+            });
+
+            auxiliaresTotal.textContent = totalAuxiliares;
+
+            if (totalAuxiliares === 0) {
+                noDataMessage.classList.remove('hidden');
+            } else {
+                noDataMessage.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Guarda los conteos y notas de los auxiliares en Firestore.
+         * @param {Object} countsData - Objeto con los conteos y notas de cada estado.
+         */
+        async function saveAuxiliaresCounts(countsData) {
+            if (!userId) {
+                console.error("No hay ID de usuario. No se puede guardar.");
+                return;
+            }
+            try {
+                // Los reportes son públicos, por eso la ruta es /public/data/reports
+                const docRef = doc(db, `artifacts/${appId}/public/data/reports`, MY_PART_REPORT_ID);
+                await setDoc(docRef, countsData);
+                console.log("Datos de auxiliares guardados con éxito.");
+                // Eliminado el alert para guardar datos
+            } catch (error) {
+                console.error("Error al guardar los datos de auxiliares:", error);
+                // Eliminado el alert de error al guardar datos
+            }
+        }
+
+        // --- Inicialización de Firebase y Listener de Datos ---
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            // Authentication
+            if (initialAuthToken) {
+                try {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("Autenticación con token personalizada exitosa.");
+                } catch (error) {
+                    console.error("Error al autenticar con token personalizada:", error);
+                    await signInAnonymously(auth);
+                }
+            } else {
+                await signInAnonymously(auth);
+                console.log("Inicio de sesión anónimo exitoso.");
+            }
+
+            // Once authenticated, get the user ID and listen for changes
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                    userIdDisplay.textContent = userId;
+                    console.log("Usuario autenticado. UID:", userId);
+
+                    // Escuchar cambios en el documento de esta parte
+                    const docRef = doc(db, `artifacts/${appId}/public/data/reports`, MY_PART_REPORT_ID);
+                    onSnapshot(docRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            currentPartData = docSnap.data();
+                            renderAuxiliaresPartTable(currentPartData);
+                        } else {
+                            console.log("No existen datos para la parte de auxiliares. Inicializando tabla.");
+                            currentPartData = {}; // Resetear si no hay datos
+                            // Inicializar currentPartData con 0s y notas vacías
+                            staffStatuses.forEach(status => {
+                                currentPartData[status.value] = { count: 0, note: '' };
+                            });
+                            renderAuxiliaresPartTable(currentPartData);
+                        }
+                    }, (error) => {
+                        console.error("Error al escuchar el documento de Firestore:", error);
+                    });
+
+                } else {
+                    console.log("Usuario no autenticado.");
+                    userIdDisplay.textContent = "No autenticado";
+                }
+            });
+
+            // Eliminado el Listener para el botón de guardar
+            auxiliaresPartTableBody.addEventListener('input', () => {
+                const inputs = auxiliaresPartTableBody.querySelectorAll('input[type="number"]');
+                const newData = {};
+                inputs.forEach(input => {
+                    const statusValue = input.dataset.status;
+                    newData[statusValue] = {
+                        count: parseInt(input.value, 10) || 0,
+                        note: currentPartData[statusValue]?.note || '' // Mantener la nota existente
+                    };
+                });
+                saveAuxiliaresCounts(newData); // Guardar automáticamente al cambiar un input
+            });
+
+            // Listener para la edición de notas (delegación de eventos)
+            auxiliaresPartTableBody.addEventListener('click', async (event) => {
+                const noteDisplayDiv = event.target.closest('.note-display');
+                if (noteDisplayDiv) {
+                    const statusValue = noteDisplayDiv.dataset.status;
+                    const initialNote = noteDisplayDiv.dataset.note || '';
+
+                    const newNote = await showNoteModal(`Editar Nota para ${staffStatuses.find(s => s.value === statusValue).label}`, { note: initialNote });
+                    
+                    if (newNote !== false) { // Si el usuario no canceló
+                        currentPartData[statusValue].note = newNote;
+                        noteDisplayDiv.dataset.note = newNote; // Actualizar el dataset para la próxima edición
+                        noteDisplayDiv.querySelector('span').textContent = newNote || 'Añadir nota...';
+                        saveAuxiliaresCounts(currentPartData); // Guardar los cambios automáticamente
+                    }
+                }
+            });
+
+            // Eliminado el Listener para el botón de volver
+        });
+    </script>
+</body>
+</html>
