@@ -49,6 +49,13 @@
             font-size: 1.1em;
             margin-top: 5px;
         }
+        /* Eliminar el estilo .header-logo ya que el logo se mueve */
+        /* .header-logo {
+            display: block;
+            margin: 0 auto 10px auto;
+            max-width: 100px;
+            height: auto;
+        } */
         .section-title {
             background-color: #A9CCE3; /* Color azul medio claro */
             font-weight: bold;
@@ -198,6 +205,8 @@
             justify-content: space-between;
             align-items: center; /* Alinea los elementos verticalmente */
             margin-top: 10px; /* Ajusta el margen superior para más espacio */
+            position: relative; /* Añadido para posicionamiento absoluto del sello */
+            min-height: 100px; /* Asegura espacio para el sello */
         }
         .footer-item {
             display: flex;
@@ -229,6 +238,20 @@
             width: 20px;
             height: 20px;
         }
+
+        /* Estilos para el nuevo sello de la FAH */
+        .stamp-logo {
+            position: absolute;
+            top: 50%; /* Centra verticalmente */
+            left: 10px; /* Ajusta la posición horizontal */
+            transform: translateY(-50%) rotate(-90deg); /* Centra y rota 90 grados a la izquierda */
+            width: 150px; /* Tamaño del sello */
+            height: 150px; /* Tamaño del sello */
+            opacity: 0.5; /* Efecto desvanecido (un poco más negro) */
+            pointer-events: none; /* Permite que los clics pasen a través del sello */
+            z-index: 0; /* Coloca el sello detrás de otro contenido si se superpone */
+        }
+
 
         /* Estilos para el botón de imprimir y guardar */
         .action-button {
@@ -601,12 +624,23 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+            /* Sello en órdenes guardadas para impresión */
+            .saved-order-card .stamp-logo {
+                opacity: 0.3 !important;
+                display: block !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                transform: translateY(-50%) rotate(-90deg) !important; /* Rotación para sellos guardados en impresión */
+                width: 80px !important; /* Tamaño original para sellos guardados en impresión */
+                height: 80px !important; /* Tamaño original para sellos guardados en impresión */
+            }
             /* Nuevos estilos de impresión para el pie de página */
             .footer-section {
                 flex-direction: row !important; /* Vuelve a la fila para impresión */
                 align-items: center !important; /* Alinea los elementos verticalmente */
                 justify-content: space-between !important; /* Espacio entre los elementos */
                 margin-top: 10px !important; /* Espacio superior */
+                min-height: 80px !important; /* Asegura espacio para el sello en impresión */
             }
             .footer-item {
                 display: flex !important;
@@ -657,6 +691,7 @@
             .footer-section {
                 flex-direction: column; /* Apila el label y el área de firma */
                 align-items: flex-start;
+                min-height: 100px; /* Asegura espacio para el sello en móviles */
             }
             .footer-item {
                 flex-direction: column; /* Apila el label y el área de firma */
@@ -672,6 +707,12 @@
             /* Mostrar el mensaje de impresión móvil en pantallas pequeñas */
             .mobile-print-tip {
                 display: block;
+            }
+            .stamp-logo {
+                position: static; /* En móviles, puede ser mejor que no sea absoluto si el espacio es limitado */
+                margin: 20px auto 0 auto; /* Centrarlo si es estático */
+                transform: rotate(-90deg); /* Mantener la rotación de 90 grados a la izquierda */
+                opacity: 0.3; /* Mantener la opacidad más oscura para móviles */
             }
         }
     </style>
@@ -788,6 +829,7 @@
         </div>
 
         <div class="footer-section">
+            <img src="IMG_5195-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
             <div class="footer-item">
                 <span class="footer-label">ENTREGADO POR:</span>
                 <div class="signature-area">
@@ -808,6 +850,7 @@
             </div>
         </div>
         <div class="footer-section">
+           
             <div class="footer-item">
                 <span class="footer-label">RECIBIDO POR:</span>
                 <div class="signature-area">
@@ -930,6 +973,7 @@
         </div>
 
         <div class="footer-section">
+            <img src="IMG_5195-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
             <div class="footer-item">
                 <span class="footer-label">ENTREGADO POR:</span>
                 <div class="signature-area">
@@ -950,6 +994,7 @@
             </div>
         </div>
         <div class="footer-section">
+            <img src="IMG_5194-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
             <div class="footer-item">
                 <span class="footer-label">RECIBIDO POR:</span>
                 <div class="signature-area">
@@ -1311,6 +1356,7 @@
                             card.classList.add('saved-order-card');
 
                             // Construir el HTML de la orden guardada con la estructura de tabla
+                            // Se incluye el sello en la sección del pie de página para las órdenes guardadas también.
                             card.innerHTML = `
                                 <div class="header-title">
                                     <div>FUERZA AEREA HONDUREÑA</div>
@@ -1392,7 +1438,9 @@
                                 <div class="discrepancy-label">Discrepancia:</div>
                                 <div class="discrepancy-content">${order.discrepancia || 'N/A'}</div>
 
-                                <div class="footer-section">
+                                <div class="footer-section" style="position: relative; min-height: 100px;">
+                                    <!-- Si esta orden guardada tiene el sello, se mostrará aquí -->
+                                    <img src="IMG_5195-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
                                     <div class="footer-item">
                                         <span class="footer-label">ENTREGADO POR:</span>
                                         <div class="signature-image-container ${order['firma-entregado'] ? '' : 'empty'}">
@@ -1410,7 +1458,9 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="footer-section">
+                                <div class="footer-section" style="position: relative; min-height: 100px;">
+                                    <!-- Si esta orden guardada tiene el sello, se mostrará aquí -->
+                          <img src="IMG_5195-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
                                     <div class="footer-item">
                                         <span class="footer-label">RECIBIDO POR:</span>
                                         <div class="signature-image-container ${order['firma-recibido'] ? '' : 'empty'}">
