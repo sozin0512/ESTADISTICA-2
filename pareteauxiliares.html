@@ -24,11 +24,13 @@
             display: flex; /* Para centrar el contenido verticalmente si es más pequeño */
             justify-content: center;
             align-items: center;
+            padding: 1rem; /* Añadir padding por defecto para evitar que el contenido toque los bordes */
         }
 
         /* Contenedor principal estilizado como una tarjeta con neumorfismo suave */
         .container {
             max-width: 800px; /* Ancho ajustado para la página de entrada de datos */
+            width: 100%; /* Permite que el contenedor se ajuste */
             margin: 2rem auto; /* Ajuste el margen ya que el body es flex */
             padding: 2.8rem; /* Más padding interno */
             background-color: #ffffff;
@@ -134,30 +136,6 @@
             font-size: 1.2rem; /* Más grande */
             text-align: center;
         }
-
-        /* Botones generales */
-        button {
-            border-radius: 1rem; /* Botones muy redondeados */
-            font-weight: 700;
-            padding: 1.1rem 2.5rem; /* Más padding */
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efecto de rebote en botones */
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Sombra en botones */
-            font-size: 1.1rem; /* Botón de texto ligeramente más grande */
-        }
-        button:hover {
-            transform: translateY(-5px); /* Efecto de elevación más notorio */
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Sombra más fuerte al pasar el ratón */
-        }
-        button.bg-indigo-600:hover {
-            background-color: #4338ca;
-        }
-        button.bg-gray-300:hover {
-            background-color: #9ca3af; /* Gris un poco más oscuro y saturado */
-        }
-        .bg-indigo-600 { background-color: #4f46e5; }
-        .text-white { color: #ffffff; }
-        .bg-gray-300 { background-color: #d1d5db; }
-        .text-gray-800 { color: #1f2937; }
 
         /* Estilos para el modal personalizado */
         .modal-overlay {
@@ -273,16 +251,59 @@
             fill: #4f46e5; /* Icono se vuelve índigo al pasar el ratón */
         }
         
-        /* Botón para volver a la página principal */
-        .back-button {
-            @apply flex items-center justify-center px-6 py-3 rounded-xl bg-gray-200 text-gray-700 font-bold shadow-md transition duration-300 ease-in-out transform;
-            width: fit-content;
-            margin-top: 2rem;
-        }
-        .back-button:hover {
-            @apply bg-gray-300 scale-105;
-        }
+        /* --- MEDIA QUERIES PARA ADAPTACIÓN A MÓVILES --- */
+        @media (max-width: 768px) { /* Para tabletas y móviles */
+            body {
+                padding: 0.5rem; /* Menos padding en los bordes del cuerpo */
+            }
+            .container {
+                margin: 1rem auto; /* Reducir margen superior/inferior */
+                padding: 1.5rem; /* Más compacto en pantallas pequeñas */
+                border-radius: 1rem; /* Bordes menos redondeados para ahorrar espacio */
+                box-shadow: 5px 5px 15px rgba(174, 174, 192, 0.2), 
+                            -5px -5px 15px rgba(255, 255, 255, 0.5); /* Sombra más suave */
+            }
 
+            h1 {
+                font-size: 2.5rem; /* Título más pequeño */
+                margin-bottom: 0.5rem; /* Menos espacio debajo del título */
+            }
+            p {
+                font-size: 0.9rem; /* Párrafos más pequeños */
+                margin-bottom: 1rem; /* Menos espacio debajo del párrafo */
+            }
+
+            /* Ajustes para la tabla en móvil */
+            th, td {
+                padding: 0.8rem 1rem; /* Reducir padding de celdas */
+                font-size: 0.85rem; /* Reducir tamaño de fuente en celdas */
+            }
+            th:nth-child(2), td:nth-child(2) { /* Ajustar la columna de "Cantidad" */
+                text-align: center;
+                width: 70px; /* Un ancho más fijo para la cantidad */
+            }
+            td:nth-child(3) { /* Columna de notas */
+                white-space: normal; /* Permitir que el texto de las notas se ajuste */
+                word-wrap: break-word; /* Romper palabras largas si es necesario */
+            }
+            .note-display {
+                padding: 0.5rem 0.8rem; /* Padding más compacto para las notas individuales */
+                min-height: unset; /* Eliminar altura mínima fija para notas */
+            }
+            .note-display span {
+                font-size: 0.8rem; /* Fuente más pequeña para el texto de la nota */
+            }
+            .edit-pencil-icon {
+                width: 18px; /* Icono más pequeño */
+                height: 18px;
+            }
+            #no-data-message {
+                font-size: 1rem; /* Mensaje de no datos más pequeño */
+            }
+            tfoot tr { /* Total general */
+                font-size: 1.1rem; /* Reducir el tamaño del total general */
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -321,15 +342,12 @@
             <p id="no-data-message" class="text-center mt-8 hidden">
                 ¡No hay datos para esta parte aún!
             </p>
-            <!-- Eliminado el botón de guardar -->
         </div>
 
         <!-- Sección para mostrar el ID de Usuario (para depuración y pruebas de múltiples usuarios) -->
         <div class="text-center text-gray-500 text-sm mt-8">
             ID de Usuario (para depuración): <span id="user-id-display" class="font-mono text-gray-700 break-all">Cargando...</span>
         </div>
-
-        <!-- Eliminado el botón para volver a la página principal -->
     </div>
 
     <!-- Modal personalizado para edición de notas -->
@@ -395,9 +413,7 @@
         const auxiliaresPartTableBody = document.getElementById('auxiliares-part-table-body');
         const auxiliaresTotal = document.getElementById('auxiliares-total');
         const noDataMessage = document.getElementById('no-data-message');
-        // Eliminada la referencia a saveButton
         const userIdDisplay = document.getElementById('user-id-display');
-        // Eliminada la referencia a backToMainButton
 
         // Modal elements
         const customModalOverlay = document.getElementById('custom-modal-overlay');
@@ -504,10 +520,8 @@
                 const docRef = doc(db, `artifacts/${appId}/public/data/reports`, MY_PART_REPORT_ID);
                 await setDoc(docRef, countsData);
                 console.log("Datos de auxiliares guardados con éxito.");
-                // Eliminado el alert para guardar datos
             } catch (error) {
                 console.error("Error al guardar los datos de auxiliares:", error);
-                // Eliminado el alert de error al guardar datos
             }
         }
 
@@ -565,7 +579,7 @@
                 }
             });
 
-            // Eliminado el Listener para el botón de guardar
+            // Listener para el input de cantidades (guardado automático)
             auxiliaresPartTableBody.addEventListener('input', () => {
                 const inputs = auxiliaresPartTableBody.querySelectorAll('input[type="number"]');
                 const newData = {};
@@ -597,7 +611,11 @@
                 }
             });
 
-            // Eliminado el Listener para el botón de volver
+            // Agrega un listener para el evento 'popstate' para detectar la navegación hacia atrás del navegador
+            window.addEventListener('popstate', (event) => {
+                // Redirige a la página principal si el usuario navega hacia atrás
+                window.location.href = 'index.html';
+            });
         });
     </script>
 </body>
