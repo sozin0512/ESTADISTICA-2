@@ -49,6 +49,13 @@
             font-size: 1.1em;
             margin-top: 5px;
         }
+        /* Eliminar el estilo .header-logo ya que el logo se mueve */
+        /* .header-logo {
+            display: block;
+            margin: 0 auto 10px auto;
+            max-width: 100px;
+            height: auto;
+        } */
         .section-title {
             background-color: #A9CCE3; /* Color azul medio claro */
             font-weight: bold;
@@ -198,6 +205,8 @@
             justify-content: space-between;
             align-items: center; /* Alinea los elementos verticalmente */
             margin-top: 10px; /* Ajusta el margen superior para más espacio */
+            position: relative; /* Añadido para posicionamiento absoluto del sello */
+            min-height: 100px; /* Asegura espacio para el sello */
         }
         .footer-item {
             display: flex;
@@ -229,6 +238,20 @@
             width: 20px;
             height: 20px;
         }
+
+        /* Estilos para el nuevo sello de la FAH */
+        .stamp-logo {
+            position: absolute;
+            top: 50%; /* Centra verticalmente */
+            left: 10px; /* Ajusta la posición horizontal */
+            transform: translateY(-50%) rotate(-90deg); /* Centra y rota 90 grados a la izquierda */
+            width: 150px; /* Tamaño del sello */
+            height: 150px; /* Tamaño del sello */
+            opacity: 0.5; /* Efecto desvanecido (un poco más negro) */
+            pointer-events: none; /* Permite que los clics pasen a través del sello */
+            z-index: 0; /* Coloca el sello detrás de otro contenido si se superpone */
+        }
+
 
         /* Estilos para el botón de imprimir y guardar */
         .action-button {
@@ -601,12 +624,23 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+            /* Sello en órdenes guardadas para impresión */
+            .saved-order-card .stamp-logo {
+                opacity: 0.3 !important;
+                display: block !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                transform: translateY(-50%) rotate(-90deg) !important; /* Rotación para sellos guardados en impresión */
+                width: 80px !important; /* Tamaño original para sellos guardados en impresión */
+                height: 80px !important; /* Tamaño original para sellos guardados en impresión */
+            }
             /* Nuevos estilos de impresión para el pie de página */
             .footer-section {
                 flex-direction: row !important; /* Vuelve a la fila para impresión */
                 align-items: center !important; /* Alinea los elementos verticalmente */
                 justify-content: space-between !important; /* Espacio entre los elementos */
                 margin-top: 10px !important; /* Espacio superior */
+                min-height: 80px !important; /* Asegura espacio para el sello en impresión */
             }
             .footer-item {
                 display: flex !important;
@@ -657,6 +691,7 @@
             .footer-section {
                 flex-direction: column; /* Apila el label y el área de firma */
                 align-items: flex-start;
+                min-height: 100px; /* Asegura espacio para el sello en móviles */
             }
             .footer-item {
                 flex-direction: column; /* Apila el label y el área de firma */
@@ -672,6 +707,12 @@
             /* Mostrar el mensaje de impresión móvil en pantallas pequeñas */
             .mobile-print-tip {
                 display: block;
+            }
+            .stamp-logo {
+                position: static; /* En móviles, puede ser mejor que no sea absoluto si el espacio es limitado */
+                margin: 20px auto 0 auto; /* Centrarlo si es estático */
+                transform: rotate(-90deg); /* Mantener la rotación de 90 grados a la izquierda */
+                opacity: 0.3; /* Mantener la opacidad más oscura para móviles */
             }
         }
     </style>
@@ -788,6 +829,7 @@
         </div>
 
         <div class="footer-section">
+            <img src="IMG_5195-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
             <div class="footer-item">
                 <span class="footer-label">ENTREGADO POR:</span>
                 <div class="signature-area">
@@ -808,6 +850,7 @@
             </div>
         </div>
         <div class="footer-section">
+           
             <div class="footer-item">
                 <span class="footer-label">RECIBIDO POR:</span>
                 <div class="signature-area">
@@ -930,6 +973,7 @@
         </div>
 
         <div class="footer-section">
+            <img src="IMG_5195-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
             <div class="footer-item">
                 <span class="footer-label">ENTREGADO POR:</span>
                 <div class="signature-area">
@@ -950,6 +994,7 @@
             </div>
         </div>
         <div class="footer-section">
+            <img src="IMG_5194-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
             <div class="footer-item">
                 <span class="footer-label">RECIBIDO POR:</span>
                 <div class="signature-area">
@@ -962,7 +1007,6 @@
     </div>
 
     <button class="action-button" id="printActiveFormsButton">Imprimir Orden</button>
-    <button class="action-button save-button" id="saveOrderButton">Guardar Orden</button>
     <button class="action-button print-saved-button" id="printSavedOrdersButton">Imprimir Órdenes Guardadas</button>
 
     <div id="messageBox" class="message-box"></div>
@@ -1005,7 +1049,6 @@
         // Elementos de UI
         const messageBox = document.getElementById('messageBox');
         const userIdDisplay = document.getElementById('userIdDisplay');
-        const saveOrderButton = document.getElementById('saveOrderButton');
         const userNameModal = document.getElementById('userNameModal');
         const userNameInput = document.getElementById('userNameInput');
         const confirmUserNameButton = document.getElementById('confirmUserNameButton');
@@ -1020,7 +1063,7 @@
         const mainFormContainer2 = document.getElementById('mainFormContainer2');
         const savedOrdersSection = document.getElementById('savedOrdersSection');
 
-        // Referencias a los nuevos botones de impresión
+        // Referencias a los botones de impresión
         const printActiveFormsButton = document.getElementById('printActiveFormsButton');
         const printSavedOrdersButton = document.getElementById('printSavedOrdersButton');
 
@@ -1080,6 +1123,8 @@
                         currentUserId = user.uid;
                         userIdDisplay.textContent = `ID de Usuario: ${currentUserId}`;
                         console.log("Usuario autenticado:", currentUserId);
+                        // Cargar el nombre de usuario de localStorage
+                        userName = localStorage.getItem('currentUserName') || '';
                         // Cargar órdenes y generar WO una vez que el usuario esté autenticado
                         loadSavedOrders();
                         generateAndSetNextWorkOrderNumber();
@@ -1090,6 +1135,7 @@
                             currentUserId = auth.currentUser?.uid || crypto.randomUUID(); // Fallback si anónimo falla
                             userIdDisplay.textContent = `ID de Usuario (Anónimo): ${currentUserId}`;
                             console.log("Sesión anónima iniciada:", currentUserId);
+                            userName = localStorage.getItem('currentUserName') || ''; // Cargar para anónimo también
                             loadSavedOrders(); // Cargar órdenes también para usuarios anónimos
                             generateAndSetNextWorkOrderNumber();
                         } else {
@@ -1099,6 +1145,7 @@
                                 currentUserId = auth.currentUser?.uid;
                                 userIdDisplay.textContent = `ID de Usuario: ${currentUserId}`;
                                 console.log("Sesión iniciada con token personalizado:", currentUserId);
+                                userName = localStorage.getItem('currentUserName') || ''; // Cargar para usuario con token
                                 loadSavedOrders(); // Cargar órdenes
                                 generateAndSetNextWorkOrderNumber();
                             } catch (error) {
@@ -1108,6 +1155,7 @@
                                 currentUserId = auth.currentUser?.uid || crypto.randomUUID();
                                 userIdDisplay.textContent = `ID de Usuario (Anónimo - Fallo de Token): ${currentUserId}`;
                                 showMessage("Error de autenticación. Sesión anónima iniciada.", "error");
+                                userName = localStorage.getItem('currentUserName') || ''; // Cargar para anónimo también
                                 loadSavedOrders(); // Cargar órdenes
                                 generateAndSetNextWorkOrderNumber();
                             }
@@ -1153,104 +1201,108 @@
             }
         }
 
-        // Función para guardar la orden de trabajo en Firestore
-        async function saveOrder() {
-            if (!db || !currentUserId) {
-                showMessage("La base de datos no está lista o el usuario no está autenticado.", "error");
-                return;
+        /**
+         * Obtiene el nombre del usuario. Si no está en localStorage, muestra un modal.
+         * @returns {Promise<string>} El nombre del usuario.
+         */
+        async function getUserName() {
+            if (userName) {
+                return userName; // Ya tenemos el nombre de usuario
             }
 
-            // Mostrar el modal para pedir el nombre del usuario
-            userNameModal.classList.remove('hidden');
-            userNameInput.focus(); // Pone el foco en el campo de texto
+            return new Promise((resolve) => {
+                userNameModal.classList.remove('hidden');
+                userNameInput.focus();
 
-            // Esperar a que el usuario confirme su nombre
-            confirmUserNameButton.onclick = async () => {
-                userName = userNameInput.value.trim();
-                if (userName === '') {
-                    showMessage("Por favor, introduce tu nombre o ID.", "error");
-                    return;
-                }
-                userNameModal.classList.add('hidden'); // Ocultar el modal
-
-                saveOrderButton.disabled = true;
-                saveOrderButton.textContent = 'Guardando...';
-                showMessage("Guardando orden...", "info");
-
-                try {
-                    const formElement = document.getElementById('mainFormContainer1'); // Siempre guardamos la data del primer formulario
-                    const orderData = {};
-
-                    // Recolectar datos de inputs de texto y textareas
-                    formElement.querySelectorAll('input[type="text"].sync-input, input[type="date"].sync-input, textarea.sync-input').forEach(input => {
-                        orderData[input.dataset.syncGroup] = input.value;
-                    });
-
-                    // Recolectar datos de checkboxes y radio buttons
-                    formElement.querySelectorAll('input[type="checkbox"].sync-checkbox, input[type="radio"].sync-checkbox').forEach(input => {
-                        orderData[input.dataset.syncGroup] = input.checked;
-                    });
-
-                    // Recolectar firmas de los canvas como Base64
-                    const signatureCanvases = formElement.querySelectorAll('.signature-canvas');
-                    signatureCanvases.forEach(canvas => {
-                        const syncGroup = canvas.dataset.syncGroup;
-                        if (canvas.classList.contains('hidden')) {
-                            orderData[syncGroup] = ''; // Si el canvas está oculto, la firma está vacía
-                        } else {
-                            orderData[syncGroup] = canvas.toDataURL(); // Guarda la imagen de la firma
-                        }
-                    });
-
-                    // Añadir el nombre del usuario que guarda la orden
-                    orderData.savedBy = userName;
-
-                    // --- Lógica para actualizar el contador de W.O. ---
-                    const woNumberString = orderData.wo; // Ej. "H-00005"
-                    // Extraer la parte numérica del WO y convertirla a entero
-                    const numericPart = parseInt(woNumberString.substring(2), 10);
-
-                    if (!isNaN(numericPart)) {
-                        const countersDocRef = doc(db, `artifacts/${globalAppId}/public/data/counters/workOrder`);
-                        try {
-                            const docSnap = await getDoc(countersDocRef);
-                            let currentLastNumber = 0;
-                            if (docSnap.exists()) {
-                                currentLastNumber = docSnap.data().lastNumber || 0;
-                            }
-
-                            // Si el número de WO de la orden actual es mayor que el último registrado, actualiza el contador
-                            if (numericPart > currentLastNumber) {
-                                await setDoc(countersDocRef, { lastNumber: numericPart });
-                                console.log(`Contador de W.O. actualizado a: ${numericPart}`);
-                            }
-                        } catch (error) {
-                            console.error("Error al actualizar el contador de W.O.:", error);
-                            // No mostrar error al usuario, ya que la orden aún puede guardarse
-                        }
+                confirmUserNameButton.onclick = () => {
+                    const inputName = userNameInput.value.trim();
+                    if (inputName === '') {
+                        showMessage("Por favor, introduce tu nombre o ID.", "error");
+                        return;
                     }
-                    // --- Fin de la lógica del contador ---
-
-                    // Ruta de la colección para datos públicos, visible para todos los usuarios
-                    const publicOrdersCollectionRef = collection(db, `artifacts/${globalAppId}/public/data/orders`);
-                    await addDoc(publicOrdersCollectionRef, {
-                        ...orderData,
-                        timestamp: new Date() // Añadir una marca de tiempo
-                    });
-
-                    showMessage("Orden guardada exitosamente!", "success");
-                    console.log("Orden guardada:", orderData);
-                    loadSavedOrders(); // Recargar la lista de órdenes guardadas
-                    generateAndSetNextWorkOrderNumber(); // Generar el siguiente WO para el formulario
-                } catch (error) {
-                    console.error("Error al guardar la orden:", error);
-                    showMessage(`Error al guardar: ${error.message}`, "error");
-                } finally {
-                    saveOrderButton.disabled = false;
-                    saveOrderButton.textContent = 'Guardar Orden';
-                }
-            };
+                    userName = inputName;
+                    localStorage.setItem('currentUserName', userName); // Guardar en localStorage
+                    userNameModal.classList.add('hidden');
+                    resolve(userName);
+                };
+            });
         }
+
+        /**
+         * Guarda la orden de trabajo actual en Firestore.
+         * @param {string} user El nombre del usuario que guarda la orden.
+         */
+        async function saveCurrentOrder(user) {
+            if (!db || !currentUserId) {
+                showMessage("La base de datos no está lista o el usuario no está autenticado.", "error");
+                return false; // Indicar que el guardado falló
+            }
+
+            showMessage("Guardando orden...", "info");
+
+            try {
+                const formElement = document.getElementById('mainFormContainer1');
+                const orderData = {};
+
+                formElement.querySelectorAll('input[type="text"].sync-input, input[type="date"].sync-input, textarea.sync-input').forEach(input => {
+                    orderData[input.dataset.syncGroup] = input.value;
+                });
+
+                formElement.querySelectorAll('input[type="checkbox"].sync-checkbox, input[type="radio"].sync-checkbox').forEach(input => {
+                    orderData[input.dataset.syncGroup] = input.checked;
+                });
+
+                const signatureCanvases = formElement.querySelectorAll('.signature-canvas');
+                signatureCanvases.forEach(canvas => {
+                    const syncGroup = canvas.dataset.syncGroup;
+                    if (canvas.classList.contains('hidden')) {
+                        orderData[syncGroup] = '';
+                    } else {
+                        orderData[syncGroup] = canvas.toDataURL();
+                    }
+                });
+
+                orderData.savedBy = user; // Usar el nombre de usuario proporcionado
+
+                const woNumberString = orderData.wo;
+                const numericPart = parseInt(woNumberString.substring(2), 10);
+
+                if (!isNaN(numericPart)) {
+                    const countersDocRef = doc(db, `artifacts/${globalAppId}/public/data/counters/workOrder`);
+                    try {
+                        const docSnap = await getDoc(countersDocRef);
+                        let currentLastNumber = 0;
+                        if (docSnap.exists()) {
+                            currentLastNumber = docSnap.data().lastNumber || 0;
+                        }
+
+                        if (numericPart > currentLastNumber) {
+                            await setDoc(countersDocRef, { lastNumber: numericPart });
+                            console.log(`Contador de W.O. actualizado a: ${numericPart}`);
+                        }
+                    } catch (error) {
+                        console.error("Error al actualizar el contador de W.O.:", error);
+                    }
+                }
+
+                const publicOrdersCollectionRef = collection(db, `artifacts/${globalAppId}/public/data/orders`);
+                await addDoc(publicOrdersCollectionRef, {
+                    ...orderData,
+                    timestamp: new Date()
+                });
+
+                showMessage("Orden guardada exitosamente!", "success");
+                console.log("Orden guardada:", orderData);
+                loadSavedOrders();
+                generateAndSetNextWorkOrderNumber();
+                return true; // Indicar que el guardado fue exitoso
+            } catch (error) {
+                console.error("Error al guardar la orden:", error);
+                showMessage(`Error al guardar: ${error.message}`, "error");
+                return false; // Indicar que el guardado falló
+            }
+        }
+
 
         // Función para cargar y mostrar las órdenes guardadas
         async function loadSavedOrders() {
@@ -1304,6 +1356,7 @@
                             card.classList.add('saved-order-card');
 
                             // Construir el HTML de la orden guardada con la estructura de tabla
+                            // Se incluye el sello en la sección del pie de página para las órdenes guardadas también.
                             card.innerHTML = `
                                 <div class="header-title">
                                     <div>FUERZA AEREA HONDUREÑA</div>
@@ -1385,7 +1438,9 @@
                                 <div class="discrepancy-label">Discrepancia:</div>
                                 <div class="discrepancy-content">${order.discrepancia || 'N/A'}</div>
 
-                                <div class="footer-section">
+                                <div class="footer-section" style="position: relative; min-height: 100px;">
+                                    <!-- Si esta orden guardada tiene el sello, se mostrará aquí -->
+                                    <img src="IMG_5195-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
                                     <div class="footer-item">
                                         <span class="footer-label">ENTREGADO POR:</span>
                                         <div class="signature-image-container ${order['firma-entregado'] ? '' : 'empty'}">
@@ -1403,7 +1458,9 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="footer-section">
+                                <div class="footer-section" style="position: relative; min-height: 100px;">
+                                    <!-- Si esta orden guardada tiene el sello, se mostrará aquí -->
+                          <img src="IMG_5195-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
                                     <div class="footer-item">
                                         <span class="footer-label">RECIBIDO POR:</span>
                                         <div class="signature-image-container ${order['firma-recibido'] ? '' : 'empty'}">
@@ -1537,9 +1594,22 @@
         }
 
         // Funciones de impresión específicas
-        function printActiveForms() {
-            document.body.classList.add('print-active-forms');
-            window.print();
+        async function printActiveForms() {
+            // Primero, asegurarnos de tener el nombre del usuario
+            const user = await getUserName();
+            if (!user) {
+                showMessage("No se puede guardar sin un nombre de usuario.", "error");
+                return;
+            }
+
+            // Luego, guardar la orden actual
+            const savedSuccessfully = await saveCurrentOrder(user);
+            
+            if (savedSuccessfully) {
+                // Solo imprimir si se guardó correctamente
+                document.body.classList.add('print-active-forms');
+                window.print();
+            }
         }
 
         function printSavedOrders() {
@@ -1700,9 +1770,6 @@
                     clearCanvasContent(canvas, targetCanvas);
                 });
             });
-
-            // Asignar el evento al botón de guardar
-            saveOrderButton.addEventListener('click', saveOrder);
 
             // Añadir el listener para el campo de búsqueda
             searchInput.addEventListener('input', loadSavedOrders);
