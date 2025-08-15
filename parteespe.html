@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🛠️ Parte Especialista (Entrada de Datos)</title>
+    <title>Parte de Personal: Especialistas</title>
     <!-- Tailwind CSS CDN para un estilo moderno y responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -24,44 +24,48 @@
             display: flex; /* Para centrar el contenido verticalmente si es más pequeño */
             justify-content: center;
             align-items: center;
+            padding: 1rem; /* Añadir padding por defecto para evitar que el contenido toque los bordes */
         }
 
         /* Contenedor principal estilizado como una tarjeta con neumorfismo suave */
         .container {
-            max-width: 980px;
-            margin: 2rem auto;
-            padding: 2.8rem;
+            max-width: 800px; /* Ancho ajustado para la página de entrada de datos */
+            width: 100%; /* Permite que el contenedor se ajuste */
+            margin: 2rem auto; /* Ajuste el margen ya que el body es flex */
+            padding: 2.8rem; /* Más padding interno */
             background-color: #ffffff;
-            border-radius: 1.8rem;
+            border-radius: 1.8rem; /* Bordes muy redondeados */
+            /* Sombras tipo neumorfismo suave */
             box-shadow: 10px 10px 30px rgba(174, 174, 192, 0.4), 
                         -10px -10px 30px rgba(255, 255, 255, 0.7);
-            border: none;
-            transition: transform 0.3s ease-in-out;
+            border: none; /* Elimina el borde anterior */
+            transition: transform 0.3s ease-in-out; /* Transición para un ligero hover */
         }
         .container:hover {
-            transform: translateY(-5px);
+            transform: translateY(-5px); /* Efecto de elevación al pasar el ratón */
         }
 
         /* Estilos para inputs numéricos */
         input[type="number"] {
-            border-radius: 0.8rem;
-            padding: 0.9rem 1.3rem;
-            border: 1px solid #e2e8f0;
-            background-color: #f7fafc;
+            border-radius: 0.8rem; /* Más redondeado */
+            padding: 0.9rem 1.3rem; /* Más padding */
+            border: 1px solid #e2e8f0; /* Borde más claro */
+            background-color: #f7fafc; /* Fondo ligeramente grisáceo */
             text-align: center;
-            width: 120px;
+            width: 120px; /* Ancho ajustable */
             -moz-appearance: textfield;
-            transition: all 0.3s ease-in-out;
+            transition: all 0.3s ease-in-out; /* Transición más suave y larga */
             font-weight: 500;
             color: #1f2937;
+            /* Sombra interna sutil para un efecto "hundido" */
             box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.8);
         }
         input[type="number"]:focus {
             outline: none;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.3), 
-                        inset 2px 2px 5px rgba(0, 0, 0, 0.05);
-            background-color: #ffffff;
+            border-color: #6366f1; /* Morado/índigo al enfocar */
+            box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.3), /* Anillo de enfoque más pronunciado */
+                        inset 2px 2px 5px rgba(0, 0, 0, 0.05); /* Mantener sombra interna */
+            background-color: #ffffff; /* Fondo blanco al enfocar */
         }
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
@@ -69,30 +73,31 @@
             margin: 0;
         }
 
-        /* Estilos de tabla generales */
+        /* Estilos de tabla */
         table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            border-radius: 1.5rem;
+            border-radius: 1.5rem; /* Bordes muy redondeados para toda la tabla */
             overflow: hidden;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.07);
-            background-color: #ffffff;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.07); /* Sombra más pronunciada para la tabla */
+            background-color: #ffffff; /* Asegurar fondo blanco */
         }
         th, td {
             text-align: left;
-            padding: 1.4rem 1.7rem;
-            border-bottom: 1px solid #edf2f7;
+            padding: 1.4rem 1.7rem; /* Más padding para celdas */
+            border-bottom: 1px solid #edf2f7; /* Línea divisoria muy suave */
         }
         th {
-            background: linear-gradient(45deg, #4f46e5, #6366f1);
+            background: linear-gradient(45deg, #4f46e5, #6366f1); /* Degradado índigo para encabezados */
             font-weight: 700;
             color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            font-size: 1rem;
-            letter-spacing: 0.06em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra de texto más fuerte */
+            font-size: 1rem; /* Tamaño de fuente ligeramente ajustado */
+            letter-spacing: 0.06em; /* Espaciado de letras */
             text-transform: uppercase;
         }
+        /* Bordes redondeados para las esquinas del thead */
         thead tr:first-child th:first-child { border-top-left-radius: 1.5rem; }
         thead tr:first-child th:last-child { border-top-right-radius: 1.5rem; }
 
@@ -100,15 +105,36 @@
             border-bottom: none;
         }
         tbody tr {
-            transition: all 0.25s ease-in-out;
+            transition: all 0.25s ease-in-out; /* Transición para hover de fila */
         }
         tbody tr:hover {
-            background-color: #f0f4f8;
-            transform: scale(1.01);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            background-color: #f0f4f8; /* Fondo más oscuro al pasar el ratón */
+            transform: scale(1.01); /* Ligerísimo zoom */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); /* Sombra al pasar el ratón */
         }
-        tbody tr:nth-child(even) {
+        tbody tr:nth-child(even) { /* Cebra para filas, ligeramente más oscuro */
             background-color: #f7f9fb;
+        }
+
+        /* Estilos para la fila del total */
+        tfoot tr {
+            background: linear-gradient(45deg, #10b981, #34d399); /* Degradado verde esmeralda para el total */
+            font-weight: bold;
+            color: #ffffff;
+            font-size: 1.35rem; /* Fuente más grande */
+            box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.15); /* Sombra más fuerte hacia arriba */
+        }
+        /* Bordes redondeados para las esquinas del tfoot */
+        tfoot tr:last-child td:first-child { border-bottom-left-radius: 1.5rem; }
+        tfoot tr:last-child td:last-child { border-bottom-right-radius: 1.5rem; }
+
+        /* Mensaje de "no hay datos" */
+        #no-data-message {
+            font-style: italic;
+            color: #94a3b8; /* Gris más claro */
+            margin-top: 2rem;
+            font-size: 1.2rem; /* Más grande */
+            text-align: center;
         }
 
         /* Estilos para el modal personalizado */
@@ -118,14 +144,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.75);
+            background-color: rgba(0, 0, 0, 0.75); /* Fondo más oscuro y opaco */
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1000;
             visibility: hidden;
             opacity: 0;
-            transition: visibility 0s, opacity 0.4s ease-in-out;
+            transition: visibility 0s, opacity 0.4s ease-in-out; /* Transición más larga para el overlay */
         }
         .modal-overlay.visible {
             visibility: visible;
@@ -133,37 +159,37 @@
         }
         .modal-content {
             background-color: #ffffff;
-            padding: 3.5rem;
-            border-radius: 2rem;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
-            max-width: 650px;
+            padding: 3.5rem; /* Más padding */
+            border-radius: 2rem; /* Bordes muy redondeados */
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35); /* Sombra muy dramática */
+            max-width: 650px; /* Un poco más ancho */
             width: 90%;
             text-align: center;
-            transform: translateY(-50px) scale(0.9);
+            transform: translateY(-50px) scale(0.9); /* Efecto de entrada más pronunciado y ligeramente encogido */
             opacity: 0;
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease-out;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease-out; /* Rebote y opacidad */
         }
         .modal-overlay.visible .modal-content {
             transform: translateY(0) scale(1);
             opacity: 1;
         }
         .modal-content h3 {
-            font-size: 2.5rem;
+            font-size: 2.5rem; /* Título de modal más grande */
             color: #4f46e5;
             margin-bottom: 1.8rem;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
         .modal-content textarea {
-            min-height: 160px;
+            min-height: 160px; /* Mayor altura */
             resize: vertical;
             transition: all 0.3s ease-in-out;
-            border-color: #e2e8f0;
-            border-radius: 1rem;
-            font-size: 1.05rem;
+            border-color: #e2e8f0; /* Borde más claro */
+            border-radius: 1rem; /* Más redondeado */
+            font-size: 1.05rem; /* Tamaño de fuente ligeramente más grande */
             line-height: 1.6;
-            padding: 1.2rem;
-            background-color: #f7fafc;
-            box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.03);
+            padding: 1.2rem; /* Más padding */
+            background-color: #f7fafc; /* Fondo ligeramente grisáceo */
+            box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.03); /* Sombra interna sutil */
         }
         .modal-content textarea:focus {
             outline: none;
@@ -172,22 +198,22 @@
             background-color: #ffffff;
         }
         .modal-content button {
-            border-radius: 1rem;
+            border-radius: 1rem; /* Botones muy redondeados */
             font-weight: 700;
-            padding: 1.1rem 2.5rem;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            font-size: 1.1rem;
+            padding: 1.1rem 2.5rem; /* Más padding */
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efecto de rebote en botones */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Sombra en botones */
+            font-size: 1.1rem; /* Botón de texto ligeramente más grande */
         }
         .modal-content button:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-5px); /* Efecto de elevación más notorio */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Sombra más fuerte al pasar el ratón */
         }
         .modal-content button.bg-indigo-600:hover {
             background-color: #4338ca;
         }
         .modal-content button.bg-gray-300:hover {
-            background-color: #9ca3af;
+            background-color: #9ca3af; /* Gris un poco más oscuro y saturado */
         }
 
         /* Estilos para el área de notas en la tabla */
@@ -195,58 +221,103 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background-color: #ffffff;
-            border-radius: 1rem;
+            background-color: #ffffff; /* Fondo blanco */
+            border-radius: 1rem; /* Más redondeado */
             padding: 0.9rem 1.2rem;
-            min-height: 58px;
+            min-height: 58px; /* Mayor altura mínima */
             border: 1px solid #eef2f7;
             cursor: pointer;
             transition: all 0.3s ease-in-out;
-            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05), -2px -2px 8px rgba(255, 255, 255, 0.8);
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05), -2px -2px 8px rgba(255, 255, 255, 0.8); /* Sombra ligera tipo neumorfismo */
         }
         .note-display:hover {
-            background-color: #f8fafc;
-            border-color: #e2e8f0;
-            transform: translateY(-3px);
-            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.08), -5px -5px 15px rgba(255, 255, 255, 0.6);
+            background-color: #f8fafc; /* Color de fondo al pasar el ratón */
+            border-color: #e2e8f0; /* Borde más oscuro al pasar el ratón */
+            transform: translateY(-3px); /* Efecto de elevación más notorio */
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.08), -5px -5px 15px rgba(255, 255, 255, 0.6); /* Sombra al pasar el ratón */
         }
         .note-display span {
             color: #475569;
-            font-size: 1rem;
+            font-size: 1rem; /* Tamaño de fuente ligeramente más grande para la nota */
             line-height: 1.4;
         }
         .edit-pencil-icon {
-            width: 22px;
+            width: 22px; /* Icono más grande */
             height: 22px;
-            fill: #94a3b8;
+            fill: #94a3b8; /* Color de icono gris más suave */
             transition: fill 0.3s ease-in-out;
         }
         .note-display:hover .edit-pencil-icon {
-            fill: #4f46e5;
+            fill: #4f46e5; /* Icono se vuelve índigo al pasar el ratón */
         }
+        
+        /* --- MEDIA QUERIES PARA ADAPTACIÓN A MÓVILES --- */
+        @media (max-width: 768px) { /* Para tabletas y móviles */
+            body {
+                padding: 0.5rem; /* Menos padding en los bordes del cuerpo */
+            }
+            .container {
+                margin: 1rem auto; /* Reducir margen superior/inferior */
+                padding: 1.5rem; /* Más compacto en pantallas pequeñas */
+                border-radius: 1rem; /* Bordes menos redondeados para ahorrar espacio */
+                box-shadow: 5px 5px 15px rgba(174, 174, 192, 0.2), 
+                            -5px -5px 15px rgba(255, 255, 255, 0.5); /* Sombra más suave */
+            }
 
-        /* Mensaje de "no hay datos" */
-        #no-data-message {
-            font-style: italic;
-            color: #94a3b8;
-            margin-top: 2rem;
-            font-size: 1.2rem;
+            h1 {
+                font-size: 2.5rem; /* Título más pequeño */
+                margin-bottom: 0.5rem; /* Menos espacio debajo del título */
+            }
+            p {
+                font-size: 0.9rem; /* Párrafos más pequeños */
+                margin-bottom: 1rem; /* Menos espacio debajo del párrafo */
+            }
+
+            /* Ajustes para la tabla en móvil */
+            th, td {
+                padding: 0.8rem 1rem; /* Reducir padding de celdas */
+                font-size: 0.85rem; /* Reducir tamaño de fuente en celdas */
+            }
+            th:nth-child(2), td:nth-child(2) { /* Ajustar la columna de "Cantidad" */
+                text-align: center;
+                width: 70px; /* Un ancho más fijo para la cantidad */
+            }
+            td:nth-child(3) { /* Columna de notas */
+                white-space: normal; /* Permitir que el texto de las notas se ajuste */
+                word-wrap: break-word; /* Romper palabras largas si es necesario */
+            }
+            .note-display {
+                padding: 0.5rem 0.8rem; /* Padding más compacto para las notas individuales */
+                min-height: unset; /* Eliminar altura mínima fija para notas */
+            }
+            .note-display span {
+                font-size: 0.8rem; /* Fuente más pequeña para el texto de la nota */
+            }
+            .edit-pencil-icon {
+                width: 18px; /* Icono más pequeño */
+                height: 18px;
+            }
+            #no-data-message {
+                font-size: 1rem; /* Mensaje de no datos más pequeño */
+            }
+            tfoot tr { /* Total general */
+                font-size: 1.1rem; /* Reducir el tamaño del total general */
+            }
         }
-
     </style>
 </head>
 <body class="min-h-screen">
     <div class="container">
-        <h1 class="text-5xl font-extrabold text-center mb-10 text-gray-800 tracking-tight">
-            🛠️ Parte <span class="text-indigo-600">Especialista</span>
+        <h1 class="text-4xl font-extrabold text-center mb-8 text-gray-800 tracking-tight">
+            🛠️ Parte de Personal: <span class="text-indigo-600">Especialistas</span>
         </h1>
         <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
-            Utiliza esta sección para reportar la cantidad de personal y notas específicas 
+            Utiliza esta sección para reportar la cantidad de personal y notas específicas para la **Parte Especialistas**.
         </p>
 
-        <!-- Sección para la Parte Especialista (donde se ingresan los datos de esta vista) -->
+        <!-- Formulario de Entrada de Datos -->
         <div class="p-8 bg-white rounded-xl shadow-lg border border-gray-100 mb-10">
-            <h2 class="text-3xl font-bold mb-8 text-gray-700 text-center">Mi Reporte (Especialista)</h2>
+            <h2 class="text-2xl font-bold mb-6 text-gray-700 text-center">Entrada de Datos del Personal</h2>
             <div class="overflow-x-auto">
                 <table class="min-w-full">
                     <thead class="bg-indigo-600">
@@ -256,13 +327,20 @@
                             <th class="px-6 py-4">Notas</th>
                         </tr>
                     </thead>
-                    <tbody id="especialista-part-table-body" class="bg-white divide-y divide-gray-200">
-                        <!-- Las filas con inputs y notas de ESTA parte se insertarán aquí con JavaScript -->
+                    <tbody id="especialistas-part-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Filas de entrada de datos se insertarán aquí con JavaScript -->
                     </tbody>
+                    <tfoot class="bg-emerald-500">
+                        <tr>
+                            <td class="px-6 py-4">Total de Especialistas</td>
+                            <td id="especialistas-total" class="px-6 py-4 text-center">0</td>
+                            <td class="px-6 py-4"></td> <!-- Celda vacía -->
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
-            <p id="no-data-message" class="text-center mt-8 text-xl text-gray-500 hidden">
-                ¡Ingresa cantidades para el personal Especialista!
+            <p id="no-data-message" class="text-center mt-8 hidden">
+                ¡No hay datos para esta parte aún!
             </p>
         </div>
 
@@ -290,7 +368,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
         // *** CONFIGURACIÓN DE FIREBASE PROPORCIONADA POR EL USUARIO ***
         const firebaseConfig = {
@@ -302,18 +380,18 @@
             appId: "1:267969738051:web:1cbf9f6b907fc787782bf6",
             measurementId: "G-3938E048HW"
         };
-        const appId = firebaseConfig.appId;
+        const appId = firebaseConfig.appId; // Usamos el appId de tu configuración
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         // ***************************************************************
 
         let db;
         let auth;
-        let userId;
+        let userId; 
 
-        // ID del documento específico para esta parte (Especialista)
+        // ID único para este reporte de parte de especialistas
         const MY_PART_REPORT_ID = "especialista_report"; 
 
-        // Definición de los estados del personal (igual que en el parte principal)
+        // Definición de los estados del personal
         const staffStatuses = [
             { value: "disponible", label: "Disponible" },
             { value: "estudiando en el pais", label: "Estudiando en el País" },
@@ -332,7 +410,8 @@
         ];
 
         // --- Elementos del DOM ---
-        const especialistaPartTableBody = document.getElementById('especialista-part-table-body');
+        const especialistasPartTableBody = document.getElementById('especialistas-part-table-body');
+        const especialistasTotal = document.getElementById('especialistas-total');
         const noDataMessage = document.getElementById('no-data-message');
         const userIdDisplay = document.getElementById('user-id-display');
 
@@ -343,29 +422,11 @@
         const modalConfirmButton = document.getElementById('modal-confirm-button');
         const modalCancelButton = document.getElementById('modal-cancel-button');
 
-        // --- Funciones para la gestión de datos y UI ---
+        // Estado actual de los conteos y notas de esta parte
+        let currentPartData = {};
 
         /**
-         * Guarda los conteos y notas de la parte de Especialista en Firestore (colección pública).
-         * @param {Object} countsData - Los datos específicos de esta parte.
-         */
-        async function saveEspecialistaCounts(countsData) {
-            if (!db || !userId) {
-                console.error("Firestore o ID de usuario no están inicializados.");
-                return;
-            }
-            // Guarda los datos en la colección pública /artifacts/{appId}/public/data/reports/{MY_PART_REPORT_ID}
-            const reportRef = doc(db, `artifacts/${appId}/public/data/reports/${MY_PART_REPORT_ID}`);
-            try {
-                await setDoc(reportRef, countsData, { merge: true });
-                console.log(`Datos de '${MY_PART_REPORT_ID}' guardados en Firestore.`);
-            } catch (e) {
-                console.error("Error al guardar en Firestore:", e);
-            }
-        }
-
-        /**
-         * Muestra el modal personalizado en modo de edición de nota.
+         * Muestra el modal personalizado para edición de nota.
          * @param {string} title - Título del modal.
          * @param {Object} [initialValues={}] - Objeto con valores iniciales (e.g., { note: '...' }).
          * @returns {Promise<string|boolean>} - Promesa que resuelve con la nota editada o false si se cancela.
@@ -374,7 +435,6 @@
             return new Promise((resolve) => {
                 modalTitle.textContent = title;
                 modalInputNote.value = initialValues.note || '';
-                modalInputNote.classList.remove('hidden'); 
                 customModalOverlay.classList.add('visible');
                 modalInputNote.focus();
 
@@ -403,74 +463,67 @@
         }
 
         /**
-         * Renderiza la tabla para la entrada de datos de la parte de Especialista.
-         * @param {Object} especialistaPartData - Los datos específicos de esta parte.
+         * Renderiza la tabla de entrada de datos de la parte de especialistas.
+         * @param {Object} partData - Objeto con los conteos y notas de cada estado.
          */
-        function renderEspecialistaTable(especialistaPartData) {
-            especialistaPartTableBody.innerHTML = '';
-            let currentPartTotal = 0; // Se mantiene para mostrar el mensaje de "no hay datos" si todo es cero
+        function renderEspecialistasPartTable(partData) {
+            especialistasPartTableBody.innerHTML = '';
+            let totalEspecialistas = 0;
 
             staffStatuses.forEach(status => {
-                const currentCount = especialistaPartData[status.value]?.count || 0;
-                const currentNote = especialistaPartData[status.value]?.note || '';
+                const count = partData[status.value]?.count || 0;
+                const note = partData[status.value]?.note || '';
+                totalEspecialistas += count;
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-base font-medium text-gray-800">${status.label}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-base text-center">
-                        <input type="number"
-                               min="0"
-                               data-status-value="${status.value}"
-                               value="${currentCount !== 0 ? currentCount : ''}"
-                               class="border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="number" 
+                                class="w-24 text-center rounded-lg border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                                value="${count}" 
+                                min="0" 
+                                data-status="${status.value}">
                     </td>
-                    <td class="px-6 py-4 text-base text-gray-700">
-                        <div class="note-display" data-status-note="${status.value}">
-                            <span class="truncate pr-2">${currentNote || 'Agregar nota...'}</span>
-                            <svg class="edit-pencil-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L18.79 7.04l-3.75-3.75L3 17.25zM20.71 5.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                    <td class="px-6 py-4 text-left">
+                        <div class="note-display" data-status="${status.value}" data-note="${note}">
+                            <span class="truncate">${note || 'Añadir nota...'}</span>
+                            <svg class="edit-pencil-icon ml-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M14.06 9.06L9 14.12l-1.63-1.63a.75.75 0 00-1.06 1.06l2.16 2.16c.29.29.77.29 1.06 0L15.12 10.12a.75.75 0 00-1.06-1.06zM17.5 4.75a2.25 2.25 0 00-2.25 2.25v2.25a.75.75 0 001.5 0V7a.75.75 0 01.75-.75h2.25a.75.75 0 000-1.5H17.5zM6.75 4.75a.75.75 0 000 1.5h2.25a.75.75 0 01.75.75v2.25a.75.75 0 001.5 0V7a2.25 2.25 0 00-2.25-2.25H6.75zM17.5 17.25a.75.75 0 000 1.5h-2.25a.75.75 0 01-.75-.75v-2.25a.75.75 0 00-1.5 0V17a2.25 2.25 0 002.25 2.25h2.25a.75.75 0 000-1.5H17.5zM6.75 17.25a2.25 2.25 0 002.25 2.25h2.25a.75.75 0 000-1.5h-2.25a.75.75 0 01-.75-.75v-2.25a.75.75 0 00-1.5 0V17.25zM12 10.25a.75.75 0 00-.75.75v2.25a.75.75 0 001.5 0V11a.75.75 0 00-.75-.75z" />
+                            </svg>
                         </div>
                     </td>
                 `;
-                especialistaPartTableBody.appendChild(row);
-
-                // Añadir listener al input de número para actualizar el conteo
-                const quantityInput = row.querySelector('input[type="number"]');
-                quantityInput.addEventListener('input', (event) => {
-                    const value = event.target.value;
-                    const count = parseInt(value, 10);
-                    const statusVal = event.target.dataset.statusValue;
-
-                    especialistaPartData[statusVal] = especialistaPartData[statusVal] || {};
-                    especialistaPartData[statusVal].count = isNaN(count) ? 0 : Math.max(0, count);
-                    saveEspecialistaCounts(especialistaPartData); // Guarda los datos de esta parte
-                });
-
-                // Añadir listener al área de notas para abrir el modal de edición
-                const noteDisplay = row.querySelector('.note-display');
-                noteDisplay.addEventListener('click', async () => {
-                    const statusVal = noteDisplay.dataset.statusNote;
-                    const currentNote = especialistaPartData[statusVal]?.note || '';
-                    const newNote = await showNoteModal(
-                        `Notas para: ${status.label}`,
-                        { note: currentNote }
-                    );
-
-                    if (newNote !== false && typeof newNote === 'string') {
-                        especialistaPartData[statusVal] = especialistaPartData[statusVal] || {};
-                        especialistaPartData[statusVal].note = newNote.trim();
-                        saveEspecialistaCounts(especialistaPartData); // Guarda los datos de esta parte
-                    }
-                });
-                currentPartTotal += currentCount;
+                especialistasPartTableBody.appendChild(row);
             });
 
-            if (currentPartTotal === 0 && Object.values(especialistaPartData).every(s => s.count === 0 && s.note === '')) {
+            especialistasTotal.textContent = totalEspecialistas;
+
+            if (totalEspecialistas === 0) {
                 noDataMessage.classList.remove('hidden');
             } else {
                 noDataMessage.classList.add('hidden');
             }
         }
 
+        /**
+         * Guarda los conteos y notas de los especialistas en Firestore.
+         * @param {Object} countsData - Objeto con los conteos y notas de cada estado.
+         */
+        async function saveEspecialistasCounts(countsData) {
+            if (!userId) {
+                console.error("No hay ID de usuario. No se puede guardar.");
+                return;
+            }
+            try {
+                // Los reportes son públicos, por eso la ruta es /public/data/reports
+                const docRef = doc(db, `artifacts/${appId}/public/data/reports`, MY_PART_REPORT_ID);
+                await setDoc(docRef, countsData);
+                console.log("Datos de especialistas guardados con éxito.");
+            } catch (error) {
+                console.error("Error al guardar los datos de especialistas:", error);
+            }
+        }
 
         // --- Inicialización de Firebase y Listener de Datos ---
 
@@ -501,40 +554,67 @@
                     userIdDisplay.textContent = userId;
                     console.log("Usuario autenticado. UID:", userId);
 
-                    // --- Escuchar el documento específico de esta parte ---
-                    const especialistaReportDocRef = doc(db, `artifacts/${appId}/public/data/reports/${MY_PART_REPORT_ID}`);
-
-                    onSnapshot(especialistaReportDocRef, (docSnap) => {
-                        let currentEspecialistaData = {};
+                    // Escuchar cambios en el documento de esta parte
+                    const docRef = doc(db, `artifacts/${appId}/public/data/reports`, MY_PART_REPORT_ID);
+                    onSnapshot(docRef, (docSnap) => {
                         if (docSnap.exists()) {
-                            currentEspecialistaData = docSnap.data();
+                            currentPartData = docSnap.data();
+                            renderEspecialistasPartTable(currentPartData);
+                        } else {
+                            console.log("No existen datos para la parte de especialistas. Inicializando tabla.");
+                            currentPartData = {}; // Resetear si no hay datos
+                            // Inicializar currentPartData con 0s y notas vacías
+                            staffStatuses.forEach(status => {
+                                currentPartData[status.value] = { count: 0, note: '' };
+                            });
+                            renderEspecialistasPartTable(currentPartData);
                         }
-                        // Asegurarse de que el objeto de datos tenga la estructura completa inicializada
-                        staffStatuses.forEach(status => {
-                            if (typeof currentEspecialistaData[status.value] !== 'object' || currentEspecialistaData[status.value] === null) {
-                                currentEspecialistaData[status.value] = { count: 0, note: '' };
-                            } else {
-                                if (typeof currentEspecialistaData[status.value].count === 'undefined') currentEspecialistaData[status.value].count = 0;
-                                if (typeof currentEspecialistaData[status.value].note === 'undefined') currentEspecialistaData[status.value].note = '';
-                            }
-                        });
-
-                        // Renderizar la tabla con los datos más recientes de esta parte
-                        renderEspecialistaTable(currentEspecialistaData);
-
-                        // Si el documento de esta parte no existía, guardarlo inicializado
-                        if (!docSnap.exists()) {
-                            saveEspecialistaCounts(currentEspecialistaData);
-                        }
-
                     }, (error) => {
-                        console.error("Error al escuchar actualizaciones de Firestore:", error);
+                        console.error("Error al escuchar el documento de Firestore:", error);
                     });
 
                 } else {
                     console.log("Usuario no autenticado.");
                     userIdDisplay.textContent = "No autenticado";
                 }
+            });
+
+            // Listener para el input de cantidades (guardado automático)
+            especialistasPartTableBody.addEventListener('input', () => {
+                const inputs = especialistasPartTableBody.querySelectorAll('input[type="number"]');
+                const newData = {};
+                inputs.forEach(input => {
+                    const statusValue = input.dataset.status;
+                    newData[statusValue] = {
+                        count: parseInt(input.value, 10) || 0,
+                        note: currentPartData[statusValue]?.note || '' // Mantener la nota existente
+                    };
+                });
+                saveEspecialistasCounts(newData); // Guardar automáticamente al cambiar un input
+            });
+
+            // Listener para la edición de notas (delegación de eventos)
+            especialistasPartTableBody.addEventListener('click', async (event) => {
+                const noteDisplayDiv = event.target.closest('.note-display');
+                if (noteDisplayDiv) {
+                    const statusValue = noteDisplayDiv.dataset.status;
+                    const initialNote = noteDisplayDiv.dataset.note || '';
+
+                    const newNote = await showNoteModal(`Editar Nota para ${staffStatuses.find(s => s.value === statusValue).label}`, { note: initialNote });
+                    
+                    if (newNote !== false) { // Si el usuario no canceló
+                        currentPartData[statusValue].note = newNote;
+                        noteDisplayDiv.dataset.note = newNote; // Actualizar el dataset para la próxima edición
+                        noteDisplayDiv.querySelector('span').textContent = newNote || 'Añadir nota...';
+                        saveEspecialistasCounts(currentPartData); // Guardar los cambios automáticamente
+                    }
+                }
+            });
+
+            // Agrega un listener para el evento 'popstate' para detectar la navegación hacia atrás del navegador
+            window.addEventListener('popstate', (event) => {
+                // Redirige a la página principal si el usuario navega hacia atrás
+                window.location.href = 'index.html';
             });
         });
     </script>
