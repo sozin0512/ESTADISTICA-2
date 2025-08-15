@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parte Principal de Personal </title>
+    <title>Parte de Personal A-1 Base Ham</title>
     <!-- Tailwind CSS CDN para un estilo moderno y responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -24,13 +24,15 @@
             display: flex; /* Para centrar el contenido verticalmente si es más pequeño */
             justify-content: center;
             align-items: center;
+            padding: 1rem; /* Añadir padding por defecto para evitar que el contenido toque los bordes */
         }
 
         /* Contenedor principal estilizado como una tarjeta con neumorfismo suave */
         .container {
-            max-width: 980px; /* Un poco más ancho */
+            max-width: 980px; /* Un poco más ancho por defecto */
+            width: 100%; /* Permite que el contenedor se ajuste */
             margin: 2rem auto; /* Ajuste el margen ya que el body es flex */
-            padding: 2.8rem; /* Más padding interno */
+            padding: 2rem; /* Reducir padding por defecto para móvil */
             background-color: #ffffff;
             border-radius: 1.8rem; /* Bordes muy redondeados */
             /* Sombras tipo neumorfismo suave */
@@ -282,6 +284,72 @@
         .bg-blue-600 { background-color: #2563eb; }
         .hover\:bg-blue-700:hover { background-color: #1d4ed8; }
 
+
+        /* --- MEDIA QUERIES PARA ADAPTACIÓN A MÓVILES --- */
+        @media (max-width: 768px) { /* Para tabletas y móviles */
+            body {
+                padding: 0.5rem; /* Menos padding en los bordes del cuerpo */
+            }
+            .container {
+                margin: 1rem auto; /* Reducir margen superior/inferior */
+                padding: 1.5rem; /* Más compacto en pantallas pequeñas */
+                border-radius: 1rem; /* Bordes menos redondeados para ahorrar espacio */
+                box-shadow: 5px 5px 15px rgba(174, 174, 192, 0.2), 
+                            -5px -5px 15px rgba(255, 255, 255, 0.5); /* Sombra más suave */
+            }
+
+            h1 {
+                font-size: 2.5rem; /* Título más pequeño */
+                margin-bottom: 0.5rem; /* Menos espacio debajo del título */
+            }
+            p {
+                font-size: 0.9rem; /* Párrafos más pequeños */
+                margin-bottom: 1rem; /* Menos espacio debajo del párrafo */
+            }
+
+            /* Asegurar que los grupos de botones se apilen */
+            .flex-wrap.justify-center.gap-4 {
+                flex-direction: column; /* Apila los botones verticalmente */
+                gap: 0.75rem; /* Espacio entre botones apilados */
+            }
+            .part-button, .action-button {
+                width: 100%; /* Botones de ancho completo */
+                min-width: unset; /* Quitar min-width fijo */
+                padding: 0.9rem 1.5rem; /* Reducir padding de botones */
+                font-size: 0.95rem; /* Fuente más pequeña para botones */
+            }
+
+            /* Ajustes para la tabla en móvil */
+            th, td {
+                padding: 0.8rem 1rem; /* Reducir padding de celdas */
+                font-size: 0.85rem; /* Reducir tamaño de fuente en celdas */
+            }
+            th:nth-child(2), td:nth-child(2) { /* Ajustar la columna de "Total Consolidado" */
+                text-align: center;
+                width: 80px; /* Un ancho más fijo para la cantidad */
+            }
+            td:nth-child(3) { /* Columna de notas */
+                white-space: normal; /* Permitir que el texto de las notas se ajuste */
+                word-wrap: break-word; /* Romper palabras largas si es necesario */
+            }
+            .note-display {
+                padding: 0.5rem 0.8rem; /* Padding más compacto para las notas individuales */
+                min-height: unset; /* Eliminar altura mínima fija para notas */
+            }
+            .note-display span {
+                font-size: 0.8rem; /* Fuente más pequeña para el texto de la nota */
+            }
+            .edit-pencil-icon {
+                width: 18px; /* Icono más pequeño */
+                height: 18px;
+            }
+            #no-consolidated-data-message {
+                font-size: 1rem; /* Mensaje de no datos más pequeño */
+            }
+            tfoot tr { /* Total general */
+                font-size: 1.1rem; /* Reducir el tamaño del total general */
+            }
+        }
 
         /* --- ESTILOS ESPECÍFICOS PARA IMPRESIÓN --- */
         @media print {
@@ -799,7 +867,7 @@
                         case 'especialista': pageName = 'parteespe.html'; break;
                         case 'oficiales': pageName = 'parteofi.html'; break;
                         case 'alafija': pageName = 'partealafi.html'; break;
-                        case 'auxiliares': pageName = 'pareteauxiliares.html'; break; // Nueva ruta para el botón de auxiliares
+                        case 'auxiliares': pageName = 'parteauxiliares.html'; break; // Ruta para el botón de auxiliares
                         default: return; // No hacer nada si el partId no coincide
                     }
                     if (pageName) { // Solo redirigir si se encontró una página válida
