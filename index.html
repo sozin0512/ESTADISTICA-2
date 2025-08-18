@@ -1,53 +1,67 @@
-
-     
-   <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Acceso de Usuario</title>
+    <!-- Importar la fuente Inter de Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', sans-serif; /* Usamos la fuente Inter */
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow: hidden; /* Evitar el desplazamiento al hacer el cuadro de login transparente */
+            overflow: hidden;
+            background-color: #1a1a1a; /* Fondo muy oscuro */
+            cursor: url('https://cur.cursors-4u.net/symbols/sy-2/sy131.cur'), auto; 
         }
 
-        #video-background {
+        #rainCanvas {
             position: fixed;
-            right: 0;
-            bottom: 0;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
-            z-index: -1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1000; /* Asegura que esté detrás de todo */
+            background-color: #0d0d0d; /* Fondo base para la lluvia */
         }
 
         .login-container {
             position: relative;
-            z-index: 1;
-            background-color: rgba(255, 255, 255, 0.1); /* Transparencia inicial */
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
-            max-width: 400px;
-            width: 100%;
-            transition: background-color 0.3s ease; /* Transición suave */
+            z-index: 10; /* Z-index aumentado para asegurar que esté sobre todo */
+            background-color: rgba(255, 255, 255, 0.08); /* Fondo casi transparente */
+            backdrop-filter: blur(10px); /* Efecto de cristal esmerilado */
+            -webkit-backdrop-filter: blur(10px); /* Para compatibilidad con Safari */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Borde sutil */
+            padding: 30px; /* Mayor padding */
+            border-radius: 12px; /* Esquinas más redondeadas */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2); /* Sombra más pronunciada pero suave */
+            max-width: 420px; /* Ancho ligeramente mayor */
+            width: 90%; /* Responsivo */
+            transition: all 0.3s ease-in-out; /* Transición para todos los cambios */
+            color: #e0e0e0; /* Color de texto claro (general) */
+            transform: scale(1); /* Escala inicial */
         }
 
         .login-container:hover {
-            background-color: rgba(255, 255, 255, 0.8); /* Cambio de transparencia al pasar el mouse */
+            background-color: rgba(255, 255, 255, 0.15); /* Ligeramente menos transparente al pasar el mouse */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.3);
+            transform: scale(1.01); /* Pequeño zoom al pasar el mouse */
         }
 
         .login-container h2 {
             margin-top: 0;
+            margin-bottom: 25px; /* Más espacio debajo del título */
             text-align: center;
+            color: #ffffff; /* Título blanco brillante */
+            font-weight: 600; /* Más peso para el título */
+            font-size: 2.2em; /* Título más grande */
+            text-shadow: 0 0 5px rgba(255,255,255,0.2); /* Sombra sutil para el título */
         }
 
         .form-group {
@@ -56,210 +70,709 @@
 
         .form-group label {
             display: block;
-            font-weight: bold;
+            font-weight: 400; /* Peso normal para las etiquetas */
+            margin-bottom: 8px; /* Espacio debajo de las etiquetas */
+            color: #ffffff; /* Color de etiqueta ahora blanco puro */
+            font-size: 0.95em;
         }
 
-        .form-group input[type="text"],
+        .form-group input[type="email"],
         .form-group input[type="password"] {
-            width: calc(100% - 24px);
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
+            width: calc(100% - 22px); /* Ajuste por padding y borde */
+            padding: 10px; /* Más padding para inputs */
+            border-radius: 6px; /* Esquinas más redondeadas */
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Borde sutil para inputs */
+            background-color: rgba(255, 255, 255, 0.1); /* Fondo transparente para inputs */
             box-sizing: border-box;
-            margin-bottom: 8px;
+            color: #ffffff; /* Texto blanco en inputs */
+            transition: all 0.2s ease-in-out;
+            font-size: 1em;
+        }
+
+        .form-group input[type="email"]::placeholder, /* Estilo para placeholders */
+        .form-group input[type="password"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-group input[type="email"]:focus,
+        .form-group input[type="password"]:focus {
+            border-color: #8cafff; /* Borde azul claro al enfocar */
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 2px rgba(140, 175, 255, 0.3); /* Sombra de enfoque */
         }
 
         .show-password {
-            cursor: pointer;
+            cursor: pointer; /* Este cursor se mantiene para elementos interactivos */
+            font-size: 0.85em;
+            color: #ffffff; /* Color de mostrar contraseña ahora blanco puro */
+            text-align: right; /* Alineado a la derecha */
+            display: block; /* Para que ocupe su propia línea */
+            margin-top: 5px; /* Pequeño espacio superior */
+            transition: color 0.2s ease;
+        }
+        .show-password:hover {
+            color: #6a9cff; /* Azul más oscuro al pasar el mouse */
         }
 
-        .form-group input[type="submit"] {
+        .form-group button,
+        .form-group input[type="submit"] { /* Input de submit también tiene este estilo */
             width: 100%;
-            padding: 10px;
+            padding: 12px; /* Más padding para botones */
             border: none;
-            border-radius: 4px;
-            background-color: #007bff;
-            color: #fff;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+            border-radius: 8px; /* Esquinas más redondeadas */
+            background: linear-gradient(135deg, #007bff, #0056b3); /* Gradiente de color */
+            color: #fff; /* Color del texto del botón blanco */
+            font-weight: 600; /* Texto del botón más grueso */
+            cursor: pointer; /* Este cursor se mantiene para elementos interactivos */
+            transition: all 0.3s ease-in-out;
+            margin-top: 20px; /* Más espacio encima del botón */
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3); /* Sombra sutil para el botón */
+            letter-spacing: 0.5px; /* Espaciado entre letras */
         }
 
+        .form-group button:hover,
         .form-group input[type="submit"]:hover {
-            background-color: #0056b3;
+            background: linear-gradient(135deg, #0056b3, #003d80); /* Gradiente más oscuro al pasar el mouse */
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+            transform: translateY(-2px); /* Pequeño efecto de elevación */
+        }
+        
+        .toggle-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px; /* Más espacio */
+            font-size: 0.9em;
+            color: #ffffff; /* Color de enlaces ahora blanco puro */
+            cursor: pointer; /* Este cursor se mantiene para elementos interactivos */
+            text-decoration: none; /* Quitamos el subrayado por defecto */
+            transition: color 0.2s ease;
+        }
+        .toggle-link:hover {
+            color: #6a9cff; /* Azul más oscuro al pasar el mouse */
+            text-decoration: underline; /* Subrayado al pasar el mouse */
         }
 
         .loading {
             display: none;
             text-align: center;
-            margin-top: 20px;
+            margin-top: 25px; /* Más espacio */
         }
 
         .loading img {
-            width: 50px;
+            width: 60px; /* GIF de carga un poco más grande */
+            filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); /* Sombra para el GIF */
+        }
+
+        .error-message, .info-message {
+            font-size: 0.9em;
+            text-align: center;
+            margin-top: 15px; /* Más espacio */
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            opacity: 0; /* Inicialmente oculto por opacidad */
+            transform: translateY(10px); /* Ligeramente desplazado */
+            animation: fadeIn 0.5s forwards; /* Animación de aparición */
         }
 
         .error-message {
-            color: red;
-            font-size: 14px;
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #ffaa99; /* Rojo suave */
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+        .info-message {
+            background-color: rgba(0, 255, 0, 0.2);
+            color: #aaffaa; /* Verde suave */
+            border: 1px solid rgba(0, 255, 0, 0.3);
         }
 
-        .welcome-message {
-            color: green;
-            font-size: 16px;
-            text-align: center;
-            margin-top: 20px;
-            display: none;
+        /* Keyframes para la animación de aparición de mensajes */
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
+        /* AJUSTES PARA LOS LEMAS */
         .created-by {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            color: white;
-            font-size: 12px;
-            text-shadow: 1px 1px 1px black;
+            bottom: 20px;
+            right: 20px;
+            color: rgba(255, 255, 255, 0.9); /* Más visible */
+            font-size: 0.8em;
+            text-shadow: 0 0 5px rgba(0,0,0,0.9); /* Sombra más fuerte para contraste */
+            letter-spacing: 0.5px;
+            z-index: 1; /* Asegura que esté por encima del canvas */
         }
 
         .lema {
             position: fixed;
-            bottom: 10px;
-            left: 10px;
-            color: white;
-            font-size: 16px;
-            text-shadow: 1px 1px 1px black;
+            bottom: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.95); /* Más visible */
+            font-size: 1.1em;
+            text-shadow: 0 0 7px rgba(0,0,0,0.9); /* Sombra más fuerte para contraste */
+            font-weight: 300;
+            z-index: 1; /* Asegura que esté por encima del canvas */
         }
     </style>
 </head>
 <body>
 
-<video id="video-background" autoplay muted loop>
-    <source src="videito.mp4" type="video/mp4">
-    <!-- Puedes agregar más formatos de video aquí para mejorar la compatibilidad -->
-    Tu navegador no admite la etiqueta de video.
-</video>
+<!-- CANVAS PARA EL EFECTO DE LLUVIA Y SOL -->
+<canvas id="rainCanvas"></canvas>
 
 <div class="login-container">
-    <h2>Iniciar sesión</h2>
+    <h2 id="form-title">Iniciar sesión</h2>
+
+    <!-- Formulario de Login -->
     <form id="login-form">
         <div class="form-group">
-            <label for="username">Nombre de usuario:</label>
-            <input type="text" id="username" name="username" required>
+            <label for="login-email">Email:</label>
+            <input type="email" id="login-email" name="email" required placeholder="tu.correo@ejemplo.com">
         </div>
         <div class="form-group">
-            <label for="password">Contraseña:</label>
-            <input type="password" id="password" name="password" required>
-            <span class="show-password" onclick="mostrarContraseña()">Mostrar contraseña</span>
+            <label for="login-password">Contraseña:</label>
+            <input type="password" id="login-password" name="password" required placeholder="Tu contraseña">
+            <span class="show-password" onclick="togglePasswordVisibility('login-password')">Mostrar contraseña</span>
         </div>
         <div class="form-group">
-            <input type="submit" value="Iniciar sesión">
+            <button type="submit" id="loginButton">Vamos a la isla</button>
         </div>
-        <div class="loading" id="loading">
+        <div class="loading" id="login-loading">
+            <!-- Asegúrate de que 'imageng.gif' esté en la misma ubicación o proporciona una URL accesible -->
             <img src="imageng.gif" alt="Cargando...">
         </div>
-        <div class="error-message" id="error-message" style="display: none;"></div>
-        <div class="welcome-message" id="welcome-message"></div>
+        <div class="error-message" id="login-error-message" style="display: none;"></div>
+        <div class="info-message" id="login-info-message" style="display: none;"></div>
+
+        <span class="toggle-link" id="show-signup">¿No tienes cuenta? Regístrate</span>
+        <span class="toggle-link" id="show-reset">¿Olvidaste tu contraseña?</span>
     </form>
+
+    <!-- Formulario de Registro -->
+    <form id="signup-form" style="display: none;">
+        <div class="form-group">
+            <label for="signup-email">Email:</label>
+            <input type="email" id="signup-email" name="email" required placeholder="tu.correo@ejemplo.com">
+        </div>
+        <div class="form-group">
+            <label for="signup-password">Contraseña:</label>
+            <input type="password" id="signup-password" name="password" required placeholder="Mínimo 6 caracteres">
+            <span class="show-password" onclick="togglePasswordVisibility('signup-password')">Mostrar contraseña</span>
+            <p style="font-size: 0.75em; color: rgba(255,255,255,0.8); margin-top: 5px;">Mínimo 6 caracteres.</p>
+        </div>
+        <div class="form-group">
+            <button type="submit">Registrar</button>
+        </div>
+        <div class="loading" id="signup-loading">
+            <img src="imageng.gif" alt="Cargando...">
+        </div>
+        <div class="error-message" id="signup-error-message" style="display: none;"></div>
+        <div class="info-message" id="signup-info-message" style="display: none;"></div>
+
+        <span class="toggle-link" id="show-login-from-signup">Volver al Login</span>
+    </form>
+
+    <!-- Formulario de Restablecimiento de Contraseña -->
+    <form id="password-reset-form" style="display: none;">
+        <div class="form-group">
+            <label for="reset-email">Email:</label>
+            <input type="email" id="reset-email" name="email" required placeholder="tu.correo@ejemplo.com">
+        </div>
+        <div class="form-group">
+            <button type="submit">Enviar Enlace de Restablecimiento</button>
+        </div>
+        <div class="loading" id="reset-loading">
+            <img src="imageng.gif" alt="Cargando...">
+        </div>
+        <div class="error-message" id="reset-error-message" style="display: none;"></div>
+        <div class="info-message" id="reset-info-message" style="display: none;"></div>
+
+        <span class="toggle-link" id="show-login-from-reset">Volver al Login</span>
+    </form>
+
 </div>
 
 <div class="created-by">CREATED BY HACKER 01</div>
 <div class="lema">SEAMOS METODICOS, "MECANICOS YA SOMOS"</div>
 
-<script>
-    // Base de datos de usuarios (simulada)
-    const usuarios = [
-        { nombreUsuario: 'pavon', contraseña: 'gruffi01' },
-        { nombreUsuario: 'rodriguez', contraseña: 'chinotin01' },
-        { nombreUsuario: 'rendon', contraseña: 'minero01' },
-        { nombreUsuario: 'andino', contraseña: 'viejo01' },
-        { nombreUsuario: 'mejia', contraseña: 'mole01' },
-        { nombreUsuario: 'vasquez', contraseña: 'villano01' },
-        { nombreUsuario: 'zeron', contraseña: 'invisible01' },
-        { nombreUsuario: 'varela', contraseña: 'neutron01' },
-        { nombreUsuario: 'duran', contraseña: 'fragmentado01' },
-        { nombreUsuario: 'moss', contraseña: 'kendo01' },
-        { nombreUsuario: 'gamez', contraseña: 'reno01' },
-        { nombreUsuario: 'lagos', contraseña: 'lingo01' },
-        { nombreUsuario: 'soza', contraseña: 'hacker01' },
-        { nombreUsuario: 'cerritos', contraseña: 'borrego01' },
-        { nombreUsuario: 'colindres', contraseña: 'duende01' },
-        { nombreUsuario: 'barahona', contraseña: 'shaggy01' },
-        { nombreUsuario: 'tomas', contraseña: 'brujo01' },
-        { nombreUsuario: 'aguilera', contraseña: 'peter01' },
-        { nombreUsuario: 'zepeda', contraseña: 'zarigueya01' },
-        { nombreUsuario: 'avila', contraseña: 'dobby01' },
-        { nombreUsuario: 'sanchez', contraseña: 'tawaka01' },
-        { nombreUsuario: 'ruz', contraseña: 'ruzo01' },
-        { nombreUsuario: 'zuniga', contraseña: 'churro01' },
-        { nombreUsuario: 'ponce', contraseña: 'kratos01' },
-        { nombreUsuario: 'chavez', contraseña: 'barber01' },
-        { nombreUsuario: 'zamora', contraseña: 'hitman01' },
-        { nombreUsuario: 'padilla', contraseña: 'condorito01' },
-        { nombreUsuario: 'vasquez.v', contraseña: 'chaolin01' },
-        { nombreUsuario: 'estudiante', contraseña: '12345' }
-    ];
+<script type="module">
+    // Importa las funciones necesarias de Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    // Función para verificar las credenciales
-    function verificarCredenciales(nombreUsuario, contraseña) {
-        // Simulamos la verificación con un tiempo de espera
-        return new Promise(resolve => {
-            setTimeout(() => {
-                // Busca el usuario en la base de datos
-                const usuario = usuarios.find(u => u.nombreUsuario === nombreUsuario);
+    // Configuración de Firebase proporcionada por el usuario
+    const firebaseConfig = {
+        apiKey: "AIzaSyAbOVvSQu9EbltRMcW6r-pF5KSSj6GRf7o",
+        authDomain: "formulario-39381.firebaseapp.com",
+        projectId: "formulario-39381",
+        storageBucket: "formulario-39381.firebasestorage.app",
+        messagingSenderId: "665854133608",
+        appId: "1:665854133608:web:9869f23b6c4f458b4402dd",
+        measurementId: "G-4ZNFBM5PZS"
+    };
 
-                // Si el usuario no existe, retorna falso
-                if (!usuario) {
-                    resolve(false);
-                }
+    // Inicializa Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-                // Si la contraseña coincide, retorna verdadero
-                resolve(usuario.contraseña === contraseña);
-            }, 2000); // Tiempo de espera simulado de 2 segundos
+    // --- Referencias a elementos del DOM ---
+    const formTitle = document.getElementById('form-title');
+
+    // Formularios
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const passwordResetForm = document.getElementById('password-reset-form');
+
+    // Inputs de Login
+    const loginEmailInput = document.getElementById('login-email');
+    const loginPasswordInput = document.getElementById('login-password');
+    const loginLoadingDiv = document.getElementById('login-loading');
+    const loginErrorMessageDiv = document.getElementById('login-error-message');
+    const loginInfoMessageDiv = document.getElementById('login-info-message');
+
+    // Inputs de Registro
+    const signupEmailInput = document.getElementById('signup-email');
+    const signupPasswordInput = document.getElementById('signup-password');
+    const signupLoadingDiv = document.getElementById('signup-loading');
+    const signupErrorMessageDiv = document.getElementById('signup-error-message');
+    const signupInfoMessageDiv = document.getElementById('signup-info-message');
+
+    // Inputs de Restablecimiento
+    const resetEmailInput = document.getElementById('reset-email');
+    const resetLoadingDiv = document.getElementById('reset-loading');
+    const resetErrorMessageDiv = document.getElementById('reset-error-message');
+    const resetInfoMessageDiv = document.getElementById('reset-info-message');
+
+    // Links para cambiar de formulario
+    const showSignupLink = document.getElementById('show-signup');
+    const showResetLink = document.getElementById('show-reset');
+    const showLoginFromSignupLink = document.getElementById('show-login-from-signup');
+    const showLoginFromResetLink = document.getElementById('show-login-from-reset');
+
+    // --- Funciones de Utilidad ---
+
+    // Muestra u oculta la contraseña
+    window.togglePasswordVisibility = function(inputId) {
+        const input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+        } else {
+            input.type = "password";
+        }
+    }
+
+    // Muestra un mensaje de estado (éxito/error/info)
+    function showMessage(type, message, targetErrorDiv, targetInfoDiv, targetLoadingDiv) {
+        // Ocultar todos los mensajes y loading
+        if (targetErrorDiv) targetErrorDiv.style.display = 'none';
+        if (targetInfoDiv) targetInfoDiv.style.display = 'none';
+        if (targetLoadingDiv) targetLoadingDiv.style.display = 'none';
+
+        if (type === 'loading') {
+            targetLoadingDiv.style.display = 'block';
+        } else if (type === 'error') {
+            targetErrorDiv.innerText = message;
+            targetErrorDiv.style.display = 'block';
+        } else if (type === 'info') {
+            targetInfoDiv.innerText = message;
+            targetInfoDiv.style.display = 'block';
+        }
+    }
+
+    // Resetea todos los mensajes y campos de un formulario
+    function resetFormState(form) {
+        form.querySelectorAll('input').forEach(input => input.value = '');
+        form.querySelectorAll('.error-message, .info-message, .loading').forEach(el => {
+            el.style.display = 'none';
+            el.style.opacity = '0'; // Reset opacity for animation
+            el.style.transform = 'translateY(10px)'; // Reset transform for animation
         });
     }
 
-    // Función para manejar el envío del formulario
-    document.getElementById('login-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // Evita que el formulario se envíe
+    // --- Funciones para cambiar entre formularios ---
 
-        // Muestra el indicador de carga
-        document.getElementById('loading').style.display = 'block';
+    function showLoginForm() {
+        resetFormState(loginForm);
+        resetFormState(signupForm);
+        resetFormState(passwordResetForm);
 
-        // Obtiene los valores del formulario
-        const nombreUsuario = document.getElementById('username').value;
-        const contraseña = document.getElementById('password').value;
+        loginForm.style.display = 'block';
+        signupForm.style.display = 'none';
+        passwordResetForm.style.display = 'none';
+        formTitle.innerText = 'Iniciar sesión';
+    }
 
-        // Verifica las credenciales
-        verificarCredenciales(nombreUsuario, contraseña)
-            .then(credencialesCorrectas => {
-                // Oculta el indicador de carga
-                document.getElementById('loading').style.display = 'none';
+    function showSignupForm() {
+        resetFormState(loginForm);
+        resetFormState(signupForm);
+        resetFormState(passwordResetForm);
 
-                if (credencialesCorrectas) {
-                    // Muestra un mensaje de bienvenida
-                    document.getElementById('welcome-message').innerText = `¡Bienvenido, ${nombreUsuario}!`;
-                    document.getElementById('welcome-message').style.display = 'block';
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'block';
+        passwordResetForm.style.display = 'none';
+        formTitle.innerText = 'Crear cuenta';
+    }
 
-                    // Redirige al usuario a otra página después de 3 segundos
-                    setTimeout(() => {
-                        window.location.href = 'todo.html';
-                    }, 3000); // 3 segundos
-                } else {
-                    // Muestra un mensaje de error
-                    document.getElementById('error-message').innerText = 'Usuario o contraseña incorrectos.';
-                    document.getElementById('error-message').style.display = 'block';
-                }
-            });
+    function showPasswordResetForm() {
+        resetFormState(loginForm);
+        resetFormState(signupForm);
+        resetFormState(passwordResetForm);
+
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'none';
+        passwordResetForm.style.display = 'block';
+        formTitle.innerText = 'Restablecer contraseña';
+    }
+
+    // --- Manejo de Eventos de Formularios ---
+
+    // Event Listener para Login
+    loginForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        showMessage('loading', '', loginErrorMessageDiv, loginInfoMessageDiv, loginLoadingDiv);
+
+        const email = loginEmailInput.value;
+        const password = loginPasswordInput.value;
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            // Si el login es exitoso, activa la animación del sol
+            activateSunAnimation(); 
+            showMessage('info', `¡Bienvenido! Redirigiendo...`, loginErrorMessageDiv, loginInfoMessageDiv, loginLoadingDiv);
+            
+            // Retrasa la redirección para permitir que la animación del sol se vea
+            setTimeout(() => {
+                window.location.href = 'todo.html'; // Redirige a tu página principal
+            }, 3000); // 3 segundos para la animación del sol
+
+        } catch (error) {
+            console.error("Error al iniciar sesión:", error);
+            let message = 'Error desconocido al iniciar sesión.';
+            switch (error.code) {
+                case 'auth/invalid-email':
+                    message = 'El formato del correo electrónico es inválido.';
+                    break;
+                case 'auth/user-disabled':
+                    message = 'Esta cuenta ha sido deshabilitada.';
+                    break;
+                case 'auth/user-not-found':
+                case 'auth/wrong-password':
+                    message = 'Correo electrónico o contraseña incorrectos.';
+                    break;
+                case 'auth/too-many-requests':
+                    message = 'Demasiados intentos de inicio de sesión fallidos. Inténtelo más tarde.';
+                    break;
+                default:
+                    message = `Error de autenticación: ${error.message}`;
+            }
+            showMessage('error', message, loginErrorMessageDiv, loginInfoMessageDiv, loginLoadingDiv);
+        }
     });
 
-    // Función para mostrar/ocultar la contraseña
-    function mostrarContraseña() {
-        const passwordInput = document.getElementById('password');
-        if (passwordInput.type === "password") {
-            passwordInput.type = "text";
-        } else {
-            passwordInput.type = "password";
+    // Event Listener para Registro
+    signupForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        showMessage('loading', '', signupErrorMessageDiv, signupInfoMessageDiv, signupLoadingDiv);
+
+        const email = signupEmailInput.value;
+        const password = signupPasswordInput.value;
+
+        try {
+            await createUserWithEmailAndPassword(auth, email, password);
+            showMessage('info', `¡Cuenta creada exitosamente! Puedes iniciar sesión.`, signupErrorMessageDiv, signupInfoMessageDiv, signupLoadingDiv);
+            setTimeout(() => {
+                showLoginForm(); // Vuelve al formulario de login
+            }, 2000);
+        } catch (error) {
+            console.error("Error al registrar usuario:", error);
+            let message = 'Error desconocido al registrar.';
+            switch (error.code) {
+                case 'auth/email-already-in-use':
+                    message = 'El correo electrónico ya está registrado.';
+                    break;
+                case 'auth/invalid-email':
+                    message = 'El formato del correo electrónico es inválido.';
+                    break;
+                case 'auth/weak-password':
+                    message = 'La contraseña es demasiado débil (mínimo 6 caracteres).';
+                    break;
+                default:
+                    message = `Error de registro: ${error.message}`;
+            }
+            showMessage('error', message, signupErrorMessageDiv, signupInfoMessageDiv, signupLoadingDiv);
+        }
+    });
+
+    // Event Listener para Restablecimiento de Contraseña
+    passwordResetForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        showMessage('loading', '', resetErrorMessageDiv, resetInfoMessageDiv, resetLoadingDiv);
+
+        const email = resetEmailInput.value;
+
+        try {
+            await sendPasswordResetEmail(auth, email);
+            showMessage('info', `Se ha enviado un enlace de restablecimiento a ${email}. Revisa tu bandeja de entrada.`, resetErrorMessageDiv, resetInfoMessageDiv, resetLoadingDiv);
+            setTimeout(() => {
+                showLoginForm(); // Vuelve al formulario de login
+            }, 3000);
+        } catch (error) {
+            console.error("Error al enviar restablecimiento de contraseña:", error);
+            let message = 'Error desconocido al restablecer contraseña.';
+            switch (error.code) {
+                case 'auth/invalid-email':
+                    message = 'El formato del correo electrónico es inválido.';
+                    break;
+                case 'auth/user-not-found':
+                    message = 'No existe un usuario con este correo electrónico.';
+                    break;
+                default:
+                    message = `Error de restablecimiento: ${error.message}`;
+            }
+            showMessage('error', message, resetErrorMessageDiv, resetInfoMessageDiv, resetLoadingDiv);
+        }
+    });
+
+    // --- Event Listeners para cambiar de vista ---
+    showSignupLink.addEventListener('click', showSignupForm);
+    showResetLink.addEventListener('click', showPasswordResetForm);
+    showLoginFromSignupLink.addEventListener('click', showLoginForm);
+    showLoginFromResetLink.addEventListener('click', showLoginForm);
+
+    // Asegúrate de que el formulario de login se muestre al cargar la página
+    showLoginForm();
+
+
+    // --- LÓGICA DEL CANVAS DE LLUVIA, RAYOS Y SOL ---
+    const canvas = document.getElementById('rainCanvas');
+    const ctx = canvas.getContext('2d');
+    const loginButton = document.getElementById('loginButton'); 
+
+    let drops = [];
+    const numDrops = 150; // Cantidad de gotas de lluvia
+
+    // Variables para el sol naciente
+    let showSun = false;
+    let sunProgress = 0; // 0 al 1, representa el avance de la animación del sol
+    const SUN_ANIMATION_DURATION = 2000; // 2 segundos para que el sol suba
+
+    // Variables para los rayos
+    let isLightningActive = false; // Controla si los rayos están activos
+    let lightningStartTime = 0;    // Momento en que empieza el efecto de rayo
+    const LIGHTNING_DISPLAY_DURATION = 200; // Duración del destello del relámpago en milisegundos
+
+    // Función para ajustar el tamaño del canvas
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    // Objeto para cada gota de lluvia
+    function Drop() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.length = Math.random() * 15 + 5;
+        this.speed = Math.random() * 5 + 3;
+        this.opacity = Math.random() * 0.5 + 0.3;
+        this.width = Math.random() * 0.8 + 0.2;
+    }
+
+    // Inicializar las gotas
+    function initRain() {
+        drops = [];
+        for (let i = 0; i < numDrops; i++) {
+            drops.push(new Drop());
         }
     }
+
+    // Dibuja las gotas de lluvia
+    function drawRain() {
+        ctx.strokeStyle = `rgba(174,194,224, ${drops[0].opacity})`; // Color azulado normal
+        ctx.lineWidth = drops[0].width;
+        ctx.lineCap = 'round';
+
+        for (let i = 0; i < numDrops; i++) {
+            const drop = drops[i];
+            ctx.beginPath();
+            ctx.moveTo(drop.x, drop.y);
+            ctx.lineTo(drop.x, drop.y + drop.length);
+            ctx.stroke();
+        }
+    }
+
+    // Función para dibujar un rayo que se extiende por la pantalla (con bifurcaciones)
+    function drawScreenLightningBolt(startX, startY, endY, maxDeviation, maxDepth = 2, currentDepth = 0) {
+        if (currentDepth > maxDepth) return;
+
+        ctx.strokeStyle = `rgba(255, 255, 255, ${1 - (currentDepth / maxDepth) * 0.4})`; // Se desvanece con la profundidad
+        ctx.lineWidth = 3 - (currentDepth * 0.8); // Se hace más fino con la profundidad
+        ctx.lineJoin = 'round';
+        ctx.miterLimit = 10;
+
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+
+        let currentX = startX;
+        let currentY = startY;
+
+        // El rayo viaja hacia abajo
+        while (currentY < endY) {
+            let nextX = currentX + (Math.random() - 0.5) * maxDeviation;
+            let nextY = currentY + (Math.random() * 20 + 15); // Segmentos más largos
+
+            // Asegurarse de que el rayo se mantenga dentro de los límites horizontales
+            nextX = Math.max(0, Math.min(canvas.width, nextX));
+
+            if (nextY > endY) {
+                nextY = endY; // Asegurarse de que termine en o antes de endY
+            }
+
+            ctx.lineTo(nextX, nextY);
+            currentX = nextX;
+            currentY = nextY;
+
+            // Bifurcación aleatoria
+            if (Math.random() < 0.15 && currentDepth < maxDepth) {
+                drawScreenLightningBolt(currentX, currentY, endY, maxDeviation * 0.7, maxDepth, currentDepth + 1);
+                // Opcional: reiniciar el path actual después de la bifurcación
+                ctx.beginPath();
+                ctx.moveTo(currentX, currentY);
+                ctx.strokeStyle = `rgba(255, 255, 255, ${1 - (currentDepth / maxDepth) * 0.4})`;
+                ctx.lineWidth = 3 - (currentDepth * 0.8);
+            }
+        }
+        ctx.stroke();
+    }
+
+
+    // Función para dibujar el sol
+    function drawSun() {
+        if (!showSun) return;
+
+        const centerX = canvas.width / 2;
+        // El sol sube desde debajo de la pantalla (initialY) hasta el centro (finalY)
+        const initialY = canvas.height + 100; // Empieza bien abajo
+        const finalY = canvas.height * 0.7; // Posición final del sol (un poco más arriba del centro inferior)
+        const currentY = initialY - (initialY - finalY) * sunProgress;
+
+        const maxRadius = Math.min(canvas.width, canvas.height) / 3; // Radio máximo
+        const currentRadius = maxRadius * sunProgress;
+
+        // Dibujar el disco solar
+        ctx.beginPath();
+        ctx.arc(centerX, currentY, currentRadius, 0, Math.PI * 2);
+        const gradient = ctx.createRadialGradient(centerX, currentY, 0, centerX, currentY, currentRadius);
+        gradient.addColorStop(0, 'rgba(255, 255, 150, 1)'); // Centro brillante
+        gradient.addColorStop(0.5, 'rgba(255, 200, 0, 0.8)'); // Naranja brillante
+        gradient.addColorStop(1, 'rgba(255, 165, 0, 0)'); // Desvanecer al borde
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        // Dibujar los rayos (más simples para el efecto resplandeciente)
+        ctx.strokeStyle = `rgba(255, 220, 0, ${sunProgress * 0.5})`; // Rayos más brillantes con el progreso
+        ctx.lineWidth = 2;
+        const numRays = 30;
+        for (let i = 0; i < numRays; i++) {
+            const angle = (Math.PI * 2 / numRays) * i;
+            const rayLength = currentRadius * (1 + Math.random() * 0.5); // Longitud variable
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX + Math.cos(angle) * currentRadius, currentY + Math.sin(angle) * currentRadius);
+            ctx.lineTo(centerX + Math.cos(angle) * (currentRadius + rayLength * sunProgress), currentY + Math.sin(angle) * (currentRadius + rayLength * sunProgress));
+            ctx.stroke();
+        }
+    }
+
+
+    // Actualizar la posición de las gotas, el progreso del sol y los rayos
+    function updateAnimation() {
+        // Actualizar la lluvia
+        for (let i = 0; i < numDrops; i++) {
+            const drop = drops[i];
+            drop.y += drop.speed;
+            if (drop.y > canvas.height) {
+                drop.y = -drop.length; // Empieza por encima de la pantalla
+                drop.x = Math.random() * canvas.width;
+            }
+        }
+
+        // Actualizar el progreso del sol si está activo
+        if (showSun && sunProgress < 1) {
+            sunProgress += (1 / SUN_ANIMATION_DURATION) * 16; // Incremento para 60fps aprox (1000ms/60fps)
+            if (sunProgress > 1) sunProgress = 1;
+        }
+
+        // Desactivar los rayos si ya pasó la duración
+        if (isLightningActive && (Date.now() - lightningStartTime >= LIGHTNING_DISPLAY_DURATION)) {
+            isLightningActive = false;
+        }
+    }
+
+    // Función para activar la animación del sol
+    function activateSunAnimation() {
+        showSun = true;
+        sunProgress = 0; // Reinicia el progreso para una nueva animación
+        isLightningActive = false; // Asegura que los rayos se detengan si estaban activos
+    }
+
+    // Bucle de animación principal
+    function animateRainAndSun() {
+        updateAnimation(); // Actualiza lluvia, sol y estado de rayos
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpia el canvas en cada frame
+
+        canvas.style.backgroundColor = '#0d0d0d'; // Fondo de lluvia constante
+
+        drawRain(); // Dibuja la lluvia
+
+        // Dibuja el relámpago si está activo y dentro de la duración
+        if (isLightningActive) {
+            // Un destello brillante sobre todo el canvas
+            const flashOpacity = 1 - (Date.now() - lightningStartTime) / LIGHTNING_DISPLAY_DURATION;
+            ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, flashOpacity * 0.7)})`; // Fade out
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Dibujar múltiples relámpagos por toda la pantalla
+            // MODIFICADO: Reducida la cantidad de rayos por flash
+            const numBoltsInFlash = Math.floor(Math.random() * 2) + 1; // 1 a 2 rayos por flash (antes 2 a 4)
+            for(let i = 0; i < numBoltsInFlash; i++) {
+                drawScreenLightningBolt(
+                    Math.random() * canvas.width, // Posición X aleatoria
+                    0, // Siempre desde la parte superior
+                    canvas.height, // Cae hasta la parte inferior
+                    50 // Desviación lateral
+                );
+            }
+        }
+
+        drawSun();  // Dibuja el sol (si está activo) - siempre se dibuja después de la lluvia/rayos
+                    // para que el sol esté "encima" de ellos si la transición ocurre.
+
+        requestAnimationFrame(animateRainAndSun); // Llama a la función en el siguiente frame
+    }
+
+    // Event Listeners para el canvas y el botón de login
+    window.addEventListener('resize', resizeCanvas);
+    
+    // Listener para el hover del botón "Vamos a la isla" (loginButton)
+    loginButton.addEventListener('mouseover', () => {
+        isLightningActive = true;
+        lightningStartTime = Date.now(); // Reinicia el temporizador para el destello
+    });
+
+    loginButton.addEventListener('mouseout', () => {
+        // Opcional: Detener el relámpago inmediatamente al salir del botón
+        // isLightningActive = false; 
+    });
+
+
+    // Inicializar y empezar la animación
+    resizeCanvas(); // Establece el tamaño inicial
+    initRain();     // Crea las gotas de lluvia
+    animateRainAndSun();  // Inicia el bucle de animación (ahora maneja lluvia, rayos y sol)
 </script>
 
 </body>
