@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Reportes de Trabajo</title>
+    <!-- Incluye Tailwind CSS para un estilo fácil y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define la fuente Inter para todo el documento */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Estilo para los campos de entrada */
+        .input-line {
+            outline: none; /* Quita el contorno al enfocar */
+            border: none; /* Reinicia todos los bordes por defecto */
+            border-bottom: 1px solid black; /* ¡Borde inferior visible, como una línea! */
+            width: 100%;
+            padding: 2px 4px; /* Ajusta el padding para que el texto esté sobre la línea */
+            background-color: white; /* Fondo blanco para que la línea se vea claramente */
+            box-sizing: border-box; /* Incluye el padding en el ancho */
+            line-height: normal; /* Asegura un espaciado de línea normal */
+        }
+        /* Estilo adicional para alinear el texto de la etiqueta con la línea del input */
+        .items-baseline p {
+            padding-bottom: 2px;
+        }
+
+        /* Estilos específicos para la impresión */
+        @media print {
+            /* Define el tamaño de la página como carta y los márgenes */
+            @page {
+                size: letter; /* Formato de papel Carta */
+                margin: 0.5in 0.75in; /* Márgenes ajustados: superior/inferior 0.5", izquierdo/derecho 0.75" */
+            }
+
+            body {
+                margin: 0; /* Elimina márgenes del body en la impresión */
+                padding: 0;
+            }
+
+            /* Asegura que el contenedor principal ocupe el ancho adecuado de la página */
+            .print-container {
+                width: 7in; /* Ancho del contenido para un formato carta (8.5in - 2*0.75in margenes) */
+                border: none; /* Elimina bordes y sombras para la impresión */
+                box-shadow: none;
+                margin: 0 auto; /* Centra el contenido en la página */
+                box-sizing: border-box; /* Asegura que el padding se incluya en el ancho */
+
+                /* Ajustes de escala y espaciado para que quepa en una sola página */
+                font-size: 0.7rem; /* Reduce el tamaño de fuente general AÚN MÁS */
+            }
+
+            .print-container .text-sm { /* Afecta el texto principal que tiene text-sm */
+                font-size: 0.7rem !important;
+                line-height: 1.15 !important; /* Ajusta el interlineado ligeramente */
+            }
+
+            .print-container .text-xs { /* Afecta el texto más pequeño */
+                font-size: 0.6rem !important;
+                line-height: 1.1 !important;
+            }
+
+            .print-container .text-base { /* Afecta el título de "REPORTE DE TRABAJO EFECTUADO" */
+                font-size: 0.85rem !important;
+            }
+
+            /* Reducir el padding interno del contenedor principal para print */
+            .print-container {
+                padding: 0.35in !important; /* Reduce el padding del div contenedor AÚN MÁS */
+            }
+
+            /* Reducir los márgenes y espaciados generales AÚN MÁS */
+            .print-container div { /* Aplicar a todos los divs dentro del contenedor principal para reducir espacio */
+                margin-bottom: 0.25rem !important; /* Reduce los márgenes inferiores */
+            }
+            .print-container .mb-8 {
+                margin-bottom: 0.6rem !important;
+            }
+            .print-container .mb-6 {
+                margin-bottom: 0.4rem !important;
+            }
+            .print-container .mb-2 {
+                margin-bottom: 0.15rem !important;
+            }
+            /* AUMENTADO AÚN MÁS: Más espacio para las firmas */
+            .print-container .mt-12 {
+                margin-top: 1.8rem !important; /* Incrementado para más espacio */
+            }
+            .print-container .space-y-2 > :not([hidden]) ~ :not([hidden]) {
+                margin-top: 0.15rem !important; /* Reduce el espaciado vertical entre elementos flexibles */
+            }
+            .input-line {
+                padding: 0.5px 2px !important; /* Reduce el padding de los inputs para ahorrar espacio vertical */
+                height: auto; /* Permite que la altura se ajuste al contenido */
+            }
+            .items-baseline p {
+                padding-bottom: 0.5px !important; /* Reduce el padding inferior para alinear mejor */
+            }
+            .print-container .flex-col {
+                gap: 0.15rem !important; /* Reduce el gap en columnas flexibles */
+            }
+            
+            /* Ajustes específicos para las secciones de firmas inferiores */
+            /* AUMENTADO AÚN MÁS: Más espacio para las firmas */
+            .print-container .mt-12 + .flex {
+                margin-top: 1.7rem !important; /* Incrementado para más espacio */
+            }
+
+            /* Oculta los elementos de control y navegación al imprimir */
+            .print-button, .navigation-buttons, .save-status {
+                display: none !important;
+            }
+
+            /* Asegura que solo el print-container sea visible al imprimir */
+            body > *:not(.print-container) {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-start p-4">
+
+    <!-- Mensaje de estado de guardado -->
+    <div id="saveStatus" class="fixed top-4 left-1/2 -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hidden z-50 save-status">
+        Guardando...
+    </div>
+
+    <!-- Controles de Navegación -->
+    <div class="w-full max-w-2xl bg-white p-4 rounded-lg shadow-md mb-4 navigation-buttons flex justify-around">
+        <button id="newReportBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+            Crear Nuevo Reporte
+        </button>
+        <button id="viewReportsBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+            Ver Reportes Guardados
+        </button>
+        <div id="userIdDisplay" class="text-gray-700 text-sm flex items-center">
+            ID de Usuario: <span id="currentUserId" class="ml-1 font-semibold">Cargando...</span>
+        </div>
+    </div>
+
+    <!-- Vista de Lista de Reportes Guardados -->
+    <div id="listView" class="w-full max-w-2xl bg-white p-8 rounded-lg shadow-md hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Reportes Guardados</h2>
+        <div id="reportsList" class="space-y-4">
+            <!-- Los reportes se cargarán aquí dinámicamente -->
+            <p class="text-gray-500 text-center">Cargando reportes...</p>
+        </div>
+    </div>
+
+    <!-- Vista del Formulario de Reporte (inicialmente visible) -->
+    <div id="reportFormView" class="w-full max-w-2xl bg-white p-8 rounded-lg shadow-md print-container">
+        <div class="text-center mb-8">
+            <p class="font-bold">FUERZAS ARMADAS DE HONDURAS</p>
+            <p class="font-bold">FUERZA AÉREA HONDUREÑA</p>
+            <p class="text-xs">Base Aérea "Coronel Hernán Acosta Mejía"</p>
+        </div>
+
+        <div class="text-center mb-6">
+            <p class="font-bold text-base">REPORTE DE TRABAJO EFECTUADO</p>
+        </div>
+
+        <div class="flex flex-col space-y-2 mb-6">
+            <div class="flex justify-between items-end">
+                <div class="flex-1 mr-4 flex items-baseline">
+                    <p class="inline-block mr-1 whitespace-nowrap">El taller / sub-sección de</p>
+                    <input type="text" id="taller" class="input-line flex-grow">
+                </div>
+                <div class="flex-1 flex items-baseline">
+                    <p class="inline-block mr-1 whitespace-nowrap">notifica que el trabajo</p>
+                    <input type="text" id="trabajo" class="input-line flex-grow">
+                </div>
+            </div>
+            <div class="flex justify-between items-end">
+                <div class="flex-1 mr-4 flex items-baseline">
+                    <p class="inline-block mr-1 whitespace-nowrap">con N° de orden de trabajo</p>
+                    <input type="text" id="ordenTrabajo" class="input-line flex-grow">
+                </div>
+                <div class="flex-1 flex items-baseline">
+                    <p class="inline-block mr-1 whitespace-nowrap">Tiempo Total</p>
+                    <input type="text" id="tiempoTotal" class="input-line flex-grow">
+                </div>
+            </div>
+            <div class="flex justify-between items-end">
+                <div class="flex-1 mr-4 flex items-baseline">
+                    <p class="inline-block mr-1 whitespace-nowrap">Matricula de la aeronave</p>
+                    <input type="text" id="matriculaAeronave" class="input-line flex-grow">
+                </div>
+                <div class="flex-1 flex items-baseline">
+                    <input type="text" id="campoAdicionalMatricula" class="input-line flex-grow">
+                </div>
+            </div>
+            <div class="flex justify-between items-end">
+                <div class="flex-1 mr-4 flex items-baseline">
+                    <p class="inline-block mr-1 whitespace-nowrap">Fecha y hora de inicio</p>
+                    <input type="datetime-local" id="fechaHoraInicio" class="input-line flex-grow">
+                </div>
+                <div class="flex-1 flex items-baseline">
+                    <p class="inline-block mr-1 whitespace-nowrap">terminado</p>
+                    <input type="datetime-local" id="fechaHoraTerminado" class="input-line flex-grow">
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <p class="mb-1">Discrepancia:</p>
+            <input type="text" id="discrepancia1" class="input-line mb-2">
+            <input type="text" id="discrepancia2" class="input-line mb-2">
+            <input type="text" id="discrepancia3" class="input-line mb-2">
+            <input type="text" id="discrepancia4" class="input-line mb-2">
+            <input type="text" id="discrepancia5" class="input-line mb-2">
+            <input type="text" id="discrepancia6" class="input-line mb-2">
+        </div>
+
+        <div class="mb-6">
+            <p class="mb-1">Acción correctiva:</p>
+            <input type="text" id="accionCorrectiva1" class="input-line mb-2">
+            <input type="text" id="accionCorrectiva2" class="input-line mb-2">
+            <input type="text" id="accionCorrectiva3" class="input-line mb-2">
+            <input type="text" id="accionCorrectiva4" class="input-line mb-2">
+            <input type="text" id="accionCorrectiva5" class="input-line mb-2">
+        </div>
+
+        <div class="flex flex-col space-y-2 mb-6">
+            <div class="flex justify-between items-end">
+                <div class="flex-1 mr-4 flex items-baseline">
+                    <p class="inline-block mr-1 whitespace-nowrap">Cantidad de horas</p>
+                    <input type="number" id="cantidadHoras" class="input-line flex-grow">
+                </div>
+                <div class="flex-1 flex items-baseline">
+                    <p class="inline-block mr-1 whitespace-nowrap">cantidad de personal</p>
+                    <input type="number" id="cantidadPersonal" class="input-line flex-grow">
+                </div>
+            </div>
+            <div class="flex flex-col items-start mt-4">
+                <p class="inline-block mr-1 whitespace-nowrap">Material que se utilizó</p>
+                <input type="text" id="materialUtilizado1" class="input-line mt-2">
+                <input type="text" id="materialUtilizado2" class="input-line mt-2">
+            </div>
+        </div>
+
+        <div class="flex justify-between mt-12 mb-8 text-center">
+            <div class="flex-1 flex flex-col items-center mx-2">
+                <input type="text" id="tecnico1" class="input-line w-full mb-2">
+                <p class="mt-2 font-bold">TÉCNICO(S) ESPECIALISTA(S)</p>
+            </div>
+            <div class="flex-1 flex flex-col items-center mx-2">
+                <input type="text" id="tecnico2" class="input-line w-full mb-2">
+                <p class="mt-2 font-bold">TÉCNICO(S) ESPECIALISTA(S)</p>
+            </div>
+        </div>
+
+        <div class="flex justify-between mt-12 text-center">
+            <div class="flex-1 flex flex-col items-center mx-2">
+                <input type="text" id="supervisor" class="input-line w-full mb-2">
+                <p class="mt-2 font-bold">SUPERVISOR</p>
+            </div>
+            <div class="flex-1 flex flex-col items-center mx-2">
+                <input type="text" id="inspector" class="input-line w-full mb-2">
+                <p class="mt-2 font-bold">INSPECTOR</p>
+            </div>
+        </div>
+
+        <div class="flex justify-between mt-12 text-center">
+            <div class="flex-1 flex flex-col items-center mx-2">
+                <input type="text" id="jefeTaller" class="input-line w-full mb-2">
+                <p class="mt-2 font-bold">JEFE TALLER / SECCION</p>
+            </div>
+            <div class="flex-1 flex flex-col items-center mx-2">
+                <input type="text" id="jefeLogistica" class="input-line w-full mb-2">
+                <p class="mt-2 font-bold">JEFE DE LOGISTICA A-4</p>
+            </div>
+        </div>
+        
+        <!-- El botón de Guardar Reporte ha sido eliminado de aquí -->
+    </div>
+
+    <!-- Botón de imprimir (ahora también guarda) -->
+    <div class="fixed bottom-4 right-4 print-button">
+        <button id="printReportFromFormBtn"
+                class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-lg">
+            Imprimir y Guardar Reporte
+        </button>
+    </div>
+
+
+    <script type="module">
+        // Importa las funciones necesarias de Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Variables globales proporcionadas por el entorno de Canvas
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyCDZtu6SLdKw0IGLWfA1leqwsUXxVwefNg",
+            authDomain: "ordenes-de-trabajo-6d1f7.firebaseapp.com",
+            projectId: "ordenes-de-trabajo-6d1f7",
+            storageBucket: "ordenes-de-trabajo-6d1f7.firebasestorage.app",
+            messagingSenderId: "800797919123",
+            appId: "1:800797919123:web:a0c7c95943f10e1c588a66",
+            measurementId: "G-TS2MJF4QCX"
+        };
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
+        
+        let db;
+        let auth;
+        let userId;
+        let currentReportId = null; // Para saber si estamos editando un reporte existente o creando uno nuevo
+
+        // Referencias a los elementos del DOM
+        const saveStatusDiv = document.getElementById('saveStatus');
+        const newReportBtn = document.getElementById('newReportBtn');
+        const viewReportsBtn = document.getElementById('viewReportsBtn');
+        // const saveReportBtn = document.getElementById('saveReportBtn'); // Eliminado: Ya no se necesita este botón
+        const printReportFromFormBtn = document.getElementById('printReportFromFormBtn'); // Botón de imprimir del formulario
+        const reportFormView = document.getElementById('reportFormView');
+        const listView = document.getElementById('listView');
+        const reportsListDiv = document.getElementById('reportsList');
+        const currentUserIdSpan = document.getElementById('currentUserId');
+
+        // Función para mostrar el estado de guardado
+        function showSaveStatus(message, isError = false) {
+            saveStatusDiv.textContent = message;
+            saveStatusDiv.classList.remove('hidden', 'bg-blue-500', 'bg-red-500');
+            saveStatusDiv.classList.add(isError ? 'bg-red-500' : 'bg-blue-500');
+        }
+
+        // Función para ocultar el estado de guardado
+        function hideSaveStatus() {
+            saveStatusDiv.classList.add('hidden');
+        }
+
+        // Función para añadir/actualizar un documento a Firestore con reintentos
+        async function saveDocumentWithRetry(collectionRef, docData, docId = null, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    if (docId) {
+                        await setDoc(doc(collectionRef, docId), docData, { merge: true });
+                        return true; // Éxito en actualización
+                    } else {
+                        const newDocRef = await addDoc(collectionRef, docData);
+                        return newDocRef.id; // Éxito en creación, devuelve el ID
+                    }
+                } catch (error) {
+                    if (i < retries - 1) {
+                        console.warn(`Intento ${i + 1} fallido. Reintentando en ${delay * Math.pow(2, i)}ms...`, error);
+                        await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+                    } else {
+                        console.error("Error al guardar en Firestore después de varios reintentos:", error);
+                        throw error; // Propaga el error final
+                    }
+                }
+            }
+        }
+
+        // Función para eliminar un documento de Firestore con reintentos
+        async function deleteDocumentWithRetry(collectionRef, docId, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    await deleteDoc(doc(collectionRef, docId));
+                    return true;
+                } catch (error) {
+                    if (i < retries - 1) {
+                        console.warn(`Intento ${i + 1} de eliminación fallido. Reintentando en ${delay * Math.pow(2, i)}ms...`, error);
+                        await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+                    } else {
+                        console.error("Error al eliminar de Firestore después de varios reintentos:", error);
+                        throw error;
+                    }
+                }
+            }
+        }
+
+        // --- Funciones de UI y Navegación ---
+
+        // Muestra u oculta las vistas
+        function displayView(viewId) {
+            reportFormView.classList.add('hidden');
+            listView.classList.add('hidden');
+            printReportFromFormBtn.classList.add('hidden'); // Ocultar el botón de imprimir del formulario por defecto
+
+            if (viewId === 'reportFormView') {
+                reportFormView.classList.remove('hidden');
+                printReportFromFormBtn.classList.remove('hidden');
+            } else if (viewId === 'listView') {
+                listView.classList.remove('hidden');
+            }
+        }
+
+        // Recopila los datos del formulario en un objeto
+        function collectFormData() {
+            const data = {};
+            const inputs = reportFormView.querySelectorAll('.input-line');
+            inputs.forEach(input => {
+                data[input.id] = input.value;
+            });
+            return data;
+        }
+
+        // Carga datos en el formulario
+        function loadReport(reportData, id) {
+            currentReportId = id;
+            const inputs = reportFormView.querySelectorAll('.input-line');
+            inputs.forEach(input => {
+                input.value = reportData[input.id] || '';
+            });
+            displayView('reportFormView');
+            // saveReportBtn.textContent = 'Actualizar Reporte'; // Eliminado
+        }
+
+        // Limpia el formulario para un nuevo reporte
+        function clearForm() {
+            currentReportId = null;
+            const inputs = reportFormView.querySelectorAll('.input-line');
+            inputs.forEach(input => {
+                input.value = '';
+            });
+            displayView('reportFormView');
+            // saveReportBtn.textContent = 'Guardar Reporte'; // Eliminado
+        }
+
+        // --- Funciones de Guardado y Eliminación ---
+
+        // Guarda o actualiza un reporte
+        async function handleSaveReport() {
+            showSaveStatus(currentReportId ? 'Actualizando reporte...' : 'Guardando nuevo reporte...');
+            const reportData = collectFormData();
+            reportData.lastModified = new Date().toISOString(); // Marca de tiempo de última modificación
+            reportData.userId = userId; // Asocia el reporte al usuario actual
+
+            try {
+                if (currentReportId) {
+                    await saveDocumentWithRetry(collection(db, `artifacts/${appId}/users/${userId}/reports`), reportData, currentReportId);
+                    showSaveStatus('Reporte actualizado exitosamente.', false);
+                } else {
+                    const newId = await saveDocumentWithRetry(collection(db, `artifacts/${appId}/users/${userId}/reports`), reportData);
+                    currentReportId = newId; // Establecer el ID si es un nuevo reporte
+                    showSaveStatus('Reporte guardado exitosamente.', false);
+                }
+                return true; // Indica que el guardado fue exitoso
+            } catch (error) {
+                console.error("Error al guardar/actualizar el reporte:", error);
+                showSaveStatus('Error al guardar el reporte.', true);
+                return false; // Indica que el guardado falló
+            } finally {
+                setTimeout(hideSaveStatus, 1500); // Ocultar el mensaje después de un tiempo
+            }
+        }
+
+        // Elimina un reporte
+        async function handleDeleteReport(id) {
+            const confirmed = window.confirm("¿Estás seguro de que quieres eliminar este reporte? Esta acción no se puede deshacer.");
+            if (!confirmed) return;
+
+            showSaveStatus('Eliminando reporte...', false);
+            try {
+                await deleteDocumentWithRetry(collection(db, `artifacts/${appId}/users/${userId}/reports`), id);
+                showSaveStatus('Reporte eliminado exitosamente.', false);
+                setTimeout(hideSaveStatus, 1500);
+            } catch (error) {
+                console.error("Error al eliminar el reporte:", error);
+                showSaveStatus('Error al eliminar el reporte.', true);
+                setTimeout(hideSaveStatus, 3000);
+            }
+        }
+
+        // --- Renderizado de Lista de Reportes ---
+
+        // Renderiza la lista de reportes desde Firestore
+        function renderReportsList(reports) {
+            reportsListDiv.innerHTML = ''; // Limpiar la lista existente
+            if (reports.length === 0) {
+                reportsListDiv.innerHTML = '<p class="text-gray-500 text-center">No hay reportes guardados aún.</p>';
+                return;
+            }
+
+            reports.forEach(report => {
+                const reportItem = document.createElement('div');
+                reportItem.className = 'bg-gray-50 p-4 rounded-lg shadow-sm flex justify-between items-center';
+                
+                // Usar la Orden de Trabajo como título si existe, sino un fallback
+                const reportTitle = report.ordenTrabajo ? `Orden N°: ${report.ordenTrabajo}` : `Reporte (${new Date(report.lastModified).toLocaleDateString()})`;
+
+                reportItem.innerHTML = `
+                    <div class="flex-1">
+                        <p class="font-bold text-gray-800">${reportTitle}</p>
+                        <p class="text-xs text-gray-600">Última modificación: ${new Date(report.lastModified).toLocaleString()}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-1 px-3 rounded edit-btn" data-id="${report.id}">Editar</button>
+                        <button class="bg-red-500 hover:bg-red-600 text-white text-sm py-1 px-3 rounded delete-btn" data-id="${report.id}">Eliminar</button>
+                        <button class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-1 px-3 rounded print-list-btn" data-id="${report.id}">Imprimir</button>
+                    </div>
+                `;
+                reportsListDiv.appendChild(reportItem);
+            });
+
+            // Añadir event listeners a los nuevos botones
+            reportsListDiv.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.target.dataset.id;
+                    const selectedReport = reports.find(r => r.id === id);
+                    if (selectedReport) {
+                        loadReport(selectedReport, id);
+                    }
+                });
+            });
+
+            reportsListDiv.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    handleDeleteReport(e.target.dataset.id);
+                });
+            });
+
+            reportsListDiv.querySelectorAll('.print-list-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.target.dataset.id;
+                    const selectedReport = reports.find(r => r.id === id);
+                    if (selectedReport) {
+                        loadReport(selectedReport, id); // Carga el reporte en el formulario
+                        // Espera un momento para que el DOM se actualice antes de imprimir
+                        setTimeout(() => {
+                            window.print();
+                        }, 100); 
+                    }
+                });
+            });
+        }
+
+        // --- Inicialización y Event Listeners Globales ---
+
+        window.onload = async function() {
+            try {
+                // Inicializar Firebase
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Autenticar al usuario
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("Autenticado con token personalizado.");
+                } else {
+                    await signInAnonymously(auth);
+                    console.log("Autenticado de forma anónima.");
+                }
+                userId = auth.currentUser?.uid || crypto.randomUUID(); // Usar uid o un UUID para anónimos
+                currentUserIdSpan.textContent = userId; // Mostrar el ID de usuario
+
+                // Configurar listener en tiempo real para los reportes del usuario
+                const userReportsCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/reports`);
+                // Firestore no soporta orderBy si no hay índice, así que se ordenará en cliente.
+                onSnapshot(userReportsCollectionRef, (snapshot) => {
+                    const fetchedReports = [];
+                    snapshot.forEach(doc => {
+                        fetchedReports.push({ id: doc.id, ...doc.data() });
+                    });
+                    // Ordenar reportes por lastModified más reciente primero
+                    fetchedReports.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+                    renderReportsList(fetchedReports);
+                }, (error) => {
+                    console.error("Error al obtener actualizaciones en tiempo real de reportes:", error);
+                    reportsListDiv.innerHTML = '<p class="text-red-500 text-center">Error al cargar reportes. Por favor, recarga la página.</p>';
+                });
+
+                // Asignar Event Listeners a los botones de navegación
+                newReportBtn.addEventListener('click', clearForm);
+                viewReportsBtn.addEventListener('click', () => displayView('listView'));
+                
+                // Modificado: El botón de imprimir ahora también guarda
+                printReportFromFormBtn.addEventListener('click', async () => {
+                    const saved = await handleSaveReport(); // Intenta guardar
+                    if (saved) {
+                        window.print(); // Si se guardó, imprime
+                    } else {
+                        // Opcional: mostrar un mensaje de que no se pudo imprimir por error al guardar
+                        showSaveStatus('No se pudo imprimir debido a un error al guardar.', true);
+                        setTimeout(hideSaveStatus, 3000);
+                    }
+                });
+
+                // Mostrar la vista de formulario por defecto al cargar
+                displayView('reportFormView');
+
+            } catch (error) {
+                console.error("Error al inicializar la aplicación:", error);
+                showSaveStatus('Error grave al cargar la aplicación. Por favor, recarga la página.', true);
+                // Si Firebase falla, ocultar los botones de guardado/impresión y mostrar solo la lista vacía o un mensaje
+                reportFormView.classList.add('hidden');
+                listView.classList.remove('hidden');
+                reportsListDiv.innerHTML = '<p class="text-red-500 text-center">No se pudo conectar a la base de datos.</p>';
+                printReportFromFormBtn.classList.add('hidden'); // Asegurarse de que el botón de impresión del formulario esté oculto.
+            }
+        };
+    </script>
+</body>
+</html>
