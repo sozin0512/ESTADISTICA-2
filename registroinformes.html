@@ -69,7 +69,7 @@
         <div class="modal-content">
             <span class="close-button">&times;</span>
             <p id="modalMessage"></p>
-            <button class="bg-blue-600 text-white py-2 px-4 rounded-md mt-4 hover:bg-blue-700" onclick="closeModal()">Cerrar</button>
+            <button class="bg-blue-600 text-white py-2 px-4 rounded-md mt-4 hover:bg-blue-700" onclick="window.closeModal()">Cerrar</button>
         </div>
     </div>
 
@@ -183,7 +183,7 @@
 
         // Google Drive API configuration
         const CLIENT_ID = '754423698333-jvj2bm8eft691pf5r84e50gj5m0vcbkh.apps.googleusercontent.com';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly'; // Added drive.readonly for download
 
         window.gapiLoaded = () => {
             console.log("gapi.js cargado."); // Debug
@@ -269,7 +269,7 @@
                 }
             };
 
-            if (gapi.client.getToken() === null || gapi.client.getToken().expires_at < Date.now()) {
+            if (gapi.client.getToken() === null || (gapi.client.getToken() && gapi.client.getToken().expires_at < Date.now())) {
                 // Prompt the user to select a Google account and authorize access.
                 tokenClient.requestAccessToken({prompt: 'consent'});
             } else {
@@ -320,7 +320,7 @@
 
                 const token = gapi.client.getToken();
                 const accessToken = token ? token.access_token : null;
-                console.log("Access Token para Drive:", accessToken ? "Presente" : "Ausente", "Primeros 5 caracteres:", accessToken ? accessToken.substring(0,5) : "N/A"); // Debug más detallado
+                console.log("Access Token para Drive (Upload):", accessToken ? "Presente" : "Ausente", "Primeros 5 caracteres:", accessToken ? accessToken.substring(0,5) : "N/A"); // Debug más detallado
                 
                 if (!accessToken) {
                     throw new Error("No hay token de acceso de Google Drive disponible. La sesión pudo haber expirado o no se inició.");
@@ -336,7 +336,7 @@
 
                 if (!uploadResponse.ok) {
                     const errorData = await uploadResponse.json();
-                    console.error("Respuesta de error de la API de Drive:", errorData); // Debug
+                    console.error("Respuesta de error de la API de Drive (Upload):", errorData); // Debug
                     throw new Error(`Error al subir el archivo a Drive: ${errorData.error.message}`);
                 }
 
@@ -350,6 +350,57 @@
                 return null;
             }
         }
+
+        window.downloadFileFromDrive = async (fileId, fileName) => { // New function for download
+            console.log("Intentando descargar archivo de Google Drive. fileId:", fileId, "fileName:", fileName); // Debug
+            if (!window.googleAuthAuthorized) {
+                window.showModal("Por favor, inicia sesión con Google Drive primero para descargar archivos.");
+                console.error("No autorizado para Google Drive. La descarga de archivos falló."); // Debug
+                return;
+            }
+
+            try {
+                const token = gapi.client.getToken();
+                const accessToken = token ? token.access_token : null;
+                console.log("Access Token para Drive (Download):", accessToken ? "Presente" : "Ausente", "Primeros 5 caracteres:", accessToken ? accessToken.substring(0,5) : "N/A"); // Debug más detallado
+
+                if (!accessToken) {
+                    throw new Error("No hay token de acceso de Google Drive disponible. La sesión pudo haber expirado o no se inició.");
+                }
+
+                // Fetch file content directly with fetch API using alt=media
+                const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text(); // Get raw error response
+                    console.error("Error en la respuesta de descarga de Drive:", response.status, response.statusText, errorText);
+                    throw new Error(`Error al descargar el archivo de Drive: ${response.statusText}.`);
+                }
+
+                // Get the blob and create a download link
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = fileName; // Use the provided file name for download
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url); // Clean up the URL object
+
+                window.showModal(`Archivo '${fileName}' descargado con éxito.`);
+                console.log(`Archivo '${fileName}' descargado.`); // Debug
+
+            } catch (error) {
+                console.error("Error al descargar el archivo de Google Drive:", error);
+                window.showModal(`Error al descargar el archivo: ${error.message}. Asegúrate de tener permisos para el archivo.`);
+            }
+        };
+
 
         // Function to display modal messages
         window.showModal = (message) => { // Make it a global property of window
@@ -375,7 +426,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Importa query, where, getDocs para la validación de duplicados
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global variables for Firebase (MANDATORY)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -404,7 +456,6 @@
         let auth;
         let userId = 'anon'; // Default anonymous user ID
         let reportsData = []; // To store all fetched reports for searching
-
 
         // --- Firebase Initialization ---
         const initializeFirebase = async () => {
@@ -435,8 +486,9 @@
                         console.log("Firebase User authenticated:", userId);
                         loadReports();
                     } else {
-                        userId = crypto.randomUUID();
-                        document.getElementById('userIdDisplay').textContent = userId;
+                        // For anonymous users, we still assign an ID for Firestore paths if needed, but they won't have a stable `uid`
+                        userId = crypto.randomUUID(); // Fallback to a random ID for truly anonymous access
+                        document.getElementById('userIdDisplay').textContent = 'Anónimo (' + userId.substring(0, 8) + '...)'; // Display a snippet
                         console.log("Firebase User anonymous:", userId);
                         loadReports();
                     }
@@ -459,17 +511,34 @@
             }
 
             const form = event.target;
+            const numeroInforme = form.numero_informe.value.trim(); // Trim whitespace
+
+            // --- Validar Número de Informe Duplicado ---
+            const publicReportsCollectionRef = collection(db, `artifacts/${appId}/public/data/reports-public`);
+            const q = query(publicReportsCollectionRef, where('numero_informe', '==', numeroInforme));
+            
+            try {
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    window.showModal(`Error: Ya existe un informe con el número "${numeroInforme}". Por favor, usa un número diferente.`);
+                    return; // Detener el proceso si hay un duplicado
+                }
+            } catch (error) {
+                console.error("Error al verificar duplicado de número de informe:", error);
+                window.showModal(`Error al verificar duplicados: ${error.message}`);
+                return;
+            }
+            // --- Fin de validación de duplicados ---
+
             const fileInput = form.adjuntar_documento;
             let driveFileId = null;
 
-            // Debugging: Log Google Drive authorization status
             console.log("Estado de autorización de Google Drive antes de intentar subir:", window.googleAuthAuthorized);
 
-            // If a file is selected and Google Drive is authorized, try to upload it
             if (fileInput.files.length > 0) {
-                if (window.googleAuthAuthorized) { // Access window.googleAuthAuthorized as it's global
+                if (window.googleAuthAuthorized) {
                     window.showModal("Subiendo archivo a Google Drive...");
-                    driveFileId = await window.uploadFileToDrive(fileInput.files[0]); // Call global function
+                    driveFileId = await window.uploadFileToDrive(fileInput.files[0]);
                     if (!driveFileId) {
                         window.showModal("No se pudo subir el archivo a Google Drive. El informe no se guardará.");
                         return;
@@ -482,47 +551,50 @@
 
 
             const reportData = {
-                numero_informe: form.numero_informe.value,
+                numero_informe: numeroInforme, // Usar el número de informe limpio
                 titulo_informe: form.titulo_informe.value,
                 descripcion_informe: form.descripcion_informe.value,
                 fecha_informe: form.fecha_informe.value,
                 estado_informe: form.estado_informe.value,
-                driveFileId: driveFileId, // Store the Drive file ID
-                driveFileName: fileInput.files[0] ? fileInput.files[0].name : null, // Store file name for display
+                driveFileId: driveFileId,
+                driveFileName: fileInput.files[0] ? fileInput.files[0].name : null,
                 createdAt: new Date(),
-                userId: userId
+                // Se guarda en una colección pública, no específica del usuario
+                // userId: userId // Ya no se necesita userId en la ruta de guardado
             };
 
             try {
-                const docRef = await addDoc(collection(db, `artifacts/${appId}/users/${userId}/reports`), reportData);
-                console.log("Informe guardado con ID: ", docRef.id);
-                window.showModal("¡Informe guardado con éxito!");
+                // Guarda el informe en una colección pública para que todos lo vean
+                const docRef = await addDoc(publicReportsCollectionRef, reportData);
+                console.log("Informe guardado en colección pública con ID: ", docRef.id);
+                window.showModal("¡Informe guardado con éxito y es visible para todos!");
                 form.reset();
                 document.getElementById('adjuntar_documento').value = ''; // Clear file input manually
             } catch (e) {
-                console.error("Error al añadir el documento: ", e);
+                console.error("Error al añadir el documento en la colección pública: ", e);
                 window.showModal(`Error al guardar el informe: ${e.message}`);
             }
         }
 
         // Function to load and display reports in real-time
         function loadReports() {
-            if (!db || !userId) {
-                console.log("Firestore no está inicializado o el usuario no está autenticado, reintentando...");
+            if (!db) { // No need to check userId for public collection
+                console.log("Firestore no está inicializado, reintentando...");
                 return;
             }
 
-            const reportsCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/reports`);
+            // Carga informes desde la colección pública
+            const publicReportsCollectionRef = collection(db, `artifacts/${appId}/public/data/reports-public`);
 
-            onSnapshot(reportsCollectionRef, (snapshot) => {
+            onSnapshot(publicReportsCollectionRef, (snapshot) => {
                 reportsData = [];
                 snapshot.forEach((doc) => {
                     reportsData.push({ id: doc.id, ...doc.data() });
                 });
                 displayReports(reportsData);
             }, (error) => {
-                console.error("Error al obtener los informes en tiempo real:", error);
-                window.showModal(`Error al cargar los informes: ${error.message}`);
+                console.error("Error al obtener los informes en tiempo real desde colección pública:", error);
+                window.showModal(`Error al cargar los informes públicos: ${error.message}. Asegúrate de que las reglas de seguridad de Firestore permitan la lectura pública.`);
             });
         }
 
@@ -536,21 +608,29 @@
                 return;
             }
 
+            // Sort reports by creation date (newest first)
+            reportsToDisplay.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+
             reportsToDisplay.forEach(report => {
                 const reportElement = document.createElement('div');
                 reportElement.className = 'bg-gray-100 p-4 rounded-md shadow-sm border border-gray-200';
 
-                let driveFileLink = '';
+                let driveFileActions = '';
                 if (report.driveFileId && report.driveFileName) {
-                    driveFileLink = `<a href="https://drive.google.com/file/d/${report.driveFileId}/view?usp=sharing" target="_blank" class="text-blue-600 hover:underline">Ver archivo en Drive (${report.driveFileName})</a>`;
+                    driveFileActions = `
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            <a href="https://drive.google.com/file/d/${report.driveFileId}/view?usp=sharing" target="_blank" class="text-blue-600 hover:underline text-xs">Ver en Drive</a>
+                            <button onclick="window.downloadFileFromDrive('${report.driveFileId}', '${report.driveFileName}')" class="text-green-600 hover:underline text-xs font-medium">Descargar</button>
+                        </div>
+                    `;
                 } else if (report.driveFileName) {
-                    driveFileLink = `Archivo adjunto: ${report.driveFileName} (no subido a Drive)`;
+                    driveFileActions = `<div class="text-xs text-gray-500 mt-2">Archivo adjunto: ${report.driveFileName} (no subido a Drive)</div>`;
                 }
 
                 reportElement.innerHTML = `
                     <h3 class="text-lg font-semibold text-gray-800">${report.titulo_informe} <span class="text-sm text-gray-500 font-normal">(${report.numero_informe})</span></h3>
                     <p class="text-gray-600 text-sm mt-1">${report.descripcion_informe}</p>
-                    <div class="text-xs text-gray-500 mt-2">${driveFileLink}</div>
+                    ${driveFileActions}
                     <div class="flex flex-wrap items-center justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200">
                         <span>Fecha: ${report.fecha_informe}</span>
                         <span>Estado: <span class="font-medium ${report.estado_informe === 'aprobado' ? 'text-green-600' : report.estado_informe === 'rechazado' ? 'text-red-600' : 'text-yellow-600'}">${report.estado_informe}</span></span>
@@ -571,10 +651,11 @@
             if (!reportId) return;
 
             try {
-                await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/reports`, reportId));
+                // Elimina de la colección pública
+                await deleteDoc(doc(db, `artifacts/${appId}/public/data/reports-public`, reportId));
                 window.showModal("Informe eliminado con éxito.");
             } catch (e) {
-                console.error("Error al eliminar el documento: ", e);
+                console.error("Error al eliminar el documento de la colección pública: ", e);
                 window.showModal(`Error al eliminar el informe: ${e.message}`);
             }
         }
