@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro y Búsqueda de Informes</title>
+    <!-- Incluye Tailwind CSS para un estilizado rápido y responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Un gris claro de Tailwind */
+        }
+        /* Estilos personalizados para focus y otros detalles */
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6; /* azul-500 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* Anillo de foco */
+        }
+        /* Para el input de tipo date, se puede estilizar el ícono del calendario */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            filter: invert(0.5) sepia(1) saturate(5) hue-rotate(175deg); /* Cambia el color del ícono */
+        }
+        /* Estilos para el modal */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+
+    <!-- Modal para mensajes -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modalMessage"></p>
+            <button class="bg-blue-600 text-white py-2 px-4 rounded-md mt-4 hover:bg-blue-700" onclick="closeModal()">Cerrar</button>
+        </div>
+    </div>
+
+    <div class="container bg-white p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-md md:max-w-lg lg:max-w-2xl mb-8">
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-8">Registrar Nuevo Informe</h1>
+        <p class="text-sm text-gray-500 text-center mb-4">ID de usuario Firebase: <span id="userIdDisplay" class="font-mono font-bold text-gray-700">Cargando...</span></p>
+
+        <!-- Botón de Google Sign-In -->
+        <button id="authorize_button" class="w-full py-2 px-4 bg-red-600 text-white font-semibold rounded-md shadow-md
+                           hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
+                           transition ease-in-out duration-150 mb-4" style="display: none;">
+            Iniciar sesión con Google Drive
+        </button>
+        <button id="signout_button" class="w-full py-2 px-4 bg-gray-600 text-white font-semibold rounded-md shadow-md
+                           hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
+                           transition ease-in-out duration-150 mb-4" style="display: none;">
+            Cerrar sesión de Google Drive
+        </button>
+        <p id="googleAuthStatus" class="text-sm text-center text-gray-600 mb-4">Cargando integración con Google Drive...</p>
+
+
+        <form id="reportForm" class="space-y-6">
+            <!-- Sección de Detalles del Informe -->
+            <fieldset class="border border-gray-300 p-4 rounded-md shadow-sm">
+                <div class="grid grid-cols-1 gap-4 mt-4">
+                    <div class="form-group">
+                        <label for="numero_informe" class="block text-sm font-medium text-gray-700 mb-1">N° de Informe:</label>
+                        <input type="text" id="numero_informe" name="numero_informe" required placeholder="N°067"
+                               class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="form-group">
+                        <label for="titulo_informe" class="block text-sm font-medium text-gray-700 mb-1">Título del Informe:</label>
+                        <input type="text" id="titulo_informe" name="titulo_informe" required placeholder="Ej. Informe de Ventas Mensuales"
+                               class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion_informe" class="block text-sm font-medium text-gray-700 mb-1">Descripción:</label>
+                        <textarea id="descripcion_informe" name="descripcion_informe" rows="5" required placeholder="Detalles sobre el informe..."
+                                  class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-y"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label for="fecha_informe" class="block text-sm font-medium text-gray-700 mb-1">Fecha del Informe:</label>
+                            <input type="date" id="fecha_informe" name="fecha_informe" required placeholder="dd/mm/aaaa"
+                                   class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div class="form-group">
+                            <label for="estado_informe" class="block text-sm font-medium text-gray-700 mb-1">Estado:</label>
+                            <select id="estado_informe" name="estado_informe" required
+                                    class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white">
+                                <option value="">Selecciona un estado</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="en_revision">En Revisión</option>
+                                <option value="aprobado">Aprobado</option>
+                                <option value="rechazado">Rechazado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="adjuntar_documento" class="block text-sm font-medium text-gray-700 mb-1">Adjuntar Documento:</label>
+                        <input type="file" id="adjuntar_documento" name="adjuntar_documento"
+                               class="w-full text-sm text-gray-500
+                                      file:mr-4 file:py-2 file:px-4
+                                      file:rounded-full file:border-0
+                                      file:text-sm file:font-semibold
+                                      file:bg-blue-50 file:text-blue-700
+                                      hover:file:bg-blue-100">
+                    </div>
+                </div>
+            </fieldset>
+
+            <button type="submit"
+                    class="submit-btn w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-md shadow-md
+                           hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                           transition ease-in-out duration-150">
+                Guardar Informe
+            </button>
+        </form>
+    </div>
+
+    <!-- Sección para ver y buscar informes -->
+    <div class="container bg-white p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-md md:max-w-lg lg:max-w-2xl mt-8">
+        <h2 class="text-2xl font-bold text-center text-blue-600 mb-6">Informes Guardados</h2>
+        <p class="text-sm text-red-600 text-center mb-4">
+            ⚠️ **Error de Permisos:** Si no ves los informes, asegúrate de que tus reglas de seguridad de Firebase Firestore permitan la lectura y escritura.
+            Ve a la consola de Firebase > Firestore Database > Rules y actualiza tus reglas.
+        </p>
+
+        <div class="mb-4">
+            <label for="search_reports" class="block text-sm font-medium text-gray-700 mb-1">Buscar Informes:</label>
+            <input type="text" id="search_reports" placeholder="Buscar por título, descripción o estado..."
+                   class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+        </div>
+
+        <div id="reportsList" class="space-y-4">
+            <!-- Los informes se cargarán aquí -->
+            <p class="text-center text-gray-500">Cargando informes...</p>
+        </div>
+    </div>
+
+    <!-- Google API Client Library -->
+    <script async defer src="https://apis.google.com/js/api.js"></script>
+    <script async defer src="https://accounts.google.com/gsi/client"></script>
+
+    <!-- Global functions for Google API initialization -->
+    <script>
+        let gapiInited = false;
+        let gisInited = false;
+        window.googleAuthAuthorized = false; // Make it a global property of window
+        let tokenClient;
+
+        // Google Drive API configuration
+        const CLIENT_ID = '754423698333-jvj2bm8eft691pf5r84e50gj5m0vcbkh.apps.googleusercontent.com';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile';
+
+        window.gapiLoaded = () => {
+            console.log("gapi.js cargado."); // Debug
+            gapi.load('client', initializeGapiClient);
+        }
+
+        async function initializeGapiClient() {
+            try {
+                await gapi.client.init({
+                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+                });
+                gapiInited = true;
+                console.log("Cliente gapi inicializado."); // Debug
+            } catch (error) {
+                console.error("Error al inicializar el cliente gapi:", error);
+                window.showModal(`Error al inicializar la integración con Google API: ${error.message}`);
+            } finally {
+                maybeEnableButtons();
+            }
+        }
+
+        window.gisLoaded = () => {
+            console.log("gis.js cargado."); // Debug
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: (tokenResponse) => {
+                    if (tokenResponse && tokenResponse.access_token) {
+                        gapi.client.setToken(tokenResponse);
+                        window.googleAuthAuthorized = true; // Set global property
+                        document.getElementById('googleAuthStatus').textContent = 'Conectado a Google Drive.';
+                        window.showModal('Conectado a Google Drive.');
+                        console.log("Autenticación con Google Drive exitosa. Token:", tokenResponse); // Debug
+                    } else {
+                        window.googleAuthAuthorized = false; // Set global property
+                        document.getElementById('googleAuthStatus').textContent = 'No conectado a Google Drive.';
+                        window.showModal('No se pudo conectar a Google Drive. Por favor, revisa la consola para más detalles.');
+                        console.error("Fallo la autenticación con Google Drive. Token Response:", tokenResponse); // Debug
+                    }
+                    maybeEnableButtons();
+                },
+            });
+            gisInited = true;
+            console.log("Cliente gis inicializado."); // Debug
+            maybeEnableButtons();
+        }
+
+        function maybeEnableButtons() {
+            console.log("Verificando si se habilitan los botones de Google Drive. gapiInited:", gapiInited, "gisInited:", gisInited, "window.googleAuthAuthorized:", window.googleAuthAuthorized); // Debug
+            if (gapiInited && gisInited) {
+                if (window.googleAuthAuthorized) {
+                    document.getElementById('signout_button').style.display = 'block';
+                    document.getElementById('authorize_button').style.display = 'none';
+                    document.getElementById('googleAuthStatus').textContent = 'Conectado a Google Drive.';
+                } else {
+                    document.getElementById('authorize_button').style.display = 'block';
+                    document.getElementById('signout_button').style.display = 'none';
+                    document.getElementById('googleAuthStatus').textContent = 'Desconectado de Google Drive. Haz clic en "Iniciar sesión con Google Drive".';
+                }
+            } else {
+                // Si aún no están inicializados, asegurar que los botones están ocultos y el mensaje apropiado
+                document.getElementById('authorize_button').style.display = 'none';
+                document.getElementById('signout_button').style.display = 'none';
+                document.getElementById('googleAuthStatus').textContent = 'Cargando integración con Google Drive...';
+            }
+        }
+
+        window.handleAuthClick = () => { // Make it a global property of window
+            console.log("Clic en Iniciar sesión con Google Drive. CLIENT_ID:", CLIENT_ID); // Debug
+            tokenClient.callback = (tokenResponse) => {
+                if (tokenResponse && tokenResponse.access_token) {
+                    gapi.client.setToken(tokenResponse);
+                    window.googleAuthAuthorized = true; // Set global property
+                    document.getElementById('googleAuthStatus').textContent = 'Conectado a Google Drive.';
+                    maybeEnableButtons();
+                    window.showModal('Conectado a Google Drive.');
+                    console.log("Autenticación con Google Drive exitosa."); // Debug
+                } else {
+                    window.googleAuthAuthorized = false; // Set global property
+                    document.getElementById('googleAuthStatus').textContent = 'No conectado a Google Drive.';
+                    window.showModal('No se pudo conectar a Google Drive. Por favor, revisa la consola para más detalles.');
+                    console.error("Fallo la autenticación con Google Drive. Token Response:", tokenResponse); // Debug
+                }
+            };
+
+            if (gapi.client.getToken() === null || gapi.client.getToken().expires_at < Date.now()) {
+                // Prompt the user to select a Google account and authorize access.
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                // Already has a token, but might need to re-authorize for new scopes or if token is expired
+                tokenClient.requestAccessToken({prompt: 'none'});
+            }
+        }
+
+        window.handleSignoutClick = () => { // Make it a global property of window
+            console.log("Clic en Cerrar sesión de Google Drive."); // Debug
+            const token = gapi.client.getToken();
+            if (token !== null) {
+                google.accounts.oauth2.revoke(token.access_token, () => {
+                    gapi.client.setToken(null);
+                    window.googleAuthAuthorized = false; // Set global property
+                    document.getElementById('googleAuthStatus').textContent = 'Sesión de Google Drive cerrada.';
+                    window.showModal('Sesión de Google Drive cerrada.');
+                    maybeEnableButtons();
+                    console.log("Sesión de Google Drive cerrada exitosamente."); // Debug
+                });
+            }
+        }
+
+        window.uploadFileToDrive = async (file, folderId = 'root') => { // Make it a global property of window
+            console.log("Intentando subir archivo a Google Drive. window.googleAuthAuthorized:", window.googleAuthAuthorized); // Debug
+            if (!window.googleAuthAuthorized) {
+                window.showModal("Por favor, inicia sesión con Google Drive primero para subir archivos.");
+                console.error("No autorizado para Google Drive. La subida de archivos falló."); // Debug
+                return null;
+            }
+
+            if (!file) {
+                window.showModal("No hay archivo seleccionado para subir.");
+                console.error("No hay archivo seleccionado para subir a Google Drive."); // Debug
+                return null;
+            }
+
+            try {
+                const metadata = {
+                    'name': file.name,
+                    'mimeType': file.type,
+                    'parents': [folderId]
+                };
+
+                const form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                form.append('file', file);
+
+                const token = gapi.client.getToken();
+                const accessToken = token ? token.access_token : null;
+                console.log("Access Token para Drive:", accessToken ? "Presente" : "Ausente", "Primeros 5 caracteres:", accessToken ? accessToken.substring(0,5) : "N/A"); // Debug más detallado
+                
+                if (!accessToken) {
+                    throw new Error("No hay token de acceso de Google Drive disponible. La sesión pudo haber expirado o no se inició.");
+                }
+
+                const uploadResponse = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                    },
+                    body: form,
+                });
+
+                if (!uploadResponse.ok) {
+                    const errorData = await uploadResponse.json();
+                    console.error("Respuesta de error de la API de Drive:", errorData); // Debug
+                    throw new Error(`Error al subir el archivo a Drive: ${errorData.error.message}`);
+                }
+
+                const fileResult = await uploadResponse.json();
+                console.log("Archivo subido a Google Drive:", fileResult);
+                window.showModal(`Archivo '${file.name}' subido a Google Drive.`);
+                return fileResult.id;
+            } catch (error) {
+                console.error("Error al subir el archivo a Google Drive:", error);
+                window.showModal(`Error al subir el archivo a Drive: ${error.message}. Por favor, revisa la consola y asegúrate de haber iniciado sesión con Google Drive.`);
+                return null;
+            }
+        }
+
+        // Function to display modal messages
+        window.showModal = (message) => { // Make it a global property of window
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('myModal').style.display = 'flex';
+        }
+
+        window.closeModal = () => { // Make it a global property of window
+            document.getElementById('myModal').style.display = 'none';
+        }
+
+        // Event listener for the close button inside the modal
+        document.querySelector('.close-button').onclick = window.closeModal;
+        // Close modal if user clicks outside of it
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('myModal')) {
+                window.closeModal();
+            }
+        }
+    </script>
+
+    <!-- Firebase SDKs and custom logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables for Firebase (MANDATORY)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Se ha incrustado directamente la configuración de Firebase
+        let firebaseConfig = {
+            apiKey: "AIzaSyDcUtwdm9fpG6iBi4QMm9i_mo2QQnUwxzs",
+            authDomain: "registro-de-informenes.firebaseapp.com",
+            projectId: "registro-de-informenes",
+            storageBucket: "registro-de-informenes.firebasestorage.app",
+            messagingSenderId: "577939441872",
+            appId: "1:577939441872:web:71cd25eb9124ee3343f6d5",
+            measurementId: "G-95TSVS6BWL"
+        };
+        
+        // Verifica que la API Key exista antes de inicializar Firebase
+        if (!firebaseConfig.apiKey) {
+            console.error("Firebase API Key no encontrada en la configuración.");
+            window.showModal("Error: Firebase API Key no encontrada. Asegúrate de que la configuración de Firebase sea correcta.");
+        }
+
+
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app;
+        let db;
+        let auth;
+        let userId = 'anon'; // Default anonymous user ID
+        let reportsData = []; // To store all fetched reports for searching
+
+
+        // --- Firebase Initialization ---
+        const initializeFirebase = async () => {
+            try {
+                if (!firebaseConfig.apiKey) {
+                    console.error("No se puede inicializar Firebase sin una API Key válida.");
+                    window.showModal("No se puede inicializar Firebase. Falta la API Key.");
+                    return;
+                }
+                
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Imprime la configuración de Firebase usada para depuración
+                console.log("Firebase Config utilizada:", firebaseConfig);
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        document.getElementById('userIdDisplay').textContent = userId;
+                        console.log("Firebase User authenticated:", userId);
+                        loadReports();
+                    } else {
+                        userId = crypto.randomUUID();
+                        document.getElementById('userIdDisplay').textContent = userId;
+                        console.log("Firebase User anonymous:", userId);
+                        loadReports();
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error initializing Firebase or authenticating:", error);
+                window.showModal(`Error al inicializar la aplicación: ${error.message}. Asegúrate de que Firebase Auth está habilitado y la API Key es correcta.`);
+            }
+        };
+
+
+        // Function to save a new report
+        async function saveReport(event) {
+            event.preventDefault();
+
+            if (!db || !userId) {
+                window.showModal("Firebase no está inicializado o el usuario no está autenticado.");
+                return;
+            }
+
+            const form = event.target;
+            const fileInput = form.adjuntar_documento;
+            let driveFileId = null;
+
+            // Debugging: Log Google Drive authorization status
+            console.log("Estado de autorización de Google Drive antes de intentar subir:", window.googleAuthAuthorized);
+
+            // If a file is selected and Google Drive is authorized, try to upload it
+            if (fileInput.files.length > 0) {
+                if (window.googleAuthAuthorized) { // Access window.googleAuthAuthorized as it's global
+                    window.showModal("Subiendo archivo a Google Drive...");
+                    driveFileId = await window.uploadFileToDrive(fileInput.files[0]); // Call global function
+                    if (!driveFileId) {
+                        window.showModal("No se pudo subir el archivo a Google Drive. El informe no se guardará.");
+                        return;
+                    }
+                } else {
+                    window.showModal("Adjuntaste un archivo, pero no estás conectado a Google Drive. Inicia sesión con Google Drive antes de guardar para subir el archivo.");
+                    // User can choose to continue saving the report without the Drive link, but we warn them.
+                }
+            }
+
+
+            const reportData = {
+                numero_informe: form.numero_informe.value,
+                titulo_informe: form.titulo_informe.value,
+                descripcion_informe: form.descripcion_informe.value,
+                fecha_informe: form.fecha_informe.value,
+                estado_informe: form.estado_informe.value,
+                driveFileId: driveFileId, // Store the Drive file ID
+                driveFileName: fileInput.files[0] ? fileInput.files[0].name : null, // Store file name for display
+                createdAt: new Date(),
+                userId: userId
+            };
+
+            try {
+                const docRef = await addDoc(collection(db, `artifacts/${appId}/users/${userId}/reports`), reportData);
+                console.log("Informe guardado con ID: ", docRef.id);
+                window.showModal("¡Informe guardado con éxito!");
+                form.reset();
+                document.getElementById('adjuntar_documento').value = ''; // Clear file input manually
+            } catch (e) {
+                console.error("Error al añadir el documento: ", e);
+                window.showModal(`Error al guardar el informe: ${e.message}`);
+            }
+        }
+
+        // Function to load and display reports in real-time
+        function loadReports() {
+            if (!db || !userId) {
+                console.log("Firestore no está inicializado o el usuario no está autenticado, reintentando...");
+                return;
+            }
+
+            const reportsCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/reports`);
+
+            onSnapshot(reportsCollectionRef, (snapshot) => {
+                reportsData = [];
+                snapshot.forEach((doc) => {
+                    reportsData.push({ id: doc.id, ...doc.data() });
+                });
+                displayReports(reportsData);
+            }, (error) => {
+                console.error("Error al obtener los informes en tiempo real:", error);
+                window.showModal(`Error al cargar los informes: ${error.message}`);
+            });
+        }
+
+        // Function to render reports to the UI
+        function displayReports(reportsToDisplay) {
+            const reportsListDiv = document.getElementById('reportsList');
+            reportsListDiv.innerHTML = '';
+
+            if (reportsToDisplay.length === 0) {
+                reportsListDiv.innerHTML = '<p class="text-center text-gray-500">No hay informes guardados.</p>';
+                return;
+            }
+
+            reportsToDisplay.forEach(report => {
+                const reportElement = document.createElement('div');
+                reportElement.className = 'bg-gray-100 p-4 rounded-md shadow-sm border border-gray-200';
+
+                let driveFileLink = '';
+                if (report.driveFileId && report.driveFileName) {
+                    driveFileLink = `<a href="https://drive.google.com/file/d/${report.driveFileId}/view?usp=sharing" target="_blank" class="text-blue-600 hover:underline">Ver archivo en Drive (${report.driveFileName})</a>`;
+                } else if (report.driveFileName) {
+                    driveFileLink = `Archivo adjunto: ${report.driveFileName} (no subido a Drive)`;
+                }
+
+                reportElement.innerHTML = `
+                    <h3 class="text-lg font-semibold text-gray-800">${report.titulo_informe} <span class="text-sm text-gray-500 font-normal">(${report.numero_informe})</span></h3>
+                    <p class="text-gray-600 text-sm mt-1">${report.descripcion_informe}</p>
+                    <div class="text-xs text-gray-500 mt-2">${driveFileLink}</div>
+                    <div class="flex flex-wrap items-center justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200">
+                        <span>Fecha: ${report.fecha_informe}</span>
+                        <span>Estado: <span class="font-medium ${report.estado_informe === 'aprobado' ? 'text-green-600' : report.estado_informe === 'rechazado' ? 'text-red-600' : 'text-yellow-600'}">${report.estado_informe}</span></span>
+                        <button data-id="${report.id}" class="delete-btn text-red-500 hover:text-red-700 font-medium ml-auto">Eliminar</button>
+                    </div>
+                `;
+                reportsListDiv.appendChild(reportElement);
+            });
+
+            reportsListDiv.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', deleteReport);
+            });
+        }
+
+        // Function to delete a report
+        async function deleteReport(event) {
+            const reportId = event.target.dataset.id;
+            if (!reportId) return;
+
+            try {
+                await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/reports`, reportId));
+                window.showModal("Informe eliminado con éxito.");
+            } catch (e) {
+                console.error("Error al eliminar el documento: ", e);
+                window.showModal(`Error al eliminar el informe: ${e.message}`);
+            }
+        }
+
+        // Function to search/filter reports
+        document.getElementById('search_reports').addEventListener('input', (event) => {
+            const searchTerm = event.target.value.toLowerCase();
+            const filteredReports = reportsData.filter(report =>
+                report.titulo_informe.toLowerCase().includes(searchTerm) ||
+                report.descripcion_informe.toLowerCase().includes(searchTerm) ||
+                report.estado_informe.toLowerCase().includes(searchTerm) ||
+                report.numero_informe.toLowerCase().includes(searchTerm) ||
+                (report.driveFileName && report.driveFileName.toLowerCase().includes(searchTerm)) // Search by file name too
+            );
+            displayReports(filteredReports);
+        });
+
+        // Attach event listeners
+        document.getElementById('reportForm').addEventListener('submit', saveReport);
+        // Access global functions for Google auth
+        document.getElementById('authorize_button').addEventListener('click', window.handleAuthClick);
+        document.getElementById('signout_button').addEventListener('click', window.handleSignoutClick);
+
+
+        // Initialize Firebase when the window loads
+        // Se asegura de que gapiLoaded y gisLoaded se llamen solo una vez y después de que el DOM esté listo
+        window.addEventListener('load', () => {
+            initializeFirebase();
+            // Llama a las funciones de inicialización de Google API aquí
+            // para asegurar que los elementos del DOM existan.
+            window.gapiLoaded();
+            window.gisLoaded();
+        });
+    </script>
+</body>
+</html>
