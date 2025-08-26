@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro y Búsqueda de Informes</title>
+    <title>BASE DE DATOS OFICINA ESTADISTICA </title>
     <!-- Incluye Tailwind CSS para un estilizado rápido y responsive -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -74,7 +74,7 @@
     </div>
 
     <div class="container bg-white p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-md md:max-w-lg lg:max-w-2xl mb-8">
-        <h1 class="text-3xl font-bold text-center text-blue-600 mb-8">Registrar Nuevo Informe</h1>
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-8">Registrar Nuevo Documento</h1>
         <p class="text-sm text-gray-500 text-center mb-4">ID de usuario Firebase: <span id="userIdDisplay" class="font-mono font-bold text-gray-700">Cargando...</span></p>
 
         <!-- Botón de Google Sign-In -->
@@ -96,7 +96,7 @@
             <fieldset class="border border-gray-300 p-4 rounded-md shadow-sm">
                 <div class="grid grid-cols-1 gap-4 mt-4">
                     <div class="form-group">
-                        <label for="numero_informe" class="block text-sm font-medium text-gray-700 mb-1">N° de Informe:</label>
+                        <label for="numero_informe" class="block text-sm font-medium text-gray-700 mb-1">N° de Informe o documento:</label>
                         <input type="text" id="numero_informe" name="numero_informe" required placeholder="N°067"
                                class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                     </div>
@@ -152,27 +152,23 @@
 
     <!-- Sección para ver y buscar informes -->
     <div class="container bg-white p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-md md:max-w-lg lg:max-w-2xl mt-8">
-        <h2 class="text-2xl font-bold text-center text-blue-600 mb-6">Informes Guardados</h2>
+        <h2 class="text-2xl font-bold text-center text-blue-600 mb-6">DOCUMENTOS GUARDADOS</h2>
         <p class="text-sm text-red-600 text-center mb-4">
-            ⚠️ **Error de Permisos:** Si no ves los informes, asegúrate de que tus reglas de seguridad de Firebase Firestore permitan la lectura y escritura.
-            Ve a la consola de Firebase > Firestore Database > Rules y actualiza tus reglas.
+            ⚠️POWERED BY HACKER 01⚠️
         </p>
 
         <div class="mb-4">
-            <label for="search_reports" class="block text-sm font-medium text-gray-700 mb-1">Buscar Informes:</label>
+            <label for="search_reports" class="block text-sm font-medium text-gray-700 mb-1">BUSCAR DOCUMENTO</label>
             <input type="text" id="search_reports" placeholder="Buscar por título, descripción o estado..."
                    class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
         </div>
 
         <div id="reportsList" class="space-y-4">
             <!-- Los informes se cargarán aquí -->
-            <p class="text-center text-gray-500">Cargando informes...</p>
+            <p class="text-center text-gray-500">cargando documentos...</p>
         </div>
     </div>
 
-    <!-- Google API Client Library -->
-    <script async defer src="https://apis.google.com/js/api.js"></script>
-    <script async defer src="https://accounts.google.com/gsi/client"></script>
 
     <!-- Global functions for Google API initialization -->
     <script>
@@ -197,11 +193,10 @@
                 });
                 gapiInited = true;
                 console.log("Cliente gapi inicializado."); // Debug
+                maybeEnableButtons(); // Ensure buttons are updated after gapi client init
             } catch (error) {
                 console.error("Error al inicializar el cliente gapi:", error);
                 window.showModal(`Error al inicializar la integración con Google API: ${error.message}`);
-            } finally {
-                maybeEnableButtons();
             }
         }
 
@@ -223,12 +218,12 @@
                         window.showModal('No se pudo conectar a Google Drive. Por favor, revisa la consola para más detalles.');
                         console.error("Fallo la autenticación con Google Drive. Token Response:", tokenResponse); // Debug
                     }
-                    maybeEnableButtons();
+                    maybeEnableButtons(); // Ensure buttons are updated after gis callback
                 },
             });
             gisInited = true;
             console.log("Cliente gis inicializado."); // Debug
-            maybeEnableButtons();
+            maybeEnableButtons(); // Ensure buttons are updated after gis init
         }
 
         function maybeEnableButtons() {
@@ -262,7 +257,7 @@
                     window.showModal('Conectado a Google Drive.');
                     console.log("Autenticación con Google Drive exitosa."); // Debug
                 } else {
-                    window.googleAuthAuthorized = false; // Set global property
+                    window.googleAuthAuthorized = false; // Set global propertyf
                     document.getElementById('googleAuthStatus').textContent = 'No conectado a Google Drive.';
                     window.showModal('No se pudo conectar a Google Drive. Por favor, revisa la consola para más detalles.');
                     console.error("Fallo la autenticación con Google Drive. Token Response:", tokenResponse); // Debug
@@ -421,6 +416,9 @@
             }
         }
     </script>
+    <!-- Google API Client Library -->
+    <script async defer src="https://apis.google.com/js/api.js" onload="window.gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="window.gisLoaded()"></script>
 
     <!-- Firebase SDKs and custom logic -->
     <script type="module">
@@ -591,7 +589,8 @@
                 snapshot.forEach((doc) => {
                     reportsData.push({ id: doc.id, ...doc.data() });
                 });
-                displayReports(reportsData);
+                displayReports(reportsData); // Update main list
+                suggestNextReportNumber(reportsData); // Suggest next report number
             }, (error) => {
                 console.error("Error al obtener los informes en tiempo real desde colección pública:", error);
                 window.showModal(`Error al cargar los informes públicos: ${error.message}. Asegúrate de que las reglas de seguridad de Firestore permitan la lectura pública.`);
@@ -608,8 +607,12 @@
                 return;
             }
 
-            // Sort reports by creation date (newest first)
-            reportsToDisplay.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+            // Sort reports by numero_informe (descending)
+            reportsToDisplay.sort((a, b) => {
+                const numA = parseInt(a.numero_informe.replace('N°', ''), 10);
+                const numB = parseInt(b.numero_informe.replace('N°', ''), 10);
+                return numB - numA; // Sort numerically in descending order
+            });
 
             reportsToDisplay.forEach(report => {
                 const reportElement = document.createElement('div');
@@ -645,6 +648,24 @@
             });
         }
 
+        // NEW FUNCTION: Suggest the next report number
+        function suggestNextReportNumber(reports) {
+            let maxNum = 0;
+            reports.forEach(report => {
+                const num = parseInt(report.numero_informe.replace('N°', ''), 10);
+                if (!isNaN(num) && num > maxNum) {
+                    maxNum = num;
+                }
+            });
+            const nextNum = maxNum + 1;
+            const numeroInformeInput = document.getElementById('numero_informe');
+            // Check if the input is currently empty or contains the old placeholder
+            // This prevents overwriting a number the user might have manually typed
+            if (!numeroInformeInput.value || numeroInformeInput.value === numeroInformeInput.placeholder) {
+                 numeroInformeInput.value = `N°${nextNum.toString().padStart(3, '0')}`; // Format as N°077
+            }
+        }
+
         // Function to delete a report
         async function deleteReport(event) {
             const reportId = event.target.dataset.id;
@@ -673,6 +694,7 @@
             displayReports(filteredReports);
         });
 
+
         // Attach event listeners
         document.getElementById('reportForm').addEventListener('submit', saveReport);
         // Access global functions for Google auth
@@ -684,10 +706,6 @@
         // Se asegura de que gapiLoaded y gisLoaded se llamen solo una vez y después de que el DOM esté listo
         window.addEventListener('load', () => {
             initializeFirebase();
-            // Llama a las funciones de inicialización de Google API aquí
-            // para asegurar que los elementos del DOM existan.
-            window.gapiLoaded();
-            window.gisLoaded();
         });
     </script>
 </body>
