@@ -1,136 +1,92 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>OFICINA</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    .dashboard {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      grid-gap: 20px;
-      padding: 20px;
-    }
-
-    .dashboard-item {
-      text-align: center;
-      padding: 20px;
-      background-color: rgba(255, 255, 255, 0.7);
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      overflow: hidden; /* Oculta el contenido que se desborda */
-      transition: max-height 0.3s; /* Agrega transición suave a la altura máxima */
-      max-height: 40px; /* Altura inicial */
-    }
-
-    .dashboard-item.expanded {
-      max-height: 1000px; /* Altura máxima expandida */
-    }
-
-    .button {
-      display: block;
-      margin: 10px auto;
-      padding: 10px 20px;
-      text-decoration: none;
-      color: black;
-      border: 1px solid black;
-      border-radius: 5px;
-      transition: transform 0.3s, box-shadow 0.3s, color 0.3s;
-    }
-
-    .button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      color: red;
-    }
-
-    h1 {
-      text-align: center;
-      color: rgb(102, 2, 2);
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    }
-
-    video {
-      position: fixed;
-      top: 0;
-      left: 0;
-      min-width: 100%;
-      min-height: 100%;
-      z-index: -1;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REPORTES DE VUELO </title>
+    <!-- Incluir Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilo personalizado para usar la fuente Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-100 text-gray-800 flex flex-col min-h-screen">
 
-<h1>OFICINA</h1>
+    <!-- Encabezado de la página -->
+    <header class="bg-green-600 text-white p-6 shadow-md">
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl font-bold rounded-lg">Mis Reportes</h1>
+            <p class="mt-2 text-lg rounded-lg">⚠️POWERED BY HACKER 01.⚠️</p>
+        </div>
+    </header>
 
-<video autoplay loop muted>
-  <source src="video.mp4" type="video/mp4">
-  Tu navegador no soporta la etiqueta de video.
-</video>
+    <!-- Contenedor principal de las secciones -->
+    <main class="container mx-auto p-4 md:p-8 flex-grow">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-<div class="dashboard" id="dashboard">
-  <div class="dashboard-item">
-    <a href="https://mega.nz/fm/wMJyxJAQ" class="button">REPORTES DE TRABAJO "ESTADISTA"</a>
-    <a href="reporte de trabajo.pdf" download class="button">REPORTES DE TRABAJO "EMERGENCIA"</a>
-  </div>
-  <div class="dashboard-item">
-    <a href="https://mega.nz/fm/wVRSRTxR" class="button">SOLICITUDES "ESTADISTA"</a>
-    <a href="FORMA 2408-13.x" download class="button">DESCARGAR SOLICITUD "EMERGENCIA"</a>
-    <a href="solicitud de materiales abastos.pdf" download class="button">DESCARGAR SOLICITUD  "ABASTOS"</a>
-  </div>
-  <div class="dashboard-item">
-    <a href="https://mega.nz/fm/9YYChbTQ" class="button">ORDEN DE TRABAJO "ESTADISTA"</a>
-    <a href="orden.xlsx" download class="button">DESCARGAR ORDEN DE TRABAJO "EMERGENCIA"</a>
-  </div>
-  <div class="dashboard-item">
-    <a href="https://mega.nz/fm/tFpi1J6C" class="button">INFORMES "ESTADISTA"</a>
-    <a href="ejemplo de informe.docx" download class="button">DESCARGAR INFORME "EMERGENCIA"</a>
-  </div>
-  <div class="dashboard-item">
-    <a href="https://mega.nz/fm/oIp12DbZ" class="button">REPUESTOS UTILIZADOS "ESTADISTA"</a>
-  </div>
-  <div class="dashboard-item">
-    <a href="https://mega.nz/fm/hZB01Zbb" class="button">LISTADO DE MATERIALES "ESTADISTA"</a>
-    <a href="FORMA 2408dsd13.xls" download class="button">DESCARGAR LISTADO DE MATERIALES "EMERGENCIA"</a>
-  </div>
-  
-<script>
-  const dashboardItems = document.querySelectorAll('.dashboard-item');
+            <!-- Sección 1: Reporte de Vuelo de Bell 412 -->
+            <section class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                <h2 class="text-2xl font-semibold text-green-700 mb-3 border-b-2 border-green-200 pb-2">
+                    🚁 Reporte de Vuelo de Bell 412
+                </h2>
+                <p class="text-gray-700 mb-4">
+                    
+                </p>
+                <a href="https://drive.google.com/drive/u/1/folders/15wTJTqzYdthLinfL7jzb-1RyakMlEw2I" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300">
+                    Ver Reporte de Vuelo
+                </a>
+            </section>
 
-  dashboardItems.forEach(item => {
-    item.addEventListener('mouseenter', () => {
-      item.classList.add('expanded'); // Agrega la clase 'expanded' cuando el cursor entra
-    });
+            <!-- Sección 2: Reporte de Vuelo UH-1H -->
+            <section class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                <h2 class="text-2xl font-semibold text-green-700 mb-3 border-b-2 border-green-200 pb-2">
+                    🚁 Reporte de Vuelo UH-1H
+                </h2>
+                <p class="text-gray-700 mb-4">
+                    
+                </p>
+                <a href="https://drive.google.com/drive/u/1/folders/1-O_r3dHJYaVR_jn5pfITTIk8xJAuelCn" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300">
+                    Ver Reporte de Vuelo
+                </a>
+            </section>
 
-    item.addEventListener('mouseleave', () => {
-      item.classList.remove('expanded'); // Quita la clase 'expanded' cuando el cursor sale
-    });
-  });
+            <!-- Sección 3: Reporte de Vuelo H-145 -->
+            <section class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                <h2 class="text-2xl font-semibold text-green-700 mb-3 border-b-2 border-green-200 pb-2">
+                    🚁 Reporte de Vuelo H-145
+                </h2>
+                <p class="text-gray-700 mb-4">
+                    
+                </p>
+                <a href="https://drive.google.com/drive/u/1/folders/1mWr4m04goBUJ_s5KCrIf-b_mUMp4fJY0" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300">
+                    Ver Reporte de Vuelo
+                </a>
+            </section>
 
-  const dashboard = document.getElementById('dashboard');
+            <!-- Sección 4: Forma 12 -->
+            <section class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                <h2 class="text-2xl font-semibold text-green-700 mb-3 border-b-2 border-green-200 pb-2">
+                    📋 Forma 12
+                </h2>
+                <p class="text-gray-700 mb-4">
+                    
+                </p>
+                <a href="https://docs.google.com/spreadsheets/d/1dzmO0OSyemXelgnldF-CXyzlvpD-gQMJ/edit?usp=sharing&ouid=114936254921005259246&rtpof=true&sd=true" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300">
+                    Ver Forma 12
+                </a>
+            </section>
 
-  dashboard.addEventListener('mousemove', (event) => {
-    const dashboardRect = dashboard.getBoundingClientRect();
-    const y = event.clientY;
-    const bottomEdge = dashboardRect.bottom;
-    const threshold = 50; // Threshold para activar el desplazamiento hacia abajo
+        </div>
 
-    if (y >= bottomEdge - threshold) {
-      window.scrollBy(0, 10); // Desplaza la página hacia abajo
-    }
-  });
-</script>
+        
+
+    <!-- Pie de página (opcional) -->
+    <footer class="bg-gray-800 text-white p-4 text-center mt-8 rounded-t-lg">
+        <p>&copy; 2025 Mis Documentos. Todos los derechos reservados.</p>
+    </footer>
 
 </body>
 </html>
-
-  
-  
-
-    
