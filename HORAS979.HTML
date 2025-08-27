@@ -1555,8 +1555,11 @@
                         return;
                     }
 
-                    // Solo procesar filas que no son componentes de motor ni etiquetas
-                    if (!filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta) && !filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta)) {
+                    // Procesar filas de ENGINE HRS, ENGINE STARTS, FLIGHTS, CICLOS
+                    if (nomenclaturaCompleta.startsWith('ENGINE HRS') || nomenclaturaCompleta.startsWith('ENGINE STARTS') || nomenclaturaCompleta.startsWith('FLIGHTS') || nomenclaturaCompleta.startsWith('CICLOS') ||
+                        nomenclaturaCompleta === 'AC HRS' || nomenclaturaCompleta === 'ATERRIZAJES' || nomenclaturaCompleta === 'RINS' ||
+                        nomenclaturaCompleta === 'CONTINGENCY EXCURSIONS 1' || nomenclaturaCompleta === 'CONTINGENCY EXCURSIONS 2') {
+                        
                         const vieneCelda = fila.querySelector('.viene-celda');
                         const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
                         const mesTotalCelda = fila.querySelector('.fila-total');
@@ -1566,10 +1569,10 @@
                         const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
                         
                         const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
-                        let totalGeneral = totalMes + viene; // El total general de la fila actual es la suma del mes y el "vienen"
+                        let totalGeneral = totalMes + viene; 
                         
-                        mesTotalCelda.textContent = formatNumber(totalMes); // Usar formatNumber
-                        generalCelda.textContent = formatNumber(totalGeneral); // Usar formatNumber
+                        mesTotalCelda.textContent = formatNumber(totalMes); 
+                        generalCelda.textContent = formatNumber(totalGeneral); 
 
                         generalValuesMap.set(nomenclaturaCompleta, totalGeneral);
                     }
@@ -1598,7 +1601,7 @@
 
                         const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
 
-                        mesTotalCelda.textContent = formatNumber(totalMes); // Usar formatNumber
+                        mesTotalCelda.textContent = formatNumber(totalMes); 
                         
                         const ABBREVIATED_CYCLE_FACTOR = parseFloat(abbrdCelda?.textContent.trim()) || 0;
                         const EXTENDED_CYCLE_FACTOR = parseFloat(extdCelda?.textContent.trim()) || 0;
@@ -1627,7 +1630,7 @@
                             accumulatedTotalCycles = sumOfTerms * FLIGHT_COUNT_FACTOR;
                         }
 
-                        generalCelda.textContent = formatNumber(accumulatedTotalCycles); // Usar formatNumber
+                        generalCelda.textContent = formatNumber(accumulatedTotalCycles); 
 
                         const restante = limite - accumulatedTotalCycles;
                         aplicarEstiloRestante(restanteCelda, restante, limite);
