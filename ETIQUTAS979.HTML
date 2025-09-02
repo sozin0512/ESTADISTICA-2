@@ -102,8 +102,7 @@
         <!-- Header banner with logo and text -->
         <div class="bg-custom-yellow p-4 text-center rounded-t-lg border-2 border-black border-b-0">
             <div class="flex justify-center items-center">
-                <!-- Se ha actualizado el src del logo con la nueva imagen y se han ajustado las clases para hacerlo más grande -->
-                <img src="IIIIIIIII.png" alt="Logo de ESCN. Helicópteros" class="w-24 h-24 rounded-full border-2 border-black p-2 bg-gray-100 object-contain">
+                <img src="https://i.ibb.co/6y4tF5s/Captura-de-pantalla-2025-09-02-115249-removebg-preview.png" alt="Logo de ESCN. Helicópteros" class="w-24 h-24 rounded-full border-2 border-black p-2 bg-gray-100 object-contain">
             </div>
             <p class="text-sm font-bold text-gray-800 mt-1">ESCN. HELICÓPTEROS</p>
             <p class="text-xs text-gray-800">FUERZA AÉREA HONDUREÑA</p>
@@ -113,9 +112,9 @@
         <!-- Data table -->
         <div class="grid grid-cols-4 gap-0 text-xs border-2 border-black border-t-0 rounded-b-lg overflow-hidden">
             <!-- Header row -->
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black">FECHA</div>
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2">LANDINGS</div>
-            <div class="p-1 font-bold text-white bg-custom-blue">6409</div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black editable-cell" contenteditable="true">FECHA</div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2 editable-cell" contenteditable="true">LANDINGS</div>
+            <div class="p-1 font-bold text-white bg-custom-blue editable-cell" contenteditable="true">6409</div>
 
             <!-- Data row 1 -->
             <div id="fecha" class="p-1 bg-custom-yellow border-r-2 border-black editable-cell" contenteditable="true"></div>
@@ -123,9 +122,9 @@
             <div id="landings" class="p-1 bg-custom-yellow editable-cell" contenteditable="true"></div>
 
             <!-- Header row 2 -->
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black">MODELO</div>
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2">ENG # 1 S/N CP-PS-62853 CSN / CSO</div>
-            <div class="p-1 font-bold text-white bg-custom-blue">5009 / 4384</div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black editable-cell" contenteditable="true">MODELO</div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2 editable-cell" contenteditable="true">ENG # 1 S/N CP-PS-62853 CSN / CSO</div>
+            <div class="p-1 font-bold text-white bg-custom-blue editable-cell" contenteditable="true">5009 / 4384</div>
             
             <!-- Data row 2 -->
             <div id="modelo" class="p-1 bg-custom-yellow border-r-2 border-black editable-cell" contenteditable="true"></div>
@@ -133,9 +132,9 @@
             <div id="eng2_tsn_tso" class="p-1 bg-custom-yellow editable-cell" contenteditable="true"></div>
 
             <!-- Header row 3 -->
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black">NUMERO DE SERIE</div>
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2">ENG # 2 S/N CP-PS-62895 CSN / CSO</div>
-            <div class="p-1 font-bold text-white bg-custom-blue">4968 / 727</div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black editable-cell" contenteditable="true">NUMERO DE SERIE</div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2 editable-cell" contenteditable="true">ENG # 2 S/N CP-PS-62895 CSN / CSO</div>
+            <div class="p-1 font-bold text-white bg-custom-blue editable-cell" contenteditable="true">4968 / 727</div>
 
             <!-- Data row 3 -->
             <div id="numero_de_serie" class="p-1 bg-custom-yellow border-r-2 border-black editable-cell" contenteditable="true"></div>
@@ -143,9 +142,9 @@
             <div id="cbox" class="p-1 bg-custom-yellow editable-cell" contenteditable="true"></div>
             
             <!-- New header row -->
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black">MATRICULA</div>
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2">A/C TT</div>
-            <div class="p-1 font-bold text-white bg-custom-blue">TQ EVENTS</div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black editable-cell" contenteditable="true">MATRICULA</div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2 editable-cell" contenteditable="true">A/C TT</div>
+            <div class="p-1 font-bold text-white bg-custom-blue editable-cell" contenteditable="true">TQ EVENTS</div>
             
             <!-- New data row -->
             <div id="matricula" class="p-1 bg-custom-yellow border-r-2 border-black editable-cell" contenteditable="true"></div>
@@ -208,6 +207,17 @@
 
     <!-- Buttons and records container, outside the sticker -->
     <div class="no-print w-full max-w-lg mt-4 flex flex-col items-center space-y-4">
+        <!-- Scan buttons -->
+        <div class="flex space-x-4">
+            <button id="scanButton" class="px-6 py-2 bg-purple-500 text-white font-bold rounded-md hover:bg-purple-600 transition-colors duration-200">
+                Escanear de Cámara
+            </button>
+            <label for="imageUpload" class="px-6 py-2 bg-indigo-500 text-white font-bold rounded-md hover:bg-indigo-600 transition-colors duration-200 cursor-pointer text-center">
+                Subir Imagen
+            </label>
+            <input type="file" id="imageUpload" class="hidden" accept="image/*">
+        </div>
+
         <div class="flex space-x-4">
             <button id="printAndSaveButton" class="px-6 py-2 bg-green-500 text-white font-bold rounded-md transition-colors duration-200">
                 Imprimir y Guardar
@@ -241,6 +251,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Hidden video element for camera feed -->
+    <video id="cameraFeed" class="hidden" playsinline autoplay></video>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -289,6 +302,9 @@
         const canvas = document.getElementById('signatureCanvas');
         const ctx = canvas.getContext('2d');
         const clearBtn = document.getElementById('clearSignatureBtn');
+        const scanButton = document.getElementById('scanButton');
+        const imageUpload = document.getElementById('imageUpload');
+        const cameraFeed = document.getElementById('cameraFeed');
 
         // Static data for form generation
         const inspectionItems = [
@@ -645,13 +661,18 @@
 
         // Function to reset the form for a new record
         function resetForm() {
-            // Clear all editable fields
-            document.querySelectorAll('.editable-cell').forEach(cell => {
-                const id = cell.id;
-                if (initialValues[id] !== undefined) {
-                    cell.textContent = initialValues[id];
-                } else {
-                    cell.textContent = '';
+            // Only clear the editable yellow data cells by their specific IDs
+            const dataCellIds = [
+                'fecha', 'eng1_tsn_tso', 'landings', 'modelo', 'eng1_csn_cso',
+                'eng2_tsn_tso', 'eng2_csn_cso', 'cbox', 'numero_de_serie',
+                'matricula', 'ac_tt', 'tq_events', 'certificacion', 'serie',
+                'lic_no', 'nombre_impreso'
+            ];
+            
+            dataCellIds.forEach(id => {
+                const cell = document.getElementById(id);
+                if (cell) {
+                    cell.textContent = initialValues[id] !== undefined ? initialValues[id] : '';
                 }
             });
 
@@ -673,6 +694,208 @@
 
         // Event listener for the "New Record" button
         newRecordButton.addEventListener('click', resetForm);
+        
+        // --- Image processing with Gemini API ---
+        async function processImage(base64Data) {
+            statusMessage.textContent = 'Analizando imagen con IA...';
+            statusMessage.style.color = 'black';
+            try {
+                const prompt = `Extrae los siguientes datos de la etiqueta de mantenimiento y devuélvelos en formato JSON. Si un campo no está presente, déjalo como una cadena vacía.
+                Campos a extraer:
+                - Fecha (date)
+                - Landings (landings)
+                - Modelo (model)
+                - ENG #1 S/N CP-PS-62853 (eng1_sn)
+                - CSN / CSO (eng1_csn_cso)
+                - ENG #2 S/N CP-PS-62895 (eng2_sn)
+                - CSN / CSO (eng2_csn_cso)
+                - CBOX (cbox)
+                - NUMERO DE SERIE (serial_number)
+                - MATRICULA (registration)
+                - A/C TT (ac_tt)
+                - TQ EVENTS (tq_events)
+                - Trabajos Completados (tasks) - extrae cada línea de trabajo como un elemento de un array.
+                - Firma (signature)
+                - Serie (series)
+                - Lic. No (lic_no)
+                - Nombre Impreso (printed_name)
+
+                EJEMPLO DE RESPUESTA JSON:
+                {
+                  "date": "10/06/2025",
+                  "landings": "100",
+                  "model": "BO-105",
+                  "eng1_sn": "CP-PS-62853",
+                  "eng1_csn_cso": "5000 / 4300",
+                  "eng2_sn": "CP-PS-62895",
+                  "eng2_csn_cso": "4900 / 700",
+                  "cbox": "2000",
+                  "serial_number": "123456",
+                  "registration": "FAH-901",
+                  "ac_tt": "1500",
+                  "tq_events": "20",
+                  "tasks": ["Inspeccion de 100 horas", "Reemplazo de filtro de aceite"],
+                  "series": "600",
+                  "lic_no": "12345",
+                  "printed_name": "Juan Perez"
+                }
+                `;
+                
+                const payload = {
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [
+                                { text: prompt },
+                                {
+                                    inlineData: {
+                                        mimeType: "image/jpeg", // Assuming all images are converted to JPEG
+                                        data: base64Data
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "date": { "type": "STRING" },
+                                "landings": { "type": "STRING" },
+                                "model": { "type": "STRING" },
+                                "eng1_sn": { "type": "STRING" },
+                                "eng1_csn_cso": { "type": "STRING" },
+                                "eng2_sn": { "type": "STRING" },
+                                "eng2_csn_cso": { "type": "STRING" },
+                                "cbox": { "type": "STRING" },
+                                "serial_number": { "type": "STRING" },
+                                "registration": { "type": "STRING" },
+                                "ac_tt": { "type": "STRING" },
+                                "tq_events": { "type": "STRING" },
+                                "tasks": { "type": "ARRAY", "items": { "type": "STRING" } },
+                                "series": { "type": "STRING" },
+                                "lic_no": { "type": "STRING" },
+                                "printed_name": { "type": "STRING" }
+                            }
+                        }
+                    }
+                };
+
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
+                    const json = result.candidates[0].content.parts[0].text;
+                    const parsedData = JSON.parse(json);
+                    
+                    // Populate the form with the extracted data
+                    document.getElementById('fecha').textContent = parsedData.date || '';
+                    document.getElementById('landings').textContent = parsedData.landings || '';
+                    document.getElementById('modelo').textContent = parsedData.model || '';
+                    document.getElementById('eng1_tsn_tso').textContent = parsedData.eng1_csn_cso || '';
+                    document.getElementById('eng1_csn_cso').textContent = parsedData.eng1_csn_cso || '';
+                    document.getElementById('eng2_tsn_tso').textContent = parsedData.eng2_csn_cso || '';
+                    document.getElementById('eng2_csn_cso').textContent = parsedData.eng2_csn_cso || '';
+                    document.getElementById('cbox').textContent = parsedData.cbox || '';
+                    document.getElementById('numero_de_serie').textContent = parsedData.serial_number || '';
+                    document.getElementById('matricula').textContent = parsedData.registration || '';
+                    document.getElementById('ac_tt').textContent = parsedData.ac_tt || '';
+                    document.getElementById('tq_events').textContent = parsedData.tq_events || '';
+                    document.getElementById('serie').textContent = parsedData.series || '';
+                    document.getElementById('lic_no').textContent = parsedData.lic_no || '';
+                    document.getElementById('nombre_impreso').textContent = parsedData.printed_name || '';
+
+                    // Populate the tasks section
+                    if (parsedData.tasks && Array.isArray(parsedData.tasks)) {
+                        trabajosContainer.innerHTML = '';
+                        parsedData.tasks.forEach((task, index) => {
+                            const newRow = document.createElement('div');
+                            newRow.classList.add('flex', 'items-start', 'text-xs', 'mt-2');
+                            newRow.innerHTML = `
+                                <span class="font-bold mr-1 flex-none w-4">${index + 1}</span>
+                                <p class="editable-cell flex-grow" contenteditable="true">${task}</p>
+                            `;
+                            trabajosContainer.appendChild(newRow);
+                        });
+                    }
+
+                    statusMessage.textContent = '¡Datos de la imagen cargados con éxito!';
+                    statusMessage.style.color = 'green';
+                } else {
+                    statusMessage.textContent = 'Error al procesar la imagen. Inténtalo de nuevo.';
+                    statusMessage.style.color = 'red';
+                }
+            } catch (error) {
+                console.error("Error al procesar la imagen:", error);
+                statusMessage.textContent = 'Error al procesar la imagen. Inténtalo de nuevo.';
+                statusMessage.style.color = 'red';
+            }
+        }
+
+        // --- Camera and Image Upload Logic ---
+        scanButton.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                cameraFeed.srcObject = stream;
+                cameraFeed.classList.remove('hidden');
+
+                cameraFeed.onloadedmetadata = () => {
+                    cameraFeed.play();
+                };
+
+                // Create a temporary canvas to capture the frame
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                statusMessage.textContent = 'Cámara activada. Toca la pantalla para capturar la imagen.';
+                statusMessage.style.color = 'blue';
+
+                const captureImage = () => {
+                    tempCanvas.width = cameraFeed.videoWidth;
+                    tempCanvas.height = cameraFeed.videoHeight;
+                    tempCtx.drawImage(cameraFeed, 0, 0, tempCanvas.width, tempCanvas.height);
+                    const imageData = tempCanvas.toDataURL('image/jpeg');
+                    
+                    // Stop the camera stream
+                    stream.getTracks().forEach(track => track.stop());
+                    cameraFeed.classList.add('hidden');
+                    
+                    // Process the captured image
+                    const base64Data = imageData.split(',')[1];
+                    processImage(base64Data);
+                    
+                    cameraFeed.removeEventListener('click', captureImage);
+                };
+
+                cameraFeed.addEventListener('click', captureImage);
+
+            } catch (error) {
+                console.error("Error al acceder a la cámara:", error);
+                statusMessage.textContent = 'Error: No se pudo acceder a la cámara. Por favor, asegúrate de que tienes permiso. También puedes usar la opción "Subir Imagen".';
+                statusMessage.style.color = 'red';
+            }
+        });
+
+        imageUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64Data = e.target.result.split(',')[1];
+                    processImage(base64Data);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
         
         // Initial state
         window.onload = () => {
