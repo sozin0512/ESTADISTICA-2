@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etiqueta de Mantenimiento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .sticker-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #f7f7f7;
+            padding: 1rem;
+            border: 2px solid #ccc;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 2rem;
+        }
+
+        /* Custom colors for the document */
+        .bg-custom-blue {
+            background-color: #002D62;
+        }
+        .bg-custom-yellow {
+            background-color: #F8D670;
+        }
+        
+        .editable-cell {
+            outline: 1px solid transparent;
+            cursor: pointer;
+            transition: outline 0.2s ease-in-out;
+            word-wrap: break-word;
+        }
+
+        .editable-cell:focus {
+            outline: 1px solid #000;
+        }
+        
+        /* Print styles */
+        @media print {
+            body {
+                background-color: #fff !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+            .sticker-container {
+                box-shadow: none !important;
+                border: 2px solid #ccc !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .editable-cell {
+                outline: none !important;
+            }
+            #signatureCanvas {
+                border: none !important;
+            }
+            .bg-custom-blue, .bg-custom-yellow {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1-px rgba(0, 0, 0, 0.06);
+            width: 90%;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Main sticker container -->
+    <div class="sticker-container">
+
+        <!-- Header banner with logo and text -->
+        <div class="bg-custom-yellow p-4 text-center rounded-t-lg border-2 border-black border-b-0">
+            <div class="flex justify-center items-center">
+                <!-- Se ha actualizado el src del logo con la nueva imagen y se han ajustado las clases para hacerlo más grande -->
+                <img src="IIIIIIIII.png" alt="Logo de ESCN. Helicópteros" class="w-24 h-24 rounded-full border-2 border-black p-2 bg-gray-100 object-contain">
+            </div>
+            <p class="text-sm font-bold text-gray-800 mt-1">ESCN. HELICÓPTEROS</p>
+            <p class="text-xs text-gray-800">FUERZA AÉREA HONDUREÑA</p>
+        </div>
+        <div class="bg-white text-center font-bold text-gray-800 text-lg py-1 border-2 border-black border-t-0">FAH</div>
+
+        <!-- Data table -->
+        <div class="grid grid-cols-4 gap-0 text-xs border-2 border-black border-t-0 rounded-b-lg overflow-hidden">
+            <!-- Header row -->
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black">FECHA</div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2">LANDINGS</div>
+            <div class="p-1 font-bold text-white bg-custom-blue">6409</div>
+
+            <!-- Data row 1 -->
+            <div id="fecha" class="p-1 bg-custom-yellow border-r-2 border-black editable-cell" contenteditable="true"></div>
+            <div id="eng1_tsn_tso" class="p-1 bg-custom-yellow border-r-2 border-black col-span-2 editable-cell" contenteditable="true"></div>
+            <div id="landings" class="p-1 bg-custom-yellow editable-cell" contenteditable="true"></div>
+
+            <!-- Header row 2 -->
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black">MODELO</div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2">ENG # 1 S/N CP-PS-62853 CSN / CSO</div>
+            <div class="p-1 font-bold text-white bg-custom-blue">5009 / 4384</div>
+            
+            <!-- Data row 2 -->
+            <div id="modelo" class="p-1 bg-custom-yellow border-r-2 border-black editable-cell" contenteditable="true"></div>
+            <div id="eng1_csn_cso" class="p-1 bg-custom-yellow border-r-2 border-black col-span-2 editable-cell" contenteditable="true"></div>
+            <div id="eng2_tsn_tso" class="p-1 bg-custom-yellow editable-cell" contenteditable="true"></div>
+
+            <!-- Header row 3 -->
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black">NUMERO DE SERIE</div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2">ENG # 2 S/N CP-PS-62895 CSN / CSO</div>
+            <div class="p-1 font-bold text-white bg-custom-blue">4968 / 727</div>
+
+            <!-- Data row 3 -->
+            <div id="numero_de_serie" class="p-1 bg-custom-yellow border-r-2 border-black editable-cell" contenteditable="true"></div>
+            <div id="eng2_csn_cso" class="p-1 bg-custom-yellow border-r-2 border-black col-span-2 editable-cell" contenteditable="true"></div>
+            <div id="cbox" class="p-1 bg-custom-yellow editable-cell" contenteditable="true"></div>
+            
+            <!-- New header row -->
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black">MATRICULA</div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2">A/C TT</div>
+            <div class="p-1 font-bold text-white bg-custom-blue">TQ EVENTS</div>
+            
+            <!-- New data row -->
+            <div id="matricula" class="p-1 bg-custom-yellow border-r-2 border-black editable-cell" contenteditable="true"></div>
+            <div id="ac_tt" class="p-1 bg-custom-yellow border-r-2 border-black col-span-2 editable-cell" contenteditable="true"></div>
+            <div id="tq_events" class="p-1 bg-custom-yellow editable-cell" contenteditable="true"></div>
+        </div>
+        
+        <!-- Text and signature sections -->
+        <div class="mt-4 border-2 border-black rounded-lg p-2 bg-white">
+            <div class="flex items-center space-x-2">
+                <h3 class="font-bold text-sm editable-cell" contenteditable="true">Se Completaron los siguientes trabajos:</h3>
+                <!-- Button hidden on print -->
+                <div class="no-print">
+                    <select id="task-type-select" class="px-2 py-1 border border-black rounded-md bg-gray-50 text-xs">
+                        <option value="none">Seleccionar Tipo de Trabajo</option>
+                        <option value="inspection">Inspección</option>
+                        <option value="remi">Remoción / Instalación</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="trabajos-container" class="space-y-2 mt-2">
+                <!-- Content will be dynamically generated here -->
+            </div>
+            
+            <p id="certificacion" class="italic text-gray-700 text-xs mb-4 mt-4 editable-cell" contenteditable="true">
+                Yo certifico que los trabajos arriba descritos fueron efectuados de acuerdo a los procedimientos del Manual de Mantenimiento Pratt & Whitney Canadá PT6T-3B P/N 3017042 y por lo tanto el motor es puesto en servicio.
+            </p>
+            
+            <!-- Signature container -->
+            <div class="flex flex-col items-center">
+                <!-- Signature -->
+                <canvas id="signatureCanvas" class="border border-black w-full h-20 rounded-md bg-white"></canvas>
+                <button id="clearSignatureBtn" class="no-print mt-2 px-2 py-1 bg-red-500 text-white text-xs rounded-md hover:bg-red-600 transition-colors duration-200">Limpiar Firma</button>
+
+                <!-- Data below the signature -->
+                <div class="flex justify-between items-end w-full mt-4 text-xs">
+                    <div class="flex-grow">
+                        <div class="flex items-center space-x-2">
+                            <p class="font-bold">Firma</p>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <p class="font-bold">Serie</p>
+                            <p id="serie" class="editable-cell text-sm" contenteditable="true"></p>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <p class="font-bold">Lic. No.</p>
+                            <p id="lic_no" class="editable-cell text-sm" contenteditable="true"></p>
+                        </div>
+                    </div>
+                    <div class="flex-grow flex flex-col items-end text-sm">
+                        <p id="nombre_impreso" class="font-bold mb-1 editable-cell" contenteditable="true">Nombre Impreso</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buttons and records container, outside the sticker -->
+    <div class="no-print w-full max-w-lg mt-4 flex flex-col items-center space-y-4">
+        <div class="flex space-x-4">
+            <button id="printAndSaveButton" class="px-6 py-2 bg-green-500 text-white font-bold rounded-md transition-colors duration-200">
+                Imprimir y Guardar
+            </button>
+            <button id="showRecordsButton" class="px-6 py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 transition-colors duration-200">
+                Mostrar Registros Guardados
+            </button>
+        </div>
+        <button id="newRecordButton" class="px-4 py-2 bg-gray-500 text-white font-bold rounded-md hover:bg-gray-600 transition-colors duration-200">
+            Nuevo Registro
+        </button>
+        <div id="statusMessage" class="mt-4 text-center text-sm font-semibold"></div>
+        <div id="recordsContainer" class="mt-4 w-full">
+            <!-- Saved records will be displayed here -->
+        </div>
+    </div>
+
+    <!-- Modal to ask for the user's name -->
+    <div id="nameModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold mb-4">Ingresa tu Nombre</h2>
+            <p class="mb-4 text-sm">Este nombre se guardará como la persona que realiza el registro.</p>
+            <input type="text" id="userNameInput" placeholder="Nombre completo" class="w-full p-2 border border-gray-300 rounded-md">
+            <div class="flex justify-end mt-4 space-x-2">
+                <button id="closeModalBtn" class="px-4 py-2 bg-gray-400 text-white font-bold rounded-md hover:bg-gray-500 transition-colors duration-200">
+                    Cancelar
+                </button>
+                <button id="saveAndPrintBtn" class="px-4 py-2 bg-green-500 text-white font-bold rounded-md hover:bg-green-600 transition-colors duration-200">
+                    Guardar y Usar Ctrl + P
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Set logging level for debugging
+        setLogLevel('debug');
+
+        // =========================================================================
+        // === Pega tu configuración de Firebase aquí para que funcione fuera de Canvas ===
+        // =========================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAnDAVVRTnl_SHejO7lyqrkGbPcFNyIBHc",
+            authDomain: "reportesti-41047.firebaseapp.com",
+            projectId: "reportesti-41047",
+            storageBucket: "reportesti-41047.firebasestorage.app",
+            messagingSenderId: "997680984231",
+            appId: "1:997680984231:web:d9c27e1ac8eaf9473feb82"
+        };
+        // =========================================================================
+
+        const appId = firebaseConfig.projectId;
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        // State management
+        let currentDocId = null;
+
+        // UI Elements
+        const taskTypeSelect = document.getElementById('task-type-select');
+        const trabajosContainer = document.getElementById('trabajos-container');
+        const printAndSaveButton = document.getElementById('printAndSaveButton');
+        const showRecordsButton = document.getElementById('showRecordsButton');
+        const newRecordButton = document.getElementById('newRecordButton');
+        const recordsContainer = document.getElementById('recordsContainer');
+        const statusMessage = document.getElementById('statusMessage');
+        const nameModal = document.getElementById('nameModal');
+        const userNameInput = document.getElementById('userNameInput');
+        const saveAndPrintBtn = document.getElementById('saveAndPrintBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const canvas = document.getElementById('signatureCanvas');
+        const ctx = canvas.getContext('2d');
+        const clearBtn = document.getElementById('clearSignatureBtn');
+
+        // Static data for form generation
+        const inspectionItems = [
+            "Scheduled Inspections", "Special Inspections", "Lubrication", "Components Requirements",
+            "Regulatory Authority Inspections", "Optional Equipment Kits Inspections",
+            "Airframe Bulletins", "Engines Inspeccion"
+        ];
+        const removalDescription = "Se removió [Parte] P/N [Número de parte] S/N [Número de serie], Reparable, por horas para Overhaul cumplidas.";
+        const installationDescription = "Se instaló [Parte] P/N [Número de parte] S/N [Número de serie], Reparable, por horas para Overhaul cumplidas.";
+        
+        // Initial values for editable fields
+        const initialValues = {
+            fecha: '',
+            eng1_tsn_tso: '',
+            landings: '',
+            modelo: '',
+            eng1_csn_cso: '',
+            eng2_tsn_tso: '',
+            eng2_csn_cso: '',
+            cbox: '',
+            numero_de_serie: '',
+            matricula: '',
+            ac_tt: '',
+            tq_events: '',
+            certificacion: 'Yo certifico que los trabajos arriba descritos fueron efectuados de acuerdo a los procedimientos del Manual de Mantenimiento Pratt & Whitney Canadá PT6T-3B P/N 3017042 y por lo tanto el motor es puesto en servicio.',
+            serie: '',
+            lic_no: '',
+            nombre_impreso: 'Nombre Impreso'
+        };
+
+        // --- Authentication & Initialization Logic ---
+        async function initAuthAndApp() {
+            try {
+                // Now we always sign in anonymously
+                await signInAnonymously(auth);
+                statusMessage.textContent = 'Autenticación colaborativa exitosa. Todos los usuarios pueden ver y editar los registros.';
+                statusMessage.style.color = 'green';
+                // Enable buttons after successful authentication
+                printAndSaveButton.disabled = false;
+                showRecordsButton.disabled = false;
+
+            } catch (error) {
+                console.error("Error de autenticación: ", error);
+                statusMessage.textContent = 'Error de autenticación. No se pueden guardar ni cargar datos.';
+                statusMessage.style.color = 'red';
+                // Disable buttons on authentication failure
+                printAndSaveButton.disabled = true;
+                showRecordsButton.disabled = true;
+            }
+        }
+
+        // --- Form generation functions ---
+        function generateInspectionRows() {
+            trabajosContainer.innerHTML = '';
+            inspectionItems.forEach((item, index) => {
+                const newRow = document.createElement('div');
+                newRow.classList.add('flex', 'flex-col', 'items-start', 'text-xs', 'mt-2', 'space-y-1');
+                newRow.innerHTML = `
+                    <div class="flex items-center space-x-2 w-full">
+                        <span class="font-bold mr-1 flex-none w-4">${index + 1}</span>
+                        <p class="flex-grow font-bold text-center">${item}</p>
+                    </div>
+                    <p class="editable-cell w-full text-left" contenteditable="true">Ingresa los detalles del trabajo aquí...</p>
+                `;
+                trabajosContainer.appendChild(newRow);
+            });
+        }
+
+        function generateRemiRows() {
+            trabajosContainer.innerHTML = '';
+            const removalRow = document.createElement('div');
+            removalRow.classList.add('flex', 'items-start', 'text-xs', 'mt-2');
+            removalRow.innerHTML = `
+                <span class="font-bold mr-1 flex-none w-4">1</span>
+                <p class="editable-cell flex-grow" contenteditable="true">${removalDescription}</p>
+            `;
+            trabajosContainer.appendChild(removalRow);
+
+            const installationRow = document.createElement('div');
+            installationRow.classList.add('flex', 'items-start', 'text-xs', 'mt-2');
+            installationRow.innerHTML = `
+                <span class="font-bold mr-1 flex-none w-4">2</span>
+                <p class="editable-cell flex-grow" contenteditable="true">${installationDescription}</p>
+            `;
+            trabajosContainer.appendChild(installationRow);
+        }
+
+        taskTypeSelect.addEventListener('change', () => {
+            const selectedType = taskTypeSelect.value;
+            if (selectedType === 'inspection') {
+                generateInspectionRows();
+            } else if (selectedType === 'remi') {
+                generateRemiRows();
+            } else {
+                trabajosContainer.innerHTML = '';
+            }
+        });
+
+        // Initialize with default state
+        taskTypeSelect.dispatchEvent(new Event('change'));
+
+        // --- Signature Pad functionality ---
+        let drawing = false;
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000';
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function startPosition(e) { drawing = true; draw(e); }
+        function endPosition() { drawing = false; ctx.beginPath(); }
+        function draw(e) {
+            if (!drawing) return;
+            let x, y;
+            const rect = canvas.getBoundingClientRect();
+            if (e.touches) {
+                x = e.touches[0].clientX - rect.left;
+                y = e.touches[0].clientY - rect.top;
+            } else {
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+            }
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        canvas.addEventListener('mousedown', startPosition);
+        canvas.addEventListener('mouseup', endPosition);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startPosition(e); });
+        canvas.addEventListener('touchend', endPosition);
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
+
+        clearBtn.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        });
+
+        function loadSignature(base64Data) {
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            };
+            img.src = base64Data;
+        }
+
+        // --- Firestore save and update functionality ---
+        async function saveToFirestore(userName) {
+            // Path for shared access
+            const documentsPath = `/artifacts/${appId}/public/data/mantenimiento_data`;
+            
+            const trabajos = [];
+            document.querySelectorAll('#trabajos-container p').forEach(p => {
+                trabajos.push(p.textContent);
+            });
+            const signatureData = canvas.toDataURL();
+
+            const dataToSave = {
+                fecha: document.getElementById('fecha').textContent,
+                landings_6409: document.getElementById('landings').textContent,
+                modelo: document.getElementById('modelo').textContent,
+                eng1_tsn_tso: document.getElementById('eng1_tsn_tso').textContent,
+                eng1_csn_cso: document.getElementById('eng1_csn_cso').textContent,
+                eng2_tsn_tso: document.getElementById('eng2_tsn_tso').textContent,
+                eng2_csn_cso: document.getElementById('eng2_csn_cso').textContent,
+                cbox: document.getElementById('cbox').textContent,
+                numero_de_serie: document.getElementById('numero_de_serie').textContent,
+                matricula: document.getElementById('matricula').textContent,
+                ac_tt: document.getElementById('ac_tt').textContent,
+                tq_events: document.getElementById('tq_events').textContent,
+                trabajos_realizados: trabajos,
+                certificacion: document.getElementById('certificacion').textContent,
+                serie: document.getElementById('serie').textContent,
+                licencia_no: document.getElementById('lic_no').textContent,
+                nombre_impreso: document.getElementById('nombre_impreso').textContent,
+                firma: signatureData,
+                guardado_por: userName,
+                timestamp: new Date()
+            };
+
+            try {
+                statusMessage.textContent = 'Guardando datos...';
+                if (currentDocId) {
+                    await updateDoc(doc(db, documentsPath, currentDocId), dataToSave);
+                    statusMessage.textContent = '¡Datos actualizados con éxito!';
+                    console.log("Documento actualizado con ID: ", currentDocId);
+                } else {
+                    const docRef = await addDoc(collection(db, documentsPath), dataToSave);
+                    statusMessage.textContent = '¡Datos guardados con éxito!';
+                    console.log("Documento añadido con ID: ", docRef.id);
+                }
+                statusMessage.style.color = 'green';
+                return true;
+            } catch (e) {
+                statusMessage.textContent = 'Error al guardar los datos.';
+                statusMessage.style.color = 'red';
+                console.error("Error al añadir/actualizar documento: ", e);
+                return false;
+            }
+        }
+
+        // --- Event listeners and logic flow ---
+
+        // Print & Save button logic
+        printAndSaveButton.addEventListener('click', () => {
+            nameModal.classList.remove('hidden');
+        });
+
+        // Close modal button
+        closeModalBtn.addEventListener('click', () => {
+            nameModal.classList.add('hidden');
+        });
+
+        // Save from modal
+        saveAndPrintBtn.addEventListener('click', async () => {
+            const userName = userNameInput.value.trim();
+            if (userName) {
+                nameModal.classList.add('hidden');
+                statusMessage.textContent = 'Guardando datos...';
+                statusMessage.style.color = 'black';
+                const saved = await saveToFirestore(userName);
+                if (saved) {
+                    statusMessage.textContent = '¡Datos guardados con éxito! Ahora puedes imprimir usando Ctrl + P (o Cmd + P en Mac).';
+                    statusMessage.style.color = 'blue';
+                }
+            } else {
+                userNameInput.placeholder = '¡Por favor, ingresa tu nombre!';
+            }
+        });
+
+        // Show records button logic
+        showRecordsButton.addEventListener('click', async () => {
+            recordsContainer.innerHTML = '';
+            statusMessage.textContent = 'Cargando registros...';
+            statusMessage.style.color = 'black';
+            
+            try {
+                // Path for shared access
+                const documentsPath = `/artifacts/${appId}/public/data/mantenimiento_data`;
+                const q = query(collection(db, documentsPath));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    statusMessage.textContent = 'No hay registros guardados.';
+                    statusMessage.style.color = 'red';
+                    return;
+                }
+
+                statusMessage.textContent = '';
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const recordElement = document.createElement('div');
+                    recordElement.classList.add('bg-white', 'p-4', 'rounded-md', 'shadow-md', 'mt-2', 'w-full');
+                    recordElement.innerHTML = `
+                        <h4 class="font-bold text-lg text-blue-800">Matrícula: ${data.matricula}</h4>
+                        <p class="text-sm text-gray-600">Fecha: ${data.fecha}</p>
+                        <p class="text-xs text-gray-400">Guardado por: ${data.guardado_por || 'N/A'}</p>
+                        <button class="view-detail-btn mt-2 px-3 py-1 bg-blue-400 text-white rounded-md hover:bg-blue-500 transition-colors duration-200" data-doc-id="${doc.id}">
+                            Ver detalles y Editar
+                        </button>
+                    `;
+                    recordsContainer.appendChild(recordElement);
+                });
+                statusMessage.textContent = 'Registros cargados exitosamente.';
+                statusMessage.style.color = 'green';
+            } catch (error) {
+                statusMessage.textContent = 'Error al cargar los registros.';
+                statusMessage.style.color = 'red';
+                console.error("Error al obtener documentos: ", error);
+            }
+        });
+
+        // Event listener for "View details" buttons
+        recordsContainer.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('view-detail-btn')) {
+                const docId = e.target.dataset.docId;
+                statusMessage.textContent = `Cargando registro ${docId}...`;
+                try {
+                    // Path for shared access
+                    const documentsPath = `/artifacts/${appId}/public/data/mantenimiento_data`;
+                    const docRef = doc(db, documentsPath, docId);
+                    const docSnap = await getDoc(docRef);
+
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        
+                        // Populate form fields with data
+                        document.getElementById('fecha').textContent = data.fecha;
+                        document.getElementById('landings').textContent = data.landings_6409;
+                        document.getElementById('modelo').textContent = data.modelo;
+                        document.getElementById('eng1_tsn_tso').textContent = data.eng1_tsn_tso;
+                        document.getElementById('eng1_csn_cso').textContent = data.eng1_csn_cso;
+                        document.getElementById('eng2_tsn_tso').textContent = data.eng2_tsn_tso;
+                        document.getElementById('eng2_csn_cso').textContent = data.eng2_csn_cso;
+                        document.getElementById('cbox').textContent = data.cbox;
+                        document.getElementById('numero_de_serie').textContent = data.numero_de_serie;
+                        document.getElementById('matricula').textContent = data.matricula;
+                        document.getElementById('ac_tt').textContent = data.ac_tt;
+                        document.getElementById('tq_events').textContent = data.tq_events;
+                        document.getElementById('certificacion').textContent = data.certificacion;
+                        document.getElementById('serie').textContent = data.serie;
+                        document.getElementById('lic_no').textContent = data.licencia_no;
+                        document.getElementById('nombre_impreso').textContent = data.nombre_impreso;
+                        
+                        // Reset trabajos and repopulate
+                        trabajosContainer.innerHTML = '';
+                        if (data.trabajos_realizados && Array.isArray(data.trabajos_realizados)) {
+                            data.trabajos_realizados.forEach((trabajo, index) => {
+                                const newRow = document.createElement('div');
+                                newRow.classList.add('flex', 'items-start', 'text-xs', 'mt-2');
+                                newRow.innerHTML = `
+                                    <span class="font-bold mr-1 flex-none w-4">${index + 1}</span>
+                                    <p class="editable-cell flex-grow" contenteditable="true">${trabajo}</p>
+                                `;
+                                trabajosContainer.appendChild(newRow);
+                            });
+                        }
+
+                        // Load signature image
+                        if (data.firma) {
+                            loadSignature(data.firma);
+                        }
+
+                        // Set the current document ID for editing
+                        currentDocId = docId;
+                        statusMessage.textContent = 'Registro cargado para edición.';
+                        statusMessage.style.color = 'green';
+                    } else {
+                        statusMessage.textContent = 'El documento no existe.';
+                        statusMessage.style.color = 'red';
+                    }
+                } catch (error) {
+                    statusMessage.textContent = 'Error al cargar el documento.';
+                    statusMessage.style.color = 'red';
+                    console.error("Error al obtener documento: ", error);
+                }
+            }
+        });
+
+        // Function to reset the form for a new record
+        function resetForm() {
+            // Clear all editable fields
+            document.querySelectorAll('.editable-cell').forEach(cell => {
+                const id = cell.id;
+                if (initialValues[id] !== undefined) {
+                    cell.textContent = initialValues[id];
+                } else {
+                    cell.textContent = '';
+                }
+            });
+
+            // Clear dynamic sections
+            trabajosContainer.innerHTML = '';
+            taskTypeSelect.value = 'none';
+
+            // Clear signature
+            clearBtn.click();
+
+            // Reset status message and records container
+            statusMessage.textContent = 'Formulario limpio para un nuevo registro.';
+            statusMessage.style.color = 'black';
+            recordsContainer.innerHTML = '';
+
+            // Clear the current document ID
+            currentDocId = null;
+        }
+
+        // Event listener for the "New Record" button
+        newRecordButton.addEventListener('click', resetForm);
+        
+        // Initial state
+        window.onload = () => {
+             // Initialize with default state
+            taskTypeSelect.dispatchEvent(new Event('change'));
+            initAuthAndApp();
+            // Reset the form to its initial empty state
+            resetForm();
+        }
+    </script>
+</body>
+</html>
