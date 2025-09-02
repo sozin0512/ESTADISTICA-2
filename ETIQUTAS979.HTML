@@ -9,7 +9,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #e5e7eb;
+            background-color: #5173b7;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -20,9 +20,9 @@
         .sticker-container {
             width: 100%;
             max-width: 600px;
-            background-color: #f7f7f7;
+            background-color: #f8f8f8;
             padding: 1rem;
-            border: 2px solid #ccc;
+            border: 2px solid #a93434;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             margin-bottom: 2rem;
         }
@@ -32,7 +32,7 @@
             background-color: #002D62;
         }
         .bg-custom-yellow {
-            background-color: #F8D670;
+            background-color: #fcbe03;
         }
         
         .editable-cell {
@@ -102,7 +102,7 @@
         <!-- Header banner with logo and text -->
         <div class="bg-custom-yellow p-4 text-center rounded-t-lg border-2 border-black border-b-0">
             <div class="flex justify-center items-center">
-                <img src="https://i.ibb.co/6y4tF5s/Captura-de-pantalla-2025-09-02-115249-removebg-preview.png" alt="Logo de ESCN. Helicópteros" class="w-24 h-24 rounded-full border-2 border-black p-2 bg-gray-100 object-contain">
+                <img src="IIIIIIIII.png" alt="Logo de ESCN. Helicópteros" class="w-24 h-24 rounded-full border-2 border-black p-2 bg-gray-100 object-contain">
             </div>
             <p class="text-sm font-bold text-gray-800 mt-1">ESCN. HELICÓPTEROS</p>
             <p class="text-xs text-gray-800">FUERZA AÉREA HONDUREÑA</p>
@@ -207,17 +207,6 @@
 
     <!-- Buttons and records container, outside the sticker -->
     <div class="no-print w-full max-w-lg mt-4 flex flex-col items-center space-y-4">
-        <!-- Scan buttons -->
-        <div class="flex space-x-4">
-            <button id="scanButton" class="px-6 py-2 bg-purple-500 text-white font-bold rounded-md hover:bg-purple-600 transition-colors duration-200">
-                Escanear de Cámara
-            </button>
-            <label for="imageUpload" class="px-6 py-2 bg-indigo-500 text-white font-bold rounded-md hover:bg-indigo-600 transition-colors duration-200 cursor-pointer text-center">
-                Subir Imagen
-            </label>
-            <input type="file" id="imageUpload" class="hidden" accept="image/*">
-        </div>
-
         <div class="flex space-x-4">
             <button id="printAndSaveButton" class="px-6 py-2 bg-green-500 text-white font-bold rounded-md transition-colors duration-200">
                 Imprimir y Guardar
@@ -229,7 +218,11 @@
         <button id="newRecordButton" class="px-4 py-2 bg-gray-500 text-white font-bold rounded-md hover:bg-gray-600 transition-colors duration-200">
             Nuevo Registro
         </button>
-        <div id="statusMessage" class="mt-4 text-center text-sm font-semibold"></div>
+
+        <!-- Status and loading bar -->
+        <div id="statusContainer" class="mt-4 w-full">
+            <div id="statusMessage" class="mt-4 text-center text-sm font-semibold"></div>
+        </div>
         <div id="recordsContainer" class="mt-4 w-full">
             <!-- Saved records will be displayed here -->
         </div>
@@ -251,9 +244,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Hidden video element for camera feed -->
-    <video id="cameraFeed" class="hidden" playsinline autoplay></video>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -302,9 +292,6 @@
         const canvas = document.getElementById('signatureCanvas');
         const ctx = canvas.getContext('2d');
         const clearBtn = document.getElementById('clearSignatureBtn');
-        const scanButton = document.getElementById('scanButton');
-        const imageUpload = document.getElementById('imageUpload');
-        const cameraFeed = document.getElementById('cameraFeed');
 
         // Static data for form generation
         const inspectionItems = [
@@ -338,11 +325,10 @@
         // --- Authentication & Initialization Logic ---
         async function initAuthAndApp() {
             try {
-                // Now we always sign in anonymously
+                statusMessage.textContent = 'Iniciando autenticación...';
                 await signInAnonymously(auth);
                 statusMessage.textContent = 'Autenticación colaborativa exitosa. Todos los usuarios pueden ver y editar los registros.';
                 statusMessage.style.color = 'green';
-                // Enable buttons after successful authentication
                 printAndSaveButton.disabled = false;
                 showRecordsButton.disabled = false;
 
@@ -350,7 +336,6 @@
                 console.error("Error de autenticación: ", error);
                 statusMessage.textContent = 'Error de autenticación. No se pueden guardar ni cargar datos.';
                 statusMessage.style.color = 'red';
-                // Disable buttons on authentication failure
                 printAndSaveButton.disabled = true;
                 showRecordsButton.disabled = true;
             }
@@ -403,7 +388,6 @@
             }
         });
 
-        // Initialize with default state
         taskTypeSelect.dispatchEvent(new Event('change'));
 
         // --- Signature Pad functionality ---
@@ -467,7 +451,6 @@
 
         // --- Firestore save and update functionality ---
         async function saveToFirestore(userName) {
-            // Path for shared access
             const documentsPath = `/artifacts/${appId}/public/data/mantenimiento_data`;
             
             const trabajos = [];
@@ -521,18 +504,14 @@
         }
 
         // --- Event listeners and logic flow ---
-
-        // Print & Save button logic
         printAndSaveButton.addEventListener('click', () => {
             nameModal.classList.remove('hidden');
         });
 
-        // Close modal button
         closeModalBtn.addEventListener('click', () => {
             nameModal.classList.add('hidden');
         });
 
-        // Save from modal
         saveAndPrintBtn.addEventListener('click', async () => {
             const userName = userNameInput.value.trim();
             if (userName) {
@@ -549,14 +528,12 @@
             }
         });
 
-        // Show records button logic
         showRecordsButton.addEventListener('click', async () => {
             recordsContainer.innerHTML = '';
             statusMessage.textContent = 'Cargando registros...';
             statusMessage.style.color = 'black';
             
             try {
-                // Path for shared access
                 const documentsPath = `/artifacts/${appId}/public/data/mantenimiento_data`;
                 const q = query(collection(db, documentsPath));
                 const querySnapshot = await getDocs(q);
@@ -592,13 +569,11 @@
             }
         });
 
-        // Event listener for "View details" buttons
         recordsContainer.addEventListener('click', async (e) => {
             if (e.target.classList.contains('view-detail-btn')) {
                 const docId = e.target.dataset.docId;
                 statusMessage.textContent = `Cargando registro ${docId}...`;
                 try {
-                    // Path for shared access
                     const documentsPath = `/artifacts/${appId}/public/data/mantenimiento_data`;
                     const docRef = doc(db, documentsPath, docId);
                     const docSnap = await getDoc(docRef);
@@ -606,7 +581,6 @@
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         
-                        // Populate form fields with data
                         document.getElementById('fecha').textContent = data.fecha;
                         document.getElementById('landings').textContent = data.landings_6409;
                         document.getElementById('modelo').textContent = data.modelo;
@@ -624,7 +598,6 @@
                         document.getElementById('lic_no').textContent = data.licencia_no;
                         document.getElementById('nombre_impreso').textContent = data.nombre_impreso;
                         
-                        // Reset trabajos and repopulate
                         trabajosContainer.innerHTML = '';
                         if (data.trabajos_realizados && Array.isArray(data.trabajos_realizados)) {
                             data.trabajos_realizados.forEach((trabajo, index) => {
@@ -638,12 +611,10 @@
                             });
                         }
 
-                        // Load signature image
                         if (data.firma) {
                             loadSignature(data.firma);
                         }
 
-                        // Set the current document ID for editing
                         currentDocId = docId;
                         statusMessage.textContent = 'Registro cargado para edición.';
                         statusMessage.style.color = 'green';
@@ -659,9 +630,7 @@
             }
         });
 
-        // Function to reset the form for a new record
         function resetForm() {
-            // Only clear the editable yellow data cells by their specific IDs
             const dataCellIds = [
                 'fecha', 'eng1_tsn_tso', 'landings', 'modelo', 'eng1_csn_cso',
                 'eng2_tsn_tso', 'eng2_csn_cso', 'cbox', 'numero_de_serie',
@@ -676,233 +645,21 @@
                 }
             });
 
-            // Clear dynamic sections
             trabajosContainer.innerHTML = '';
             taskTypeSelect.value = 'none';
-
-            // Clear signature
             clearBtn.click();
-
-            // Reset status message and records container
             statusMessage.textContent = 'Formulario limpio para un nuevo registro.';
             statusMessage.style.color = 'black';
             recordsContainer.innerHTML = '';
-
-            // Clear the current document ID
             currentDocId = null;
         }
 
-        // Event listener for the "New Record" button
         newRecordButton.addEventListener('click', resetForm);
-        
-        // --- Image processing with Gemini API ---
-        async function processImage(base64Data) {
-            statusMessage.textContent = 'Analizando imagen con IA...';
-            statusMessage.style.color = 'black';
-            try {
-                const prompt = `Extrae los siguientes datos de la etiqueta de mantenimiento y devuélvelos en formato JSON. Si un campo no está presente, déjalo como una cadena vacía.
-                Campos a extraer:
-                - Fecha (date)
-                - Landings (landings)
-                - Modelo (model)
-                - ENG #1 S/N CP-PS-62853 (eng1_sn)
-                - CSN / CSO (eng1_csn_cso)
-                - ENG #2 S/N CP-PS-62895 (eng2_sn)
-                - CSN / CSO (eng2_csn_cso)
-                - CBOX (cbox)
-                - NUMERO DE SERIE (serial_number)
-                - MATRICULA (registration)
-                - A/C TT (ac_tt)
-                - TQ EVENTS (tq_events)
-                - Trabajos Completados (tasks) - extrae cada línea de trabajo como un elemento de un array.
-                - Firma (signature)
-                - Serie (series)
-                - Lic. No (lic_no)
-                - Nombre Impreso (printed_name)
-
-                EJEMPLO DE RESPUESTA JSON:
-                {
-                  "date": "10/06/2025",
-                  "landings": "100",
-                  "model": "BO-105",
-                  "eng1_sn": "CP-PS-62853",
-                  "eng1_csn_cso": "5000 / 4300",
-                  "eng2_sn": "CP-PS-62895",
-                  "eng2_csn_cso": "4900 / 700",
-                  "cbox": "2000",
-                  "serial_number": "123456",
-                  "registration": "FAH-901",
-                  "ac_tt": "1500",
-                  "tq_events": "20",
-                  "tasks": ["Inspeccion de 100 horas", "Reemplazo de filtro de aceite"],
-                  "series": "600",
-                  "lic_no": "12345",
-                  "printed_name": "Juan Perez"
-                }
-                `;
-                
-                const payload = {
-                    contents: [
-                        {
-                            role: "user",
-                            parts: [
-                                { text: prompt },
-                                {
-                                    inlineData: {
-                                        mimeType: "image/jpeg", // Assuming all images are converted to JPEG
-                                        data: base64Data
-                                    }
-                                }
-                            ]
-                        }
-                    ],
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        responseSchema: {
-                            type: "OBJECT",
-                            properties: {
-                                "date": { "type": "STRING" },
-                                "landings": { "type": "STRING" },
-                                "model": { "type": "STRING" },
-                                "eng1_sn": { "type": "STRING" },
-                                "eng1_csn_cso": { "type": "STRING" },
-                                "eng2_sn": { "type": "STRING" },
-                                "eng2_csn_cso": { "type": "STRING" },
-                                "cbox": { "type": "STRING" },
-                                "serial_number": { "type": "STRING" },
-                                "registration": { "type": "STRING" },
-                                "ac_tt": { "type": "STRING" },
-                                "tq_events": { "type": "STRING" },
-                                "tasks": { "type": "ARRAY", "items": { "type": "STRING" } },
-                                "series": { "type": "STRING" },
-                                "lic_no": { "type": "STRING" },
-                                "printed_name": { "type": "STRING" }
-                            }
-                        }
-                    }
-                };
-
-                const apiKey = ""; 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-                
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const result = await response.json();
-                
-                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
-                    const json = result.candidates[0].content.parts[0].text;
-                    const parsedData = JSON.parse(json);
-                    
-                    // Populate the form with the extracted data
-                    document.getElementById('fecha').textContent = parsedData.date || '';
-                    document.getElementById('landings').textContent = parsedData.landings || '';
-                    document.getElementById('modelo').textContent = parsedData.model || '';
-                    document.getElementById('eng1_tsn_tso').textContent = parsedData.eng1_csn_cso || '';
-                    document.getElementById('eng1_csn_cso').textContent = parsedData.eng1_csn_cso || '';
-                    document.getElementById('eng2_tsn_tso').textContent = parsedData.eng2_csn_cso || '';
-                    document.getElementById('eng2_csn_cso').textContent = parsedData.eng2_csn_cso || '';
-                    document.getElementById('cbox').textContent = parsedData.cbox || '';
-                    document.getElementById('numero_de_serie').textContent = parsedData.serial_number || '';
-                    document.getElementById('matricula').textContent = parsedData.registration || '';
-                    document.getElementById('ac_tt').textContent = parsedData.ac_tt || '';
-                    document.getElementById('tq_events').textContent = parsedData.tq_events || '';
-                    document.getElementById('serie').textContent = parsedData.series || '';
-                    document.getElementById('lic_no').textContent = parsedData.lic_no || '';
-                    document.getElementById('nombre_impreso').textContent = parsedData.printed_name || '';
-
-                    // Populate the tasks section
-                    if (parsedData.tasks && Array.isArray(parsedData.tasks)) {
-                        trabajosContainer.innerHTML = '';
-                        parsedData.tasks.forEach((task, index) => {
-                            const newRow = document.createElement('div');
-                            newRow.classList.add('flex', 'items-start', 'text-xs', 'mt-2');
-                            newRow.innerHTML = `
-                                <span class="font-bold mr-1 flex-none w-4">${index + 1}</span>
-                                <p class="editable-cell flex-grow" contenteditable="true">${task}</p>
-                            `;
-                            trabajosContainer.appendChild(newRow);
-                        });
-                    }
-
-                    statusMessage.textContent = '¡Datos de la imagen cargados con éxito!';
-                    statusMessage.style.color = 'green';
-                } else {
-                    statusMessage.textContent = 'Error al procesar la imagen. Inténtalo de nuevo.';
-                    statusMessage.style.color = 'red';
-                }
-            } catch (error) {
-                console.error("Error al procesar la imagen:", error);
-                statusMessage.textContent = 'Error al procesar la imagen. Inténtalo de nuevo.';
-                statusMessage.style.color = 'red';
-            }
-        }
-
-        // --- Camera and Image Upload Logic ---
-        scanButton.addEventListener('click', async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                cameraFeed.srcObject = stream;
-                cameraFeed.classList.remove('hidden');
-
-                cameraFeed.onloadedmetadata = () => {
-                    cameraFeed.play();
-                };
-
-                // Create a temporary canvas to capture the frame
-                const tempCanvas = document.createElement('canvas');
-                const tempCtx = tempCanvas.getContext('2d');
-                
-                statusMessage.textContent = 'Cámara activada. Toca la pantalla para capturar la imagen.';
-                statusMessage.style.color = 'blue';
-
-                const captureImage = () => {
-                    tempCanvas.width = cameraFeed.videoWidth;
-                    tempCanvas.height = cameraFeed.videoHeight;
-                    tempCtx.drawImage(cameraFeed, 0, 0, tempCanvas.width, tempCanvas.height);
-                    const imageData = tempCanvas.toDataURL('image/jpeg');
-                    
-                    // Stop the camera stream
-                    stream.getTracks().forEach(track => track.stop());
-                    cameraFeed.classList.add('hidden');
-                    
-                    // Process the captured image
-                    const base64Data = imageData.split(',')[1];
-                    processImage(base64Data);
-                    
-                    cameraFeed.removeEventListener('click', captureImage);
-                };
-
-                cameraFeed.addEventListener('click', captureImage);
-
-            } catch (error) {
-                console.error("Error al acceder a la cámara:", error);
-                statusMessage.textContent = 'Error: No se pudo acceder a la cámara. Por favor, asegúrate de que tienes permiso. También puedes usar la opción "Subir Imagen".';
-                statusMessage.style.color = 'red';
-            }
-        });
-
-        imageUpload.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const base64Data = e.target.result.split(',')[1];
-                    processImage(base64Data);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
         
         // Initial state
         window.onload = () => {
-             // Initialize with default state
             taskTypeSelect.dispatchEvent(new Event('change'));
             initAuthAndApp();
-            // Reset the form to its initial empty state
             resetForm();
         }
     </script>
