@@ -9,7 +9,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #5173b7;
+            background-color: #e5e7eb;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -20,9 +20,9 @@
         .sticker-container {
             width: 100%;
             max-width: 600px;
-            background-color: #f8f8f8;
+            background-color: #f7f7f7;
             padding: 1rem;
-            border: 2px solid #a93434;
+            border: 2px solid #ccc;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             margin-bottom: 2rem;
         }
@@ -32,7 +32,7 @@
             background-color: #002D62;
         }
         .bg-custom-yellow {
-            background-color: #fcbe03;
+            background-color: #F8D670;
         }
         
         .editable-cell {
@@ -109,47 +109,49 @@
         </div>
         <div class="bg-white text-center font-bold text-gray-800 text-lg py-1 border-2 border-black border-t-0">FAH</div>
 
-        <!-- Data table -->
+        <!-- Data table with 4 columns -->
         <div class="grid grid-cols-4 gap-0 text-xs border-2 border-black border-t-0 rounded-b-lg overflow-hidden">
-            <!-- Header row -->
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black editable-cell" contenteditable="true">FECHA</div>
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2 editable-cell" contenteditable="true">LANDINGS</div>
-            <div class="p-1 font-bold text-white bg-custom-blue editable-cell" contenteditable="true">6409</div>
+            <!-- Row 1: FECHA INICIO & FECHA FINALIZACIÓN -->
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-white border-b-2">FECHA INICIO</div>
+            <div id="fecha_inicio" class="p-1 text-black bg-custom-yellow border-r-2 border-white border-b-2 editable-cell font-bold" contenteditable="true"></div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-white border-b-2">FECHA FINALIZACIÓN</div>
+            <div id="fecha_finalizacion" class="p-1 text-black bg-custom-yellow border-b-2 border-white editable-cell font-bold" contenteditable="true"></div>
 
-            <!-- Data row 1 -->
-            <div id="fecha" class="p-1 bg-custom-yellow border-r-2 border-black editable-cell" contenteditable="true"></div>
-            <div id="eng1_tsn_tso" class="p-1 bg-custom-yellow border-r-2 border-black col-span-2 editable-cell" contenteditable="true"></div>
-            <div id="landings" class="p-1 bg-custom-yellow editable-cell" contenteditable="true"></div>
-
-            <!-- Header row 2 -->
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black editable-cell" contenteditable="true">MODELO</div>
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2 editable-cell" contenteditable="true">ENG # 1 S/N CP-PS-62853 CSN / CSO</div>
-            <div class="p-1 font-bold text-white bg-custom-blue editable-cell" contenteditable="true">5009 / 4384</div>
+            <!-- Row 2: MODELO & ENG 1 S/N TSN / TSO -->
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-white border-b-2">MODELO</div>
+            <div id="modelo" class="p-1 text-black bg-custom-yellow border-r-2 border-white border-b-2 editable-cell font-bold" contenteditable="true"></div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-white border-b-2">ENG 1 S/N TSN / TSO</div>
+            <div id="eng1_tsn_tso" class="p-1 text-black bg-custom-yellow border-b-2 border-white editable-cell font-bold" contenteditable="true"></div>
             
-            <!-- Data row 2 -->
-            <div id="modelo" class="p-1 bg-custom-yellow border-r-2 border-black editable-cell" contenteditable="true"></div>
-            <div id="eng1_csn_cso" class="p-1 bg-custom-yellow border-r-2 border-black col-span-2 editable-cell" contenteditable="true"></div>
-            <div id="eng2_tsn_tso" class="p-1 bg-custom-yellow editable-cell" contenteditable="true"></div>
-
-            <!-- Header row 3 -->
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black editable-cell" contenteditable="true">NUMERO DE SERIE</div>
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2 editable-cell" contenteditable="true">ENG # 2 S/N CP-PS-62895 CSN / CSO</div>
-            <div class="p-1 font-bold text-white bg-custom-blue editable-cell" contenteditable="true">4968 / 727</div>
-
-            <!-- Data row 3 -->
-            <div id="numero_de_serie" class="p-1 bg-custom-yellow border-r-2 border-black editable-cell" contenteditable="true"></div>
-            <div id="eng2_csn_cso" class="p-1 bg-custom-yellow border-r-2 border-black col-span-2 editable-cell" contenteditable="true"></div>
-            <div id="cbox" class="p-1 bg-custom-yellow editable-cell" contenteditable="true"></div>
+            <!-- Row 3: NÚMERO DE SERIE & ENG 1 S/N CSN / CSO -->
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-white border-b-2">NÚMERO DE SERIE</div>
+            <div id="numero_de_serie" class="p-1 text-black bg-custom-yellow border-r-2 border-white border-b-2 editable-cell font-bold" contenteditable="true"></div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-white border-b-2">ENG 1 S/N CSN / CSO</div>
+            <div id="eng1_csn_cso" class="p-1 text-black bg-custom-yellow border-b-2 border-white editable-cell font-bold" contenteditable="true"></div>
             
-            <!-- New header row -->
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black editable-cell" contenteditable="true">MATRICULA</div>
-            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-black col-span-2 editable-cell" contenteditable="true">A/C TT</div>
-            <div class="p-1 font-bold text-white bg-custom-blue editable-cell" contenteditable="true">TQ EVENTS</div>
+            <!-- Row 4: MATRÍCULA & ENG 2 S/N TSN / TSO -->
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-white border-b-2">MATRÍCULA</div>
+            <div id="matricula" class="p-1 text-black bg-custom-yellow border-r-2 border-white border-b-2 editable-cell font-bold" contenteditable="true"></div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-white border-b-2">ENG 2 S/N TSN / TSO</div>
+            <div id="eng2_tsn_tso" class="p-1 text-black bg-custom-yellow border-b-2 border-white editable-cell font-bold" contenteditable="true"></div>
             
-            <!-- New data row -->
-            <div id="matricula" class="p-1 bg-custom-yellow border-r-2 border-black editable-cell" contenteditable="true"></div>
-            <div id="ac_tt" class="p-1 bg-custom-yellow border-r-2 border-black col-span-2 editable-cell" contenteditable="true"></div>
-            <div id="tq_events" class="p-1 bg-custom-yellow editable-cell" contenteditable="true"></div>
+            <!-- Row 5: A/C TT & ENG 2 S/N CSN / CSO -->
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-white border-b-2">A/C TT</div>
+            <div id="ac_tt" class="p-1 text-black bg-custom-yellow border-r-2 border-white border-b-2 editable-cell font-bold" contenteditable="true"></div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-white border-b-2">ENG 2 S/N CSN / CSO</div>
+            <div id="eng2_csn_cso" class="p-1 text-black bg-custom-yellow border-b-2 border-white editable-cell font-bold" contenteditable="true"></div>
+            
+            <!-- Row 6: TQ EVENTS & C-BOX S/N TSN / TSO -->
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-white border-b-2">TQ EVENTS</div>
+            <div id="tq" class="p-1 text-black bg-custom-yellow border-r-2 border-white border-b-2 editable-cell font-bold" contenteditable="true"></div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-white border-b-2">C-BOX S/N TSN / TSO</div>
+            <div id="cbox_tsn_tso" class="p-1 text-black bg-custom-yellow border-b-2 border-white editable-cell font-bold" contenteditable="true"></div>
+
+            <!-- Row 7: LANDINGS & C-BOX S/N CSN / CSO -->
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-white border-b-2">LANDINGS</div>
+            <div id="landings" class="p-1 text-black bg-custom-yellow border-r-2 border-white border-b-2 editable-cell font-bold" contenteditable="true"></div>
+            <div class="p-1 font-bold text-white bg-custom-blue border-r-2 border-white border-b-2">C-BOX S/N CSN / CSO</div>
+            <div id="cbox_csn_cso" class="p-1 text-black bg-custom-yellow border-b-2 border-white editable-cell font-bold" contenteditable="true"></div>
         </div>
         
         <!-- Text and signature sections -->
@@ -160,8 +162,14 @@
                 <div class="no-print">
                     <select id="task-type-select" class="px-2 py-1 border border-black rounded-md bg-gray-50 text-xs">
                         <option value="none">Seleccionar Tipo de Trabajo</option>
-                        <option value="inspection">Inspección</option>
+                        <option value="inspection_1">Inspección #1</option>
+                        <option value="inspection_2">Inspección #2</option>
+                        <option value="inspection_3">Inspección #3</option>
+                        <option value="inspection_4">Inspección #4</option>
+                        <option value="inspection_5">Inspección #5</option>
+                        <option value="inspection_6">Inspección #6</option>
                         <option value="remi">Remoción / Instalación</option>
+                        <option value="motores">Motores</option>
                     </select>
                 </div>
             </div>
@@ -170,8 +178,8 @@
                 <!-- Content will be dynamically generated here -->
             </div>
             
-            <p id="certificacion" class="italic text-gray-700 text-xs mb-4 mt-4 editable-cell" contenteditable="true">
-                Yo certifico que los trabajos arriba descritos fueron efectuados de acuerdo a los procedimientos del Manual de Mantenimiento Pratt & Whitney Canadá PT6T-3B P/N 3017042 y por lo tanto el motor es puesto en servicio.
+            <p id="certificacion" class="italic text-gray-700 text-xs mb-4 mt-4 editable-cell font-bold" contenteditable="true">
+                Yo certifico que los trabajos arriba descritos fueron efectuados de acuerdo a los procedimientos del Manual de Mantenimiento y por lo tanto la aeronave es puesta en servicio.
             </p>
             
             <!-- Signature container -->
@@ -181,24 +189,18 @@
                 <button id="clearSignatureBtn" class="no-print mt-2 px-2 py-1 bg-red-500 text-white text-xs rounded-md hover:bg-red-600 transition-colors duration-200">Limpiar Firma</button>
 
                 <!-- Data below the signature -->
-                <div class="flex justify-between items-end w-full mt-4 text-xs">
-                    <div class="flex-grow">
-                        <div class="flex items-center space-x-2">
-                            <p class="font-bold">Firma</p>
-                        </div>
-
-                        <div class="flex items-center space-x-2">
-                            <p class="font-bold">Serie</p>
-                            <p id="serie" class="editable-cell text-sm" contenteditable="true"></p>
-                        </div>
-
-                        <div class="flex items-center space-x-2">
-                            <p class="font-bold">Lic. No.</p>
-                            <p id="lic_no" class="editable-cell text-sm" contenteditable="true"></p>
-                        </div>
+                <div class="flex justify-between items-center w-full mt-4 text-xs">
+                    <div class="flex items-center space-x-2">
+                        <p class="font-bold">Serie</p>
+                        <p id="firma" class="editable-cell text-sm font-bold" contenteditable="true"></p>
                     </div>
-                    <div class="flex-grow flex flex-col items-end text-sm">
-                        <p id="nombre_impreso" class="font-bold mb-1 editable-cell" contenteditable="true">Nombre Impreso</p>
+                    <div class="flex items-center space-x-2">
+                        <p class="font-bold">Jefe de Taller</p>
+                        <p id="jefe_taller" class="editable-cell text-sm font-bold" contenteditable="true"></p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <p class="font-bold">Lic. No.</p>
+                        <p id="lic_no" class="editable-cell text-sm font-bold" contenteditable="true"></p>
                     </div>
                 </div>
             </div>
@@ -207,6 +209,16 @@
 
     <!-- Buttons and records container, outside the sticker -->
     <div class="no-print w-full max-w-lg mt-4 flex flex-col items-center space-y-4">
+        <!-- New file upload and scan buttons -->
+        <div class="flex flex-col items-center space-y-2 w-full p-4 border rounded-md border-gray-300 bg-gray-200">
+            <h3 class="font-bold text-lg text-gray-700">Escanear Documento (IA)</h3>
+            <p class="text-xs text-gray-500">Sube una imagen del documento para rellenar los datos automáticamente.</p>
+            <input type="file" id="imageUpload" accept="image/*" class="w-full text-sm">
+            <button id="scanImageBtn" class="w-full px-6 py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 transition-colors duration-200">
+                Escanear Imagen
+            </button>
+        </div>
+        
         <div class="flex space-x-4">
             <button id="printAndSaveButton" class="px-6 py-2 bg-green-500 text-white font-bold rounded-md transition-colors duration-200">
                 Imprimir y Guardar
@@ -244,7 +256,7 @@
             </div>
         </div>
     </div>
-
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -292,34 +304,539 @@
         const canvas = document.getElementById('signatureCanvas');
         const ctx = canvas.getContext('2d');
         const clearBtn = document.getElementById('clearSignatureBtn');
+        const imageUpload = document.getElementById('imageUpload');
+        const scanImageBtn = document.getElementById('scanImageBtn');
 
         // Static data for form generation
-        const inspectionItems = [
-            "Scheduled Inspections", "Special Inspections", "Lubrication", "Components Requirements",
-            "Regulatory Authority Inspections", "Optional Equipment Kits Inspections",
-            "Airframe Bulletins", "Engines Inspeccion"
-        ];
+        const inspections = {
+            inspection_1: {
+                title: "Se completó la inspección #1, de 100 horas y 12 meses. (MM 5-00-00 / Tabla 5-1)",
+                sections: [
+                    {
+                        title: "Programa de Limitaciones de Aeronavegabilidad",
+                        items: [
+                            "Inspección de 25 hrs (MM 4-00-00 / Tabla 4-1)"
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Programadas-Parte “A”",
+                        items: [
+                            "Inspección diaria-parte “A” (MM 5-00-00 / Para 5-5)",
+                            "Inspección # 1 de 100 hrs / 12 meses-parte “A” (MM 5-00-00 / Para 5-6)"
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Especiales",
+                        items: [
+                            "Inspección de 25 hrs (MM 5-00-00 / Para 5-17, 5-18.)",
+                            "Inspección de 100 hrs de operación de la collective lever (MM 5-00-00 / Para 5-21)"
+                        ]
+                    },
+                    {
+                        title: "Lubricación",
+                        items: [
+                            "Lubricación de 25 hrs (MM 12-00-00 / Tabla 12-3)",
+                            "Lubricación de 50 hrs (MM 12-00-00 / Tabla 12-3)"
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Adicionales",
+                        items: [
+                            "Ciclaje de la batería de nickel y cadmium – 100 hrs (MM 96-00-00 / Para 96-25, 96-26)"
+                        ]
+                    },
+                    {
+                        title: "Boletines de Servicio (ASB's) Recurrentes",
+                        items: [
+                            "ASB 412-96-89 (to prevent fatigue failure of the T/R yoke assembly P/N 212-011-702-ALL)",
+                            "ASB 412-00-100 (inspection of cap angle P/N 212-030-191-001)",
+                            "ASB 412-00-102 Rev. “A”. (T/R counterweight bell crank retention nut)",
+                            "ASB 412-11-148 Rev. “A”. (inspection of collective lever P/N 412-010-408-101)",
+                            "ASB 412-13-155 (inspection of tail rotor blade P/N 212-010-750-ALL)"
+                        ]
+                    },
+                    {
+                        title: "Trabajos Adicionales",
+                        items: [
+                            "Se instaló sello del mástil, nuevo P/N 412-340-012-101",
+                            "Se completó pintura general de la aeronave (gris claro parte superior y gris oscuro parte inferior del fuselaje)"
+                        ]
+                    }
+                ]
+            },
+            inspection_2: {
+                title: "Se completó la inspección #2 de 200 horas. (MM 5-00-00 / Tabla 5-1)",
+                sections: [
+                    {
+                        title: "Inspecciones Programadas-Parte “A”",
+                        items: [
+                            "Inspección de 25 hrs (MM 4-00-00 / Tabla 4-1)",
+                            "Inspección diaria-parte “A” (MM 5-00-00 / Para 5-5)",
+                            "Inspección # 2 de 200 hrs / 12 meses-parte “A” (MM 5-00-00 / Para 5-6)",
+                            "Inspección de 12 meses - first aid kit",
+                            "Chequeo de 12 meses del peso - fire extinguisher cabin",
+                            "Chequeo de 12 meses del peso - fire extinguisher cockpit"
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Especiales",
+                        items: [
+                            "Inspección de 25 hrs (MM 5-00-00 / Para 5-17, 5-18.)",
+                            "Inspección de 100 hrs de operación de la collective lever (MM 5-00-00 / Para 5-21)",
+                            "Inspección de 300 hrs / 6 meses de operación de los pernos expandibles de las palas del rotor principal (MM 5-00-00 / para 5-22a)",
+                            "Inspección de 600 hrs / 12 meses de operación de los ejes impulsores del rotor de cola (MM 5-00-00 / para 5-23)",
+                            "Inspección de 600 hrs / 12 meses de operación del eje impulsor principal (MM 5-00-00 / para 5-24)",
+                            "Inspección de 24 meses de operación de los pernos de los controles de vuelo (MM 5-00-00 / para 5-27)",
+                            "Inspección de 24 meses de operación del mástil del rotor principal (MM 5-00-00 / Para 5-27A)"
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Adicionales",
+                        items: [
+                            "Ciclaje de la batería de nickel y cadmium – 100 hrs (MM 96-00-00 / Para 96-25, 96-26)",
+                            "Inspección de los tapones de llenado del sistema de combustible, sistema de aceite y sistema hidráulico, por propio funcionamiento y sellado– 12 meses (MM 5-00-00 / para 5-6)",
+                            "Inspección del sistema de instrumentos- 12 meses (MM 5-00-00 / para 5-6):",
+                            "   Calibración de los sistemas compass del piloto y copiloto y compass magnético standby.",
+                            "   Drenado del sistema pitot-static por cualquier humedad acumulada.",
+                            "   Prueba del sistema pitot-static por fugas."
+                        ]
+                    },
+                    {
+                        title: "Lubricación",
+                        items: [
+                            "Lubricación de 25 hrs (MM 12-00-00 / Tabla 12-3)",
+                            "Lubricación de 50 hrs (MM 12-00-00 / Tabla 12-3)",
+                            "Lubricación de las balineras colgantes del rotor de cola – 300 hrs (MM 12-00-00 / Tabla 12-3)",
+                            "Cambio de aceite de la caja de 42º- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)",
+                            "Cambio de aceite de la caja de 90º- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)",
+                            "Cambio de aceite y filtro externo de la transmisión- 3000 hrs / 12 meses (MM 12-00-00 / Tabla 12-1)"
+                        ]
+                    },
+                    {
+                        title: "Inspecciones de Autoridad Reguladora",
+                        items: [
+                            "Inspección de 12 meses compass swing-412",
+                            "Chequeo por fuga Sistema estático pitot-24 (FAR 91.413).",
+                            "Recertificación del transponder - 24 meses (FAR 91.411).",
+                            "Inspección de 24 meses altimetro del copiloto (FAR91.411 / car 571 app “b”)."
+                        ]
+                    },
+                    {
+                        title: "Boletines de Servicio (ASB's) Recurrentes",
+                        items: [
+                            "ASB 412-96-89 (to prevent fatigue failure of the T/R yoke assembly P/N 212-011-702-ALL)",
+                            "ASB 412-00-100 (inspection of cap angle P/N 212-030-191-001)",
+                            "ASB 412-00-102 Rev. “A”. (T/R counterweight bell crank retention nut)",
+                            "ASB 412-09-137 (main rotor blade expandable bolt inspection P/N 412-010-137-103)",
+                            "ASB 412-11-148 Rev. “A”. (inspection of collective lever P/N 412-010-408-101)",
+                            "ASB 412-13-155 (inspection of tail rotor blade P/N 212-010-750-ALL)"
+                        ]
+                    },
+                    {
+                        title: "Programa de Retiro & Overhaul de Componentes",
+                        items: [
+                            "Se instaló Nuevo M/R Control System Bolts Kit P/N 412-704-112-105, 1EA.",
+                            "Se instaló Nuevo M/R Supplemental Control System Bolts Kit P/N 20-057-5-24D, 3EA."
+                        ]
+                    },
+                    {
+                        title: "Trabajos Adicionales",
+                        items: [
+                            "Se instaló Nuevo Sello del Mástil, P/N 412-340-012-101, 1EA.",
+                            "Se instaló Nuevos Bushings de la Collective Lever, P/N 412-010-421-103, 2EA.",
+                            "Se instaló Nuevo Bellcrank del Sistema Antitorque, P/N 212-001-759-101, 1EA.",
+                            "Se instaló Nuevo Panel Assy P/N 205-032-811-077, 1EA."
+                        ]
+                    }
+                ]
+            },
+            inspection_3: {
+                title: "Inspección #3 (300 HORAS)",
+                sections: [
+                    {
+                        title: "Programa de Limitaciones de Aeronavegabilidad",
+                        items: [
+                            "Inspección de 25 hrs (MM 4-00-00 / Tabla 4-1)."
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Programadas-Parte “A”",
+                        items: [
+                            "Inspección diaria-parte “A” (MM 5-00-00 / Para 5-5).",
+                            "Inspección # 2 de 200 hrs / 12 meses-parte “A” (MM 5-00-00 / Para 5-6).",
+                            "Inspección de 12 meses - first aid kit.",
+                            "Chequeo de 12 meses del peso - fire extinguisher cabin.",
+                            "Chequeo de 12 meses del peso - fire extinguisher cockpit."
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Especiales",
+                        items: [
+                            "Inspección de 25 hrs (MM 5-00-00 / Para 5-17, 5-18.).",
+                            "Inspección de 100 hrs de operación de la collective lever (MM 5-00-00 / Para 5-21).",
+                            "Inspección de 300 hrs / 6 meses de operación de los pernos expandibles de las palas del rotor principal (MM 5-00-00 / para 5-22a).",
+                            "Inspección de 600 hrs / 12 meses de operación de los ejes impulsores del rotor de cola (MM 5-00-00 / para 5-23).",
+                            "Inspección de 600 hrs / 12 meses de operación del eje impulsor principal (MM 5-00-00 / para 5-24).",
+                            "Inspección de 24 meses de operación de los pernos de los controles de vuelo (MM 5-00-00 / para 5-27).",
+                            "Inspección de 24 meses de operación del mástil del rotor principal (MM 5-00-00 / Para 5-27A)."
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Adicionales",
+                        items: [
+                            "Ciclaje de la batería de nickel y cadmium – 100 hrs (MM 96-00-00 / Para 96-25, 96-26).",
+                            "Inspección de los tapones de llenado del sistema de combustible, sistema de aceite y sistema hidráulico, por propio funcionamiento y sellado– 12 meses (MM 5-00-00 / para 5-6).",
+                            "Inspección del sistema de instrumentos- 12 meses (MM 5-00-00 / para 5-6):",
+                            "    Calibración de los sistemas compass del piloto y copiloto y compass magnético standby.",
+                            "    Drenado del sistema pitot-static por cualquier humedad acumulada.",
+                            "    Prueba del sistema pitot-static por fugas."
+                        ]
+                    },
+                    {
+                        title: "Lubricación",
+                        items: [
+                            "Lubricación de 25 hrs (MM 12-00-00 / Tabla 12-3).",
+                            "Lubricación de 50 hrs (MM 12-00-00 / Tabla 12-3).",
+                            "Lubricación de las balineras colgantes del rotor de cola – 300 hrs (MM 12-00-00 / Tabla 12-3).",
+                            "Cambio de aceite de la caja de 42º- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1).",
+                            "Cambio de aceite de la caja de 90º- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1).",
+                            "Cambio de aceite y filtro externo de la transmisión- 3000 hrs / 12 meses (MM 12-00-00 / Tabla 12-1)."
+                        ]
+                    },
+                    {
+                        title: "Inspecciones de Autoridad Reguladora",
+                        items: [
+                            "Inspección de 12 meses compass swing-412.",
+                            "Chequeo por fuga Sistema estático pitot-24 (FAR 91.413).",
+                            "Recertificación del transponder - 24 meses (FAR 91.411).",
+                            "Inspección de 24 meses altimetro del copiloto (FAR91.411 / car 571 app “b”)."
+                        ]
+                    },
+                    {
+                        title: "Boletines de Servicio (ASB's) Recurrentes",
+                        items: [
+                            "ASB 412-96-89 (to prevent fatigue failure of the T/R yoke assembly P/N 212-011-702-ALL).",
+                            "ASB 412-00-100 (inspection of cap angle P/N 212-030-191-001).",
+                            "ASB 412-00-102 Rev. “A”. (T/R counterweight bell crank retention nut).",
+                            "ASB 412-09-137 (main rotor blade expandable bolt inspection P/N 412-010-137-103).",
+                            "ASB 412-11-148 Rev. “A”. (inspection of collective lever P/N 412-010-408-101).",
+                            "ASB 412-13-155 (inspection of tail rotor blade P/N 212-010-750-ALL)."
+                        ]
+                    },
+                    {
+                        title: "Programa de Retiro & Overhaul de Componentes",
+                        items: [
+                            "Se instaló Nuevo M/R Control System Bolts Kit P/N 412-704-112-105, 1EA.",
+                            "Se instaló Nuevo M/R Supplemental Control System Bolts Kit P/N 20-057-5-24D, 3EA."
+                        ]
+                    },
+                    {
+                        title: "Trabajos Adicionales",
+                        items: [
+                            "Se instaló Nuevo Sello del Mástil, P/N 412-340-012-101, 1EA.",
+                            "Se instaló Nuevos Bushings de la Collective Lever, P/N 412-010-421-103, 2EA.",
+                            "Se instaló Nuevo Bellcrank del Sistema Antitorque, P/N 212-001-759-101, 1EA.",
+                            "Se instaló Nuevo Panel Assy P/N 205-032-811-077, 1EA."
+                        ]
+                    }
+                ]
+            },
+            inspection_4: {
+                title: "Inspección #4 de 100 horas / 12 meses-parte “A” (MM 5-00-00 / Para 5-6)",
+                sections: [
+                    {
+                        title: "Programa de Limitaciones de Aeronavegabilidad",
+                        items: [
+                            "Inspección de 25 hrs (MM 4-00-00 / Tabla 4-1)"
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Programadas-Parte “A”",
+                        items: [
+                            "Inspección diaria-parte “A” (MM 5-00-00 / Para 5-5)",
+                            "Inspección # 4 de 100 hrs / 12 meses-parte “A” (MM 5-00-00 / Para 5-6)"
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Especiales",
+                        items: [
+                            "Inspección de 25 hrs (MM 5-00-00 / Para 5-17, 5-18.)",
+                            "Inspección de 100 hrs de operación de la collective lever (MM 5-00-00 / Para 5-21)"
+                        ]
+                    },
+                    {
+                        title: "Lubricación",
+                        items: [
+                            "Lubricación de 25 hrs (MM 12-00-00 / Tabla 12-3)",
+                            "Lubricación de 50 hrs (MM 12-00-00 / Tabla 12-3)",
+                            "Cambio de aceite de la caja de 42°- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)",
+                            "Cambio de aceite de la caja de 90°- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)"
+                        ]
+                    },
+                    {
+                        title: "Inspecciones de Autoridad Reguladora",
+                        items: [
+                            "Inspección de 100 hrs / anual del artex 406 emergency locator transmitter (ELT)"
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Adicionales",
+                        items: [
+                            "Ciclaje de la batería de nickel y cadmium – 100 hrs (MM 96-00-00 / Para 96-25, 96-26)"
+                        ]
+                    },
+                    {
+                        title: "Inspección de Kits de Equipo Opcional",
+                        items: [
+                            "Inspección de 25 hrs // 100 hrs del air conditioning system (412AC-208M chapter 3 page 9)",
+                            "Inspección diaria // 100 hrs de los crosstubes (AA-01136 Rev. “M” page 59)",
+                            "Inspección diaria // 100 hrs de los skid tubes (AA-01139 Rev. “I” page 33)",
+                            "Inspección de 100 hrs del wire strike protection system (ER 82737 Rev. “H”)",
+                            "Inspección de 100 hrs del heli-access steps (MMS-D412-630 Rev. “C”)"
+                        ]
+                    },
+                    {
+                        title: "Boletines de Servicio (ASB's) Recurrentes",
+                        items: [
+                            "ASB 412-96-89 (to prevent fatigue failure of the T/R yoke assembly P/N 212-011-702-ALL)",
+                            "ASB 412-00-100 (inspection of cap angle P/N 212-030-191-001)",
+                            "ASB 412-00-102 Rev. “A”. (T/R counterweight bell crank retention nut)",
+                            "ASB 412-11-148 Rev. “A”. (inspection of collective lever P/N 412-010-408-101)",
+                            "ASB 412-13-155 (inspection of tail rotor blade P/N 212-010-750-ALL)"
+                        ]
+                    },
+                    {
+                        title: "Trabajos Adicionales",
+                        items: [
+                            "Se removió Actuator Linear P/N 204-060-762-103 S/N 2388 y se instaló Actuator Linear P/N 204-060-762-5 S/N REF982, proveniente de overhaul."
+                        ]
+                    }
+                ]
+            },
+            inspection_5: {
+                title: "Inspección #5 de 100 hrs / 12 meses-parte “A” (MM 5-00-00 / Para 5-6)",
+                sections: [
+                    {
+                        title: "Programa de Limitaciones de Aeronavegabilidad",
+                        items: [
+                            "Inspección de 25 hrs (MM 4-00-00 / Tabla 4-1)",
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Programadas-Parte “A”",
+                        items: [
+                            "Inspección diaria-parte “A” (MM 5-00-00 / Para 5-5)",
+                            "Inspección # 5 de 100 hrs / 12 meses-parte “A” (MM 5-00-00 / Para 5-6)",
+                            "Inspección de 5000 hrs / 5 años (MM 5-00-00 / Para 5-8)",
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Especiales",
+                        items: [
+                            "Inspección de 25 hrs (MM 5-00-00 / Para 5-17, 5-18.)",
+                            "Inspección de 100 hrs de operación de la collective lever (MM 5-00-00 / Para 5-21)",
+                            "Inspección de 300 hrs / 6 meses de operación de los pernos expandibles de las palas del rotor principal (MM 5-00-00 / para 5-22A)",
+                        ]
+                    },
+                    {
+                        title: "Lubricación",
+                        items: [
+                            "Lubricación de 25 hrs (MM 12-00-00 / Tabla 12-3)",
+                            "Lubricación de 50 hrs (MM 12-00-00 / Tabla 12-3)",
+                            "Cambio de aceite de la caja de 42º- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)",
+                            "Cambio de aceite de la caja de 90º- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)",
+                        ]
+                    },
+                    {
+                        title: "Inspecciones de Autoridad Reguladora",
+                        items: [
+                            "Inspección de 100 hrs / anual del artex 406 emergency locator transmitter (ELT)",
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Adicionales",
+                        items: [
+                            "Ciclaje de la batería de nickel y cadmium – 100 hrs (MM 96-00-00 / Para 96-25, 96-26)",
+                            "Chequeo del peso del extintor de fuego 3BR- 6 meses",
+                        ]
+                    },
+                    {
+                        title: "Inspección de Kits de Equipo Opcional",
+                        items: [
+                            "Inspección de 25 hrs // 100 hrs del air conditioning system (412AC-208M chapter 3 page 9)",
+                            "Inspección diaria // 100 hrs de los crosstubes (AA-01136 Rev. “M” page 59)",
+                            "Inspección diaria // 100 hrs de los skid tubes (AA-01139 Rev. “I” page 33)",
+                            "Inspección de 100 hrs del wire strike protection system (ER 82737 Rev. “H”)",
+                            "Inspección de 100 hrs del heli-access steps (MMS-D412-630 Rev. “C”)",
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Periódicas del Twin-Pac",
+                        items: [
+                            "Inspección de 25 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 50 hrs / 6 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 100 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 150 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 150 hrs / 6 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 150 hrs / 12 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 300 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 600 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 900 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                        ]
+                    }
+                ]
+            },
+            inspection_6: {
+                title: "Inspección #6 de 600 horas. (MM 5-00-00 / Tabla 5-1)",
+                sections: [
+                    {
+                        title: "Programa de Limitaciones de Aeronavegabilidad",
+                        items: [
+                            "Inspección de 25 hrs (MM 4-00-00 / Tabla 4-1)"
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Programadas-Parte “A”",
+                        items: [
+                            "Inspección diaria-parte “A” (MM 5-00-00 / Para 5-5)",
+                            "Inspección de fase # 6 de 100 hrs / 12 meses-parte “A” (MM 5-00-00 / Para 5-6)"
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Especiales",
+                        items: [
+                            "Inspección de 25 hrs (MM 5-00-00 / Para 5-17, 5-18.)",
+                            "Inspección de 100 hrs de operación de la collective lever (MM 5-00-00 / Para 5-21)",
+                            "Inspección de 300 hrs / 6 meses de operación de los pernos expandibles de las palas del rotor principal (MM 5-00-00 / para 5-22a)",
+                            "Inspección de 600 hrs / 12 meses de operación de los ejes impulsores del rotor de cola (MM 5-00-00 / para 5-23)",
+                            "Inspección de 600 hrs / 12 meses de operación del eje impulsor principal (MM 5-00-00 / para 5-24)",
+                            "Inspección de 24 meses de operación de los pernos de los controles de vuelo (MM 5-00-00 / para 5-27)",
+                            "Inspección de 24 meses de operación del mástil del rotor principal (MM 5-00-00 / Para 5-27A)",
+                            "Inspección de 3600 hrs total del fuselaje y cada 300 hrs / 12 meses (MM 5-00-00 / Para 5-35)"
+                        ]
+                    },
+                    {
+                        title: "Lubricación",
+                        items: [
+                            "Lubricación de 25 hrs (MM 12-00-00 / Tabla 12-3)",
+                            "Lubricación de 50 hrs (MM 12-00-00 / Tabla 12-3)",
+                            "Lubricación de las balineras colgantes del rotor de cola – 300 hrs (MM 12-00-00 / Tabla 12-3)",
+                            "Cambio de aceite de la caja de 42°- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)",
+                            "Cambio de aceite de la caja de 90°- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)",
+                            "Cambio de aceite y filtro externo de la transmisión- 3000 hrs / 12 meses (MM 12-00-00 / Tabla 12-1)"
+                        ]
+                    },
+                    {
+                        title: "Inspecciones de Autoridad Reguladora",
+                        items: [
+                            "Inspección de 12 meses compass swing-412",
+                            "Inspección de 100 hrs / anual del artex 406 emergency locator transmitter (ELT)",
+                            "Chequeo por fuga Sistema estático pitot-24 (FAR 91.413).",
+                            "Recertificación del transponder - 24 meses (FAR 91.411).",
+                            "Inspección de 24 meses altimetro del copiloto (FAR91.411 / car 571 app “b”).",
+                            "Inspección de 24 meses altimetro del copiloto (FAR91.411 / car 571 app “b”)."
+                        ]
+                    },
+                    {
+                        title: "Inspecciones Adicionales",
+                        items: [
+                            "Chequeo del peso del extintor de fuego 3BR- 6 meses",
+                            "Inspección del sistema de instrumentos- 12 meses (MM 5-00-00 / para 5-6):",
+                            "    Calibración de los sistemas compass del piloto y copiloto y compass magnético standby.",
+                            "    Drenado del sistema pitot-static por cualquier humedad acumulada.",
+                            "    Prueba del sistema pitot-static por fugas.",
+                            "Ciclaje de la batería de nickel y cadmium – 100 hrs (MM 96-00-00 / Para 96-25, 96-26)",
+                            "Inspección de los tapones de llenado del sistema de combustible, sistema de aceite y sistema hidráulico, por propio funcionamiento y sellado– 12 meses (MM 5-00-00 / para 5-6)"
+                        ]
+                    },
+                    {
+                        title: "Inspección de Kits de Equipo Opcional",
+                        items: [
+                            "Inspección de 25 hrs // 100 hrs del air conditioning system (412AC-208M chapter 3 page 9)",
+                            "Inspección diaria // 100 hrs de los crosstubes (AA-01136 Rev. “M” page 59)",
+                            "Inspección diaria // 100 hrs de los skid tubes (AA-01139 Rev. “I” page 33)",
+                            "Inspección de 100 hrs del wire strike protection system (ER 82737 Rev. “H”)",
+                            "Inspección de 100 hrs del heli-access steps (MMS-D412-630 Rev. “C”)"
+                        ]
+                    },
+                    {
+                        title: "Boletines de Servicio (ASB's) Recurrentes",
+                        items: [
+                            "ASB 412-96-89 (to prevent fatigue failure of the T/R yoke assembly P/N 212-011-702-ALL)",
+                            "ASB 412-00-100 (inspection of cap angle P/N 212-030-191-001)",
+                            "ASB 412-00-102 Rev. “A”. (T/R counterweight bell crank retention nut)",
+                            "ASB 412-11-148 Rev. “A”. (inspection of collective lever P/N 412-010-408-101)",
+                            "ASB 412-13-155 (inspection of tail rotor blade P/N 212-010-750-ALL)",
+                            "ASB 412-09-137 (inspection of main rotor blade expandable bolt inspection P/N 412-010-137-103)"
+                        ]
+                    },
+                    {
+                        title: "Programa de Retiro & Overhaul de Componentes",
+                        items: [
+                            "Se instaló Nuevo M/R Control System Bolts Kit P/N 412-704-112-105, 1EA.",
+                            "Se instaló Nuevo M/R Supplemental Control System Bolts Kit P/N 20-057-5-24D, 3EA."
+                        ]
+                    },
+                    {
+                        title: "Trabajos Adicionales",
+                        items: [
+                            "Se instaló Nuevo Sello del Mástil, P/N 412-340-012-101, 1EA.",
+                            "Se instaló Nuevos Bushings de la Collective Lever, P/N 412-010-421-103, 2EA.",
+                            "Se instaló Nuevo Bellcrank del Sistema Antitorque, P/N 212-001-759-101, 1EA.",
+                            "Se instaló Nuevo Panel Assy P/N 205-032-811-077, 1EA."
+                        ]
+                    }
+                ]
+            },
+            remi: {
+                title: "Remoción / Instalación",
+                items: []
+            },
+            motores: {
+                title: "Motores",
+                sections: [
+                    {
+                        title: "Inspecciones Periódicas del Twin-Pac",
+                        items: [
+                            "Inspección de 25 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 50 hrs / 6 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 100 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 150 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 150 hrs / 6 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 150 hrs / 12 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 300 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 600 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
+                            "Inspección de 900 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)"
+                        ]
+                    }
+                ]
+            }
+        };
+
         const removalDescription = "Se removió [Parte] P/N [Número de parte] S/N [Número de serie], Reparable, por horas para Overhaul cumplidas.";
         const installationDescription = "Se instaló [Parte] P/N [Número de parte] S/N [Número de serie], Reparable, por horas para Overhaul cumplidas.";
         
         // Initial values for editable fields
         const initialValues = {
-            fecha: '',
-            eng1_tsn_tso: '',
-            landings: '',
+            fecha_inicio: '',
             modelo: '',
-            eng1_csn_cso: '',
-            eng2_tsn_tso: '',
-            eng2_csn_cso: '',
-            cbox: '',
             numero_de_serie: '',
             matricula: '',
             ac_tt: '',
-            tq_events: '',
-            certificacion: 'Yo certifico que los trabajos arriba descritos fueron efectuados de acuerdo a los procedimientos del Manual de Mantenimiento Pratt & Whitney Canadá PT6T-3B P/N 3017042 y por lo tanto el motor es puesto en servicio.',
-            serie: '',
-            lic_no: '',
-            nombre_impreso: 'Nombre Impreso'
+            tq: '',
+            envents: '',
+            landings: '',
+            fecha_finalizacion: '',
+            eng1_tsn_tso: '',
+            eng1_csn_cso: '',
+            eng2_tsn_tso: '',
+            eng2_csn_cso: '',
+            cbox_tsn_tso: '',
+            cbox_csn_cso: '',
+            certificacion: 'Yo certifico que los trabajos arriba descritos fueron efectuados de acuerdo a los procedimientos del Manual de Mantenimiento y por lo tanto la aeronave es puesta en servicio.',
+            firma: '',
+            jefe_taller: '',
+            lic_no: ''
         };
 
         // --- Authentication & Initialization Logic ---
@@ -331,63 +848,124 @@
                 statusMessage.style.color = 'green';
                 printAndSaveButton.disabled = false;
                 showRecordsButton.disabled = false;
-
+                scanImageBtn.disabled = false;
             } catch (error) {
                 console.error("Error de autenticación: ", error);
                 statusMessage.textContent = 'Error de autenticación. No se pueden guardar ni cargar datos.';
                 statusMessage.style.color = 'red';
                 printAndSaveButton.disabled = true;
                 showRecordsButton.disabled = true;
+                scanImageBtn.disabled = true;
             }
         }
 
         // --- Form generation functions ---
-        function generateInspectionRows() {
-            trabajosContainer.innerHTML = '';
-            inspectionItems.forEach((item, index) => {
-                const newRow = document.createElement('div');
-                newRow.classList.add('flex', 'flex-col', 'items-start', 'text-xs', 'mt-2', 'space-y-1');
-                newRow.innerHTML = `
-                    <div class="flex items-center space-x-2 w-full">
-                        <span class="font-bold mr-1 flex-none w-4">${index + 1}</span>
-                        <p class="flex-grow font-bold text-center">${item}</p>
-                    </div>
-                    <p class="editable-cell w-full text-left" contenteditable="true">Ingresa los detalles del trabajo aquí...</p>
-                `;
-                trabajosContainer.appendChild(newRow);
+        function createItemElement(text, index) {
+            const itemRow = document.createElement('div');
+            itemRow.classList.add('flex', 'items-center', 'text-xs', 'space-x-1', 'group');
+            itemRow.innerHTML = `
+                <span class="font-bold flex-none w-4 item-number">${index}.</span>
+                <p class="editable-cell flex-grow font-bold text-gray-800" contenteditable="true">${text}</p>
+                <button class="remove-item-btn text-red-500 hover:text-red-700 font-bold px-2 py-1 transition-colors duration-200 opacity-0 group-hover:opacity-100 no-print text-xl leading-none">&minus;</button>
+            `;
+            const removeBtn = itemRow.querySelector('.remove-item-btn');
+            removeBtn.addEventListener('click', () => {
+                itemRow.remove();
+                updateItemNumbers();
             });
+            return itemRow;
+        }
+
+        function createSectionElement(section) {
+            const sectionContainer = document.createElement('div');
+            sectionContainer.classList.add('space-y-1', 'border-2', 'border-black', 'rounded-md', 'p-2', 'bg-white');
+            
+            const sectionTitleBar = document.createElement('div');
+            sectionTitleBar.classList.add('flex', 'justify-between', 'items-center', 'bg-custom-yellow', 'rounded-t-md', 'p-1', 'border-b-2', 'border-black');
+            sectionTitleBar.innerHTML = `
+                <p class="font-bold text-sm text-gray-800">${section.title}</p>
+                <button class="add-item-btn text-black hover:text-gray-700 font-bold text-xl leading-none px-2 py-1 no-print">&plus;</button>
+            `;
+            const addItemBtn = sectionTitleBar.querySelector('.add-item-btn');
+            addItemBtn.addEventListener('click', () => {
+                const newItem = createItemElement("Nuevo ítem", 0);
+                sectionContainer.querySelector('.list-content').appendChild(newItem);
+                updateItemNumbers();
+            });
+            sectionContainer.appendChild(sectionTitleBar);
+
+            const listContent = document.createElement('div');
+            listContent.classList.add('list-content', 'space-y-1');
+            section.items.forEach(item => {
+                listContent.appendChild(createItemElement(item, 0));
+            });
+            sectionContainer.appendChild(listContent);
+            
+            return sectionContainer;
+        }
+
+        function generateInspectionRows(inspectionKey) {
+            trabajosContainer.innerHTML = '';
+            if (inspections[inspectionKey]) {
+                const sectionData = inspections[inspectionKey];
+                
+                // Main title for the inspection type
+                const mainTitle = document.createElement('p');
+                mainTitle.classList.add('font-bold', 'text-sm', 'text-white', 'bg-custom-blue', 'p-1', 'mt-2', 'w-full', 'rounded-md', 'text-center');
+                mainTitle.textContent = sectionData.title;
+                trabajosContainer.appendChild(mainTitle);
+
+                // Check if the inspection data has a 'sections' property
+                if (sectionData.sections) {
+                    sectionData.sections.forEach(section => {
+                        trabajosContainer.appendChild(createSectionElement(section));
+                    });
+                } else if (sectionData.items) {
+                    // This is for other inspections with a simple list structure
+                    const listContainer = document.createElement('div');
+                    listContainer.classList.add('space-y-1', 'border-2', 'border-black', 'rounded-md', 'p-2', 'bg-white');
+                    sectionData.items.forEach(item => {
+                        listContainer.appendChild(createItemElement(item, 0));
+                    });
+                    trabajosContainer.appendChild(listContainer);
+                }
+            }
+            updateItemNumbers();
         }
 
         function generateRemiRows() {
             trabajosContainer.innerHTML = '';
-            const removalRow = document.createElement('div');
-            removalRow.classList.add('flex', 'items-start', 'text-xs', 'mt-2');
-            removalRow.innerHTML = `
-                <span class="font-bold mr-1 flex-none w-4">1</span>
-                <p class="editable-cell flex-grow" contenteditable="true">${removalDescription}</p>
-            `;
-            trabajosContainer.appendChild(removalRow);
-
-            const installationRow = document.createElement('div');
-            installationRow.classList.add('flex', 'items-start', 'text-xs', 'mt-2');
-            installationRow.innerHTML = `
-                <span class="font-bold mr-1 flex-none w-4">2</span>
-                <p class="editable-cell flex-grow" contenteditable="true">${installationDescription}</p>
-            `;
-            trabajosContainer.appendChild(installationRow);
+            const listContainer = document.createElement('div');
+            listContainer.classList.add('space-y-1', 'border-2', 'border-black', 'rounded-md', 'p-2', 'bg-white');
+            
+            listContainer.appendChild(createItemElement(removalDescription, 1));
+            listContainer.appendChild(createItemElement(installationDescription, 2));
+            trabajosContainer.appendChild(listContainer);
         }
 
+        function updateItemNumbers() {
+            const allItems = document.querySelectorAll('.list-content .item-number');
+            allItems.forEach((item, index) => {
+                item.textContent = `${index + 1}.`;
+            });
+        }
+        
         taskTypeSelect.addEventListener('change', () => {
             const selectedType = taskTypeSelect.value;
-            if (selectedType === 'inspection') {
-                generateInspectionRows();
+            if (selectedType.startsWith('inspection')) {
+                generateInspectionRows(selectedType);
             } else if (selectedType === 'remi') {
                 generateRemiRows();
+            } else if (selectedType === 'motores') {
+                generateInspectionRows('motores');
             } else {
                 trabajosContainer.innerHTML = '';
             }
+            updateItemNumbers();
         });
 
+        // Set initial state to Inspection #1
+        taskTypeSelect.value = 'inspection_1';
         taskTypeSelect.dispatchEvent(new Event('change'));
 
         // --- Signature Pad functionality ---
@@ -460,24 +1038,27 @@
             const signatureData = canvas.toDataURL();
 
             const dataToSave = {
-                fecha: document.getElementById('fecha').textContent,
-                landings_6409: document.getElementById('landings').textContent,
+                fecha_inicio: document.getElementById('fecha_inicio').textContent,
                 modelo: document.getElementById('modelo').textContent,
+                numero_de_serie: document.getElementById('numero_de_serie').textContent,
+                matricula: document.getElementById('matricula').textContent,
+                ac_tt: document.getElementById('ac_tt').textContent,
+                tq: document.getElementById('tq').textContent,
+                envents: document.getElementById('envents').textContent,
+                landings: document.getElementById('landings').textContent,
+                fecha_finalizacion: document.getElementById('fecha_finalizacion').textContent,
                 eng1_tsn_tso: document.getElementById('eng1_tsn_tso').textContent,
                 eng1_csn_cso: document.getElementById('eng1_csn_cso').textContent,
                 eng2_tsn_tso: document.getElementById('eng2_tsn_tso').textContent,
                 eng2_csn_cso: document.getElementById('eng2_csn_cso').textContent,
-                cbox: document.getElementById('cbox').textContent,
-                numero_de_serie: document.getElementById('numero_de_serie').textContent,
-                matricula: document.getElementById('matricula').textContent,
-                ac_tt: document.getElementById('ac_tt').textContent,
-                tq_events: document.getElementById('tq_events').textContent,
+                cbox_tsn_tso: document.getElementById('cbox_tsn_tso').textContent,
+                cbox_csn_cso: document.getElementById('cbox_csn_cso').textContent,
                 trabajos_realizados: trabajos,
                 certificacion: document.getElementById('certificacion').textContent,
-                serie: document.getElementById('serie').textContent,
+                firma: document.getElementById('firma').textContent,
+                jefe_taller: document.getElementById('jefe_taller').textContent,
                 licencia_no: document.getElementById('lic_no').textContent,
-                nombre_impreso: document.getElementById('nombre_impreso').textContent,
-                firma: signatureData,
+                firma_digital: signatureData,
                 guardado_por: userName,
                 timestamp: new Date()
             };
@@ -502,6 +1083,115 @@
                 return false;
             }
         }
+
+        // --- AI Scan Functionality ---
+        scanImageBtn.addEventListener('click', async () => {
+            const file = imageUpload.files[0];
+            if (!file) {
+                statusMessage.textContent = 'Por favor, selecciona una imagen primero.';
+                statusMessage.style.color = 'red';
+                return;
+            }
+
+            statusMessage.textContent = 'Escaneando imagen... por favor espera.';
+            scanImageBtn.disabled = true;
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64Data = e.target.result.split(',')[1];
+                const apiKey = ""; // La API Key se provee en runtime
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                const prompt = "Extrae los datos de la etiqueta de mantenimiento en la imagen. No incluyas los títulos de las celdas, solo los valores. Si un campo está vacío, déjalo como una cadena vacía. Devuelve los datos como un objeto JSON con las siguientes claves: 'fecha_inicio', 'fecha_finalizacion', 'modelo', 'eng1_tsn_tso', 'numero_de_serie', 'eng1_csn_cso', 'matricula', 'eng2_tsn_tso', 'ac_tt', 'eng2_csn_cso', 'tq', 'cbox_tsn_tso', 'landings', 'cbox_csn_cso', 'firma', 'jefe_taller', 'licencia', 'motor1_tsn_tso', 'motor2_tsn_tso', 'motor1_csn_cso', 'motor2_csn_cso'. Para el campo 'firma', describe si la firma es visible o no.";
+                
+                const payload = {
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [
+                                { text: prompt },
+                                {
+                                    inlineData: {
+                                        mimeType: file.type,
+                                        data: base64Data
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "fecha_inicio": { "type": "STRING" },
+                                "fecha_finalizacion": { "type": "STRING" },
+                                "modelo": { "type": "STRING" },
+                                "eng1_tsn_tso": { "type": "STRING" },
+                                "numero_de_serie": { "type": "STRING" },
+                                "eng1_csn_cso": { "type": "STRING" },
+                                "matricula": { "type": "STRING" },
+                                "eng2_tsn_tso": { "type": "STRING" },
+                                "eng2_csn_cso": { "type": "STRING" },
+                                "ac_tt": { "type": "STRING" },
+                                "tq": { "type": "STRING" },
+                                "cbox_tsn_tso": { "type": "STRING" },
+                                "landings": { "type": "STRING" },
+                                "cbox_csn_cso": { "type": "STRING" },
+                                "motor1_tsn_tso": { "type": "STRING" },
+                                "motor2_tsn_tso": { "type": "STRING" },
+                                "motor1_csn_cso": { "type": "STRING" },
+                                "motor2_csn_cso": { "type": "STRING" },
+                                "firma": { "type": "STRING" },
+                                "jefe_taller": { "type": "STRING" },
+                                "licencia": { "type": "STRING" }
+                            }
+                        }
+                    }
+                };
+                
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const result = await response.json();
+                    const jsonString = result.candidates[0].content.parts[0].text;
+                    const data = JSON.parse(jsonString);
+
+                    // Fill form fields with data from the AI
+                    document.getElementById('fecha_inicio').textContent = data.fecha_inicio || '';
+                    document.getElementById('fecha_finalizacion').textContent = data.fecha_finalizacion || '';
+                    document.getElementById('modelo').textContent = data.modelo || '';
+                    document.getElementById('eng1_tsn_tso').textContent = data.eng1_tsn_tso || '';
+                    document.getElementById('numero_de_serie').textContent = data.numero_de_serie || '';
+                    document.getElementById('eng1_csn_cso').textContent = data.eng1_csn_cso || '';
+                    document.getElementById('matricula').textContent = data.matricula || '';
+                    document.getElementById('eng2_tsn_tso').textContent = data.eng2_tsn_tso || '';
+                    document.getElementById('ac_tt').textContent = data.ac_tt || '';
+                    document.getElementById('eng2_csn_cso').textContent = data.eng2_csn_cso || '';
+                    document.getElementById('tq').textContent = data.tq || '';
+                    document.getElementById('cbox_tsn_tso').textContent = data.cbox_tsn_tso || '';
+                    document.getElementById('landings').textContent = data.landings || '';
+                    document.getElementById('cbox_csn_cso').textContent = data.cbox_csn_cso || '';
+                    document.getElementById('firma').textContent = data.firma || '';
+                    document.getElementById('jefe_taller').textContent = data.jefe_taller || '';
+                    document.getElementById('lic_no').textContent = data.licencia || '';
+                    
+                    statusMessage.textContent = 'Datos escaneados y rellenados con éxito.';
+                    statusMessage.style.color = 'green';
+                } catch (error) {
+                    statusMessage.textContent = 'Error al escanear la imagen. Por favor, inténtalo de nuevo.';
+                    statusMessage.style.color = 'red';
+                    console.error("Error al llamar a la API de Gemini: ", error);
+                } finally {
+                    scanImageBtn.disabled = false;
+                }
+            };
+            reader.readAsDataURL(file);
+        });
 
         // --- Event listeners and logic flow ---
         printAndSaveButton.addEventListener('click', () => {
@@ -539,129 +1229,97 @@
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    statusMessage.textContent = 'No hay registros guardados.';
-                    statusMessage.style.color = 'red';
+                    recordsContainer.innerHTML = `<p class="text-center text-gray-500">No hay registros guardados.</p>`;
+                    statusMessage.textContent = 'Registros cargados.';
+                    statusMessage.style.color = 'green';
                     return;
                 }
 
-                statusMessage.textContent = '';
-                
+                recordsContainer.innerHTML = `<h3 class="font-bold text-lg text-gray-700 mb-2">Registros Guardados</h3>`;
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    const recordElement = document.createElement('div');
-                    recordElement.classList.add('bg-white', 'p-4', 'rounded-md', 'shadow-md', 'mt-2', 'w-full');
-                    recordElement.innerHTML = `
-                        <h4 class="font-bold text-lg text-blue-800">Matrícula: ${data.matricula}</h4>
-                        <p class="text-sm text-gray-600">Fecha: ${data.fecha}</p>
-                        <p class="text-xs text-gray-400">Guardado por: ${data.guardado_por || 'N/A'}</p>
-                        <button class="view-detail-btn mt-2 px-3 py-1 bg-blue-400 text-white rounded-md hover:bg-blue-500 transition-colors duration-200" data-doc-id="${doc.id}">
-                            Ver detalles y Editar
-                        </button>
+                    const recordDiv = document.createElement('div');
+                    recordDiv.classList.add('record-item', 'p-4', 'border', 'border-gray-300', 'bg-white', 'rounded-md', 'mb-2', 'cursor-pointer', 'hover:bg-gray-50');
+                    recordDiv.innerHTML = `
+                        <p class="font-bold">ID: ${doc.id}</p>
+                        <p class="text-sm">Matrícula: ${data.matricula || 'N/A'}</p>
+                        <p class="text-sm">Guardado por: ${data.guardado_por || 'Anónimo'}</p>
+                        <p class="text-xs text-gray-500">Fecha: ${data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString() : 'N/A'}</p>
                     `;
-                    recordsContainer.appendChild(recordElement);
+                    recordDiv.addEventListener('click', () => {
+                        loadRecord(data, doc.id);
+                    });
+                    recordsContainer.appendChild(recordDiv);
                 });
-                statusMessage.textContent = 'Registros cargados exitosamente.';
+                statusMessage.textContent = 'Registros cargados con éxito.';
                 statusMessage.style.color = 'green';
+
             } catch (error) {
                 statusMessage.textContent = 'Error al cargar los registros.';
                 statusMessage.style.color = 'red';
-                console.error("Error al obtener documentos: ", error);
+                console.error("Error al cargar documentos: ", error);
             }
         });
 
-        recordsContainer.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('view-detail-btn')) {
-                const docId = e.target.dataset.docId;
-                statusMessage.textContent = `Cargando registro ${docId}...`;
-                try {
-                    const documentsPath = `/artifacts/${appId}/public/data/mantenimiento_data`;
-                    const docRef = doc(db, documentsPath, docId);
-                    const docSnap = await getDoc(docRef);
+        function loadRecord(data, docId) {
+            currentDocId = docId;
+            statusMessage.textContent = `Registro ID: ${docId} cargado. Puedes editar y guardar.`;
+            statusMessage.style.color = 'blue';
 
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        
-                        document.getElementById('fecha').textContent = data.fecha;
-                        document.getElementById('landings').textContent = data.landings_6409;
-                        document.getElementById('modelo').textContent = data.modelo;
-                        document.getElementById('eng1_tsn_tso').textContent = data.eng1_tsn_tso;
-                        document.getElementById('eng1_csn_cso').textContent = data.eng1_csn_cso;
-                        document.getElementById('eng2_tsn_tso').textContent = data.eng2_tsn_tso;
-                        document.getElementById('eng2_csn_cso').textContent = data.eng2_csn_cso;
-                        document.getElementById('cbox').textContent = data.cbox;
-                        document.getElementById('numero_de_serie').textContent = data.numero_de_serie;
-                        document.getElementById('matricula').textContent = data.matricula;
-                        document.getElementById('ac_tt').textContent = data.ac_tt;
-                        document.getElementById('tq_events').textContent = data.tq_events;
-                        document.getElementById('certificacion').textContent = data.certificacion;
-                        document.getElementById('serie').textContent = data.serie;
-                        document.getElementById('lic_no').textContent = data.licencia_no;
-                        document.getElementById('nombre_impreso').textContent = data.nombre_impreso;
-                        
-                        trabajosContainer.innerHTML = '';
-                        if (data.trabajos_realizados && Array.isArray(data.trabajos_realizados)) {
-                            data.trabajos_realizados.forEach((trabajo, index) => {
-                                const newRow = document.createElement('div');
-                                newRow.classList.add('flex', 'items-start', 'text-xs', 'mt-2');
-                                newRow.innerHTML = `
-                                    <span class="font-bold mr-1 flex-none w-4">${index + 1}</span>
-                                    <p class="editable-cell flex-grow" contenteditable="true">${trabajo}</p>
-                                `;
-                                trabajosContainer.appendChild(newRow);
-                            });
-                        }
+            // Fill editable cells
+            document.getElementById('fecha_inicio').textContent = data.fecha_inicio || '';
+            document.getElementById('fecha_finalizacion').textContent = data.fecha_finalizacion || '';
+            document.getElementById('modelo').textContent = data.modelo || '';
+            document.getElementById('eng1_tsn_tso').textContent = data.eng1_tsn_tso || '';
+            document.getElementById('numero_de_serie').textContent = data.numero_de_serie || '';
+            document.getElementById('eng1_csn_cso').textContent = data.eng1_csn_cso || '';
+            document.getElementById('matricula').textContent = data.matricula || '';
+            document.getElementById('eng2_tsn_tso').textContent = data.eng2_tsn_tso || '';
+            document.getElementById('ac_tt').textContent = data.ac_tt || '';
+            document.getElementById('eng2_csn_cso').textContent = data.eng2_csn_cso || '';
+            document.getElementById('tq').textContent = data.tq || '';
+            document.getElementById('cbox_tsn_tso').textContent = data.cbox_tsn_tso || '';
+            document.getElementById('landings').textContent = data.landings || '';
+            document.getElementById('cbox_csn_cso').textContent = data.cbox_csn_cso || '';
+            document.getElementById('certificacion').textContent = data.certificacion || '';
+            document.getElementById('firma').textContent = data.firma || '';
+            document.getElementById('jefe_taller').textContent = data.jefe_taller || '';
+            document.getElementById('lic_no').textContent = data.licencia_no || '';
 
-                        if (data.firma) {
-                            loadSignature(data.firma);
-                        }
-
-                        currentDocId = docId;
-                        statusMessage.textContent = 'Registro cargado para edición.';
-                        statusMessage.style.color = 'green';
-                    } else {
-                        statusMessage.textContent = 'El documento no existe.';
-                        statusMessage.style.color = 'red';
-                    }
-                } catch (error) {
-                    statusMessage.textContent = 'Error al cargar el documento.';
-                    statusMessage.style.color = 'red';
-                    console.error("Error al obtener documento: ", error);
-                }
+            // Load signature
+            if (data.firma_digital) {
+                loadSignature(data.firma_digital);
+            } else {
+                clearBtn.click();
             }
-        });
 
-        function resetForm() {
-            const dataCellIds = [
-                'fecha', 'eng1_tsn_tso', 'landings', 'modelo', 'eng1_csn_cso',
-                'eng2_tsn_tso', 'eng2_csn_cso', 'cbox', 'numero_de_serie',
-                'matricula', 'ac_tt', 'tq_events', 'certificacion', 'serie',
-                'lic_no', 'nombre_impreso'
-            ];
-            
-            dataCellIds.forEach(id => {
-                const cell = document.getElementById(id);
-                if (cell) {
-                    cell.textContent = initialValues[id] !== undefined ? initialValues[id] : '';
-                }
+            // Load trabajos
+            trabajosContainer.innerHTML = '';
+            if (data.trabajos_realizados && Array.isArray(data.trabajos_realizados)) {
+                let itemCounter = 1;
+                data.trabajos_realizados.forEach(itemText => {
+                    const itemRow = createItemElement(itemText, itemCounter);
+                    trabajosContainer.appendChild(itemRow);
+                    itemCounter++;
+                });
+            }
+            updateItemNumbers();
+        }
+
+        newRecordButton.addEventListener('click', () => {
+            currentDocId = null;
+            document.querySelectorAll('.editable-cell').forEach(cell => {
+                cell.textContent = initialValues[cell.id] !== undefined ? initialValues[cell.id] : '';
             });
-
+            clearBtn.click();
             trabajosContainer.innerHTML = '';
             taskTypeSelect.value = 'none';
-            clearBtn.click();
-            statusMessage.textContent = 'Formulario limpio para un nuevo registro.';
+            statusMessage.textContent = 'Nuevo registro iniciado.';
             statusMessage.style.color = 'black';
-            recordsContainer.innerHTML = '';
-            currentDocId = null;
-        }
+        });
 
-        newRecordButton.addEventListener('click', resetForm);
-        
-        // Initial state
-        window.onload = () => {
-            taskTypeSelect.dispatchEvent(new Event('change'));
-            initAuthAndApp();
-            resetForm();
-        }
+        // Initial setup
+        initAuthAndApp();
     </script>
 </body>
 </html>
