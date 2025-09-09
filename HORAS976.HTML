@@ -377,9 +377,8 @@
         @media print {
             body {
                 margin: 0;
-                padding: 5mm; /* Reducir el padding general */
-                font-size: 9px; /* Reducir el tamaño de la fuente para que quepa más */
-                overflow: visible !important; /* Asegurar que no haya scroll oculto */
+                padding: 10mm;
+                font-size: 10px;
             }
             .button-container, .tab-container, .year-container, 
             #auth-container, #helicopter-svg, #anonymous-mask-img, #reveal-circle,
@@ -387,56 +386,23 @@
             #motorStatusModal { /* Ocultar el modal de estado del motor en la impresión principal */
                 display: none !important; 
             }
-            .print-header { 
-                display: block !important; 
-                text-align: center;
-                margin-bottom: 5mm;
-                font-size: 14px; /* Un poco más grande para el encabezado de impresión */
-                font-weight: bold;
-            }
+            .print-header { display: block !important; }
             table {
                 page-break-inside: avoid;
-                width: 100% !important; /* Forzar el 100% de ancho */
-                table-layout: fixed; /* Ayuda a que las columnas se ajusten */
+                width: 100%; 
                 border-collapse: collapse;
             }
             th, td {
                 page-break-inside: avoid;
                 page-break-after: auto;
                 border: 1px solid #000 !important;
-                padding: 1px 2px; /* Reducir el padding de las celdas */
-                text-align: center;
-                font-size: 8px; /* Tamaño de fuente aún más pequeño para las celdas */
-                white-space: normal; /* Permitir que el texto se envuelva */
-                word-break: break-all; /* Romper palabras largas si es necesario */
+                padding: 2px;
+                font-size: 9px; 
             }
-            th:nth-child(1), td:nth-child(1) { /* Columna de Nomenclatura */
-                min-width: 80px !important; /* Ajustar el ancho mínimo para Nomenclatura */
-                width: 15% !important; /* Darle un porcentaje de ancho */
-                text-align: left !important;
-                padding-left: 2px !important;
-            }
-            th:nth-child(2), td:nth-child(2) { /* Columna de Vienen */
-                width: 5% !important;
-            }
-            th:nth-child(n+3):nth-child(-n+33), td:nth-child(n+3):nth-child(-n+33) { /* Columnas de días (1-31) */
-                width: 2.2% !important; /* Ajustar el ancho para los 31 días */
-            }
-            th:nth-child(34), td:nth-child(34) { /* Columna MES TOTAL */
-                width: 7% !important;
-            }
-            th:nth-child(35), td:nth-child(35) { /* Columna GENERAL */
-                width: 7% !important;
-            }
-            th:nth-child(n+36), td:nth-child(n+36) { /* Columnas adicionales (LIMITE, etc.) */
-                width: 7% !important; /* Ajustar el ancho de las columnas adicionales */
-            }
-
-
             .nomenclatura {
                 text-align: left !important;
                 padding-left: 2px !important;
-                min-width: 80px !important; /* Ajustado para impresión */
+                min-width: 120px !important; 
             }
             .restante-verde, .restante-amarillo, .restante-rojo,
             .label-yellow, .label-red {
@@ -473,8 +439,8 @@
                 display: none !important;
             }
             @page {
-                size: A4 landscape; /* Orientación horizontal para más espacio */
-                margin: 5mm; /* Márgenes más pequeños para aprovechar el espacio */
+                size: A4 landscape;
+                margin: 10mm;
             }
         }
 
@@ -685,6 +651,7 @@
         import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js';
 
         // Tu configuración de Firebase (actualizada con la que proporcionaste)
+         // Tu configuración de Firebase (actualizada con la que proporcionaste)
        const firebaseConfig = {
             apiKey: "AIzaSyASg6fgH-Lo6PXLnnw_p8LzHl-WNDiuHrU",
             authDomain: "fah-901-ba5f4.firebaseapp.com",
@@ -707,8 +674,7 @@
 
         // Variables globales
         let añoActual = new Date().getFullYear(); // Inicia con el año actual
-        // Cargar mesActual desde localStorage, o usar el mes actual del sistema si no está guardado
-        let mesActual = parseInt(localStorage.getItem('lastActiveMonth')) || new Date().getMonth(); 
+        let mesActual = new Date().getMonth(); // Inicia con el mes actual (0-11)
         let userId = "anonimo"; // Valor por defecto, se actualizará con el UID de Firebase Auth
         let currentUserRole = null; // Rol del usuario actual
 
@@ -1067,7 +1033,7 @@
             let allMonthsData = {};
 
             try {
-                const snapshot = await get(ref(database, allYearsDataRef)); // Usar ref(database, ...)
+                const snapshot = await get(allYearsDataRef);
                 if (snapshot.exists()) {
                     allMonthsData = snapshot.val();
                 }
@@ -1122,29 +1088,29 @@
             const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${añoActual}/${mesActual}`;
 
             try {
-                console.log(`DEBUG: Intentando cargar datos de: ${rutaDatosMes}`);
+                console.log(`Cargando datos de: ${rutaDatosMes}`);
                 const datosSnapshot = await get(ref(database, rutaDatosMes));
                 const datos = datosSnapshot.val();
                 // *** NUEVO LOG PARA DEPURACIÓN ***
-                console.log(`DEBUG: Datos de tabla cargados de Firebase para ${meses[mesActual]} de ${añoActual}:`, datos);
+                console.log(`Datos de tabla cargados de Firebase para ${meses[mesActual]} de ${añoActual}:`, datos);
 
                 if (datos) {
                     cargarDatosEnTablaHTML(datos, mesActual);
-                    console.log(`DEBUG: Datos de tabla cargados en HTML para ${meses[mesActual]} de ${añoActual}`);
+                    console.log(`Datos de tabla cargados para ${meses[mesActual]} de ${añoActual}`);
                 } else {
-                    console.log(`DEBUG: No hay datos de tabla guardados para ${meses[mesActual]} de ${añoActual}. Limpiando tabla.`);
+                    console.log(`No hay datos de tabla guardados para ${meses[mesActual]} de ${añoActual}. Limpiando tabla.`);
                     limpiarTablaHTML(mesActual);
                 }
 
-                console.log(`DEBUG: Intentando cargar recordatorio de: ${rutaRecordatorio}`);
+                console.log(`Cargando recordatorio de: ${rutaRecordatorio}`);
                 const recordatorioSnapshot = await get(ref(database, rutaRecordatorio));
                 const recordatorio = recordatorioSnapshot.val();
                 if (recordatorio !== null) {
                     recordatorioTextarea.value = recordatorio;
-                    console.log(`DEBUG: Recordatorio cargado para ${meses[mesActual]} de ${añoActual}`);
+                    console.log(`Recordatorio cargado para ${meses[mesActual]} de ${añoActual}`);
                 } else {
                     recordatorioTextarea.value = "";
-                    console.log(`DEBUG: No hay recordatorio guardado para ${meses[mesActual]} de ${añoActual}.`);
+                    console.log(`No hay recordatorio guardado para ${meses[mesActual]} de ${añoActual}.`);
                 }
                 actualizarTotales(); // Asegurarse de que los totales se actualicen después de cargar
             } catch (error) {
@@ -1155,7 +1121,6 @@
         }
 
         function limpiarTablaHTML(indiceTabla) {
-            console.log(`DEBUG: Ejecutando limpiarTablaHTML para la tabla ${indiceTabla}`);
             const tabla = document.querySelectorAll(".tabla-vuelo")[indiceTabla];
             if (tabla) {
                 tabla.querySelectorAll('tbody tr').forEach(fila => {
@@ -1241,7 +1206,6 @@
         }
 
         function cargarDatosEnTablaHTML(datos, indiceTabla) {
-            console.log(`DEBUG: Ejecutando cargarDatosEnTablaHTML para la tabla ${indiceTabla}`);
             const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
             if (tabla) {
                 const filasHTML = Array.from(tabla.querySelectorAll('tr'));
@@ -1317,7 +1281,7 @@
                 });
             }
             // *** NUEVO LOG PARA DEPURACIÓN ***
-            console.log("DEBUG: Datos de tabla a guardar:", datos);
+            console.log("Datos de tabla a guardar:", datos);
             return datos;
         }
 
@@ -1490,8 +1454,6 @@
 
         async function mostrarTabla(index) {
             mesActual = index;
-            // Guardar el mes activo en localStorage
-            localStorage.setItem('lastActiveMonth', index); 
             document.querySelectorAll(".tabla-mes").forEach((div, i) => {
                 div.style.display = i === index ? "block" : "none";
             });
@@ -1502,24 +1464,17 @@
             printMonthHeader.textContent = `DATOS DE VUELO - ${meses[index].toUpperCase()} ${añoActual}`;
 
             if (mesActual > 0 && auth.currentUser) {
-                console.log(`DEBUG: Copiando valor general del mes ${meses[mesActual - 1]} al mes ${meses[mesActual]}`);
                 await copiarValorGeneralAMesSiguiente(añoActual, mesActual - 1, mesActual);
             }
         }
 
         async function copiarValorGeneralAMesSiguiente(año, mesOrigenIndex, mesDestinoIndex) {
-            if (!userId || userId === "anonimo") {
-                console.log("DEBUG: No se puede copiar datos entre meses: Usuario no autenticado.");
-                return;
-            }
+            if (!userId || userId === "anonimo") return;
 
             const rutaOrigen = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesOrigenIndex}`; 
             try {
-                console.log(`DEBUG: Intentando obtener datos del mes de origen: ${rutaOrigen}`);
                 const snapshot = await get(ref(database, rutaOrigen));
                 const datosOrigen = snapshot.val();
-                console.log(`DEBUG: Datos de origen para copiar:`, datosOrigen);
-
                 if (datosOrigen) {
                     const tablaDestino = document.querySelectorAll(".tabla-vuelo")[mesDestinoIndex];
                     if (tablaDestino) {
@@ -1535,7 +1490,6 @@
                                 if (indexFilaDestino !== -1) {
                                     // La columna 34 es la columna "GENERAL" en la estructura de datos de la tabla
                                     const valorGeneral = filaDatosOrigen[34]; 
-                                    console.log(`DEBUG: Copiando valor general para ${nomenclaturaOrigen}: ${valorGeneral}`);
                                     if (valorGeneral !== undefined && valorGeneral !== null && valorGeneral.toString().trim() !== "") {
                                         const filaDestino = tablaDestino.querySelectorAll("tbody tr")[indexFilaDestino];
                                         if (filaDestino) {
@@ -1554,11 +1508,8 @@
                             }
                         });
                         actualizarTotales();
-                        // Guardar los datos del mes destino después de copiar, para que persistan.
                         await guardarDatosEnFirebase(añoActual, mesDestinoIndex, obtenerDatosTabla(mesDestinoIndex), recordatorioTextarea.value);
                     }
-                } else {
-                    console.log(`DEBUG: No hay datos en el mes de origen (${meses[mesOrigenIndex]}) para copiar.`);
                 }
             } catch (error) {
                 console.error("Error al copiar datos entre meses:", error.code, error.message);
@@ -1608,22 +1559,12 @@
                     // Solo procesar filas que no son componentes de motor ni etiquetas
                     if (!filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta) && !filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta)) {
                         const vieneCelda = fila.querySelector('.viene-celda');
-                        // Seleccionar celdas diarias desde la columna 3 (día 1) hasta la columna 33 (día 31)
                         const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
                         const mesTotalCelda = fila.querySelector('.fila-total');
                         const generalCelda = fila.querySelector('.fila-general');
                         
                         const viene = parseFloat(vieneCelda?.textContent.trim()) || 0;
                         const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
-
-                        // --- NUEVOS LOGS DE DEPURACIÓN PARA AC HRS ---
-                        if (nomenclaturaCompleta === "AC HRS") {
-                            console.log(`DEBUG: Procesando fila: ${nomenclaturaCompleta}`);
-                            console.log(`DEBUG: Contenido de vieneCelda: '${vieneCelda?.textContent.trim()}' -> ${viene}`);
-                            console.log(`DEBUG: dailyCells (NodeList):`, dailyCells);
-                            console.log(`DEBUG: valoresDiarios (Array parsed):`, valoresDiarios);
-                        }
-                        // --- FIN NUEVOS LOGS DE DEPURACIÓN ---
                         
                         const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
                         let totalGeneral = totalMes + viene; // El total general de la fila actual es la suma del mes y el "vienen"
@@ -1631,18 +1572,11 @@
                         mesTotalCelda.textContent = formatNumber(totalMes); // Usar formatNumber
                         generalCelda.textContent = formatNumber(totalGeneral); // Usar formatNumber
 
-                        // --- NUEVOS LOGS DE DEPURACIÓN PARA AC HRS ---
-                        if (nomenclaturaCompleta === "AC HRS") {
-                            console.log(`DEBUG: totalMes calculado para ${nomenclaturaCompleta}: ${totalMes}`);
-                            console.log(`DEBUG: totalGeneral calculado para ${nomenclaturaCompleta}: ${totalGeneral}`);
-                        }
-                        // --- FIN NUEVOS LOGS DE DEPURACIÓN ---
-
                         generalValuesMap.set(nomenclaturaCompleta, totalGeneral);
                     }
                 });
 
-                // PASO 2: Calcular totales y restantes para filas de componentes de motor y filas de etiquetas (CICLOS)
+                // PASO 2: Calcular totales y restantes para filas de componentes de motor
                 filas.forEach((fila) => {
                     const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
                     if (!nomenclaturaCompleta || fila.querySelector('.motor-header')) {
@@ -1698,29 +1632,6 @@
 
                         const restante = limite - accumulatedTotalCycles;
                         aplicarEstiloRestante(restanteCelda, restante, limite);
-                    } else if (filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta)) {
-                        // Lógica específica para filas como "CICLOS 1" y "CICLOS 2"
-                        const vieneCelda = fila.querySelector('.viene-celda');
-                        const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
-                        const mesTotalCelda = fila.querySelector('.fila-total');
-                        const generalCelda = fila.querySelector('.fila-general');
-
-                        const viene = parseFloat(vieneCelda?.textContent.trim()) || 0;
-                        const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
-                        const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
-                        mesTotalCelda.textContent = formatNumber(totalMes);
-
-                        let motorNumero = null;
-                        const motorMatch = nomenclaturaCompleta.match(/\s(\d)$/);
-                        if (motorMatch) {
-                            motorNumero = parseInt(motorMatch[1]);
-                        }
-
-                        if (nomenclaturaCompleta.startsWith("CICLOS") && motorNumero !== null) {
-                            const noOfStarts = generalValuesMap.get(`ENGINE STARTS ${motorNumero}`) || 0;
-                            generalCelda.textContent = formatNumber(noOfStarts); // Establece el valor GENERAL de CICLOS al de ENGINE STARTS
-                        }
-                        // Las filas de CICLOS no tienen celda 'restante', así que no se llama a aplicarEstiloRestante aquí.
                     }
                 });
             });
