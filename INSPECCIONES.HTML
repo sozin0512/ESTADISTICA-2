@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Inspecciones FAH-976</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #e9ecef;
+            min-height: 100vh;
+        }
+        .form-header-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background-color: #343a40;
+            border: 1px solid #343a40;
+        }
+        .form-header-cell {
+            background-color: #f8f9fa;
+            padding: 0.25rem 0.5rem;
+        }
+        .form-header-cell label {
+            font-size: 0.65rem;
+            font-weight: bold;
+            display: block;
+            color: #495057;
+        }
+        .form-header-cell .value {
+            font-size: 0.8rem;
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 0.1rem 0;
+        }
+        .form-header-cell .value:focus {
+            outline: none;
+        }
+        .section-header {
+            background-color: #ffc107;
+            font-weight: bold;
+            text-align: center;
+        }
+        .status-vigente { background-color: #28a745; color: white; font-weight: bold; }
+        .status-vencida { background-color: #dc3545; color: white; font-weight: bold; }
+        .editable-cell { cursor: text; position: relative; }
+        .editable-cell:hover { background-color: #f0f8ff; }
+        .editable-cell:focus { outline: 2px solid #007bff; background-color: #e7f1ff; }
+        .read-only-cell { background-color: #f8f9fa; cursor: not-allowed; }
+        table, th, td { border: 1px solid #6c757d; }
+        th { background-color: #e9ecef; }
+        .remaining-ok { color: #155724; }
+        .remaining-warn { color: #856404; font-weight: bold; }
+        .remaining-danger { color: #721c24; font-weight: bold; }
+        
+        #edit-mode-toggle {
+            transition: background-color: 0.3s, color: 0.3s;
+        }
+        #edit-mode-toggle.active {
+            background-color: #dc3545;
+        }
+        .action-button {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-button.edit { background-color: #007bff; color: white; }
+        .action-button.delete { background-color: #dc3545; color: white; }
+        .action-button:hover { opacity: 0.8; }
+        
+        #add-inspection-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #add-edit-modal, #calculation-modal, #date-modal, #delete-modal {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        @media print {
+            body { background: #fff; }
+            #main-app-content { box-shadow: none; border: none; }
+            .no-print { display: none !important; }
+            th, td { font-size: 7px; }
+            .p-2 { padding: 0.2rem; }
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6">
+
+    <div id="auth-container" class="w-full max-w-md mx-auto text-center">
+        <div class="bg-white p-8 rounded-lg shadow-2xl">
+            <h2 class="text-2xl font-bold mb-4 text-gray-700">Acceso Requerido</h2>
+            <p class="text-gray-600">Por favor, inicia sesión en la página principal para ver esta sección.</p>
+            <button onclick="window.location.href='76.html'" class="mt-6 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
+                Volver a la Bitácora
+            </button>
+        </div>
+    </div>
+
+    <div id="main-app-content" class="hidden w-full max-w-full mx-auto bg-white p-4 sm:p-6 rounded-lg shadow-lg">
+        
+        <div class="form-header-grid">
+            <div class="form-header-cell col-span-2">
+                <label>1. NOMENCLATURA</label>
+                <div class="value">HELICOPTERO</div>
+            </div>
+            <div class="form-header-cell">
+                <label>2. MODELO</label>
+                <div class="value">BELL 412</div>
+            </div>
+            <div class="form-header-cell">
+                <label>3. No SERIE</label>
+                <div class="value">FAH-976</div>
+            </div>
+        </div>
+         <div class="form-header-grid mt-px">
+             <div class="form-header-cell col-span-2">
+                <label>HORAS TOTALES DE VUELO (AC HRS)</label>
+                <div id="total-flight-hours" class="value text-lg font-bold text-blue-600">--.--</div>
+            </div>
+            <div class="form-header-cell">
+                <label>4. PAGINA No</label>
+                <input type="text" class="value" value="1">
+            </div>
+             <div class="form-header-cell">
+                <label>No DE PAGINAS</label>
+                <input type="text" class="value">
+            </div>
+        </div>
+        
+        <div class="flex justify-end gap-2 my-2 no-print">
+            <button id="edit-mode-toggle" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-5 rounded-lg text-sm hidden">Activar Modo Edición</button>
+            <button id="add-inspection-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg text-sm hidden">
+                + Nueva Inspección
+            </button>
+        </div>
+        
+        <div class="overflow-x-auto mt-1">
+            <table id="inspections-table" class="min-w-full border-collapse text-xs">
+                <thead class="bg-gray-200 text-center font-bold">
+                    <tr>
+                        <th class="p-2 w-2/5">5. ARTICULO PARA SER INSPECCIONADO</th>
+                        <th class="p-2">6. REFERENCIA</th>
+                        <th class="p-2">7. FRECUENCIA</th>
+                        <th class="p-2">Última Realizada</th>
+                        <th class="p-2">SIG. CUMPLIMIENTO</th>
+                        <th class="p-2">Restante</th>
+                        <th class="p-2">VIGENCIA</th>
+                        <th class="p-2 no-print edit-actions-header hidden">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white">
+                    <!-- Contenido dinámico generado por JS -->
+                    <tr id="loading-row"><td colspan="8" class="p-4 text-center text-gray-500">Cargando inspecciones...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="mt-8 flex justify-center gap-4 no-print">
+            <button onclick="window.location.href=''" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg">
+                Volver a la Bitácora
+            </button>
+            <button id="trabajos-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-5 rounded-lg">
+                Trabajos a efectuarse
+            </button>
+            <button onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-5 rounded-lg">
+                Imprimir
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal para Agregar/Editar Inspección -->
+    <div id="add-edit-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="w-full max-w-lg p-6 bg-white rounded-lg shadow-2xl">
+            <h3 id="add-edit-modal-title" class="text-lg font-bold text-gray-800 mb-4"></h3>
+            <form id="add-edit-form" class="space-y-4">
+                <div>
+                    <label for="inspection-id" class="block text-sm font-medium text-gray-700">ID</label>
+                    <input type="text" id="inspection-id" class="mt-1 block w-full p-2 border rounded-md" readonly>
+                </div>
+                <div>
+                    <label for="inspection-name" class="block text-sm font-medium text-gray-700">Nombre de la Inspección</label>
+                    <input type="text" id="inspection-name" class="mt-1 block w-full p-2 border rounded-md" required>
+                </div>
+                <div>
+                    <label for="inspection-ref" class="block text-sm font-medium text-gray-700">Referencia</label>
+                    <input type="text" id="inspection-ref" class="mt-1 block w-full p-2 border rounded-md">
+                </div>
+                <div>
+                    <label for="inspection-section" class="block text-sm font-medium text-gray-700">Sección</label>
+                    <select id="inspection-section" class="mt-1 block w-full p-2 border rounded-md"></select>
+                </div>
+                <div>
+                    <label for="inspection-freq-type" class="block text-sm font-medium text-gray-700">Tipo de Frecuencia</label>
+                    <select id="inspection-freq-type" class="mt-1 block w-full p-2 border rounded-md">
+                        <option value="NONE">-- Seleccionar --</option>
+                        <option value="HRS">Horas (HRS)</option>
+                        <option value="DATE">Fecha (DIARIA, MESES, AÑOS)</option>
+                        <option value="DUAL_H">Dual - Horas</option>
+                        <option value="DUAL_D">Dual - Días</option>
+                        <option value="DUAL_M">Dual - Meses</option>
+                        <option value="DUAL_Y">Dual - Años</option>
+                        <option value="SPECIAL">Especial (SPECIAL)</option>
+                    </select>
+                </div>
+                <div id="freq-value-container" class="hidden">
+                    <label for="inspection-freq-value" class="block text-sm font-medium text-gray-700">Valor de Frecuencia</label>
+                    <input type="number" id="inspection-freq-value" class="mt-1 block w-full p-2 border rounded-md">
+                </div>
+                <div id="freq-text-container" class="hidden">
+                    <label for="inspection-freq-text" class="block text-sm font-medium text-gray-700">Texto de Frecuencia</label>
+                    <input type="text" id="inspection-freq-text" class="mt-1 block w-full p-2 border rounded-md">
+                </div>
+                <div class="flex justify-end gap-4 mt-6">
+                    <button type="button" id="add-edit-modal-cancel" class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
+                    <button type="submit" id="add-edit-modal-save" class="px-5 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal de Confirmación de Borrado -->
+    <div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50">
+        <div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-2xl text-center">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Confirmar Borrado</h3>
+            <p class="text-gray-600 mb-6">¿Estás seguro que deseas eliminar esta inspección?</p>
+            <p id="delete-inspection-name" class="font-bold mb-4"></p>
+            <div class="flex justify-center gap-4">
+                <button id="delete-modal-cancel" class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
+                <button id="delete-modal-confirm" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Opciones de Cálculo -->
+    <div id="calculation-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="w-full max-w-2xl p-6 bg-white rounded-lg shadow-2xl">
+            <h3 id="calc-modal-title" class="text-lg font-bold text-gray-800 mb-4">Asistente de Cálculo</h3>
+            <p class="text-sm text-gray-600 mb-6">Selecciona una opción para calcular el valor de "Última Realizada":</p>
+            
+            <div class="space-y-4">
+                <button id="calc-option-reset" class="w-full text-left p-3 bg-green-100 hover:bg-green-200 rounded-lg border border-green-400">
+                    <strong class="text-green-800">Opción Rápida: Reiniciar Ciclo</strong>
+                    <p class="text-xs text-gray-600">Registra la última inspección con las horas de vuelo actuales para empezar un nuevo ciclo.</p>
+                </button>
+                 <hr>
+                <button id="calc-option-a" class="w-full text-left p-3 bg-gray-100 hover:bg-blue-100 rounded-lg border border-gray-300">
+                    <strong class="text-blue-700">Opción A: Asumir que se acaba de cumplir</strong>
+                    <p class="text-xs text-gray-500">Calcula la última inspección como: (Horas Actuales - Frecuencia).</p>
+                </button>
+                <button id="calc-option-b" class="w-full text-left p-3 bg-gray-100 hover:bg-blue-100 rounded-lg border border-gray-300">
+                    <strong class="text-blue-700">Opción B: Asumir a mitad de ciclo</strong>
+                    <p class="text-xs text-gray-500">Calcula la última inspección como: (Horas Actuales - Frecuencia / 2).</p>
+                </button>
+                <div class="p-3 bg-gray-100 rounded-lg border border-gray-300">
+                    <strong class="text-blue-700">Opción C: Calcular desde el próximo cumplimiento</strong>
+                    <p class="text-xs text-gray-500 mb-2">Introduce el valor del <strong>próximo</strong> cumplimiento y el sistema calculará el anterior.</p>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="calc-next-due-input" placeholder="Ej: 600" class="p-2 border border-gray-400 rounded-md w-full">
+                        <button id="calc-option-c" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg">Calcular</button>
+                    </div>
+                </div>
+                <div class="p-3 bg-orange-100 rounded-lg border border-orange-300">
+                    <strong class="text-orange-800">Opción D: Registrar cumplimiento en horas pasadas</strong>
+                    <p class="text-xs text-gray-500 mb-2">Introduce las <strong>horas de vuelo exactas (AC HRS)</strong> en las que se realizó la inspección en el pasado.</p>
+                    <div class="flex items-center gap-2">
+                        <input type="number" step="0.1" id="calc-past-hours-input" placeholder="Ej: 4850.5" class="p-2 border border-gray-400 rounded-md w-full">
+                        <button id="calc-option-d" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg">Registrar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end mt-6">
+                 <button id="calc-modal-close" class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Fecha -->
+    <div id="date-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50">
+        <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-2xl">
+            <h3 id="date-modal-title" class="text-lg font-bold text-gray-800 mb-4">Registrar Fecha de Cumplimiento</h3>
+            <div class="space-y-4">
+                <button id="date-modal-reset-cycle" class="w-full text-left p-3 bg-green-100 hover:bg-green-200 rounded-lg border border-green-400">
+                    <strong class="text-green-800">Opción Rápida: Reiniciar Ciclo con Fecha Actual</strong>
+                    <p class="text-xs text-gray-600">Registra la inspección como cumplida hoy para empezar un nuevo ciclo.</p>
+                </button>
+                <hr>
+                <div>
+                    <p class="text-gray-600 mb-2 text-sm">O selecciona una fecha específica de un cumplimiento anterior:</p>
+                    <input type="date" id="date-modal-input" class="p-2 border border-gray-400 rounded-md w-full">
+                </div>
+            </div>
+            <div class="flex justify-end gap-4 mt-8">
+                <button id="date-modal-cancel" class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
+                <button id="date-modal-save" class="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg">Guardar Fecha</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { getDatabase, ref, onValue, set, get, remove, push } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+        const inspectionsList = [
+            { type: 'header', name: 'AIRWORTHINESS LIMITATIONS SCHEDULE' },
+            { id: 1, name: '1. 25 HORAS INSPECCIÓN DE LOS DAMPER YOKE SET (P/N 412-010-145-101/-146-103) (VER NOTA) - 412', ref: '4-00-00 / TABLA 4-1', freqType: 'HRS', freqValue: 25, freqText: '25 HRS' },
+            { id: 2, name: '2. 25 HORAS INSPECCIÓN DE LAS MAIN ROTOR HUB PIVOT BEARING (P/N 412-010-106-101) (VER NOTA) - 412', ref: '4-00-00 / TABLA 4-1', freqType: 'HRS', freqValue: 25, freqText: '25 HRS' },
+            { type: 'header', name: 'SCHEDULE INSPECTIONS' },
+            { id: 3, name: '3. INSPECCION DIARIA - PARTE A (VER NOTA) - 412', ref: '5-00-00 / PARA 5-8', freqType: 'DATE', freqValue: { days: 1 }, freqText: 'DIARIA' },
+            { id: 4, name: '4. 100 HORAS / 12 MESES INSPECCIÓN - PARTE A (VER NOTA) - 412', ref: '5-00-00 / PARA 5-9', freqType: 'DUAL_H', freqValue: 100, freqText: '100 HRS' },
+            { id: '4a', name: '4. 100 HORAS / 12 MESES INSPECCIÓN - PARTE A (VER NOTA) - 412', ref: '5-00-00 / PARA 5-9', freqType: 'DUAL_M', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 5, name: '5. 1000 HORAS INSPECCIÓN - PARTE A (VER NOTA) - 412', ref: '5-00-00 / PARA 5-10', freqType: 'HRS', freqValue: 1000, freqText: '1000 HRS' },
+            { id: 6, name: '6. 5000 HORAS / 5 AÑOS INSPECCIÓN - PARTE A (VER NOTA) - 412', ref: '5-00-00 / PARA 5-11', freqType: 'DUAL_H', freqValue: 5000, freqText: '5000 HRS' },
+            { id: '6a', name: '6. 5000 HORAS / 5 AÑOS INSPECCIÓN - PARTE A (VER NOTA) - 412', ref: '5-00-00 / PARA 5-11', freqType: 'DUAL_Y', freqValue: { years: 5 }, freqText: '5 AÑOS' },
+            { id: 7, name: '7. 100 HORAS / 90 DIAS GUIA INSPECCIÓN DE CORROSION.', ref: 'SSD-PSE-87-001-CH30', freqType: 'DUAL_H', freqValue: 100, freqText: '100 HRS' },
+            { id: '7a', name: '7. 100 HORAS / 90 DIAS GUIA INSPECCIÓN DE CORROSION.', ref: 'SSD-PSE-87-001-CH30', freqType: 'DUAL_D', freqValue: { days: 90 }, freqText: '90 DIAS' },
+            { id: 8, name: '8. 12 MESES INSPECCIÓN DE KIT DE PRIMEROS AUXILIOS - 412', ref: 'PER MFGR /', freqType: 'DATE', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 9, name: '9. 12 MESES CHEQUEO DE PESO - EXTINGUIDOR DE FUEGO CABIN', ref: 'PER MFGR /', freqType: 'DATE', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 10, name: '10. 12 MESES CHEQUEO DE PESO - EXTINGUIDOR DE FUEGO COCKPIT', ref: 'PER MFGR /', freqType: 'DATE', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { type: 'header', name: 'INSPECCIONES POR FASE A, B, C, D' },
+            { id: 11, name: '11. FASE A (CADA 100 HORAS)', ref: 'BHT-412-MM', freqType: 'HRS', freqValue: 100, freqText: '100 HRS' },
+            { id: 12, name: '12. FASE B (CADA 200 HORAS)', ref: 'BHT-412-MM', freqType: 'HRS', freqValue: 200, freqText: '200 HRS' },
+            { id: 13, name: '13. FASE C (CADA 400 HORAS)', ref: 'BHT-412-MM', freqType: 'HRS', freqValue: 400, freqText: '400 HRS' },
+            { id: 14, name: '14. FASE D (CADA 800 HORAS)', ref: 'BHT-412-MM', freqType: 'HRS', freqValue: 800, freqText: '800 HRS' },
+            { type: 'header', name: 'ENGINE 1 INSPECCIONES' },
+            { id: 201, name: 'E1. INSPECCIÓN VISUAL DIARIA DEL MOTOR', ref: 'P&WC PT6T-3D MM', freqType: 'DATE', freqValue: { days: 1 }, freqText: 'DIARIA' },
+            { id: 202, name: 'E1. REVISIÓN DE FILTROS DE ACEITE', ref: 'P&WC PT6T-3D MM', freqType: 'HRS', freqValue: 100, freqText: '100 HRS' },
+            { id: 203, name: 'E1. INSPECCIÓN DE LA SECCIÓN CALIENTE (HSI)', ref: 'P&WC PT6T-3D MM', freqType: 'HRS', freqValue: 1000, freqText: '1000 HRS' },
+            { type: 'header', name: 'ENGINE 2 INSPECCIONES' },
+            { id: 211, name: 'E2. INSPECCIÓN VISUAL DIARIA DEL MOTOR', ref: 'P&WC PT6T-3D MM', freqType: 'DATE', freqValue: { days: 1 }, freqText: 'DIARIA' },
+            { id: 212, name: 'E2. REVISIÓN DE FILTROS DE ACEITE', ref: 'P&WC PT6T-3D MM', freqType: 'HRS', freqValue: 100, freqText: '100 HRS' },
+            { id: 213, name: 'E2. INSPECCIÓN DE LA SECCIÓN CALIENTE (HSI)', ref: 'P&WC PT6T-3D MM', freqType: 'HRS', freqValue: 1000, freqText: '1000 HRS' },
+            { type: 'header', name: 'SPECIAL INSPECTIONS' },
+            { id: 157, name: 'SPECIAL INSPECTION - Each 25 Hours For The Next Four Inspections', ref: 'DMC-412-A-05-47-00-04A-283A-A / 00036', freqType: 'HRS', freqValue: 25, freqText: '25 HRS' },
+            { id: 158, name: 'SPECIAL INSPECTION - Each 25 Hours of Tail Rotor Operation', ref: 'DMC-412-A-05-47-00-05A-283A-A / 00037', freqType: 'HRS', freqValue: 25, freqText: '25 HRS' },
+            { id: 159, name: 'SPECIAL INSPECTION - Each 25 Hours Tailboom Attachment Inspection', ref: 'DMC-412-A-05-47-00-30A-283A-A / 00039', freqType: 'HRS', freqValue: 25, freqText: '25 HRS' },
+            { id: 160, name: 'SPECIAL INSPECTION - 50 Hours After Installation of Components', ref: 'DMC-412-A-05-47-00-06A-283A-A / 00038', freqType: 'HRS', freqValue: 50, freqText: '50 HRS' },
+            { id: 161, name: 'SPECIAL INSPECTION - Each 50 Hours Tailboom Attachment Inspection', ref: 'DMC-412-A-05-47-00-51A-283A-A / 00038-1', freqType: 'HRS', freqValue: 50, freqText: '50 HRS' },
+            { id: 162, name: 'SPECIAL INSPECTION - Each 100 Hours Tailboom Vertical Fin Spar Cap Inspection', ref: 'DMC-412-A-05-47-00-31A-283A-A / 00040', freqType: 'HRS', freqValue: 100, freqText: '100 HRS' },
+            { id: 163, name: 'SPECIAL INSPECTION - Each 100 Hours of Collective Lever Operation', ref: 'DMC-412-A-05-47-00-08A-283A-A / 00041', freqType: 'HRS', freqValue: 100, freqText: '100 HRS' },
+            { id: 164, name: 'SPECIAL INSPECTION - Each 150 Hours of Starter Generator (200SG119Q) Operation', ref: 'DMC-412-A-05-47-00-09A-283A-A / 00042', freqType: 'HRS', freqValue: 150, freqText: '150 HRS' },
+            { id: 165, name: 'SPECIAL INSPECTION - Each 300 Hours/6 Months of Expandable Blade Bolt Operation', ref: 'DMC-412-A-05-47-00-10A-283A-A / 00043', freqType: 'DUAL_H', freqValue: 300, freqText: '300 HRS' },
+            { id: '165a', name: 'SPECIAL INSPECTION - Each 300 Hours/6 Months of Expandable Blade Bolt Operation', ref: 'DMC-412-A-05-47-00-10A-283A-A / 00043', freqType: 'DUAL_M', freqValue: { months: 6 }, freqText: '6 MESES' },
+            { id: 166, name: 'SPECIAL INSPECTION - Each 600 Hours/12 Months of Tail Rotor Driveshaft Operation', ref: 'DMC-412-A-05-47-00-11A-283A-A / 00044', freqType: 'DUAL_H', freqValue: 600, freqText: '600 HRS' },
+            { id: '166a', name: 'SPECIAL INSPECTION - Each 600 Hours/12 Months of Tail Rotor Driveshaft Operation', ref: 'DMC-412-A-05-47-00-11A-283A-A / 00044', freqType: 'DUAL_M', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 167, name: 'SPECIAL INSPECTION - Each 600 Hours/12 Months Inspection of Tailboom Attachment Bolts', ref: 'DMC-412-A-05-47-00-00B-283B-A / 00045', freqType: 'DUAL_H', freqValue: 600, freqText: '600 HRS' },
+            { id: '167a', name: 'SPECIAL INSPECTION - Each 600 Hours/12 Months Inspection of Tailboom Attachment Bolts', ref: 'DMC-412-A-05-47-00-00B-283B-A / 00045', freqType: 'DUAL_M', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 168, name: 'SPECIAL INSPECTION - Each 600 Hours/12 Months of Main Driveshaft Operation', ref: 'DMC-412-A-05-47-00-12A-283A-A / 00046', freqType: 'DUAL_H', freqValue: 600, freqText: '600 HRS' },
+            { id: '168a', name: 'SPECIAL INSPECTION - Each 600 Hours/12 Months of Main Driveshaft Operation', ref: 'DMC-412-A-05-47-00-12A-283A-A / 00046', freqType: 'DUAL_M', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 169, name: 'SPECIAL INSPECTION - Each 600 Hours/12 Months Inspection of Magnetic Brake Assembly', ref: 'DMC-412-A-05-47-00-50A-283A-A / 00047', freqType: 'DUAL_H', freqValue: 600, freqText: '600 HRS' },
+            { id: '169a', name: 'SPECIAL INSPECTION - Each 600 Hours/12 Months Inspection of Magnetic Brake Assembly', ref: 'DMC-412-A-05-47-00-50A-283A-A / 00047', freqType: 'DUAL_M', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 170, name: 'SPECIAL INSPECTION - Each 1000 Hours of Component Operation', ref: 'DMC-412-A-05-47-00-13A-283A-A / 00048', freqType: 'HRS', freqValue: 1000, freqText: '1000 HRS' },
+            { id: 171, name: 'SPECIAL INSPECTION - Each 12 Months/2500 Landings of Aft High Crosstube Operation', ref: 'DMC-412-A-05-47-00-14A-283A-A / 00049', freqType: 'DUAL_M', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: '171a', name: 'SPECIAL INSPECTION - Each 12 Months/2500 Landings of Aft High Crosstube Operation', ref: 'DMC-412-A-05-47-00-14A-283A-A / 00049', freqType: 'SPECIAL', freqText: '2500 Landings' },
+            { id: 172, name: 'SPECIAL INSPECTION - Each 24 Months of Control Bolt Operation', ref: 'DMC-412-A-05-47-00-15A-283A-A / 00050', freqType: 'DATE', freqValue: { months: 24 }, freqText: '24 MESES' },
+            { id: 173, name: 'SPECIAL INSPECTION - Each 24 Months of Main Rotor Mast Operation', ref: 'DMC-412-A-05-47-00-16A-283A-A / 00051', freqType: 'DATE', freqValue: { months: 24 }, freqText: '24 MESES' },
+            { id: 174, name: 'SPECIAL INSPECTION - Each 2500 Hours of Main Rotor Hub Assembly Operation', ref: 'DMC-412-A-05-47-00-17A-283A-A / 00052', freqType: 'HRS', freqValue: 2500, freqText: '2500 HRS' },
+            { id: 175, name: 'SPECIAL INSPECTION - Each 2500 Hours of Main Rotor Blade Operation', ref: 'DMC-412-A-05-47-00-18A-283A-A / 00053', freqType: 'HRS', freqValue: 2500, freqText: '2500 HRS' },
+            { id: 176, name: 'SPECIAL INSPECTION - Each 2500/3000 Hours/5 Years of Main Rotor Mast (412-040-366-109 and Subsequent)', ref: 'DMC-412-A-05-47-00-19A-283A-A / 00054', freqType: 'DUAL_H', freqValue: 2500, freqText: '2500/3000 HRS' },
+            { id: '176a', name: 'SPECIAL INSPECTION - Each 2500/3000 Hours/5 Years of Main Rotor Mast (412-040-366-109 and Subsequent)', ref: 'DMC-412-A-05-47-00-19A-283A-A / 00054', freqType: 'DUAL_Y', freqValue: { years: 5 }, freqText: '5 AÑOS' },
+            { id: 177, name: 'SPECIAL INSPECTION - Each 2500 Hours of Tail Rotor Drive System Operation', ref: 'DMC-412-A-05-47-00-20A-283A-A / 00055', freqType: 'HRS', freqValue: 2500, freqText: '2500 HRS' },
+            { id: 178, name: 'SPECIAL INSPECTION - Each 3000 Hours/5 Years of Main Rotor Mast (412-040-366-103 and -105)', ref: 'DMC-412-A-05-47-00-21A-283A-A / 00056', freqType: 'DUAL_H', freqValue: 3000, freqText: '3000 HRS' },
+            { id: '178a', name: 'SPECIAL INSPECTION - Each 3000 Hours/5 Years of Main Rotor Mast (412-040-366-103 and -105)', ref: 'DMC-412-A-05-47-00-21A-283A-A / 00056', freqType: 'DUAL_Y', freqValue: { years: 5 }, freqText: '5 AÑOS' },
+            { id: 179, name: 'SPECIAL INSPECTION - Each 3000 Hours of Transmission (412-040-002) Operation', ref: 'DMC-412-A-05-47-00-22A-283A-A / 00057', freqType: 'HRS', freqValue: 3000, freqText: '3000 HRS' },
+            { id: 180, name: 'SPECIAL INSPECTION - Each 3000 Hours of Transmission (412-040-004/..-007/..-802)', ref: 'DMC-412-A-05-47-00-23A-283A-A / 00058', freqType: 'HRS', freqValue: 3000, freqText: '3000 HRS' },
+            { id: 181, name: 'SPECIAL INSPECTION - Each 300 Hours/12 Months (After 3600 Total Airframe Time)', ref: 'DMC-412-A-05-47-00-24A-283A-A / 00059', freqType: 'DUAL_H', freqValue: 300, freqText: '300 HRS' },
+            { id: '181a', name: 'SPECIAL INSPECTION - Each 300 Hours/12 Months (After 3600 Total Airframe Time)', ref: 'DMC-412-A-05-47-00-24A-283A-A / 00059', freqType: 'DUAL_M', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 182, name: 'SPECIAL INSPECTION - Each 3000 Hours/5 Years of Transmission Mount & Friction Damper', ref: 'DMC-412-A-05-47-00-28A-283A-A / 00060', freqType: 'DUAL_H', freqValue: 3000, freqText: '3000 HRS' },
+            { id: '182a', name: 'SPECIAL INSPECTION - Each 3000 Hours/5 Years of Transmission Mount & Friction Damper', ref: 'DMC-412-A-05-47-00-28A-283A-A / 00060', freqType: 'DUAL_Y', freqValue: { years: 5 }, freqText: '5 AÑOS' },
+            { id: 183, name: 'SPECIAL INSPECTION - Each 2500 Hours/10 Years Inspection Of Collective Stick Tube', ref: 'DMC-412-A-05-47-00-29A-283A-A / 00061', freqType: 'DUAL_H', freqValue: 2500, freqText: '2500 HRS' },
+            { id: '183a', name: 'SPECIAL INSPECTION - Each 2500 Hours/10 Years Inspection Of Collective Stick Tube', ref: 'DMC-412-A-05-47-00-29A-283A-A / 00061', freqType: 'DUAL_Y', freqValue: { years: 10 }, freqText: '10 AÑOS' },
+            { type: 'header', name: 'LUBRICACION' },
+            { id: 33, name: '33. LUBRICACION DE LA AERONAVE (VER NOTA)', ref: 'BHT-412-MM-1', freqType: 'HRS', freqValue: 100, freqText: '100 HRS' },
+            { id: 34, name: '34. CAMBIO DE ACEITE DE MOTOR #1 (VER NOTA)', ref: 'BHT-412-MM-1', freqType: 'HRS', freqValue: 200, freqText: '200 HRS' },
+            { id: 35, name: '35. CAMBIO DE ACEITE DE MOTOR #2 (VER NOTA)', ref: 'BHT-412-MM-1', freqType: 'HRS', freqValue: 200, freqText: '200 HRS' },
+            { id: 36, name: '36. CAMBIO DE ACEITE DE TRANSMISION PRINCIPAL (VER NOTA)', ref: 'BHT-412-MM-1', freqType: 'HRS', freqValue: 400, freqText: '400 HRS' },
+            { id: 37, name: '37. CAMBIO DE ACEITE DE CAJA DE 42 GRADOS (VER NOTA)', ref: 'BHT-412-MM-1', freqType: 'HRS', freqValue: 800, freqText: '800 HRS' },
+            { id: 38, name: '38. CAMBIO DE ACEITE DE CAJA DE 90 GRADOS (VER NOTA)', ref: 'BHT-412-MM-1', freqType: 'HRS', freqValue: 800, freqText: '800 HRS' },
+            { id: 142, name: 'LUBRICACION - Tail rotor trunnion bearings (two)', ref: 'MIL-G-81322', freqType: 'HRS', freqValue: 50, freqText: '50 HRS' },
+            { id: 143, name: 'LUBRICACION - Tail rotor crosshead bearing', ref: 'MIL-G-81322', freqType: 'HRS', freqValue: 50, freqText: '50 HRS' },
+            { id: 144, name: 'LUBRICACION - Drive link (two places per link)', ref: 'MIL-G-81322', freqType: 'HRS', freqValue: 25, freqText: '25 HRS' },
+            { id: 145, name: 'LUBRICACION - Rephasing lever bearings (four places)', ref: 'MIL-G-81322', freqType: 'HRS', freqValue: 25, freqText: '25 HRS' },
+            { id: 146, name: 'LUBRICACION - Swashplate inner ring trunnion rod ends (two) and collective lever trunnion rod end (one)', ref: 'MIL-G-81322', freqType: 'HRS', freqValue: 50, freqText: '50 HRS' },
+            { id: 147, name: 'LUBRICACION - Anti-torque flight control tube bearings', ref: 'MIL-G-81322', freqType: 'HRS', freqValue: 25, freqText: '25 HRS' },
+            { id: 148, name: 'LUBRICACION - Collective hub and sleeve (two fittings)', ref: 'MIL-G-81322', freqType: 'HRS', freqValue: 25, freqText: '25 HRS' },
+            { id: 149, name: 'LUBRICACION - Swashplate bearings (two)', ref: 'MIL-G-81322', freqType: 'HRS', freqValue: 100, freqText: '100 HRS' },
+            { id: 150, name: 'LUBRICACION - Cargo hook link assembly, clevis assembly, load bolt assembly', ref: 'BHT-212-SI-5', freqType: 'HRS', freqValue: 300, freqText: '300 HRS' },
+            { id: 151, name: 'LUBRICACION - Tail rotor hanger bearings (four)', ref: '412-A-12-01-00-00A-040A-A', freqType: 'DUAL_H', freqValue: 600, freqText: '600 HRS' },
+            { id: '151a', name: 'LUBRICACION - Tail rotor hanger bearings (four)', ref: '412-A-12-01-00-00A-040A-A', freqType: 'DUAL_M', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 152, name: 'LUBRICACION - Tail rotor driveshaft flex couplings', ref: '412-A-12-01-00-00A-040A-A', freqType: 'DUAL_H', freqValue: 600, freqText: '600 HRS' },
+            { id: '152a', name: 'LUBRICACION - Tail rotor driveshaft flex couplings', ref: '412-A-12-01-00-00A-040A-A', freqType: 'DUAL_M', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 153, name: 'LUBRICACION - Intermediate gearbox flex couplings', ref: '412-A-12-01-00-00A-040A-A', freqType: 'DUAL_H', freqValue: 600, freqText: '600 HRS' },
+            { id: '153a', name: 'LUBRICACION - Intermediate gearbox flex couplings', ref: '412-A-12-01-00-00A-040A-A', freqType: 'DUAL_M', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 154, name: 'LUBRICACION - Tail rotor gearbox flex coupling (one)', ref: '412-A-12-01-00-00A-040A-A', freqType: 'DUAL_H', freqValue: 600, freqText: '600 HRS' },
+            { id: '154a', name: 'LUBRICACION - Tail rotor gearbox flex coupling (one)', ref: '412-A-12-01-00-00A-040A-A', freqType: 'DUAL_M', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 155, name: 'LUBRICACION - Transmission tail rotor drive quill flex coupling (one)', ref: '412-A-12-01-00-00A-040A-A', freqType: 'DUAL_H', freqValue: 600, freqText: '600 HRS' },
+            { id: '155a', name: 'LUBRICACION - Transmission tail rotor drive quill flex coupling (one)', ref: '412-A-12-01-00-00A-040A-A', freqType: 'DUAL_M', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 156, name: 'LUBRICACION - Tail rotor crosshead splines', ref: '412-A-12-01-00-00A-040A-A', freqType: 'DUAL_H', freqValue: 600, freqText: '600 HRS' },
+            { id: '156a', name: 'LUBRICACION - Tail rotor crosshead splines', ref: '412-A-12-01-00-00A-040A-A', freqType: 'DUAL_M', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { type: 'header', name: 'MISCELLANEOUS' },
+            { id: 53, name: '53. BATERIA PRINCIPAL', ref: 'PER MFGR', freqType: 'DATE', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 54, name: '54. BATERIA DE STANDBY', ref: 'PER MFGR', freqType: 'DATE', freqValue: { months: 24 }, freqText: '24 MESES' },
+            { id: 55, name: '55. ELT', ref: 'PER MFGR', freqType: 'DATE', freqValue: { months: 60 }, freqText: '60 MESES' },
+            { id: 56, name: '56. PITOT STATIC SYSTEM', ref: 'FAR 91.411', freqType: 'DATE', freqValue: { months: 24 }, freqText: '24 MESES' },
+            { id: 57, name: '57. TRANSPONDER', ref: 'FAR 91.413', freqType: 'DATE', freqValue: { months: 24 }, freqText: '24 MESES' },
+            { id: 58, name: '58. COMPASS SWING', ref: 'LOCAL', freqType: 'DATE', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 59, name: '59. CINTURONES DE SEGURIDAD', ref: 'PER MFGR', freqType: 'DATE', freqValue: { months: 60 }, freqText: '60 MESES' },
+            { id: 60, name: '60. MANGUERAS DE MOTORES', ref: 'PER MFGR', freqType: 'DATE', freqValue: { months: 60 }, freqText: '60 MESES' },
+            { id: 61, name: '61. MANGUERAS HIDRAULICAS', ref: 'PER MFGR', freqType: 'DATE', freqValue: { months: 60 }, freqText: '60 MESES' },
+            { id: 62, name: '62. MANGUERAS DE COMBUSTIBLE', ref: 'PER MFGR', freqType: 'DATE', freqValue: { months: 60 }, freqText: '60 MESES' },
+            { id: 63, name: '63. MANGUERAS DE ACEITE', ref: 'PER MFGR', freqType: 'DATE', freqValue: { months: 60 }, freqText: '60 MESES' },
+            { id: 64, name: '64. BOTELAS DE FLOTADORES', ref: 'PER MFGR', freqType: 'DATE', freqValue: { months: 60 }, freqText: '60 MESES' },
+            { id: 65, name: '65. BOTELAS DE EXTINTORES DE FUEGO', ref: 'PER MFGR', freqType: 'DATE', freqValue: { months: 60 }, freqText: '60 MESES' },
+            { id: 66, name: '66. BALSA SALVAVIDAS', ref: 'PER MFGR', freqType: 'DATE', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 67, name: '67. CHALECOS SALVAVIDAS', ref: 'PER MFGR', freqType: 'DATE', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 68, name: '68. FILTROS DE COMBUSTIBLE', ref: 'BHT-412-MM-1', freqType: 'HRS', freqValue: 400, freqText: '400 HRS' },
+            { id: 69, name: '69. FILTROS HIDRAULICOS', ref: 'BHT-412-MM-1', freqType: 'HRS', freqValue: 800, freqText: '800 HRS' },
+            { id: 70, name: '70. FILTROS DE ACEITE DE MOTOR', ref: 'BHT-412-MM-1', freqType: 'HRS', freqValue: 200, freqText: '200 HRS' },
+            { id: 71, name: '71. FILTRO DE ACEITE DE TRANSMISION', ref: 'BHT-412-MM-1', freqType: 'HRS', freqValue: 400, freqText: '400 HRS' },
+            { id: 72, name: '72. FILTRO DE ACEITE DE CAJA 42 GRADOS', ref: 'BHT-412-MM-1', freqType: 'HRS', freqValue: 800, freqText: '800 HRS' },
+            { id: 73, name: '73. FILTRO DE ACEITE DE CAJA 90 GRADOS', ref: 'BHT-412-MM-1', freqType: 'HRS', freqValue: 800, freqText: '800 HRS' },
+            { type: 'header', name: 'DIRECTIVAS DE AERONAVEGABILIDAD' },
+            { id: 115, name: '115. AD 2001-11-08 (Elevator Horns)', ref: 'AD 2001-11-08', freqType: 'HRS', freqValue: 1200, freqText: '1200 HRS' },
+            { id: 116, name: '116. AD 2002-13-02 (T/R Blade Grips)', ref: 'AD 2002-13-02', freqType: 'HRS', freqValue: 600, freqText: '600 HRS' },
+            { id: 117, name: '117. AD 2005-12-08 (T/R Blade Assembly)', ref: 'AD 2005-12-08', freqType: 'HRS', freqValue: 25, freqText: '25 HRS' },
+            { id: 118, name: '118. AD 2006-16-06 (M/R Blade Grips)', ref: 'AD 2006-16-06', freqType: 'HRS', freqValue: 300, freqText: '300 HRS' },
+            { id: 119, name: '118. AD 2006-16-06 (M/R Blade Grips)', ref: 'AD 2006-16-06', freqType: 'DATE', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 120, name: '120. AD 2011-13-05 (T/R Pitch Horns)', ref: 'AD 2011-13-05', freqType: 'HRS', freqValue: 600, freqText: '600 HRS' },
+            { id: 121, name: '121. AD 2012-19-09 (Swashplate Support)', ref: 'AD 2012-19-09', freqType: 'HRS', freqValue: 1200, freqText: '1200 HRS' },
+            { id: 122, name: '121. AD 2012-19-09 (Swashplate Support)', ref: 'AD 2012-19-09', freqType: 'DATE', freqValue: { years: 5 }, freqText: '5 AÑOS' },
+            { id: 123, name: '123. AD 2013-04-03 (P/T Tube)', ref: 'AD 2013-04-03', freqType: 'HRS', freqValue: 1200, freqText: '1200 HRS' },
+            { id: 124, name: '123. AD 2013-04-03 (P/T Tube)', ref: 'AD 2013-04-03', freqType: 'DATE', freqValue: { years: 5 }, freqText: '5 AÑOS' },
+            { id: 125, name: '125. AD 2014-04-03 (Collective Lever)', ref: 'AD 2014-04-03', freqType: 'HRS', freqValue: 1200, freqText: '1200 HRS' },
+            { id: 126, name: '125. AD 2014-04-03 (Collective Lever)', ref: 'AD 2014-04-03', freqType: 'DATE', freqValue: { years: 5 }, freqText: '5 AÑOS' },
+            { id: 127, name: '127. AD 2014-16-05 (T/R Blades)', ref: 'AD 2014-16-05', freqType: 'HRS', freqValue: 25, freqText: '25 HRS' },
+            { id: 128, name: '128. AD 2014-25-51 (ELT)', ref: 'AD 2014-25-51', freqType: 'DATE', freqValue: { months: 12 }, freqText: '12 MESES' },
+            { id: 129, name: '129. AD 2015-08-05 (Cyclic Pitch Horns)', ref: 'AD 2015-08-05', freqType: 'HRS', freqValue: 1200, freqText: '1200 HRS' },
+            { id: 130, name: '129. AD 2015-08-05 (Cyclic Pitch Horns)', ref: 'AD 2015-08-05', freqType: 'DATE', freqValue: { years: 5 }, freqText: '5 AÑOS' },
+            { id: 131, name: '131. AD 2018-12-04 (T/R Crosshead)', ref: 'AD 2018-12-04', freqType: 'HRS', freqValue: 300, freqText: '300 HRS' },
+            { id: 132, name: '131. AD 2018-12-04 (T/R Crosshead)', ref: 'AD 2018-12-04', freqType: 'DATE', freqValue: { months: 24 }, freqText: '24 MESES' },
+            { type: 'header', name: 'BOLETINES DE SERVICIO' },
+            { id: 133, name: '133. ASB 412-92-69 (Fuel Cells)', ref: 'ASB 412-92-69', freqType: 'HRS', freqValue: 1200, freqText: '1200 HRS' },
+            { id: 134, name: '133. ASB 412-92-69 (Fuel Cells)', ref: 'ASB 412-92-69', freqType: 'DATE', freqValue: { years: 5 }, freqText: '5 AÑOS' },
+            { id: 135, name: '135. ASB 412-94-81 (Mast)', ref: 'ASB 412-94-81', freqType: 'HRS', freqValue: 1200, freqText: '1200 HRS' },
+            { id: 136, name: '135. ASB 412-94-81 (Mast)', ref: 'ASB 412-94-81', freqType: 'DATE', freqValue: { years: 5 }, freqText: '5 AÑOS' },
+            { id: 137, name: '137. ASB 412-96-93 (T/R Yoke)', ref: 'ASB 412-96-93', freqType: 'HRS', freqValue: 1200, freqText: '1200 HRS' },
+            { id: 138, name: '138. ASB 412-05-115 (M/R Yoke)', ref: 'ASB 412-05-115', freqType: 'HRS', freqValue: 2500, freqText: '2500 HRS' },
+            { id: 139, name: '138. ASB 412-05-115 (M/R Yoke)', ref: 'ASB 412-05-115', freqType: 'DATE', freqValue: { years: 5 }, freqText: '5 AÑOS' },
+            { id: 140, name: '140. ASB 412-05-117 (M/R Trunnion)', ref: 'ASB 412-05-117', freqType: 'HRS', freqValue: 2500, freqText: '2500 HRS' },
+            { id: 141, name: '141. ASB 412-CF-04-1 (Fuel Cells)', ref: 'ASB 412-CF-04-1', freqType: 'DATE', freqValue: { months: 12 }, freqText: '12 MESES' }
+        ];
+
+        let inspectionsListFromFirebase = [];
+        let currentUserRole = 'viewer';
+        let currentTotalHours = 0;
+        let inspectionsDataCache = {};
+        let editMode = false;
+        let activeInspectionForCalc = null;
+        let activeInspectionForDelete = null;
+        let inspectionsListRef = null;
+        let inspectionsDataRef = null;
+        let totalHoursRef = null;
+        let rolesRef = null;
+        let expiredListRef = null;
+        let database = null;
+        let auth = null;
+        let sharedProjectId = null;
+
+        const authContainer = document.getElementById('auth-container');
+        const mainAppContent = document.getElementById('main-app-content');
+        const inspectionsTableBody = document.querySelector('#inspections-table tbody');
+        const totalFlightHoursDisplay = document.getElementById('total-flight-hours');
+        
+        const addInspectionBtn = document.getElementById('add-inspection-btn');
+        const editModeToggle = document.getElementById('edit-mode-toggle');
+        const editActionsHeader = document.querySelector('.edit-actions-header');
+
+        const addEditModal = document.getElementById('add-edit-modal');
+        const addEditModalTitle = document.getElementById('add-edit-modal-title');
+        const addEditForm = document.getElementById('add-edit-form');
+        const inspectionIdInput = document.getElementById('inspection-id');
+        const inspectionNameInput = document.getElementById('inspection-name');
+        const inspectionRefInput = document.getElementById('inspection-ref');
+        const inspectionSectionSelect = document.getElementById('inspection-section');
+        const inspectionFreqTypeSelect = document.getElementById('inspection-freq-type');
+        const freqValueContainer = document.getElementById('freq-value-container');
+        const inspectionFreqValueInput = document.getElementById('inspection-freq-value');
+        const freqTextContainer = document.getElementById('freq-text-container');
+        const inspectionFreqTextInput = document.getElementById('inspection-freq-text');
+        const addEditModalCancel = document.getElementById('add-edit-modal-cancel');
+
+        const deleteModal = document.getElementById('delete-modal');
+        const deleteInspectionName = document.getElementById('delete-inspection-name');
+        const deleteModalCancel = document.getElementById('delete-modal-cancel');
+        const deleteModalConfirm = document.getElementById('delete-modal-confirm');
+
+        const calculationModal = document.getElementById('calculation-modal');
+        const calcModalTitle = document.getElementById('calc-modal-title');
+        const calcOptionReset = document.getElementById('calc-option-reset');
+        const calcOptionA = document.getElementById('calc-option-a');
+        const calcOptionB = document.getElementById('calc-option-b');
+        const calcOptionC = document.getElementById('calc-option-c');
+        const calcNextDueInput = document.getElementById('calc-next-due-input');
+        const calcOptionD = document.getElementById('calc-option-d');
+        const calcPastHoursInput = document.getElementById('calc-past-hours-input');
+        const calcModalClose = document.getElementById('calc-modal-close');
+
+        const dateModal = document.getElementById('date-modal');
+        const dateModalTitle = document.getElementById('date-modal-title');
+        const dateModalInput = document.getElementById('date-modal-input');
+        const dateModalSave = document.getElementById('date-modal-save');
+        const dateModalCancel = document.getElementById('date-modal-cancel');
+        const dateModalResetCycle = document.getElementById('date-modal-reset-cycle');
+
+        const trabajosBtn = document.getElementById('trabajos-btn');
+
+        async function initApp() {
+            sharedProjectId = "FAH-976-DATA";
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyASg6fgH-Lo6PXLnnw_p8LzHl-WNDiuHrU",
+                authDomain: "fah-901-ba5f4.firebaseapp.com",
+                databaseURL: "https://fah-901-ba5f4-default-rtdb.firebaseio.com",
+                projectId: "fah-901-ba5f4",
+                storageBucket: "fah-901-ba5f4.firebasestorage.app",
+                messagingSenderId: "630831139898",
+                appId: "1:630831139898:web:1771a16e1ad4bfb8ca3903",
+                measurementId: "G-WNZJ1VEH9H"
+            };
+
+            const app = initializeApp(firebaseConfig);
+            database = getDatabase(app);
+            auth = getAuth(app);
+            
+            inspectionsListRef = ref(database, `artifacts/${sharedProjectId}/public_data/inspections_list`);
+            inspectionsDataRef = ref(database, `artifacts/${sharedProjectId}/public_data/inspecciones_formato`);
+            totalHoursRef = ref(database, `artifacts/${sharedProjectId}/public_data/totales_generales/Overall`);
+            rolesRef = ref(database, 'user_roles');
+            expiredListRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos`);
+
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    authContainer.style.display = 'none';
+                    mainAppContent.classList.remove('hidden');
+                    const roleSnapshot = await get(ref(database, `user_roles/${user.uid}`));
+                    currentUserRole = roleSnapshot.val() || 'viewer';
+                    
+                    // Allow all logged in users to see edit buttons
+                    addInspectionBtn.classList.remove('hidden');
+                    editModeToggle.classList.remove('hidden');
+                    
+                    loadInspectionsListAndData();
+                } else {
+                    authContainer.style.display = 'block';
+                    mainAppContent.classList.add('hidden');
+                    addInspectionBtn.classList.add('hidden');
+                    editModeToggle.classList.add('hidden');
+                }
+            });
+
+            signInAnonymously(auth).catch((error) => {
+                console.error("Anonymous sign-in failed:", error);
+            });
+        }
+        
+        initApp();
+        
+        window.addEventListener('keydown', (e) => {
+             if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'e') {
+                 toggleEditMode();
+                 e.preventDefault(); // Evita que el navegador realice su acción por defecto
+             }
+        });
+        
+        editModeToggle.addEventListener('click', toggleEditMode);
+
+        async function loadInspectionsListAndData() {
+            const listSnapshot = await get(inspectionsListRef);
+            let firebaseData = listSnapshot.val();
+            let firebaseList = [];
+
+            // Firebase may return an object if keys are non-sequential, or an array.
+            if (firebaseData) {
+                if (Array.isArray(firebaseData)) {
+                    firebaseList = firebaseData;
+                } else if (typeof firebaseData === 'object') {
+                    // This assumes keys are numeric and sortable, which is how Firebase stores arrays.
+                    firebaseList = Object.keys(firebaseData)
+                        .sort((a, b) => parseInt(a) - parseInt(b))
+                        .map(key => firebaseData[key]);
+                }
+            }
+
+            // Check if the list in Firebase is effectively empty.
+            if (firebaseList.length === 0) {
+                console.log("Firebase inspection list is empty. Populating from local source.");
+                const initialInspections = inspectionsList;
+                
+                try {
+                    await set(inspectionsListRef, initialInspections);
+                    console.log("Firebase list populated successfully.");
+                } catch (error) {
+                    console.error("Failed to populate Firebase list:", error);
+                }
+            } else {
+                console.log("Firebase inspection list already exists. Using it as source of truth.");
+            }
+
+            // Now, set up the real-time listeners for data changes.
+            onValue(inspectionsListRef, (snapshot) => {
+                 let updatedData = snapshot.val();
+                 let updatedList = [];
+                 if (updatedData) {
+                     if (Array.isArray(updatedData)) {
+                         updatedList = updatedData;
+                     } else if (typeof updatedData === 'object') {
+                         updatedList = Object.keys(updatedData)
+                             .sort((a, b) => parseInt(a) - parseInt(b))
+                             .map(key => updatedData[key]);
+                     }
+                 }
+                 inspectionsListFromFirebase = updatedList.filter(i => i != null && typeof i === 'object');
+                 renderInspectionsTable();
+            });
+
+            onValue(totalHoursRef, (snapshot) => {
+                const totalHoursData = snapshot.val();
+                currentTotalHours = totalHoursData?.['AC HRS'] || 0;
+                totalFlightHoursDisplay.textContent = parseFloat(currentTotalHours).toFixed(2);
+                renderInspectionsTable();
+            });
+
+            onValue(inspectionsDataRef, (snapshot) => {
+                inspectionsDataCache = snapshot.val() || {};
+                renderInspectionsTable();
+            });
+        }
+        
+        function toggleEditMode() {
+            editMode = !editMode;
+            editActionsHeader.classList.toggle('hidden', !editMode);
+
+            if (editMode) {
+                editModeToggle.textContent = 'Desactivar Modo Edición';
+                editModeToggle.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                editModeToggle.classList.add('bg-red-600', 'hover:bg-red-700', 'active');
+            } else {
+                editModeToggle.textContent = 'Activar Modo Edición';
+                editModeToggle.classList.remove('bg-red-600', 'hover:bg-red-700', 'active');
+                editModeToggle.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+            }
+            renderInspectionsTable();
+        }
+
+        function calculateStatus(item, lastDone, totalHours) {
+            let status = 'VIGENTE';
+            
+            if (item.freqType.includes('H')) {
+                const lastDoneHours = parseFloat(lastDone) || 0;
+                if(lastDone !== ''){
+                    const nextDue = lastDoneHours + item.freqValue;
+                    if (totalHours >= nextDue) {
+                        status = 'VENCIDA';
+                    }
+                }
+            } else if (item.freqType.includes('DATE') || item.freqType.includes('DUAL')) {
+                if (lastDone && /^\d{4}-\d{2}-\d{2}$/.test(lastDone)) {
+                    const lastDoneDate = new Date(lastDone + "T00:00:00");
+                    const nextDueDate = new Date(lastDoneDate);
+                    if (item.freqValue.days) nextDueDate.setDate(nextDueDate.getDate() + item.freqValue.days);
+                    if (item.freqValue.months) nextDueDate.setMonth(nextDueDate.getMonth() + item.freqValue.months);
+                    if (item.freqValue.years) nextDueDate.setFullYear(nextDueDate.getFullYear() + item.freqValue.years);
+                    
+                    const today = new Date().toISOString().split('T')[0];
+                    if (today >= nextDueDate.toISOString().split('T')[0]) {
+                        status = 'VENCIDA';
+                    }
+                }
+            }
+            return status;
+        }
+
+        function getFinalStatus(item) {
+            const data = inspectionsDataCache[item.id] || {};
+            const lastDone = data.lastDone || '';
+            let status = calculateStatus(item, lastDone, currentTotalHours);
+
+            if (status !== 'VENCIDA') {
+                const linkedInspections = inspectionsListFromFirebase.filter(
+                    linkedItem => linkedItem.type !== 'header' && linkedItem.name === item.name && linkedItem.id !== item.id
+                );
+                
+                for (const linkedItem of linkedInspections) {
+                    const linkedData = inspectionsDataCache[linkedItem.id] || {};
+                    const linkedLastDone = linkedData.lastDone || '';
+                    if (calculateStatus(linkedItem, linkedLastDone, currentTotalHours) === 'VENCIDA') {
+                        status = 'VENCIDA';
+                        break;
+                    }
+                }
+            }
+            return status;
+        }
+
+        function renderInspectionsTable() {
+            const loadingRow = document.getElementById('loading-row');
+            if (inspectionsListFromFirebase.length > 0) {
+                if (loadingRow) loadingRow.remove();
+            }
+
+            inspectionsTableBody.innerHTML = '';
+            
+            inspectionsListFromFirebase.forEach(item => {
+                if (!item) return; // Safeguard against null items in the array
+                if (item.type === 'header') {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="${editMode ? 8 : 7}" class="p-2 section-header">${item.name}</td>`;
+                    inspectionsTableBody.appendChild(row);
+                    return;
+                }
+
+                const data = inspectionsDataCache[item.id] || {};
+                const lastDone = data.lastDone || '';
+                
+                const status = getFinalStatus(item);
+                let statusClass = status === 'VENCIDA' ? 'status-vencida' : 'status-vigente';
+                
+                let nextDue = '';
+                let remaining = '';
+                let remainingClass = '';
+
+                if (item.freqType.includes('H')) {
+                    const lastDoneHours = parseFloat(lastDone) || 0;
+                    if(lastDone !== ''){
+                        nextDue = (lastDoneHours + item.freqValue).toFixed(2);
+                        const remainingHours = nextDue - currentTotalHours;
+                        remaining = remainingHours.toFixed(2);
+                        if (remainingHours <= 0) remainingClass = 'remaining-danger';
+                        else if (remainingHours <= item.freqValue * 0.1) remainingClass = 'remaining-warn';
+                        else remainingClass = 'remaining-ok';
+                    }
+                } else if (item.freqType.includes('DATE') || item.freqType.includes('DUAL')) {
+                    if (lastDone && /^\d{4}-\d{2}-\d{2}$/.test(lastDone)) {
+                        const lastDoneDate = new Date(lastDone + "T00:00:00");
+                        const nextDueDate = new Date(lastDoneDate);
+                        if (item.freqValue.days) nextDueDate.setDate(nextDueDate.getDate() + item.freqValue.days);
+                        if (item.freqValue.months) nextDueDate.setMonth(nextDueDate.getMonth() + item.freqValue.months);
+                        if (item.freqValue.years) nextDueDate.setFullYear(nextDueDate.getFullYear() + item.freqValue.years);
+                        
+                        nextDue = nextDueDate.toISOString().split('T')[0];
+                        
+                        const today = new Date();
+                        today.setHours(0,0,0,0);
+                        const diffTime = nextDueDate - today;
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        remaining = `${diffDays} días`;
+
+                        if (diffDays <= 0) remainingClass = 'remaining-danger';
+                        else if (diffDays <= 30) remainingClass = 'remaining-warn';
+                        else remainingClass = 'remaining-ok';
+                    }
+                }
+
+                const row = document.createElement('tr');
+                const isEditable = item.freqType !== 'SPECIAL' && item.freqText !== 'ON CONDITION' && !item.freqText.includes('CYCLES') && !editMode;
+                const isConfigurable = editMode && item.type !== 'header';
+                
+                let actionIcon = '';
+                if (item.freqType.includes('H') && isEditable) {
+                    actionIcon = `<svg data-inspection-id="${item.id}" class="calc-icon cursor-pointer no-print ml-1 h-4 w-4 text-gray-500 hover:text-blue-600" title="Asistente de cálculo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" /></svg>`;
+                } else if ((item.freqType.includes('DATE') || item.freqType.includes('DUAL')) && isEditable) {
+                    actionIcon = `<svg data-inspection-id="${item.id}" class="date-reset-icon cursor-pointer no-print ml-1 h-4 w-4 text-gray-500 hover:text-green-600" title="Reiniciar ciclo con fecha" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/> </svg>`;
+                }
+                
+                const actionsHtml = isConfigurable ? `
+                    <td class="p-2 text-center align-middle no-print">
+                        <div class="flex flex-col gap-1">
+                            <button class="action-button edit-insp" data-id="${item.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.72-2.19l-4.57 4.57-1.42.36.36-1.42 4.57-4.57a1.5 1.5 0 012.12 2.12z" /></svg>
+                                Editar
+                            </button>
+                            <button class="action-button delete-insp" data-id="${item.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1H9a1 1 0 00-1 1v3m0 0H5.5a1 1 0 000 2h13a1 1 0 000-2H16" /></svg>
+                                Borrar
+                            </button>
+                        </div>
+                    </td>` : `<td class="p-2 text-center align-top read-only-cell hidden no-print"></td>`;
+                
+                row.innerHTML = `
+                    <td class="p-2 align-top">${item.name}</td>
+                    <td class="p-2 text-center align-top">${item.ref}</td>
+                    <td class="p-2 text-center align-top">${item.freqText}</td>
+                    <td class="p-2 text-center align-top font-semibold">
+                        <div class="flex items-center justify-center relative">
+                             <span class="w-full ${isEditable ? 'editable-cell' : 'read-only-cell'}" contenteditable="${isEditable}" data-inspection-id="${item.id}">${lastDone}</span>
+                             ${actionIcon}
+                        </div>
+                    </td>
+                    <td class="p-2 text-center align-top read-only-cell">${nextDue}</td>
+                    <td class="p-2 text-center align-top read-only-cell ${remainingClass}">${remaining}</td>
+                    <td class="p-2 text-center align-top ${statusClass}">${status}</td>
+                    ${actionsHtml}
+                `;
+                inspectionsTableBody.appendChild(row);
+            });
+
+            document.querySelectorAll('.editable-cell[contenteditable="true"]').forEach(span => {
+                span.addEventListener('blur', saveInspectionData);
+                span.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.target.blur();
+                    }
+                });
+            });
+
+            document.querySelectorAll('.calc-icon').forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    const id = e.currentTarget.dataset.inspectionId;
+                    const inspection = inspectionsListFromFirebase.find(insp => insp.id == id);
+                    if (inspection) {
+                        openCalculationModal(inspection);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.date-reset-icon').forEach(icon => {
+                icon.addEventListener('click', async (e) => { 
+                    const id = e.currentTarget.dataset.inspectionId;
+                    const inspection = inspectionsListFromFirebase.find(insp => insp.id == id);
+                    if (inspection) {
+                        openDateModal(inspection);
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.edit-insp').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    const inspection = inspectionsListFromFirebase.find(insp => String(insp.id) === String(id));
+                    if (inspection) {
+                        openAddEditModal(inspection);
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.delete-insp').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    const inspection = inspectionsListFromFirebase.find(insp => String(insp.id) === String(id));
+                    if (inspection) {
+                        openDeleteModal(inspection);
+                    }
+                });
+            });
+        }
+        
+        function saveInspectionData(event) {
+            const span = event.target;
+            const id = span.dataset.inspectionId;
+            let value = span.textContent.trim();
+
+            saveLastDoneValue(id, value)
+                .then(() => {
+                    console.log(`Datos guardados para ID ${id} y vinculados.`);
+                    renderInspectionsTable();
+                })
+                .catch(error => {
+                    console.error("Error al guardar:", error);
+                });
+        }
+
+        function openAddEditModal(inspection = null) {
+            // Populate sections dropdown
+            inspectionSectionSelect.innerHTML = '';
+            const sections = inspectionsListFromFirebase.filter(item => item.type === 'header');
+            sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section.name;
+                option.textContent = section.name;
+                inspectionSectionSelect.appendChild(option);
+            });
+
+            if (inspection) {
+                // Editing existing inspection
+                addEditModalTitle.textContent = "Editar Inspección";
+                inspectionIdInput.value = inspection.id;
+                inspectionNameInput.value = inspection.name;
+                inspectionRefInput.value = inspection.ref;
+
+                // Find and set the current section
+                const inspectionIndex = inspectionsListFromFirebase.findIndex(item => String(item.id) === String(inspection.id));
+                let currentSectionName = '';
+                if (inspectionIndex > -1) {
+                    for (let i = inspectionIndex - 1; i >= 0; i--) {
+                        if (inspectionsListFromFirebase[i].type === 'header') {
+                            currentSectionName = inspectionsListFromFirebase[i].name;
+                            break;
+                        }
+                    }
+                }
+                inspectionSectionSelect.value = currentSectionName;
+                inspectionSectionSelect.disabled = true; // Disable changing section on edit
+
+                inspectionFreqTypeSelect.value = inspection.freqType;
+                if (inspection.freqType.startsWith('HRS') || inspection.freqType.startsWith('DUAL_H') || inspection.freqType.includes('CYCLES')) {
+                    freqValueContainer.classList.remove('hidden');
+                    freqTextContainer.classList.add('hidden');
+                    inspectionFreqValueInput.value = inspection.freqValue;
+                } else if (inspection.freqType.startsWith('DATE') || inspection.freqType.startsWith('DUAL')) {
+                     freqValueContainer.classList.remove('hidden');
+                     freqTextContainer.classList.remove('hidden');
+                     if(inspection.freqValue && typeof inspection.freqValue === 'object') {
+                          if(inspection.freqValue.days) inspectionFreqValueInput.value = inspection.freqValue.days;
+                          if(inspection.freqValue.months) inspectionFreqValueInput.value = inspection.freqValue.months;
+                          if(inspection.freqValue.years) inspectionFreqValueInput.value = inspection.freqValue.years;
+                     }
+                     inspectionFreqTextInput.value = inspection.freqText;
+                } else if (inspection.freqType === 'SPECIAL' || inspection.freqType === 'NONE' ) {
+                     freqValueContainer.classList.add('hidden');
+                     freqTextContainer.classList.remove('hidden');
+                     inspectionFreqTextInput.value = inspection.freqText;
+                } else {
+                     freqValueContainer.classList.add('hidden');
+                     freqTextContainer.classList.add('hidden');
+                }
+            } else {
+                // Adding new inspection
+                addEditModalTitle.textContent = "Nueva Inspección";
+                addEditForm.reset();
+                inspectionIdInput.value = '';
+                inspectionSectionSelect.disabled = false; // Enable section selection
+                freqValueContainer.classList.add('hidden');
+                freqTextContainer.classList.add('hidden');
+            }
+            addEditModal.style.display = 'flex';
+        }
+        
+        function closeAddEditModal() {
+            addEditModal.style.display = 'none';
+        }
+
+        async function saveInspection(event) {
+            event.preventDefault();
+            
+            const isEditing = !!inspectionIdInput.value;
+            let id;
+
+            if (isEditing) {
+                id = inspectionIdInput.value;
+            } else {
+                const maxId = inspectionsListFromFirebase
+                    .reduce((max, item) => {
+                        const numId = parseInt(String(item.id));
+                        return !isNaN(numId) && numId > max ? numId : max;
+                    }, 0);
+                id = maxId + 1;
+            }
+
+            const name = inspectionNameInput.value.trim();
+            const referenceValue = inspectionRefInput.value.trim();
+            const freqType = inspectionFreqTypeSelect.value;
+            let freqValue = null;
+            let freqText = inspectionFreqTextInput.value.trim();
+            const hasValueInput = !freqValueContainer.classList.contains('hidden');
+            const valueFromInput = parseFloat(inspectionFreqValueInput.value);
+            
+            // FIX: When frequency type changes to one that doesn't use the text input (like HRS),
+            // its old value can persist. We reset it here to ensure it's regenerated correctly.
+            if (freqType.startsWith('HRS') || freqType.includes('CYCLES')) {
+                freqText = '';
+            }
+
+            if (hasValueInput && !isNaN(valueFromInput)) {
+                if (freqType === 'HRS' || freqType === 'DUAL_H' || freqType.includes('CYCLES')) {
+                    freqValue = valueFromInput;
+                    if (!freqText) freqText = `${freqValue} HRS`;
+                } else if (freqType === 'DATE' || freqType === 'DUAL_D') {
+                    freqValue = { days: valueFromInput };
+                    if (!freqText) freqText = `${valueFromInput} DIAS`;
+                } else if (freqType === 'DUAL_M') {
+                    freqValue = { months: valueFromInput };
+                    if (!freqText) freqText = `${valueFromInput} MESES`;
+                } else if (freqType === 'DUAL_Y') {
+                    freqValue = { years: valueFromInput };
+                    if (!freqText) freqText = `${valueFromInput} AÑOS`;
+                }
+            }
+
+            if (!name || (freqType !== 'SPECIAL' && freqType !== 'NONE' && freqValue === null && !freqText)) {
+                console.error("Error de validación: El nombre y la frecuencia son obligatorios. Asegúrese de que el valor de la frecuencia sea un número válido.");
+                return;
+            }
+            
+            const newInspection = { id: String(id), name, ref: referenceValue, freqType, freqValue, freqText };
+            
+            const inspectionRef = ref(database, `artifacts/${sharedProjectId}/public_data/inspections_list`);
+
+            let updatedList;
+            if (isEditing) {
+                const existingIndex = inspectionsListFromFirebase.findIndex(item => String(item.id) === String(id));
+                updatedList = [...inspectionsListFromFirebase];
+                if (existingIndex !== -1) {
+                    updatedList[existingIndex] = newInspection;
+                }
+            } else {
+                const selectedSectionName = inspectionSectionSelect.value;
+                const sectionHeaderIndex = inspectionsListFromFirebase.findIndex(item => item.type === 'header' && item.name === selectedSectionName);
+                
+                let insertionIndex = inspectionsListFromFirebase.length;
+                if (sectionHeaderIndex !== -1) {
+                    let nextSectionHeaderIndex = inspectionsListFromFirebase.findIndex((item, index) => index > sectionHeaderIndex && item.type === 'header');
+                    if (nextSectionHeaderIndex !== -1) {
+                        insertionIndex = nextSectionHeaderIndex;
+                    }
+                }
+                
+                updatedList = [...inspectionsListFromFirebase];
+                updatedList.splice(insertionIndex, 0, newInspection);
+            }
+            
+            try {
+                await set(inspectionRef, updatedList);
+                closeAddEditModal();
+            } catch (error) {
+                console.error("Error al guardar la inspección:", error);
+            }
+        }
+        
+        function openDeleteModal(inspection) {
+            activeInspectionForDelete = inspection;
+            deleteInspectionName.textContent = `"${inspection.name}"`;
+            deleteModal.style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            deleteModal.style.display = 'none';
+            activeInspectionForDelete = null;
+        }
+
+        async function deleteInspection() {
+            if (!activeInspectionForDelete) return;
+
+            const updatedList = inspectionsListFromFirebase.filter(item => String(item.id) !== String(activeInspectionForDelete.id));
+            const inspectionsListRef = ref(database, `artifacts/${sharedProjectId}/public_data/inspections_list`);
+            
+            try {
+                await set(inspectionsListRef, updatedList);
+                closeDeleteModal();
+            } catch (error) {
+                console.error("Error al eliminar la inspección:", error);
+            }
+        }
+
+        function openCalculationModal(inspection) {
+            activeInspectionForCalc = inspection;
+            calcModalTitle.textContent = `Asistente: ${inspection.name}`;
+            calcNextDueInput.value = '';
+            calcPastHoursInput.value = '';
+            
+            calculationModal.style.display = 'flex';
+        }
+
+        function closeCalculationModal() {
+            calculationModal.style.display = 'none';
+            activeInspectionForCalc = null;
+        }
+        
+        function openDateModal(inspection) {
+            activeInspectionForCalc = inspection;
+            dateModalTitle.textContent = `Registrar Fecha para: ${inspection.name}`;
+            dateModalInput.value = new Date().toISOString().split('T')[0];
+
+            dateModal.style.display = 'flex';
+        }
+
+        function closeDateModal() {
+            dateModal.style.display = 'none';
+            activeInspectionForCalc = null;
+        }
+
+        function handleCalculation(option) {
+            if (!activeInspectionForCalc) return;
+
+            const inspectionToProcess = activeInspectionForCalc; // Capture the object before it's nulled
+            let calculatedValue;
+            const freq = inspectionToProcess.freqValue;
+
+            if (option === 'RESET') {
+                calculatedValue = currentTotalHours;
+            } else if (option === 'A') {
+                calculatedValue = currentTotalHours - freq;
+            } else if (option === 'B') {
+                calculatedValue = currentTotalHours - (freq / 2);
+            } else if (option === 'C') {
+                const nextDue = parseFloat(calcNextDueInput.value);
+                if (isNaN(nextDue)) {
+                    console.error("Por favor, introduce un valor numérico válido.");
+                    closeCalculationModal(); // Close modal on error
+                    return;
+                }
+                calculatedValue = nextDue - freq;
+            } else if (option === 'D') {
+                const pastHours = parseFloat(calcPastHoursInput.value);
+                if (isNaN(pastHours)) {
+                    console.error("Por favor, introduce un valor numérico válido para las horas pasadas.");
+                    closeCalculationModal(); // Close modal on error
+                    return;
+                }
+                calculatedValue = pastHours;
+            }
+            
+            closeCalculationModal();
+            
+            if (calculatedValue !== undefined) {
+                const finalValue = calculatedValue.toFixed(2);
+                saveLastDoneValue(inspectionToProcess.id, finalValue)
+                    .then(() => {
+                        console.log(`Valor calculado guardado para ${inspectionToProcess.id} y vinculados: ${finalValue}`);
+                        renderInspectionsTable();
+                    })
+                    .catch(err => console.error("Error al guardar valor calculado:", err));
+            }
+        }
+        
+        async function saveLastDoneValue(id, value) {
+            const triggerInspection = inspectionsListFromFirebase.find(item => String(item.id) === String(id));
+            if (!triggerInspection) {
+                console.error(`Inspection with ID ${id} not found.`);
+                return;
+            }
+
+            const inspectionName = triggerInspection.name;
+            const isValueDate = /^\d{4}-\d{2}-\d{2}$/.test(value);
+            const isValueHours = !isNaN(parseFloat(value)) && !isValueDate;
+
+            const linkedInspections = inspectionsListFromFirebase.filter(item => item.name === inspectionName);
+            const promises = [];
+
+            for (const linkedInspection of linkedInspections) {
+                const linkedId = linkedInspection.id;
+                let finalValue = value; 
+
+                const isLinkedDateBased = linkedInspection.freqType.includes('DATE') || linkedInspection.freqType.includes('DUAL_M') || linkedInspection.freqType.includes('DUAL_Y') || linkedInspection.freqType.includes('DUAL_D');
+                const isLinkedHoursBased = linkedInspection.freqType.includes('HRS') || linkedInspection.freqType.includes('DUAL_H');
+
+                if (isValueHours && isLinkedDateBased) {
+                    finalValue = new Date().toISOString().split('T')[0];
+                } else if (isValueDate && isLinkedHoursBased) {
+                    finalValue = currentTotalHours.toFixed(2);
+                }
+                
+                if (!inspectionsDataCache[linkedId]) {
+                    inspectionsDataCache[linkedId] = {};
+                }
+                inspectionsDataCache[linkedId].lastDone = finalValue;
+
+                const inspectionDataRef = ref(database, `artifacts/${sharedProjectId}/public_data/inspecciones_formato/${linkedId}`);
+                promises.push(set(inspectionDataRef, { lastDone: finalValue }));
+            }
+
+            return Promise.all(promises);
+        }
+
+        // Event Listeners for Modals
+        calcOptionReset.addEventListener('click', () => handleCalculation('RESET'));
+        calcOptionA.addEventListener('click', () => handleCalculation('A'));
+        calcOptionB.addEventListener('click', () => handleCalculation('B'));
+        calcOptionC.addEventListener('click', () => handleCalculation('C'));
+        calcOptionD.addEventListener('click', () => handleCalculation('D'));
+        calcModalClose.addEventListener('click', closeCalculationModal);
+        
+        dateModalResetCycle.addEventListener('click', () => {
+             if (!activeInspectionForCalc) return;
+            const inspectionToProcess = activeInspectionForCalc;
+            const today = new Date().toISOString().split('T')[0];
+            
+            closeDateModal();
+
+            saveLastDoneValue(inspectionToProcess.id, today)
+                .then(() => {
+                    console.log(`Ciclo reiniciado con fecha para ${inspectionToProcess.id} y vinculados: ${today}`);
+                    renderInspectionsTable();
+                })
+                .catch(err => console.error("Error al reiniciar ciclo con fecha:", err));
+        });
+
+        dateModalSave.addEventListener('click', () => {
+            if (!activeInspectionForCalc) return;
+            
+            const inspectionToProcess = activeInspectionForCalc; // Capture object
+            const dateValue = dateModalInput.value;
+            
+            closeDateModal();
+
+            if (dateValue) {
+                saveLastDoneValue(inspectionToProcess.id, dateValue)
+                    .then(() => {
+                        console.log(`Fecha guardada para ${inspectionToProcess.id} y vinculados: ${dateValue}`);
+                        renderInspectionsTable();
+                    })
+                    .catch(err => console.error("Error al guardar fecha:", err));
+            }
+        });
+        dateModalCancel.addEventListener('click', closeDateModal);
+
+        addInspectionBtn.addEventListener('click', () => openAddEditModal());
+        addEditModalCancel.addEventListener('click', closeAddEditModal);
+        addEditForm.addEventListener('submit', saveInspection);
+        deleteModalConfirm.addEventListener('click', deleteInspection);
+        deleteModalCancel.addEventListener('click', closeDeleteModal);
+        
+        inspectionFreqTypeSelect.addEventListener('change', (e) => {
+            const type = e.target.value;
+            freqValueContainer.classList.add('hidden');
+            freqTextContainer.classList.add('hidden');
+            
+            if (type.startsWith('HRS') || type.includes('CYCLES')) {
+                freqValueContainer.classList.remove('hidden');
+                freqTextContainer.classList.add('hidden');
+            } else if (type.startsWith('DATE') || type.startsWith('DUAL')) {
+                freqValueContainer.classList.remove('hidden');
+                freqTextContainer.classList.remove('hidden');
+            } else if (type === 'SPECIAL' || type === 'NONE') {
+                freqValueContainer.classList.add('hidden');
+                freqTextContainer.classList.remove('hidden');
+            }
+        });
+
+        async function goToWorkOrderPage() {
+            const expiredInspections = inspectionsListFromFirebase.filter(item => {
+                if (item.type === 'header' || item.freqType === 'SPECIAL') {
+                    return false;
+                }
+                return getFinalStatus(item) === 'VENCIDA';
+            }).map(item => {
+                const data = inspectionsDataCache[item.id] || {};
+                return {
+                    id: item.id,
+                    name: item.name,
+                    ref: item.ref,
+                    freqText: item.freqText,
+                    lastDone: data.lastDone || ''
+                };
+            });
+            
+            const expiredRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos`);
+            try {
+                 await set(expiredRef, expiredInspections);
+                 console.log("Lista de trabajos vencidos actualizada correctamente.");
+             } catch (error) {
+                 console.error("Error al guardar los trabajos vencidos en Firebase:", error);
+             }
+            window.location.href = 'trabajos-efectuarse.html';
+        }
+
+        trabajosBtn.addEventListener('click', goToWorkOrderPage);
+    </script>
+</body>
+</html>
+"
+

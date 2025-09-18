@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control Unificado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Librerías para generar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Custom styles for the new layout */
+        .sidebar-link {
+            display: block;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            color: #d1d5db; /* text-gray-300 */
+        }
+        .sidebar-link:hover {
+            background-color: #374151; /* bg-gray-700 */
+            color: white;
+        }
+        .sidebar-link.active {
+            background-color: #1d4ed8; /* bg-blue-700 */
+            color: white;
+            font-weight: 600;
+        }
+        .modal.hidden { display: none; }
+        /* Estilos para el contenedor del PDF (oculto) */
+        #pdf-container {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            width: 794px; /* A4 portrait width in pixels approx */
+            font-family: Arial, sans-serif;
+            color: #000;
+        }
+        #edit-mode-indicator {
+            transition: opacity 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="flex bg-gray-100 min-h-screen">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-gray-800 text-white p-4 flex flex-col">
+        <div class="flex items-center gap-3 mb-8">
+            <svg class="w-8 h-8 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0.0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-1.007 1.11-1.227l.554-.221a.75.75 0 01.442 0l.554.221a1.25 1.25 0 001.11 1.227.75.75 0 01.75.75v.542a.75.75 0 01-.75.75c-1.259 0-2.274.55-3.045 1.343a.75.75 0 01-1.06 0c-.77-.792-1.786-1.342-3.045-1.342a.75.75 0 01-.75-.75v-.542a.75.75 0 01.75-.75c.55-.22 1.02-.685 1.11-1.227zM6.223 9.21c.217-.584.66-1.117 1.223-1.393l.554-.221a.75.75 0 01.442 0l.554.221c.563.276 1.006.81 1.223 1.393.17.457.258.95.258 1.455a4.502 4.502 0 01-8.998-.002c0-.504.088-.998.258-1.455zM12 12.75a.75.75 0 00-1.5 0v2.015a.75.75 0 00.18.484l1.125 1.125a.75.75 0 001.06-1.06L12 14.265v-1.515z"/>
+                <path fill-rule="evenodd" d="M1.5 4.5a3 3 0 013-3h15a3 3 0 013 3v15a3 3 0 01-3 3h-15a3 3 0 01-3-3v-15zm3 .75a.75.75 0 00-.75.75v13.5a.75.75 0 00.75.75h13.5a.75.75 0 00.75-.75v-13.5a.75.75 0 00-.75-.75h-13.5z" clip-rule="evenodd"/>
+            </svg>
+            <h2 class="text-xl font-bold">Panel Unificado</h2>
+        </div>
+        <nav id="filters" class="flex flex-col gap-1">
+            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 px-4">Talleres</h3>
+            <a href="#" class="sidebar-link active" data-filter="Todos">Todos los Talleres</a>
+            <!-- Filter links will be dynamically inserted here -->
+        </nav>
+        <div class="mt-auto">
+             <button onclick="location.reload()" class="w-full sidebar-link text-center bg-gray-700 hover:bg-gray-600">Recargar Datos</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 sm:p-8 overflow-y-auto">
+        <div class="max-w-7xl mx-auto space-y-8">
+            <!-- Sección para Inspecciones Pendientes -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h1 class="text-2xl font-bold mb-4 text-orange-600">Inspecciones Vencidas Pendientes (Todos)</h1>
+                <p class="text-gray-600 mb-6">Estas son las inspecciones vencidas de todas las aeronaves que necesitan una orden de trabajo.</p>
+                <div id="pending-inspections-list" class="space-y-3">
+                    <p class="text-center text-gray-500 py-4">Cargando inspecciones pendientes...</p>
+                </div>
+            </div>
+
+            <!-- Sección para Órdenes de Trabajo Generadas -->
+            <div class="bg-white rounded-lg shadow-lg p-6 relative">
+                 <div id="edit-mode-indicator" class="hidden absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full">Modo Edición Activado</div>
+                <h1 class="text-2xl font-bold mb-4 text-gray-800">Órdenes de Trabajo Generadas (Todos)</h1>
+                <p id="content-description" class="text-gray-600 mb-8">Mostrando todas las órdenes de trabajo asignadas para todas las aeronaves.</p>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border">
+                        <thead class="bg-gray-800 text-white">
+                            <tr>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">N° de OT</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Aeronave</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Discrepancia</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Taller Asignado</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Fecha Creación</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Estado</th>
+                                <th class="text-center py-3 px-4 uppercase font-semibold text-sm">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="work-orders-table" class="text-gray-700">
+                            <tr id="loading-row"><td colspan="7" class="text-center p-8 text-gray-500">Cargando órdenes de trabajo...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals (no changes needed here) -->
+    <!-- ... Contenedor PDF, Modal Taller, Modal Eliminar, Modal Completar, Modal Feedback ... -->
+    <div id="pdf-container"></div>
+    <div id="workshop-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h3 id="workshop-modal-title" class="text-xl font-bold mb-4">Asignar Taller</h3>
+            <p class="mb-4">Selecciona el taller que se encargará de esta orden de trabajo.</p>
+            <select id="workshop-select" class="w-full border border-gray-300 rounded-md p-2 mb-6"></select>
+            <div class="flex justify-end gap-4">
+                <button id="cancel-workshop" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">Cancelar</button>
+                <button id="confirm-workshop" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Confirmar</button>
+            </div>
+        </div>
+    </div>
+    <div id="delete-confirm-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md text-center">
+             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100"><svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg></div>
+            <h3 class="text-xl font-bold mt-4 mb-2">Confirmar Eliminación</h3><p class="mb-6 text-gray-600">¿Estás seguro de que quieres eliminar esta orden de trabajo? Esta acción no se puede deshacer.</p>
+             <div class="flex justify-center gap-4"><button id="cancel-delete" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded">Cancelar</button><button id="confirm-delete" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded">Eliminar</button></div>
+        </div>
+    </div>
+    <div id="complete-reminder-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md text-center">
+             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100"><svg class="h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg></div>
+            <h3 class="text-xl font-bold mt-4 mb-2">Recordatorio Importante</h3><p class="mb-6 text-gray-600">No olvides llevar el reporte de trabajo a Estadistica. Muchas gracias.</p>
+             <div class="flex justify-center gap-4"><button id="cancel-complete" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded">Cancelar</button><button id="confirm-complete" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded">Confirmar y Completar</button></div>
+        </div>
+    </div>
+    <div id="feedback-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md text-center">
+            <div id="feedback-icon-container" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100"></div>
+            <h3 id="feedback-title" class="text-xl font-bold mt-4 mb-2">Error</h3><p id="feedback-message" class="mb-6 text-gray-600">Hubo un error.</p>
+            <button id="close-feedback-modal" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded">Cerrar</button>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getDatabase, ref, onValue, set, get, update, remove } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+        import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+        // --- CAMBIO CLAVE: Usa tu propia configuración de Firebase aquí si es diferente ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyASg6fgH-Lo6PXLnnw_p8LzHl-WNDiuHrU",
+            authDomain: "fah-901-ba5f4.firebaseapp.com",
+            databaseURL: "https://fah-901-ba5f4-default-rtdb.firebaseio.com",
+            projectId: "fah-901-ba5f4",
+            storageBucket: "fah-901-ba5f4.firebasestorage.app",
+            messagingSenderId: "630831139898",
+            appId: "1:63083113988:web:1771a16e1ad4bfb8ca3903"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+        
+        // --- CAMBIO CLAVE: Lista de IDs de helicópteros ---
+        const helicopterIds = ["FAH-980", "FAH-979", "FAH-945", "FAH-990", "FAH-991", "FAH-976"]; // Agrega o quita según necesites
+
+        const { jsPDF } = window.jspdf;
+
+        const workshops = ["RADIO", "INSTRUMENTOS", "HYD", "HELICES", "ELECTRICIDAD", "BATERIA", "MOTORES", "ESTRUCTURAS", "ARMAMENTO", "HELICOPTEROS"];
+        // ... (resto de las declaraciones de variables del DOM)
+        const filtersContainer = document.getElementById('filters');
+        const contentDescription = document.getElementById('content-description');
+        const workOrdersTable = document.getElementById('work-orders-table');
+        const pendingInspectionsContainer = document.getElementById('pending-inspections-list');
+        const workshopModal = document.getElementById('workshop-modal');
+        const workshopModalTitle = document.getElementById('workshop-modal-title');
+        const workshopSelect = document.getElementById('workshop-select');
+        const confirmWorkshopBtn = document.getElementById('confirm-workshop');
+        const feedbackModal = document.getElementById('feedback-modal');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const feedbackIconContainer = document.getElementById('feedback-icon-container');
+        const closeFeedbackModalBtn = document.getElementById('close-feedback-modal');
+        const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete');
+        const cancelDeleteBtn = document.getElementById('cancel-delete');
+        const completeReminderModal = document.getElementById('complete-reminder-modal');
+        const confirmCompleteBtn = document.getElementById('confirm-complete');
+        const cancelCompleteBtn = document.getElementById('cancel-complete');
+        const editModeIndicator = document.getElementById('edit-mode-indicator');
+
+        let currentInspectionId = null;
+        let currentWorkOrderId = null;
+        let currentHelicopterId = null; // Para saber en qué DB actuar
+        let editMode = false;
+        let isEditAction = false;
+        
+        // --- CAMBIO CLAVE: Almacenamiento de datos de todas las fuentes ---
+        let dataStore = {
+            workOrders: {},
+            expiredInspections: {}
+        };
+        let currentFilter = 'Todos';
+
+        function showFeedback(message, type = 'error') { /* ... (sin cambios) ... */
+             feedbackMessage.textContent = message;
+            if (type === 'error') {
+                feedbackTitle.textContent = 'Error';
+                feedbackIconContainer.innerHTML = `<svg class="h-6 w-6 text-red-600" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+                feedbackIconContainer.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100';
+                closeFeedbackModalBtn.className = 'bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded';
+            } else {
+                feedbackTitle.textContent = 'Éxito';
+                feedbackIconContainer.innerHTML = `<svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>`;
+                feedbackIconContainer.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100';
+                 closeFeedbackModalBtn.className = 'bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded';
+            }
+            feedbackModal.classList.remove('hidden');
+        }
+        closeFeedbackModalBtn.addEventListener('click', () => feedbackModal.classList.add('hidden'));
+
+        async function main() {
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                showFeedback("No se pudo autenticar con el servicio. La aplicación no funcionará correctamente.");
+                return;
+            }
+
+            // ... (código de configuración de talleres y filtros, sin cambios)
+            workshopSelect.innerHTML = '<option value="TODOS">TODOS LOS TALLERES</option>';
+            workshops.forEach(workshop => {
+                const option = document.createElement('option');
+                option.value = workshop;
+                option.textContent = workshop;
+                workshopSelect.appendChild(option);
+            });
+            workshops.forEach(workshop => {
+                const link = document.createElement('a');
+                link.href = "#";
+                link.className = "sidebar-link";
+                link.dataset.filter = workshop;
+                link.textContent = workshop;
+                filtersContainer.appendChild(link);
+            });
+
+            // --- CAMBIO CLAVE: Escuchar datos de todos los helicópteros ---
+            helicopterIds.forEach(heliId => {
+                const dbName = `${heliId}-DATA`;
+                const workOrdersRef = ref(database, `artifacts/${dbName}/public_data/ordenes_trabajo`);
+                const expiredInspectionsRef = ref(database, `artifacts/${dbName}/public_data/trabajos_vencidos`);
+
+                onValue(workOrdersRef, (snapshot) => {
+                    const data = snapshot.val() || {};
+                    // "Etiquetar" cada orden con su helicóptero de origen
+                    const taggedData = Object.values(data).map(wo => ({...wo, helicopterId: heliId}));
+                    dataStore.workOrders[heliId] = taggedData;
+                    renderContent();
+                }, (error) => showFeedback(`Error cargando OT de ${heliId}.`));
+
+                onValue(expiredInspectionsRef, (snapshot) => {
+                    const data = snapshot.val() || [];
+                     // "Etiquetar" cada inspección con su helicóptero de origen
+                    const taggedData = data.map(insp => ({...insp, helicopterId: heliId}));
+                    dataStore.expiredInspections[heliId] = taggedData;
+                    renderContent();
+                }, (error) => showFeedback(`Error cargando inspecciones de ${heliId}.`));
+            });
+        }
+        
+        function flattenData(dataObject) {
+            return Object.values(dataObject).flat();
+        }
+
+        function renderContent() {
+            const allWorkOrders = flattenData(dataStore.workOrders);
+            const allExpiredInspections = flattenData(dataStore.expiredInspections);
+
+            const generatedInspectionIds = new Set(allWorkOrders.map(wo => `${wo.helicopterId}-${wo.inspectionId}`));
+            const pendingInspections = allExpiredInspections.filter(insp => !generatedInspectionIds.has(`${insp.helicopterId}-${insp.id}`));
+            
+            renderPendingInspections(pendingInspections);
+            renderTable(allWorkOrders);
+        }
+
+        function renderPendingInspections(pending) {
+            pendingInspectionsContainer.innerHTML = '';
+            if (pending.length === 0) {
+                pendingInspectionsContainer.innerHTML = `<p class="text-center text-gray-500 py-4">No hay inspecciones pendientes por generar.</p>`;
+                return;
+            }
+             // Ordenar por helicóptero
+            pending.sort((a,b) => a.helicopterId.localeCompare(b.helicopterId));
+            pending.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg border';
+                div.innerHTML = `
+                    <div>
+                        <p class="font-semibold text-gray-800">${item.name} <span class="text-xs font-bold text-white bg-gray-500 px-2 py-0.5 rounded-full">${item.helicopterId}</span></p>
+                        <p class="text-sm text-gray-500">Ref: ${item.ref}</p>
+                    </div>
+                    <button data-inspection-id="${item.id}" data-helicopter-id="${item.helicopterId}" class="generate-ot-btn bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">Generar OT</button>
+                `;
+                pendingInspectionsContainer.appendChild(div);
+            });
+            document.querySelectorAll('.generate-ot-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    currentInspectionId = e.currentTarget.dataset.inspectionId;
+                    currentHelicopterId = e.currentTarget.dataset.helicopterId;
+                    isEditAction = false;
+                    workshopModalTitle.textContent = `Generar OT para ${currentHelicopterId}`;
+                    confirmWorkshopBtn.textContent = 'Confirmar y Generar';
+                    workshopSelect.querySelector('option[value="TODOS"]').disabled = false;
+                    workshopModal.classList.remove('hidden');
+                });
+            });
+        }
+        
+        function getStatusBadge(status) { /* ... (sin cambios) ... */ 
+            let colorClasses = 'bg-orange-100 text-orange-800'; // Abierta
+                if (status === 'Recibida') {
+                    colorClasses = 'bg-yellow-100 text-yellow-800';
+                } else if (status === 'En Progreso') {
+                    colorClasses = 'bg-blue-100 text-blue-800';
+                } else if (status === 'Completada') {
+                    colorClasses = 'bg-green-100 text-green-800';
+                }
+                return `<span class="${colorClasses} text-sm font-medium mr-2 px-2.5 py-0.5 rounded-full">${status}</span>`;
+        }
+
+        function renderTable(allWorkOrders) {
+            workOrdersTable.innerHTML = '';
+            const sortedWorkOrders = [...allWorkOrders].sort((a, b) => {
+                // Primero por ID de OT, luego por ID de helicóptero si las OT son iguales
+                const otCompare = b.workOrderId.localeCompare(a.workOrderId);
+                if (otCompare !== 0) return otCompare;
+                return a.helicopterId.localeCompare(b.helicopterId);
+            });
+
+            const filteredData = currentFilter === 'Todos' 
+                ? sortedWorkOrders
+                : sortedWorkOrders.filter(wo => wo.taller === currentFilter);
+
+            if (filteredData.length === 0) {
+                workOrdersTable.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-gray-500">No hay órdenes de trabajo para mostrar.</td></tr>`;
+                return;
+            }
+
+            filteredData.forEach(wo => {
+                const row = document.createElement('tr');
+                row.className = "border-b hover:bg-gray-50";
+                
+                const status = wo.status || 'Abierta';
+                let statusChangeButton = '';
+                // --- CAMBIO CLAVE: Añadir data-helicopter-id a los botones ---
+                if (status === 'Abierta') {
+                    statusChangeButton = `<button data-wo-id="${wo.workOrderId}" data-helicopter-id="${wo.helicopterId}" data-new-status="Recibida" class="change-status-btn text-white bg-yellow-500 hover:bg-yellow-600 font-medium rounded-lg text-sm px-3 py-1">Recibir</button>`;
+                } else if (status === 'Recibida') {
+                    statusChangeButton = `<button data-wo-id="${wo.workOrderId}" data-helicopter-id="${wo.helicopterId}" data-new-status="En Progreso" class="change-status-btn text-white bg-blue-500 hover:bg-blue-600 font-medium rounded-lg text-sm px-3 py-1">Iniciar</button>`;
+                } else if (status === 'En Progreso') {
+                    statusChangeButton = `<button data-wo-id="${wo.workOrderId}" data-helicopter-id="${wo.helicopterId}" data-new-status="Completada" class="change-status-btn text-white bg-green-500 hover:bg-green-600 font-medium rounded-lg text-sm px-3 py-1">Completar</button>`;
+                }
+
+                let adminButtons = '';
+                if (editMode) {
+                    adminButtons = `
+                        <button data-wo-id="${wo.workOrderId}" data-helicopter-id="${wo.helicopterId}" class="edit-ot-btn text-white bg-yellow-500 hover:bg-yellow-600 font-medium rounded-lg text-sm px-4 py-2">Editar</button>
+                        <button data-wo-id="${wo.workOrderId}" data-helicopter-id="${wo.helicopterId}" class="delete-ot-btn text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm px-4 py-2">Eliminar</button>
+                    `;
+                }
+
+                row.innerHTML = `
+                    <td class="py-3 px-4 font-mono">${wo.workOrderId}</td>
+                    <td class="py-3 px-4 font-semibold">${wo.helicopterId}</td>
+                    <td class="py-3 px-4">${wo.name}</td>
+                    <td class="py-3 px-4"><span class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">${wo.taller || 'No asignado'}</span></td>
+                    <td class="py-3 px-4">${new Date(wo.creationDate + "T00:00:00").toLocaleDateString('es-HN')}</td>
+                    <td class="py-3 px-4">${getStatusBadge(status)}</td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="flex justify-center gap-2">
+                                <button data-wo-id="${wo.workOrderId}" data-helicopter-id="${wo.helicopterId}" class="view-pdf-btn text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-4 py-2">Ver PDF</button>
+                                <a href="https://sozin0512.github.io/ESTADISTICA-2/REPORTES.HTML" target="_blank" class="text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-4 py-2 inline-flex items-center">Ver Reporte</a>
+                            </div>
+                            <div class="flex justify-center gap-2 mt-1">
+                                ${statusChangeButton}
+                                ${adminButtons}
+                            </div>
+                        </div>
+                    </td>
+                `;
+                workOrdersTable.appendChild(row);
+            });
+            
+            // Re-asignar event listeners después de cada renderizado
+            addTableButtonListeners();
+        }
+        
+        function addTableButtonListeners() {
+            document.querySelectorAll('.view-pdf-btn').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const target = e.currentTarget;
+                    currentWorkOrderId = target.dataset.woId;
+                    currentHelicopterId = target.dataset.helicopterId;
+                    const allWorkOrders = flattenData(dataStore.workOrders);
+                    const workOrderData = allWorkOrders.find(wo => wo.workOrderId === currentWorkOrderId && wo.helicopterId === currentHelicopterId);
+                    if (workOrderData) await generateAndOpenPDF(workOrderData);
+                    else showFeedback("No se encontraron los datos de la orden de trabajo.");
+                });
+            });
+            
+            document.querySelectorAll('.change-status-btn').forEach(btn => {
+                btn.addEventListener('click', async e => {
+                    const target = e.currentTarget;
+                    currentWorkOrderId = target.dataset.woId;
+                    currentHelicopterId = target.dataset.helicopterId;
+                    const newStatus = target.dataset.newStatus;
+                    
+                    if (newStatus === 'Completada') {
+                        completeReminderModal.classList.remove('hidden');
+                    } else {
+                        try {
+                            const otRef = ref(database, `artifacts/${currentHelicopterId}-DATA/public_data/ordenes_trabajo/${currentWorkOrderId}`);
+                            await update(otRef, { status: newStatus });
+                            showFeedback(`Estado actualizado a "${newStatus}".`, 'success');
+                        } catch (error) {
+                            showFeedback('Error al actualizar el estado.');
+                        }
+                    }
+                });
+            });
+
+            if (editMode) {
+                document.querySelectorAll('.edit-ot-btn').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        const target = e.currentTarget;
+                        currentWorkOrderId = target.dataset.woId;
+                        currentHelicopterId = target.dataset.helicopterId;
+                        isEditAction = true;
+                        const allWorkOrders = flattenData(dataStore.workOrders);
+                        const workOrderData = allWorkOrders.find(wo => wo.workOrderId === currentWorkOrderId && wo.helicopterId === currentHelicopterId);
+                        
+                        workshopModalTitle.textContent = `Editar Taller para ${currentWorkOrderId} (${currentHelicopterId})`;
+                        confirmWorkshopBtn.textContent = 'Guardar Cambios';
+                        workshopSelect.value = workOrderData.taller;
+                        workshopSelect.querySelector('option[value="TODOS"]').disabled = true;
+                        workshopModal.classList.remove('hidden');
+                    });
+                });
+                document.querySelectorAll('.delete-ot-btn').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        const target = e.currentTarget;
+                        currentWorkOrderId = target.dataset.woId;
+                        currentHelicopterId = target.dataset.helicopterId;
+                        deleteConfirmModal.classList.remove('hidden');
+                    });
+                });
+            }
+        }
+
+        filtersContainer.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetLink = e.target.closest('.sidebar-link');
+            if (targetLink) {
+                document.querySelector('.sidebar-link.active').classList.remove('active');
+                targetLink.classList.add('active');
+                currentFilter = targetLink.dataset.filter;
+                contentDescription.textContent = currentFilter === 'Todos' ? 'Mostrando todas las órdenes de trabajo asignadas.' : `Filtrando órdenes de trabajo para el taller de ${currentFilter}.`;
+                renderContent();
+            }
+        });
+
+        document.getElementById('cancel-workshop').addEventListener('click', () => workshopModal.classList.add('hidden'));
+
+        confirmWorkshopBtn.addEventListener('click', async () => {
+            const selectedTaller = workshopSelect.value;
+            workshopModal.classList.add('hidden');
+            const dbName = `${currentHelicopterId}-DATA`;
+
+            if (isEditAction) { // Lógica para editar
+                try {
+                    const otRef = ref(database, `artifacts/${dbName}/public_data/ordenes_trabajo/${currentWorkOrderId}`);
+                    await update(otRef, { taller: selectedTaller });
+                    showFeedback('Orden de trabajo actualizada con éxito.', 'success');
+                } catch(error) { showFeedback("Error al actualizar la orden de trabajo."); }
+            } else { // Lógica para crear
+                const allExpiredInspections = flattenData(dataStore.expiredInspections);
+                const inspectionDetails = allExpiredInspections.find(item => String(item.id) === String(currentInspectionId) && item.helicopterId === currentHelicopterId);
+                if (!inspectionDetails) return;
+
+                try {
+                    const snapshot = await get(ref(database, `artifacts/${dbName}/public_data/ordenes_trabajo`));
+                    const initialCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+                    
+                    const workshopsToGenerate = selectedTaller === 'TODOS' ? workshops : [selectedTaller];
+                    let generatedCount = 0;
+
+                    for (let i = 0; i < workshopsToGenerate.length; i++) {
+                         const workOrderId = `OT-${String(initialCount + i + 1).padStart(4, '0')}`;
+                         const taller = workshopsToGenerate[i];
+                         const newWorkOrder = {
+                            workOrderId, taller, status: 'Abierta',
+                            inspectionId: inspectionDetails.id, name: inspectionDetails.name, ref: inspectionDetails.ref,
+                            lastDone: inspectionDetails.lastDone, freqText: inspectionDetails.freqText,
+                            creationDate: new Date().toISOString().split('T')[0]
+                        };
+                        await set(ref(database, `artifacts/${dbName}/public_data/ordenes_trabajo/${workOrderId}`), newWorkOrder);
+                        generatedCount++;
+                    }
+                    showFeedback(`${generatedCount} orden(es) de trabajo generada(s) con éxito.`, 'success');
+                } catch (error) { showFeedback("Hubo un error al crear la(s) orden(es) de trabajo."); }
+            }
+        });
+
+        cancelDeleteBtn.addEventListener('click', () => deleteConfirmModal.classList.add('hidden'));
+        confirmDeleteBtn.addEventListener('click', async () => {
+            deleteConfirmModal.classList.add('hidden');
+            try {
+                const dbName = `${currentHelicopterId}-DATA`;
+                await remove(ref(database, `artifacts/${dbName}/public_data/ordenes_trabajo/${currentWorkOrderId}`));
+                showFeedback('Orden de trabajo eliminada con éxito.', 'success');
+            } catch(error) { showFeedback("Error al eliminar la orden de trabajo."); }
+        });
+
+        cancelCompleteBtn.addEventListener('click', () => completeReminderModal.classList.add('hidden'));
+        confirmCompleteBtn.addEventListener('click', async () => {
+            completeReminderModal.classList.add('hidden');
+            try {
+                const dbName = `${currentHelicopterId}-DATA`;
+                const otRef = ref(database, `artifacts/${dbName}/public_data/ordenes_trabajo/${currentWorkOrderId}`);
+                await update(otRef, { status: 'Completada' });
+                showFeedback(`Estado actualizado a "Completada".`, 'success');
+            } catch (error) { showFeedback('Error al actualizar el estado.'); }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'e') {
+                e.preventDefault();
+                editMode = !editMode;
+                editModeIndicator.classList.toggle('hidden');
+                renderContent();
+            }
+        });
+        
+        async function generateAndOpenPDF(wo) {
+            // ... (Función de PDF sin cambios, excepto por el nombre de la aeronave)
+            const container = document.getElementById('pdf-container');
+            const now = new Date();
+            const time = now.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit', hour12: false });
+            
+            container.innerHTML = `
+                <div class="bg-white" style="width: 794px; min-height: 1123px; font-family: Arial, sans-serif; color: #1f2937; display: flex; flex-direction: column;">
+                    <header class="bg-gray-800 text-white p-8 flex justify-between items-start">
+                        <div>
+                            <h2 class="text-xl font-semibold">FUERZA AEREA HONDUREÑA</h2>
+                             <h3 class="text-lg font-medium text-gray-300">BASE AEREA 'CNEL. HERNAN ACOSTA MEJIA'</h3>
+                            <h1 class="text-4xl font-bold tracking-tight mt-2">ORDEN DE TRABAJO</h1>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-mono text-2xl">${wo.workOrderId}</p>
+                            <p class="text-sm text-gray-300">N° de W.O.</p>
+                        </div>
+                    </header>
+                    <main class="p-8 flex-grow">
+                        <section class="grid grid-cols-3 gap-6 text-center">
+                            <div class="bg-gray-100 p-4 rounded-xl shadow-sm">
+                                <h3 class="text-sm font-bold text-gray-500 uppercase">AERONAVE</h3>
+                                <p class="text-2xl font-semibold mt-1">BELL 412 ${wo.helicopterId}</p>
+                            </div>
+                             <div class="bg-blue-100 p-4 rounded-xl shadow-sm text-blue-800">
+                                <h3 class="text-sm font-bold uppercase">TALLER ASIGNADO</h3>
+                                <p class="text-2xl font-semibold mt-1">${wo.taller}</p>
+                            </div>
+                             <div class="bg-gray-100 p-4 rounded-xl shadow-sm">
+                                <h3 class="text-sm font-bold text-gray-500 uppercase">FECHA Y HORA</h3>
+                                <p class="text-2xl font-semibold mt-1">${new Date(wo.creationDate + 'T00:00:00').toLocaleDateString('es-HN')} <span class="text-xl text-gray-500">${time}</span></p>
+                            </div>
+                        </section>
+                        <section class="mt-10">
+                             <h3 class="text-lg font-bold text-gray-800 border-b-2 border-gray-200 pb-2">Descripción de la Tarea</h3>
+                             <div class="mt-4 p-6 bg-white border rounded-lg min-h-[150px]">
+                                <p class="text-lg leading-relaxed">${wo.name}</p>
+                                <p class="mt-6 text-base text-gray-500"><strong>Referencia Técnica:</strong> ${wo.ref}</p>
+                             </div>
+                        </section>
+                        <section class="mt-16">
+                            <div class="grid grid-cols-2 gap-12 pt-8 border-t-2 border-gray-200">
+                                <div class="text-center">
+                                   <p class="text-base text-gray-600">Entregado por:</p>
+                                   <div class="mt-20 border-b-2 border-gray-300"></div>
+                                   <p class="text-sm font-bold text-gray-700 mt-2">Estadistica de Helicopteros</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-base text-gray-600">Recibido por:</p>
+                                    <div class="mt-20 border-b-2 border-gray-300"></div>
+                                    <p class="text-sm font-bold text-gray-700 mt-2">${wo.taller}</p>
+                                </div>
+                            </div>
+                        </section>
+                    </main>
+                    <footer class="p-8 mt-auto text-center text-xs text-gray-400">
+                        <p>Documento generado automáticamente por el Sistema de Control de Mantenimiento.</p>
+                    </footer>
+                </div>
+            `;
+            const canvas = await html2canvas(container, { scale: 2 });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const ratio = Math.min(pageWidth / canvas.width, pageHeight / canvas.height);
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width * ratio, canvas.height * ratio);
+            window.open(URL.createObjectURL(pdf.output('blob')));
+            container.innerHTML = '';
+        }
+
+        main();
+    </script>
+</body>
+</html>
+
+
+

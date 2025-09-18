@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orden de Trabajo - Trabajos a Efectuarse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #e9ecef;
+        }
+        .paper-container {
+            width: 100%;
+            max-width: 8.5in; /* Tamaño carta */
+            min-height: 11in;
+            margin: 2rem auto;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.25rem;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        table, th, td {
+            border: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .editable-cell { cursor: text; }
+        .editable-cell:hover { background-color: #f0f8ff; }
+        .editable-cell:focus { 
+            background-color: #e7f1ff;
+            outline: 2px solid #3b82f6; 
+            outline-offset: -1px;
+        }
+        #signature-canvas {
+            width: 400px;
+            height: 200px;
+            cursor: crosshair;
+        }
+        .signature-cell img, .footer-signature-area img {
+            max-height: 40px;
+            display: block;
+            margin: 0 auto;
+        }
+        .signature-cell p, .footer-signature-area p {
+            line-height: 1;
+        }
+        .signature-line {
+            border-top: 1px solid #495057;
+            margin-top: 0.5rem;
+        }
+
+        @media print {
+            body {
+                background: none;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .paper-container {
+                box-shadow: none;
+                margin: 0;
+                padding: 1.5rem;
+                max-width: 100%;
+                border: 1px solid #dee2e6;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .editable-cell {
+                background-color: white !important;
+                outline: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="paper-container flex flex-col">
+        <header class="mb-8">
+            <div class="flex justify-between items-center border-b-2 border-gray-700 pb-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Orden de Trabajo</h1>
+                    <p class="text-gray-600">Mantenimiento Correctivo y Preventivo</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold">Aeronave: <span class="font-normal">BELL 412 / FAH-976</span></p>
+                    <p class="font-bold">Fecha: <span class="font-normal" id="current-date"></span></p>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-grow">
+            <h2 class="text-xl font-semibold text-center mb-4 text-red-700">Listado de Inspecciones Vencidas</h2>
+            
+            <div id="loading-message" class="text-center text-gray-500 my-8">Cargando lista de trabajos...</div>
+            
+            <table class="w-full text-sm text-left text-gray-600">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                    <tr>
+                        <th scope="col" class="px-4 py-3 w-10 text-center">#</th>
+                        <th scope="col" class="px-4 py-3">Descripción del Trabajo / Inspección</th>
+                        <th scope="col" class="px-4 py-3 w-40">Referencia</th>
+                        <th scope="col" class="px-4 py-3 w-32">Mecánico</th>
+                        <th scope="col" class="px-4 py-3 w-32">Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody id="vencidas-list">
+                    <!-- Filas generadas por JS -->
+                </tbody>
+            </table>
+        </main>
+
+        <footer class="mt-16">
+            <div class="grid grid-cols-2 gap-12">
+                <div class="text-center">
+                    <div class="footer-signature-area cursor-pointer min-h-[70px] flex flex-col justify-end items-center" data-title="Supervisor">
+                        <p class="text-gray-500 text-sm no-print">(Haga clic para firmar)</p>
+                    </div>
+                    <div class="signature-line"></div>
+                    <p class="mt-2 font-semibold">Supervisor</p>
+                    <p class="text-xs text-gray-500">(Nombre y Licencia)</p>
+                </div>
+                <div class="text-center">
+                    <div class="footer-signature-area cursor-pointer min-h-[70px] flex flex-col justify-end items-center" data-title="Inspector">
+                         <p class="text-gray-500 text-sm no-print">(Haga clic para firmar)</p>
+                    </div>
+                    <div class="signature-line"></div>
+                    <p class="mt-2 font-semibold">Inspector</p>
+                    <p class="text-xs text-gray-500">(Nombre y Licencia)</p>
+                </div>
+            </div>
+        </footer>
+        
+        <div class="flex justify-center mt-12 gap-4 no-print">
+            <button onclick="window.location.href='index.html'" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
+                Volver al Control
+            </button>
+            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
+                Imprimir / Guardar PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Signature Modal -->
+    <div id="signature-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
+        <div class="bg-white rounded-lg shadow-2xl">
+            <div class="p-4 border-b">
+                <h3 id="signature-modal-title" class="text-lg font-bold text-gray-800">Firme en el recuadro</h3>
+            </div>
+            <div class="p-2">
+                <canvas id="signature-canvas" class="border border-gray-300"></canvas>
+            </div>
+            <div class="p-4 border-t">
+                <label for="signature-name" class="block text-sm font-medium text-gray-700">Nombre</label>
+                <input type="text" id="signature-name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Escriba su nombre y licencia">
+            </div>
+            <div class="flex justify-end gap-2 p-4 bg-gray-50">
+                <button id="signature-clear" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Borrar</button>
+                <button id="signature-cancel" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg">Cancelar</button>
+                <button id="signature-save" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg">Guardar Firma</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyASg6fgH-Lo6PXLnnw_p8LzHl-WNDiuHrU",
+            authDomain: "fah-901-ba5f4.firebaseapp.com",
+            databaseURL: "https://fah-901-ba5f4-default-rtdb.firebaseio.com",
+            projectId: "fah-901-ba5f4",
+            storageBucket: "fah-901-ba5f4.firebasestorage.app",
+            messagingSenderId: "630831139898",
+            appId: "1:630831139898:web:1771a16e1ad4bfb8ca3903",
+            measurementId: "G-WNZJ1VEH9H"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        
+        const sharedProjectId = "FAH-976-DATA";
+        const paperContainer = document.querySelector('.paper-container');
+        const expiredListTableBody = document.getElementById('vencidas-list');
+        const loadingMessage = document.getElementById('loading-message');
+        const dateDisplay = document.getElementById('current-date');
+        
+        // Signature Modal elements
+        const signatureModal = document.getElementById('signature-modal');
+        const signatureCanvas = document.getElementById('signature-canvas');
+        const signatureNameInput = document.getElementById('signature-name');
+        const signatureClearBtn = document.getElementById('signature-clear');
+        const signatureCancelBtn = document.getElementById('signature-cancel');
+        const signatureSaveBtn = document.getElementById('signature-save');
+        let signaturePad;
+        let activeSignatureCell = null;
+
+
+        dateDisplay.textContent = new Date().toLocaleDateString('es-HN');
+
+        const expiredRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos`);
+
+        onValue(expiredRef, (snapshot) => {
+            loadingMessage.classList.add('hidden');
+            const expiredInspecciones = snapshot.val();
+            renderExpiredInspections(expiredInspecciones);
+        }, (error) => {
+            console.error("Error fetching data from Firebase:", error);
+            loadingMessage.textContent = "Error al cargar la lista.";
+            loadingMessage.classList.remove('hidden');
+        });
+        
+        function renderExpiredInspections(inspections) {
+            expiredListTableBody.innerHTML = '';
+            
+            if (!inspections || inspections.length === 0) {
+                expiredListTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-8 text-gray-500">
+                            No hay inspecciones vencidas en este momento. ¡Buen trabajo!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            inspections.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.className = 'bg-white border-b hover:bg-red-50';
+                
+                const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(item.ref)}`;
+
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-center font-medium text-gray-900">${index + 1}</td>
+                    <td class="px-4 py-3 font-medium text-gray-900">
+                        ${item.name}
+                        <p class="text-xs text-red-600 font-semibold">(Frecuencia: ${item.freqText} / Última vez: ${item.lastDone || 'N/A'})</p>
+                    </td>
+                    <td class="px-4 py-3">
+                        <a href="${googleSearchUrl}" target="_blank" class="text-blue-600 hover:underline" title="Buscar referencia en Google">
+                            ${item.ref}
+                        </a>
+                    </td>
+                    <td class="px-4 py-3 editable-cell signature-cell text-center align-middle"></td>
+                    <td class="px-4 py-3 editable-cell" contenteditable="true"></td>
+                `;
+                expiredListTableBody.appendChild(row);
+            });
+        }
+        
+        function openSignatureModal(cell) {
+            activeSignatureCell = cell;
+            
+            const modalTitle = document.getElementById('signature-modal-title');
+            const nameLabel = document.querySelector('#signature-modal label[for="signature-name"]');
+            const title = cell.dataset.title;
+
+            if (title === 'Inspector') {
+                modalTitle.textContent = 'Firma del Inspector';
+                nameLabel.textContent = 'Nombre del Inspector';
+            } else if (title === 'Supervisor') {
+                 modalTitle.textContent = 'Firma del Supervisor';
+                 nameLabel.textContent = 'Nombre del Supervisor';
+            } else { // Fallback for table cells
+                modalTitle.textContent = 'Firma del Mecánico';
+                nameLabel.textContent = 'Nombre del Mecánico';
+            }
+
+            signatureModal.classList.remove('hidden');
+            signatureNameInput.value = '';
+            const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+            signatureCanvas.width = signatureCanvas.offsetWidth * ratio;
+            signatureCanvas.height = signatureCanvas.offsetHeight * ratio;
+            signatureCanvas.getContext("2d").scale(ratio, ratio);
+            signaturePad = new SignaturePad(signatureCanvas, {
+                backgroundColor: 'rgb(255, 255, 255)'
+            });
+        }
+
+        function closeSignatureModal() {
+            signatureModal.classList.add('hidden');
+            if(signaturePad){
+                signaturePad.clear();
+                signaturePad.off();
+            }
+            signatureNameInput.value = '';
+            activeSignatureCell = null;
+        }
+        
+        paperContainer.addEventListener('click', (e) => {
+            const signatureTarget = e.target.closest('.signature-cell, .footer-signature-area');
+            if (signatureTarget) {
+                if (signatureTarget.querySelector('img')) {
+                    if (confirm('¿Desea reemplazar esta firma?')) {
+                        openSignatureModal(signatureTarget);
+                    }
+                } else {
+                    openSignatureModal(signatureTarget);
+                }
+            }
+        });
+        
+        signatureClearBtn.addEventListener('click', () => {
+            if (signaturePad) {
+                signaturePad.clear();
+            }
+        });
+        
+        signatureCancelBtn.addEventListener('click', closeSignatureModal);
+        
+        signatureSaveBtn.addEventListener('click', () => {
+            const name = signatureNameInput.value.trim();
+            if (signaturePad && !signaturePad.isEmpty() && activeSignatureCell && name) {
+                const dataURL = signaturePad.toDataURL('image/png');
+                activeSignatureCell.innerHTML = ''; // Clear previous content
+                
+                const img = document.createElement('img');
+                img.src = dataURL;
+                img.alt = 'Firma';
+                
+                const nameElement = document.createElement('p');
+                nameElement.className = 'text-xs mt-1 font-semibold';
+                nameElement.textContent = name;
+                
+                activeSignatureCell.appendChild(img);
+                activeSignatureCell.appendChild(nameElement);
+
+                closeSignatureModal();
+            } else {
+                alert("Por favor, dibuje su firma y escriba su nombre antes de guardar.");
+            }
+        });
+
+    </script>
+</body>
+</html>
+
