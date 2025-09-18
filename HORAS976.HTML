@@ -124,6 +124,8 @@
         #forgot-password-btn:hover { background: linear-gradient(to right, #d97706, #ca8a04); }
         #logout-btn { background: linear-gradient(to right, #ef4444, #dc2626); color: white; }
         #logout-btn:hover { background: linear-gradient(to right, #dc2626, #b91c1c); }
+        #inspections-btn { background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white; }
+        #inspections-btn:hover { background: linear-gradient(to right, #7c3aed, #6d28d9); }
 
         #auth-status {
             color: #dc2626;
@@ -623,6 +625,7 @@
             <button id="btnImprimir" class="px-6 py-2 bg-gray-700 text-white rounded-md shadow-md hover:bg-gray-800 transition-colors">Imprimir Tabla</button>
             <button id="btnMotorStatus" class="px-6 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition-colors">Estado de Motores</button>
             <button id="btnComponentStatus" class="px-6 py-2 bg-purple-500 text-white rounded-md shadow-md hover:bg-purple-600 transition-colors">Estado de Componentes</button>
+            <button id="inspections-btn" class="px-6 py-2 bg-purple-600 text-white rounded-md shadow-md hover:bg-purple-700 transition-colors">Inspecciones</button>
         </div>
     </div>
 
@@ -633,7 +636,7 @@
                 <button id="closeMotorStatusModal" class="text-gray-500 hover:text-gray-700 text-3xl leading-none">&times;</button>
             </div>
             <div id="motorStatusContent" class="space-y-4">
-                </div>
+            </div>
             <div class="print-options-container mt-6">
                 <strong>Opciones de Impresión:</strong>
                 <label><input type="radio" name="motorStatusPrintOption" value="full" checked> Completo</label>
@@ -651,8 +654,7 @@
         import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js';
 
         // Tu configuración de Firebase (actualizada con la que proporcionaste)
-         // Tu configuración de Firebase (actualizada con la que proporcionaste)
-       const firebaseConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyASg6fgH-Lo6PXLnnw_p8LzHl-WNDiuHrU",
             authDomain: "fah-901-ba5f4.firebaseapp.com",
             databaseURL: "https://fah-901-ba5f4-default-rtdb.firebaseio.com",
@@ -668,9 +670,14 @@
         const database = getDatabase(app); // Obtiene la instancia de Realtime Database
         const auth = getAuth(app); // Obtiene la instancia de Autenticación
 
+        // --- CORRECCIÓN AQUÍ ---
+        // Usamos un ID de proyecto fijo y compartido para que ambas páginas (principal e inspecciones)
+        // se comuniquen con la misma ubicación, respetando la estructura de tus reglas de seguridad.
+        const sharedProjectId = "FAH-976-DATA";
+
         // Define __app_id con un valor por defecto si no está definida
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        console.log("App ID utilizada:", appId); // Log para depuración
+        console.log("App ID utilizada:", appId);
 
         // Variables globales
         let añoActual = new Date().getFullYear(); // Inicia con el año actual
@@ -766,15 +773,16 @@
         const mainAppContent = document.getElementById('main-app-content');
         const btnImprimir = document.getElementById('btnImprimir');
 
-        // Nuevos elementos para el estado de motores
+        // Elementos para el estado de motores
         const btnMotorStatus = document.getElementById('btnMotorStatus');
         const motorStatusModal = document.getElementById('motorStatusModal');
         const closeMotorStatusModal = document.getElementById('closeMotorStatusModal');
         const motorStatusContent = document.getElementById('motorStatusContent');
         const btnPrintMotorStatus = document.getElementById('btnPrintMotorStatus');
-        // Nuevo botón de estado de componentes
+        // Botón de estado de componentes
         const btnComponentStatus = document.getElementById('btnComponentStatus');
-
+        // Botón de inspecciones
+        const btnInspections = document.getElementById('inspections-btn');
 
         // Helper para extraer la nomenclatura base y la variante (ej. "HUB COMPRESOR" y "1.1")
         function parseNomenclatura(nombreCompleto) {
@@ -975,8 +983,8 @@
             recordatorioTextarea.readOnly = !isAdministrator;
             btnImprimir.disabled = !isAuthenticated;
             btnMotorStatus.disabled = !isAuthenticated;
-            // Deshabilitar el nuevo botón si no está autenticado
-            btnComponentStatus.disabled = !isAuthenticated; 
+            btnComponentStatus.disabled = !isAuthenticated;
+            btnInspections.disabled = !isAuthenticated;
             btnPrintMotorStatus.disabled = !isAuthenticated;
 
             if (role === 'viewer') {
@@ -991,7 +999,6 @@
             }
         }
 
-
         // -----------------------------------------------------------
         // Funciones de Base de Datos (Firebase Realtime Database)
         // -----------------------------------------------------------
@@ -1004,17 +1011,12 @@
                 return;
             }
 
-            const rutaDatosMes = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesIndex}`;
-            const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${año}/${mesIndex}`;
-            const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-976-Overall`; // Nueva ruta para totales generales
+            const rutaDatosMes = `artifacts/${sharedProjectId}/public_data/datos_vuelo/${año}/${mesIndex}`;
+            const rutaRecordatorio = `artifacts/${sharedProjectId}/public_data/recordatorios/${año}/${mesIndex}`;
 
             try {
-                // Guardar datos de tabla del mes actual
                 await set(ref(database, rutaDatosMes), datosTabla);
-                // Guardar recordatorio del mes actual
                 await set(ref(database, rutaRecordatorio), recordatorio);
-
-                // Calcular y guardar los totales generales acumulados
                 await calcularYGuardarTotalesGenerales();
 
                 console.log(`Datos y recordatorio guardados correctamente para ${meses[mesIndex]} de ${año}`);
@@ -1027,9 +1029,8 @@
             }
         }
 
-        // Nueva función para calcular y guardar los totales generales acumulados
         async function calcularYGuardarTotalesGenerales() {
-            const allYearsDataRef = ref(database, `artifacts/${appId}/public_data/datos_vuelo`);
+            const allYearsDataRef = ref(database, `artifacts/${sharedProjectId}/public_data/datos_vuelo`);
             let allMonthsData = {};
 
             try {
@@ -1044,22 +1045,19 @@
                     'RINS': 0
                 };
 
-                // Iterar sobre todos los años y meses para calcular el total general
                 for (const yearKey in allMonthsData) {
                     if (Object.hasOwnProperty.call(allMonthsData, yearKey)) {
                         const yearData = allMonthsData[yearKey];
                         for (const monthKey in yearData) {
                             if (Object.hasOwnProperty.call(yearData, monthKey)) {
                                 const monthData = yearData[monthKey];
-                                // Asegurarse de que los datos de la fila existan antes de intentar acceder a ellos
-                                // Y que la columna 34 (GENERAL) exista y sea numérica
-                                if (monthData && Array.isArray(monthData) && monthData[0] && !isNaN(parseFloat(monthData[0][34]))) { // AC HRS
+                                if (monthData && Array.isArray(monthData) && monthData[0] && !isNaN(parseFloat(monthData[0][34]))) {
                                     newCumulativeTotals['AC HRS'] += parseFloat(monthData[0][34]) || 0; 
                                 }
-                                if (monthData && Array.isArray(monthData) && monthData[1] && !isNaN(parseFloat(monthData[1][34]))) { // ATERRIZAJES
+                                if (monthData && Array.isArray(monthData) && monthData[1] && !isNaN(parseFloat(monthData[1][34]))) {
                                     newCumulativeTotals['ATERRIZAJES'] += parseFloat(monthData[1][34]) || 0; 
                                 }
-                                if (monthData && Array.isArray(monthData) && monthData[2] && !isNaN(parseFloat(monthData[2][34]))) { // RINS
+                                if (monthData && Array.isArray(monthData) && monthData[2] && !isNaN(parseFloat(monthData[2][34]))) {
                                     newCumulativeTotals['RINS'] += parseFloat(monthData[2][34]) || 0; 
                                 }
                             }
@@ -1067,8 +1065,7 @@
                     }
                 }
                 
-                // Guardar los totales generales acumulados en su propia ubicación
-                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-976-Overall`;
+                const rutaTotalesGenerales = `artifacts/${sharedProjectId}/public_data/totales_generales/Overall`;
                 await set(ref(database, rutaTotalesGenerales), newCumulativeTotals);
                 console.log("Totales generales acumulados guardados:", newCumulativeTotals);
 
@@ -1077,21 +1074,19 @@
             }
         }
 
-
         async function cargarDatosDeFirebase() {
             if (!userId || userId === "anonimo") {
                 console.warn("No se pueden cargar datos: Usuario no autenticado.");
                 return;
             }
 
-            const rutaDatosMes = `artifacts/${appId}/public_data/datos_vuelo/${añoActual}/${mesActual}`;
-            const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${añoActual}/${mesActual}`;
+            const rutaDatosMes = `artifacts/${sharedProjectId}/public_data/datos_vuelo/${añoActual}/${mesActual}`;
+            const rutaRecordatorio = `artifacts/${sharedProjectId}/public_data/recordatorios/${añoActual}/${mesActual}`;
 
             try {
                 console.log(`Cargando datos de: ${rutaDatosMes}`);
                 const datosSnapshot = await get(ref(database, rutaDatosMes));
                 const datos = datosSnapshot.val();
-                // *** NUEVO LOG PARA DEPURACIÓN ***
                 console.log(`Datos de tabla cargados de Firebase para ${meses[mesActual]} de ${añoActual}:`, datos);
 
                 if (datos) {
@@ -1112,7 +1107,7 @@
                     recordatorioTextarea.value = "";
                     console.log(`No hay recordatorio guardado para ${meses[mesActual]} de ${añoActual}.`);
                 }
-                actualizarTotales(); // Asegurarse de que los totales se actualicen después de cargar
+                actualizarTotales();
             } catch (error) {
                 console.error("Error al cargar los datos de Firebase:", error.code, error.message);
                 authStatus.textContent = `Error al cargar los datos: ${error.message}`;
@@ -1124,10 +1119,6 @@
             const tabla = document.querySelectorAll(".tabla-vuelo")[indiceTabla];
             if (tabla) {
                 tabla.querySelectorAll('tbody tr').forEach(fila => {
-                    const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
-                    const isEditableComponentRow = filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta);
-                    const isLabelRow = filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta);
-
                     fila.querySelectorAll('td').forEach((celda, indexCelda) => {
                         const isNomenclatura = celda.classList.contains('nomenclatura');
                         const isTotalCell = celda.classList.contains('fila-total') || celda.classList.contains('fila-general');
@@ -1163,6 +1154,10 @@
                             }
                             return; 
                         }
+
+                        const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
+                        const isEditableComponentRow = filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta);
+                        const isLabelRow = filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta);
 
                         if (isEditableComponentRow) {
                             const { nomenclaturaBase, varianteClave } = parseNomenclatura(nomenclaturaCompleta);
@@ -1212,7 +1207,6 @@
                 let datosIndex = 0; 
 
                 filasHTML.forEach((filaHTML) => {
-                    // Si es una fila de encabezado de motor, no tiene datos para cargar de Firebase directamente en esta iteración
                     if (filaHTML.querySelector('.motor-header')) {
                         return;
                     }
@@ -1226,7 +1220,6 @@
                                                 celda.classList.contains('restante-label');
 
                             if (celda && !isNomenclatura && !isLabelCell && datosFila[indexCelda] !== undefined) {
-                                // Usar formatNumber para aplicar el formato deseado
                                 celda.textContent = formatNumber(datosFila[indexCelda]);
                                 if (celda.textContent.trim() !== "") {
                                     celda.classList.add("led-persistente");
@@ -1267,10 +1260,7 @@
             const datos = [];
             if (tabla) {
                 tabla.querySelectorAll('tr').forEach(fila => {
-                    // Solo incluir filas que no sean encabezados de motor en los datos a guardar
                     if (fila.querySelector('.motor-header')) {
-                        // Si es un encabezado de motor, lo ignoramos para los datos de la tabla
-                        // pero necesitamos mantener la consistencia del índice si se procesa el HTML
                         return; 
                     }
                     const filaData = [];
@@ -1280,7 +1270,6 @@
                     datos.push(filaData);
                 });
             }
-            // *** NUEVO LOG PARA DEPURACIÓN ***
             console.log("Datos de tabla a guardar:", datos);
             return datos;
         }
@@ -1469,12 +1458,18 @@
         }
 
         async function copiarValorGeneralAMesSiguiente(año, mesOrigenIndex, mesDestinoIndex) {
-            if (!userId || userId === "anonimo") return;
+            if (!userId || userId === "anonimo") {
+                console.log("DEBUG: No se puede copiar datos entre meses: Usuario no autenticado.");
+                return;
+            }
 
             const rutaOrigen = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesOrigenIndex}`; 
             try {
+                console.log(`DEBUG: Intentando obtener datos del mes de origen: ${rutaOrigen}`);
                 const snapshot = await get(ref(database, rutaOrigen));
                 const datosOrigen = snapshot.val();
+                console.log(`DEBUG: Datos de origen para copiar:`, datosOrigen);
+
                 if (datosOrigen) {
                     const tablaDestino = document.querySelectorAll(".tabla-vuelo")[mesDestinoIndex];
                     if (tablaDestino) {
@@ -1490,6 +1485,7 @@
                                 if (indexFilaDestino !== -1) {
                                     // La columna 34 es la columna "GENERAL" en la estructura de datos de la tabla
                                     const valorGeneral = filaDatosOrigen[34]; 
+                                    console.log(`DEBUG: Copiando valor general para ${nomenclaturaOrigen}: ${valorGeneral}`);
                                     if (valorGeneral !== undefined && valorGeneral !== null && valorGeneral.toString().trim() !== "") {
                                         const filaDestino = tablaDestino.querySelectorAll("tbody tr")[indexFilaDestino];
                                         if (filaDestino) {
@@ -1508,8 +1504,11 @@
                             }
                         });
                         actualizarTotales();
+                        // Guardar los datos del mes destino después de copiar, para que persistan.
                         await guardarDatosEnFirebase(añoActual, mesDestinoIndex, obtenerDatosTabla(mesDestinoIndex), recordatorioTextarea.value);
                     }
+                } else {
+                    console.log(`DEBUG: No hay datos en el mes de origen (${meses[mesOrigenIndex]}) para copiar.`);
                 }
             } catch (error) {
                 console.error("Error al copiar datos entre meses:", error.code, error.message);
@@ -1559,12 +1558,22 @@
                     // Solo procesar filas que no son componentes de motor ni etiquetas
                     if (!filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta) && !filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta)) {
                         const vieneCelda = fila.querySelector('.viene-celda');
+                        // Seleccionar celdas diarias desde la columna 3 (día 1) hasta la columna 33 (día 31)
                         const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
                         const mesTotalCelda = fila.querySelector('.fila-total');
                         const generalCelda = fila.querySelector('.fila-general');
                         
                         const viene = parseFloat(vieneCelda?.textContent.trim()) || 0;
                         const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
+
+                        // --- NUEVOS LOGS DE DEPURACIÓN PARA AC HRS ---
+                        if (nomenclaturaCompleta === "AC HRS") {
+                            console.log(`DEBUG: Procesando fila: ${nomenclaturaCompleta}`);
+                            console.log(`DEBUG: Contenido de vieneCelda: '${vieneCelda?.textContent.trim()}' -> ${viene}`);
+                            console.log(`DEBUG: dailyCells (NodeList):`, dailyCells);
+                            console.log(`DEBUG: valoresDiarios (Array parsed):`, valoresDiarios);
+                        }
+                        // --- FIN NUEVOS LOGS DE DEPURACIÓN ---
                         
                         const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
                         let totalGeneral = totalMes + viene; // El total general de la fila actual es la suma del mes y el "vienen"
@@ -1572,11 +1581,18 @@
                         mesTotalCelda.textContent = formatNumber(totalMes); // Usar formatNumber
                         generalCelda.textContent = formatNumber(totalGeneral); // Usar formatNumber
 
+                        // --- NUEVOS LOGS DE DEPURACIÓN PARA AC HRS ---
+                        if (nomenclaturaCompleta === "AC HRS") {
+                            console.log(`DEBUG: totalMes calculado para ${nomenclaturaCompleta}: ${totalMes}`);
+                            console.log(`DEBUG: totalGeneral calculado para ${nomenclaturaCompleta}: ${totalGeneral}`);
+                        }
+                        // --- FIN NUEVOS LOGS DE DEPURACIÓN ---
+
                         generalValuesMap.set(nomenclaturaCompleta, totalGeneral);
                     }
                 });
 
-                // PASO 2: Calcular totales y restantes para filas de componentes de motor
+                // PASO 2: Calcular totales y restantes para filas de componentes de motor y filas de etiquetas (CICLOS)
                 filas.forEach((fila) => {
                     const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
                     if (!nomenclaturaCompleta || fila.querySelector('.motor-header')) {
@@ -1632,6 +1648,29 @@
 
                         const restante = limite - accumulatedTotalCycles;
                         aplicarEstiloRestante(restanteCelda, restante, limite);
+                    } else if (filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta)) {
+                        // Lógica específica para filas como "CICLOS 1" y "CICLOS 2"
+                        const vieneCelda = fila.querySelector('.viene-celda');
+                        const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
+                        const mesTotalCelda = fila.querySelector('.fila-total');
+                        const generalCelda = fila.querySelector('.fila-general');
+
+                        const viene = parseFloat(vieneCelda?.textContent.trim()) || 0;
+                        const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
+                        const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
+                        mesTotalCelda.textContent = formatNumber(totalMes);
+
+                        let motorNumero = null;
+                        const motorMatch = nomenclaturaCompleta.match(/\s(\d)$/);
+                        if (motorMatch) {
+                            motorNumero = parseInt(motorMatch[1]);
+                        }
+
+                        if (nomenclaturaCompleta.startsWith("CICLOS") && motorNumero !== null) {
+                            const noOfStarts = generalValuesMap.get(`ENGINE STARTS ${motorNumero}`) || 0;
+                            generalCelda.textContent = formatNumber(noOfStarts); // Establece el valor GENERAL de CICLOS al de ENGINE STARTS
+                        }
+                        // Las filas de CICLOS no tienen celda 'restante', así que no se llama a aplicarEstiloRestante aquí.
                     }
                 });
             });
@@ -1835,6 +1874,7 @@
             document.querySelectorAll('input[name="motorStatusPrintOption"]').forEach(radio => {
                 radio.addEventListener('change', renderMotorStatus);
             });
+            
 
             // Event listener para el nuevo botón "Estado de Componentes"
             btnComponentStatus.addEventListener('click', async () => {
@@ -1870,6 +1910,15 @@
                     showCustomAlert(`Error al cargar datos para la página de componentes: ${error.message}`);
                 }
             });
+
+            // Event listener para el botón de Inspecciones
+            btnInspections.addEventListener('click', () => {
+                if (!auth.currentUser) {
+                    showCustomAlert('Debes iniciar sesión para ver las inspecciones.');
+                    return;
+                }
+                window.location.href = 'INSPECCIONES.HTML';
+            });
         }
 
         // Configura la posición y la distancia de caída de la careta de Anonymous.
@@ -1903,3 +1952,4 @@
     </script>
 </body>
 </html>
+
