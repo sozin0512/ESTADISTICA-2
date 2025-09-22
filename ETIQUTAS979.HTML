@@ -98,15 +98,26 @@
 <body class="bg-gray-100">
     <!-- Main sticker container -->
     <div class="sticker-container">
+        
+        <!-- Model Selector -->
+        <div class="mb-4 bg-white p-2 rounded-md border-2 border-black">
+            <label for="model-select" class="block text-sm font-bold text-gray-700 mb-1">Seleccionar Modelo de Aeronave:</label>
+            <select id="model-select" class="w-full px-2 py-1 border border-black rounded-md bg-gray-50 text-base font-bold">
+                <option value="bell412">Bell 412</option>
+                <option value="uh1h">UH-1H</option>
+            </select>
+        </div>
 
         <!-- Header banner with logo and text -->
         <div class="bg-custom-yellow p-4 text-center rounded-t-lg border-2 border-black border-b-0">
             <div id="image-viewer" class="mb-2">
                  <p class="font-bold text-gray-700 mb-2"></p>
-              
-            <p class="text-xs text-black">ESCUADRON DE HELICOPTEROS</p>
+     
+            </div>
+            <p class="text-sm font-bold text-gray-800 mt-1">ESCN. HELICÓPTEROS</p>
+            <p class="text-xs text-gray-800">FUERZA AÉREA HONDUREÑA</p>
         </div>
-        <div class="bg-white text-center font-bold text-black text-lg py-1 border-2 border-black border-t-0">FUERZA AEREA HONDUREÑA</div>
+        <div class="bg-white text-center font-bold text-gray-800 text-lg py-1 border-2 border-black border-t-0">BASE HAM </div>
 
         <!-- Data table with 4 columns -->
         <div class="grid grid-cols-4 gap-0 text-xs border-2 border-black border-t-0 rounded-b-lg overflow-hidden">
@@ -241,8 +252,6 @@
         <div class="modal-content">
             <h2 class="text-xl font-bold mb-4">Firma del Mecánico</h2>
             <canvas id="modalSignatureCanvas" class="border border-black w-full h-48 rounded-md bg-white"></canvas>
-            <label for="mechanicNameInput" class="block text-sm font-bold mt-4">Nombre del Mecánico</label>
-            <input type="text" id="mechanicNameInput" placeholder="Escriba su nombre y licencia (ej: Juan Pérez / 12345)" class="w-full p-2 border border-gray-300 rounded-md mt-1">
             <div class="flex justify-end mt-4 space-x-2">
                 <button id="clearModalSignatureBtn" class="px-4 py-2 bg-gray-500 text-white font-bold rounded-md hover:bg-gray-600 transition-colors duration-200">Borrar</button>
                 <button id="cancelSignatureBtn" class="px-4 py-2 bg-yellow-500 text-white font-bold rounded-md hover:bg-yellow-600 transition-colors duration-200">
@@ -286,6 +295,7 @@
         let userId = null;
 
         // UI Elements
+        const modelSelect = document.getElementById('model-select');
         const taskTypeSelect = document.getElementById('task-type-select');
         const trabajosContainer = document.getElementById('trabajos-container');
         const saveButton = document.getElementById('saveButton');
@@ -306,87 +316,137 @@
         const modalCtx = modalSignatureCanvas.getContext('2d');
         const saveSignatureBtn = document.getElementById('saveSignatureBtn');
         const cancelSignatureBtn = document.getElementById('cancelSignatureBtn');
-        const mechanicNameInput = document.getElementById('mechanicNameInput');
         const clearModalSignatureBtn = document.getElementById('clearModalSignatureBtn');
 
 
-        // --- Data Structure for Inspections (same as before) ---
+        // --- Data Structure for Inspections ---
         const inspections = {
-             scheduled_inspections_a: {
-                label: "Scheduled Inspections - Part A",
-                items: {
-                    daily_inspection: { title: "Daily Inspection (DMC-412-A-05-40-00-00A-281A-A / 00022)", hours: 10 },
-                    '100_hour': { title: "100 Hour/12 Month Inspection (DMC-412-A-05-40-00-01A-281A-A / 00023)", hours: 100 },
-                    '1000_hour': { title: "1000 Hour Inspection (DMC-412-A-05-40-00-02A-281A-A / 00024)", hours: 1000 },
-                    '5000_hour': { title: "5000 Hour/5 Year Inspection (DMC-412-A-05-40-00-03A-281A-A / 00025)", hours: 5000 },
+            bell412: {
+                 label: "Bell 412",
+                 scheduled_inspections_a: {
+                    label: "Scheduled Inspections - Part A",
+                    items: {
+                        daily_inspection: { title: "Daily Inspection (DMC-412-A-05-40-00-00A-281A-A / 00022)", hours: 10 },
+                        '100_hour': { title: "100 Hour/12 Month Inspection (DMC-412-A-05-40-00-01A-281A-A / 00023)", hours: 100 },
+                        '1000_hour': { title: "1000 Hour Inspection (DMC-412-A-05-40-00-02A-281A-A / 00024)", hours: 1000 },
+                        '5000_hour': { title: "5000 Hour/5 Year Inspection (DMC-412-A-05-40-00-03A-281A-A / 00025)", hours: 5000 },
+                    }
+                },
+                scheduled_inspections_b: {
+                    label: "Scheduled Inspections - Part B",
+                    items: {
+                        '25_hour': { title: "25 Hour/30 Day Inspection (DMC-412-A-05-40-00-04A-281A-A / 00026)", hours: 25 },
+                        '300_hour': { title: "300 Hour/12 Month Inspection (DMC-412-A-05-40-00-05A-281A-A / 00027)", hours: 300 },
+                        '600_hour': { title: "600 Hour/12 Month Inspection (DMC-412-A-05-40-00-06A-281A-A / 00028)", hours: 600 },
+                        '5000_hour': { title: "5000 Hour/5 Year Inspection (DMC-412-A-05-40-00-07A-281A-A / 00029)", hours: 5000 },
+                    }
+                },
+                special_inspections: {
+                    label: "Special Inspections",
+                    items: {
+                        description: { title: "Description (DMC-412-A-05-47-00-00A-042A-A / 00030)" },
+                        daily_10_hour: { title: "Daily/10 Hour Inspection, Whichever Occurs First Until 250 Hours (DMC-412-A-05-47-00-00A-283A-A / 00031)", hours: 10 },
+                        '1_5_flight_hours_main_rotor': { title: "Between 1 and 5 Flight Hours After Main Rotor Hub Installation (DMC-412-A-05-47-00-01A-283A-A / 00032)", hours: 5 },
+                        '1_25_flight_hours_expandable_blade_bolt': { title: "Between 1 and 25 Flight Hours After Expandable Blade Bolt Installation (DMC-412-A-05-47-00-02A-283A-A / 00034)", hours: 25 },
+                        '25_hours_tail_rotor': { title: "Each 25 Hours of Tail Rotor Operation (DMC-412-A-05-47-00-05A-283A-A / 00037)", hours: 25 },
+                        '50_hours_after_installation': { title: "50 Hours After Installation of Components (DMC-412-A-05-47-00-06A-283A-A / 00038)", hours: 50 },
+                        '100_hours_collective_lever': { title: "Each 100 Hours of Collective Lever Operation (DMC-412-A-05-47-00-08A-283A-A / 00041)", hours: 100 },
+                        '150_hours_starter_generator': { title: "Each 150 Hours of Starter Generator (200SG119Q) Operation (DMC-412-A-05-47-00-09A-283A-A / 00042)", hours: 150 },
+                        '300_hours_expandable_blade_bolt': { title: "Each 300 Hours or 6 Months of Expandable Blade Bolt Operation (DMC-412-A-05-47-00-10A-283A-A / 00043)", hours: 300 },
+                        '600_hours_tail_rotor_driveshaft': { title: "Each 600 Hours of Tail Rotor Driveshaft Operation or 12 Months (DMC-412-A-05-47-00-11A-283A-A / 00044)", hours: 600 },
+                        '1000_hours_component': { title: "Each 1000 Hours of Component Operation (DMC-412-A-05-47-00-13A-283A-A / 00048)", hours: 1000 },
+                        '2500_hours_main_rotor_hub': { title: "Each 2500 Hours of Main Rotor Hub Assembly Operation (DMC-412-A-05-47-00-17A-283A-A / 00052)", hours: 2500 },
+                        '3000_hours_main_rotor_mast': { title: "Each 3000 Hours or 5 Years of Main Rotor Mast (412-040-366-103 and -105) Operation (DMC-412-A-05-47-00-21A-283A-A / 00056)", hours: 3000 },
+                        '3600_hours_airframe': { title: "3600 Hours Total Airframe Time and Each 300 Hours/12 Months Inspection (DMC-412-A-05-47-00-24A-283A-A / 00059)", hours: 3600 },
+                    }
+                },
+                remi: {
+                    label: "Remoción / Instalación",
+                    items: {
+                        main: { title: "Remoción / Instalación de Componente" }
+                    }
+                },
+                motores: {
+                    label: "Motores",
+                    items: {
+                        '25_hrs': { title: "Inspección de 25 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 25 },
+                        '50_hrs': { title: "Inspección de 50 hrs / 6 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 50 },
+                        '100_hrs': { title: "Inspección de 100 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 100 },
+                        '150_hrs': { title: "Inspección de 150 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 150 },
+                        '300_hrs': { title: "Inspección de 300 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 300 },
+                        '600_hrs': { title: "Inspección de 600 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 600 },
+                        '900_hrs': { title: "Inspección de 900 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 900 }
+                    }
                 }
             },
-            scheduled_inspections_b: {
-                label: "Scheduled Inspections - Part B",
-                items: {
-                    '25_hour': { title: "25 Hour/30 Day Inspection (DMC-412-A-05-40-00-04A-281A-A / 00026)", hours: 25 },
-                    '300_hour': { title: "300 Hour/12 Month Inspection (DMC-412-A-05-40-00-05A-281A-A / 00027)", hours: 300 },
-                    '600_hour': { title: "600 Hour/12 Month Inspection (DMC-412-A-05-40-00-06A-281A-A / 00028)", hours: 600 },
-                    '5000_hour': { title: "5000 Hour/5 Year Inspection (DMC-412-A-05-40-00-07A-281A-A / 00029)", hours: 5000 },
-                }
-            },
-            special_inspections: {
-                label: "Special Inspections",
-                items: {
-                    description: { title: "Description (DMC-412-A-05-47-00-00A-042A-A / 00030)" },
-                    daily_10_hour: { title: "Daily/10 Hour Inspection, Whichever Occurs First Until 250 Hours (DMC-412-A-05-47-00-00A-283A-A / 00031)", hours: 10 },
-                    '1_5_flight_hours_main_rotor': { title: "Between 1 and 5 Flight Hours After Main Rotor Hub Installation (DMC-412-A-05-47-00-01A-283A-A / 00032)", hours: 5 },
-                    '1_5_flight_hours_tailboom': { title: "Between 1 and 5 Flight Hours After Tailboom Installation or Attachment Bolt Replacement (DMC-412-A-05-47-00-00A-283B-A / 00033)", hours: 5 },
-                    '1_5_flight_hours_tail_rotor_gearbox': { title: "Between 1 and 5 Flight Hours After Tail Rotor Gearbox or Intermediate Gearbox Installation (DMC-412-A-05-47-00-32A-283A-A / 00033.1)", hours: 5 },
-                    '1_25_flight_hours_expandable_blade_bolt': { title: "Between 1 and 25 Flight Hours After Expandable Blade Bolt Installation (DMC-412-A-05-47-00-02A-283A-A / 00034)", hours: 25 },
-                    '5_10_flight_hours_tail_rotor_hub': { title: "Between 5 and 10 Hours of Flight After Tail Rotor Hub and Blade Assembly Installation (DMC-412-A-05-47-00-03A-283A-A / 00035)", hours: 10 },
-                    '25_hours_for_the_next_four': { title: "Each 25 Hours For the Next Four Inspections (DMC-412-A-05-47-00-04A-283A-A / 00036)", hours: 25 },
-                    '25_hours_tail_rotor': { title: "Each 25 Hours of Tail Rotor Operation (DMC-412-A-05-47-00-05A-283A-A / 00037)", hours: 25 },
-                    '25_hours_tailboom_attachment': { title: "Each 25 Hours Tailboom Attachment Inspection (DMC-412-A-05-47-00-30A-283A-A / 00039)", hours: 25 },
-                    '50_hours_after_installation': { title: "50 Hours After Installation of Components (DMC-412-A-05-47-00-06A-283A-A / 00038)", hours: 50 },
-                    '50_hours_tailboom_attachment': { title: "Each 50 Hours Tailboom Attachment Inspection (DMC-412-A-05-47-00-51A-283A-A / 00038.1)", hours: 50 },
-                    '100_hours_tailboom_vertical_fin': { title: "Each 100 Hours Tailboom Vertical Fin Spar Cap Inspection (DMC-412-A-05-47-00-31A-283A-A / 00040)", hours: 100 },
-                    '100_hours_collective_lever': { title: "Each 100 Hours of Collective Lever Operation (DMC-412-A-05-47-00-08A-283A-A / 00041)", hours: 100 },
-                    '150_hours_starter_generator': { title: "Each 150 Hours of Starter Generator (200SG119Q) Operation (DMC-412-A-05-47-00-09A-283A-A / 00042)", hours: 150 },
-                    '300_hours_expandable_blade_bolt': { title: "Each 300 Hours or 6 Months of Expandable Blade Bolt Operation (DMC-412-A-05-47-00-10A-283A-A / 00043)", hours: 300 },
-                    '600_hours_tail_rotor_driveshaft': { title: "Each 600 Hours of Tail Rotor Driveshaft Operation or 12 Months (DMC-412-A-05-47-00-11A-283A-A / 00044)", hours: 600 },
-                    '600_hours_tailboom_attachment_bolts': { title: "Each 600 Hours or 12 Months of Tailboom Attachment Bolts (DMC-412-A-05-47-00-00B-283B-A / 00045)", hours: 600 },
-                    '600_hours_main_driveshaft': { title: "Each 600 Hours of Main Driveshaft Operation or 12 Months (DMC-412-A-05-47-00-12A-283A-A / 00046)", hours: 600 },
-                    '600_hours_magnetic_brake': { title: "Each 600 Hours or 12 Months Inspection Of Magnetic Brake Assembly (DMC-412-A-05-47-00-50A-283A-A / 00047)", hours: 600 },
-                    '1000_hours_component': { title: "Each 1000 Hours of Component Operation (DMC-412-A-05-47-00-13A-283A-A / 00048)", hours: 1000 },
-                    '1000_hours_crosstube': { title: "Each 12 Months or 2500 Landings of Aft High Crosstube Operation (DMC-412-A-05-47-00-14A-283A-A / 00049)", hours: 1000 },
-                    '24_months_control_bolt': { title: "Each 24 Months of Control Bolt Operation (DMC-412-A-05-47-00-15A-283A-A / 00050)" },
-                    '24_months_main_rotor_mast': { title: "Each 24 Months of Main Rotor Mast Operation (DMC-412-A-05-47-00-16A-283A-A / 00051)" },
-                    '2500_hours_main_rotor_hub': { title: "Each 2500 Hours of Main Rotor Hub Assembly Operation (DMC-412-A-05-47-00-17A-283A-A / 00052)", hours: 2500 },
-                    '2500_hours_main_rotor_blade': { title: "Each 2500 Hours of Main Rotor Blade Operation (DMC-412-A-05-47-00-18A-283A-A / 00053)", hours: 2500 },
-                    '2500_or_3000_hours_main_rotor_mast': { title: "Each 2500 or 3000 Hours or 5 Years of Main Rotor Mast (412-040-366-109 and Subsequent) Operation (DMC-412-A-05-47-00-19A-283A-A / 00054)", hours: 3000 },
-                    '2500_hours_tail_rotor_drive_system': { title: "Each 2500 Hours of Tail Rotor Drive System Operation (DMC-412-A-05-47-00-20A-283A-A / 00055)", hours: 2500 },
-                    '3000_hours_main_rotor_mast': { title: "Each 3000 Hours or 5 Years of Main Rotor Mast (412-040-366-103 and -105) Operation (DMC-412-A-05-47-00-21A-283A-A / 00056)", hours: 3000 },
-                    '3000_hours_transmission_2': { title: "Each 3000 Hours of Transmission (412-040-002) Operation (DMC-412-A-05-47-00-22A-283A-A / 00057)", hours: 3000 },
-                    '3000_hours_transmission_4': { title: "Each 3000 Hours of Transmission (412-040-004/412-040-007/412-040-802) Operation (DMC-412-A-05-47-00-23A-283A-A / 00058)", hours: 3000 },
-                    '3600_hours_airframe': { title: "3600 Hours Total Airframe Time and Each 300 Hours/12 Months Inspection (DMC-412-A-05-47-00-24A-283A-A / 00059)", hours: 3600 },
-                    '3000_hours_transmission_mount': { title: "Each 3000 Hours or 5 Years Of Transmission Mount Assembly (204-031-927) And Friction Damper Assembly (204-031-920) Operation (DMC-412-A-05-47-00-28A-283A-A / 00060)", hours: 3000 },
-                    '2500_hours_collective_stick_tube': { title: "Each 2500 Hours or 10 Years Inspection Of Collective Stick Tube (DMC-412-A-05-47-00-29A-283A-A / 00061)", hours: 2500 },
-                }
-            },
-            remi: {
-                label: "Remoción / Instalación",
-                items: {
-                    main: { title: "Remoción / Instalación de Componente" }
-                }
-            },
-            motores: {
-                label: "Motores",
-                items: {
-                    '25_hrs': { title: "Inspección de 25 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 25 },
-                    '50_hrs': { title: "Inspección de 50 hrs / 6 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 50 },
-                    '100_hrs': { title: "Inspección de 100 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 100 },
-                    '150_hrs': { title: "Inspección de 150 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 150 },
-                    '150_hrs_6_meses': { title: "Inspección de 150 hrs / 6 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 150 },
-                    '150_hrs_12_meses': { title: "Inspección de 150 hrs / 12 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 150 },
-                    '300_hrs': { title: "Inspección de 300 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 300 },
-                    '600_hrs': { title: "Inspección de 600 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 600 },
-                    '900_hrs': { title: "Inspección de 900 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 900 }
+            uh1h: {
+                label: "UH-1H",
+                daily: {
+                    label: "Inspección Diaria (TM 1-1520-210-PMD)",
+                    items: {
+                        daily_1: { title: "Inspeccion general de la aeronave y sus componentes." },
+                        daily_2: { title: "Chequeo de la cabina de vuelo y compartimientos." },
+                        daily_3: { title: "Chequeo del sistema de combustible." },
+                        daily_4: { title: "Chequeo del sistema de aceite." },
+                        daily_5: { title: "Chequeo del motor y sus sistemas asociados." },
+                        daily_6: { title: "Chequeo del sistema del rotor principal y de cola." },
+                        daily_7: { title: "Chequeo del tren de aterrizaje." }
+                    }
+                },
+                phase_a: {
+                    label: "Inspección de Fase A (Cada 25 Horas)",
+                    items: {
+                        phase_a_1: { title: "Chequeo de seguridad de controles de vuelo." },
+                        phase_a_2: { title: "Inspeccion visual de la estructura del rotor principal y palas." },
+                        phase_a_3: { title: "Inspeccion de la transmision principal y caja de 90/42 grados." },
+                        phase_a_4: { title: "Inspeccion del sistema hidraulico." },
+                        phase_a_5: { title: "Inspeccion de la seccion del motor." }
+                    }
+                },
+                phase_b: {
+                    label: "Inspección de Fase B (Cada 50 Horas)",
+                     items: {
+                        phase_b_1: { title: "Lubricacion general de la aeronave." },
+                        phase_b_2: { title: "Chequeo de las baterias." },
+                        phase_b_3: { title: "Inspeccion del sistema de extincion de incendios." },
+                        phase_b_4: { title: "Inspeccion de los cinturones de seguridad y arneses." }
+                    }
+                },
+                phase_c: {
+                    label: "Inspección de Fase C (Cada 100 Horas)",
+                    items: {
+                        phase_c_1: { title: "Cambio de aceite y filtro del motor." },
+                        phase_c_2: { title: "Cambio de aceite y filtro de la transmision principal." },
+                        phase_c_3: { title: "Inspeccion y limpieza de los inyectores de combustible." },
+                        phase_c_4: { title: "Inspeccion del sistema de enfriamiento del aceite." },
+                        phase_c_5: { title: "Chequeo de tension y estado de las fajas del motor." }
+                    }
+                },
+                phase_d: {
+                    label: "Inspección de Fase D (Cada 300 Horas)",
+                    items: {
+                        phase_d_1: { title: "Inspeccion del sistema neumatico." },
+                        phase_d_2: { title: "Inspeccion de la unidad de control de combustible (FCU)." },
+                        phase_d_3: { title: "Chequeo de la tuberia de combustible y aceite por fugas." },
+                        phase_d_4: { title: "Inspeccion detallada de la estructura de la aeronave." }
+                    }
+                },
+                 phase_e: {
+                    label: "Inspección de Fase E (Cada 600 Horas)",
+                    items: {
+                        phase_e_1: { title: "Reemplazo de los filtros del sistema hidraulico." },
+                        phase_e_2: { title: "Inspeccion del eje de mando del rotor de cola." },
+                        phase_e_3: { title: "Inspeccion de los componentes del tren de aterrizaje." },
+                        phase_e_4: { title: "Chequeo del sistema de calefaccion y ventilacion." }
+                    }
+                },
+                 phase_f: {
+                    label: "Inspección de Fase F (Cada 1200 Horas)",
+                    items: {
+                        phase_f_1: { title: "Inspeccion estructural profunda (NDI segun sea requerido)." },
+                        phase_f_2: { title: "Reemplazo de mangueras y sellos segun el manual." },
+                        phase_f_3: { title: "Overhaul de componentes mayores segun horas de servicio." }
+                    }
                 }
             }
         };
@@ -434,16 +494,22 @@
         }
 
         // --- Form generation functions ---
-        function populateTaskSelector() {
+        function populateTaskSelector(modelKey) {
             taskTypeSelect.innerHTML = '<option value="none">Seleccionar y Añadir Trabajo</option>';
-            for (const groupKey in inspections) {
-                const group = inspections[groupKey];
+            const modelData = inspections[modelKey];
+
+            for (const groupKey in modelData) {
+                if (groupKey === 'label') continue; // Skip the model label
+
+                const group = modelData[groupKey];
                 const optgroup = document.createElement('optgroup');
                 optgroup.label = group.label;
+
                 for (const itemKey in group.items) {
                     const item = group.items[itemKey];
                     const option = document.createElement('option');
-                    option.value = `${groupKey}.${itemKey}`;
+                    // The value now needs to include the model key
+                    option.value = `${modelKey}.${groupKey}.${itemKey}`;
                     option.textContent = item.title;
                     optgroup.appendChild(option);
                 }
@@ -469,46 +535,46 @@
             return itemRow;
         }
         
-        function addItemToGroupBlock(groupKey, itemKey) {
-            const groupData = inspections[groupKey];
-            const itemData = groupData.items[itemKey];
-            if (!itemData) return;
+        function addItemToGroupBlock(modelKey, groupKey, itemKey) {
+             const groupData = inspections[modelKey][groupKey];
+             const itemData = groupData.items[itemKey];
+             if (!itemData) return;
 
-            let groupBlock = document.getElementById(`trabajo-group-${groupKey}`);
-            if (!groupBlock) {
-                groupBlock = document.createElement('div');
-                groupBlock.id = `trabajo-group-${groupKey}`;
-                groupBlock.dataset.groupKey = groupKey;
-                groupBlock.classList.add('mt-4');
-                const header = document.createElement('div');
-                header.classList.add('flex', 'justify-between', 'items-center', 'font-bold', 'text-sm', 'text-white', 'bg-custom-blue', 'p-1', 'rounded-t-md');
-                header.innerHTML = `
-                    <p>${groupData.label}</p>
-                    <button class="remove-block-btn text-white hover:text-red-300 font-bold px-2 no-print text-xl">&times;</button>
-                `;
-                header.querySelector('.remove-block-btn').onclick = () => { groupBlock.remove(); updateItemNumbers(); };
-                groupBlock.appendChild(header);
+             let groupBlock = document.getElementById(`trabajo-group-${groupKey}`);
+             if (!groupBlock) {
+                 groupBlock = document.createElement('div');
+                 groupBlock.id = `trabajo-group-${groupKey}`;
+                 groupBlock.dataset.groupKey = groupKey;
+                 groupBlock.classList.add('mt-4');
+                 const header = document.createElement('div');
+                 header.classList.add('flex', 'justify-between', 'items-center', 'font-bold', 'text-sm', 'text-white', 'bg-custom-blue', 'p-1', 'rounded-t-md');
+                 header.innerHTML = `
+                     <p>${groupData.label}</p>
+                     <button class="remove-block-btn text-white hover:text-red-300 font-bold px-2 no-print text-xl">&times;</button>
+                 `;
+                 header.querySelector('.remove-block-btn').onclick = () => { groupBlock.remove(); updateItemNumbers(); };
+                 groupBlock.appendChild(header);
 
-                const contentContainer = document.createElement('div');
-                contentContainer.classList.add('border-2', 'border-t-0', 'border-black', 'rounded-b-md', 'p-2', 'bg-white', 'space-y-2');
-                const listContent = document.createElement('div');
-                listContent.classList.add('list-content', 'space-y-1');
-                contentContainer.appendChild(listContent);
-                groupBlock.appendChild(contentContainer);
-                trabajosContainer.appendChild(groupBlock);
-            }
+                 const contentContainer = document.createElement('div');
+                 contentContainer.classList.add('border-2', 'border-t-0', 'border-black', 'rounded-b-md', 'p-2', 'bg-white', 'space-y-2');
+                 const listContent = document.createElement('div');
+                 listContent.classList.add('list-content', 'space-y-1');
+                 contentContainer.appendChild(listContent);
+                 groupBlock.appendChild(contentContainer);
+                 trabajosContainer.appendChild(groupBlock);
+             }
 
-            const listContent = groupBlock.querySelector('.list-content');
-            if (listContent.querySelector(`[data-item-key="${itemKey}"]`)) return;
-            
-            if (groupKey === 'remi') {
-                 listContent.appendChild(createItemElement(removalDescription, 'remi_remocion'));
-                 listContent.appendChild(createItemElement(installationDescription, 'remi_instalacion'));
-            } else {
-                 listContent.appendChild(createItemElement(itemData.title, itemKey));
-            }
-            updateItemNumbers();
-        }
+             const listContent = groupBlock.querySelector('.list-content');
+             if (listContent.querySelector(`[data-item-key="${itemKey}"]`)) return;
+
+             if (groupKey === 'remi') {
+                  listContent.appendChild(createItemElement(removalDescription, 'remi_remocion'));
+                  listContent.appendChild(createItemElement(installationDescription, 'remi_instalacion'));
+             } else {
+                  listContent.appendChild(createItemElement(itemData.title, itemKey));
+             }
+             updateItemNumbers();
+         }
 
         function updateItemNumbers() {
             const allItems = document.querySelectorAll('#trabajos-container .item-number');
@@ -517,25 +583,31 @@
             });
         }
         
-        taskTypeSelect.addEventListener('change', () => {
-            const selectedValue = taskTypeSelect.value;
-            if (selectedValue === 'none') return;
-            const [groupKey, itemKey] = selectedValue.split('.');
-            const selectedItemData = inspections[groupKey]?.items[itemKey];
-
-            if (selectedItemData && typeof selectedItemData.hours === 'number') {
-                const parentGroup = inspections[groupKey].items;
-                for (const currentItemKey in parentGroup) {
-                    const currentItemData = parentGroup[currentItemKey];
-                    if (typeof currentItemData.hours === 'number' && currentItemData.hours <= selectedItemData.hours) {
-                        addItemToGroupBlock(groupKey, currentItemKey);
-                    }
-                }
-            } else {
-                addItemToGroupBlock(groupKey, itemKey);
-            }
-            taskTypeSelect.value = 'none';
+        modelSelect.addEventListener('change', (e) => {
+            const selectedModel = e.target.value;
+            populateTaskSelector(selectedModel);
+            trabajosContainer.innerHTML = ''; // Clear existing tasks when model changes
         });
+
+        taskTypeSelect.addEventListener('change', () => {
+             const selectedValue = taskTypeSelect.value;
+             if (selectedValue === 'none') return;
+             const [modelKey, groupKey, itemKey] = selectedValue.split('.');
+             const selectedItemData = inspections[modelKey]?.[groupKey]?.items[itemKey];
+
+             if (selectedItemData && typeof selectedItemData.hours === 'number') {
+                 const parentGroup = inspections[modelKey][groupKey].items;
+                 for (const currentItemKey in parentGroup) {
+                     const currentItemData = parentGroup[currentItemKey];
+                     if (typeof currentItemData.hours === 'number' && currentItemData.hours <= selectedItemData.hours) {
+                         addItemToGroupBlock(modelKey, groupKey, currentItemKey);
+                     }
+                 }
+             } else {
+                 addItemToGroupBlock(modelKey, groupKey, itemKey);
+             }
+             taskTypeSelect.value = 'none';
+         });
 
         // --- Signature Pad functionality ---
         let drawing = false;
@@ -563,9 +635,7 @@
             targetCtx.beginPath(); 
         }
         function draw(e, targetCtx, isModal) {
-            // This condition was flawed. Let's fix it.
             if ((isModal && !modalDrawing) || (!isModal && !drawing)) return;
-
             const rect = e.target.getBoundingClientRect();
             let x, y;
             if (e.touches) {
@@ -581,7 +651,6 @@
             targetCtx.moveTo(x, y);
         }
 
-        // --- Main Canvas (Preview) Listeners (only opens modal) ---
         canvas.addEventListener('click', () => {
             signatureModal.classList.remove('hidden');
             resizeCanvas(modalSignatureCanvas, modalCtx);
@@ -592,7 +661,6 @@
             mechanicNameInput.value = currentLic ? `${currentJefe} / ${currentLic}` : currentJefe;
         });
         
-        // --- Modal Canvas Listeners ---
         modalSignatureCanvas.addEventListener('mousedown', (e) => startPosition(e, modalCtx, true));
         modalSignatureCanvas.addEventListener('mouseup', (e) => endPosition(e, modalCtx, true));
         modalSignatureCanvas.addEventListener('mousemove', (e) => draw(e, modalCtx, true));
@@ -600,7 +668,6 @@
         modalSignatureCanvas.addEventListener('touchend', (e) => { e.preventDefault(); endPosition(e, modalCtx, true); });
         modalSignatureCanvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e, modalCtx, true); });
 
-        // --- Modal Buttons ---
         cancelSignatureBtn.addEventListener('click', () => {
             signatureModal.classList.add('hidden');
         });
@@ -614,7 +681,6 @@
         saveSignatureBtn.addEventListener('click', () => {
             const mechanicInfo = mechanicNameInput.value.trim();
             
-            // Draw the name onto the modal canvas
             if (mechanicInfo) {
                 modalCtx.font = "16px Inter";
                 modalCtx.fillStyle = "black";
@@ -622,11 +688,9 @@
                 modalCtx.fillText(mechanicInfo, modalSignatureCanvas.width / 2, modalSignatureCanvas.height - 10);
             }
 
-            // Copy the result to the main canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(modalSignatureCanvas, 0, 0, canvas.width, canvas.height);
 
-            // Update the main form fields
             const parts = mechanicInfo.split('/');
             const name = parts[0] ? parts[0].trim() : '';
             const license = parts[1] ? parts[1].trim() : '';
@@ -671,12 +735,16 @@
                     });
                 });
                 if (items.length > 0) {
-                    trabajos_realizados.push({ groupKey: groupKey, groupLabel: inspections[groupKey].label, items: items });
+                     // Find the group label dynamically
+                    const modelKey = modelSelect.value;
+                    const groupLabel = inspections[modelKey]?.[groupKey]?.label || groupKey;
+                    trabajos_realizados.push({ groupKey, groupLabel, items });
                 }
             });
 
             const signatureData = canvas.toDataURL();
             const dataToSave = {
+                selectedModel: modelSelect.value,
                 fecha_inicio: document.getElementById('fecha_inicio').textContent,
                 modelo: document.getElementById('modelo').textContent,
                 numero_de_serie: document.getElementById('numero_de_serie').textContent,
@@ -719,7 +787,7 @@
             }
         }
 
-        // --- AI Scan Functionality (no changes) ---
+        // --- AI Scan Functionality ---
         scanImageBtn.addEventListener('click', async () => {
             const file = imageUpload.files[0];
             if (!file) {
@@ -737,7 +805,6 @@
                 mainImage.src = fileDataUrl;
                 const base64Data = fileDataUrl.split(',')[1];
                 
-                // NOTE: A real API key would be required outside of the Canvas environment
                 const apiKey = ""; 
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
@@ -806,7 +873,7 @@
                         const recordDiv = document.createElement('div');
                         recordDiv.classList.add('record-item', 'p-4', 'border', 'border-gray-300', 'bg-white', 'rounded-md', 'mb-2', 'cursor-pointer', 'hover:bg-gray-50');
                         recordDiv.innerHTML = `
-                            <p class="font-bold">Matrícula: ${data.matricula || 'N/A'}</p>
+                            <p class="font-bold">Matrícula: ${data.matricula || 'N/A'} (${data.selectedModel || 'N/A'})</p>
                             <p class="text-sm">Jefe: ${data.jefe_taller || 'N/A'}</p>
                             <p class="text-xs text-gray-500">Fecha: ${data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString() : 'N/A'}</p>
                         `;
@@ -828,6 +895,10 @@
             statusMessage.textContent = `Registro cargado. Puede editar y guardar.`;
             statusMessage.style.color = 'blue';
 
+            // Set model selector first
+            modelSelect.value = data.selectedModel || 'bell412';
+            populateTaskSelector(modelSelect.value);
+
             Object.keys(initialValues).forEach(key => {
                 const element = document.getElementById(key);
                 if (element) {
@@ -840,17 +911,16 @@
             trabajosContainer.innerHTML = '';
             if (data.trabajos_realizados && Array.isArray(data.trabajos_realizados)) {
                 data.trabajos_realizados.forEach(groupData => {
-                    if (groupData.items && Array.isArray(groupData.items)) {
-                        groupData.items.forEach(item => {
-                            addItemToGroupBlock(groupData.groupKey, item.key);
-                            // We need to update the text content for editable items like remocion/instalacion
-                            const addedElement = trabajosContainer.querySelector(`[data-item-key="${item.key}"] p`);
-                            if(addedElement) {
-                                addedElement.textContent = item.text;
-                            }
-                        });
-                    }
-                });
+                     if (groupData.items && Array.isArray(groupData.items)) {
+                         groupData.items.forEach(item => {
+                             addItemToGroupBlock(data.selectedModel, groupData.groupKey, item.key);
+                             const addedElement = trabajosContainer.querySelector(`[data-item-key="${item.key}"] p`);
+                             if(addedElement) {
+                                 addedElement.textContent = item.text;
+                             }
+                         });
+                     }
+                 });
             }
             updateItemNumbers();
         }
@@ -869,8 +939,9 @@
 
         // Initial setup
         initAuthAndApp();
-        populateTaskSelector();
+        populateTaskSelector(modelSelect.value); // Populate with default model
     </script>
 </body>
 </html>
+
 
