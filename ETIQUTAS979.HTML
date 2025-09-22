@@ -101,13 +101,14 @@
 
         <!-- Header banner with logo and text -->
         <div class="bg-custom-yellow p-4 text-center rounded-t-lg border-2 border-black border-b-0">
-            <div class="flex justify-center items-center">
-                <img src="IIIIIIIII.png" alt="Logo de ESCN. Helicópteros" class="w-24 h-24 rounded-full border-2 border-black p-2 bg-gray-100 object-contain">
+            <div id="image-viewer" class="mb-2">
+                <p class="font-bold text-gray-700 mb-2"></p>
+    
             </div>
             <p class="text-sm font-bold text-gray-800 mt-1">ESCN. HELICÓPTEROS</p>
             <p class="text-xs text-gray-800">FUERZA AÉREA HONDUREÑA</p>
         </div>
-        <div class="bg-white text-center font-bold text-gray-800 text-lg py-1 border-2 border-black border-t-0">FAH</div>
+        <div class="bg-red-500text-center font-bold text-gray-800 text-lg py-1 border-2 border-black border-t-0"></div>
 
         <!-- Data table with 4 columns -->
         <div class="grid grid-cols-4 gap-0 text-xs border-2 border-black border-t-0 rounded-b-lg overflow-hidden">
@@ -156,20 +157,12 @@
         
         <!-- Text and signature sections -->
         <div class="mt-4 border-2 border-black rounded-lg p-2 bg-white">
-            <div class="flex items-center space-x-2">
-                <h3 class="font-bold text-sm editable-cell" contenteditable="true">Se Completaron los siguientes trabajos:</h3>
-                <!-- Button hidden on print -->
-                <div class="no-print">
-                    <select id="task-type-select" class="px-2 py-1 border border-black rounded-md bg-gray-50 text-xs">
-                        <option value="none">Seleccionar Tipo de Trabajo</option>
-                        <option value="inspection_1">Inspección #1</option>
-                        <option value="inspection_2">Inspección #2</option>
-                        <option value="inspection_3">Inspección #3</option>
-                        <option value="inspection_4">Inspección #4</option>
-                        <option value="inspection_5">Inspección #5</option>
-                        <option value="inspection_6">Inspección #6</option>
-                        <option value="remi">Remoción / Instalación</option>
-                        <option value="motores">Motores</option>
+            <div class="flex justify-between items-center space-x-4">
+                <h3 class="font-bold text-sm editable-cell flex-shrink-0" contenteditable="true">Se Completaron los siguientes trabajos:</h3>
+                <!-- Dropdown to add tasks -->
+                <div class="no-print flex-grow">
+                    <select id="task-type-select" class="w-full px-2 py-1 border border-black rounded-md bg-gray-50 text-xs">
+                        <!-- Options will be dynamically generated here -->
                     </select>
                 </div>
             </div>
@@ -190,12 +183,13 @@
 
                 <!-- Data below the signature -->
                 <div class="flex justify-between items-center w-full mt-4 text-xs">
+                   
                     <div class="flex items-center space-x-2">
                         <p class="font-bold">Serie</p>
-                        <p id="firma" class="editable-cell text-sm font-bold" contenteditable="true"></p>
+                        <p id="serie" class="editable-cell text-sm font-bold" contenteditable="true"></p>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <p class="font-bold">Jefe de Taller</p>
+                      <div class="flex items-center space-x-2">
+                        <p class="font-bold">JEFE DE TALLER</p>
                         <p id="jefe_taller" class="editable-cell text-sm font-bold" contenteditable="true"></p>
                     </div>
                     <div class="flex items-center space-x-2">
@@ -271,9 +265,9 @@
         // =========================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyAnDAVVRTnl_SHejO7lyqrkGbPcFNyIBHc",
-            authDomain: "reportesti-41047.firebaseapp.com",
+            authDomain: "reportesti-4104T7.firebaseapp.com",
             projectId: "reportesti-41047",
-            storageBucket: "reportesti-41047.firebasestorage.app",
+            storageBucket: "reportesti-41047.appspot.com",
             messagingSenderId: "997680984231",
             appId: "1:997680984231:web:d9c27e1ac8eaf9473feb82"
         };
@@ -306,513 +300,89 @@
         const clearBtn = document.getElementById('clearSignatureBtn');
         const imageUpload = document.getElementById('imageUpload');
         const scanImageBtn = document.getElementById('scanImageBtn');
+        const mainImage = document.getElementById('main-image');
 
-        // Static data for form generation
+        // --- Data Structure for Inspections ---
         const inspections = {
-            inspection_1: {
-                title: "Se completó la inspección #1, de 100 horas y 12 meses. (MM 5-00-00 / Tabla 5-1)",
-                sections: [
-                    {
-                        title: "Programa de Limitaciones de Aeronavegabilidad",
-                        items: [
-                            "Inspección de 25 hrs (MM 4-00-00 / Tabla 4-1)"
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Programadas-Parte “A”",
-                        items: [
-                            "Inspección diaria-parte “A” (MM 5-00-00 / Para 5-5)",
-                            "Inspección # 1 de 100 hrs / 12 meses-parte “A” (MM 5-00-00 / Para 5-6)"
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Especiales",
-                        items: [
-                            "Inspección de 25 hrs (MM 5-00-00 / Para 5-17, 5-18.)",
-                            "Inspección de 100 hrs de operación de la collective lever (MM 5-00-00 / Para 5-21)"
-                        ]
-                    },
-                    {
-                        title: "Lubricación",
-                        items: [
-                            "Lubricación de 25 hrs (MM 12-00-00 / Tabla 12-3)",
-                            "Lubricación de 50 hrs (MM 12-00-00 / Tabla 12-3)"
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Adicionales",
-                        items: [
-                            "Ciclaje de la batería de nickel y cadmium – 100 hrs (MM 96-00-00 / Para 96-25, 96-26)"
-                        ]
-                    },
-                    {
-                        title: "Boletines de Servicio (ASB's) Recurrentes",
-                        items: [
-                            "ASB 412-96-89 (to prevent fatigue failure of the T/R yoke assembly P/N 212-011-702-ALL)",
-                            "ASB 412-00-100 (inspection of cap angle P/N 212-030-191-001)",
-                            "ASB 412-00-102 Rev. “A”. (T/R counterweight bell crank retention nut)",
-                            "ASB 412-11-148 Rev. “A”. (inspection of collective lever P/N 412-010-408-101)",
-                            "ASB 412-13-155 (inspection of tail rotor blade P/N 212-010-750-ALL)"
-                        ]
-                    },
-                    {
-                        title: "Trabajos Adicionales",
-                        items: [
-                            "Se instaló sello del mástil, nuevo P/N 412-340-012-101",
-                            "Se completó pintura general de la aeronave (gris claro parte superior y gris oscuro parte inferior del fuselaje)"
-                        ]
-                    }
-                ]
+            scheduled_inspections_a: {
+                label: "Scheduled Inspections - Part A",
+                items: {
+                    daily_inspection: { title: "Daily Inspection (DMC-412-A-05-40-00-00A-281A-A / 00022)", hours: 10 },
+                    '100_hour': { title: "100 Hour/12 Month Inspection (DMC-412-A-05-40-00-01A-281A-A / 00023)", hours: 100 },
+                    '1000_hour': { title: "1000 Hour Inspection (DMC-412-A-05-40-00-02A-281A-A / 00024)", hours: 1000 },
+                    '5000_hour': { title: "5000 Hour/5 Year Inspection (DMC-412-A-05-40-00-03A-281A-A / 00025)", hours: 5000 },
+                }
             },
-            inspection_2: {
-                title: "Se completó la inspección #2 de 200 horas. (MM 5-00-00 / Tabla 5-1)",
-                sections: [
-                    {
-                        title: "Inspecciones Programadas-Parte “A”",
-                        items: [
-                            "Inspección de 25 hrs (MM 4-00-00 / Tabla 4-1)",
-                            "Inspección diaria-parte “A” (MM 5-00-00 / Para 5-5)",
-                            "Inspección # 2 de 200 hrs / 12 meses-parte “A” (MM 5-00-00 / Para 5-6)",
-                            "Inspección de 12 meses - first aid kit",
-                            "Chequeo de 12 meses del peso - fire extinguisher cabin",
-                            "Chequeo de 12 meses del peso - fire extinguisher cockpit"
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Especiales",
-                        items: [
-                            "Inspección de 25 hrs (MM 5-00-00 / Para 5-17, 5-18.)",
-                            "Inspección de 100 hrs de operación de la collective lever (MM 5-00-00 / Para 5-21)",
-                            "Inspección de 300 hrs / 6 meses de operación de los pernos expandibles de las palas del rotor principal (MM 5-00-00 / para 5-22a)",
-                            "Inspección de 600 hrs / 12 meses de operación de los ejes impulsores del rotor de cola (MM 5-00-00 / para 5-23)",
-                            "Inspección de 600 hrs / 12 meses de operación del eje impulsor principal (MM 5-00-00 / para 5-24)",
-                            "Inspección de 24 meses de operación de los pernos de los controles de vuelo (MM 5-00-00 / para 5-27)",
-                            "Inspección de 24 meses de operación del mástil del rotor principal (MM 5-00-00 / Para 5-27A)"
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Adicionales",
-                        items: [
-                            "Ciclaje de la batería de nickel y cadmium – 100 hrs (MM 96-00-00 / Para 96-25, 96-26)",
-                            "Inspección de los tapones de llenado del sistema de combustible, sistema de aceite y sistema hidráulico, por propio funcionamiento y sellado– 12 meses (MM 5-00-00 / para 5-6)",
-                            "Inspección del sistema de instrumentos- 12 meses (MM 5-00-00 / para 5-6):",
-                            "   Calibración de los sistemas compass del piloto y copiloto y compass magnético standby.",
-                            "   Drenado del sistema pitot-static por cualquier humedad acumulada.",
-                            "   Prueba del sistema pitot-static por fugas."
-                        ]
-                    },
-                    {
-                        title: "Lubricación",
-                        items: [
-                            "Lubricación de 25 hrs (MM 12-00-00 / Tabla 12-3)",
-                            "Lubricación de 50 hrs (MM 12-00-00 / Tabla 12-3)",
-                            "Lubricación de las balineras colgantes del rotor de cola – 300 hrs (MM 12-00-00 / Tabla 12-3)",
-                            "Cambio de aceite de la caja de 42º- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)",
-                            "Cambio de aceite de la caja de 90º- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)",
-                            "Cambio de aceite y filtro externo de la transmisión- 3000 hrs / 12 meses (MM 12-00-00 / Tabla 12-1)"
-                        ]
-                    },
-                    {
-                        title: "Inspecciones de Autoridad Reguladora",
-                        items: [
-                            "Inspección de 12 meses compass swing-412",
-                            "Chequeo por fuga Sistema estático pitot-24 (FAR 91.413).",
-                            "Recertificación del transponder - 24 meses (FAR 91.411).",
-                            "Inspección de 24 meses altimetro del copiloto (FAR91.411 / car 571 app “b”)."
-                        ]
-                    },
-                    {
-                        title: "Boletines de Servicio (ASB's) Recurrentes",
-                        items: [
-                            "ASB 412-96-89 (to prevent fatigue failure of the T/R yoke assembly P/N 212-011-702-ALL)",
-                            "ASB 412-00-100 (inspection of cap angle P/N 212-030-191-001)",
-                            "ASB 412-00-102 Rev. “A”. (T/R counterweight bell crank retention nut)",
-                            "ASB 412-09-137 (main rotor blade expandable bolt inspection P/N 412-010-137-103)",
-                            "ASB 412-11-148 Rev. “A”. (inspection of collective lever P/N 412-010-408-101)",
-                            "ASB 412-13-155 (inspection of tail rotor blade P/N 212-010-750-ALL)"
-                        ]
-                    },
-                    {
-                        title: "Programa de Retiro & Overhaul de Componentes",
-                        items: [
-                            "Se instaló Nuevo M/R Control System Bolts Kit P/N 412-704-112-105, 1EA.",
-                            "Se instaló Nuevo M/R Supplemental Control System Bolts Kit P/N 20-057-5-24D, 3EA."
-                        ]
-                    },
-                    {
-                        title: "Trabajos Adicionales",
-                        items: [
-                            "Se instaló Nuevo Sello del Mástil, P/N 412-340-012-101, 1EA.",
-                            "Se instaló Nuevos Bushings de la Collective Lever, P/N 412-010-421-103, 2EA.",
-                            "Se instaló Nuevo Bellcrank del Sistema Antitorque, P/N 212-001-759-101, 1EA.",
-                            "Se instaló Nuevo Panel Assy P/N 205-032-811-077, 1EA."
-                        ]
-                    }
-                ]
+            scheduled_inspections_b: {
+                label: "Scheduled Inspections - Part B",
+                items: {
+                    '25_hour': { title: "25 Hour/30 Day Inspection (DMC-412-A-05-40-00-04A-281A-A / 00026)", hours: 25 },
+                    '300_hour': { title: "300 Hour/12 Month Inspection (DMC-412-A-05-40-00-05A-281A-A / 00027)", hours: 300 },
+                    '600_hour': { title: "600 Hour/12 Month Inspection (DMC-412-A-05-40-00-06A-281A-A / 00028)", hours: 600 },
+                    '5000_hour': { title: "5000 Hour/5 Year Inspection (DMC-412-A-05-40-00-07A-281A-A / 00029)", hours: 5000 },
+                }
             },
-            inspection_3: {
-                title: "Inspección #3 (300 HORAS)",
-                sections: [
-                    {
-                        title: "Programa de Limitaciones de Aeronavegabilidad",
-                        items: [
-                            "Inspección de 25 hrs (MM 4-00-00 / Tabla 4-1)."
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Programadas-Parte “A”",
-                        items: [
-                            "Inspección diaria-parte “A” (MM 5-00-00 / Para 5-5).",
-                            "Inspección # 2 de 200 hrs / 12 meses-parte “A” (MM 5-00-00 / Para 5-6).",
-                            "Inspección de 12 meses - first aid kit.",
-                            "Chequeo de 12 meses del peso - fire extinguisher cabin.",
-                            "Chequeo de 12 meses del peso - fire extinguisher cockpit."
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Especiales",
-                        items: [
-                            "Inspección de 25 hrs (MM 5-00-00 / Para 5-17, 5-18.).",
-                            "Inspección de 100 hrs de operación de la collective lever (MM 5-00-00 / Para 5-21).",
-                            "Inspección de 300 hrs / 6 meses de operación de los pernos expandibles de las palas del rotor principal (MM 5-00-00 / para 5-22a).",
-                            "Inspección de 600 hrs / 12 meses de operación de los ejes impulsores del rotor de cola (MM 5-00-00 / para 5-23).",
-                            "Inspección de 600 hrs / 12 meses de operación del eje impulsor principal (MM 5-00-00 / para 5-24).",
-                            "Inspección de 24 meses de operación de los pernos de los controles de vuelo (MM 5-00-00 / para 5-27).",
-                            "Inspección de 24 meses de operación del mástil del rotor principal (MM 5-00-00 / Para 5-27A)."
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Adicionales",
-                        items: [
-                            "Ciclaje de la batería de nickel y cadmium – 100 hrs (MM 96-00-00 / Para 96-25, 96-26).",
-                            "Inspección de los tapones de llenado del sistema de combustible, sistema de aceite y sistema hidráulico, por propio funcionamiento y sellado– 12 meses (MM 5-00-00 / para 5-6).",
-                            "Inspección del sistema de instrumentos- 12 meses (MM 5-00-00 / para 5-6):",
-                            "    Calibración de los sistemas compass del piloto y copiloto y compass magnético standby.",
-                            "    Drenado del sistema pitot-static por cualquier humedad acumulada.",
-                            "    Prueba del sistema pitot-static por fugas."
-                        ]
-                    },
-                    {
-                        title: "Lubricación",
-                        items: [
-                            "Lubricación de 25 hrs (MM 12-00-00 / Tabla 12-3).",
-                            "Lubricación de 50 hrs (MM 12-00-00 / Tabla 12-3).",
-                            "Lubricación de las balineras colgantes del rotor de cola – 300 hrs (MM 12-00-00 / Tabla 12-3).",
-                            "Cambio de aceite de la caja de 42º- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1).",
-                            "Cambio de aceite de la caja de 90º- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1).",
-                            "Cambio de aceite y filtro externo de la transmisión- 3000 hrs / 12 meses (MM 12-00-00 / Tabla 12-1)."
-                        ]
-                    },
-                    {
-                        title: "Inspecciones de Autoridad Reguladora",
-                        items: [
-                            "Inspección de 12 meses compass swing-412.",
-                            "Chequeo por fuga Sistema estático pitot-24 (FAR 91.413).",
-                            "Recertificación del transponder - 24 meses (FAR 91.411).",
-                            "Inspección de 24 meses altimetro del copiloto (FAR91.411 / car 571 app “b”)."
-                        ]
-                    },
-                    {
-                        title: "Boletines de Servicio (ASB's) Recurrentes",
-                        items: [
-                            "ASB 412-96-89 (to prevent fatigue failure of the T/R yoke assembly P/N 212-011-702-ALL).",
-                            "ASB 412-00-100 (inspection of cap angle P/N 212-030-191-001).",
-                            "ASB 412-00-102 Rev. “A”. (T/R counterweight bell crank retention nut).",
-                            "ASB 412-09-137 (main rotor blade expandable bolt inspection P/N 412-010-137-103).",
-                            "ASB 412-11-148 Rev. “A”. (inspection of collective lever P/N 412-010-408-101).",
-                            "ASB 412-13-155 (inspection of tail rotor blade P/N 212-010-750-ALL)."
-                        ]
-                    },
-                    {
-                        title: "Programa de Retiro & Overhaul de Componentes",
-                        items: [
-                            "Se instaló Nuevo M/R Control System Bolts Kit P/N 412-704-112-105, 1EA.",
-                            "Se instaló Nuevo M/R Supplemental Control System Bolts Kit P/N 20-057-5-24D, 3EA."
-                        ]
-                    },
-                    {
-                        title: "Trabajos Adicionales",
-                        items: [
-                            "Se instaló Nuevo Sello del Mástil, P/N 412-340-012-101, 1EA.",
-                            "Se instaló Nuevos Bushings de la Collective Lever, P/N 412-010-421-103, 2EA.",
-                            "Se instaló Nuevo Bellcrank del Sistema Antitorque, P/N 212-001-759-101, 1EA.",
-                            "Se instaló Nuevo Panel Assy P/N 205-032-811-077, 1EA."
-                        ]
-                    }
-                ]
-            },
-            inspection_4: {
-                title: "Inspección #4 de 100 horas / 12 meses-parte “A” (MM 5-00-00 / Para 5-6)",
-                sections: [
-                    {
-                        title: "Programa de Limitaciones de Aeronavegabilidad",
-                        items: [
-                            "Inspección de 25 hrs (MM 4-00-00 / Tabla 4-1)"
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Programadas-Parte “A”",
-                        items: [
-                            "Inspección diaria-parte “A” (MM 5-00-00 / Para 5-5)",
-                            "Inspección # 4 de 100 hrs / 12 meses-parte “A” (MM 5-00-00 / Para 5-6)"
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Especiales",
-                        items: [
-                            "Inspección de 25 hrs (MM 5-00-00 / Para 5-17, 5-18.)",
-                            "Inspección de 100 hrs de operación de la collective lever (MM 5-00-00 / Para 5-21)"
-                        ]
-                    },
-                    {
-                        title: "Lubricación",
-                        items: [
-                            "Lubricación de 25 hrs (MM 12-00-00 / Tabla 12-3)",
-                            "Lubricación de 50 hrs (MM 12-00-00 / Tabla 12-3)",
-                            "Cambio de aceite de la caja de 42°- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)",
-                            "Cambio de aceite de la caja de 90°- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)"
-                        ]
-                    },
-                    {
-                        title: "Inspecciones de Autoridad Reguladora",
-                        items: [
-                            "Inspección de 100 hrs / anual del artex 406 emergency locator transmitter (ELT)"
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Adicionales",
-                        items: [
-                            "Ciclaje de la batería de nickel y cadmium – 100 hrs (MM 96-00-00 / Para 96-25, 96-26)"
-                        ]
-                    },
-                    {
-                        title: "Inspección de Kits de Equipo Opcional",
-                        items: [
-                            "Inspección de 25 hrs // 100 hrs del air conditioning system (412AC-208M chapter 3 page 9)",
-                            "Inspección diaria // 100 hrs de los crosstubes (AA-01136 Rev. “M” page 59)",
-                            "Inspección diaria // 100 hrs de los skid tubes (AA-01139 Rev. “I” page 33)",
-                            "Inspección de 100 hrs del wire strike protection system (ER 82737 Rev. “H”)",
-                            "Inspección de 100 hrs del heli-access steps (MMS-D412-630 Rev. “C”)"
-                        ]
-                    },
-                    {
-                        title: "Boletines de Servicio (ASB's) Recurrentes",
-                        items: [
-                            "ASB 412-96-89 (to prevent fatigue failure of the T/R yoke assembly P/N 212-011-702-ALL)",
-                            "ASB 412-00-100 (inspection of cap angle P/N 212-030-191-001)",
-                            "ASB 412-00-102 Rev. “A”. (T/R counterweight bell crank retention nut)",
-                            "ASB 412-11-148 Rev. “A”. (inspection of collective lever P/N 412-010-408-101)",
-                            "ASB 412-13-155 (inspection of tail rotor blade P/N 212-010-750-ALL)"
-                        ]
-                    },
-                    {
-                        title: "Trabajos Adicionales",
-                        items: [
-                            "Se removió Actuator Linear P/N 204-060-762-103 S/N 2388 y se instaló Actuator Linear P/N 204-060-762-5 S/N REF982, proveniente de overhaul."
-                        ]
-                    }
-                ]
-            },
-            inspection_5: {
-                title: "Inspección #5 de 100 hrs / 12 meses-parte “A” (MM 5-00-00 / Para 5-6)",
-                sections: [
-                    {
-                        title: "Programa de Limitaciones de Aeronavegabilidad",
-                        items: [
-                            "Inspección de 25 hrs (MM 4-00-00 / Tabla 4-1)",
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Programadas-Parte “A”",
-                        items: [
-                            "Inspección diaria-parte “A” (MM 5-00-00 / Para 5-5)",
-                            "Inspección # 5 de 100 hrs / 12 meses-parte “A” (MM 5-00-00 / Para 5-6)",
-                            "Inspección de 5000 hrs / 5 años (MM 5-00-00 / Para 5-8)",
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Especiales",
-                        items: [
-                            "Inspección de 25 hrs (MM 5-00-00 / Para 5-17, 5-18.)",
-                            "Inspección de 100 hrs de operación de la collective lever (MM 5-00-00 / Para 5-21)",
-                            "Inspección de 300 hrs / 6 meses de operación de los pernos expandibles de las palas del rotor principal (MM 5-00-00 / para 5-22A)",
-                        ]
-                    },
-                    {
-                        title: "Lubricación",
-                        items: [
-                            "Lubricación de 25 hrs (MM 12-00-00 / Tabla 12-3)",
-                            "Lubricación de 50 hrs (MM 12-00-00 / Tabla 12-3)",
-                            "Cambio de aceite de la caja de 42º- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)",
-                            "Cambio de aceite de la caja de 90º- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)",
-                        ]
-                    },
-                    {
-                        title: "Inspecciones de Autoridad Reguladora",
-                        items: [
-                            "Inspección de 100 hrs / anual del artex 406 emergency locator transmitter (ELT)",
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Adicionales",
-                        items: [
-                            "Ciclaje de la batería de nickel y cadmium – 100 hrs (MM 96-00-00 / Para 96-25, 96-26)",
-                            "Chequeo del peso del extintor de fuego 3BR- 6 meses",
-                        ]
-                    },
-                    {
-                        title: "Inspección de Kits de Equipo Opcional",
-                        items: [
-                            "Inspección de 25 hrs // 100 hrs del air conditioning system (412AC-208M chapter 3 page 9)",
-                            "Inspección diaria // 100 hrs de los crosstubes (AA-01136 Rev. “M” page 59)",
-                            "Inspección diaria // 100 hrs de los skid tubes (AA-01139 Rev. “I” page 33)",
-                            "Inspección de 100 hrs del wire strike protection system (ER 82737 Rev. “H”)",
-                            "Inspección de 100 hrs del heli-access steps (MMS-D412-630 Rev. “C”)",
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Periódicas del Twin-Pac",
-                        items: [
-                            "Inspección de 25 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 50 hrs / 6 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 100 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 150 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 150 hrs / 6 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 150 hrs / 12 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 300 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 600 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 900 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                        ]
-                    }
-                ]
-            },
-            inspection_6: {
-                title: "Inspección #6 de 600 horas. (MM 5-00-00 / Tabla 5-1)",
-                sections: [
-                    {
-                        title: "Programa de Limitaciones de Aeronavegabilidad",
-                        items: [
-                            "Inspección de 25 hrs (MM 4-00-00 / Tabla 4-1)"
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Programadas-Parte “A”",
-                        items: [
-                            "Inspección diaria-parte “A” (MM 5-00-00 / Para 5-5)",
-                            "Inspección de fase # 6 de 100 hrs / 12 meses-parte “A” (MM 5-00-00 / Para 5-6)"
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Especiales",
-                        items: [
-                            "Inspección de 25 hrs (MM 5-00-00 / Para 5-17, 5-18.)",
-                            "Inspección de 100 hrs de operación de la collective lever (MM 5-00-00 / Para 5-21)",
-                            "Inspección de 300 hrs / 6 meses de operación de los pernos expandibles de las palas del rotor principal (MM 5-00-00 / para 5-22a)",
-                            "Inspección de 600 hrs / 12 meses de operación de los ejes impulsores del rotor de cola (MM 5-00-00 / para 5-23)",
-                            "Inspección de 600 hrs / 12 meses de operación del eje impulsor principal (MM 5-00-00 / para 5-24)",
-                            "Inspección de 24 meses de operación de los pernos de los controles de vuelo (MM 5-00-00 / para 5-27)",
-                            "Inspección de 24 meses de operación del mástil del rotor principal (MM 5-00-00 / Para 5-27A)",
-                            "Inspección de 3600 hrs total del fuselaje y cada 300 hrs / 12 meses (MM 5-00-00 / Para 5-35)"
-                        ]
-                    },
-                    {
-                        title: "Lubricación",
-                        items: [
-                            "Lubricación de 25 hrs (MM 12-00-00 / Tabla 12-3)",
-                            "Lubricación de 50 hrs (MM 12-00-00 / Tabla 12-3)",
-                            "Lubricación de las balineras colgantes del rotor de cola – 300 hrs (MM 12-00-00 / Tabla 12-3)",
-                            "Cambio de aceite de la caja de 42°- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)",
-                            "Cambio de aceite de la caja de 90°- 300 hrs / 180 días (MM 12-00-00 / Tabla 12-1)",
-                            "Cambio de aceite y filtro externo de la transmisión- 3000 hrs / 12 meses (MM 12-00-00 / Tabla 12-1)"
-                        ]
-                    },
-                    {
-                        title: "Inspecciones de Autoridad Reguladora",
-                        items: [
-                            "Inspección de 12 meses compass swing-412",
-                            "Inspección de 100 hrs / anual del artex 406 emergency locator transmitter (ELT)",
-                            "Chequeo por fuga Sistema estático pitot-24 (FAR 91.413).",
-                            "Recertificación del transponder - 24 meses (FAR 91.411).",
-                            "Inspección de 24 meses altimetro del copiloto (FAR91.411 / car 571 app “b”).",
-                            "Inspección de 24 meses altimetro del copiloto (FAR91.411 / car 571 app “b”)."
-                        ]
-                    },
-                    {
-                        title: "Inspecciones Adicionales",
-                        items: [
-                            "Chequeo del peso del extintor de fuego 3BR- 6 meses",
-                            "Inspección del sistema de instrumentos- 12 meses (MM 5-00-00 / para 5-6):",
-                            "    Calibración de los sistemas compass del piloto y copiloto y compass magnético standby.",
-                            "    Drenado del sistema pitot-static por cualquier humedad acumulada.",
-                            "    Prueba del sistema pitot-static por fugas.",
-                            "Ciclaje de la batería de nickel y cadmium – 100 hrs (MM 96-00-00 / Para 96-25, 96-26)",
-                            "Inspección de los tapones de llenado del sistema de combustible, sistema de aceite y sistema hidráulico, por propio funcionamiento y sellado– 12 meses (MM 5-00-00 / para 5-6)"
-                        ]
-                    },
-                    {
-                        title: "Inspección de Kits de Equipo Opcional",
-                        items: [
-                            "Inspección de 25 hrs // 100 hrs del air conditioning system (412AC-208M chapter 3 page 9)",
-                            "Inspección diaria // 100 hrs de los crosstubes (AA-01136 Rev. “M” page 59)",
-                            "Inspección diaria // 100 hrs de los skid tubes (AA-01139 Rev. “I” page 33)",
-                            "Inspección de 100 hrs del wire strike protection system (ER 82737 Rev. “H”)",
-                            "Inspección de 100 hrs del heli-access steps (MMS-D412-630 Rev. “C”)"
-                        ]
-                    },
-                    {
-                        title: "Boletines de Servicio (ASB's) Recurrentes",
-                        items: [
-                            "ASB 412-96-89 (to prevent fatigue failure of the T/R yoke assembly P/N 212-011-702-ALL)",
-                            "ASB 412-00-100 (inspection of cap angle P/N 212-030-191-001)",
-                            "ASB 412-00-102 Rev. “A”. (T/R counterweight bell crank retention nut)",
-                            "ASB 412-11-148 Rev. “A”. (inspection of collective lever P/N 412-010-408-101)",
-                            "ASB 412-13-155 (inspection of tail rotor blade P/N 212-010-750-ALL)",
-                            "ASB 412-09-137 (inspection of main rotor blade expandable bolt inspection P/N 412-010-137-103)"
-                        ]
-                    },
-                    {
-                        title: "Programa de Retiro & Overhaul de Componentes",
-                        items: [
-                            "Se instaló Nuevo M/R Control System Bolts Kit P/N 412-704-112-105, 1EA.",
-                            "Se instaló Nuevo M/R Supplemental Control System Bolts Kit P/N 20-057-5-24D, 3EA."
-                        ]
-                    },
-                    {
-                        title: "Trabajos Adicionales",
-                        items: [
-                            "Se instaló Nuevo Sello del Mástil, P/N 412-340-012-101, 1EA.",
-                            "Se instaló Nuevos Bushings de la Collective Lever, P/N 412-010-421-103, 2EA.",
-                            "Se instaló Nuevo Bellcrank del Sistema Antitorque, P/N 212-001-759-101, 1EA.",
-                            "Se instaló Nuevo Panel Assy P/N 205-032-811-077, 1EA."
-                        ]
-                    }
-                ]
+            special_inspections: {
+                label: "Special Inspections",
+                items: {
+                    description: { title: "Description (DMC-412-A-05-47-00-00A-042A-A / 00030)" },
+                    daily_10_hour: { title: "Daily/10 Hour Inspection, Whichever Occurs First Until 250 Hours (DMC-412-A-05-47-00-00A-283A-A / 00031)", hours: 10 },
+                    '1_5_flight_hours_main_rotor': { title: "Between 1 and 5 Flight Hours After Main Rotor Hub Installation (DMC-412-A-05-47-00-01A-283A-A / 00032)", hours: 5 },
+                    '1_5_flight_hours_tailboom': { title: "Between 1 and 5 Flight Hours After Tailboom Installation or Attachment Bolt Replacement (DMC-412-A-05-47-00-00A-283B-A / 00033)", hours: 5 },
+                    '1_5_flight_hours_tail_rotor_gearbox': { title: "Between 1 and 5 Flight Hours After Tail Rotor Gearbox or Intermediate Gearbox Installation (DMC-412-A-05-47-00-32A-283A-A / 00033.1)", hours: 5 },
+                    '1_25_flight_hours_expandable_blade_bolt': { title: "Between 1 and 25 Flight Hours After Expandable Blade Bolt Installation (DMC-412-A-05-47-00-02A-283A-A / 00034)", hours: 25 },
+                    '5_10_flight_hours_tail_rotor_hub': { title: "Between 5 and 10 Hours of Flight After Tail Rotor Hub and Blade Assembly Installation (DMC-412-A-05-47-00-03A-283A-A / 00035)", hours: 10 },
+                    '25_hours_for_the_next_four': { title: "Each 25 Hours For the Next Four Inspections (DMC-412-A-05-47-00-04A-283A-A / 00036)", hours: 25 },
+                    '25_hours_tail_rotor': { title: "Each 25 Hours of Tail Rotor Operation (DMC-412-A-05-47-00-05A-283A-A / 00037)", hours: 25 },
+                    '25_hours_tailboom_attachment': { title: "Each 25 Hours Tailboom Attachment Inspection (DMC-412-A-05-47-00-30A-283A-A / 00039)", hours: 25 },
+                    '50_hours_after_installation': { title: "50 Hours After Installation of Components (DMC-412-A-05-47-00-06A-283A-A / 00038)", hours: 50 },
+                    '50_hours_tailboom_attachment': { title: "Each 50 Hours Tailboom Attachment Inspection (DMC-412-A-05-47-00-51A-283A-A / 00038.1)", hours: 50 },
+                    '100_hours_tailboom_vertical_fin': { title: "Each 100 Hours Tailboom Vertical Fin Spar Cap Inspection (DMC-412-A-05-47-00-31A-283A-A / 00040)", hours: 100 },
+                    '100_hours_collective_lever': { title: "Each 100 Hours of Collective Lever Operation (DMC-412-A-05-47-00-08A-283A-A / 00041)", hours: 100 },
+                    '150_hours_starter_generator': { title: "Each 150 Hours of Starter Generator (200SG119Q) Operation (DMC-412-A-05-47-00-09A-283A-A / 00042)", hours: 150 },
+                    '300_hours_expandable_blade_bolt': { title: "Each 300 Hours or 6 Months of Expandable Blade Bolt Operation (DMC-412-A-05-47-00-10A-283A-A / 00043)", hours: 300 },
+                    '600_hours_tail_rotor_driveshaft': { title: "Each 600 Hours of Tail Rotor Driveshaft Operation or 12 Months (DMC-412-A-05-47-00-11A-283A-A / 00044)", hours: 600 },
+                    '600_hours_tailboom_attachment_bolts': { title: "Each 600 Hours or 12 Months of Tailboom Attachment Bolts (DMC-412-A-05-47-00-00B-283B-A / 00045)", hours: 600 },
+                    '600_hours_main_driveshaft': { title: "Each 600 Hours of Main Driveshaft Operation or 12 Months (DMC-412-A-05-47-00-12A-283A-A / 00046)", hours: 600 },
+                    '600_hours_magnetic_brake': { title: "Each 600 Hours or 12 Months Inspection Of Magnetic Brake Assembly (DMC-412-A-05-47-00-50A-283A-A / 00047)", hours: 600 },
+                    '1000_hours_component': { title: "Each 1000 Hours of Component Operation (DMC-412-A-05-47-00-13A-283A-A / 00048)", hours: 1000 },
+                    '1000_hours_crosstube': { title: "Each 12 Months or 2500 Landings of Aft High Crosstube Operation (DMC-412-A-05-47-00-14A-283A-A / 00049)", hours: 1000 },
+                    '24_months_control_bolt': { title: "Each 24 Months of Control Bolt Operation (DMC-412-A-05-47-00-15A-283A-A / 00050)" },
+                    '24_months_main_rotor_mast': { title: "Each 24 Months of Main Rotor Mast Operation (DMC-412-A-05-47-00-16A-283A-A / 00051)" },
+                    '2500_hours_main_rotor_hub': { title: "Each 2500 Hours of Main Rotor Hub Assembly Operation (DMC-412-A-05-47-00-17A-283A-A / 00052)", hours: 2500 },
+                    '2500_hours_main_rotor_blade': { title: "Each 2500 Hours of Main Rotor Blade Operation (DMC-412-A-05-47-00-18A-283A-A / 00053)", hours: 2500 },
+                    '2500_or_3000_hours_main_rotor_mast': { title: "Each 2500 or 3000 Hours or 5 Years of Main Rotor Mast (412-040-366-109 and Subsequent) Operation (DMC-412-A-05-47-00-19A-283A-A / 00054)", hours: 3000 },
+                    '2500_hours_tail_rotor_drive_system': { title: "Each 2500 Hours of Tail Rotor Drive System Operation (DMC-412-A-05-47-00-20A-283A-A / 00055)", hours: 2500 },
+                    '3000_hours_main_rotor_mast': { title: "Each 3000 Hours or 5 Years of Main Rotor Mast (412-040-366-103 and -105) Operation (DMC-412-A-05-47-00-21A-283A-A / 00056)", hours: 3000 },
+                    '3000_hours_transmission_2': { title: "Each 3000 Hours of Transmission (412-040-002) Operation (DMC-412-A-05-47-00-22A-283A-A / 00057)", hours: 3000 },
+                    '3000_hours_transmission_4': { title: "Each 3000 Hours of Transmission (412-040-004/412-040-007/412-040-802) Operation (DMC-412-A-05-47-00-23A-283A-A / 00058)", hours: 3000 },
+                    '3600_hours_airframe': { title: "3600 Hours Total Airframe Time and Each 300 Hours/12 Months Inspection (DMC-412-A-05-47-00-24A-283A-A / 00059)", hours: 3600 },
+                    '3000_hours_transmission_mount': { title: "Each 3000 Hours or 5 Years Of Transmission Mount Assembly (204-031-927) And Friction Damper Assembly (204-031-920) Operation (DMC-412-A-05-47-00-28A-283A-A / 00060)", hours: 3000 },
+                    '2500_hours_collective_stick_tube': { title: "Each 2500 Hours or 10 Years Inspection Of Collective Stick Tube (DMC-412-A-05-47-00-29A-283A-A / 00061)", hours: 2500 },
+                }
             },
             remi: {
-                title: "Remoción / Instalación",
-                items: []
+                label: "Remoción / Instalación",
+                items: {
+                    main: { title: "Remoción / Instalación de Componente" }
+                }
             },
             motores: {
-                title: "Motores",
-                sections: [
-                    {
-                        title: "Inspecciones Periódicas del Twin-Pac",
-                        items: [
-                            "Inspección de 25 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 50 hrs / 6 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 100 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 150 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 150 hrs / 6 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 150 hrs / 12 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 300 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 600 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)",
-                            "Inspección de 900 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)"
-                        ]
-                    }
-                ]
+                label: "Motores",
+                items: {
+                    '25_hrs': { title: "Inspección de 25 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 25 },
+                    '50_hrs': { title: "Inspección de 50 hrs / 6 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 50 },
+                    '100_hrs': { title: "Inspección de 100 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 100 },
+                    '150_hrs': { title: "Inspección de 150 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 150 },
+                    '150_hrs_6_meses': { title: "Inspección de 150 hrs / 6 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 150 },
+                    '150_hrs_12_meses': { title: "Inspección de 150 hrs / 12 meses motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 150 },
+                    '300_hrs': { title: "Inspección de 300 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 300 },
+                    '600_hrs': { title: "Inspección de 600 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 600 },
+                    '900_hrs': { title: "Inspección de 900 hrs motor # 1 & # 2 (EM 72-00-00 / Table 601)", hours: 900 }
+                }
             }
         };
-
+        
         const removalDescription = "Se removió [Parte] P/N [Número de parte] S/N [Número de serie], Reparable, por horas para Overhaul cumplidas.";
         const installationDescription = "Se instaló [Parte] P/N [Número de parte] S/N [Número de serie], Reparable, por horas para Overhaul cumplidas.";
         
@@ -824,7 +394,6 @@
             matricula: '',
             ac_tt: '',
             tq: '',
-            envents: '',
             landings: '',
             fecha_finalizacion: '',
             eng1_tsn_tso: '',
@@ -834,7 +403,7 @@
             cbox_tsn_tso: '',
             cbox_csn_cso: '',
             certificacion: 'Yo certifico que los trabajos arriba descritos fueron efectuados de acuerdo a los procedimientos del Manual de Mantenimiento y por lo tanto la aeronave es puesta en servicio.',
-            firma: '',
+            serie: '',
             jefe_taller: '',
             lic_no: ''
         };
@@ -860,113 +429,130 @@
         }
 
         // --- Form generation functions ---
-        function createItemElement(text, index) {
+        function populateTaskSelector() {
+            taskTypeSelect.innerHTML = '<option value="none">Seleccionar y Añadir Trabajo</option>';
+            for (const groupKey in inspections) {
+                const group = inspections[groupKey];
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = group.label;
+                for (const itemKey in group.items) {
+                    const item = group.items[itemKey];
+                    const option = document.createElement('option');
+                    option.value = `${groupKey}.${itemKey}`;
+                    option.textContent = item.title;
+                    optgroup.appendChild(option);
+                }
+                taskTypeSelect.appendChild(optgroup);
+            }
+        }
+
+        function createItemElement(text, itemKey) {
             const itemRow = document.createElement('div');
             itemRow.classList.add('flex', 'items-center', 'text-xs', 'space-x-1', 'group');
+            itemRow.dataset.itemKey = itemKey;
             itemRow.innerHTML = `
-                <span class="font-bold flex-none w-4 item-number">${index}.</span>
+                <span class="font-bold flex-none w-4 item-number"></span>
                 <p class="editable-cell flex-grow font-bold text-gray-800" contenteditable="true">${text}</p>
                 <button class="remove-item-btn text-red-500 hover:text-red-700 font-bold px-2 py-1 transition-colors duration-200 opacity-0 group-hover:opacity-100 no-print text-xl leading-none">&minus;</button>
             `;
             const removeBtn = itemRow.querySelector('.remove-item-btn');
-            removeBtn.addEventListener('click', () => {
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const groupBlock = itemRow.closest('[id^="trabajo-group-"]');
                 itemRow.remove();
+                if (groupBlock && groupBlock.querySelectorAll('.list-content > div').length === 0) {
+                   // Optional: remove group block if it becomes empty
+                   // groupBlock.remove(); 
+                }
                 updateItemNumbers();
             });
             return itemRow;
         }
+        
+        function addItemToGroupBlock(groupKey, itemKey) {
+            const groupData = inspections[groupKey];
+            const itemData = groupData.items[itemKey];
+            if (!itemData) return;
 
-        function createSectionElement(section) {
-            const sectionContainer = document.createElement('div');
-            sectionContainer.classList.add('space-y-1', 'border-2', 'border-black', 'rounded-md', 'p-2', 'bg-white');
-            
-            const sectionTitleBar = document.createElement('div');
-            sectionTitleBar.classList.add('flex', 'justify-between', 'items-center', 'bg-custom-yellow', 'rounded-t-md', 'p-1', 'border-b-2', 'border-black');
-            sectionTitleBar.innerHTML = `
-                <p class="font-bold text-sm text-gray-800">${section.title}</p>
-                <button class="add-item-btn text-black hover:text-gray-700 font-bold text-xl leading-none px-2 py-1 no-print">&plus;</button>
-            `;
-            const addItemBtn = sectionTitleBar.querySelector('.add-item-btn');
-            addItemBtn.addEventListener('click', () => {
-                const newItem = createItemElement("Nuevo ítem", 0);
-                sectionContainer.querySelector('.list-content').appendChild(newItem);
-                updateItemNumbers();
-            });
-            sectionContainer.appendChild(sectionTitleBar);
+            let groupBlock = document.getElementById(`trabajo-group-${groupKey}`);
 
-            const listContent = document.createElement('div');
-            listContent.classList.add('list-content', 'space-y-1');
-            section.items.forEach(item => {
-                listContent.appendChild(createItemElement(item, 0));
-            });
-            sectionContainer.appendChild(listContent);
-            
-            return sectionContainer;
-        }
+            // Create group block if it doesn't exist
+            if (!groupBlock) {
+                groupBlock = document.createElement('div');
+                groupBlock.id = `trabajo-group-${groupKey}`;
+                groupBlock.dataset.groupKey = groupKey;
+                groupBlock.classList.add('mt-4');
 
-        function generateInspectionRows(inspectionKey) {
-            trabajosContainer.innerHTML = '';
-            if (inspections[inspectionKey]) {
-                const sectionData = inspections[inspectionKey];
-                
-                // Main title for the inspection type
-                const mainTitle = document.createElement('p');
-                mainTitle.classList.add('font-bold', 'text-sm', 'text-white', 'bg-custom-blue', 'p-1', 'mt-2', 'w-full', 'rounded-md', 'text-center');
-                mainTitle.textContent = sectionData.title;
-                trabajosContainer.appendChild(mainTitle);
+                const header = document.createElement('div');
+                header.classList.add('flex', 'justify-between', 'items-center', 'font-bold', 'text-sm', 'text-white', 'bg-custom-blue', 'p-1', 'rounded-t-md');
+                header.innerHTML = `
+                    <p>${groupData.label}</p>
+                    <button class="remove-block-btn text-white hover:text-red-300 font-bold px-2 no-print text-xl">&times;</button>
+                `;
+                header.querySelector('.remove-block-btn').onclick = () => {
+                    groupBlock.remove();
+                    updateItemNumbers();
+                };
+                groupBlock.appendChild(header);
 
-                // Check if the inspection data has a 'sections' property
-                if (sectionData.sections) {
-                    sectionData.sections.forEach(section => {
-                        trabajosContainer.appendChild(createSectionElement(section));
-                    });
-                } else if (sectionData.items) {
-                    // This is for other inspections with a simple list structure
-                    const listContainer = document.createElement('div');
-                    listContainer.classList.add('space-y-1', 'border-2', 'border-black', 'rounded-md', 'p-2', 'bg-white');
-                    sectionData.items.forEach(item => {
-                        listContainer.appendChild(createItemElement(item, 0));
-                    });
-                    trabajosContainer.appendChild(listContainer);
-                }
+                const contentContainer = document.createElement('div');
+                contentContainer.classList.add('border-2', 'border-t-0', 'border-black', 'rounded-b-md', 'p-2', 'bg-white', 'space-y-2');
+                const listContent = document.createElement('div');
+                listContent.classList.add('list-content', 'space-y-1');
+                contentContainer.appendChild(listContent);
+                groupBlock.appendChild(contentContainer);
+                trabajosContainer.appendChild(groupBlock);
             }
+
+            const listContent = groupBlock.querySelector('.list-content');
+
+            // Prevent adding duplicate items
+            if (listContent.querySelector(`[data-item-key="${itemKey}"]`)) {
+                return; // Silently exit if item already exists
+            }
+            
+            // Special handling for remi/installation
+            if (groupKey === 'remi') {
+                 listContent.appendChild(createItemElement(removalDescription, 'remi_remocion'));
+                 listContent.appendChild(createItemElement(installationDescription, 'remi_instalacion'));
+            } else {
+                 listContent.appendChild(createItemElement(itemData.title, itemKey));
+            }
+           
             updateItemNumbers();
         }
 
-        function generateRemiRows() {
-            trabajosContainer.innerHTML = '';
-            const listContainer = document.createElement('div');
-            listContainer.classList.add('space-y-1', 'border-2', 'border-black', 'rounded-md', 'p-2', 'bg-white');
-            
-            listContainer.appendChild(createItemElement(removalDescription, 1));
-            listContainer.appendChild(createItemElement(installationDescription, 2));
-            trabajosContainer.appendChild(listContainer);
-        }
-
         function updateItemNumbers() {
-            const allItems = document.querySelectorAll('.list-content .item-number');
+            const allItems = document.querySelectorAll('#trabajos-container .item-number');
             allItems.forEach((item, index) => {
                 item.textContent = `${index + 1}.`;
             });
         }
         
         taskTypeSelect.addEventListener('change', () => {
-            const selectedType = taskTypeSelect.value;
-            if (selectedType.startsWith('inspection')) {
-                generateInspectionRows(selectedType);
-            } else if (selectedType === 'remi') {
-                generateRemiRows();
-            } else if (selectedType === 'motores') {
-                generateInspectionRows('motores');
+            const selectedValue = taskTypeSelect.value;
+            if (selectedValue === 'none') return;
+
+            const [groupKey, itemKey] = selectedValue.split('.');
+            const selectedItemData = inspections[groupKey]?.items[itemKey];
+
+            // If the selected item has an 'hours' property, add all inspections with fewer or equal hours from the same group
+            if (selectedItemData && typeof selectedItemData.hours === 'number') {
+                const parentGroup = inspections[groupKey].items;
+                for (const currentItemKey in parentGroup) {
+                    const currentItemData = parentGroup[currentItemKey];
+                    if (typeof currentItemData.hours === 'number' && currentItemData.hours <= selectedItemData.hours) {
+                        addItemToGroupBlock(groupKey, currentItemKey);
+                    }
+                }
             } else {
-                trabajosContainer.innerHTML = '';
+                // Otherwise, just add the single selected item
+                addItemToGroupBlock(groupKey, itemKey);
             }
-            updateItemNumbers();
+
+            taskTypeSelect.value = 'none'; // Reset dropdown after selection
         });
 
-        // Set initial state to Inspection #1
-        taskTypeSelect.value = 'inspection_1';
-        taskTypeSelect.dispatchEvent(new Event('change'));
 
         // --- Signature Pad functionality ---
         let drawing = false;
@@ -1031,10 +617,30 @@
         async function saveToFirestore(userName) {
             const documentsPath = `/artifacts/${appId}/public/data/mantenimiento_data`;
             
-            const trabajos = [];
-            document.querySelectorAll('#trabajos-container p').forEach(p => {
-                trabajos.push(p.textContent);
+            const trabajos_realizados = [];
+            const groupBlocks = trabajosContainer.querySelectorAll(':scope > div[id^="trabajo-group-"]');
+            
+            groupBlocks.forEach(block => {
+                const groupKey = block.dataset.groupKey;
+                const groupLabel = inspections[groupKey].label;
+                const items = [];
+                
+                block.querySelectorAll('.list-content > div').forEach(itemDiv => {
+                    items.push({
+                        key: itemDiv.dataset.itemKey,
+                        text: itemDiv.querySelector('p').textContent
+                    });
+                });
+                
+                if (items.length > 0) {
+                    trabajos_realizados.push({
+                        groupKey: groupKey,
+                        groupLabel: groupLabel,
+                        items: items
+                    });
+                }
             });
+
             const signatureData = canvas.toDataURL();
 
             const dataToSave = {
@@ -1044,7 +650,6 @@
                 matricula: document.getElementById('matricula').textContent,
                 ac_tt: document.getElementById('ac_tt').textContent,
                 tq: document.getElementById('tq').textContent,
-                envents: document.getElementById('envents').textContent,
                 landings: document.getElementById('landings').textContent,
                 fecha_finalizacion: document.getElementById('fecha_finalizacion').textContent,
                 eng1_tsn_tso: document.getElementById('eng1_tsn_tso').textContent,
@@ -1053,12 +658,12 @@
                 eng2_csn_cso: document.getElementById('eng2_csn_cso').textContent,
                 cbox_tsn_tso: document.getElementById('cbox_tsn_tso').textContent,
                 cbox_csn_cso: document.getElementById('cbox_csn_cso').textContent,
-                trabajos_realizados: trabajos,
+                trabajos_realizados: trabajos_realizados,
                 certificacion: document.getElementById('certificacion').textContent,
-                firma: document.getElementById('firma').textContent,
+                serie: document.getElementById('serie').textContent,
                 jefe_taller: document.getElementById('jefe_taller').textContent,
                 licencia_no: document.getElementById('lic_no').textContent,
-                firma_digital: signatureData,
+                firma: signatureData,
                 guardado_por: userName,
                 timestamp: new Date()
             };
@@ -1098,11 +703,14 @@
             
             const reader = new FileReader();
             reader.onload = async (e) => {
-                const base64Data = e.target.result.split(',')[1];
-                const apiKey = ""; // La API Key se provee en runtime
+                const fileDataUrl = e.target.result;
+                mainImage.src = fileDataUrl; // Update the main image viewer
+
+                const base64Data = fileDataUrl.split(',')[1];
+                const apiKey = "AIzaSyAFpL-UJVno1ddDeNpDg843w4wfJZOLdhM"; // La API Key se provee en runtime
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
-                const prompt = "Extrae los datos de la etiqueta de mantenimiento en la imagen. No incluyas los títulos de las celdas, solo los valores. Si un campo está vacío, déjalo como una cadena vacía. Devuelve los datos como un objeto JSON con las siguientes claves: 'fecha_inicio', 'fecha_finalizacion', 'modelo', 'eng1_tsn_tso', 'numero_de_serie', 'eng1_csn_cso', 'matricula', 'eng2_tsn_tso', 'ac_tt', 'eng2_csn_cso', 'tq', 'cbox_tsn_tso', 'landings', 'cbox_csn_cso', 'firma', 'jefe_taller', 'licencia', 'motor1_tsn_tso', 'motor2_tsn_tso', 'motor1_csn_cso', 'motor2_csn_cso'. Para el campo 'firma', describe si la firma es visible o no.";
+                const prompt = "Extrae los datos de la etiqueta de mantenimiento en la imagen. No incluyas los títulos de las celdas, solo los valores. Si un campo está vacío, déjalo como una cadena vacía. Devuelve los datos como un objeto JSON con las siguientes claves: 'fecha_inicio', 'fecha_finalizacion', 'modelo', 'eng1_tsn_tso', 'numero_de_serie', 'eng1_csn_cso', 'matricula', 'eng2_tsn_tso', 'ac_tt', 'eng2_csn_cso', 'tq', 'cbox_tsn_tso', 'landings', 'cbox_csn_cso', 'firma', 'serie', 'licencia', 'motor1_tsn_tso', 'motor2_tsn_tso', 'motor1_csn_cso', 'motor2_csn_cso'. Para el campo 'firma', describe si la firma es visible o no.";
                 
                 const payload = {
                     contents: [
@@ -1143,7 +751,7 @@
                                 "motor1_csn_cso": { "type": "STRING" },
                                 "motor2_csn_cso": { "type": "STRING" },
                                 "firma": { "type": "STRING" },
-                                "jefe_taller": { "type": "STRING" },
+                                "serie": { "type": "STRING" },
                                 "licencia": { "type": "STRING" }
                             }
                         }
@@ -1176,8 +784,7 @@
                     document.getElementById('cbox_tsn_tso').textContent = data.cbox_tsn_tso || '';
                     document.getElementById('landings').textContent = data.landings || '';
                     document.getElementById('cbox_csn_cso').textContent = data.cbox_csn_cso || '';
-                    document.getElementById('firma').textContent = data.firma || '';
-                    document.getElementById('jefe_taller').textContent = data.jefe_taller || '';
+                    document.getElementById('serie').textContent = data.serie || '';
                     document.getElementById('lic_no').textContent = data.licencia || '';
                     
                     statusMessage.textContent = 'Datos escaneados y rellenados con éxito.';
@@ -1282,13 +889,13 @@
             document.getElementById('landings').textContent = data.landings || '';
             document.getElementById('cbox_csn_cso').textContent = data.cbox_csn_cso || '';
             document.getElementById('certificacion').textContent = data.certificacion || '';
-            document.getElementById('firma').textContent = data.firma || '';
+            document.getElementById('serie').textContent = data.serie || '';
             document.getElementById('jefe_taller').textContent = data.jefe_taller || '';
             document.getElementById('lic_no').textContent = data.licencia_no || '';
 
             // Load signature
-            if (data.firma_digital) {
-                loadSignature(data.firma_digital);
+            if (data.firma) {
+                loadSignature(data.firma);
             } else {
                 clearBtn.click();
             }
@@ -1296,11 +903,36 @@
             // Load trabajos
             trabajosContainer.innerHTML = '';
             if (data.trabajos_realizados && Array.isArray(data.trabajos_realizados)) {
-                let itemCounter = 1;
-                data.trabajos_realizados.forEach(itemText => {
-                    const itemRow = createItemElement(itemText, itemCounter);
-                    trabajosContainer.appendChild(itemRow);
-                    itemCounter++;
+                data.trabajos_realizados.forEach(groupData => {
+                    const groupKey = groupData.groupKey;
+                    
+                    let groupBlock = document.createElement('div');
+                    groupBlock.id = `trabajo-group-${groupKey}`;
+                    groupBlock.dataset.groupKey = groupKey;
+                    groupBlock.classList.add('mt-4');
+
+                    const header = document.createElement('div');
+                    header.classList.add('flex', 'justify-between', 'items-center', 'font-bold', 'text-sm', 'text-white', 'bg-custom-blue', 'p-1', 'rounded-t-md');
+                    header.innerHTML = `
+                        <p>${groupData.groupLabel}</p>
+                        <button class="remove-block-btn text-white hover:text-red-300 font-bold px-2 no-print text-xl">&times;</button>
+                    `;
+                    header.querySelector('.remove-block-btn').onclick = () => groupBlock.remove();
+                    groupBlock.appendChild(header);
+
+                    const contentContainer = document.createElement('div');
+                    contentContainer.classList.add('border-2', 'border-t-0', 'border-black', 'rounded-b-md', 'p-2', 'bg-white');
+                    const listContent = document.createElement('div');
+                    listContent.classList.add('list-content', 'space-y-1');
+                    
+                    if (groupData.items && Array.isArray(groupData.items)) {
+                        groupData.items.forEach(item => {
+                            listContent.appendChild(createItemElement(item.text, item.key));
+                        });
+                    }
+                    contentContainer.appendChild(listContent);
+                    groupBlock.appendChild(contentContainer);
+                    trabajosContainer.appendChild(groupBlock);
                 });
             }
             updateItemNumbers();
@@ -1309,7 +941,8 @@
         newRecordButton.addEventListener('click', () => {
             currentDocId = null;
             document.querySelectorAll('.editable-cell').forEach(cell => {
-                cell.textContent = initialValues[cell.id] !== undefined ? initialValues[cell.id] : '';
+                const initialValue = initialValues[cell.id];
+                cell.textContent = initialValue !== undefined ? initialValue : '';
             });
             clearBtn.click();
             trabajosContainer.innerHTML = '';
@@ -1320,6 +953,7 @@
 
         // Initial setup
         initAuthAndApp();
+        populateTaskSelector();
     </script>
 </body>
 </html>
