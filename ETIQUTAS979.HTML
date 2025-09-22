@@ -111,13 +111,13 @@
         <!-- Header banner with logo and text -->
         <div class="bg-custom-yellow p-4 text-center rounded-t-lg border-2 border-black border-b-0">
             <div id="image-viewer" class="mb-2">
-                 <p class="font-bold text-gray-700 mb-2">Documentación de Referencia</p>
-         
+                 <p class="font-bold text-gray-700 mb-2"></p>
+              
             </div>
             <p class="text-sm font-bold text-gray-800 mt-1">ESCN. HELICÓPTEROS</p>
             <p class="text-xs text-gray-800">FUERZA AÉREA HONDUREÑA</p>
         </div>
-        <div class="bg-white text-center font-bold text-gray-800 text-lg py-1 border-2 border-black border-t-0">BASE HAM </div>
+        <div class="bg-white text-center font-bold text-gray-800 text-lg py-1 border-2 border-black border-t-0">BASE HAM</div>
 
         <!-- Data table with 4 columns -->
         <div class="grid grid-cols-4 gap-0 text-xs border-2 border-black border-t-0 rounded-b-lg overflow-hidden">
@@ -323,41 +323,61 @@
         const inspections = {
             bell412: {
                  label: "Bell 412",
-                 scheduled_inspections_a: {
+                scheduled_inspections_a: {
                     label: "Scheduled Inspections - Part A",
                     items: {
-                        daily_inspection: { title: "Daily Inspection (DMC-412-A-05-40-00-00A-281A-A / 00022)", hours: 10 },
-                        '100_hour': { title: "100 Hour/12 Month Inspection (DMC-412-A-05-40-00-01A-281A-A / 00023)", hours: 100 },
-                        '1000_hour': { title: "1000 Hour Inspection (DMC-412-A-05-40-00-02A-281A-A / 00024)", hours: 1000 },
-                        '5000_hour': { title: "5000 Hour/5 Year Inspection (DMC-412-A-05-40-00-03A-281A-A / 00025)", hours: 5000 },
+                        daily_inspection: { title: "Daily Inspection - Part A (DMC-412-A-05-40-00-00A-281A-A / 00022)", hours: 10 },
+                        '100_hour': { title: "100 Hour/12 Month Inspection - Part A (DMC-412-A-05-40-00-01A-281A-A / 00023)", hours: 100 },
+                        '1000_hour': { title: "1000 Hour Inspection - Part A (DMC-412-A-05-40-00-02A-281A-A / 00024)", hours: 1000 },
+                        '5000_hour': { title: "5000 Hour/5 Year Inspection - Part A (DMC-412-A-05-40-00-03A-281A-A / 00025)", hours: 5000 },
                     }
                 },
                 scheduled_inspections_b: {
                     label: "Scheduled Inspections - Part B",
                     items: {
-                        '25_hour': { title: "25 Hour/30 Day Inspection (DMC-412-A-05-40-00-04A-281A-A / 00026)", hours: 25 },
-                        '300_hour': { title: "300 Hour/12 Month Inspection (DMC-412-A-05-40-00-05A-281A-A / 00027)", hours: 300 },
-                        '600_hour': { title: "600 Hour/12 Month Inspection (DMC-412-A-05-40-00-06A-281A-A / 00028)", hours: 600 },
-                        '5000_hour': { title: "5000 Hour/5 Year Inspection (DMC-412-A-05-40-00-07A-281A-A / 00029)", hours: 5000 },
+                        '25_hour': { title: "25 Hour/30 Day Inspection - Part B (DMC-412-A-05-40-00-04A-281A-A / 00026)", hours: 25 },
+                        '300_hour': { title: "300 Hour/12 Month Inspection - Part B (DMC-412-A-05-40-00-05A-281A-A / 00027)", hours: 300 },
+                        '600_hour': { title: "600 Hour/12 Month Inspection - Part B (DMC-412-A-05-40-00-06A-281A-A / 00028)", hours: 600 },
+                        '5000_hour_b': { title: "5000 Hour/5 Year Inspection - Part B (DMC-412-A-05-40-00-07A-281A-A / 00029)", hours: 5000 },
                     }
                 },
                 special_inspections: {
                     label: "Special Inspections",
                     items: {
-                        description: { title: "Description (DMC-412-A-05-47-00-00A-042A-A / 00030)" },
+                        description: { title: "Description (DMC-412-A-05-47-00-00A-042A-A / 00030)"},
                         daily_10_hour: { title: "Daily/10 Hour Inspection, Whichever Occurs First Until 250 Hours (DMC-412-A-05-47-00-00A-283A-A / 00031)", hours: 10 },
                         '1_5_flight_hours_main_rotor': { title: "Between 1 and 5 Flight Hours After Main Rotor Hub Installation (DMC-412-A-05-47-00-01A-283A-A / 00032)", hours: 5 },
+                        '1_5_flight_hours_tailboom': { title: "Between 1 and 5 Flight Hours After Tailboom Installation or Attachment Bolt Replacement (DMC-412-A-05-47-00-00A-283B-A / 00033)", hours: 5 },
+                        '1_5_flight_hours_tail_rotor_gearbox': { title: "Between 1 and 5 Flight Hours After Tail Rotor Gearbox or Intermediate Gearbox Installation (DMC-412-A-05-47-00-32A-283A-A / 00033.1)", hours: 5 },
                         '1_25_flight_hours_expandable_blade_bolt': { title: "Between 1 and 25 Flight Hours After Expandable Blade Bolt Installation (DMC-412-A-05-47-00-02A-283A-A / 00034)", hours: 25 },
+                        '5_10_flight_hours_tail_rotor_hub': { title: "Between 5 and 10 Hours of Flight After Tail Rotor Hub and Blade Assembly Installation (DMC-412-A-05-47-00-03A-283A-A / 00035)", hours: 10 },
+                        '25_hours_for_the_next_four': { title: "Each 25 Hours For the Next Four Inspections (DMC-412-A-05-47-00-04A-283A-A / 00036)", hours: 25 },
                         '25_hours_tail_rotor': { title: "Each 25 Hours of Tail Rotor Operation (DMC-412-A-05-47-00-05A-283A-A / 00037)", hours: 25 },
+                        '25_hours_tailboom_attachment': { title: "Each 25 Hours Tailboom Attachment Inspection (DMC-412-A-05-47-00-30A-283A-A / 00039)", hours: 25 },
                         '50_hours_after_installation': { title: "50 Hours After Installation of Components (DMC-412-A-05-47-00-06A-283A-A / 00038)", hours: 50 },
+                        '50_hours_tailboom_attachment': { title: "Each 50 Hours Tailboom Attachment Inspection (DMC-412-A-05-47-00-51A-283A-A / 00038.1)", hours: 50 },
+                        '100_hours_tailboom_vertical_fin': { title: "Each 100 Hours Tailboom Vertical Fin Spar Cap Inspection (DMC-412-A-05-47-00-31A-283A-A / 00040)", hours: 100 },
                         '100_hours_collective_lever': { title: "Each 100 Hours of Collective Lever Operation (DMC-412-A-05-47-00-08A-283A-A / 00041)", hours: 100 },
                         '150_hours_starter_generator': { title: "Each 150 Hours of Starter Generator (200SG119Q) Operation (DMC-412-A-05-47-00-09A-283A-A / 00042)", hours: 150 },
                         '300_hours_expandable_blade_bolt': { title: "Each 300 Hours or 6 Months of Expandable Blade Bolt Operation (DMC-412-A-05-47-00-10A-283A-A / 00043)", hours: 300 },
                         '600_hours_tail_rotor_driveshaft': { title: "Each 600 Hours of Tail Rotor Driveshaft Operation or 12 Months (DMC-412-A-05-47-00-11A-283A-A / 00044)", hours: 600 },
+                        '600_hours_tailboom_attachment_bolts': { title: "Each 600 Hours or 12 Months Inspection of Tailboom Attachment Bolts (DMC-412-A-05-47-00-00B-283B-A / 00045)", hours: 600 },
+                        '600_hours_main_driveshaft': { title: "Each 600 Hours of Main Driveshaft Operation or 12 Months (DMC-412-A-05-47-00-12A-283A-A / 00046)", hours: 600 },
+                        '600_hours_magnetic_brake': { title: "Each 600 Hours or 12 Months Inspection Of Magnetic Brake Assembly (DMC-412-A-05-47-00-50A-283A-A / 00047)", hours: 600 },
                         '1000_hours_component': { title: "Each 1000 Hours of Component Operation (DMC-412-A-05-47-00-13A-283A-A / 00048)", hours: 1000 },
+                        '1000_hours_crosstube': { title: "Each 12 Months or 2500 Landings of Aft High Crosstube Operation (DMC-412-A-05-47-00-14A-283A-A / 00049)", hours: 1000 },
+                        '24_months_control_bolt': { title: "Each 24 Months of Control Bolt Operation (DMC-412-A-05-47-00-15A-283A-A / 00050)" },
+                        '24_months_main_rotor_mast': { title: "Each 24 Months of Main Rotor Mast Operation (DMC-412-A-05-47-00-16A-283A-A / 00051)" },
                         '2500_hours_main_rotor_hub': { title: "Each 2500 Hours of Main Rotor Hub Assembly Operation (DMC-412-A-05-47-00-17A-283A-A / 00052)", hours: 2500 },
-                        '3000_hours_main_rotor_mast': { title: "Each 3000 Hours or 5 Years of Main Rotor Mast (412-040-366-103 and -105) Operation (DMC-412-A-05-47-00-21A-283A-A / 00056)", hours: 3000 },
+                        '2500_hours_main_rotor_blade': { title: "Each 2500 Hours of Main Rotor Blade Operation (DMC-412-A-05-47-00-18A-283A-A / 00053)", hours: 2500 },
+                        '2500_or_3000_hours_main_rotor_mast_109': { title: "Each 2500 or 3000 Hours or 5 Years of Main Rotor Mast (412-040-366-109 and Subsequent) Operation (DMC-412-A-05-47-00-19A-283A-A / 00054)", hours: 3000 },
+                        '2500_hours_tail_rotor_drive_system': { title: "Each 2500 Hours of Tail Rotor Drive System Operation (DMC-412-A-05-47-00-20A-283A-A / 00055)", hours: 2500 },
+                        '3000_hours_main_rotor_mast_103_105': { title: "Each 3000 Hours or 5 Years of Main Rotor Mast (412-040-366-103 and -105) Operation (DMC-412-A-05-47-00-21A-283A-A / 00056)", hours: 3000 },
+                        '3000_hours_transmission_002': { title: "Each 3000 Hours of Transmission (412-040-002) Operation (DMC-412-A-05-47-00-22A-283A-A / 00057)", hours: 3000 },
+                        '3000_hours_transmission_004_007_802': { title: "Each 3000 Hours of Transmission (412-040-004/412-040-007/412-040-802) Operation (DMC-412-A-05-47-00-23A-283A-A / 00058)", hours: 3000 },
                         '3600_hours_airframe': { title: "3600 Hours Total Airframe Time and Each 300 Hours/12 Months Inspection (DMC-412-A-05-47-00-24A-283A-A / 00059)", hours: 3600 },
+                        '3000_hours_transmission_mount': { title: "Each 3000 Hours or 5 Years Of Transmission Mount Assembly (204-031-927) And Friction Damper Assembly (204-031-920) Operation (DMC-412-A-05-47-00-28A-283A-A / 00060)", hours: 3000 },
+                        '2500_hours_collective_stick_tube': { title: "Each 2500 Hours or 10 Years Inspection Of Collective Stick Tube (DMC-412-A-05-47-00-29A-283A-A / 00061)", hours: 2500 },
                     }
                 },
                 remi: {
@@ -940,4 +960,5 @@
     </script>
 </body>
 </html>
+
 
