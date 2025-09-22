@@ -89,9 +89,9 @@
             background: white;
             padding: 2rem;
             border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1-px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             width: 90%;
-            max-width: 400px;
+            max-width: 500px;
         }
     </style>
 </head>
@@ -102,13 +102,11 @@
         <!-- Header banner with logo and text -->
         <div class="bg-custom-yellow p-4 text-center rounded-t-lg border-2 border-black border-b-0">
             <div id="image-viewer" class="mb-2">
-                <p class="font-bold text-gray-700 mb-2"></p>
-    
-            </div>
-            <p class="text-sm font-bold text-gray-800 mt-1">ESCN. HELICÓPTEROS</p>
-            <p class="text-xs text-gray-800">FUERZA AÉREA HONDUREÑA</p>
+                 <p class="font-bold text-gray-700 mb-2"></p>
+              
+            <p class="text-xs text-black">ESCUADRON DE HELICOPTEROS</p>
         </div>
-        <div class="bg-red-500text-center font-bold text-gray-800 text-lg py-1 border-2 border-black border-t-0"></div>
+        <div class="bg-white text-center font-bold text-black text-lg py-1 border-2 border-black border-t-0">FUERZA AEREA HONDUREÑA</div>
 
         <!-- Data table with 4 columns -->
         <div class="grid grid-cols-4 gap-0 text-xs border-2 border-black border-t-0 rounded-b-lg overflow-hidden">
@@ -178,7 +176,7 @@
             <!-- Signature container -->
             <div class="flex flex-col items-center">
                 <!-- Signature -->
-                <canvas id="signatureCanvas" class="border border-black w-full h-20 rounded-md bg-white"></canvas>
+                <canvas id="signatureCanvas" class="border border-black w-full h-20 rounded-md bg-white cursor-pointer"></canvas>
                 <button id="clearSignatureBtn" class="no-print mt-2 px-2 py-1 bg-red-500 text-white text-xs rounded-md hover:bg-red-600 transition-colors duration-200">Limpiar Firma</button>
 
                 <!-- Data below the signature -->
@@ -203,6 +201,7 @@
 
     <!-- Buttons and records container, outside the sticker -->
     <div class="no-print w-full max-w-lg mt-4 flex flex-col items-center space-y-4">
+        <div id="userInfo" class="text-xs text-center text-gray-600 p-2 bg-gray-200 rounded-md w-full"></div>
         <!-- New file upload and scan buttons -->
         <div class="flex flex-col items-center space-y-2 w-full p-4 border rounded-md border-gray-300 bg-gray-200">
             <h3 class="font-bold text-lg text-gray-700">Escanear Documento (IA)</h3>
@@ -214,11 +213,14 @@
         </div>
         
         <div class="flex space-x-4">
-            <button id="printAndSaveButton" class="px-6 py-2 bg-green-500 text-white font-bold rounded-md transition-colors duration-200">
-                Imprimir y Guardar
+            <button id="saveButton" class="px-6 py-2 bg-green-500 text-white font-bold rounded-md transition-colors duration-200">
+                Guardar
             </button>
             <button id="showRecordsButton" class="px-6 py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 transition-colors duration-200">
-                Mostrar Registros Guardados
+                Mostrar Registros
+            </button>
+             <button onclick="window.print()" class="px-6 py-2 bg-gray-600 text-white font-bold rounded-md transition-colors duration-200">
+                Imprimir
             </button>
         </div>
         <button id="newRecordButton" class="px-4 py-2 bg-gray-500 text-white font-bold rounded-md hover:bg-gray-600 transition-colors duration-200">
@@ -233,19 +235,21 @@
             <!-- Saved records will be displayed here -->
         </div>
     </div>
-
-    <!-- Modal to ask for the user's name -->
-    <div id="nameModal" class="modal hidden">
+    
+    <!-- Modal for Signature -->
+    <div id="signatureModal" class="modal hidden">
         <div class="modal-content">
-            <h2 class="text-xl font-bold mb-4">Ingresa tu Nombre</h2>
-            <p class="mb-4 text-sm">Este nombre se guardará como la persona que realiza el registro.</p>
-            <input type="text" id="userNameInput" placeholder="Nombre completo" class="w-full p-2 border border-gray-300 rounded-md">
+            <h2 class="text-xl font-bold mb-4">Firma del Mecánico</h2>
+            <canvas id="modalSignatureCanvas" class="border border-black w-full h-48 rounded-md bg-white"></canvas>
+            <label for="mechanicNameInput" class="block text-sm font-bold mt-4">Nombre del Mecánico</label>
+            <input type="text" id="mechanicNameInput" placeholder="Escriba su nombre y licencia (ej: Juan Pérez / 12345)" class="w-full p-2 border border-gray-300 rounded-md mt-1">
             <div class="flex justify-end mt-4 space-x-2">
-                <button id="closeModalBtn" class="px-4 py-2 bg-gray-400 text-white font-bold rounded-md hover:bg-gray-500 transition-colors duration-200">
+                <button id="clearModalSignatureBtn" class="px-4 py-2 bg-gray-500 text-white font-bold rounded-md hover:bg-gray-600 transition-colors duration-200">Borrar</button>
+                <button id="cancelSignatureBtn" class="px-4 py-2 bg-yellow-500 text-white font-bold rounded-md hover:bg-yellow-600 transition-colors duration-200">
                     Cancelar
                 </button>
-                <button id="saveAndPrintBtn" class="px-4 py-2 bg-green-500 text-white font-bold rounded-md hover:bg-green-600 transition-colors duration-200">
-                    Guardar y Usar Ctrl + P
+                <button id="saveSignatureBtn" class="px-4 py-2 bg-green-500 text-white font-bold rounded-md hover:bg-green-600 transition-colors duration-200">
+                    Guardar Firma
                 </button>
             </div>
         </div>
@@ -253,27 +257,24 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Set logging level for debugging
         setLogLevel('debug');
-
-        // =========================================================================
-        // === Pega tu configuración de Firebase aquí para que funcione fuera de Canvas ===
-        // =========================================================================
-        const firebaseConfig = {
+        
+        // --- Canvas Global Variables (MANDATORY) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'reportesti-41047';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyAnDAVVRTnl_SHejO7lyqrkGbPcFNyIBHc",
-            authDomain: "reportesti-4104T7.firebaseapp.com",
+            authDomain: "reportesti-41047.firebaseapp.com",
             projectId: "reportesti-41047",
             storageBucket: "reportesti-41047.appspot.com",
             messagingSenderId: "997680984231",
             appId: "1:997680984231:web:d9c27e1ac8eaf9473feb82"
         };
-        // =========================================================================
-
-        const appId = firebaseConfig.projectId;
+         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : undefined;
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -282,29 +283,36 @@
         
         // State management
         let currentDocId = null;
+        let userId = null;
 
         // UI Elements
         const taskTypeSelect = document.getElementById('task-type-select');
         const trabajosContainer = document.getElementById('trabajos-container');
-        const printAndSaveButton = document.getElementById('printAndSaveButton');
+        const saveButton = document.getElementById('saveButton');
         const showRecordsButton = document.getElementById('showRecordsButton');
         const newRecordButton = document.getElementById('newRecordButton');
         const recordsContainer = document.getElementById('recordsContainer');
         const statusMessage = document.getElementById('statusMessage');
-        const nameModal = document.getElementById('nameModal');
-        const userNameInput = document.getElementById('userNameInput');
-        const saveAndPrintBtn = document.getElementById('saveAndPrintBtn');
-        const closeModalBtn = document.getElementById('closeModalBtn');
         const canvas = document.getElementById('signatureCanvas');
         const ctx = canvas.getContext('2d');
         const clearBtn = document.getElementById('clearSignatureBtn');
         const imageUpload = document.getElementById('imageUpload');
         const scanImageBtn = document.getElementById('scanImageBtn');
         const mainImage = document.getElementById('main-image');
+        const userInfo = document.getElementById('userInfo');
+        
+        const signatureModal = document.getElementById('signatureModal');
+        const modalSignatureCanvas = document.getElementById('modalSignatureCanvas');
+        const modalCtx = modalSignatureCanvas.getContext('2d');
+        const saveSignatureBtn = document.getElementById('saveSignatureBtn');
+        const cancelSignatureBtn = document.getElementById('cancelSignatureBtn');
+        const mechanicNameInput = document.getElementById('mechanicNameInput');
+        const clearModalSignatureBtn = document.getElementById('clearModalSignatureBtn');
 
-        // --- Data Structure for Inspections ---
+
+        // --- Data Structure for Inspections (same as before) ---
         const inspections = {
-            scheduled_inspections_a: {
+             scheduled_inspections_a: {
                 label: "Scheduled Inspections - Part A",
                 items: {
                     daily_inspection: { title: "Daily Inspection (DMC-412-A-05-40-00-00A-281A-A / 00022)", hours: 10 },
@@ -386,45 +394,42 @@
         const removalDescription = "Se removió [Parte] P/N [Número de parte] S/N [Número de serie], Reparable, por horas para Overhaul cumplidas.";
         const installationDescription = "Se instaló [Parte] P/N [Número de parte] S/N [Número de serie], Reparable, por horas para Overhaul cumplidas.";
         
-        // Initial values for editable fields
         const initialValues = {
-            fecha_inicio: '',
-            modelo: '',
-            numero_de_serie: '',
-            matricula: '',
-            ac_tt: '',
-            tq: '',
-            landings: '',
-            fecha_finalizacion: '',
-            eng1_tsn_tso: '',
-            eng1_csn_cso: '',
-            eng2_tsn_tso: '',
-            eng2_csn_cso: '',
-            cbox_tsn_tso: '',
-            cbox_csn_cso: '',
+            fecha_inicio: '', modelo: '', numero_de_serie: '', matricula: '', ac_tt: '', tq: '', landings: '', fecha_finalizacion: '', eng1_tsn_tso: '', eng1_csn_cso: '', eng2_tsn_tso: '', eng2_csn_cso: '', cbox_tsn_tso: '', cbox_csn_cso: '',
             certificacion: 'Yo certifico que los trabajos arriba descritos fueron efectuados de acuerdo a los procedimientos del Manual de Mantenimiento y por lo tanto la aeronave es puesta en servicio.',
-            serie: '',
-            jefe_taller: '',
-            lic_no: ''
+            serie: '', jefe_taller: '', lic_no: ''
         };
 
         // --- Authentication & Initialization Logic ---
         async function initAuthAndApp() {
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                    statusMessage.textContent = 'Autenticación exitosa. Listo para guardar y cargar sus registros.';
+                    statusMessage.style.color = 'green';
+                    userInfo.textContent = `Usuario ID: ${userId}`;
+                    saveButton.disabled = false;
+                    showRecordsButton.disabled = false;
+                    scanImageBtn.disabled = false;
+                } else {
+                    userId = null;
+                    statusMessage.textContent = 'No autenticado. Por favor, recargue la página.';
+                    statusMessage.style.color = 'red';
+                    userInfo.textContent = 'Usuario no identificado';
+                    saveButton.disabled = true;
+                    showRecordsButton.disabled = true;
+                    scanImageBtn.disabled = true;
+                }
+            });
+
             try {
-                statusMessage.textContent = 'Iniciando autenticación...';
-                await signInAnonymously(auth);
-                statusMessage.textContent = 'Autenticación colaborativa exitosa. Todos los usuarios pueden ver y editar los registros.';
-                statusMessage.style.color = 'green';
-                printAndSaveButton.disabled = false;
-                showRecordsButton.disabled = false;
-                scanImageBtn.disabled = false;
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
             } catch (error) {
                 console.error("Error de autenticación: ", error);
-                statusMessage.textContent = 'Error de autenticación. No se pueden guardar ni cargar datos.';
-                statusMessage.style.color = 'red';
-                printAndSaveButton.disabled = true;
-                showRecordsButton.disabled = true;
-                scanImageBtn.disabled = true;
             }
         }
 
@@ -458,12 +463,7 @@
             const removeBtn = itemRow.querySelector('.remove-item-btn');
             removeBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const groupBlock = itemRow.closest('[id^="trabajo-group-"]');
                 itemRow.remove();
-                if (groupBlock && groupBlock.querySelectorAll('.list-content > div').length === 0) {
-                   // Optional: remove group block if it becomes empty
-                   // groupBlock.remove(); 
-                }
                 updateItemNumbers();
             });
             return itemRow;
@@ -475,24 +475,18 @@
             if (!itemData) return;
 
             let groupBlock = document.getElementById(`trabajo-group-${groupKey}`);
-
-            // Create group block if it doesn't exist
             if (!groupBlock) {
                 groupBlock = document.createElement('div');
                 groupBlock.id = `trabajo-group-${groupKey}`;
                 groupBlock.dataset.groupKey = groupKey;
                 groupBlock.classList.add('mt-4');
-
                 const header = document.createElement('div');
                 header.classList.add('flex', 'justify-between', 'items-center', 'font-bold', 'text-sm', 'text-white', 'bg-custom-blue', 'p-1', 'rounded-t-md');
                 header.innerHTML = `
                     <p>${groupData.label}</p>
                     <button class="remove-block-btn text-white hover:text-red-300 font-bold px-2 no-print text-xl">&times;</button>
                 `;
-                header.querySelector('.remove-block-btn').onclick = () => {
-                    groupBlock.remove();
-                    updateItemNumbers();
-                };
+                header.querySelector('.remove-block-btn').onclick = () => { groupBlock.remove(); updateItemNumbers(); };
                 groupBlock.appendChild(header);
 
                 const contentContainer = document.createElement('div');
@@ -505,20 +499,14 @@
             }
 
             const listContent = groupBlock.querySelector('.list-content');
-
-            // Prevent adding duplicate items
-            if (listContent.querySelector(`[data-item-key="${itemKey}"]`)) {
-                return; // Silently exit if item already exists
-            }
+            if (listContent.querySelector(`[data-item-key="${itemKey}"]`)) return;
             
-            // Special handling for remi/installation
             if (groupKey === 'remi') {
                  listContent.appendChild(createItemElement(removalDescription, 'remi_remocion'));
                  listContent.appendChild(createItemElement(installationDescription, 'remi_instalacion'));
             } else {
                  listContent.appendChild(createItemElement(itemData.title, itemKey));
             }
-           
             updateItemNumbers();
         }
 
@@ -532,11 +520,9 @@
         taskTypeSelect.addEventListener('change', () => {
             const selectedValue = taskTypeSelect.value;
             if (selectedValue === 'none') return;
-
             const [groupKey, itemKey] = selectedValue.split('.');
             const selectedItemData = inspections[groupKey]?.items[itemKey];
 
-            // If the selected item has an 'hours' property, add all inspections with fewer or equal hours from the same group
             if (selectedItemData && typeof selectedItemData.hours === 'number') {
                 const parentGroup = inspections[groupKey].items;
                 for (const currentItemKey in parentGroup) {
@@ -546,36 +532,42 @@
                     }
                 }
             } else {
-                // Otherwise, just add the single selected item
                 addItemToGroupBlock(groupKey, itemKey);
             }
-
-            taskTypeSelect.value = 'none'; // Reset dropdown after selection
+            taskTypeSelect.value = 'none';
         });
-
 
         // --- Signature Pad functionality ---
         let drawing = false;
-
-        function resizeCanvas() {
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = '#000';
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        let modalDrawing = false;
+        
+        function resizeCanvas(targetCanvas, targetCtx) {
+            const rect = targetCanvas.getBoundingClientRect();
+            targetCanvas.width = rect.width;
+            targetCanvas.height = rect.height;
+            targetCtx.lineWidth = 2;
+            targetCtx.lineCap = 'round';
+            targetCtx.strokeStyle = '#000';
+            targetCtx.fillStyle = '#fff';
+            targetCtx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        window.addEventListener('resize', () => resizeCanvas(canvas, ctx));
+        resizeCanvas(canvas, ctx);
 
-        function startPosition(e) { drawing = true; draw(e); }
-        function endPosition() { drawing = false; ctx.beginPath(); }
-        function draw(e) {
-            if (!drawing) return;
+        function startPosition(e, targetCtx, isModal) { 
+            if(isModal) modalDrawing = true; else drawing = true;
+            draw(e, targetCtx, isModal); 
+        }
+        function endPosition(e, targetCtx, isModal) { 
+            if(isModal) modalDrawing = false; else drawing = false;
+            targetCtx.beginPath(); 
+        }
+        function draw(e, targetCtx, isModal) {
+            // This condition was flawed. Let's fix it.
+            if ((isModal && !modalDrawing) || (!isModal && !drawing)) return;
+
+            const rect = e.target.getBoundingClientRect();
             let x, y;
-            const rect = canvas.getBoundingClientRect();
             if (e.touches) {
                 x = e.touches[0].clientX - rect.left;
                 y = e.touches[0].clientY - rect.top;
@@ -583,19 +575,67 @@
                 x = e.clientX - rect.left;
                 y = e.clientY - rect.top;
             }
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x, y);
+            targetCtx.lineTo(x, y);
+            targetCtx.stroke();
+            targetCtx.beginPath();
+            targetCtx.moveTo(x, y);
         }
 
-        canvas.addEventListener('mousedown', startPosition);
-        canvas.addEventListener('mouseup', endPosition);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startPosition(e); });
-        canvas.addEventListener('touchend', endPosition);
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
+        // --- Main Canvas (Preview) Listeners (only opens modal) ---
+        canvas.addEventListener('click', () => {
+            signatureModal.classList.remove('hidden');
+            resizeCanvas(modalSignatureCanvas, modalCtx);
+            modalCtx.drawImage(canvas, 0, 0, modalSignatureCanvas.width, modalSignatureCanvas.height);
+            
+            const currentJefe = document.getElementById('jefe_taller').textContent.trim();
+            const currentLic = document.getElementById('lic_no').textContent.trim();
+            mechanicNameInput.value = currentLic ? `${currentJefe} / ${currentLic}` : currentJefe;
+        });
+        
+        // --- Modal Canvas Listeners ---
+        modalSignatureCanvas.addEventListener('mousedown', (e) => startPosition(e, modalCtx, true));
+        modalSignatureCanvas.addEventListener('mouseup', (e) => endPosition(e, modalCtx, true));
+        modalSignatureCanvas.addEventListener('mousemove', (e) => draw(e, modalCtx, true));
+        modalSignatureCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); startPosition(e, modalCtx, true); });
+        modalSignatureCanvas.addEventListener('touchend', (e) => { e.preventDefault(); endPosition(e, modalCtx, true); });
+        modalSignatureCanvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e, modalCtx, true); });
 
+        // --- Modal Buttons ---
+        cancelSignatureBtn.addEventListener('click', () => {
+            signatureModal.classList.add('hidden');
+        });
+
+        clearModalSignatureBtn.addEventListener('click', () => {
+            modalCtx.clearRect(0, 0, modalSignatureCanvas.width, modalSignatureCanvas.height);
+            modalCtx.fillStyle = '#fff';
+            modalCtx.fillRect(0, 0, modalSignatureCanvas.width, modalSignatureCanvas.height);
+        });
+
+        saveSignatureBtn.addEventListener('click', () => {
+            const mechanicInfo = mechanicNameInput.value.trim();
+            
+            // Draw the name onto the modal canvas
+            if (mechanicInfo) {
+                modalCtx.font = "16px Inter";
+                modalCtx.fillStyle = "black";
+                modalCtx.textAlign = "center";
+                modalCtx.fillText(mechanicInfo, modalSignatureCanvas.width / 2, modalSignatureCanvas.height - 10);
+            }
+
+            // Copy the result to the main canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(modalSignatureCanvas, 0, 0, canvas.width, canvas.height);
+
+            // Update the main form fields
+            const parts = mechanicInfo.split('/');
+            const name = parts[0] ? parts[0].trim() : '';
+            const license = parts[1] ? parts[1].trim() : '';
+            document.getElementById('jefe_taller').textContent = name;
+            document.getElementById('lic_no').textContent = license;
+
+            signatureModal.classList.add('hidden');
+        });
+        
         clearBtn.addEventListener('click', () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#fff';
@@ -606,43 +646,36 @@
             const img = new Image();
             img.onload = () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             };
             img.src = base64Data;
         }
 
         // --- Firestore save and update functionality ---
-        async function saveToFirestore(userName) {
-            const documentsPath = `/artifacts/${appId}/public/data/mantenimiento_data`;
+        async function saveToFirestore() {
+            if (!userId) {
+                statusMessage.textContent = 'Error: No se ha identificado al usuario.';
+                statusMessage.style.color = 'red';
+                return;
+            }
+            const documentsPath = `/artifacts/${appId}/users/${userId}/mantenimiento_data`;
             
             const trabajos_realizados = [];
-            const groupBlocks = trabajosContainer.querySelectorAll(':scope > div[id^="trabajo-group-"]');
-            
-            groupBlocks.forEach(block => {
+            trabajosContainer.querySelectorAll(':scope > div[id^="trabajo-group-"]').forEach(block => {
                 const groupKey = block.dataset.groupKey;
-                const groupLabel = inspections[groupKey].label;
                 const items = [];
-                
                 block.querySelectorAll('.list-content > div').forEach(itemDiv => {
                     items.push({
                         key: itemDiv.dataset.itemKey,
                         text: itemDiv.querySelector('p').textContent
                     });
                 });
-                
                 if (items.length > 0) {
-                    trabajos_realizados.push({
-                        groupKey: groupKey,
-                        groupLabel: groupLabel,
-                        items: items
-                    });
+                    trabajos_realizados.push({ groupKey: groupKey, groupLabel: inspections[groupKey].label, items: items });
                 }
             });
 
             const signatureData = canvas.toDataURL();
-
             const dataToSave = {
                 fecha_inicio: document.getElementById('fecha_inicio').textContent,
                 modelo: document.getElementById('modelo').textContent,
@@ -658,13 +691,13 @@
                 eng2_csn_cso: document.getElementById('eng2_csn_cso').textContent,
                 cbox_tsn_tso: document.getElementById('cbox_tsn_tso').textContent,
                 cbox_csn_cso: document.getElementById('cbox_csn_cso').textContent,
-                trabajos_realizados: trabajos_realizados,
+                trabajos_realizados,
                 certificacion: document.getElementById('certificacion').textContent,
                 serie: document.getElementById('serie').textContent,
                 jefe_taller: document.getElementById('jefe_taller').textContent,
                 licencia_no: document.getElementById('lic_no').textContent,
                 firma: signatureData,
-                guardado_por: userName,
+                owner: userId,
                 timestamp: new Date()
             };
 
@@ -673,23 +706,20 @@
                 if (currentDocId) {
                     await updateDoc(doc(db, documentsPath, currentDocId), dataToSave);
                     statusMessage.textContent = '¡Datos actualizados con éxito!';
-                    console.log("Documento actualizado con ID: ", currentDocId);
                 } else {
                     const docRef = await addDoc(collection(db, documentsPath), dataToSave);
+                    currentDocId = docRef.id;
                     statusMessage.textContent = '¡Datos guardados con éxito!';
-                    console.log("Documento añadido con ID: ", docRef.id);
                 }
                 statusMessage.style.color = 'green';
-                return true;
             } catch (e) {
                 statusMessage.textContent = 'Error al guardar los datos.';
                 statusMessage.style.color = 'red';
-                console.error("Error al añadir/actualizar documento: ", e);
-                return false;
+                console.error("Error al guardar documento: ", e);
             }
         }
 
-        // --- AI Scan Functionality ---
+        // --- AI Scan Functionality (no changes) ---
         scanImageBtn.addEventListener('click', async () => {
             const file = imageUpload.files[0];
             if (!file) {
@@ -704,89 +734,39 @@
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const fileDataUrl = e.target.result;
-                mainImage.src = fileDataUrl; // Update the main image viewer
-
+                mainImage.src = fileDataUrl;
                 const base64Data = fileDataUrl.split(',')[1];
-                const apiKey = "AIzaSyAFpL-UJVno1ddDeNpDg843w4wfJZOLdhM"; // La API Key se provee en runtime
+                
+                // NOTE: A real API key would be required outside of the Canvas environment
+                const apiKey = ""; 
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
-                const prompt = "Extrae los datos de la etiqueta de mantenimiento en la imagen. No incluyas los títulos de las celdas, solo los valores. Si un campo está vacío, déjalo como una cadena vacía. Devuelve los datos como un objeto JSON con las siguientes claves: 'fecha_inicio', 'fecha_finalizacion', 'modelo', 'eng1_tsn_tso', 'numero_de_serie', 'eng1_csn_cso', 'matricula', 'eng2_tsn_tso', 'ac_tt', 'eng2_csn_cso', 'tq', 'cbox_tsn_tso', 'landings', 'cbox_csn_cso', 'firma', 'serie', 'licencia', 'motor1_tsn_tso', 'motor2_tsn_tso', 'motor1_csn_cso', 'motor2_csn_cso'. Para el campo 'firma', describe si la firma es visible o no.";
+                const prompt = "Extrae los datos de la etiqueta de mantenimiento en la imagen. No incluyas los títulos de las celdas, solo los valores. Si un campo está vacío, déjalo como una cadena vacía. Devuelve los datos como un objeto JSON con las siguientes claves: 'fecha_inicio', 'fecha_finalizacion', 'modelo', 'eng1_tsn_tso', 'numero_de_serie', 'eng1_csn_cso', 'matricula', 'eng2_tsn_tso', 'ac_tt', 'eng2_csn_cso', 'tq', 'cbox_tsn_tso', 'landings', 'cbox_csn_cso', 'serie', 'licencia', 'jefe_taller'.";
                 
                 const payload = {
-                    contents: [
-                        {
-                            role: "user",
-                            parts: [
-                                { text: prompt },
-                                {
-                                    inlineData: {
-                                        mimeType: file.type,
-                                        data: base64Data
-                                    }
-                                }
-                            ]
-                        }
-                    ],
+                    contents: [ { role: "user", parts: [ { text: prompt }, { inlineData: { mimeType: file.type, data: base64Data } } ] } ],
                     generationConfig: {
                         responseMimeType: "application/json",
                         responseSchema: {
                             type: "OBJECT",
                             properties: {
-                                "fecha_inicio": { "type": "STRING" },
-                                "fecha_finalizacion": { "type": "STRING" },
-                                "modelo": { "type": "STRING" },
-                                "eng1_tsn_tso": { "type": "STRING" },
-                                "numero_de_serie": { "type": "STRING" },
-                                "eng1_csn_cso": { "type": "STRING" },
-                                "matricula": { "type": "STRING" },
-                                "eng2_tsn_tso": { "type": "STRING" },
-                                "eng2_csn_cso": { "type": "STRING" },
-                                "ac_tt": { "type": "STRING" },
-                                "tq": { "type": "STRING" },
-                                "cbox_tsn_tso": { "type": "STRING" },
-                                "landings": { "type": "STRING" },
-                                "cbox_csn_cso": { "type": "STRING" },
-                                "motor1_tsn_tso": { "type": "STRING" },
-                                "motor2_tsn_tso": { "type": "STRING" },
-                                "motor1_csn_cso": { "type": "STRING" },
-                                "motor2_csn_cso": { "type": "STRING" },
-                                "firma": { "type": "STRING" },
-                                "serie": { "type": "STRING" },
-                                "licencia": { "type": "STRING" }
+                                "fecha_inicio": { "type": "STRING" }, "fecha_finalizacion": { "type": "STRING" }, "modelo": { "type": "STRING" }, "eng1_tsn_tso": { "type": "STRING" }, "numero_de_serie": { "type": "STRING" }, "eng1_csn_cso": { "type": "STRING" }, "matricula": { "type": "STRING" }, "eng2_tsn_tso": { "type": "STRING" }, "eng2_csn_cso": { "type": "STRING" }, "ac_tt": { "type": "STRING" }, "tq": { "type": "STRING" }, "cbox_tsn_tso": { "type": "STRING" }, "landings": { "type": "STRING" }, "cbox_csn_cso": { "type": "STRING" }, "serie": { "type": "STRING" }, "licencia": { "type": "STRING" }, "jefe_taller": { "type": "STRING" }
                             }
                         }
                     }
                 };
                 
                 try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    
+                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                     const result = await response.json();
                     const jsonString = result.candidates[0].content.parts[0].text;
                     const data = JSON.parse(jsonString);
 
-                    // Fill form fields with data from the AI
-                    document.getElementById('fecha_inicio').textContent = data.fecha_inicio || '';
-                    document.getElementById('fecha_finalizacion').textContent = data.fecha_finalizacion || '';
-                    document.getElementById('modelo').textContent = data.modelo || '';
-                    document.getElementById('eng1_tsn_tso').textContent = data.eng1_tsn_tso || '';
-                    document.getElementById('numero_de_serie').textContent = data.numero_de_serie || '';
-                    document.getElementById('eng1_csn_cso').textContent = data.eng1_csn_cso || '';
-                    document.getElementById('matricula').textContent = data.matricula || '';
-                    document.getElementById('eng2_tsn_tso').textContent = data.eng2_tsn_tso || '';
-                    document.getElementById('ac_tt').textContent = data.ac_tt || '';
-                    document.getElementById('eng2_csn_cso').textContent = data.eng2_csn_cso || '';
-                    document.getElementById('tq').textContent = data.tq || '';
-                    document.getElementById('cbox_tsn_tso').textContent = data.cbox_tsn_tso || '';
-                    document.getElementById('landings').textContent = data.landings || '';
-                    document.getElementById('cbox_csn_cso').textContent = data.cbox_csn_cso || '';
-                    document.getElementById('serie').textContent = data.serie || '';
-                    document.getElementById('lic_no').textContent = data.licencia || '';
-                    
+                    Object.keys(data).forEach(key => {
+                        const elementId = (key === 'licencia') ? 'lic_no' : key;
+                        const element = document.getElementById(elementId);
+                        if (element) element.textContent = data[key] || '';
+                    });
                     statusMessage.textContent = 'Datos escaneados y rellenados con éxito.';
                     statusMessage.style.color = 'green';
                 } catch (error) {
@@ -801,66 +781,41 @@
         });
 
         // --- Event listeners and logic flow ---
-        printAndSaveButton.addEventListener('click', () => {
-            nameModal.classList.remove('hidden');
-        });
-
-        closeModalBtn.addEventListener('click', () => {
-            nameModal.classList.add('hidden');
-        });
-
-        saveAndPrintBtn.addEventListener('click', async () => {
-            const userName = userNameInput.value.trim();
-            if (userName) {
-                nameModal.classList.add('hidden');
-                statusMessage.textContent = 'Guardando datos...';
-                statusMessage.style.color = 'black';
-                const saved = await saveToFirestore(userName);
-                if (saved) {
-                    statusMessage.textContent = '¡Datos guardados con éxito! Ahora puedes imprimir usando Ctrl + P (o Cmd + P en Mac).';
-                    statusMessage.style.color = 'blue';
-                }
-            } else {
-                userNameInput.placeholder = '¡Por favor, ingresa tu nombre!';
-            }
-        });
+        saveButton.addEventListener('click', saveToFirestore);
 
         showRecordsButton.addEventListener('click', async () => {
+            if (!userId) {
+                statusMessage.textContent = 'Debe estar autenticado para ver los registros.';
+                statusMessage.style.color = 'red';
+                return;
+            }
             recordsContainer.innerHTML = '';
-            statusMessage.textContent = 'Cargando registros...';
-            statusMessage.style.color = 'black';
+            statusMessage.textContent = 'Cargando sus registros...';
             
             try {
-                const documentsPath = `/artifacts/${appId}/public/data/mantenimiento_data`;
-                const q = query(collection(db, documentsPath));
+                const documentsPath = `/artifacts/${appId}/users/${userId}/mantenimiento_data`;
+                const q = query(collection(db, documentsPath), where("owner", "==", userId));
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    recordsContainer.innerHTML = `<p class="text-center text-gray-500">No hay registros guardados.</p>`;
-                    statusMessage.textContent = 'Registros cargados.';
-                    statusMessage.style.color = 'green';
-                    return;
-                }
-
-                recordsContainer.innerHTML = `<h3 class="font-bold text-lg text-gray-700 mb-2">Registros Guardados</h3>`;
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const recordDiv = document.createElement('div');
-                    recordDiv.classList.add('record-item', 'p-4', 'border', 'border-gray-300', 'bg-white', 'rounded-md', 'mb-2', 'cursor-pointer', 'hover:bg-gray-50');
-                    recordDiv.innerHTML = `
-                        <p class="font-bold">ID: ${doc.id}</p>
-                        <p class="text-sm">Matrícula: ${data.matricula || 'N/A'}</p>
-                        <p class="text-sm">Guardado por: ${data.guardado_por || 'Anónimo'}</p>
-                        <p class="text-xs text-gray-500">Fecha: ${data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString() : 'N/A'}</p>
-                    `;
-                    recordDiv.addEventListener('click', () => {
-                        loadRecord(data, doc.id);
+                    recordsContainer.innerHTML = `<p class="text-center text-gray-500">No tiene registros guardados.</p>`;
+                } else {
+                    recordsContainer.innerHTML = `<h3 class="font-bold text-lg text-gray-700 mb-2">Sus Registros Guardados</h3>`;
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const recordDiv = document.createElement('div');
+                        recordDiv.classList.add('record-item', 'p-4', 'border', 'border-gray-300', 'bg-white', 'rounded-md', 'mb-2', 'cursor-pointer', 'hover:bg-gray-50');
+                        recordDiv.innerHTML = `
+                            <p class="font-bold">Matrícula: ${data.matricula || 'N/A'}</p>
+                            <p class="text-sm">Jefe: ${data.jefe_taller || 'N/A'}</p>
+                            <p class="text-xs text-gray-500">Fecha: ${data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString() : 'N/A'}</p>
+                        `;
+                        recordDiv.addEventListener('click', () => loadRecord(data, doc.id));
+                        recordsContainer.appendChild(recordDiv);
                     });
-                    recordsContainer.appendChild(recordDiv);
-                });
-                statusMessage.textContent = 'Registros cargados con éxito.';
+                }
+                statusMessage.textContent = 'Registros cargados.';
                 statusMessage.style.color = 'green';
-
             } catch (error) {
                 statusMessage.textContent = 'Error al cargar los registros.';
                 statusMessage.style.color = 'red';
@@ -870,69 +825,31 @@
 
         function loadRecord(data, docId) {
             currentDocId = docId;
-            statusMessage.textContent = `Registro ID: ${docId} cargado. Puedes editar y guardar.`;
+            statusMessage.textContent = `Registro cargado. Puede editar y guardar.`;
             statusMessage.style.color = 'blue';
 
-            // Fill editable cells
-            document.getElementById('fecha_inicio').textContent = data.fecha_inicio || '';
-            document.getElementById('fecha_finalizacion').textContent = data.fecha_finalizacion || '';
-            document.getElementById('modelo').textContent = data.modelo || '';
-            document.getElementById('eng1_tsn_tso').textContent = data.eng1_tsn_tso || '';
-            document.getElementById('numero_de_serie').textContent = data.numero_de_serie || '';
-            document.getElementById('eng1_csn_cso').textContent = data.eng1_csn_cso || '';
-            document.getElementById('matricula').textContent = data.matricula || '';
-            document.getElementById('eng2_tsn_tso').textContent = data.eng2_tsn_tso || '';
-            document.getElementById('ac_tt').textContent = data.ac_tt || '';
-            document.getElementById('eng2_csn_cso').textContent = data.eng2_csn_cso || '';
-            document.getElementById('tq').textContent = data.tq || '';
-            document.getElementById('cbox_tsn_tso').textContent = data.cbox_tsn_tso || '';
-            document.getElementById('landings').textContent = data.landings || '';
-            document.getElementById('cbox_csn_cso').textContent = data.cbox_csn_cso || '';
-            document.getElementById('certificacion').textContent = data.certificacion || '';
-            document.getElementById('serie').textContent = data.serie || '';
-            document.getElementById('jefe_taller').textContent = data.jefe_taller || '';
-            document.getElementById('lic_no').textContent = data.licencia_no || '';
+            Object.keys(initialValues).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = data[key] || initialValues[key];
+                }
+            });
+            
+            loadSignature(data.firma || '');
 
-            // Load signature
-            if (data.firma) {
-                loadSignature(data.firma);
-            } else {
-                clearBtn.click();
-            }
-
-            // Load trabajos
             trabajosContainer.innerHTML = '';
             if (data.trabajos_realizados && Array.isArray(data.trabajos_realizados)) {
                 data.trabajos_realizados.forEach(groupData => {
-                    const groupKey = groupData.groupKey;
-                    
-                    let groupBlock = document.createElement('div');
-                    groupBlock.id = `trabajo-group-${groupKey}`;
-                    groupBlock.dataset.groupKey = groupKey;
-                    groupBlock.classList.add('mt-4');
-
-                    const header = document.createElement('div');
-                    header.classList.add('flex', 'justify-between', 'items-center', 'font-bold', 'text-sm', 'text-white', 'bg-custom-blue', 'p-1', 'rounded-t-md');
-                    header.innerHTML = `
-                        <p>${groupData.groupLabel}</p>
-                        <button class="remove-block-btn text-white hover:text-red-300 font-bold px-2 no-print text-xl">&times;</button>
-                    `;
-                    header.querySelector('.remove-block-btn').onclick = () => groupBlock.remove();
-                    groupBlock.appendChild(header);
-
-                    const contentContainer = document.createElement('div');
-                    contentContainer.classList.add('border-2', 'border-t-0', 'border-black', 'rounded-b-md', 'p-2', 'bg-white');
-                    const listContent = document.createElement('div');
-                    listContent.classList.add('list-content', 'space-y-1');
-                    
                     if (groupData.items && Array.isArray(groupData.items)) {
                         groupData.items.forEach(item => {
-                            listContent.appendChild(createItemElement(item.text, item.key));
+                            addItemToGroupBlock(groupData.groupKey, item.key);
+                            // We need to update the text content for editable items like remocion/instalacion
+                            const addedElement = trabajosContainer.querySelector(`[data-item-key="${item.key}"] p`);
+                            if(addedElement) {
+                                addedElement.textContent = item.text;
+                            }
                         });
                     }
-                    contentContainer.appendChild(listContent);
-                    groupBlock.appendChild(contentContainer);
-                    trabajosContainer.appendChild(groupBlock);
                 });
             }
             updateItemNumbers();
@@ -941,8 +858,7 @@
         newRecordButton.addEventListener('click', () => {
             currentDocId = null;
             document.querySelectorAll('.editable-cell').forEach(cell => {
-                const initialValue = initialValues[cell.id];
-                cell.textContent = initialValue !== undefined ? initialValue : '';
+                cell.textContent = initialValues[cell.id] || '';
             });
             clearBtn.click();
             trabajosContainer.innerHTML = '';
@@ -957,3 +873,4 @@
     </script>
 </body>
 </html>
+
