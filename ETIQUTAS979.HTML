@@ -111,8 +111,8 @@
         <!-- Header banner with logo and text -->
         <div class="bg-custom-yellow p-4 text-center rounded-t-lg border-2 border-black border-b-0">
             <div id="image-viewer" class="mb-2">
-                 <p class="font-bold text-gray-700 mb-2"></p>
-     
+                 <p class="font-bold text-gray-700 mb-2">Documentación de Referencia</p>
+         
             </div>
             <p class="text-sm font-bold text-gray-800 mt-1">ESCN. HELICÓPTEROS</p>
             <p class="text-xs text-gray-800">FUERZA AÉREA HONDUREÑA</p>
@@ -655,10 +655,6 @@
             signatureModal.classList.remove('hidden');
             resizeCanvas(modalSignatureCanvas, modalCtx);
             modalCtx.drawImage(canvas, 0, 0, modalSignatureCanvas.width, modalSignatureCanvas.height);
-            
-            const currentJefe = document.getElementById('jefe_taller').textContent.trim();
-            const currentLic = document.getElementById('lic_no').textContent.trim();
-            mechanicNameInput.value = currentLic ? `${currentJefe} / ${currentLic}` : currentJefe;
         });
         
         modalSignatureCanvas.addEventListener('mousedown', (e) => startPosition(e, modalCtx, true));
@@ -679,8 +675,14 @@
         });
 
         saveSignatureBtn.addEventListener('click', () => {
-            const mechanicInfo = mechanicNameInput.value.trim();
+            const jefeTallerText = document.getElementById('jefe_taller').textContent.trim();
+            const licNoText = document.getElementById('lic_no').textContent.trim();
             
+            let mechanicInfo = jefeTallerText;
+            if (licNoText) {
+                mechanicInfo += ` / ${licNoText}`;
+            }
+
             if (mechanicInfo) {
                 modalCtx.font = "16px Inter";
                 modalCtx.fillStyle = "black";
@@ -690,12 +692,6 @@
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(modalSignatureCanvas, 0, 0, canvas.width, canvas.height);
-
-            const parts = mechanicInfo.split('/');
-            const name = parts[0] ? parts[0].trim() : '';
-            const license = parts[1] ? parts[1].trim() : '';
-            document.getElementById('jefe_taller').textContent = name;
-            document.getElementById('lic_no').textContent = license;
 
             signatureModal.classList.add('hidden');
         });
@@ -722,7 +718,7 @@
                 statusMessage.style.color = 'red';
                 return;
             }
-            const documentsPath = `/artifacts/${appId}/users/${userId}/mantenimiento_data`;
+            const documentsPath = `/artifacts/${appId}/public/data/mantenimiento_data`;
             
             const trabajos_realizados = [];
             trabajosContainer.querySelectorAll(':scope > div[id^="trabajo-group-"]').forEach(block => {
@@ -857,17 +853,17 @@
                 return;
             }
             recordsContainer.innerHTML = '';
-            statusMessage.textContent = 'Cargando sus registros...';
+            statusMessage.textContent = 'Cargando registros...';
             
             try {
-                const documentsPath = `/artifacts/${appId}/users/${userId}/mantenimiento_data`;
-                const q = query(collection(db, documentsPath), where("owner", "==", userId));
+                const documentsPath = `/artifacts/${appId}/public/data/mantenimiento_data`;
+                const q = query(collection(db, documentsPath));
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    recordsContainer.innerHTML = `<p class="text-center text-gray-500">No tiene registros guardados.</p>`;
+                    recordsContainer.innerHTML = `<p class="text-center text-gray-500">No hay registros guardados.</p>`;
                 } else {
-                    recordsContainer.innerHTML = `<h3 class="font-bold text-lg text-gray-700 mb-2">Sus Registros Guardados</h3>`;
+                    recordsContainer.innerHTML = `<h3 class="font-bold text-lg text-gray-700 mb-2">Todos los Registros Guardados</h3>`;
                     querySnapshot.forEach((doc) => {
                         const data = doc.data();
                         const recordDiv = document.createElement('div');
@@ -875,6 +871,7 @@
                         recordDiv.innerHTML = `
                             <p class="font-bold">Matrícula: ${data.matricula || 'N/A'} (${data.selectedModel || 'N/A'})</p>
                             <p class="text-sm">Jefe: ${data.jefe_taller || 'N/A'}</p>
+                            <p class="text-xs text-gray-500">Creado por ID: ${data.owner || 'Desconocido'}</p>
                             <p class="text-xs text-gray-500">Fecha: ${data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString() : 'N/A'}</p>
                         `;
                         recordDiv.addEventListener('click', () => loadRecord(data, doc.id));
@@ -943,5 +940,4 @@
     </script>
 </body>
 </html>
-
 
