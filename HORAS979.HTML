@@ -1109,7 +1109,7 @@
                 }
                 actualizarTotales();
             } catch (error) {
-                console.error("Error al cargar los datos de Firebase:", error.code, error.message);
+                console.error("Error al cargar los datos de Firebase:", error); // Simplificado para mejor lectura del error
                 authStatus.textContent = `Error al cargar los datos: ${error.message}`;
                 authStatus.style.color = 'red';
             }
@@ -1119,6 +1119,9 @@
             const tabla = document.querySelectorAll(".tabla-vuelo")[indiceTabla];
             if (tabla) {
                 tabla.querySelectorAll('tbody tr').forEach(fila => {
+                    const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
+                    const isEditableComponentRow = filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta);
+
                     fila.querySelectorAll('td').forEach((celda, indexCelda) => {
                         const isNomenclatura = celda.classList.contains('nomenclatura');
                         const isTotalCell = celda.classList.contains('fila-total') || celda.classList.contains('fila-general');
@@ -1155,10 +1158,6 @@
                             return; 
                         }
 
-                        const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
-                        const isEditableComponentRow = filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta);
-                        const isLabelRow = filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta);
-
                         if (isEditableComponentRow) {
                             const { nomenclaturaBase, varianteClave } = parseNomenclatura(nomenclaturaCompleta);
                             let config = limitesConfig[nomenclaturaBase];
@@ -1189,6 +1188,9 @@
                             celda.classList.remove("led-persistente");
                         }
                     });
+
+                    // --- CORRECCIÓN AQUÍ ---
+                    // Esta lógica se movió dentro del bucle forEach de las filas
                     if (isEditableComponentRow) {
                         const restanteCelda = fila.querySelector('.fila-restante');
                         const limiteCelda = fila.querySelector('.limite-celda');
@@ -1463,7 +1465,7 @@
                 return;
             }
 
-            const rutaOrigen = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesOrigenIndex}`; 
+            const rutaOrigen = `artifacts/${sharedProjectId}/public_data/datos_vuelo/${año}/${mesOrigenIndex}`; 
             try {
                 console.log(`DEBUG: Intentando obtener datos del mes de origen: ${rutaOrigen}`);
                 const snapshot = await get(ref(database, rutaOrigen));
@@ -1884,7 +1886,7 @@
                 }
 
                 // Obtener los totales generales directamente de Firebase Realtime Database
-                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-976-Overall`;
+                const rutaTotalesGenerales = `artifacts/${sharedProjectId}/public_data/totales_generales/Overall`;
                 try {
                     const snapshot = await get(ref(database, rutaTotalesGenerales));
                     let generalTotals = { 'AC HRS': 0, 'ATERRIZAJES': 0, 'RINS': 0 };
@@ -1952,4 +1954,6 @@
     </script>
 </body>
 </html>
+
+
 
