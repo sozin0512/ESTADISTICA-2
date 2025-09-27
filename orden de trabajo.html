@@ -69,7 +69,7 @@
             <div class="bg-white rounded-lg shadow-lg p-6">
                 <h1 class="text-2xl font-bold mb-4 text-orange-600">Inspecciones Vencidas Pendientes (Todos)</h1>
                 <p class="text-gray-600 mb-6">Estas son las inspecciones vencidas de todas las aeronaves que necesitan una orden de trabajo.</p>
-                <div id="pending-inspections-list" class="space-y-3">
+                <div id="pending-inspections-list">
                     <p class="text-center text-gray-500 py-4">Cargando inspecciones pendientes...</p>
                 </div>
             </div>
@@ -101,8 +101,7 @@
         </div>
     </main>
 
-    <!-- Modals (no changes needed here) -->
-    <!-- ... Contenedor PDF, Modal Taller, Modal Eliminar, Modal Completar, Modal Feedback ... -->
+    <!-- Modals -->
     <div id="pdf-container"></div>
     <div id="workshop-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
@@ -136,14 +135,27 @@
             <button id="close-feedback-modal" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded">Cerrar</button>
         </div>
     </div>
+    <!-- Password Modal -->
+    <div id="password-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
+            <h3 class="text-xl font-bold mb-4">Acceso de Administrador</h3>
+            <p class="mb-4 text-gray-600">Por favor, introduce la contraseña para activar el modo de edición.</p>
+            <input type="password" id="password-input" class="w-full border border-gray-300 rounded-md p-2 mb-4" placeholder="Contraseña">
+            <p id="password-error" class="text-red-500 text-sm mb-4 hidden">Contraseña incorrecta.</p>
+            <div class="flex justify-end gap-4">
+                <button id="cancel-password" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">Cancelar</button>
+                <button id="confirm-password" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Confirmar</button>
+            </div>
+        </div>
+    </div>
     
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { getDatabase, ref, onValue, set, get, update, remove } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
         import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-        // --- CAMBIO CLAVE: Usa tu propia configuración de Firebase aquí si es diferente ---
-        const firebaseConfig = {
+        // --- CAMBIO CLAVE: Configuración de Firebase Principal (para la mayoría de helicópteros) ---
+        const firebaseConfigPrimary = {
             apiKey: "AIzaSyASg6fgH-Lo6PXLnnw_p8LzHl-WNDiuHrU",
             authDomain: "fah-901-ba5f4.firebaseapp.com",
             databaseURL: "https://fah-901-ba5f4-default-rtdb.firebaseio.com",
@@ -153,17 +165,33 @@
             appId: "1:63083113988:web:1771a16e1ad4bfb8ca3903"
         };
         
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-        const auth = getAuth(app);
+        // --- CAMBIO CLAVE: Configuración de Firebase Secundaria (para FAH-979) ---
+        const firebaseConfigSecondary = {
+            apiKey: "AIzaSyCIZjCL34TG4f8WSd3xdbuO8WKbVuI5F2c",
+            authDomain: "fah-979.firebaseapp.com",
+            databaseURL: "https://fah-979-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "fah-979",
+            storageBucket: "fah-979.firebasestorage.app",
+            messagingSenderId: "48264926465",
+            appId: "1:48264926465:web:546b8c73d4615349ebf700",
+            measurementId: "G-3KRV6FV0FB"
+        };
+        
+        // Inicializar ambas aplicaciones de Firebase
+        const primaryApp = initializeApp(firebaseConfigPrimary, 'primaryApp');
+        const secondaryApp = initializeApp(firebaseConfigSecondary, 'secondaryApp');
+        
+        const dbPrimary = getDatabase(primaryApp);
+        const dbSecondary = getDatabase(secondaryApp);
+        const auth = getAuth(primaryApp);
+        const authSecondary = getAuth(secondaryApp); // --- CAMBIO CLAVE: Autenticación para la DB secundaria
         
         // --- CAMBIO CLAVE: Lista de IDs de helicópteros ---
-        const helicopterIds = ["FAH-980", "FAH-979", "FAH-945", "FAH-990", "FAH-991", "FAH-976"]; // Agrega o quita según necesites
+        const helicopterIds = ["FAH-980", "FAH-979", "FAH-945", "FAH-990", "FAH-991", "FAH-976"];
 
         const { jsPDF } = window.jspdf;
 
         const workshops = ["RADIO", "INSTRUMENTOS", "HYD", "HELICES", "ELECTRICIDAD", "BATERIA", "MOTORES", "ESTRUCTURAS", "ARMAMENTO", "HELICOPTEROS"];
-        // ... (resto de las declaraciones de variables del DOM)
         const filtersContainer = document.getElementById('filters');
         const contentDescription = document.getElementById('content-description');
         const workOrdersTable = document.getElementById('work-orders-table');
@@ -184,21 +212,34 @@
         const confirmCompleteBtn = document.getElementById('confirm-complete');
         const cancelCompleteBtn = document.getElementById('cancel-complete');
         const editModeIndicator = document.getElementById('edit-mode-indicator');
+        const passwordModal = document.getElementById('password-modal');
+        const passwordInput = document.getElementById('password-input');
+        const confirmPasswordBtn = document.getElementById('confirm-password');
+        const cancelPasswordBtn = document.getElementById('cancel-password');
+        const passwordError = document.getElementById('password-error');
+
 
         let currentInspectionId = null;
         let currentWorkOrderId = null;
-        let currentHelicopterId = null; // Para saber en qué DB actuar
+        let currentHelicopterId = null;
         let editMode = false;
         let isEditAction = false;
         
-        // --- CAMBIO CLAVE: Almacenamiento de datos de todas las fuentes ---
         let dataStore = {
             workOrders: {},
             expiredInspections: {}
         };
         let currentFilter = 'Todos';
 
-        function showFeedback(message, type = 'error') { /* ... (sin cambios) ... */
+        // --- CAMBIO CLAVE: Función para obtener la instancia de DB correcta ---
+        function getDbForHeli(heliId) {
+            if (heliId === 'FAH-979') {
+                return dbSecondary;
+            }
+            return dbPrimary;
+        }
+
+        function showFeedback(message, type = 'error') {
              feedbackMessage.textContent = message;
             if (type === 'error') {
                 feedbackTitle.textContent = 'Error';
@@ -217,13 +258,15 @@
 
         async function main() {
             try {
+                // --- CAMBIO CLAVE: Autenticarse en AMBAS bases de datos ---
                 await signInAnonymously(auth);
+                await signInAnonymously(authSecondary);
             } catch (error) {
-                showFeedback("No se pudo autenticar con el servicio. La aplicación no funcionará correctamente.");
+                console.error("Firebase Authentication Error:", error);
+                showFeedback("No se pudo autenticar con uno de los servicios. La aplicación podría no funcionar correctamente.");
                 return;
             }
 
-            // ... (código de configuración de talleres y filtros, sin cambios)
             workshopSelect.innerHTML = '<option value="TODOS">TODOS LOS TALLERES</option>';
             workshops.forEach(workshop => {
                 const option = document.createElement('option');
@@ -240,15 +283,39 @@
                 filtersContainer.appendChild(link);
             });
 
-            // --- CAMBIO CLAVE: Escuchar datos de todos los helicópteros ---
+            // --- NUEVO: Event listener delegado para inspecciones pendientes ---
+            pendingInspectionsContainer.addEventListener('click', (e) => {
+                // Manejar clic en el encabezado para colapsar/expandir
+                const header = e.target.closest('.heli-group-header');
+                if (header) {
+                    const list = header.nextElementSibling;
+                    const icon = header.querySelector('svg');
+                    list.classList.toggle('hidden');
+                    icon.classList.toggle('rotate-180');
+                }
+
+                // Manejar clic en el botón "Generar OT"
+                const generateBtn = e.target.closest('.generate-ot-btn');
+                if (generateBtn) {
+                    currentInspectionId = generateBtn.dataset.inspectionId;
+                    currentHelicopterId = generateBtn.dataset.helicopterId;
+                    isEditAction = false;
+                    workshopModalTitle.textContent = `Generar OT para ${currentHelicopterId}`;
+                    confirmWorkshopBtn.textContent = 'Confirmar y Generar';
+                    workshopSelect.querySelector('option[value="TODOS"]').disabled = false;
+                    workshopModal.classList.remove('hidden');
+                }
+            });
+
+            // Escuchar datos de todos los helicópteros usando la DB correcta
             helicopterIds.forEach(heliId => {
+                const dbInstance = getDbForHeli(heliId); // Obtiene la DB correcta
                 const dbName = `${heliId}-DATA`;
-                const workOrdersRef = ref(database, `artifacts/${dbName}/public_data/ordenes_trabajo`);
-                const expiredInspectionsRef = ref(database, `artifacts/${dbName}/public_data/trabajos_vencidos`);
+                const workOrdersRef = ref(dbInstance, `artifacts/${dbName}/public_data/ordenes_trabajo`);
+                const expiredInspectionsRef = ref(dbInstance, `artifacts/${dbName}/public_data/trabajos_vencidos`);
 
                 onValue(workOrdersRef, (snapshot) => {
                     const data = snapshot.val() || {};
-                    // "Etiquetar" cada orden con su helicóptero de origen
                     const taggedData = Object.values(data).map(wo => ({...wo, helicopterId: heliId}));
                     dataStore.workOrders[heliId] = taggedData;
                     renderContent();
@@ -256,7 +323,6 @@
 
                 onValue(expiredInspectionsRef, (snapshot) => {
                     const data = snapshot.val() || [];
-                     // "Etiquetar" cada inspección con su helicóptero de origen
                     const taggedData = data.map(insp => ({...insp, helicopterId: heliId}));
                     dataStore.expiredInspections[heliId] = taggedData;
                     renderContent();
@@ -285,34 +351,61 @@
                 pendingInspectionsContainer.innerHTML = `<p class="text-center text-gray-500 py-4">No hay inspecciones pendientes por generar.</p>`;
                 return;
             }
-             // Ordenar por helicóptero
-            pending.sort((a,b) => a.helicopterId.localeCompare(b.helicopterId));
-            pending.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg border';
-                div.innerHTML = `
-                    <div>
-                        <p class="font-semibold text-gray-800">${item.name} <span class="text-xs font-bold text-white bg-gray-500 px-2 py-0.5 rounded-full">${item.helicopterId}</span></p>
-                        <p class="text-sm text-gray-500">Ref: ${item.ref}</p>
+
+            const groupedByHeli = pending.reduce((acc, item) => {
+                (acc[item.helicopterId] = acc[item.helicopterId] || []).push(item);
+                return acc;
+            }, {});
+
+            const sortedHeliIds = Object.keys(groupedByHeli).sort();
+
+            sortedHeliIds.forEach(heliId => {
+                const inspections = groupedByHeli[heliId];
+                
+                // --- CAMBIO CLAVE: Eliminar inspecciones duplicadas por nombre ---
+                const uniqueInspections = Array.from(
+                    inspections.reduce((map, item) => map.set(item.name, item), new Map()).values()
+                );
+
+                const groupContainer = document.createElement('div');
+                groupContainer.className = 'bg-gray-50 rounded-lg border mb-3 shadow-sm';
+
+                const header = document.createElement('div');
+                header.className = 'heli-group-header flex justify-between items-center p-3 cursor-pointer hover:bg-gray-100';
+                header.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-lg text-gray-800">${heliId}</span>
+                        <span class="text-sm bg-orange-500 text-white font-semibold px-2.5 py-0.5 rounded-full">${uniqueInspections.length}</span>
                     </div>
-                    <button data-inspection-id="${item.id}" data-helicopter-id="${item.helicopterId}" class="generate-ot-btn bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">Generar OT</button>
+                    <svg class="w-5 h-5 text-gray-600 transition-transform transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                    </svg>
                 `;
-                pendingInspectionsContainer.appendChild(div);
-            });
-            document.querySelectorAll('.generate-ot-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    currentInspectionId = e.currentTarget.dataset.inspectionId;
-                    currentHelicopterId = e.currentTarget.dataset.helicopterId;
-                    isEditAction = false;
-                    workshopModalTitle.textContent = `Generar OT para ${currentHelicopterId}`;
-                    confirmWorkshopBtn.textContent = 'Confirmar y Generar';
-                    workshopSelect.querySelector('option[value="TODOS"]').disabled = false;
-                    workshopModal.classList.remove('hidden');
+
+                const listContainer = document.createElement('div');
+                listContainer.className = 'heli-inspections-list hidden border-t border-gray-200 p-2 space-y-2';
+                
+                uniqueInspections.sort((a, b) => a.name.localeCompare(b.name));
+                uniqueInspections.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between p-2 bg-white rounded-md border';
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-semibold text-gray-700 text-sm">${item.name}</p>
+                            <p class="text-xs text-gray-500 mt-1">Ref: ${item.ref}</p>
+                        </div>
+                        <button data-inspection-id="${item.id}" data-helicopter-id="${item.helicopterId}" class="generate-ot-btn bg-orange-500 hover:bg-orange-600 text-white font-bold py-1 px-3 rounded-md text-sm transition-transform transform hover:scale-105">Generar OT</button>
+                    `;
+                    listContainer.appendChild(div);
                 });
+
+                groupContainer.appendChild(header);
+                groupContainer.appendChild(listContainer);
+                pendingInspectionsContainer.appendChild(groupContainer);
             });
         }
         
-        function getStatusBadge(status) { /* ... (sin cambios) ... */ 
+        function getStatusBadge(status) {
             let colorClasses = 'bg-orange-100 text-orange-800'; // Abierta
                 if (status === 'Recibida') {
                     colorClasses = 'bg-yellow-100 text-yellow-800';
@@ -327,7 +420,6 @@
         function renderTable(allWorkOrders) {
             workOrdersTable.innerHTML = '';
             const sortedWorkOrders = [...allWorkOrders].sort((a, b) => {
-                // Primero por ID de OT, luego por ID de helicóptero si las OT son iguales
                 const otCompare = b.workOrderId.localeCompare(a.workOrderId);
                 if (otCompare !== 0) return otCompare;
                 return a.helicopterId.localeCompare(b.helicopterId);
@@ -348,7 +440,6 @@
                 
                 const status = wo.status || 'Abierta';
                 let statusChangeButton = '';
-                // --- CAMBIO CLAVE: Añadir data-helicopter-id a los botones ---
                 if (status === 'Abierta') {
                     statusChangeButton = `<button data-wo-id="${wo.workOrderId}" data-helicopter-id="${wo.helicopterId}" data-new-status="Recibida" class="change-status-btn text-white bg-yellow-500 hover:bg-yellow-600 font-medium rounded-lg text-sm px-3 py-1">Recibir</button>`;
                 } else if (status === 'Recibida') {
@@ -388,7 +479,6 @@
                 workOrdersTable.appendChild(row);
             });
             
-            // Re-asignar event listeners después de cada renderizado
             addTableButtonListeners();
         }
         
@@ -416,7 +506,8 @@
                         completeReminderModal.classList.remove('hidden');
                     } else {
                         try {
-                            const otRef = ref(database, `artifacts/${currentHelicopterId}-DATA/public_data/ordenes_trabajo/${currentWorkOrderId}`);
+                            const dbInstance = getDbForHeli(currentHelicopterId);
+                            const otRef = ref(dbInstance, `artifacts/${currentHelicopterId}-DATA/public_data/ordenes_trabajo/${currentWorkOrderId}`);
                             await update(otRef, { status: newStatus });
                             showFeedback(`Estado actualizado a "${newStatus}".`, 'success');
                         } catch (error) {
@@ -471,28 +562,34 @@
         confirmWorkshopBtn.addEventListener('click', async () => {
             const selectedTaller = workshopSelect.value;
             workshopModal.classList.add('hidden');
+            const dbInstance = getDbForHeli(currentHelicopterId);
             const dbName = `${currentHelicopterId}-DATA`;
 
             if (isEditAction) { // Lógica para editar
                 try {
-                    const otRef = ref(database, `artifacts/${dbName}/public_data/ordenes_trabajo/${currentWorkOrderId}`);
+                    const otRef = ref(dbInstance, `artifacts/${dbName}/public_data/ordenes_trabajo/${currentWorkOrderId}`);
                     await update(otRef, { taller: selectedTaller });
                     showFeedback('Orden de trabajo actualizada con éxito.', 'success');
                 } catch(error) { showFeedback("Error al actualizar la orden de trabajo."); }
             } else { // Lógica para crear
                 const allExpiredInspections = flattenData(dataStore.expiredInspections);
                 const inspectionDetails = allExpiredInspections.find(item => String(item.id) === String(currentInspectionId) && item.helicopterId === currentHelicopterId);
-                if (!inspectionDetails) return;
+                if (!inspectionDetails) {
+                    showFeedback("No se encontraron los detalles de la inspección para crear la OT.");
+                    return;
+                }
 
                 try {
-                    const snapshot = await get(ref(database, `artifacts/${dbName}/public_data/ordenes_trabajo`));
-                    const initialCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+                    const snapshot = await get(ref(dbInstance, `artifacts/${dbName}/public_data/ordenes_trabajo`));
+                    const allOts = snapshot.val() || {};
+                    const otNumbers = Object.keys(allOts).map(key => parseInt(key.replace('OT-', ''), 10)).filter(num => !isNaN(num));
+                    const lastOtNumber = otNumbers.length > 0 ? Math.max(...otNumbers) : 0;
                     
                     const workshopsToGenerate = selectedTaller === 'TODOS' ? workshops : [selectedTaller];
                     let generatedCount = 0;
 
                     for (let i = 0; i < workshopsToGenerate.length; i++) {
-                         const workOrderId = `OT-${String(initialCount + i + 1).padStart(4, '0')}`;
+                         const workOrderId = `OT-${String(lastOtNumber + i + 1).padStart(4, '0')}`;
                          const taller = workshopsToGenerate[i];
                          const newWorkOrder = {
                             workOrderId, taller, status: 'Abierta',
@@ -500,11 +597,14 @@
                             lastDone: inspectionDetails.lastDone, freqText: inspectionDetails.freqText,
                             creationDate: new Date().toISOString().split('T')[0]
                         };
-                        await set(ref(database, `artifacts/${dbName}/public_data/ordenes_trabajo/${workOrderId}`), newWorkOrder);
+                        await set(ref(dbInstance, `artifacts/${dbName}/public_data/ordenes_trabajo/${workOrderId}`), newWorkOrder);
                         generatedCount++;
                     }
                     showFeedback(`${generatedCount} orden(es) de trabajo generada(s) con éxito.`, 'success');
-                } catch (error) { showFeedback("Hubo un error al crear la(s) orden(es) de trabajo."); }
+                } catch (error) { 
+                    console.error("Error creating work order:", error);
+                    showFeedback("Hubo un error al crear la(s) orden(es) de trabajo. Verifique los permisos de la base de datos."); 
+                }
             }
         });
 
@@ -512,8 +612,9 @@
         confirmDeleteBtn.addEventListener('click', async () => {
             deleteConfirmModal.classList.add('hidden');
             try {
+                const dbInstance = getDbForHeli(currentHelicopterId);
                 const dbName = `${currentHelicopterId}-DATA`;
-                await remove(ref(database, `artifacts/${dbName}/public_data/ordenes_trabajo/${currentWorkOrderId}`));
+                await remove(ref(dbInstance, `artifacts/${dbName}/public_data/ordenes_trabajo/${currentWorkOrderId}`));
                 showFeedback('Orden de trabajo eliminada con éxito.', 'success');
             } catch(error) { showFeedback("Error al eliminar la orden de trabajo."); }
         });
@@ -522,8 +623,9 @@
         confirmCompleteBtn.addEventListener('click', async () => {
             completeReminderModal.classList.add('hidden');
             try {
+                const dbInstance = getDbForHeli(currentHelicopterId);
                 const dbName = `${currentHelicopterId}-DATA`;
-                const otRef = ref(database, `artifacts/${dbName}/public_data/ordenes_trabajo/${currentWorkOrderId}`);
+                const otRef = ref(dbInstance, `artifacts/${dbName}/public_data/ordenes_trabajo/${currentWorkOrderId}`);
                 await update(otRef, { status: 'Completada' });
                 showFeedback(`Estado actualizado a "Completada".`, 'success');
             } catch (error) { showFeedback('Error al actualizar el estado.'); }
@@ -532,14 +634,43 @@
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'e') {
                 e.preventDefault();
-                editMode = !editMode;
-                editModeIndicator.classList.toggle('hidden');
+                if (editMode) {
+                    editMode = false;
+                    editModeIndicator.classList.add('hidden');
+                    renderContent();
+                } else {
+                    passwordInput.value = '';
+                    passwordError.classList.add('hidden');
+                    passwordModal.classList.remove('hidden');
+                    passwordInput.focus();
+                }
+            }
+        });
+
+        cancelPasswordBtn.addEventListener('click', () => {
+            passwordModal.classList.add('hidden');
+        });
+
+        confirmPasswordBtn.addEventListener('click', () => {
+            const enteredPassword = passwordInput.value;
+            if (enteredPassword === 'Kevin') {
+                editMode = true;
+                editModeIndicator.classList.remove('hidden');
+                passwordModal.classList.add('hidden');
                 renderContent();
+            } else {
+                passwordError.classList.remove('hidden');
+                passwordInput.value = '';
+            }
+        });
+        
+        passwordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                confirmPasswordBtn.click();
             }
         });
         
         async function generateAndOpenPDF(wo) {
-            // ... (Función de PDF sin cambios, excepto por el nombre de la aeronave)
             const container = document.getElementById('pdf-container');
             const now = new Date();
             const time = now.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -614,6 +745,4 @@
     </script>
 </body>
 </html>
-
-
 
