@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Órdenes de Trabajo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #e9ecef;
+        }
+        .paper-container {
+            width: 100%;
+            max-width: 8.5in;
+            margin: 2rem auto;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.25rem;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .modal-content {
+             max-height: 90vh;
+             overflow-y: auto;
+        }
+         table, th, td {
+            border: 1px solid #dee2e6;
+        }
+        .signature-cell img, .footer-signature-area img {
+            max-height: 40px;
+            display: block;
+            margin: 0 auto;
+        }
+        .signature-line {
+            border-top: 1px solid #495057;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="paper-container">
+        <header class="mb-8 border-b-2 border-gray-700 pb-4">
+            <h1 class="text-3xl font-bold text-gray-800">Historial de Órdenes de Trabajo</h1>
+            <p class="text-gray-600">Consulta las órdenes de trabajo completadas y archivadas.</p>
+        </header>
+
+        <main id="archive-list" class="space-y-4">
+            <div id="loading-message" class="text-center text-gray-500 my-8">Cargando historial...</div>
+        </main>
+
+        <div class="flex justify-center mt-12">
+            <button onclick="window.location.href='index.html'" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
+                Volver a la Orden Actual
+            </button>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="details-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-75">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl modal-content">
+            <div class="p-4 sm:p-6">
+                <!-- Modal Header -->
+                <div class="flex justify-between items-center border-b-2 border-gray-200 pb-3 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Detalle de Orden Archivada</h2>
+                    <button id="close-modal-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+                </div>
+                
+                <!-- Modal Body -->
+                <div id="modal-body-content">
+                    <!-- Dynamic content will be injected here -->
+                </div>
+
+                 <!-- Modal Footer -->
+                <div class="flex justify-end mt-6 pt-4 border-t">
+                     <button id="close-modal-footer-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+        import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIZjCL34TG4f8WSd3xdbuO8WKbVuI5F2c",
+            authDomain: "fah-979.firebaseapp.com",
+            databaseURL: "https://fah-979-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "fah-979",
+            storageBucket: "fah-979.firebasestorage.app",
+            messagingSenderId: "48264926465",
+            appId: "1:48264926465:web:546b8c73d4615349ebf700",
+            measurementId: "G-3KRV6FV0FB"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+        
+        const sharedProjectId = "FAH-979-DATA";
+        const archiveListContainer = document.getElementById('archive-list');
+        const loadingMessage = document.getElementById('loading-message');
+        const modal = document.getElementById('details-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const closeModalFooterBtn = document.getElementById('close-modal-footer-btn');
+
+        let allArchives = {};
+
+        async function initializeAppAndData() {
+            try {
+                await signInAnonymously(auth);
+                loadArchives();
+            } catch (error) {
+                console.error("Anonymous sign-in failed:", error);
+                loadingMessage.textContent = "Error de conexión. No se pudo cargar el historial.";
+            }
+        }
+
+        function loadArchives() {
+            const historyRef = ref(database, `artifacts/${sharedProjectId}/public_data/historial_ordenes`);
+            onValue(historyRef, (snapshot) => {
+                loadingMessage.classList.add('hidden');
+                const archives = snapshot.val();
+                allArchives = archives;
+                renderArchiveList(archives);
+            }, (error) => {
+                console.error("Error fetching archives:", error);
+                loadingMessage.textContent = "Error al cargar el historial.";
+            });
+        }
+
+        function renderArchiveList(archives) {
+            archiveListContainer.innerHTML = '';
+            if (!archives || Object.keys(archives).length === 0) {
+                archiveListContainer.innerHTML = `<p class="text-center text-gray-500">No hay órdenes de trabajo archivadas.</p>`;
+                return;
+            }
+
+            const sortedKeys = Object.keys(archives).sort().reverse(); // Sort by timestamp, newest first
+
+            sortedKeys.forEach(key => {
+                const archive = archives[key];
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer';
+                card.dataset.archiveId = key;
+                
+                const archivedDate = new Date(archive.archivedAt).toLocaleString('es-HN');
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-lg text-indigo-700">Orden de Trabajo No. ${archive.details['orden-trabajo-no'] || 'N/A'}</p>
+                            <p class="text-sm text-gray-600">Matrícula: <span class="font-medium">${archive.details.matricula || 'N/A'}</span></p>
+                            <p class="text-xs text-gray-500 mt-1">Archivado el: ${archivedDate}</p>
+                        </div>
+                        <button class="view-details-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg text-sm">Ver Detalles</button>
+                    </div>
+                `;
+                archiveListContainer.appendChild(card);
+            });
+        }
+
+        archiveListContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('view-details-btn')) {
+                const card = e.target.closest('[data-archive-id]');
+                const archiveId = card.dataset.archiveId;
+                if (archiveId && allArchives[archiveId]) {
+                    populateAndShowModal(allArchives[archiveId]);
+                }
+            }
+        });
+
+        function populateAndShowModal(data) {
+            const modalBody = document.getElementById('modal-body-content');
+            
+            let inspectionsHtml = '';
+            if(data.inspections && data.inspections.length > 0) {
+                 data.inspections.forEach((item, index) => {
+                    let signatureContent = item.signature ? `<img src="${item.signature.signatureDataUrl}" alt="Firma" /><p class="text-xs mt-1 font-semibold">${item.signature.signatureName || ''}</p>` : 'No firmado';
+                    inspectionsHtml += `
+                        <tr class="bg-white border-b">
+                            <td class="px-4 py-2 text-center">${index + 1}</td>
+                            <td class="px-4 py-2">${item.name}</td>
+                            <td class="px-4 py-2">${item.ref}</td>
+                            <td class="px-4 py-2 text-center signature-cell">${signatureContent}</td>
+                            <td class="px-4 py-2">${item.accionTomada || ''}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                inspectionsHtml = `<tr><td colspan="5" class="text-center p-4">No se registraron inspecciones.</td></tr>`;
+            }
+
+            modalBody.innerHTML = `
+                <section class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Detalles Generales</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-sm">
+                        ${Object.entries(data.details).map(([key, value]) => `
+                            <div>
+                                <p class="font-semibold text-gray-500 capitalize">${key.replace(/-/g, ' ')}</p>
+                                <p class="text-gray-800">${value || '—'}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </section>
+                <section>
+                     <h3 class="text-xl font-bold text-gray-800 mb-3">Inspecciones Realizadas</h3>
+                     <table class="w-full text-sm text-left text-gray-600">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                           <tr>
+                                <th class="px-4 py-2 w-10 text-center">#</th>
+                                <th class="px-4 py-2">Descripción</th>
+                                <th class="px-4 py-2">Referencia</th>
+                                <th class="px-4 py-2">Mecánico</th>
+                                <th class="px-4 py-2">Acción Tomada</th>
+                           </tr>
+                        </thead>
+                        <tbody>${inspectionsHtml}</tbody>
+                    </table>
+                </section>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.getElementById('modal-body-content').innerHTML = ''; // Clear content
+        }
+
+        closeModalBtn.addEventListener('click', closeModal);
+        closeModalFooterBtn.addEventListener('click', closeModal);
+        
+        // Close modal on escape key
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+        initializeAppAndData();
+    </script>
+</body>
+</html>
