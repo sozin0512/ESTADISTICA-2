@@ -165,7 +165,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, writeBatch, updateDoc, deleteDoc, deleteField, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, writeBatch, updateDoc, deleteDoc, deleteField, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let app, auth, db, userId;
         let currentAcHrs = 0;
@@ -227,25 +227,56 @@
             currentAcHrs = parseFloat(sessionStorage.getItem('acHrsForInspection')) || 0;
             acHrsDisplay.textContent = currentAcHrs > 0 ? currentAcHrs.toFixed(2) : "N/A";
             
-            try {
-                await seedDatabaseIfNeeded();
-                const [definitionsSnapshot, dataSnapshot] = await Promise.all([
-                    getDocs(collection(db, `artifacts/${appId}/users/${userId}/inspection_definitions`)),
-                    getDoc(doc(db, `artifacts/${appId}/users/${userId}/inspection_data/all_inspections`))
-                ]);
-                
-                allInspectionDefinitions = definitionsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                const savedData = dataSnapshot.exists() ? dataSnapshot.data() : {};
-                
-                renderTable(allInspectionDefinitions, savedData);
+            const defsRef = collection(db, `artifacts/${appId}/public/data/inspection_definitions`);
+            const dataDocRef = doc(db, `artifacts/${appId}/public/data/inspection_data/all_inspections`);
 
-                loaderContainer.classList.add('hidden');
-                inspectionsTable.classList.remove('hidden');
+            try {
+                const definitionsSnapshot = await getDocs(defsRef);
+                if (definitionsSnapshot.empty) {
+                    await seedDatabase();
+                    return; 
+                }
+                allInspectionDefinitions = definitionsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                onSnapshot(dataDocRef, (docSnap) => {
+                    const savedData = docSnap.exists() ? docSnap.data() : {};
+                    renderTable(allInspectionDefinitions, savedData);
+                    loaderContainer.classList.add('hidden');
+                    inspectionsTable.classList.remove('hidden');
+                });
+
             } catch (error) {
                 console.error("Error loading data:", error);
                 loaderContainer.innerHTML = `<p class="text-red-600">Error al cargar datos.</p>`;
             }
         }
+
+        async function seedDatabase() {
+            showToast("Configurando su base de datos por primera vez...", "info");
+            const seedData = [
+                // Avionics
+                { name: "12 Months inspection (GDU 620, GRS 77H, GDC 74H, GMU 44, GTP 59)", ref: "ICA-AMT-UH-1H-FAH-945-IDD-1 PAGE 3 / 190-01007-00 REV. F", freq: 12, base: "Months", category: "AVIONICS INSPECTION" },
+                { name: "2200 hours / 12 years inspection (GDU 620, GRS 77H, GDC 74H, GMU 44, GTP 59)", ref: "ICA-AMT-UH-1H-FAH-945-IDD-1 PAGE 3 / 190-01007-00 REV. F", freq: "2200/12", base: "Hours/Years", category: "AVIONICS INSPECTION" },
+                { name: "5 years inspection (GDU 620, GRS 77H, GDC 74H, GMU 44, GTP 59)", ref: "ICA-AMT-UH-1H-FAH-945-IDD-1 PAGE 3 / 190-01007-00 REV. F", freq: 5, base: "Years", category: "AVIONICS INSPECTION" },
+                { name: "Audio Panel (MAU-500) - Periodic maintenance", ref: "ICA-AMT-UH-1H-FAH-945-IDD-1 12/10 / C46e-1001-01", freq: 150, base: "Hours-Airframe", category: "AVIONICS INSPECTION" },
+
+                // Special Inspections
+                { name: "Main Rotor Blade - Check for skin delamination and/or debonding", ref: "BHT-UH-1H-MM-1, CHAP 62", freq: 10, base: "Hours", category: "SPECIAL INSPECTIONS" },
+                { name: "Tail Rotor Blades - Inspect for condition and security", ref: "BHT-UH-1H-MM-1, CHAP 64", freq: 25, base: "Hours", category: "SPECIAL INSPECTIONS" },
+                { name: "Engine Compressor - Wash", ref: "T.O. 2J-T53-16, SEC II", freq: 100, base: "Hours", category: "SPECIAL INSPECTIONS" },
+                { name: "Particle Separator - Clean", ref: "BHT-UH-1H-MM-1, CHAP 71", freq: 50, base: "Hours", category: "SPECIAL INSPECTIONS" },
+            ];
+            const batch = writeBatch(db);
+            const defsRef = collection(db, `artifacts/${appId}/public/data/inspection_definitions`);
+            seedData.forEach(inspection => {
+                const docRef = doc(defsRef);
+                batch.set(docRef, inspection);
+            });
+            await batch.commit();
+            showToast("Base de datos configurada. Recargando...", "success");
+            await initialize(); 
+        }
+
 
         function renderTable(definitions, savedData) {
             tableBody.innerHTML = '';
@@ -345,7 +376,7 @@
                 remainingDays = Math.floor((finalNextDate - today) / (1000 * 60 * 60 * 24));
             }
 
-            if ((currentAcHrs > 0 && remainingHours <= 0) || remainingDays < 0) status = 'VENCIDA';
+            if ((currentAcHrs > 0 && remainingHours <= 0) || remainingDays <= 0) status = 'VENCIDA';
 
             if (remainingDays !== Infinity && remainingHours !== Infinity) remaining = `${remainingHours.toFixed(2)}h / ${remainingDays}d`;
             else if (remainingHours !== Infinity) remaining = `${remainingHours.toFixed(2)}h`;
@@ -364,10 +395,10 @@
 
         async function handleAutoSave(row, field, value) {
             const id = row.dataset.id;
-            const dataDocRef = doc(db, `artifacts/${appId}/users/${userId}/inspection_data/all_inspections`);
+            const dataDocRef = doc(db, `artifacts/${appId}/public/data/inspection_data/all_inspections`);
             try {
                  await setDoc(dataDocRef, { [id]: { [field]: value } }, { merge: true });
-                updateRowUI(row);
+                // No need to call updateRowUI here, onSnapshot will handle it.
                 showToast('Cambio guardado');
             } catch (error) {
                  console.error("Error en autoguardado:", error);
@@ -429,8 +460,8 @@
             const id = row.dataset.id;
             if (!id || !confirm('¿Estás seguro de que quieres eliminar esta inspección permanentemente?')) return;
 
-            const defDocRef = doc(db, `artifacts/${appId}/users/${userId}/inspection_definitions`, id);
-            const dataDocRef = doc(db, `artifacts/${appId}/users/${userId}/inspection_data/all_inspections`);
+            const defDocRef = doc(db, `artifacts/${appId}/public/data/inspection_definitions`, id);
+            const dataDocRef = doc(db, `artifacts/${appId}/public/data/inspection_data/all_inspections`);
 
             try {
                 const batch = writeBatch(db);
@@ -438,7 +469,7 @@
                 batch.update(dataDocRef, { [id]: deleteField() });
                 await batch.commit();
                 
-                row.remove();
+                // onSnapshot will handle UI update
                 showToast('Inspección eliminada');
             } catch (error) {
                 console.error("Error al eliminar:", error);
@@ -492,10 +523,10 @@
             const newInspectionData = { name, ref, freq, base, category };
 
             try {
-                const defsRef = collection(db, `artifacts/${appId}/users/${userId}/inspection_definitions`);
+                const defsRef = collection(db, `artifacts/${appId}/public/data/inspection_definitions`);
                 await addDoc(defsRef, newInspectionData);
+                // onSnapshot will handle the UI update
                 showToast("Inspección agregada con éxito");
-                await initialize(); // Recarga toda la tabla para consistencia
             } catch (error) {
                 console.error("Error al guardar nueva inspección:", error);
                 showToast("Error al guardar.", "error");
@@ -535,7 +566,6 @@
 
         function updateHoursAndSave(newHours) {
             if (activeRowForModal && !isNaN(newHours)) {
-                activeRowForModal.querySelector('.hours-input').value = newHours.toFixed(2);
                 handleAutoSave(activeRowForModal, 'lastHours', newHours.toFixed(2));
             }
             closeHoursAssistant();
@@ -544,7 +574,6 @@
         function updateDateAndSave(newDate) {
             if (activeRowForModal && newDate) {
                 const dateString = newDate.toISOString().split('T')[0];
-                activeRowForModal.querySelector('.date-input').value = dateString;
                 handleAutoSave(activeRowForModal, 'lastDate', dateString);
             }
             closeDateAssistant();
@@ -556,13 +585,11 @@
             const definition = allInspectionDefinitions.find(d => d.id === id);
             if (!definition) return;
 
-            activeRowForModal.querySelector('.hours-input').value = currentAcHrs.toFixed(2);
             handleAutoSave(activeRowForModal, 'lastHours', currentAcHrs.toFixed(2));
 
             const base = (definition.base || '').toLowerCase();
             if (base.includes('day') || base.includes('month') || base.includes('year')) {
                 const today = new Date().toISOString().split('T')[0];
-                activeRowForModal.querySelector('.date-input').value = today;
                 handleAutoSave(activeRowForModal, 'lastDate', today);
             }
             closeHoursAssistant();
@@ -604,10 +631,10 @@
                 };
 
                 try {
-                    const defsRef = collection(db, `artifacts/${appId}/users/${userId}/inspection_definitions`);
+                    const defsRef = collection(db, `artifacts/${appId}/public/data/inspection_definitions`);
                     await addDoc(defsRef, newInspectionData);
                     showToast("Nueva categoría y primera inspección agregadas.");
-                    await initialize(); 
+                    // onSnapshot will handle the update
                 } catch (error) {
                     console.error("Error al agregar nueva categoría:", error);
                     showToast("Error al guardar la categoría.", "error");
@@ -620,7 +647,7 @@
                 const row = e.target.closest('tr');
                 if (!row.dataset.id) return;
                 const id = row.dataset.id;
-                const defDocRef = doc(db, `artifacts/${appId}/users/${userId}/inspection_definitions`, id);
+                const defDocRef = doc(db, `artifacts/${appId}/public/data/inspection_definitions`, id);
                 let updateData = {};
                 if (e.target.classList.contains('task-name')) updateData.name = e.target.textContent;
                 else if (e.target.classList.contains('ref-cell')) updateData.ref = e.target.textContent;
@@ -628,6 +655,7 @@
                 if (Object.keys(updateData).length > 0) {
                      try {
                         await updateDoc(defDocRef, updateData);
+                        // onSnapshot will handle update, but update local for immediate feedback
                         const defIndex = allInspectionDefinitions.findIndex(d => d.id === id);
                         if(defIndex > -1) allInspectionDefinitions[defIndex] = {...allInspectionDefinitions[defIndex], ...updateData};
                         updateRowUI(row);
@@ -707,10 +735,10 @@
         document.getElementById('btnRegresar').addEventListener('click', () => window.history.back());
 
         async function seedDatabaseIfNeeded() {
-            const defsRef = collection(db, `artifacts/${appId}/users/${userId}/inspection_definitions`);
+            const defsRef = collection(db, `artifacts/${appId}/public/data/inspection_definitions`);
             const snapshot = await getDocs(defsRef);
             if (snapshot.empty) {
-                console.log("Base de datos de definiciones vacía.");
+                // The seedDatabase function will be called from initialize()
             }
         }
 
