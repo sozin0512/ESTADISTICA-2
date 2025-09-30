@@ -1,749 +1,1389 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Inspecciones FAH-945</title>
+    <title>Datos de Vuelo FAH-945</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background-color: #e9ecef; }
-        .container { max-width: 98%; margin: 1.5rem auto; background: white; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
-        .header-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background-color: #343a40; padding: 1px; border-top-left-radius: 8px; border-top-right-radius: 8px; }
-        .header-item { background-color: white; padding: 0.5rem 1rem; }
-        .header-item strong { display: block; font-size: 0.75rem; color: #6c757d; }
-        .header-item span { font-size: 1rem; font-weight: 600; }
-        .actions-bar { display: flex; justify-content: flex-end; align-items: center; padding: 1rem; background-color: #f8f9fa; gap: 0.5rem; flex-wrap: wrap; }
-        .btn { padding: 0.5rem 1rem; border-radius: 0.25rem; border: 1px solid transparent; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.5rem; }
-        .btn-yellow { background-color: #ffc107; border-color: #ffc107; color: #212529; }
-        .btn-blue { background-color: #0d6efd; border-color: #0d6efd; color: white; }
-        .btn-green { background-color: #198754; border-color: #198754; color: white; }
-        .btn-orange { background-color: #fd7e14; border-color: #fd7e14; color: white; }
-        .btn-secondary { background-color: #6c757d; border-color: #6c757d; color: white; }
-        .btn-danger { background-color: #dc3545; border-color: #dc3545; color: white; padding: 0.2rem 0.5rem; font-size: 0.7rem; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th, td { border: 1px solid #dee2e6; padding: 0.6rem 0.5rem; text-align: center; vertical-align: middle; }
-        th { background-color: #f8f9fa; font-weight: 700; }
-        .category-header td { background-color: #343a40; color: white; font-weight: bold; font-size: 0.85rem; text-align: center; padding: 0.4rem; }
-        .task-name, .ref-cell, .freq-cell { text-align: left; }
-        [contenteditable="true"] { background-color: #fff3cd; outline-color: #ffc107; padding: 0.5rem; }
-        .status-vigente { background-color: #198754; color: white; font-weight: bold; }
-        .status-vencida { background-color: #dc3545; color: white; font-weight: bold; }
-        .loader-container { text-align: center; padding: 4rem 0; }
-        .loader { border: 5px solid #f3f3f3; border-radius: 50%; border-top: 5px solid #343a40; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        input[type="date"], input[type="text"] { width: 100%; border: 1px solid #ced4da; border-radius: 0.25rem; padding: 0.25rem; background-color: #f8f9fa; }
-        .hours-input, .date-input { cursor: pointer; background-color: #e9ecef !important; }
-        .delete-btn-cell { width: 40px; }
-        
-        #toast-notification { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); padding: 1rem 2rem; border-radius: 8px; color: white; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: bottom 0.5s ease-in-out; z-index: 1050; }
-        #toast-notification.show { bottom: 30px; }
-        #toast-notification.success { background-color: #198754; }
-        #toast-notification.error { background-color: #dc3545; }
-        #toast-notification.info { background-color: #0d6efd; }
+        /* Chosen Palette: Warm Neutrals with Subtle Accents */
+        /* Estilos generales del cuerpo y fondo */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to bottom, #E0E0E0 0%, #F5F5F5 100%); /* Gris claro a Blanco muy suave */
+            overflow-x: hidden; /* Evita el scroll horizontal */
+            position: relative; /* Para posicionar elementos absolutos */
+        }
 
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            .header-grid { grid-template-columns: 1fr; }
-            .actions-bar { justify-content: center; }
-            
-            #inspections-table thead { display: none; }
-            #inspections-table tr { display: block; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 4px; }
-            #inspections-table .category-header { display: none; }
-            #inspections-table td { display: block; text-align: right; padding-left: 50%; position: relative; border: none; border-bottom: 1px solid #eee; }
-            #inspections-table td:last-child { border-bottom: 0; }
-            #inspections-table td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 6px;
-                width: 45%;
-                padding-right: 10px;
-                white-space: nowrap;
-                text-align: left;
-                font-weight: bold;
+        h2 {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.875rem; /* 30px */
+            margin-bottom: 1.25rem; /* 20px */
+            color: #4A4A4A; /* Gris oscuro para el texto principal */
+        }
+
+        /* Contenedor de autenticación */
+        #auth-container {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 2.5rem; /* Más padding */
+            border: 1px solid #D1D1D1; /* Borde más sutil */
+            border-radius: 0.75rem; /* 12px, más redondeado */
+            max-width: 400px;
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            background: linear-gradient(135deg, #fdfefe 0%, #ffffff 100%); /* Gradiente suave */
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1), 0 5px 10px -3px rgba(0, 0, 0, 0.05); /* Sombra pronunciada pero suave */
+            animation: fadeInScale 1s ease-out forwards; /* Animación de aparición */
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        #auth-container h3 {
+            margin-top: 0;
+            color: #4A4A4A;
+            font-size: 1.75rem; /* 28px */
+            margin-bottom: 1.75rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+
+        #auth-container input {
+            width: calc(100% - 22px);
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #D1D1D1;
+            border-radius: 0.375rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        #auth-container input:focus {
+            border-color: #A3C9A8; /* Tono verde suave */
+            box-shadow: 0 0 0 4px rgba(163, 201, 168, 0.3);
+            outline: none;
+        }
+
+        #auth-container button {
+            padding: 12px 25px;
+            margin: 8px 5px;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 700;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.1);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #auth-container button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: skewX(-20deg);
+            transition: all 0.4s ease;
+        }
+        #auth-container button:hover::before {
+            left: 100%;
+        }
+
+        #auth-container button:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+        #auth-container button:hover {
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Colores de botones de autenticación */
+        #login-btn { background: linear-gradient(to right, #6B8E23, #8BC34A); color: white; } /* Verde Oliva a Verde Lima */
+        #login-btn:hover { background: linear-gradient(to right, #5A781E, #7AA93A); }
+        #signup-btn { background: linear-gradient(to right, #4682B4, #5CACEE); color: white; } /* Azul Acero a Azul Cielo */
+        #signup-btn:hover { background: linear-gradient(to right, #3A719C, #4B9AD5); }
+        #forgot-password-btn { background: linear-gradient(to right, #D2B48C, #EEDD82); color: white; } /* Bronceado a Amarillo Claro */
+        #forgot-password-btn:hover { background: linear-gradient(to right, #BD9C7A, #DDCB75); }
+        #logout-btn { background: linear-gradient(to right, #CD5C5C, #E9967A); color: white; } /* Rojo Indio a Salmón Oscuro */
+        #logout-btn:hover { background: linear-gradient(to right, #B84D4D, #D2836E); }
+
+        #auth-status {
+            color: #DC2626;
+            margin-top: 1.25rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* Contenedor principal de la aplicación */
+        #main-app-content {
+            display: none; /* Oculto por defecto */
+            width: 100%;
+        }
+        #main-app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        #main-app-header h2 {
+            margin-bottom: 0;
+            color: #4A4A4A;
+        }
+
+        /* Estilos de la tabla y elementos relacionados */
+        .user-id-container {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: #555;
+        }
+        .year-container, .tab-container, .button-container {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        .tab-button {
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            background-color: #D3D3D3; /* Gris claro */
+            border: 1px solid #A9A9A9; /* Gris oscuro */
+            cursor: pointer;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s ease;
+        }
+        .tab-button:hover { background-color: #C0C0C0; } /* Gris más oscuro */
+        .tab-button.active {
+            background-color: #B0C4DE; /* Azul acero claro */
+            font-weight: bold;
+            border-color: #778899; /* Gris pizarra */
+        }
+
+        table {
+            border-collapse: collapse;
+            width: auto; /* Ajustar ancho automáticamente */
+            font-size: 0.6875rem; /* 11px */
+            margin: 0 auto; /* Centrar tabla */
+            margin-top: 1.25rem;
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        th, td {
+            border: 1px solid #E0E0E0; /* Gris muy claro */
+            padding: 0.375rem;
+            text-align: center;
+            min-width: 25px;
+            white-space: nowrap;
+        }
+        th {
+            background-color: #D8BFD8; /* Ciruela clara */
+            color: #4A4A4A;
+            font-weight: bold;
+        }
+        .nomenclatura {
+            background-color: #F8F8F8; /* Gris casi blanco */
+            font-weight: bold;
+            text-align: left;
+            padding-left: 5px;
+            min-width: 150px;
+        }
+        .motor-header {
+            background-color: #FFD700; /* Oro */
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Estilos para celdas editables y de solo lectura */
+        td.editable-cell {
+            background-color: #FDFDFD;
+            cursor: text;
+        }
+        td.editable-cell:focus {
+            outline: 2px solid #A3C9A8;
+            background-color: #F0F8EE;
+        }
+        td.read-only-cell {
+            background-color: #FAFAFA;
+            cursor: not-allowed;
+        }
+
+        /* Estilos para el efecto LED */
+        .led-persistente {
+            background-color: #F8F7F7 !important;
+            color: #0E0F0E;
+            animation: resplandor 2s infinite;
+            font-weight: bold;
+        }
+        @keyframes resplandor {
+            0% { box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+            50% { box-shadow: 0 0 10px rgba(0,0,0,0.2); }
+            100% { box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+        }
+        .celda-modificada {
+            animation: ledFlash 1s ease-in-out;
+        }
+        @keyframes ledFlash {
+            0% { background-color: #A3C9A8; } /* Color de acento suave */
+            50% { background-color: #F8F7F7; }
+            100% { background-color: #F8F7F7; }
+        }
+
+        /* Estilos para el texto de RESTANTE */
+        /* Eliminados */
+
+        /* Nuevos estilos para las etiquetas y el parpadeo */
+        /* Eliminados */
+
+        /* Contenedor para el cuadro de recordatorio global */
+        .recordatorio-global-container {
+            margin-top: 15px;
+            width: 100%;
+            border: 1px solid #B0C4DE;
+            background-color: #E6EAF0; /* Azul claro muy suave */
+            padding: 5px;
+            box-sizing: border-box;
+            max-width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 8px;
+        }
+        #recordatorio-textarea {
+            width: 100%;
+            min-height: 80px;
+            border: 1px solid #B0C4DE;
+            background-color: #E6EAF0;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            padding: 5px;
+            box-sizing: border-box;
+            border-radius: 5px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        #recordatorio-textarea::placeholder { color: #666; }
+
+        /* Contenedor para las opciones de impresión */
+        .print-options-container {
+            text-align: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #D1D1D1;
+            border-radius: 8px;
+            background-color: #F8F8F8;
+            max-width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .print-options-container label {
+            margin: 0 10px;
+            font-weight: normal;
+            color: #4A4A4A;
+        }
+
+        /* Estilos del helicóptero */
+        #helicopter-svg {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: auto;
+            filter: drop-shadow(3px 5px 2px rgba(0, 0, 0, 0.2));
+            z-index: 20;
+            animation: flyInHeli 2s ease-out forwards, hover 3s ease-in-out infinite alternate 2s;
+        }
+        @keyframes flyInHeli {
+            from { top: -150px; opacity: 0; transform: translateX(-50%) rotate(-15deg); }
+            to { top: 20px; opacity: 1; transform: translateX(-50%) rotate(0deg); }
+        }
+        @keyframes hover {
+            0% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+            100% { transform: translateX(-50%) translateY(0px); }
+        }
+
+        /* Estilos de la careta de Anonymous */
+        #anonymous-mask-img {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            width: 60px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(3px 5px 2px rgba(0, 0, 0, 0.2));
+            z-index: 15;
+            opacity: 0;
+            pointer-events: none;
+            animation: dropAndRiseMask 4s ease-in-out forwards 2.5s;
+        }
+        @keyframes dropAndRiseMask {
+            0% { opacity: 0; transform: translateX(-50%) translateY(-100%); }
+            10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            35% { transform: translateX(-50%) translateY(var(--mask-drop-distance)); }
+            65% { transform: translateX(-50%) translateY(var(--mask-drop-distance)); }
+            90% { transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-100%); }
+        }
+
+        /* Estilos del efecto de revelación (círculo blanco) */
+        #reveal-circle {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 12;
+            pointer-events: none;
+            animation: revealEffect 1s ease-out forwards 3.9s;
+        }
+        @keyframes revealEffect {
+            0% { opacity: 0; transform: translateX(-50%) scale(0); }
+            50% { opacity: 0.8; transform: translateX(-50%) scale(1); }
+            100% { opacity: 0; transform: translateX(-50%) scale(1.5); }
+        }
+
+        /* Estilos de impresión */
+        @media print {
+            body {
+                margin: 0;
+                padding: 10mm;
+                font-size: 10px;
+            }
+            .button-container, .tab-container, .year-container, 
+            #auth-container, #helicopter-svg, #anonymous-mask-img, #reveal-circle,
+            #main-app-header, .print-options-container, .user-id-container,
+            #motorStatusModal { /* Ocultar el modal de estado del motor en la impresión principal */
+                display: none !important; 
+            }
+            .print-header { display: block !important; }
+            table {
+                page-break-inside: avoid;
+                width: 100%; 
+                border-collapse: collapse;
+            }
+            th, td {
+                page-break-inside: avoid;
+                page-break-after: auto;
+                border: 1px solid #000 !important;
+                padding: 2px;
+                font-size: 9px; 
+            }
+            .nomenclatura {
+                text-align: left !important;
+                padding-left: 2px !important;
+                min-width: 120px !important; 
+            }
+            /* Eliminados estilos de impresión para restantes y etiquetas */
+            .recordatorio-global-container, #recordatorio-textarea {
+                display: block !important; 
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                background-color: #e0e0e0 !important;
+                border: 1px solid #000 !important;
+            }
+            #recordatorio-textarea::placeholder {
+                text-shadow: none !important; 
+                color: #000 !important;
+            }
+            /* Eliminado .blinking de impresión */
+            /* Reglas específicas para ocultar elementos según la clase del body */
+            body.print-no-reminders .recordatorio-global-container {
+                display: none !important;
+            }
+            /* Eliminado print-no-yellow-labels de impresión */
+            @page {
+                size: A4 landscape;
+                margin: 10mm;
             }
         }
 
-        /* Print Styles */
-        @media print {
-            body { background-color: white; font-size: 10pt; }
-            .container { box-shadow: none; border: 1px solid #ccc; margin: 0; max-width: 100%; border-radius: 0; }
-            .no-print { display: none !important; }
-            .header-grid { border-radius: 0; }
-            table { font-size: 9pt; }
-            th, td { padding: 4px; }
-            input { border: none; background-color: transparent !important; }
-            .status-vigente, .status-vencida { color: black !important; background-color: transparent !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .status-vencida { font-weight: bold; border: 1px solid black; }
-            @page { size: letter landscape; margin: 0.5in; }
+        /* Estilos del modal de estado de motores */
+        #motorStatusModal {
+            display: none !important; /* Ocultar completamente el modal */
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header-grid">
-            <div class="header-item"><strong>1. NOMENCLATURA</strong> <span id="header-nomenclatura">HELICOPTERO</span></div>
-            <div class="header-item"><strong>2. MODELO</strong> <span id="header-modelo">BELL UH-1H</span></div>
-            <div class="header-item"><strong>3. No. SERIE</strong> <span id="header-serie">FAH-945</span></div>
-            <div class="header-item"><strong>4. HORAS TOTALES DE VUELO (AC HRS)</strong> <span id="ac-hours-display">...</span></div>
-            <div class="header-item"><strong>4a. FECHA</strong> <span id="header-fecha"></span></div>
-            <div class="header-item"><strong>4b. PAGINA No</strong> <span>1</span></div>
-        </div>
-
-        <div class="actions-bar no-print">
-            <button id="btnVerVencidas" class="btn btn-yellow mr-auto"><i class="fas fa-exclamation-triangle"></i> Ver Vencidas</button>
-            <button id="btnAgregarCategoria" class="btn btn-green hidden"><i class="fas fa-plus"></i> Nueva Categoría</button>
-            <button id="btnModoEdicion" class="btn btn-blue"><i class="fas fa-edit"></i> Modo Edición (Ctrl+E)</button>
-            <button id="btnPrint" class="btn btn-secondary"><i class="fas fa-print"></i> Imprimir</button>
-            <button id="btnRegresar" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Regresar</button>
-        </div>
+    <!-- Application Structure Plan: La aplicación está diseñada como una Single Page Application (SPA) con una interfaz de usuario de tipo dashboard/tabla interactiva. Se estructura en secciones clave:
+        1.  **Autenticación:** Un formulario de inicio de sesión/registro al principio que controla el acceso a la aplicación principal.
+        2.  **Encabezado de la Aplicación Principal:** Muestra el título de la aplicación y un botón de cierre de sesión.
+        3.  **Controles de Navegación de Datos:** Un selector de año y botones de pestañas para navegar entre los meses. Esto permite a los usuarios explorar los datos de vuelo por período de tiempo.
+        4.  **Tabla de Datos de Vuelo:** La sección central y principal. Presenta una tabla detallada con datos diarios, totales mensuales y generales de vuelos y componentes de un solo motor. Las celdas son editables para usuarios autenticados.
+        5.  **Recordatorios del Mes:** Un área de texto debajo de la tabla para que los usuarios autenticados puedan guardar notas o recordatorios específicos del mes.
+        6.  **Opciones de Impresión:** Controles para personalizar la salida impresa de la tabla.
+        7.  **Botones de Acción:** Botones para imprimir la tabla, y acceder a modales de "Estado de Motores" y "Estado de Componentes".
         
-        <div id="loader-container">
-            <div class="loader"></div>
-            <p>Cargando datos de inspección...</p>
-        </div>
+        La estructura fue elegida para centralizar la entrada y visualización de datos de vuelo por mes y año, haciendo la navegación temporal fácil. La distinción clara entre la tabla principal y los modales de estado permite un enfoque en diferentes niveles de detalle sin sobrecargar la vista principal. La edición directa en la tabla y los recordatorios facilitan la interacción y gestión de datos.
+    -->
+    <!-- Visualization & Content Choices:
+        - Report Info: Datos de vuelo y estado de componentes de un helicóptero.
+        - Goal: Registrar y visualizar las horas de vuelo, aterrizajes, RINS y el estado de los componentes del motor a lo largo del tiempo.
+        - Viz/Presentation Method:
+            - **Tabla interactiva (HTML table):** Para los datos de vuelo diarios y totales. Permite la entrada directa de datos y la visualización organizada de grandes conjuntos de números.
+            - **Área de texto (HTML textarea):** Para los "Recordatorios del Mes". Facilita la entrada de notas cualitativa.
+        - Interaction:
+            - **Edición directa en celdas:** Los usuarios autenticados pueden modificar los valores numéricos directamente en la tabla, lo que activa el guardado automático en Firebase.
+            - **Pestañas (HTML buttons + JS):** Para cambiar entre los meses. Proporciona una navegación clara y rápida entre los períodos de datos.
+            - **Selector de año (HTML select + JS):** Para cambiar el año de visualización de los datos.
+        - Justification: La tabla es el formato más adecuado para la entrada de datos numéricos diarios. La navegación por pestañas y selector de año hace que explorar los datos históricos sea intuitivo. La edición en vivo y el autoguardado mejoran la usabilidad.
+        - Library/Method: Vanilla JS para toda la lógica interactiva, Tailwind CSS para el diseño responsive y la estética.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <svg id="helicopter-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+        <g id="SVGRepo_iconCarrier">
+            <path d="M16 13.5C16 15.433 13.3137 17 10 17C6.68629 17 4 15.433 4 13.5C4 11.567 6.68629 10 10 10C13.3137 10 16 11.567 16 13.5Z" fill="#8B4513" stroke="#5A2D0D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <!-- Cuerpo marrón -->
+            <path d="M12 12.5C12 13.0523 11.5523 13.5 11 13.5H9C8.44772 13.5 8 13.0523 8 12.5C8 11.9477 8.44772 11.5 9 11.5H11C11.5523 11.5 12 11.9477 12 12.5Z" fill="#F5F5DC"></path> <!-- Ventana beige claro -->
+            <path d="M16 13.5H20C20.5523 13.5 21 13.0523 21 12.5C21 11.9477 20.5523 11.5 20 11.5H16" stroke="#5A2D0D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <!-- Cola horizontal -->
+            <path d="M5 16.5L4 18.5M15 16.5L16 18.5" stroke="#5A2D0D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <!-- Tren de aterrizaje vertical -->
+            <path d="M4 18.5H16" stroke="#5A2D0D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <!-- Tren de aterrizaje horizontal -->
+            <path d="M10 10V4C10 3.44772 10.4477 3 11 3H13C13.5523 3 14 3.44772 14 4V10" stroke="#5A2D0D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <!-- Soporte del rotor principal -->
+            <path d="M12 2V1C12 0.447715 11.5523 0 11 0H9C8.44772 0 8 0.447715 8 1V2" stroke="#5A2D0D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <!-- Rotor principal vertical -->
+            <path d="M12 2H18C18.5523 2 19 2.44772 19 3V5C19 5.55228 18.5523 6 18 6H12" stroke="#5A2D0D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <!-- Rotor principal horizontal -->
+            <path d="M20 11.5V9.5C20 8.94772 20.4477 8.5 21 8.5H23C23.5523 8.5 24 8.94772 24 9.5V11.5" stroke="#5A2D0D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <!-- Rotor de cola vertical -->
+            <path d="M20 11.5H22C22.5523 11.5 23 11.9477 23 12.5V14.5C23 15.0523 22.5523 15.5 22 15.5H20" stroke="#5A2D0D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <!-- Rotor de cola horizontal -->
+        </g>
+    </svg>
 
-        <table id="inspections-table" class="hidden">
-            <thead>
-                <tr>
-                    <th class="delete-btn-cell"></th>
-                    <th>5. ARTICULO PARA SER INSPECCIONADO</th>
-                    <th>6. REFERENCIA</th>
-                    <th>7. FRECUENCIA</th>
-                    <th>Última Realizada</th>
-                    <th>SIG. CUMPLIMIENTO</th>
-                    <th>Restante</th>
-                    <th>VIGENCIA</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Rows will be dynamically inserted here -->
-            </tbody>
-        </table>
+    <img id="anonymous-mask-img" src="https://wallpapercrafter.com/desktop/340779-Technology-Anonymous-Phone-Wallpaper.jpg" alt="Anonymous Mask">
+
+    <div id="reveal-circle"></div>
+
+    <div id="auth-container" class="rounded-lg shadow-md p-6 bg-white">
+        <h3 class="text-xl font-semibold mb-4">Acceso de Usuario</h3>
+        <input type="email" id="email" placeholder="Correo electrónico" class="w-full p-2 mb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <input type="password" id="password" placeholder="Contraseña" class="w-full p-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="flex flex-col sm:flex-row justify-center gap-2">
+            <button id="login-btn" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">Iniciar Sesión</button>
+            <button id="signup-btn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Registrarse</button>
+        </div>
+        <button id="forgot-password-btn" class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors mt-4">Olvidé mi contraseña</button>
+        <p id="auth-status" class="text-red-600 mt-3 text-sm"></p>
     </div>
 
-    <!-- Hours Assistant Modal -->
-    <div id="hours-assistant-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50 no-print">
-        <div class="relative mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
-            <h3 class="text-xl font-bold text-center mb-1">Asistente de Horas</h3>
-            <p id="modal-title-hours" class="text-center text-gray-600 mb-4"></p>
-            <div class="space-y-3">
-                <div class="p-3 border rounded-md bg-green-50 border-green-200">
-                    <p class="font-semibold text-green-800">Opción Rápida: Reiniciar Ciclo</p>
-                    <p class="text-sm text-gray-600 mb-2">Registra la última inspección con las horas de vuelo y/o fecha actuales para empezar un nuevo ciclo.</p>
-                    <button id="btn-reiniciar-ciclo" class="btn btn-green w-full">Usar Horas y Fecha Actuales: <span id="modal-current-hrs"></span></button>
-                </div>
-                <div class="p-3 border rounded-md"><p class="font-semibold">Opción A: Asumir que se acaba de cumplir</p><p class="text-sm text-gray-600 mb-2">Calcula la última inspección como: (Horas Actuales - Frecuencia).</p><button id="btn-opcion-a-hrs" class="btn btn-secondary w-full">Calcular y Registrar</button></div>
-                <div class="p-3 border rounded-md"><p class="font-semibold">Opción B: Asumir a mitad de ciclo</p><p class="text-sm text-gray-600 mb-2">Calcula la última inspección como: (Horas Actuales - Frecuencia / 2).</p><button id="btn-opcion-b-hrs" class="btn btn-secondary w-full">Calcular y Registrar</button></div>
-                <div class="p-3 border rounded-md"><p class="font-semibold">Opción C: Calcular desde el próximo cumplimiento</p><p class="text-sm text-gray-600">Introduce el valor del próximo cumplimiento y el sistema calculará el anterior.</p><div class="flex gap-2 mt-2"><input type="number" id="input-next-due-hrs" placeholder="Ej: 600" class="flex-grow p-2 border rounded-md"><button id="btn-opcion-c-hrs" class="btn btn-blue">Calcular</button></div></div>
-                <div class="p-3 border rounded-md"><p class="font-semibold">Opción D: Registrar cumplimiento en horas pasadas</p><p class="text-sm text-gray-600">Introduce las horas de vuelo exactas (AC HRS) en las que se realizó la inspección.</p><div class="flex gap-2 mt-2"><input type="number" id="input-past-hrs" placeholder="Ej: 4850.5" class="flex-grow p-2 border rounded-md"><button id="btn-opcion-d-hrs" class="btn btn-orange">Registrar</button></div></div>
-            </div>
-            <div class="mt-4 text-right"><button id="btn-close-modal-hrs" class="btn btn-secondary">Cerrar</button></div>
+    <div id="main-app-content">
+        <div id="main-app-header" class="flex justify-between items-center mb-4">
+            <h2 class="flex-grow text-center sm:text-left">DATOS DE VUELO FAH-945</h2>
+            <button id="logout-btn" class="px-4 py-2 bg-red-500 text-white rounded-md shadow-md hover:bg-red-600 transition-colors">Cerrar Sesión</button>
         </div>
-    </div>
-    
-    <!-- Date Assistant Modal -->
-    <div id="date-assistant-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50 no-print">
-        <div class="relative mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
-            <h3 class="text-xl font-bold text-center mb-1">Asistente de Fechas</h3>
-            <p id="modal-title-date" class="text-center text-gray-600 mb-4"></p>
-            <div class="space-y-3">
-                <div class="p-3 border rounded-md bg-green-50 border-green-200"><p class="font-semibold text-green-800">Opción Rápida: Reiniciar Ciclo</p><p class="text-sm text-gray-600 mb-2">Registra la última inspección con la fecha de hoy para empezar un nuevo ciclo.</p><button id="btn-date-reiniciar-ciclo" class="btn btn-green w-full">Usar Fecha Actual</button></div>
-                <div class="p-3 border rounded-md"><p class="font-semibold">Opción A: Asumir que se acaba de cumplir</p><p class="text-sm text-gray-600 mb-2">Calcula la última inspección restando la frecuencia a la fecha de hoy.</p><button id="btn-opcion-a-date" class="btn btn-secondary w-full">Calcular y Registrar</button></div>
-                <div class="p-3 border rounded-md"><p class="font-semibold">Opción B: Asumir a mitad de ciclo</p><p class="text-sm text-gray-600 mb-2">Calcula la última inspección restando la mitad de la frecuencia a la fecha de hoy.</p><button id="btn-opcion-b-date" class="btn btn-secondary w-full">Calcular y Registrar</button></div>
-                <div class="p-3 border rounded-md"><p class="font-semibold">Opción C: Calcular desde el próximo cumplimiento</p><p class="text-sm text-gray-600">Introduce la fecha del próximo cumplimiento y el sistema calculará la anterior.</p><div class="flex gap-2 mt-2"><input type="date" id="input-next-due-date" class="flex-grow p-2 border rounded-md"><button id="btn-opcion-c-date" class="btn btn-blue">Calcular</button></div></div>
-                <div class="p-3 border rounded-md"><p class="font-semibold">Opción D: Registrar cumplimiento en fecha pasada</p><p class="text-sm text-gray-600">Introduce la fecha exacta en la que se realizó la inspección.</p><div class="flex gap-2 mt-2"><input type="date" id="input-past-date" class="flex-grow p-2 border rounded-md"><button id="btn-opcion-d-date" class="btn btn-orange">Registrar</button></div></div>
-            </div>
-            <div class="mt-4 text-right"><button id="btn-close-modal-date" class="btn btn-secondary">Cerrar</button></div>
+
+        <div class="user-id-container">
+            ID de Usuario: <span id="user-id">Cargando...</span>
+        </div>
+        <div class="year-container">
+            Año: <select id="select-year" class="p-2 border border-gray-300 rounded-md"></select>
+        </div>
+        <div class="tab-container" id="meses"></div>
+
+        <div class="print-header" id="print-month-header"></div>
+
+        <div id="contenedor-tablas" class="overflow-x-auto"></div>
+        
+        <div class="recordatorio-global-container">
+            <strong>Recordatorios del Mes:</strong>
+            <textarea id="recordatorio-textarea" placeholder="Escribe tus recordatorios aquí"></textarea>
+        </div>
+
+        <div class="print-options-container">
+            <strong>Opciones de Impresión:</strong>
+            <label><input type="radio" name="printOption" value="full" checked> Tabla Completa</label>
+            <label><input type="radio" name="printOption" value="no-reminders"> Sin Recordatorios</label>
+            <!-- Eliminado "Sin Columnas Amarillas" ya que no existen -->
+        </div>
+
+        <div class="button-container flex justify-center gap-4 mt-4">
+            <button id="btnImprimir" class="px-6 py-2 bg-gray-700 text-white rounded-md shadow-md hover:bg-gray-800 transition-colors">Imprimir Tabla</button>
+            <!-- Eliminado el botón "Estado de Motores" -->
+            <button id="btnComponentStatus" class="px-6 py-2 bg-purple-500 text-white rounded-md shadow-md hover:bg-purple-600 transition-colors">Estado de Componentes</button>
+            <button id="btnInspecciones" class="px-6 py-2 bg-teal-500 text-white rounded-md shadow-md hover:bg-teal-600 transition-colors">Inspecciones</button>
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast-notification"></div>
-
+    <!-- Eliminado el modal de estado de motores completamente -->
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, writeBatch, updateDoc, deleteDoc, deleteField, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Importa las funciones necesarias de Firebase SDK
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { getDatabase, ref, set, onValue, get } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js';
 
-        let app, auth, db, userId;
-        let currentAcHrs = 0;
-        let allInspectionDefinitions = [];
-        let isEditMode = false;
-        let activeRowForModal = null;
-
-
-        // --- INICIO: Configuración de Firebase ---
+        // Tu configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBpZUx4sy6VIKGHzsMCNX4eQQ9sasQhy9Q",
             authDomain: "fah-945.firebaseapp.com",
             databaseURL: "https://fah-945-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "fah-945",
-            storageBucket: "fah-945.appspot.com",
+            storageBucket: "fah-945.firebase-storage.app",
             messagingSenderId: "789748725591",
             appId: "1:789748725591:web:f7f551a77be0092531f012",
             measurementId: "G-3JW0YYE2QQ"
         };
-        const appId = typeof __app_id !== 'undefined' ? __app_id.replace(/[.#$\[\]]/g, '_') : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        // --- FIN: Configuración de Firebase ---
 
-        const acHrsDisplay = document.getElementById('ac-hours-display');
-        const loaderContainer = document.getElementById('loader-container');
-        const inspectionsTable = document.getElementById('inspections-table');
-        const tableBody = inspectionsTable.querySelector("tbody");
-        const btnModoEdicion = document.getElementById('btnModoEdicion');
-        const btnAgregarCategoria = document.getElementById('btnAgregarCategoria');
-        const hoursModal = document.getElementById('hours-assistant-modal');
-        const dateModal = document.getElementById('date-assistant-modal');
+        // Inicializa Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
 
-        async function main() {
-            document.getElementById('header-fecha').textContent = new Date().toLocaleDateString('es-ES');
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        await initialize();
-                    } else {
-                        if (initialAuthToken) { await signInWithCustomToken(auth, initialAuthToken); } 
-                        else { await signInAnonymously(auth); }
-                    }
-                });
-            } catch (error) {
-                console.error("Firebase Init Error:", error);
-                loaderContainer.innerHTML = `<p class="text-red-600">Error de inicialización de Firebase.</p>`;
-            }
-        }
+        // Define __app_id y sanitiza para que sea una ruta de Firebase válida
+        let appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        appId = appId.replace(/[.#$\[\]]/g, '_'); // Reemplaza caracteres inválidos con guion bajo
 
-        async function initialize() {
-            if (!userId) return;
-            loaderContainer.classList.remove('hidden');
-            inspectionsTable.classList.add('hidden');
+        // Variables globales
+        let añoActual = new Date().getFullYear();
+        // Cargar mesActual desde localStorage, o usar el mes actual del sistema si no está guardado
+        let mesActual = parseInt(localStorage.getItem('lastActiveMonth')) || new Date().getMonth();
+        let userId = "anonimo";
+        let currentUserRole = null;
 
-            currentAcHrs = parseFloat(sessionStorage.getItem('acHrsForInspection')) || 0;
-            acHrsDisplay.textContent = currentAcHrs > 0 ? currentAcHrs.toFixed(2) : "N/A";
-            
-            const defsRef = collection(db, `artifacts/${appId}/public/data/inspection_definitions`);
-            const dataDocRef = doc(db, `artifacts/${appId}/public/data/inspection_data/all_inspections`);
+        const años = [2024, 2025, 2026, 2027, 2028];
+        const meses = [
+            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ];
 
-            try {
-                const definitionsSnapshot = await getDocs(defsRef);
-                if (definitionsSnapshot.empty) {
-                    await seedDatabase();
-                    return; 
-                }
-                allInspectionDefinitions = definitionsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        // Definición de todas las filas en el ORDEN FINAL DESEADO (solo para MOTOR #1)
+        const nombresFilasOrdenadas = [
+            "AC HRS",
+            "ATERRIZAJES",
+            "RINS",
+            "CONTINGENCY EXCURSIONS 1",
+            "ENGINE HRS 1", 
+            "ENGINE STARTS 1", 
+            "FLIGHTS 1", 
+            "IMPELLER",
+            "COMPRESOR COMPONENTS", 
+            "GAS PRODUCER COMPONENTS", 
+            "POWER TURBINE COMPONENTS", 
+        ];
 
-                onSnapshot(dataDocRef, (docSnap) => {
-                    const savedData = docSnap.exists() ? docSnap.data() : {};
-                    renderTable(allInspectionDefinitions, savedData);
-                    loaderContainer.classList.add('hidden');
-                    inspectionsTable.classList.remove('hidden');
-                });
+        // Referencias a elementos del DOM
+        const contenedorTablas = document.getElementById("contenedor-tablas");
+        const contenedorMeses = document.getElementById("meses");
+        const selectYear = document.getElementById("select-year");
+        const printMonthHeader = document.getElementById("print-month-header");
+        const recordatorioTextarea = document.getElementById("recordatorio-textarea");
+        const userIdDisplay = document.getElementById("user-id");
 
-            } catch (error) {
-                console.error("Error loading data:", error);
-                loaderContainer.innerHTML = `<p class="text-red-600">Error al cargar datos.</p>`;
-            }
-        }
+        // Elementos de autenticación
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const forgotPasswordBtn = document.getElementById('forgot-password-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const authStatus = document.getElementById('auth-status');
+        const authContainer = document.getElementById('auth-container');
+        const mainAppContent = document.getElementById('main-app-content');
+        const btnImprimir = document.getElementById('btnImprimir');
 
-        async function seedDatabase() {
-            showToast("Configurando su base de datos por primera vez...", "info");
-            const seedData = [
-                // Avionics
-                { name: "12 Months inspection (GDU 620, GRS 77H, GDC 74H, GMU 44, GTP 59)", ref: "ICA-AMT-UH-1H-FAH-945-IDD-1 PAGE 3 / 190-01007-00 REV. F", freq: 12, base: "Months", category: "AVIONICS INSPECTION" },
-                { name: "2200 hours / 12 years inspection (GDU 620, GRS 77H, GDC 74H, GMU 44, GTP 59)", ref: "ICA-AMT-UH-1H-FAH-945-IDD-1 PAGE 3 / 190-01007-00 REV. F", freq: "2200/12", base: "Hours/Years", category: "AVIONICS INSPECTION" },
-                { name: "5 years inspection (GDU 620, GRS 77H, GDC 74H, GMU 44, GTP 59)", ref: "ICA-AMT-UH-1H-FAH-945-IDD-1 PAGE 3 / 190-01007-00 REV. F", freq: 5, base: "Years", category: "AVIONICS INSPECTION" },
-                { name: "Audio Panel (MAU-500) - Periodic maintenance", ref: "ICA-AMT-UH-1H-FAH-945-IDD-1 12/10 / C46e-1001-01", freq: 150, base: "Hours-Airframe", category: "AVIONICS INSPECTION" },
-
-                // Special Inspections
-                { name: "Main Rotor Blade - Check for skin delamination and/or debonding", ref: "BHT-UH-1H-MM-1, CHAP 62", freq: 10, base: "Hours", category: "SPECIAL INSPECTIONS" },
-                { name: "Tail Rotor Blades - Inspect for condition and security", ref: "BHT-UH-1H-MM-1, CHAP 64", freq: 25, base: "Hours", category: "SPECIAL INSPECTIONS" },
-                { name: "Engine Compressor - Wash", ref: "T.O. 2J-T53-16, SEC II", freq: 100, base: "Hours", category: "SPECIAL INSPECTIONS" },
-                { name: "Particle Separator - Clean", ref: "BHT-UH-1H-MM-1, CHAP 71", freq: 50, base: "Hours", category: "SPECIAL INSPECTIONS" },
-            ];
-            const batch = writeBatch(db);
-            const defsRef = collection(db, `artifacts/${appId}/public/data/inspection_definitions`);
-            seedData.forEach(inspection => {
-                const docRef = doc(defsRef);
-                batch.set(docRef, inspection);
-            });
-            await batch.commit();
-            showToast("Base de datos configurada. Recargando...", "success");
-            await initialize(); 
-        }
+        // Nuevo botón de estado de componentes
+        const btnComponentStatus = document.getElementById('btnComponentStatus');
 
 
-        function renderTable(definitions, savedData) {
-            tableBody.innerHTML = '';
-            const grouped = definitions.reduce((acc, item) => {
-                (acc[item.category] = acc[item.category] || []).push(item);
-                return acc;
-            }, {});
-
-            const sortedCategories = Object.keys(grouped).sort();
-
-            for (const category of sortedCategories) {
-                const headerRow = document.createElement('tr');
-                headerRow.className = 'category-header';
-                headerRow.innerHTML = `<td colspan="8">${category.toUpperCase()}</td>`;
-                tableBody.appendChild(headerRow);
-
-                grouped[category].sort((a,b) => a.name.localeCompare(b.name)).forEach(item => {
-                    const data = savedData[item.id] || {};
-                    const lastDate = data.lastDate || '';
-                    const lastHours = data.lastHours || '';
-                    
-                    const row = document.createElement('tr');
-                    row.dataset.id = item.id;
-                    row.innerHTML = `
-                        <td data-label="" class="delete-btn-cell"></td>
-                        <td data-label="Inspección" class="task-name" contenteditable="false">${item.name}</td>
-                        <td data-label="Referencia" class="ref-cell" contenteditable="false">${item.ref}</td>
-                        <td data-label="Frecuencia" class="freq-cell" contenteditable="false">${item.freq} ${item.base}</td>
-                        <td data-label="Última Realizada">
-                            <input type="text" value="${lastHours}" class="w-full text-center hours-input" placeholder="Hrs" readonly>
-                            <input type="date" value="${lastDate}" class="w-full date-input" readonly>
-                        </td>
-                        <td data-label="Próx. Cumplimiento"></td>
-                        <td data-label="Restante"></td>
-                        <td data-label="Vigencia"></td>
-                    `;
-                    tableBody.appendChild(row);
-                    updateRowUI(row);
-                });
-            }
-        }
-        
-        function updateRowUI(row) {
-             const inspectionId = row.dataset.id;
-             const definition = allInspectionDefinitions.find(d => d.id === inspectionId);
-             if (!definition) return;
-
-             const lastHours = row.querySelector('.hours-input').value;
-             const lastDate = row.querySelector('.date-input').value;
-             const { nextDueDate, nextDueHrs, remaining, status } = calculateStatus(lastDate, lastHours, definition.freq, definition.base);
-
-             row.cells[5].innerHTML = `<span>${nextDueHrs}</span><br><span>${nextDueDate}</span>`;
-             row.cells[6].textContent = remaining;
-             row.cells[7].textContent = status;
-             row.cells[7].className = status === 'VIGENTE' ? 'status-vigente' : 'status-vencida';
-        }
-
-
-        function calculateStatus(lastDateStr, lastHoursStr, freq, base) {
-            let nextDueDate = '---', nextDueHrs = '---', remaining = '---', status = 'VIGENTE';
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            if (!base || base.toLowerCase().includes('condition') || base.toLowerCase().includes('preflight') || base.toLowerCase().includes('after')) {
-                return { nextDueDate: 'N/A', nextDueHrs: 'N/A', remaining: 'N/A', status: 'VIGENTE' };
-            }
-
-            const freqs = String(freq).split('/').map(f => parseFloat(f.trim()));
-            const bases = String(base).split('/').map(b => b.trim().toLowerCase());
-            
-            let remainingDays = Infinity, remainingHours = Infinity;
-            let finalNextDate = null, finalNextHours = Infinity;
-
-            const lastHours = parseFloat(lastHoursStr);
-            const lastDate = lastDateStr ? new Date(lastDateStr + 'T12:00:00') : null;
-
-            bases.forEach((b, index) => {
-                const f = freqs[index];
-                if (b.includes('hour') && !isNaN(lastHours) && !isNaN(f)) {
-                    if ((lastHours + f) < finalNextHours) finalNextHours = lastHours + f;
-                }
-                if (lastDate && (b.includes('day') || b.includes('month') || b.includes('year') || b.includes('día') || b.includes('mes') || b.includes('año'))) {
-                    const nextDate = new Date(lastDate);
-                    if (b.includes('day') || b.includes('día')) nextDate.setDate(nextDate.getDate() + f);
-                    else if (b.includes('month') || b.includes('mes')) nextDate.setMonth(nextDate.getMonth() + f);
-                    else if (b.includes('year') || b.includes('año')) nextDate.setFullYear(nextDate.getFullYear() + f);
-                    if (!finalNextDate || nextDate < finalNextDate) finalNextDate = nextDate;
-                }
-            });
-            
-            if (finalNextHours !== Infinity) {
-                nextDueHrs = finalNextHours.toFixed(2);
-                remainingHours = finalNextHours - currentAcHrs;
-            }
-            if (finalNextDate) {
-                nextDueDate = finalNextDate.toLocaleDateString('es-ES', { year: '2-digit', month: '2-digit', day: '2-digit' });
-                remainingDays = Math.floor((finalNextDate - today) / (1000 * 60 * 60 * 24));
-            }
-
-            if ((currentAcHrs > 0 && remainingHours <= 0) || remainingDays <= 0) status = 'VENCIDA';
-
-            if (remainingDays !== Infinity && remainingHours !== Infinity) remaining = `${remainingHours.toFixed(2)}h / ${remainingDays}d`;
-            else if (remainingHours !== Infinity) remaining = `${remainingHours.toFixed(2)}h`;
-            else if (remainingDays !== Infinity) remaining = `${remainingDays}d`;
-
-            return { nextDueDate, nextDueHrs, remaining, status };
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast-notification');
-            toast.textContent = message;
-            toast.className = type;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        async function handleAutoSave(row, field, value) {
-            const id = row.dataset.id;
-            const dataDocRef = doc(db, `artifacts/${appId}/public/data/inspection_data/all_inspections`);
-            try {
-                 await setDoc(dataDocRef, { [id]: { [field]: value } }, { merge: true });
-                // No need to call updateRowUI here, onSnapshot will handle it.
-                showToast('Cambio guardado');
-            } catch (error) {
-                 console.error("Error en autoguardado:", error);
-                 showToast('Error al guardar', 'error');
-            }
-        }
-        
-        function handleEditRequest() {
-            if (isEditMode) {
-                toggleEditMode();
+        // Helper para extraer la nomenclatura base y la variante (Ya no es estrictamente necesario sin límites, pero se mantiene si hay nombres con formato similar)
+        function parseNomenclatura(nombreCompleto) {
+            let nomenclaturaBase = '';
+            let varianteClave = ''; 
+            const matchNumericPart = nombreCompleto.match(/(\d+(?:\.\d+)?)$/);
+            if (matchNumericPart) {
+                varianteClave = matchNumericPart[1];
+                nomenclaturaBase = nombreCompleto.substring(0, nombreCompleto.length - varianteClave.length).trim();
             } else {
-                const password = prompt("Ingrese la contraseña para activar el modo de edición:");
-                if (password === "Kevin") {
-                    toggleEditMode();
-                } else if (password !== null) {
-                    showToast("Contraseña incorrecta", "error");
-                }
+                nomenclaturaBase = nombreCompleto; 
+                varianteClave = '1.0'; 
+            }
+            return { nomenclaturaBase, varianteClave };
+        }
+
+        /**
+         * Formatea un número para mostrarlo sin decimales si es un entero,
+         * o con decimales si tiene parte fraccionaria.
+         * @param {number|string} value El valor a formatear.
+         * @returns {string} El valor formateado como string.
+         */
+        function formatNumber(value) {
+            const num = parseFloat(value);
+            if (isNaN(num)) {
+                return '';
+            }
+            if (num % 1 === 0) {
+                return num.toString();
+            } else {
+                return num.toString();
             }
         }
 
-        function toggleEditMode() {
-            isEditMode = !isEditMode;
-            document.querySelectorAll('.add-inspection-row').forEach(row => row.remove());
+        // -----------------------------------------------------------
+        // Funciones de Autenticación
+        // -----------------------------------------------------------
 
-            btnAgregarCategoria.classList.toggle('hidden');
-
-            tableBody.querySelectorAll('tr[data-id]').forEach(row => {
-                const taskNameCell = row.querySelector('.task-name');
-                const refCell = row.querySelector('.ref-cell');
-                const freqCell = row.querySelector('.freq-cell');
-                const deleteCell = row.querySelector('.delete-btn-cell');
-                
-                taskNameCell.setAttribute('contenteditable', isEditMode);
-                refCell.setAttribute('contenteditable', isEditMode);
-                freqCell.setAttribute('contenteditable', isEditMode);
-                
-                if(isEditMode) {
-                    deleteCell.innerHTML = `<button class="btn btn-danger delete-btn"><i class="fas fa-trash-alt"></i></button>`;
-                } else {
-                    deleteCell.innerHTML = '';
-                }
-            });
-
-            if (isEditMode) {
-                tableBody.querySelectorAll('.category-header').forEach(headerRow => {
-                    const category = headerRow.querySelector('td').textContent.trim();
-                    const addRow = document.createElement('tr');
-                    addRow.className = 'add-inspection-row';
-                    addRow.innerHTML = `<td colspan="8"><button class="btn btn-green w-full add-inspection-btn" data-category="${category}">+ Agregar Inspección a ${category}</button></td>`;
-                    headerRow.parentNode.insertBefore(addRow, headerRow.nextSibling);
-                });
-            }
-
-            btnModoEdicion.innerHTML = isEditMode ? '<i class="fas fa-check"></i> Salir Edición' : '<i class="fas fa-edit"></i> Modo Edición (Ctrl+E)';
-            showToast(isEditMode ? 'Modo de edición activado' : 'Modo de edición desactivado', 'info');
-        }
-
-        async function handleDelete(row) {
-            const id = row.dataset.id;
-            if (!id || !confirm('¿Estás seguro de que quieres eliminar esta inspección permanentemente?')) return;
-
-            const defDocRef = doc(db, `artifacts/${appId}/public/data/inspection_definitions`, id);
-            const dataDocRef = doc(db, `artifacts/${appId}/public/data/inspection_data/all_inspections`);
-
+        signupBtn.addEventListener('click', async () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            if (!email || !password) { authStatus.textContent = 'Por favor, introduce un correo y una contraseña.'; return; }
             try {
-                const batch = writeBatch(db);
-                batch.delete(defDocRef);
-                batch.update(dataDocRef, { [id]: deleteField() });
-                await batch.commit();
-                
-                // onSnapshot will handle UI update
-                showToast('Inspección eliminada');
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                authStatus.textContent = 'Registro exitoso. ¡Bienvenido!';
+                authStatus.style.color = 'green';
+                emailInput.value = '';
+                passwordInput.value = '';
+                await set(ref(database, `user_roles/${user.uid}`), 'viewer');
             } catch (error) {
-                console.error("Error al eliminar:", error);
-                showToast('Error al eliminar', 'error');
+                authStatus.textContent = `Error al registrar: ${error.message}`;
+                authStatus.style.color = 'red';
             }
-        }
-        
-        function getHourFrequency(definition) {
-            const freqs = String(definition.freq).split('/').map(f => parseFloat(f.trim()));
-            const bases = (definition.base || '').split('/').map(b => b.trim().toLowerCase());
-            const hourIndex = bases.findIndex(b => b.includes('hour'));
-            return hourIndex !== -1 ? freqs[hourIndex] : 0;
-        }
-        
-        function parseFrequency(text) {
-            const parts = text.trim().split(/\s+/);
-            const freq = parseFloat(parts[0]) || 0;
-            const base = parts.slice(1).join(' ') || '';
-            return { freq, base };
-        }
-
-        function handleAddNewInspection(button) {
-            const category = button.dataset.category;
-            const newRow = document.createElement('tr');
-            newRow.className = 'new-inspection-row';
-            newRow.innerHTML = `
-                <td><button class="btn btn-green save-new-btn"><i class="fas fa-save"></i></button></td>
-                <td contenteditable="true" class="task-name">Nueva Inspección</td>
-                <td contenteditable="true" class="ref-cell">Referencia</td>
-                <td contenteditable="true" class="freq-cell">100 HORAS</td>
-                <td colspan="4">Complete los datos y guarde</td>
-            `;
-            button.closest('tr').insertAdjacentElement('afterend', newRow);
-            newRow.querySelector('.task-name').focus();
-            button.disabled = true;
-        }
-
-        async function saveNewInspection(button) {
-            const row = button.closest('tr');
-            const name = row.cells[1].textContent.trim();
-            const ref = row.cells[2].textContent.trim();
-            const freqText = row.cells[3].textContent.trim();
-            const category = row.previousElementSibling.querySelector('.add-inspection-btn').dataset.category;
-
-            if (!name || !ref || !freqText) {
-                showToast("Por favor complete todos los campos.", "error");
-                return;
-            }
-
-            const { freq, base } = parseFrequency(freqText);
-            const newInspectionData = { name, ref, freq, base, category };
-
-            try {
-                const defsRef = collection(db, `artifacts/${appId}/public/data/inspection_definitions`);
-                await addDoc(defsRef, newInspectionData);
-                // onSnapshot will handle the UI update
-                showToast("Inspección agregada con éxito");
-            } catch (error) {
-                console.error("Error al guardar nueva inspección:", error);
-                showToast("Error al guardar.", "error");
-            }
-        }
-
-        // --- Modals Logic ---
-        function openHoursAssistant(row) {
-            activeRowForModal = row;
-            const id = row.dataset.id;
-            const definition = allInspectionDefinitions.find(d => d.id === id);
-            if (!definition) return;
-            
-            document.getElementById('modal-title-hours').textContent = `${definition.name} (${definition.freq} ${definition.base})`;
-            document.getElementById('modal-current-hrs').textContent = currentAcHrs.toFixed(2);
-            document.getElementById('input-next-due-hrs').value = '';
-            document.getElementById('input-past-hrs').value = '';
-
-            hoursModal.classList.remove('hidden');
-        }
-
-        function openDateAssistant(row) {
-            activeRowForModal = row;
-            const id = row.dataset.id;
-            const definition = allInspectionDefinitions.find(d => d.id === id);
-            if (!definition) return;
-
-            document.getElementById('modal-title-date').textContent = `${definition.name} (${definition.freq} ${definition.base})`;
-            document.getElementById('input-next-due-date').value = '';
-            document.getElementById('input-past-date').value = '';
-
-            dateModal.classList.remove('hidden');
-        }
-        
-        function closeHoursAssistant() { hoursModal.classList.add('hidden'); activeRowForModal = null; }
-        function closeDateAssistant() { dateModal.classList.add('hidden'); activeRowForModal = null; }
-
-        function updateHoursAndSave(newHours) {
-            if (activeRowForModal && !isNaN(newHours)) {
-                handleAutoSave(activeRowForModal, 'lastHours', newHours.toFixed(2));
-            }
-            closeHoursAssistant();
-        }
-        
-        function updateDateAndSave(newDate) {
-            if (activeRowForModal && newDate) {
-                const dateString = newDate.toISOString().split('T')[0];
-                handleAutoSave(activeRowForModal, 'lastDate', dateString);
-            }
-            closeDateAssistant();
-        }
-
-        function updateAndSaveCycle() {
-            if (!activeRowForModal) return;
-            const id = activeRowForModal.dataset.id;
-            const definition = allInspectionDefinitions.find(d => d.id === id);
-            if (!definition) return;
-
-            handleAutoSave(activeRowForModal, 'lastHours', currentAcHrs.toFixed(2));
-
-            const base = (definition.base || '').toLowerCase();
-            if (base.includes('day') || base.includes('month') || base.includes('year')) {
-                const today = new Date().toISOString().split('T')[0];
-                handleAutoSave(activeRowForModal, 'lastDate', today);
-            }
-            closeHoursAssistant();
-        }
-        
-        function getDateFrequency(definition) {
-            const freqs = String(definition.freq).split('/').map(f => parseFloat(f.trim()));
-            const bases = (definition.base || '').split('/').map(b => b.trim().toLowerCase());
-            const dateIndex = bases.findIndex(b => b.includes('day') || b.includes('month') || b.includes('year') || b.includes('día') || b.includes('mes') || b.includes('año'));
-            if (dateIndex === -1) return null;
-            return { freq: freqs[dateIndex], base: bases[dateIndex] };
-        }
-
-        function calculatePastDate(baseDate, amount, unit, factor = 1) {
-            const newDate = new Date(baseDate);
-            amount = amount * factor;
-            if (unit.includes('day')|| unit.includes('día')) newDate.setDate(newDate.getDate() - amount);
-            else if (unit.includes('month') || unit.includes('mes')) newDate.setMonth(newDate.getMonth() - amount);
-            else if (unit.includes('year') || unit.includes('año')) newDate.setFullYear(newDate.getFullYear() - amount);
-            return newDate;
-        }
-
-        // --- EVENT LISTENERS ---
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key.toLowerCase() === 'e') { e.preventDefault(); handleEditRequest(); }
         });
-        
-        btnModoEdicion.addEventListener('click', handleEditRequest);
-        
-        btnAgregarCategoria.addEventListener('click', async () => {
-            const categoryName = prompt("Ingrese el nombre de la nueva categoría:");
-            if (categoryName && categoryName.trim() !== '') {
-                const newInspectionData = {
-                    name: "Nueva Inspección en esta categoría",
-                    ref: "N/A",
-                    freq: 0,
-                    base: "N/A",
-                    category: categoryName.trim().toUpperCase()
-                };
+
+        loginBtn.addEventListener('click', async () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            if (!email || !password) { authStatus.textContent = 'Por favor, introduce un correo y una contraseña.'; return; }
+            try {
+                await setPersistence(auth, browserLocalPersistence);
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                authStatus.textContent = 'Sesión iniciada. ¡Bienvenido!';
+                authStatus.style.color = 'green';
+                emailInput.value = '';
+                passwordInput.value = '';
+            } catch (error) {
+                authStatus.textContent = `Error al iniciar sesión: ${error.message}`;
+                authStatus.style.color = 'red';
+            }
+        });
+
+        forgotPasswordBtn.addEventListener('click', async () => {
+            const email = emailInput.value;
+            if (!email) { authStatus.textContent = 'Por favor, introduce tu correo electrónico para restablecer la contraseña.'; authStatus.style.color = 'red'; return; }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                authStatus.textContent = 'Se ha enviado un correo de restablecimiento de contraseña a tu dirección.';
+                authStatus.style.color = 'green';
+            } catch (error) {
+                authStatus.textContent = `Error al restablecer contraseña: ${error.message}`;
+                authStatus.style.color = 'red';
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                authStatus.textContent = 'Sesión cerrada.';
+                authStatus.style.color = 'red';
+            } catch (error) {
+                authStatus.textContent = `Error al cerrar sesión: ${error.message}`;
+                authStatus.style.color = 'red';
+            }
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                userIdDisplay.textContent = userId;
+                
+                authContainer.style.display = 'none';
+                mainAppContent.style.display = 'block';
+                authStatus.textContent = '';
 
                 try {
-                    const defsRef = collection(db, `artifacts/${appId}/public/data/inspection_definitions`);
-                    await addDoc(defsRef, newInspectionData);
-                    showToast("Nueva categoría y primera inspección agregadas.");
-                    // onSnapshot will handle the update
+                    const rolePath = `user_roles/${userId}`;
+                    const snapshot = await get(ref(database, rolePath));
+                    currentUserRole = snapshot.val() || 'viewer';
+                    
+                    if (!snapshot.exists()) {
+                        await set(ref(database, rolePath), 'viewer');
+                    }
+                    
+                    applyRolePermissions(currentUserRole);
+                    await cargarDatosDeFirebase();
+                    agregarEventosDeEdicion();
                 } catch (error) {
-                    console.error("Error al agregar nueva categoría:", error);
-                    showToast("Error al guardar la categoría.", "error");
+                    authStatus.textContent = `Error crítico: ${error.message}. Por favor, recarga.`;
+                    authStatus.style.color = 'red';
+                    currentUserRole = 'viewer';
+                    applyRolePermissions(currentUserRole);
+                    await cargarDatosDeFirebase();
+                    agregarEventosDeEdicion();
                 }
+
+            } else {
+                userId = "anonimo";
+                userIdDisplay.textContent = userId;
+                
+                authContainer.style.display = 'block';
+                mainAppContent.style.display = 'none';
+                authStatus.textContent = 'Por favor, inicia sesión o regístrate para acceder.';
+                authStatus.style.color = 'red';
+                currentUserRole = null;
+                applyRolePermissions(null);
             }
         });
 
-        tableBody.addEventListener('blur', async (e) => {
-            if (isEditMode && e.target.matches('[contenteditable="true"]')) {
-                const row = e.target.closest('tr');
-                if (!row.dataset.id) return;
-                const id = row.dataset.id;
-                const defDocRef = doc(db, `artifacts/${appId}/public/data/inspection_definitions`, id);
-                let updateData = {};
-                if (e.target.classList.contains('task-name')) updateData.name = e.target.textContent;
-                else if (e.target.classList.contains('ref-cell')) updateData.ref = e.target.textContent;
-                else if (e.target.classList.contains('freq-cell')) Object.assign(updateData, parseFrequency(e.target.textContent));
-                if (Object.keys(updateData).length > 0) {
-                     try {
-                        await updateDoc(defDocRef, updateData);
-                        // onSnapshot will handle update, but update local for immediate feedback
-                        const defIndex = allInspectionDefinitions.findIndex(d => d.id === id);
-                        if(defIndex > -1) allInspectionDefinitions[defIndex] = {...allInspectionDefinitions[defIndex], ...updateData};
-                        updateRowUI(row);
-                        showToast('Cambio guardado');
-                    } catch (error) { console.error("Error al actualizar:", error); showToast('Error al actualizar', 'error'); }
-                }
-            }
-        }, true);
+        /**
+         * Aplica los permisos de la interfaz de usuario basados en el rol del usuario.
+         * Ahora, cualquier usuario autenticado puede editar.
+         * @param {string|null} role - El rol del usuario ('admin', 'viewer' o null si no está autenticado).
+         */
+        function applyRolePermissions(role) {
+            const isAuthenticated = (role !== null);
 
-        tableBody.addEventListener('click', (e) => {
-            const row = e.target.closest('tr');
-            if (!row || !row.dataset.id) { 
-                if (e.target.closest('.add-inspection-btn')) handleAddNewInspection(e.target.closest('.add-inspection-btn'));
-                else if (e.target.closest('.save-new-btn')) saveNewInspection(e.target.closest('.save-new-btn'));
-                return;
-            }
-            if (e.target.closest('.delete-btn')) {
-                 handleDelete(row);
-            } else if (e.target.classList.contains('hours-input')) {
-                 openHoursAssistant(row);
-            } else if (e.target.classList.contains('date-input')) {
-                const id = row.dataset.id;
-                const def = allInspectionDefinitions.find(d => d.id === id);
-                if (def) {
-                    const base = (def.base || '').toLowerCase();
-                    const isDateBased = ['day', 'día', 'month', 'mes', 'year', 'año'].some(term => base.includes(term));
-                    if (isDateBased) {
-                        openDateAssistant(row);
+            document.querySelectorAll('.tabla-vuelo tbody tr').forEach(fila => {
+                fila.querySelectorAll('td').forEach((celda) => {
+                    const isNomenclatura = celda.classList.contains('nomenclatura');
+                    const isTotalCell = celda.classList.contains('fila-total') || celda.classList.contains('fila-general');
+                    const isMotorHeader = celda.classList.contains('motor-header');
+                    
+                    // No hay más celdas de "Restante" o "Label" específicas después de la eliminación
+                    if (isNomenclatura || isTotalCell || isMotorHeader) {
+                        celda.contentEditable = 'false';
+                        celda.classList.add('read-only-cell');
+                        celda.classList.remove('editable-cell');
+                    } else {
+                        celda.contentEditable = isAuthenticated ? 'true' : 'false';
+                        if (isAuthenticated) {
+                            celda.classList.add('editable-cell');
+                            celda.classList.remove('read-only-cell');
+                        } else {
+                            celda.classList.add('read-only-cell');
+                            celda.classList.remove('editable-cell');
+                        }
                     }
-                }
-            }
-        });
-
-        // Hours Modal Listeners
-        document.getElementById('btn-close-modal-hrs').addEventListener('click', closeHoursAssistant);
-        document.getElementById('btn-reiniciar-ciclo').addEventListener('click', updateAndSaveCycle);
-        document.getElementById('btn-opcion-a-hrs').addEventListener('click', () => { const def = allInspectionDefinitions.find(d => d.id === activeRowForModal.dataset.id); updateHoursAndSave(currentAcHrs - getHourFrequency(def)); });
-        document.getElementById('btn-opcion-b-hrs').addEventListener('click', () => { const def = allInspectionDefinitions.find(d => d.id === activeRowForModal.dataset.id); updateHoursAndSave(currentAcHrs - (getHourFrequency(def) / 2)); });
-        document.getElementById('btn-opcion-c-hrs').addEventListener('click', () => { const nextDue = parseFloat(document.getElementById('input-next-due-hrs').value); if(isNaN(nextDue)) return; const def = allInspectionDefinitions.find(d => d.id === activeRowForModal.dataset.id); updateHoursAndSave(nextDue - getHourFrequency(def)); });
-        document.getElementById('btn-opcion-d-hrs').addEventListener('click', () => { const past = parseFloat(document.getElementById('input-past-hrs').value); if(!isNaN(past)) updateHoursAndSave(past); });
-
-        // Date Modal Listeners
-        document.getElementById('btn-close-modal-date').addEventListener('click', closeDateAssistant);
-        document.getElementById('btn-date-reiniciar-ciclo').addEventListener('click', () => updateDateAndSave(new Date()));
-        document.getElementById('btn-opcion-a-date').addEventListener('click', () => { const def = allInspectionDefinitions.find(d => d.id === activeRowForModal.dataset.id); const freq = getDateFrequency(def); if(!freq) return; updateDateAndSave(calculatePastDate(new Date(), freq.freq, freq.base)); });
-        document.getElementById('btn-opcion-b-date').addEventListener('click', () => { const def = allInspectionDefinitions.find(d => d.id === activeRowForModal.dataset.id); const freq = getDateFrequency(def); if(!freq) return; updateDateAndSave(calculatePastDate(new Date(), freq.freq, freq.base, 0.5)); });
-        document.getElementById('btn-opcion-c-date').addEventListener('click', () => { const nextDueStr = document.getElementById('input-next-due-date').value; if(!nextDueStr) return; const nextDueDate = new Date(nextDueStr + 'T12:00:00'); const def = allInspectionDefinitions.find(d => d.id === activeRowForModal.dataset.id); const freq = getDateFrequency(def); if(!freq) return; updateDateAndSave(calculatePastDate(nextDueDate, freq.freq, freq.base)); });
-        document.getElementById('btn-opcion-d-date').addEventListener('click', () => { const pastStr = document.getElementById('input-past-date').value; if(pastStr) updateDateAndSave(new Date(pastStr + 'T12:00:00')); });
-
-
-        document.getElementById('btnVerVencidas').addEventListener('click', () => {
-             const vencidas = [];
-            tableBody.querySelectorAll('tr[data-id]').forEach(row => {
-                const statusCell = row.cells[7];
-                if (statusCell && statusCell.textContent === 'VENCIDA') {
-                    const inspectionId = row.dataset.id;
-                    const definition = allInspectionDefinitions.find(d => d.id === inspectionId);
-                    if (definition) {
-                        const lastHours = row.querySelector('.hours-input').value;
-                        const lastDate = row.querySelector('.date-input').value;
-                        const category = definition.category;
-                        vencidas.push({ ...definition, lastHours, lastDate, category });
-                    }
-                }
+                });
             });
 
-            if (vencidas.length > 0) {
-                sessionStorage.setItem('vencidas', JSON.stringify(vencidas));
-                sessionStorage.setItem('currentAcHrs', currentAcHrs);
-                window.location.href = 'vencidas.html'; 
+            selectYear.disabled = !isAuthenticated; 
+            document.querySelectorAll('.tab-button').forEach(btn => { btn.disabled = !isAuthenticated; });
+            recordatorioTextarea.readOnly = !isAuthenticated;
+            btnImprimir.disabled = !isAuthenticated;
+            btnComponentStatus.disabled = !isAuthenticated; 
+
+            if (isAuthenticated) {
+                authStatus.textContent = `Has iniciado sesión. Puedes ver y editar todos los datos.`;
+                authStatus.style.color = 'green';
             } else {
-                showToast('No hay inspecciones vencidas para mostrar.', 'info');
-            }
-        });
-
-        document.getElementById('btnPrint').addEventListener('click', () => window.print());
-        document.getElementById('btnRegresar').addEventListener('click', () => window.history.back());
-
-        async function seedDatabaseIfNeeded() {
-            const defsRef = collection(db, `artifacts/${appId}/public/data/inspection_definitions`);
-            const snapshot = await getDocs(defsRef);
-            if (snapshot.empty) {
-                // The seedDatabase function will be called from initialize()
+                authStatus.textContent = 'Por favor, inicia sesión o regístrate para acceder.';
+                authStatus.style.color = 'red';
             }
         }
 
-        main();
+
+        // -----------------------------------------------------------
+        // Funciones de Base de Datos (Firebase Realtime Database)
+        // -----------------------------------------------------------
+
+        async function guardarDatosEnFirebase(año, mesIndex, datosTabla, recordatorio) {
+            if (!auth.currentUser) {
+                authStatus.textContent = 'Acceso denegado: Debes iniciar sesión para guardar datos.';
+                authStatus.style.color = 'orange';
+                return;
+            }
+
+            const rutaDatosMes = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesIndex}`;
+            const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${año}/${mesIndex}`;
+            const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-945-Overall`;
+
+            console.log(`Intentando guardar datos para el año: ${año}, mes: ${meses[mesIndex]}`);
+            console.log("Datos a guardar:", datosTabla);
+            console.log("Recordatorio a guardar:", recordatorio);
+
+            try {
+                await set(ref(database, rutaDatosMes), datosTabla);
+                await set(ref(database, rutaRecordatorio), recordatorio);
+
+                await calcularYGuardarTotalesGenerales();
+
+                authStatus.textContent = `Datos guardados para ${meses[mesIndex]} de ${año}.`;
+                authStatus.style.color = 'green';
+                console.log(`Guardado exitoso para ${meses[mesIndex]} de ${año}.`);
+            } catch (error) {
+                authStatus.textContent = `Error al guardar los datos: ${error.message}`;
+                authStatus.style.color = 'red';
+                console.error(`Error al guardar los datos para ${meses[mesIndex]} de ${año}:`, error);
+            }
+        }
+
+        async function calcularYGuardarTotalesGenerales() {
+            const allYearsDataRef = ref(database, `artifacts/${appId}/public_data/datos_vuelo`);
+            let allMonthsData = {};
+
+            try {
+                const snapshot = await get(allYearsDataRef);
+                if (snapshot.exists()) {
+                    allMonthsData = snapshot.val();
+                }
+
+                let newCumulativeTotals = {
+                    'AC HRS': 0,
+                    'ATERRIZAJES': 0,
+                    'RINS': 0
+                };
+
+                for (const yearKey in allMonthsData) {
+                    if (Object.hasOwnProperty.call(allMonthsData, yearKey)) {
+                        const yearData = allMonthsData[yearKey];
+                        for (const monthKey in yearData) {
+                            if (Object.hasOwnProperty.call(yearData, monthKey)) {
+                                const monthData = yearData[monthKey];
+                                // Los índices 0, 1, 2 corresponden a AC HRS, ATERRIZAJES, RINS respectivamente.
+                                // La columna 34 es la "GENERAL" para estas filas.
+                                if (monthData && Array.isArray(monthData) && monthData[0] && !isNaN(parseFloat(monthData[0][34]))) {
+                                    newCumulativeTotals['AC HRS'] += parseFloat(monthData[0][34]) || 0; 
+                                }
+                                if (monthData && Array.isArray(monthData) && monthData[1] && !isNaN(parseFloat(monthData[1][34]))) {
+                                    newCumulativeTotals['ATERRIZAJES'] += parseFloat(monthData[1][34]) || 0; 
+                                }
+                                if (monthData && Array.isArray(monthData) && monthData[2] && !isNaN(parseFloat(monthData[2][34]))) {
+                                    newCumulativeTotals['RINS'] += parseFloat(monthData[2][34]) || 0; 
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-945-Overall`;
+                await set(ref(database, rutaTotalesGenerales), newCumulativeTotals);
+
+            } catch (error) {
+                console.error("Error al calcular y guardar totales generales:", error);
+            }
+        }
+
+
+        async function cargarDatosDeFirebase() {
+            if (!userId || userId === "anonimo") {
+                return;
+            }
+
+            const rutaDatosMes = `artifacts/${appId}/public_data/datos_vuelo/${añoActual}/${mesActual}`;
+            const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${añoActual}/${mesActual}`;
+
+            console.log(`Cargando datos para el año: ${añoActual}, mes: ${meses[mesActual]}`);
+
+            try {
+                const datosSnapshot = await get(ref(database, rutaDatosMes));
+                const datos = datosSnapshot.val();
+
+                console.log("Datos recuperados de Firebase para el mes actual:", datos);
+
+                // Siempre limpiar la tabla para el mes actual, para asegurar un estado fresco
+                limpiarTablaHTML(mesActual);
+
+                if (datos) {
+                    // Si existen datos para el mes actual, cargarlos en la tabla.
+                    cargarDatosEnTablaHTML(datos, mesActual);
+                } else {
+                    // Si no existen datos para el mes actual,
+                    // Y si no es el primer mes (Enero, índice 0),
+                    // intentar copiar "GENERAL" del mes anterior a "VIENEN" del mes actual.
+                    if (mesActual > 0) {
+                        console.log(`No hay datos guardados para ${meses[mesActual]}, intentando copiar de ${meses[mesActual - 1]}.`);
+                        await copiarValorGeneralAMesSiguiente(añoActual, mesActual - 1, mesActual);
+                    } else {
+                        console.log(`No hay datos guardados para ${meses[mesActual]} (primer mes).`);
+                    }
+                }
+
+                const recordatorioSnapshot = await get(ref(database, rutaRecordatorio));
+                const recordatorio = recordatorioSnapshot.val();
+                if (recordatorio !== null) {
+                    recordatorioTextarea.value = recordatorio;
+                } else {
+                    recordatorioTextarea.value = "";
+                }
+                actualizarTotales(); // Recalcular totales después de la posible carga/copia de datos
+            } catch (error) {
+                authStatus.textContent = `Error al cargar los datos: ${error.message}`;
+                authStatus.style.color = 'red';
+                console.error(`Error al cargar los datos para ${meses[mesActual]} de ${añoActual}:`, error);
+            }
+        }
+
+        function limpiarTablaHTML(indiceTabla) {
+            const tabla = document.querySelectorAll(".tabla-vuelo")[indiceTabla];
+            if (tabla) {
+                tabla.querySelectorAll('tbody tr').forEach(fila => {
+                    fila.querySelectorAll('td').forEach((celda) => {
+                        const isNomenclatura = celda.classList.contains('nomenclatura');
+                        const isTotalCell = celda.classList.contains('fila-total') || celda.classList.contains('fila-general');
+                        const isMotorHeader = celda.classList.contains('motor-header');
+                        
+                        if (isMotorHeader || isNomenclatura || isTotalCell) {
+                            // No hacer nada, son celdas de solo lectura o encabezados
+                            return; 
+                        }
+                        
+                        // Limpiar el contenido de todas las celdas de datos
+                        celda.textContent = "";
+                        celda.classList.remove("led-persistente");
+                    });
+                });
+                actualizarTotales();
+            }
+        }
+
+        function cargarDatosEnTablaHTML(datos, indiceTabla) {
+            console.log(`Cargando estos datos en la tabla HTML para el mes ${meses[indiceTabla]}:`, datos);
+            const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
+            if (tabla) {
+                const filasHTML = Array.from(tabla.querySelectorAll('tr'));
+                let datosIndex = 0; 
+
+                filasHTML.forEach((filaHTML) => {
+                    // Solo procesar filas que no sean encabezados de motor
+                    if (filaHTML.querySelector('.motor-header')) {
+                        return;
+                    }
+
+                    const datosFila = datos[datosIndex];
+                    if (datosFila) {
+                        filaHTML.querySelectorAll('td').forEach((celda, indexCelda) => {
+                            const isNomenclatura = celda.classList.contains('nomenclatura');
+                            if (celda && !isNomenclatura && datosFila[indexCelda] !== undefined) {
+                                celda.textContent = formatNumber(datosFila[indexCelda]);
+                                if (celda.textContent.trim() !== "") {
+                                    celda.classList.add("led-persistente");
+                                } else {
+                                    celda.classList.remove("led-persistente");
+                                }
+                            }
+                        });
+                    }
+                    datosIndex++; 
+                });
+            }
+        }
+
+        function obtenerDatosTabla(indiceTabla) {
+            const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
+            const datos = [];
+            if (tabla) {
+                tabla.querySelectorAll('tr').forEach(fila => {
+                    // Ignorar filas de encabezado de motor al obtener datos para guardar
+                    if (fila.querySelector('.motor-header')) {
+                        return; 
+                    }
+                    const filaData = [];
+                    fila.querySelectorAll('td').forEach(celda => {
+                        filaData.push(celda.textContent);
+                    });
+                    datos.push(filaData);
+                });
+            }
+            return datos;
+        }
+
+        // -----------------------------------------------------------
+        // Funciones de Interfaz de Usuario y Lógica de Tabla
+        // -----------------------------------------------------------
+
+        function cargarAños() {
+            selectYear.innerHTML = "";
+            años.forEach((año) => {
+                const option = document.createElement("option");
+                option.value = año;
+                option.textContent = año;
+                selectYear.appendChild(option);
+            });
+            selectYear.value = añoActual;
+            selectYear.onchange = async () => {
+                // Guardar datos del mes actual antes de cambiar de año
+                if (auth.currentUser && userId !== "anonimo") {
+                    const currentMonthData = obtenerDatosTabla(mesActual);
+                    const currentMonthRecordatorio = recordatorioTextarea.value;
+                    await guardarDatosEnFirebase(añoActual, mesActual, currentMonthData, currentMonthRecordatorio);
+                }
+
+                añoActual = parseInt(selectYear.value);
+                crearTablasParaAño(añoActual);
+                await cargarDatosDeFirebase();
+                agregarEventosDeEdicion();
+                applyRolePermissions(currentUserRole);
+            };
+        }
+
+        function crearBotonesMeses() {
+            contenedorMeses.innerHTML = "";
+            meses.forEach((mes, i) => {
+                const btn = document.createElement("button");
+                btn.className = "tab-button";
+                btn.textContent = mes;
+                btn.onclick = async () => {
+                    // Guardar datos del mes ACTUALMENTE activo (mesActual) antes de cambiar
+                    if (auth.currentUser && userId !== "anonimo") {
+                        const currentMonthData = obtenerDatosTabla(mesActual);
+                        const currentMonthRecordatorio = recordatorioTextarea.value;
+                        await guardarDatosEnFirebase(añoActual, mesActual, currentMonthData, currentMonthRecordatorio);
+                    }
+
+                    // Ahora cambia al nuevo mes
+                    mesActual = i;
+                    mostrarTabla(i); 
+                    await cargarDatosDeFirebase(); // Esto cargará los datos para el nuevo mesActual
+                    agregarEventosDeEdicion();
+                    applyRolePermissions(currentUserRole);
+                };
+                contenedorMeses.appendChild(btn);
+            });
+            mostrarTabla(mesActual);
+        }
+
+        function crearTablasParaAño(año) {
+            contenedorTablas.innerHTML = "";
+            meses.forEach((mes, i) => {
+                const div = document.createElement("div");
+                div.className = "tabla-mes";
+                div.style.display = i === mesActual ? "block" : "none";
+
+                const tabla = document.createElement("table");
+                tabla.className = "tabla-vuelo";
+
+                const thead = document.createElement("thead");
+                const encabezado = document.createElement("tr");
+                encabezado.innerHTML = `
+                    <th>NOMENCLATURA</th>
+                    <th>VIENEN</th>
+                `;
+                for (let d = 1; d <= 31; d++) {
+                    encabezado.innerHTML += `<th>${d}</th>`;
+                }
+                encabezado.innerHTML += `
+                    <th>MES TOTAL</th>
+                    <th>GENERAL</th>
+                `;
+                thead.appendChild(encabezado);
+                tabla.appendChild(thead);
+
+                const tbody = document.createElement("tbody");
+                
+                nombresFilasOrdenadas.forEach((nombre) => {
+                    const totalColsInHeader = 35; 
+                    
+                    if (nombre === "ENGINE HRS 1") { // Cambiado a ENGINE HRS 1 para que aparezca después de RINS
+                        const separador1 = document.createElement("tr");
+                        separador1.innerHTML = `<td colspan="${totalColsInHeader}" class="motor-header" contenteditable="false">MOTOR # 1</td>`;
+                        tbody.appendChild(separador1);
+                    }
+                    
+                    const fila = crearFilaTabla(nombre);
+                    tbody.appendChild(fila);
+                });
+
+                tabla.appendChild(tbody);
+                div.appendChild(tabla);
+                contenedorTablas.appendChild(div);
+            });
+        }
+
+        function crearFilaTabla(nombre) {
+            const fila = document.createElement("tr");
+            
+            let rowHtml = `
+                <td class="nomenclatura" contenteditable="false">${nombre}</td>
+                <td contenteditable="true" class="viene-celda"></td>
+                ${Array.from({ length: 31 }, (_, d) => `<td contenteditable="true"></td>`).join('')}
+                <td class="fila-total" contenteditable="false">0.0</td>
+                <td class="fila-general" contenteditable="false">0.0</td>
+            `;
+
+            fila.innerHTML = rowHtml;
+            return fila;
+        }
+
+        async function mostrarTabla(index) {
+            mesActual = index;
+            // Guardar el mes activo en localStorage
+            localStorage.setItem('lastActiveMonth', index); 
+            document.querySelectorAll(".tabla-mes").forEach((div, i) => {
+                div.style.display = i === index ? "block" : "none";
+            });
+            document.querySelectorAll(".tab-button").forEach((btn, i) => {
+                btn.classList.toggle("active", i === index);
+            });
+            document.title = `Datos de Vuelo - ${meses[index]} ${añoActual}`;
+            printMonthHeader.textContent = `DATOS DE VUELO - ${meses[index].toUpperCase()} ${añoActual}`;
+        }
+
+        async function copiarValorGeneralAMesSiguiente(año, mesOrigenIndex, mesDestinoIndex) {
+            if (!userId || userId === "anonimo") return;
+
+            const rutaOrigen = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesOrigenIndex}`; 
+            try {
+                const snapshot = await get(ref(database, rutaOrigen));
+                const datosOrigen = snapshot.val();
+                if (datosOrigen) {
+                    const tablaDestino = document.querySelectorAll(".tabla-vuelo")[mesDestinoIndex];
+                    if (tablaDestino) {
+                        const nombresFilasEnTabla = Array.from(tablaDestino.querySelectorAll('.nomenclatura')).map(td => td.textContent.trim());
+
+                        datosOrigen.forEach((filaDatosOrigen, indexFilaOrigen) => {
+                            const originalRowName = nombresFilasOrdenadas[indexFilaOrigen];
+                            if (originalRowName) {
+                                const indexFilaDestino = nombresFilasEnTabla.indexOf(originalRowName);
+
+                                if (indexFilaDestino !== -1) {
+                                    // La columna 34 es la columna "GENERAL" en la estructura de datos de la tabla (ahora simplificada)
+                                    const valorGeneral = filaDatosOrigen[34]; 
+                                    if (valorGeneral !== undefined && valorGeneral !== null && valorGeneral.toString().trim() !== "") {
+                                        const filaDestino = tablaDestino.querySelectorAll("tbody tr")[indexFilaDestino];
+                                        if (filaDestino) {
+                                            const celdaVienen = filaDestino.querySelector(".viene-celda");
+                                            if (celdaVienen) {
+                                                celdaVienen.textContent = formatNumber(valorGeneral);
+                                                if (celdaVienen.textContent.trim() !== "") {
+                                                    celdaVienen.classList.add("led-persistente");
+                                                } else {
+                                                    celdaVienen.classList.remove("led-persistente");
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        actualizarTotales();
+                        // No llamar a guardarDatosEnFirebase aquí, ya que cargarDatosDeFirebase
+                        // es quien decide si se cargan datos existentes o se copian del mes anterior.
+                        // Si se copian, se guardarán cuando el usuario edite la tabla.
+                    }
+                }
+            } catch (error) {
+                console.error("Error al copiar datos entre meses:", error.code, error.message);
+            }
+        }
+
+        // Calcula y actualiza todos los totales en la tabla (ahora simplificado para todas las filas)
+        function actualizarTotales() {
+            document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
+                const filas = Array.from(tabla.querySelectorAll("tbody tr"));
+                const generalValuesMap = new Map(); 
+
+                filas.forEach((fila) => {
+                    const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
+                    if (!nomenclaturaCompleta || fila.querySelector('.motor-header')) {
+                        return;
+                    }
+
+                    const vieneCelda = fila.querySelector('.viene-celda');
+                    const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
+                    const mesTotalCelda = fila.querySelector('.fila-total');
+                    const generalCelda = fila.querySelector('.fila-general');
+                    
+                    const viene = parseFloat(vieneCelda?.textContent.trim()) || 0;
+                    const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
+                    
+                    const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
+                    let totalGeneral = totalMes + viene;
+                    
+                    mesTotalCelda.textContent = formatNumber(totalMes);
+                    generalCelda.textContent = formatNumber(totalGeneral);
+
+                    // Almacenar los totales generales de las filas clave para el modal de componentes
+                    if (nomenclaturaCompleta === 'AC HRS' || nomenclaturaCompleta === 'ATERRIZAJES' || nomenclaturaCompleta === 'RINS') {
+                        generalValuesMap.set(nomenclaturaCompleta, totalGeneral);
+                    }
+                });
+            });
+            calcularYGuardarTotalesGenerales(); // Llamada para actualizar los totales acumulados en Firebase
+        }
+
+        function agregarEventosDeEdicion() {
+            document.querySelectorAll(".tabla-vuelo td[contenteditable='true']").forEach((celda) => {
+                celda.removeEventListener("input", handleTableCellInput);
+                celda.addEventListener("input", handleTableCellInput);
+                celda.dataset.originalContent = celda.textContent;
+            });
+
+            recordatorioTextarea.removeEventListener("input", handleRecordatorioInput);
+            recordatorioTextarea.addEventListener("input", handleRecordatorioInput);
+        }
+
+        async function handleTableCellInput(e) {
+            const celda = e.target;
+            if (celda.contentEditable === 'true') {
+                if (!auth.currentUser) {
+                    authStatus.textContent = 'Acceso denegado: Debes iniciar sesión para editar datos.';
+                    authStatus.style.color = 'orange';
+                    celda.textContent = celda.dataset.originalContent || '';
+                    return;
+                }
+
+                celda.dataset.originalContent = celda.textContent;
+
+                if (celda.textContent.trim() !== "") {
+                    celda.classList.add("led-persistente");
+                } else {
+                    celda.classList.remove("led-persistente");
+                }
+
+                actualizarTotales();
+                await guardarDatosEnFirebase(añoActual, mesActual, obtenerDatosTabla(mesActual), recordatorioTextarea.value);
+            }
+        }
+
+        async function handleRecordatorioInput() {
+            if (!auth.currentUser) {
+                authStatus.textContent = 'Acceso denegado: Debes iniciar sesión para editar recordatorios.';
+                authStatus.style.color = 'orange';
+                return;
+            }
+            await guardarDatosEnFirebase(añoActual, mesActual, obtenerDatosTabla(mesActual), recordatorioTextarea.value);
+        }
+
+        document.querySelectorAll('input[name="printOption"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                document.body.classList.remove('print-no-reminders');
+                if (radio.value === 'no-reminders') {
+                    document.body.classList.add('print-no-reminders');
+                }
+            });
+        });
+
+        btnImprimir.addEventListener('click', () => {
+            window.print();
+        });
+        
+        // Función para mostrar un mensaje personalizado en lugar de alert()
+        function showCustomAlert(message) {
+            const alertModal = document.createElement('div');
+            alertModal.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4';
+            alertModal.innerHTML = `
+                <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center">
+                    <p class="text-lg mb-4">${message}</p>
+                    <button id="closeCustomAlert" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Aceptar</button>
+                </div>
+            `;
+            document.body.appendChild(alertModal);
+
+            document.getElementById('closeCustomAlert').addEventListener('click', () => {
+                document.body.removeChild(alertModal);
+            });
+        }
+
+
+        // --- Función de inicialización de la aplicación ---
+        async function iniciar() {
+            cargarAños();
+            crearTablasParaAño(añoActual);
+            crearBotonesMeses();
+
+            // Event listener para el botón "Estado de Componentes"
+            btnComponentStatus.addEventListener('click', async () => {
+                if (!auth.currentUser) {
+                    showCustomAlert('Debes iniciar sesión para ver el estado de los componentes.');
+                    return;
+                }
+
+                // Obtener los totales generales directamente de Firebase Realtime Database
+                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-94-Overall`;
+                try {
+                    const snapshot = await get(ref(database, rutaTotalesGenerales));
+                    let generalTotals = { 'AC HRS': 0, 'ATERRIZAJES': 0, 'RINS': 0 };
+                    if (snapshot.exists()) {
+                        generalTotals = snapshot.val();
+                    }
+
+                    const componentsData = [
+                        { name: "AC HRS", current: generalTotals['AC HRS'] || 0, type: "general_total" },
+                        { name: "ATERRIZAJES", current: generalTotals['ATERRIZAJES'] || 0, type: "general_total" },
+                        { name: "RINS", current: generalTotals['RINS'] || 0, type: "general_total" }
+                    ];
+                    
+                    // Guardar los datos en localStorage (para compatibilidad si COMPONENTES945.HTML aún lo usa)
+                    localStorage.setItem('componentStatusData', JSON.stringify(componentsData));
+                    
+                    window.location.href = 'COMPONENTES945.HTML'; // Redirige a la nueva página
+                } catch (error) {
+                    showCustomAlert(`Error al cargar datos para la página de componentes: ${error.message}`);
+                }
+            });
+
+            // Event listener para el nuevo botón "Inspecciones"
+            const btnInspecciones = document.getElementById('btnInspecciones');
+            btnInspecciones.addEventListener('click', () => {
+                if (!auth.currentUser) {
+                    showCustomAlert('Debes iniciar sesión para ver las inspecciones.');
+                    return;
+                }
+
+                // Encuentra la tabla actualmente activa
+                const activeTable = document.querySelector(`.tabla-mes[style*="display: block"] .tabla-vuelo`);
+                if (activeTable) {
+                    let acHrsGeneralValue = '0';
+                    const filas = activeTable.querySelectorAll('tbody tr');
+                    filas.forEach(fila => {
+                        const nomenclatura = fila.querySelector('.nomenclatura')?.textContent.trim();
+                        if (nomenclatura === 'AC HRS') {
+                            acHrsGeneralValue = fila.querySelector('.fila-general')?.textContent.trim() || '0';
+                        }
+                    });
+                    
+                    // Usar sessionStorage para pasar las horas. Es más robusto que los parámetros URL.
+                    sessionStorage.setItem('acHrsForInspection', acHrsGeneralValue);
+                    window.location.href = 'inspecciones945.html';
+                } else {
+                    showCustomAlert('No se pudo encontrar la tabla de datos activa.');
+                }
+            });
+        }
+
+        // Configura la posición y la distancia de caída de la careta de Anonymous.
+        function animateIntroElements() {
+            const helicopter = document.getElementById('helicopter-svg');
+            const authContainer = document.getElementById('auth-container');
+            const anonymousMask = document.getElementById('anonymous-mask-img');
+            const revealCircle = document.getElementById('reveal-circle');
+
+            if (!helicopter || !authContainer || !anonymousMask || !revealCircle) {
+                return;
+            }
+
+            const heliRect = helicopter.getBoundingClientRect();
+            const authRect = authContainer.getBoundingClientRect();
+            
+            const maskDropDistance = authRect.top - heliRect.bottom - (anonymousMask.offsetHeight / 2);
+
+            document.documentElement.style.setProperty('--mask-drop-distance', `${maskDropDistance}px`);
+
+            revealCircle.style.top = `${authRect.top + (authRect.height / 2)}px`;
+            revealCircle.style.left = `50%`;
+        }
+
+        // Iniciar la aplicación cuando la ventana esté completamente cargada
+        window.addEventListener("load", () => {
+            iniciar();
+            setTimeout(animateIntroElements, 100);
+        });
     </script>
 </body>
 </html>
+
+
 
