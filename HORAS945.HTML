@@ -521,6 +521,7 @@
             <button id="btnImprimir" class="px-6 py-2 bg-gray-700 text-white rounded-md shadow-md hover:bg-gray-800 transition-colors">Imprimir Tabla</button>
             <!-- Eliminado el botón "Estado de Motores" -->
             <button id="btnComponentStatus" class="px-6 py-2 bg-purple-500 text-white rounded-md shadow-md hover:bg-purple-600 transition-colors">Estado de Componentes</button>
+            <button id="btnInspecciones" class="px-6 py-2 bg-teal-500 text-white rounded-md shadow-md hover:bg-teal-600 transition-colors">Inspecciones</button>
         </div>
     </div>
 
@@ -551,8 +552,9 @@
         const database = getDatabase(app);
         const auth = getAuth(app);
 
-        // Define __app_id con un valor por defecto si no está definida
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Define __app_id y sanitiza para que sea una ruta de Firebase válida
+        let appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        appId = appId.replace(/[.#$\[\]]/g, '_'); // Reemplaza caracteres inválidos con guion bajo
 
         // Variables globales
         let añoActual = new Date().getFullYear();
@@ -1322,6 +1324,34 @@
                     showCustomAlert(`Error al cargar datos para la página de componentes: ${error.message}`);
                 }
             });
+
+            // Event listener para el nuevo botón "Inspecciones"
+            const btnInspecciones = document.getElementById('btnInspecciones');
+            btnInspecciones.addEventListener('click', () => {
+                if (!auth.currentUser) {
+                    showCustomAlert('Debes iniciar sesión para ver las inspecciones.');
+                    return;
+                }
+
+                // Encuentra la tabla actualmente activa
+                const activeTable = document.querySelector(`.tabla-mes[style*="display: block"] .tabla-vuelo`);
+                if (activeTable) {
+                    let acHrsGeneralValue = '0';
+                    const filas = activeTable.querySelectorAll('tbody tr');
+                    filas.forEach(fila => {
+                        const nomenclatura = fila.querySelector('.nomenclatura')?.textContent.trim();
+                        if (nomenclatura === 'AC HRS') {
+                            acHrsGeneralValue = fila.querySelector('.fila-general')?.textContent.trim() || '0';
+                        }
+                    });
+                    
+                    // Usar sessionStorage para pasar las horas. Es más robusto que los parámetros URL.
+                    sessionStorage.setItem('acHrsForInspection', acHrsGeneralValue);
+                    window.location.href = 'inspecciones945.html';
+                } else {
+                    showCustomAlert('No se pudo encontrar la tabla de datos activa.');
+                }
+            });
         }
 
         // Configura la posición y la distancia de caída de la careta de Anonymous.
@@ -1354,3 +1384,6 @@
     </script>
 </body>
 </html>
+
+
+
