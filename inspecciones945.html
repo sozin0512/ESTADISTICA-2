@@ -185,7 +185,8 @@
             appId: "1:789748725591:web:f7f551a77be0092531f012",
             measurementId: "G-3JW0YYE2QQ"
         };
-        const appId = typeof __app_id !== 'undefined' ? __app_id.replace(/[.#$\[\]]/g, '_') : 'default-app-id';
+        // Usamos un ID de aplicación compartido para que todos los usuarios vean los mismos datos en tiempo real.
+        const appId = 'FAH-945-SHARED-CONTROL';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         // --- FIN: Configuración de Firebase ---
 
