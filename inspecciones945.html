@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Inspecciones FAH-945</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background-color: #e9ecef; }
+        .container { max-width: 98%; margin: 1.5rem auto; background: white; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        .header-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background-color: #343a40; padding: 1px; border-top-left-radius: 8px; border-top-right-radius: 8px; }
+        .header-item { background-color: white; padding: 0.5rem 1rem; }
+        .header-item strong { display: block; font-size: 0.75rem; color: #6c757d; }
+        .header-item span { font-size: 1rem; font-weight: 600; }
+        .actions-bar { display: flex; justify-content: flex-end; align-items: center; padding: 1rem; background-color: #f8f9fa; gap: 0.5rem; flex-wrap: wrap; }
+        .btn { padding: 0.5rem 1rem; border-radius: 0.25rem; border: 1px solid transparent; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-yellow { background-color: #ffc107; border-color: #ffc107; color: #212529; }
+        .btn-blue { background-color: #0d6efd; border-color: #0d6efd; color: white; }
+        .btn-green { background-color: #198754; border-color: #198754; color: white; }
+        .btn-orange { background-color: #fd7e14; border-color: #fd7e14; color: white; }
+        .btn-secondary { background-color: #6c757d; border-color: #6c757d; color: white; }
+        .btn-danger { background-color: #dc3545; border-color: #dc3545; color: white; padding: 0.2rem 0.5rem; font-size: 0.7rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        th, td { border: 1px solid #dee2e6; padding: 0.6rem 0.5rem; text-align: center; vertical-align: middle; }
+        th { background-color: #f8f9fa; font-weight: 700; }
+        .category-header td { background-color: #343a40; color: white; font-weight: bold; font-size: 0.85rem; text-align: center; padding: 0.4rem; }
+        .task-name, .ref-cell, .freq-cell { text-align: left; }
+        [contenteditable="true"] { background-color: #fff3cd; outline-color: #ffc107; padding: 0.5rem; }
+        .status-vigente { background-color: #198754; color: white; font-weight: bold; }
+        .status-vencida { background-color: #dc3545; color: white; font-weight: bold; }
+        .loader-container { text-align: center; padding: 4rem 0; }
+        .loader { border: 5px solid #f3f3f3; border-radius: 50%; border-top: 5px solid #343a40; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        input[type="date"], input[type="text"] { width: 100%; border: 1px solid #ced4da; border-radius: 0.25rem; padding: 0.25rem; background-color: #f8f9fa; }
+        .hours-input, .date-input { cursor: pointer; background-color: #e9ecef !important; }
+        .delete-btn-cell { width: 40px; }
+        
+        #toast-notification { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); padding: 1rem 2rem; border-radius: 8px; color: white; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: bottom 0.5s ease-in-out; z-index: 1050; }
+        #toast-notification.show { bottom: 30px; }
+        #toast-notification.success { background-color: #198754; }
+        #toast-notification.error { background-color: #dc3545; }
+        #toast-notification.info { background-color: #0d6efd; }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .header-grid { grid-template-columns: 1fr; }
+            .actions-bar { justify-content: center; }
+            
+            #inspections-table thead { display: none; }
+            #inspections-table tr { display: block; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 4px; }
+            #inspections-table .category-header { display: none; }
+            #inspections-table td { display: block; text-align: right; padding-left: 50%; position: relative; border: none; border-bottom: 1px solid #eee; }
+            #inspections-table td:last-child { border-bottom: 0; }
+            #inspections-table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body { background-color: white; font-size: 10pt; }
+            .container { box-shadow: none; border: 1px solid #ccc; margin: 0; max-width: 100%; border-radius: 0; }
+            .no-print { display: none !important; }
+            .header-grid { border-radius: 0; }
+            table { font-size: 9pt; }
+            th, td { padding: 4px; }
+            input { border: none; background-color: transparent !important; }
+            .status-vigente, .status-vencida { color: black !important; background-color: transparent !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .status-vencida { font-weight: bold; border: 1px solid black; }
+            @page { size: letter landscape; margin: 0.5in; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-grid">
+            <div class="header-item"><strong>1. NOMENCLATURA</strong> <span id="header-nomenclatura">HELICOPTERO</span></div>
+            <div class="header-item"><strong>2. MODELO</strong> <span id="header-modelo">BELL UH-1H</span></div>
+            <div class="header-item"><strong>3. No. SERIE</strong> <span id="header-serie">FAH-945</span></div>
+            <div class="header-item"><strong>4. HORAS TOTALES DE VUELO (AC HRS)</strong> <span id="ac-hours-display">...</span></div>
+            <div class="header-item"><strong>4a. FECHA</strong> <span id="header-fecha"></span></div>
+            <div class="header-item"><strong>4b. PAGINA No</strong> <span>1</span></div>
+        </div>
+
+        <div class="actions-bar no-print">
+            <button id="btnVerVencidas" class="btn btn-yellow mr-auto"><i class="fas fa-exclamation-triangle"></i> Ver Vencidas</button>
+            <button id="btnAgregarCategoria" class="btn btn-green hidden"><i class="fas fa-plus"></i> Nueva Categoría</button>
+            <button id="btnModoEdicion" class="btn btn-blue"><i class="fas fa-edit"></i> Modo Edición (Ctrl+E)</button>
+            <button id="btnPrint" class="btn btn-secondary"><i class="fas fa-print"></i> Imprimir</button>
+            <button id="btnRegresar" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Regresar</button>
+        </div>
+        
+        <div id="loader-container">
+            <div class="loader"></div>
+            <p>Cargando datos de inspección...</p>
+        </div>
+
+        <table id="inspections-table" class="hidden">
+            <thead>
+                <tr>
+                    <th class="delete-btn-cell"></th>
+                    <th>5. ARTICULO PARA SER INSPECCIONADO</th>
+                    <th>6. REFERENCIA</th>
+                    <th>7. FRECUENCIA</th>
+                    <th>Última Realizada</th>
+                    <th>SIG. CUMPLIMIENTO</th>
+                    <th>Restante</th>
+                    <th>VIGENCIA</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Hours Assistant Modal -->
+    <div id="hours-assistant-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50 no-print">
+        <div class="relative mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <h3 class="text-xl font-bold text-center mb-1">Asistente de Horas</h3>
+            <p id="modal-title-hours" class="text-center text-gray-600 mb-4"></p>
+            <div class="space-y-3">
+                <div class="p-3 border rounded-md bg-green-50 border-green-200">
+                    <p class="font-semibold text-green-800">Opción Rápida: Reiniciar Ciclo</p>
+                    <p class="text-sm text-gray-600 mb-2">Registra la última inspección con las horas de vuelo y/o fecha actuales para empezar un nuevo ciclo.</p>
+                    <button id="btn-reiniciar-ciclo" class="btn btn-green w-full">Usar Horas y Fecha Actuales: <span id="modal-current-hrs"></span></button>
+                </div>
+                <div class="p-3 border rounded-md"><p class="font-semibold">Opción A: Asumir que se acaba de cumplir</p><p class="text-sm text-gray-600 mb-2">Calcula la última inspección como: (Horas Actuales - Frecuencia).</p><button id="btn-opcion-a-hrs" class="btn btn-secondary w-full">Calcular y Registrar</button></div>
+                <div class="p-3 border rounded-md"><p class="font-semibold">Opción B: Asumir a mitad de ciclo</p><p class="text-sm text-gray-600 mb-2">Calcula la última inspección como: (Horas Actuales - Frecuencia / 2).</p><button id="btn-opcion-b-hrs" class="btn btn-secondary w-full">Calcular y Registrar</button></div>
+                <div class="p-3 border rounded-md"><p class="font-semibold">Opción C: Calcular desde el próximo cumplimiento</p><p class="text-sm text-gray-600">Introduce el valor del próximo cumplimiento y el sistema calculará el anterior.</p><div class="flex gap-2 mt-2"><input type="number" id="input-next-due-hrs" placeholder="Ej: 600" class="flex-grow p-2 border rounded-md"><button id="btn-opcion-c-hrs" class="btn btn-blue">Calcular</button></div></div>
+                <div class="p-3 border rounded-md"><p class="font-semibold">Opción D: Registrar cumplimiento en horas pasadas</p><p class="text-sm text-gray-600">Introduce las horas de vuelo exactas (AC HRS) en las que se realizó la inspección.</p><div class="flex gap-2 mt-2"><input type="number" id="input-past-hrs" placeholder="Ej: 4850.5" class="flex-grow p-2 border rounded-md"><button id="btn-opcion-d-hrs" class="btn btn-orange">Registrar</button></div></div>
+            </div>
+            <div class="mt-4 text-right"><button id="btn-close-modal-hrs" class="btn btn-secondary">Cerrar</button></div>
+        </div>
+    </div>
+    
+    <!-- Date Assistant Modal -->
+    <div id="date-assistant-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50 no-print">
+        <div class="relative mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <h3 class="text-xl font-bold text-center mb-1">Asistente de Fechas</h3>
+            <p id="modal-title-date" class="text-center text-gray-600 mb-4"></p>
+            <div class="space-y-3">
+                <div class="p-3 border rounded-md bg-green-50 border-green-200"><p class="font-semibold text-green-800">Opción Rápida: Reiniciar Ciclo</p><p class="text-sm text-gray-600 mb-2">Registra la última inspección con la fecha de hoy para empezar un nuevo ciclo.</p><button id="btn-date-reiniciar-ciclo" class="btn btn-green w-full">Usar Fecha Actual</button></div>
+                <div class="p-3 border rounded-md"><p class="font-semibold">Opción A: Asumir que se acaba de cumplir</p><p class="text-sm text-gray-600 mb-2">Calcula la última inspección restando la frecuencia a la fecha de hoy.</p><button id="btn-opcion-a-date" class="btn btn-secondary w-full">Calcular y Registrar</button></div>
+                <div class="p-3 border rounded-md"><p class="font-semibold">Opción B: Asumir a mitad de ciclo</p><p class="text-sm text-gray-600 mb-2">Calcula la última inspección restando la mitad de la frecuencia a la fecha de hoy.</p><button id="btn-opcion-b-date" class="btn btn-secondary w-full">Calcular y Registrar</button></div>
+                <div class="p-3 border rounded-md"><p class="font-semibold">Opción C: Calcular desde el próximo cumplimiento</p><p class="text-sm text-gray-600">Introduce la fecha del próximo cumplimiento y el sistema calculará la anterior.</p><div class="flex gap-2 mt-2"><input type="date" id="input-next-due-date" class="flex-grow p-2 border rounded-md"><button id="btn-opcion-c-date" class="btn btn-blue">Calcular</button></div></div>
+                <div class="p-3 border rounded-md"><p class="font-semibold">Opción D: Registrar cumplimiento en fecha pasada</p><p class="text-sm text-gray-600">Introduce la fecha exacta en la que se realizó la inspección.</p><div class="flex gap-2 mt-2"><input type="date" id="input-past-date" class="flex-grow p-2 border rounded-md"><button id="btn-opcion-d-date" class="btn btn-orange">Registrar</button></div></div>
+            </div>
+            <div class="mt-4 text-right"><button id="btn-close-modal-date" class="btn btn-secondary">Cerrar</button></div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-notification"></div>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, writeBatch, updateDoc, deleteDoc, deleteField, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        let app, auth, db, userId;
+        let currentAcHrs = 0;
+        let allInspectionDefinitions = [];
+        let isEditMode = false;
+        let activeRowForModal = null;
+
+
+        // --- INICIO: Configuración de Firebase ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpZUx4sy6VIKGHzsMCNX4eQQ9sasQhy9Q",
+            authDomain: "fah-945.firebaseapp.com",
+            databaseURL: "https://fah-945-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "fah-945",
+            storageBucket: "fah-945.appspot.com",
+            messagingSenderId: "789748725591",
+            appId: "1:789748725591:web:f7f551a77be0092531f012",
+            measurementId: "G-3JW0YYE2QQ"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id.replace(/[.#$\[\]]/g, '_') : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // --- FIN: Configuración de Firebase ---
+
+        const acHrsDisplay = document.getElementById('ac-hours-display');
+        const loaderContainer = document.getElementById('loader-container');
+        const inspectionsTable = document.getElementById('inspections-table');
+        const tableBody = inspectionsTable.querySelector("tbody");
+        const btnModoEdicion = document.getElementById('btnModoEdicion');
+        const btnAgregarCategoria = document.getElementById('btnAgregarCategoria');
+        const hoursModal = document.getElementById('hours-assistant-modal');
+        const dateModal = document.getElementById('date-assistant-modal');
+
+        async function main() {
+            document.getElementById('header-fecha').textContent = new Date().toLocaleDateString('es-ES');
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        await initialize();
+                    } else {
+                        if (initialAuthToken) { await signInWithCustomToken(auth, initialAuthToken); } 
+                        else { await signInAnonymously(auth); }
+                    }
+                });
+            } catch (error) {
+                console.error("Firebase Init Error:", error);
+                loaderContainer.innerHTML = `<p class="text-red-600">Error de inicialización de Firebase.</p>`;
+            }
+        }
+
+        async function initialize() {
+            if (!userId) return;
+            loaderContainer.classList.remove('hidden');
+            inspectionsTable.classList.add('hidden');
+
+            currentAcHrs = parseFloat(sessionStorage.getItem('acHrsForInspection')) || 0;
+            acHrsDisplay.textContent = currentAcHrs > 0 ? currentAcHrs.toFixed(2) : "N/A";
+            
+            try {
+                await seedDatabaseIfNeeded();
+                const [definitionsSnapshot, dataSnapshot] = await Promise.all([
+                    getDocs(collection(db, `artifacts/${appId}/users/${userId}/inspection_definitions`)),
+                    getDoc(doc(db, `artifacts/${appId}/users/${userId}/inspection_data/all_inspections`))
+                ]);
+                
+                allInspectionDefinitions = definitionsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                const savedData = dataSnapshot.exists() ? dataSnapshot.data() : {};
+                
+                renderTable(allInspectionDefinitions, savedData);
+
+                loaderContainer.classList.add('hidden');
+                inspectionsTable.classList.remove('hidden');
+            } catch (error) {
+                console.error("Error loading data:", error);
+                loaderContainer.innerHTML = `<p class="text-red-600">Error al cargar datos.</p>`;
+            }
+        }
+
+        function renderTable(definitions, savedData) {
+            tableBody.innerHTML = '';
+            const grouped = definitions.reduce((acc, item) => {
+                (acc[item.category] = acc[item.category] || []).push(item);
+                return acc;
+            }, {});
+
+            const sortedCategories = Object.keys(grouped).sort();
+
+            for (const category of sortedCategories) {
+                const headerRow = document.createElement('tr');
+                headerRow.className = 'category-header';
+                headerRow.innerHTML = `<td colspan="8">${category.toUpperCase()}</td>`;
+                tableBody.appendChild(headerRow);
+
+                grouped[category].sort((a,b) => a.name.localeCompare(b.name)).forEach(item => {
+                    const data = savedData[item.id] || {};
+                    const lastDate = data.lastDate || '';
+                    const lastHours = data.lastHours || '';
+                    
+                    const row = document.createElement('tr');
+                    row.dataset.id = item.id;
+                    row.innerHTML = `
+                        <td data-label="" class="delete-btn-cell"></td>
+                        <td data-label="Inspección" class="task-name" contenteditable="false">${item.name}</td>
+                        <td data-label="Referencia" class="ref-cell" contenteditable="false">${item.ref}</td>
+                        <td data-label="Frecuencia" class="freq-cell" contenteditable="false">${item.freq} ${item.base}</td>
+                        <td data-label="Última Realizada">
+                            <input type="text" value="${lastHours}" class="w-full text-center hours-input" placeholder="Hrs" readonly>
+                            <input type="date" value="${lastDate}" class="w-full date-input" readonly>
+                        </td>
+                        <td data-label="Próx. Cumplimiento"></td>
+                        <td data-label="Restante"></td>
+                        <td data-label="Vigencia"></td>
+                    `;
+                    tableBody.appendChild(row);
+                    updateRowUI(row);
+                });
+            }
+        }
+        
+        function updateRowUI(row) {
+             const inspectionId = row.dataset.id;
+             const definition = allInspectionDefinitions.find(d => d.id === inspectionId);
+             if (!definition) return;
+
+             const lastHours = row.querySelector('.hours-input').value;
+             const lastDate = row.querySelector('.date-input').value;
+             const { nextDueDate, nextDueHrs, remaining, status } = calculateStatus(lastDate, lastHours, definition.freq, definition.base);
+
+             row.cells[5].innerHTML = `<span>${nextDueHrs}</span><br><span>${nextDueDate}</span>`;
+             row.cells[6].textContent = remaining;
+             row.cells[7].textContent = status;
+             row.cells[7].className = status === 'VIGENTE' ? 'status-vigente' : 'status-vencida';
+        }
+
+
+        function calculateStatus(lastDateStr, lastHoursStr, freq, base) {
+            let nextDueDate = '---', nextDueHrs = '---', remaining = '---', status = 'VIGENTE';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (!base || base.toLowerCase().includes('condition') || base.toLowerCase().includes('preflight') || base.toLowerCase().includes('after')) {
+                return { nextDueDate: 'N/A', nextDueHrs: 'N/A', remaining: 'N/A', status: 'VIGENTE' };
+            }
+
+            const freqs = String(freq).split('/').map(f => parseFloat(f.trim()));
+            const bases = String(base).split('/').map(b => b.trim().toLowerCase());
+            
+            let remainingDays = Infinity, remainingHours = Infinity;
+            let finalNextDate = null, finalNextHours = Infinity;
+
+            const lastHours = parseFloat(lastHoursStr);
+            const lastDate = lastDateStr ? new Date(lastDateStr + 'T12:00:00') : null;
+
+            bases.forEach((b, index) => {
+                const f = freqs[index];
+                if (b.includes('hour') && !isNaN(lastHours) && !isNaN(f)) {
+                    if ((lastHours + f) < finalNextHours) finalNextHours = lastHours + f;
+                }
+                if (lastDate && (b.includes('day') || b.includes('month') || b.includes('year') || b.includes('día') || b.includes('mes') || b.includes('año'))) {
+                    const nextDate = new Date(lastDate);
+                    if (b.includes('day') || b.includes('día')) nextDate.setDate(nextDate.getDate() + f);
+                    else if (b.includes('month') || b.includes('mes')) nextDate.setMonth(nextDate.getMonth() + f);
+                    else if (b.includes('year') || b.includes('año')) nextDate.setFullYear(nextDate.getFullYear() + f);
+                    if (!finalNextDate || nextDate < finalNextDate) finalNextDate = nextDate;
+                }
+            });
+            
+            if (finalNextHours !== Infinity) {
+                nextDueHrs = finalNextHours.toFixed(2);
+                remainingHours = finalNextHours - currentAcHrs;
+            }
+            if (finalNextDate) {
+                nextDueDate = finalNextDate.toLocaleDateString('es-ES', { year: '2-digit', month: '2-digit', day: '2-digit' });
+                remainingDays = Math.floor((finalNextDate - today) / (1000 * 60 * 60 * 24));
+            }
+
+            if ((currentAcHrs > 0 && remainingHours <= 0) || remainingDays < 0) status = 'VENCIDA';
+
+            if (remainingDays !== Infinity && remainingHours !== Infinity) remaining = `${remainingHours.toFixed(2)}h / ${remainingDays}d`;
+            else if (remainingHours !== Infinity) remaining = `${remainingHours.toFixed(2)}h`;
+            else if (remainingDays !== Infinity) remaining = `${remainingDays}d`;
+
+            return { nextDueDate, nextDueHrs, remaining, status };
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast-notification');
+            toast.textContent = message;
+            toast.className = type;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        async function handleAutoSave(row, field, value) {
+            const id = row.dataset.id;
+            const dataDocRef = doc(db, `artifacts/${appId}/users/${userId}/inspection_data/all_inspections`);
+            try {
+                 await setDoc(dataDocRef, { [id]: { [field]: value } }, { merge: true });
+                updateRowUI(row);
+                showToast('Cambio guardado');
+            } catch (error) {
+                 console.error("Error en autoguardado:", error);
+                 showToast('Error al guardar', 'error');
+            }
+        }
+        
+        function handleEditRequest() {
+            if (isEditMode) {
+                toggleEditMode();
+            } else {
+                const password = prompt("Ingrese la contraseña para activar el modo de edición:");
+                if (password === "Kevin") {
+                    toggleEditMode();
+                } else if (password !== null) {
+                    showToast("Contraseña incorrecta", "error");
+                }
+            }
+        }
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            document.querySelectorAll('.add-inspection-row').forEach(row => row.remove());
+
+            btnAgregarCategoria.classList.toggle('hidden');
+
+            tableBody.querySelectorAll('tr[data-id]').forEach(row => {
+                const taskNameCell = row.querySelector('.task-name');
+                const refCell = row.querySelector('.ref-cell');
+                const freqCell = row.querySelector('.freq-cell');
+                const deleteCell = row.querySelector('.delete-btn-cell');
+                
+                taskNameCell.setAttribute('contenteditable', isEditMode);
+                refCell.setAttribute('contenteditable', isEditMode);
+                freqCell.setAttribute('contenteditable', isEditMode);
+                
+                if(isEditMode) {
+                    deleteCell.innerHTML = `<button class="btn btn-danger delete-btn"><i class="fas fa-trash-alt"></i></button>`;
+                } else {
+                    deleteCell.innerHTML = '';
+                }
+            });
+
+            if (isEditMode) {
+                tableBody.querySelectorAll('.category-header').forEach(headerRow => {
+                    const category = headerRow.querySelector('td').textContent.trim();
+                    const addRow = document.createElement('tr');
+                    addRow.className = 'add-inspection-row';
+                    addRow.innerHTML = `<td colspan="8"><button class="btn btn-green w-full add-inspection-btn" data-category="${category}">+ Agregar Inspección a ${category}</button></td>`;
+                    headerRow.parentNode.insertBefore(addRow, headerRow.nextSibling);
+                });
+            }
+
+            btnModoEdicion.innerHTML = isEditMode ? '<i class="fas fa-check"></i> Salir Edición' : '<i class="fas fa-edit"></i> Modo Edición (Ctrl+E)';
+            showToast(isEditMode ? 'Modo de edición activado' : 'Modo de edición desactivado', 'info');
+        }
+
+        async function handleDelete(row) {
+            const id = row.dataset.id;
+            if (!id || !confirm('¿Estás seguro de que quieres eliminar esta inspección permanentemente?')) return;
+
+            const defDocRef = doc(db, `artifacts/${appId}/users/${userId}/inspection_definitions`, id);
+            const dataDocRef = doc(db, `artifacts/${appId}/users/${userId}/inspection_data/all_inspections`);
+
+            try {
+                const batch = writeBatch(db);
+                batch.delete(defDocRef);
+                batch.update(dataDocRef, { [id]: deleteField() });
+                await batch.commit();
+                
+                row.remove();
+                showToast('Inspección eliminada');
+            } catch (error) {
+                console.error("Error al eliminar:", error);
+                showToast('Error al eliminar', 'error');
+            }
+        }
+        
+        function getHourFrequency(definition) {
+            const freqs = String(definition.freq).split('/').map(f => parseFloat(f.trim()));
+            const bases = (definition.base || '').split('/').map(b => b.trim().toLowerCase());
+            const hourIndex = bases.findIndex(b => b.includes('hour'));
+            return hourIndex !== -1 ? freqs[hourIndex] : 0;
+        }
+        
+        function parseFrequency(text) {
+            const parts = text.trim().split(/\s+/);
+            const freq = parseFloat(parts[0]) || 0;
+            const base = parts.slice(1).join(' ') || '';
+            return { freq, base };
+        }
+
+        function handleAddNewInspection(button) {
+            const category = button.dataset.category;
+            const newRow = document.createElement('tr');
+            newRow.className = 'new-inspection-row';
+            newRow.innerHTML = `
+                <td><button class="btn btn-green save-new-btn"><i class="fas fa-save"></i></button></td>
+                <td contenteditable="true" class="task-name">Nueva Inspección</td>
+                <td contenteditable="true" class="ref-cell">Referencia</td>
+                <td contenteditable="true" class="freq-cell">100 HORAS</td>
+                <td colspan="4">Complete los datos y guarde</td>
+            `;
+            button.closest('tr').insertAdjacentElement('afterend', newRow);
+            newRow.querySelector('.task-name').focus();
+            button.disabled = true;
+        }
+
+        async function saveNewInspection(button) {
+            const row = button.closest('tr');
+            const name = row.cells[1].textContent.trim();
+            const ref = row.cells[2].textContent.trim();
+            const freqText = row.cells[3].textContent.trim();
+            const category = row.previousElementSibling.querySelector('.add-inspection-btn').dataset.category;
+
+            if (!name || !ref || !freqText) {
+                showToast("Por favor complete todos los campos.", "error");
+                return;
+            }
+
+            const { freq, base } = parseFrequency(freqText);
+            const newInspectionData = { name, ref, freq, base, category };
+
+            try {
+                const defsRef = collection(db, `artifacts/${appId}/users/${userId}/inspection_definitions`);
+                await addDoc(defsRef, newInspectionData);
+                showToast("Inspección agregada con éxito");
+                await initialize(); // Recarga toda la tabla para consistencia
+            } catch (error) {
+                console.error("Error al guardar nueva inspección:", error);
+                showToast("Error al guardar.", "error");
+            }
+        }
+
+        // --- Modals Logic ---
+        function openHoursAssistant(row) {
+            activeRowForModal = row;
+            const id = row.dataset.id;
+            const definition = allInspectionDefinitions.find(d => d.id === id);
+            if (!definition) return;
+            
+            document.getElementById('modal-title-hours').textContent = `${definition.name} (${definition.freq} ${definition.base})`;
+            document.getElementById('modal-current-hrs').textContent = currentAcHrs.toFixed(2);
+            document.getElementById('input-next-due-hrs').value = '';
+            document.getElementById('input-past-hrs').value = '';
+
+            hoursModal.classList.remove('hidden');
+        }
+
+        function openDateAssistant(row) {
+            activeRowForModal = row;
+            const id = row.dataset.id;
+            const definition = allInspectionDefinitions.find(d => d.id === id);
+            if (!definition) return;
+
+            document.getElementById('modal-title-date').textContent = `${definition.name} (${definition.freq} ${definition.base})`;
+            document.getElementById('input-next-due-date').value = '';
+            document.getElementById('input-past-date').value = '';
+
+            dateModal.classList.remove('hidden');
+        }
+        
+        function closeHoursAssistant() { hoursModal.classList.add('hidden'); activeRowForModal = null; }
+        function closeDateAssistant() { dateModal.classList.add('hidden'); activeRowForModal = null; }
+
+        function updateHoursAndSave(newHours) {
+            if (activeRowForModal && !isNaN(newHours)) {
+                activeRowForModal.querySelector('.hours-input').value = newHours.toFixed(2);
+                handleAutoSave(activeRowForModal, 'lastHours', newHours.toFixed(2));
+            }
+            closeHoursAssistant();
+        }
+        
+        function updateDateAndSave(newDate) {
+            if (activeRowForModal && newDate) {
+                const dateString = newDate.toISOString().split('T')[0];
+                activeRowForModal.querySelector('.date-input').value = dateString;
+                handleAutoSave(activeRowForModal, 'lastDate', dateString);
+            }
+            closeDateAssistant();
+        }
+
+        function updateAndSaveCycle() {
+            if (!activeRowForModal) return;
+            const id = activeRowForModal.dataset.id;
+            const definition = allInspectionDefinitions.find(d => d.id === id);
+            if (!definition) return;
+
+            activeRowForModal.querySelector('.hours-input').value = currentAcHrs.toFixed(2);
+            handleAutoSave(activeRowForModal, 'lastHours', currentAcHrs.toFixed(2));
+
+            const base = (definition.base || '').toLowerCase();
+            if (base.includes('day') || base.includes('month') || base.includes('year')) {
+                const today = new Date().toISOString().split('T')[0];
+                activeRowForModal.querySelector('.date-input').value = today;
+                handleAutoSave(activeRowForModal, 'lastDate', today);
+            }
+            closeHoursAssistant();
+        }
+        
+        function getDateFrequency(definition) {
+            const freqs = String(definition.freq).split('/').map(f => parseFloat(f.trim()));
+            const bases = (definition.base || '').split('/').map(b => b.trim().toLowerCase());
+            const dateIndex = bases.findIndex(b => b.includes('day') || b.includes('month') || b.includes('year') || b.includes('día') || b.includes('mes') || b.includes('año'));
+            if (dateIndex === -1) return null;
+            return { freq: freqs[dateIndex], base: bases[dateIndex] };
+        }
+
+        function calculatePastDate(baseDate, amount, unit, factor = 1) {
+            const newDate = new Date(baseDate);
+            amount = amount * factor;
+            if (unit.includes('day')|| unit.includes('día')) newDate.setDate(newDate.getDate() - amount);
+            else if (unit.includes('month') || unit.includes('mes')) newDate.setMonth(newDate.getMonth() - amount);
+            else if (unit.includes('year') || unit.includes('año')) newDate.setFullYear(newDate.getFullYear() - amount);
+            return newDate;
+        }
+
+        // --- EVENT LISTENERS ---
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key.toLowerCase() === 'e') { e.preventDefault(); handleEditRequest(); }
+        });
+        
+        btnModoEdicion.addEventListener('click', handleEditRequest);
+        
+        btnAgregarCategoria.addEventListener('click', async () => {
+            const categoryName = prompt("Ingrese el nombre de la nueva categoría:");
+            if (categoryName && categoryName.trim() !== '') {
+                const newInspectionData = {
+                    name: "Nueva Inspección en esta categoría",
+                    ref: "N/A",
+                    freq: 0,
+                    base: "N/A",
+                    category: categoryName.trim().toUpperCase()
+                };
+
+                try {
+                    const defsRef = collection(db, `artifacts/${appId}/users/${userId}/inspection_definitions`);
+                    await addDoc(defsRef, newInspectionData);
+                    showToast("Nueva categoría y primera inspección agregadas.");
+                    await initialize(); 
+                } catch (error) {
+                    console.error("Error al agregar nueva categoría:", error);
+                    showToast("Error al guardar la categoría.", "error");
+                }
+            }
+        });
+
+        tableBody.addEventListener('blur', async (e) => {
+            if (isEditMode && e.target.matches('[contenteditable="true"]')) {
+                const row = e.target.closest('tr');
+                if (!row.dataset.id) return;
+                const id = row.dataset.id;
+                const defDocRef = doc(db, `artifacts/${appId}/users/${userId}/inspection_definitions`, id);
+                let updateData = {};
+                if (e.target.classList.contains('task-name')) updateData.name = e.target.textContent;
+                else if (e.target.classList.contains('ref-cell')) updateData.ref = e.target.textContent;
+                else if (e.target.classList.contains('freq-cell')) Object.assign(updateData, parseFrequency(e.target.textContent));
+                if (Object.keys(updateData).length > 0) {
+                     try {
+                        await updateDoc(defDocRef, updateData);
+                        const defIndex = allInspectionDefinitions.findIndex(d => d.id === id);
+                        if(defIndex > -1) allInspectionDefinitions[defIndex] = {...allInspectionDefinitions[defIndex], ...updateData};
+                        updateRowUI(row);
+                        showToast('Cambio guardado');
+                    } catch (error) { console.error("Error al actualizar:", error); showToast('Error al actualizar', 'error'); }
+                }
+            }
+        }, true);
+
+        tableBody.addEventListener('click', (e) => {
+            const row = e.target.closest('tr');
+            if (!row || !row.dataset.id) { 
+                if (e.target.closest('.add-inspection-btn')) handleAddNewInspection(e.target.closest('.add-inspection-btn'));
+                else if (e.target.closest('.save-new-btn')) saveNewInspection(e.target.closest('.save-new-btn'));
+                return;
+            }
+            if (e.target.closest('.delete-btn')) {
+                 handleDelete(row);
+            } else if (e.target.classList.contains('hours-input')) {
+                 openHoursAssistant(row);
+            } else if (e.target.classList.contains('date-input')) {
+                const id = row.dataset.id;
+                const def = allInspectionDefinitions.find(d => d.id === id);
+                if (def) {
+                    const base = (def.base || '').toLowerCase();
+                    const isDateBased = ['day', 'día', 'month', 'mes', 'year', 'año'].some(term => base.includes(term));
+                    if (isDateBased) {
+                        openDateAssistant(row);
+                    }
+                }
+            }
+        });
+
+        // Hours Modal Listeners
+        document.getElementById('btn-close-modal-hrs').addEventListener('click', closeHoursAssistant);
+        document.getElementById('btn-reiniciar-ciclo').addEventListener('click', updateAndSaveCycle);
+        document.getElementById('btn-opcion-a-hrs').addEventListener('click', () => { const def = allInspectionDefinitions.find(d => d.id === activeRowForModal.dataset.id); updateHoursAndSave(currentAcHrs - getHourFrequency(def)); });
+        document.getElementById('btn-opcion-b-hrs').addEventListener('click', () => { const def = allInspectionDefinitions.find(d => d.id === activeRowForModal.dataset.id); updateHoursAndSave(currentAcHrs - (getHourFrequency(def) / 2)); });
+        document.getElementById('btn-opcion-c-hrs').addEventListener('click', () => { const nextDue = parseFloat(document.getElementById('input-next-due-hrs').value); if(isNaN(nextDue)) return; const def = allInspectionDefinitions.find(d => d.id === activeRowForModal.dataset.id); updateHoursAndSave(nextDue - getHourFrequency(def)); });
+        document.getElementById('btn-opcion-d-hrs').addEventListener('click', () => { const past = parseFloat(document.getElementById('input-past-hrs').value); if(!isNaN(past)) updateHoursAndSave(past); });
+
+        // Date Modal Listeners
+        document.getElementById('btn-close-modal-date').addEventListener('click', closeDateAssistant);
+        document.getElementById('btn-date-reiniciar-ciclo').addEventListener('click', () => updateDateAndSave(new Date()));
+        document.getElementById('btn-opcion-a-date').addEventListener('click', () => { const def = allInspectionDefinitions.find(d => d.id === activeRowForModal.dataset.id); const freq = getDateFrequency(def); if(!freq) return; updateDateAndSave(calculatePastDate(new Date(), freq.freq, freq.base)); });
+        document.getElementById('btn-opcion-b-date').addEventListener('click', () => { const def = allInspectionDefinitions.find(d => d.id === activeRowForModal.dataset.id); const freq = getDateFrequency(def); if(!freq) return; updateDateAndSave(calculatePastDate(new Date(), freq.freq, freq.base, 0.5)); });
+        document.getElementById('btn-opcion-c-date').addEventListener('click', () => { const nextDueStr = document.getElementById('input-next-due-date').value; if(!nextDueStr) return; const nextDueDate = new Date(nextDueStr + 'T12:00:00'); const def = allInspectionDefinitions.find(d => d.id === activeRowForModal.dataset.id); const freq = getDateFrequency(def); if(!freq) return; updateDateAndSave(calculatePastDate(nextDueDate, freq.freq, freq.base)); });
+        document.getElementById('btn-opcion-d-date').addEventListener('click', () => { const pastStr = document.getElementById('input-past-date').value; if(pastStr) updateDateAndSave(new Date(pastStr + 'T12:00:00')); });
+
+
+        document.getElementById('btnVerVencidas').addEventListener('click', () => {
+             const vencidas = [];
+            tableBody.querySelectorAll('tr[data-id]').forEach(row => {
+                const statusCell = row.cells[7];
+                if (statusCell && statusCell.textContent === 'VENCIDA') {
+                    const inspectionId = row.dataset.id;
+                    const definition = allInspectionDefinitions.find(d => d.id === inspectionId);
+                    if (definition) {
+                        const lastHours = row.querySelector('.hours-input').value;
+                        const lastDate = row.querySelector('.date-input').value;
+                        const category = definition.category;
+                        vencidas.push({ ...definition, lastHours, lastDate, category });
+                    }
+                }
+            });
+
+            if (vencidas.length > 0) {
+                sessionStorage.setItem('vencidas', JSON.stringify(vencidas));
+                sessionStorage.setItem('currentAcHrs', currentAcHrs);
+                window.location.href = 'vencidas.html'; 
+            } else {
+                showToast('No hay inspecciones vencidas para mostrar.', 'info');
+            }
+        });
+
+        document.getElementById('btnPrint').addEventListener('click', () => window.print());
+        document.getElementById('btnRegresar').addEventListener('click', () => window.history.back());
+
+        async function seedDatabaseIfNeeded() {
+            const defsRef = collection(db, `artifacts/${appId}/users/${userId}/inspection_definitions`);
+            const snapshot = await getDocs(defsRef);
+            if (snapshot.empty) {
+                console.log("Base de datos de definiciones vacía.");
+            }
+        }
+
+        main();
+    </script>
+</body>
+</html>
+

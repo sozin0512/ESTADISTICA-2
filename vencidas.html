@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orden de Trabajo: FAH-945</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #e9ecef;
+        }
+        .paper-container {
+            width: 100%;
+            max-width: 8.5in; /* Tamaño carta */
+            min-height: 11in;
+            margin: 2rem auto;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.25rem;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        table, th, td {
+            border: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .editable-cell { cursor: text; }
+        .editable-cell:hover { background-color: #f0f8ff; }
+        .editable-cell:focus {
+            background-color: white;
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+        }
+        .editable-field {
+             cursor: text;
+             display: block;
+             width: 100%;
+             height: 100%;
+             padding: 0.25rem 0.5rem;
+        }
+        .editable-field:focus {
+            background-color: #e7f1ff;
+            outline: 2px solid #3b82f6;
+            outline-offset: -2px;
+        }
+
+        #signature-canvas {
+            width: 400px;
+            height: 200px;
+            cursor: crosshair;
+        }
+        .signature-cell img, .footer-signature-area img {
+            max-height: 40px;
+            display: block;
+            margin: 0 auto;
+        }
+        .signature-cell p, .footer-signature-area p {
+            line-height: 1;
+        }
+        .signature-line {
+            border-top: 1px solid #495057;
+            margin-top: 0.5rem;
+        }
+
+        @media print {
+            body {
+                background: none;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .paper-container {
+                box-shadow: none;
+                margin: 0;
+                padding: 1.5rem;
+                max-width: 100%;
+                border: 1px solid #dee2e6;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .editable-cell, .editable-field {
+                background-color: white !important;
+                outline: none !important;
+                padding: 2px 0;
+                box-shadow: none;
+            }
+            .print-table-style {
+                border: 1px solid #4a5568 !important;
+                background-color: #1a202c !important; /* Tailwind blue-900 */
+                color: white !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="paper-container flex flex-col">
+        <header class="mb-8">
+            <div class="flex justify-between items-center border-b-2 border-gray-700 pb-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">TRABAJOS A EFECTUARSE</h1>
+                    <p class="text-gray-600">Mantenimiento Correctivo y Preventivo</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold">Aeronave: <span class="font-normal">BELL UH-1H / FAH-945</span></p>
+                    <p class="font-bold">Fecha: <span class="font-normal" id="current-date"></span></p>
+                </div>
+            </div>
+        </header>
+
+        <section id="work-order-details" class="mb-8">
+            <div class="text-center mb-1">
+                <div class="bg-yellow-300 p-2 font-bold text-black border border-b-0 border-gray-700">
+                    <p>ESCN. HELICÓPTEROS / FUERZA AÉREA HONDUREÑA</p>
+                </div>
+                <div class="bg-white p-2 font-bold text-black border border-gray-700">
+                    <p>BASE HAM</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-4 border-t border-l border-gray-700 text-sm">
+                <!-- Row 1 -->
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">FECHA INICIO</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="fecha-inicio" class="editable-field" contenteditable="true"></span></div>
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">FECHA FINALIZACIÓN</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="fecha-finalizacion" class="editable-field" contenteditable="true"></span></div>
+                <!-- Row 2 -->
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">MODELO</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="modelo" class="editable-field" contenteditable="true">BELL UH-1H</span></div>
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 1 TSN/TSO</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="eng1-sn-tsn-tso" class="editable-field" contenteditable="true"></span></div>
+                <!-- Row 3 -->
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">NÚMERO DE SERIE</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="numero-serie" class="editable-field" contenteditable="true"></span></div>
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 1  CSN/CSO</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="eng1-sn-csn-cso" class="editable-field" contenteditable="true"></span></div>
+                <!-- Row 4 -->
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">MATRÍCULA</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="matricula" class="editable-field" contenteditable="true">FAH-945</span></div>
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 2  TSN/TSO</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="eng2-sn-tsn-tso" class="editable-field" contenteditable="true"></span></div>
+                <!-- Row 5 -->
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">A/C TT</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="ac-tt" class="editable-field" contenteditable="false"></span></div>
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 2  CSN/CSO</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="eng2-sn-csn-cso" class="editable-field" contenteditable="true"></span></div>
+                <!-- Row 6 -->
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">TQ EVENTS</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="tq-events" class="editable-field" contenteditable="true"></span></div>
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">C-BOX TSN/TSO</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="cbox-sn-tsn-tso" class="editable-field" contenteditable="true"></span></div>
+                <!-- Row 7 -->
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">LANDINGS</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="landings" class="editable-field" contenteditable="true"></span></div>
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">S/N C-BOX </div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="cbox-sn-csn-cs" class="editable-field" contenteditable="true"></span></div>
+                <!-- Row 8 -->
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ELABORADO POR</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="elaborado-por" class="editable-field" contenteditable="true"></span></div>
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ORDEN DE TRABAJO No.</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="orden-trabajo-no" class="editable-field" contenteditable="true"></span></div>
+                <!-- Row 9 -->
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">N/S MOTOR #1</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="ns-motor-1" class="editable-field" contenteditable="true"></span></div>
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">N/S MOTOR #2</div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="ns-motor-2" class="editable-field" contenteditable="true"></span></div>
+            </div>
+        </section>
+
+        <main class="flex-grow">
+            <h2 class="text-xl font-semibold text-center mb-4 text-red-700">Listado de Inspecciones Vencidas</h2>
+            
+            <div id="loading-message" class="text-center text-gray-500 my-8">Cargando lista de trabajos...</div>
+            
+            <table class="w-full text-sm text-left text-gray-600">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                    <tr>
+                        <th scope="col" class="px-4 py-3 w-10 text-center">#</th>
+                        <th scope="col" class="px-4 py-3">Descripción del Trabajo / Inspección</th>
+                        <th scope="col" class="px-4 py-3 w-40">Referencia</th>
+                        <th scope="col" class="px-4 py-3 w-32">Mecánico</th>
+                        <th scope="col" class="px-4 py-3 w-32">ACCION TOMADA</th>
+                    </tr>
+                </thead>
+                <tbody id="vencidas-list">
+                </tbody>
+            </table>
+            
+            <div class="mt-8 no-print">
+                <h3 class="text-lg font-semibold text-center text-gray-700">Progreso de Tareas</h3>
+                <div class="w-full bg-gray-200 rounded-full h-6 mt-2 shadow-inner">
+                    <div id="progress-bar" class="bg-blue-600 h-6 rounded-full text-center text-white text-sm leading-6 transition-all duration-500" style="width: 0%;">
+                        <span id="progress-text">0%</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mt-16">
+            <div class="grid grid-cols-2 gap-12">
+                <div class="text-center">
+                    <div class="footer-signature-area cursor-pointer min-h-[70px] flex flex-col justify-end items-center" data-title="Supervisor">
+                        <p class="text-gray-500 text-sm no-print">(Haga clic para firmar)</p>
+                    </div>
+                    <div class="signature-line"></div>
+                    <p class="mt-2 font-semibold">Supervisor</p>
+                    <p class="text-xs text-gray-500">(Nombre y Licencia)</p>
+                </div>
+                <div class="text-center">
+                    <div class="footer-signature-area cursor-pointer min-h-[70px] flex flex-col justify-end items-center" data-title="Inspector">
+                         <p class="text-gray-500 text-sm no-print">(Haga clic para firmar)</p>
+                    </div>
+                    <div class="signature-line"></div>
+                    <p class="mt-2 font-semibold">Inspector</p>
+                    <p class="text-xs text-gray-500">(Nombre y Licencia)</p>
+                </div>
+            </div>
+        </footer>
+        
+        <div class="flex justify-center mt-12 gap-4 no-print">
+             <button onclick="window.history.back()" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-5 rounded-lg transition-colors">
+                Regresar al Control
+            </button>
+            <button id="report-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
+                Generar Reporte
+            </button>
+            <button id="archive-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
+                Limpiar Orden
+            </button>
+            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
+                Imprimir / Guardar PDF
+            </button>
+        </div>
+    </div>
+
+    <div id="signature-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
+        <div class="bg-white rounded-lg shadow-2xl">
+            <div class="p-4 border-b">
+                <h3 id="signature-modal-title" class="text-lg font-bold text-gray-800">Firme en el recuadro</h3>
+            </div>
+            <div class="p-2">
+                <canvas id="signature-canvas" class="border border-gray-300"></canvas>
+            </div>
+            <div class="p-4 border-t">
+                <label for="signature-name" class="block text-sm font-medium text-gray-700">Nombre</label>
+                <input type="text" id="signature-name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Escriba su nombre y licencia">
+            </div>
+            <div class="flex justify-end gap-2 p-4 bg-gray-50">
+                <button id="signature-clear" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Borrar</button>
+                <button id="signature-cancel" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg">Cancelar</button>
+                <button id="signature-save" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg">Guardar Firma</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Password Modal for Deletion -->
+    <div id="password-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm">
+            <div class="p-4 border-b">
+                <h3 class="text-lg font-bold text-gray-800">Confirmar Eliminación</h3>
+            </div>
+            <div class="p-4">
+                <label for="password-input" class="block text-sm font-medium text-gray-700">Para borrar la firma, ingrese la clave:</label>
+                <input type="password" id="password-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                <p id="password-error" class="text-red-500 text-sm mt-2 h-4"></p>
+            </div>
+            <div class="flex justify-end gap-2 p-4 bg-gray-50">
+                <button id="password-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
+                <button id="password-confirm" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm">
+            <div class="p-6 text-center">
+                <svg class="mx-auto mb-4 h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <h3 id="confirm-modal-title" class="mb-5 text-lg font-normal text-gray-500">¿Desea continuar?</h3>
+                <button id="confirm-modal-ok" type="button" class="text-white bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                    Sí
+                </button>
+                <button id="confirm-modal-cancel" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- ELEMENT REFERENCES ---
+        const paperContainer = document.querySelector('.paper-container');
+        const expiredListTableBody = document.getElementById('vencidas-list');
+        const loadingMessage = document.getElementById('loading-message');
+        
+        // Modals
+        const signatureModal = document.getElementById('signature-modal');
+        const passwordModal = document.getElementById('password-modal');
+        const confirmModal = document.getElementById('confirm-modal');
+        
+        // Signature Pad
+        const signatureCanvas = document.getElementById('signature-canvas');
+        const signatureNameInput = document.getElementById('signature-name');
+        const signatureClearBtn = document.getElementById('signature-clear');
+        const signatureCancelBtn = document.getElementById('signature-cancel');
+        const signatureSaveBtn = document.getElementById('signature-save');
+        let signaturePad;
+        let activeSignatureCell = null;
+
+        // Password Modal
+        const passwordInput = document.getElementById('password-input');
+        const passwordError = document.getElementById('password-error');
+        const passwordCancelBtn = document.getElementById('password-cancel');
+        const passwordConfirmBtn = document.getElementById('password-confirm');
+        let signatureToDeleteIndex = null;
+        
+        // Confirmation Modal
+        const confirmModalTitle = document.getElementById('confirm-modal-title');
+        const confirmModalOkBtn = document.getElementById('confirm-modal-ok');
+        const confirmModalCancelBtn = document.getElementById('confirm-modal-cancel');
+        let confirmAction = () => {};
+
+        // App State
+        let workOrderData = []; // Holds the inspection data for the session
+        let currentAcHrs = 0;
+
+        // --- INITIALIZATION ---
+        function initializeApp() {
+            // Set dates
+            const currentDateStr = new Date().toLocaleString('es-HN');
+            document.getElementById('current-date').textContent = currentDateStr;
+            document.getElementById('fecha-inicio').textContent = currentDateStr;
+
+            // Load data from Session Storage
+            currentAcHrs = parseFloat(sessionStorage.getItem('currentAcHrs')) || 0;
+            const vencidasJSON = sessionStorage.getItem('vencidas');
+            workOrderData = vencidasJSON ? JSON.parse(vencidasJSON) : [];
+            
+            // Add original index for tracking changes
+            workOrderData.forEach((item, index) => item.originalIndex = index);
+
+            document.getElementById('ac-tt').textContent = currentAcHrs > 0 ? currentAcHrs.toFixed(2) : "N/A";
+            
+            loadingMessage.classList.add('hidden');
+            renderExpiredInspections();
+        }
+
+        // --- CORE LOGIC ---
+        function calculateStatus(lastDateStr, lastHoursStr, freq, base) {
+            let nextDueDate = '---', nextDueHrs = '---', remaining = '---';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (base.toLowerCase().includes('condition') || base.toLowerCase().includes('preflight') || base.toLowerCase().includes('after')) {
+                return { nextDueDate: 'N/A', nextDueHrs: 'N/A', remaining: 'N/A' };
+            }
+            
+            const freqs = String(freq).split('/').map(f => parseFloat(f.trim()));
+            const bases = String(base).split('/').map(b => b.trim().toLowerCase());
+            
+            let finalNextDate = null;
+            let finalNextHours = Infinity;
+
+            const lastHours = parseFloat(lastHoursStr);
+            const lastDate = lastDateStr ? new Date(lastDateStr + 'T12:00:00') : null;
+
+            bases.forEach((b, index) => {
+                const f = freqs[index];
+                if (b.includes('hour') && !isNaN(lastHours) && !isNaN(f)) {
+                    const dueHrs = lastHours + f;
+                    if (dueHrs < finalNextHours) finalNextHours = dueHrs;
+                }
+                if (lastDate) {
+                    const nextDate = new Date(lastDate);
+                    if (b.includes('day')) nextDate.setDate(nextDate.getDate() + f);
+                    else if (b.includes('month')) nextDate.setMonth(nextDate.getMonth() + f);
+                    else if (b.includes('year')) nextDate.setFullYear(nextDate.getFullYear() + f);
+                    
+                    if (!finalNextDate || nextDate < finalNextDate) {
+                        finalNextDate = nextDate;
+                    }
+                }
+            });
+            
+            if (finalNextHours !== Infinity) {
+                nextDueHrs = finalNextHours.toFixed(2);
+            }
+            if (finalNextDate) {
+                nextDueDate = finalNextDate.toLocaleDateString('es-ES', { year: '2-digit', month: '2-digit', day: '2-digit' });
+            }
+
+            return { nextDueDate, nextDueHrs };
+        }
+        
+        // --- RENDERING ---
+        function renderExpiredInspections() {
+            expiredListTableBody.innerHTML = '';
+            let signedCount = 0;
+            
+            if (!workOrderData || workOrderData.length === 0) {
+                expiredListTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-500">No hay inspecciones vencidas.</td></tr>`;
+                updateProgressBar(0, 0);
+                return;
+            }
+            
+            const groupedByCategory = workOrderData.reduce((acc, item) => {
+                const category = item.category || 'Inspecciones Generales';
+                if (!acc[category]) acc[category] = [];
+                acc[category].push(item);
+                return acc;
+            }, {});
+            
+            let itemCounter = 1;
+
+            for (const category in groupedByCategory) {
+                const themeRow = document.createElement('tr');
+                themeRow.className = 'bg-blue-100';
+                themeRow.innerHTML = `<th colspan="5" class="px-4 py-2 text-left text-sm font-bold text-blue-800">${category.toUpperCase()}</th>`;
+                expiredListTableBody.appendChild(themeRow);
+
+                groupedByCategory[category].forEach((item) => {
+                    if (item.signature && item.signature.signatureDataUrl) {
+                        signedCount++;
+                    }
+                    const { nextDueDate, nextDueHrs } = calculateStatus(item.lastDate, item.lastHours, item.freq, item.base);
+                    
+                    const row = document.createElement('tr');
+                    row.className = 'bg-white border-b hover:bg-red-50';
+                    
+                    const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(item.ref)}`;
+
+                    let signatureContent = '';
+                    if (item.signature && item.signature.signatureDataUrl) {
+                        signatureContent = `<img src="${item.signature.signatureDataUrl}" alt="Firma" /><p class="text-xs mt-1 font-semibold">${item.signature.signatureName || ''}</p>`;
+                    }
+                    
+                    const accionTomadaContent = item.accionTomada || '';
+
+                    row.innerHTML = `
+                        <td class="px-4 py-3 text-center font-medium text-gray-900">${itemCounter++}</td>
+                        <td class="px-4 py-3 font-medium text-gray-900">
+                            ${item.name}
+                            <p class="text-xs text-red-600 font-semibold">(Próx. Cumplimiento: ${nextDueHrs}h / ${nextDueDate})</p>
+                        </td>
+                        <td class="px-4 py-3">
+                            <a href="${googleSearchUrl}" target="_blank" class="text-blue-600 hover:underline" title="Buscar referencia en Google">${item.ref}</a>
+                        </td>
+                        <td class="px-4 py-3 editable-cell signature-cell text-center align-middle" data-index="${item.originalIndex}">${signatureContent}</td>
+                        <td class="px-4 py-3 editable-cell accion-tomada-cell" contenteditable="true" data-index="${item.originalIndex}">${accionTomadaContent}</td>
+                    `;
+                    expiredListTableBody.appendChild(row);
+                });
+            }
+            updateProgressBar(signedCount, workOrderData.length);
+        }
+
+        function updateProgressBar(signed, total) {
+            const percentage = total > 0 ? Math.round((signed / total) * 100) : 0;
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+
+            if (progressBar && progressText) {
+                progressBar.style.width = `${percentage}%`;
+                progressText.textContent = `${percentage}%`;
+                progressBar.classList.toggle('bg-green-600', percentage === 100);
+                progressBar.classList.toggle('bg-blue-600', percentage < 100);
+            }
+        }
+
+        // --- EVENT HANDLERS & ACTIONS ---
+        
+        // Save "Accion Tomada" on blur
+        expiredListTableBody.addEventListener('blur', (e) => {
+            if (e.target && e.target.classList.contains('accion-tomada-cell')) {
+                const index = parseInt(e.target.dataset.index, 10);
+                const text = e.target.textContent.trim();
+                const item = workOrderData.find(d => d.originalIndex === index);
+                if (item) {
+                    item.accionTomada = text;
+                    console.log(`Accion Tomada for item ${index} updated in memory.`);
+                }
+            }
+        }, true);
+        
+        // Signature Handling
+        function openSignatureModal(cell) {
+            activeSignatureCell = cell;
+            const modalTitle = document.getElementById('signature-modal-title');
+            const nameLabel = document.querySelector('#signature-modal label[for="signature-name"]');
+            const title = cell.dataset.title;
+
+            if (title === 'Inspector' || title === 'Supervisor') {
+                modalTitle.textContent = `Firma del ${title}`;
+                nameLabel.textContent = `Nombre del ${title}`;
+            } else {
+                modalTitle.textContent = 'Firma del Mecánico';
+                nameLabel.textContent = 'Nombre del Mecánico';
+            }
+
+            signatureModal.classList.remove('hidden');
+            signatureNameInput.value = '';
+            const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+            signatureCanvas.width = signatureCanvas.offsetWidth * ratio;
+            signatureCanvas.height = signatureCanvas.offsetHeight * ratio;
+            signatureCanvas.getContext("2d").scale(ratio, ratio);
+            signaturePad = new SignaturePad(signatureCanvas, { backgroundColor: 'rgb(255, 255, 255)' });
+        }
+
+        function closeSignatureModal() {
+            signatureModal.classList.add('hidden');
+            if(signaturePad) signaturePad.clear();
+            activeSignatureCell = null;
+        }
+        
+        paperContainer.addEventListener('click', (e) => {
+            const signatureTarget = e.target.closest('.signature-cell, .footer-signature-area');
+            if (signatureTarget) {
+                if (signatureTarget.querySelector('img')) {
+                    signatureToDeleteIndex = signatureTarget.dataset.index;
+                    passwordModal.classList.remove('hidden');
+                    passwordInput.focus();
+                } else {
+                    openSignatureModal(signatureTarget);
+                }
+            }
+        });
+        
+        signatureClearBtn.addEventListener('click', () => signaturePad.clear());
+        signatureCancelBtn.addEventListener('click', closeSignatureModal);
+        
+        signatureSaveBtn.addEventListener('click', () => {
+            const name = signatureNameInput.value.trim();
+            if (signaturePad.isEmpty() || !name) {
+                alert("Por favor, dibuje su firma y escriba su nombre.");
+                return;
+            }
+            
+            const dataURL = signaturePad.toDataURL('image/png');
+            const index = parseInt(activeSignatureCell.dataset.index, 10);
+            const item = workOrderData.find(d => d.originalIndex === index);
+
+            if (item) { // Save to in-memory data for table rows
+                item.signature = { signatureDataUrl: dataURL, signatureName: name };
+                renderExpiredInspections(); // Re-render to show signature
+            } else { // Handle footer signatures (UI only)
+                 activeSignatureCell.innerHTML = `<img src="${dataURL}" alt="Firma"><p class="text-xs mt-1 font-semibold">${name}</p>`;
+            }
+            closeSignatureModal();
+        });
+
+        // Password Modal for deleting signatures
+        passwordCancelBtn.addEventListener('click', () => passwordModal.classList.add('hidden'));
+        passwordConfirmBtn.addEventListener('click', () => {
+            if (passwordInput.value === "Kevin") {
+                if (signatureToDeleteIndex !== null) {
+                    const index = parseInt(signatureToDeleteIndex, 10);
+                    const item = workOrderData.find(d => d.originalIndex === index);
+                    if (item) {
+                       delete item.signature;
+                       renderExpiredInspections();
+                    }
+                    passwordModal.classList.add('hidden');
+                    signatureToDeleteIndex = null;
+                }
+            } else {
+                passwordError.textContent = "Clave incorrecta.";
+                setTimeout(() => passwordError.textContent = '', 3000);
+            }
+        });
+
+        // General Confirmation Modal
+        confirmModalCancelBtn.addEventListener('click', () => confirmModal.classList.add('hidden'));
+        confirmModalOkBtn.addEventListener('click', () => {
+            confirmAction();
+            confirmModal.classList.add('hidden');
+        });
+
+        // Archive Button
+        document.getElementById('archive-btn').addEventListener('click', () => {
+            confirmModalTitle.textContent = '¿Seguro que desea limpiar la orden? Esto borrará los datos de la sesión actual.';
+            confirmAction = () => {
+                sessionStorage.removeItem('vencidas');
+                sessionStorage.removeItem('currentAcHrs');
+                workOrderData = [];
+                renderExpiredInspections();
+                alert("Orden de trabajo limpiada.");
+            };
+            confirmModal.classList.remove('hidden');
+        });
+        
+        // Report Generation
+        document.getElementById('report-btn').addEventListener('click', () => {
+            if (!workOrderData || workOrderData.length === 0) {
+                alert("No hay inspecciones para generar un reporte.");
+                return;
+            }
+            generateDiscrepancyReport(workOrderData);
+        });
+
+        function generateDiscrepancyReport(inspections) {
+            const matricula = document.getElementById('matricula').textContent || 'FAH-945';
+            const fecha = new Date().toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: '2-digit' }).replace('.', '').toUpperCase();
+
+            const groupedByCategory = inspections.reduce((acc, item) => {
+                const category = item.category || 'Inspecciones Generales';
+                if (!acc[category]) acc[category] = [];
+                acc[category].push(item);
+                return acc;
+            }, {});
+
+            let discrepancyRows = '';
+            let correctiveRows = '';
+            let themeCounter = 1;
+
+            for (const category in groupedByCategory) {
+                let itemCounter = 1;
+                discrepancyRows += `<tr><td class="num">${themeCounter}.</td><td><strong>${category.toUpperCase()}</strong></td></tr>`;
+                correctiveRows += `<tr><td class="num">${themeCounter}.</td><td colspan="2"><strong>${category.toUpperCase()}</strong></td></tr>`;
+                
+                groupedByCategory[category].forEach(item => {
+                    discrepancyRows += `<tr><td class="num">${themeCounter}.${itemCounter}</td><td>Efectuar ${item.name} / ${item.ref}</td></tr>`;
+                    
+                    const signatureCell = (item.signature && item.signature.signatureDataUrl)
+                        ? `<td class="mechanic-sig"><img src="${item.signature.signatureDataUrl}" alt="Firma"><p>${item.signature.signatureName || ''}</p></td>`
+                        : '<td></td>';
+                    
+                    correctiveRows += `<tr><td class="num">${themeCounter}.${itemCounter++}</td><td>Se completó ${item.name} / ${item.ref}. ${item.accionTomada || ''}</td>${signatureCell}</tr>`;
+                });
+                themeCounter++;
+            }
+
+            const reportContent = `
+            <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte - ${matricula}</title>
+            <style>
+                body { font-family: Arial, sans-serif; font-size: 11px; }
+                .report-container { width: 100%; max-width: 8.5in; margin: auto; }
+                .header { text-align: center; } .header h1, .header h2, .header h3 { margin: 1px 0; font-weight: bold; }
+                .header h1 { font-size: 16px; } .header h2 { font-size: 14px; } .header h3 { font-size: 12px; font-weight: normal; }
+                .info-table { width: 100%; margin: 15px 0; border: none; } .info-table td { font-size: 12px; font-weight: bold; }
+                .notification { font-size: 12px; margin-bottom: 10px; }
+                .data-table { width: 100%; border-collapse: collapse; border: 2px solid black; }
+                .data-table th { color: white; text-align: left; padding: 6px; font-size: 14px; border: 2px solid black; }
+                .data-table td { border: 1.5px solid black; padding: 5px; vertical-align: top; }
+                .data-table .num { font-weight: bold; text-align: center; width: 45px; }
+                .discrepancy-table th { background-color: #2E75B5; } .discrepancy-table td { background-color: #FFC000; }
+                .corrective-table { margin-top: 20px; } .corrective-table th { background-color: #00B050; }
+                .corrective-table td { background-color: #E2EFDA; }
+                .corrective-table .mechanic-sig { text-align: center; width: 150px; }
+                .corrective-table .mechanic-sig img { max-height: 30px; display: block; margin: 0 auto 2px; }
+                .corrective-table .mechanic-sig p { font-size: 9px; margin: 0; line-height: 1; }
+                .official-signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 60px; margin-top: 40px; text-align: center; }
+                .official-signatures div { padding-top: 40px; border-top: 1px solid black; }
+                @media print { .no-print { display: none; } }
+            </style></head><body>
+            <div class="report-container">
+                <div class="header"><h1>FUERZAS ARMADAS DE HONDURAS</h1><h2>FUERZA AÉREA HONDUREÑA</h2><h3>Base Aérea "Coronel Hernán Acosta Mejía"</h3><h2>REPORTE DE TRABAJO EFECTUADO</h2></div>
+                <table class="info-table"><tr><td>AVION No. BELL UH-1H ${matricula}</td><td style="text-align: right;">FECHA: ${fecha}</td></tr></table>
+                <p class="notification">El Taller / Sección Helicópteros notifica que el trabajo:</p>
+                <table class="data-table discrepancy-table"><thead><tr><th colspan="2">Discrepancia:</th></tr></thead><tbody>${discrepancyRows}</tbody></table>
+                <table class="data-table corrective-table"><thead><tr><th colspan="2">Acción Correctiva:</th><th>Técnico Especialista</th></tr></thead><tbody>${correctiveRows}</tbody></table>
+                <footer class="signatures-container"><div class="official-signatures"><div><p>SUPERVISOR</p></div><div><p>INSPECTOR</p></div><div><p>JEFE TALLER / SECCION</p></div><div><p>JEFE DE LOGISTICA A-4</p></div></div></footer>
+            </div>
+            <button class="no-print" onclick="window.print()" style="position: fixed; top: 10px; right: 10px; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 5px;">Imprimir</button>
+            </body></html>`;
+            
+            const reportWindow = window.open('', '_blank');
+            reportWindow.document.write(reportContent);
+            reportWindow.document.close();
+        }
+
+        // --- START THE APP ---
+        initializeApp();
+    });
+    </script>
+</body>
+</html>
+
