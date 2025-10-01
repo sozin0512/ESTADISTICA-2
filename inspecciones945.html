@@ -707,6 +707,7 @@
             const category = button.dataset.category;
             const newRow = document.createElement('tr');
             newRow.className = 'new-inspection-row';
+            newRow.dataset.category = category; // Pass category to the new row
             newRow.innerHTML = `
                 <td><button class="btn btn-green save-new-btn"><i class="fas fa-save"></i></button></td>
                 <td contenteditable="true" class="task-name">Nueva Inspección</td>
@@ -724,7 +725,7 @@
             const name = row.cells[1].textContent.trim();
             const ref = row.cells[2].textContent.trim();
             const freqText = row.cells[3].textContent.trim();
-            const category = row.previousElementSibling.querySelector('.add-inspection-btn').dataset.category;
+            const category = row.dataset.category; // Read category directly from the row
 
             if (!name || !ref || !freqText) {
                 showToast("Por favor complete todos los campos.", "error");
