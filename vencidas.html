@@ -192,7 +192,7 @@
         <main class="flex-grow">
             <h2 class="text-xl font-semibold text-center mb-4 text-red-700">Listado de Inspecciones Vencidas</h2>
             
-            <div id="loading-message" class="text-center text-gray-500 my-8">Cargando lista de trabajos...</div>
+            <div id="loading-message" class="text-center text-gray-500 my-8">Conectando a la base de datos...</div>
             
             <!-- Contenedor para hacer la tabla desplazable en móvil -->
             <div class="overflow-x-auto">
@@ -225,7 +225,7 @@
             <!-- Las firmas se apilan en móvil y se ponen en 2 columnas en escritorio -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-12">
                 <div class="text-center">
-                    <div class="footer-signature-area cursor-pointer min-h-[70px] flex flex-col justify-end items-center" data-title="Supervisor">
+                    <div id="supervisor-signature" class="footer-signature-area cursor-pointer min-h-[70px] flex flex-col justify-end items-center" data-title="Supervisor">
                         <p class="text-gray-500 text-sm no-print">(Haga clic para firmar)</p>
                     </div>
                     <div class="signature-line"></div>
@@ -233,7 +233,7 @@
                     <p class="text-xs text-gray-500">(Nombre y Licencia)</p>
                 </div>
                 <div class="text-center">
-                    <div class="footer-signature-area cursor-pointer min-h-[70px] flex flex-col justify-end items-center" data-title="Inspector">
+                    <div id="inspector-signature" class="footer-signature-area cursor-pointer min-h-[70px] flex flex-col justify-end items-center" data-title="Inspector">
                          <p class="text-gray-500 text-sm no-print">(Haga clic para firmar)</p>
                     </div>
                     <div class="signature-line"></div>
@@ -317,400 +317,502 @@
         </div>
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- ELEMENT REFERENCES ---
-        const paperContainer = document.querySelector('.paper-container');
-        const expiredListTableBody = document.getElementById('vencidas-list');
-        const loadingMessage = document.getElementById('loading-message');
-        
-        // Modals
-        const signatureModal = document.getElementById('signature-modal');
-        const passwordModal = document.getElementById('password-modal');
-        const confirmModal = document.getElementById('confirm-modal');
-        
-        // Signature Pad
-        const signatureCanvas = document.getElementById('signature-canvas');
-        const signatureNameInput = document.getElementById('signature-name');
-        const signatureClearBtn = document.getElementById('signature-clear');
-        const signatureCancelBtn = document.getElementById('signature-cancel');
-        const signatureSaveBtn = document.getElementById('signature-save');
-        let signaturePad;
-        let activeSignatureCell = null;
+    <script type="module">
+        // --- Firebase SDK Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Password Modal
-        const passwordInput = document.getElementById('password-input');
-        const passwordError = document.getElementById('password-error');
-        const passwordCancelBtn = document.getElementById('password-cancel');
-        const passwordConfirmBtn = document.getElementById('password-confirm');
-        let signatureToDeleteIndex = null;
-        
-        // Confirmation Modal
-        const confirmModalTitle = document.getElementById('confirm-modal-title');
-        const confirmModalOkBtn = document.getElementById('confirm-modal-ok');
-        const confirmModalCancelBtn = document.getElementById('confirm-modal-cancel');
-        let confirmAction = () => {};
-
-        // App State
-        let workOrderData = []; // Holds the inspection data for the session
-        let currentAcHrs = 0;
-
-        // --- INITIALIZATION ---
-        function initializeApp() {
-            // Set dates
-            const currentDateStr = new Date().toLocaleString('es-HN');
-            document.getElementById('current-date').textContent = currentDateStr;
-            document.getElementById('fecha-inicio').textContent = currentDateStr;
-
-            // Load data from Session Storage
-            currentAcHrs = parseFloat(sessionStorage.getItem('currentAcHrs')) || 0;
-            const vencidasJSON = sessionStorage.getItem('vencidas');
-            workOrderData = vencidasJSON ? JSON.parse(vencidasJSON) : [];
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- ELEMENT REFERENCES ---
+            const paperContainer = document.querySelector('.paper-container');
+            const expiredListTableBody = document.getElementById('vencidas-list');
+            const loadingMessage = document.getElementById('loading-message');
+            const allEditableFields = document.querySelectorAll('.editable-field');
             
-            // Add original index for tracking changes
-            workOrderData.forEach((item, index) => item.originalIndex = index);
+            // Modals & Signature Pad... (rest of the elements)
+            const signatureModal = document.getElementById('signature-modal');
+            const passwordModal = document.getElementById('password-modal');
+            const confirmModal = document.getElementById('confirm-modal');
+            const signatureCanvas = document.getElementById('signature-canvas');
+            const signatureNameInput = document.getElementById('signature-name');
+            const signatureClearBtn = document.getElementById('signature-clear');
+            const signatureCancelBtn = document.getElementById('signature-cancel');
+            const signatureSaveBtn = document.getElementById('signature-save');
+            let signaturePad;
+            let activeSignatureCell = null;
+            const passwordInput = document.getElementById('password-input');
+            const passwordError = document.getElementById('password-error');
+            const passwordCancelBtn = document.getElementById('password-cancel');
+            const passwordConfirmBtn = document.getElementById('password-confirm');
+            let signatureToDeleteData = null; // Changed to store {type, index}
+            const confirmModalTitle = document.getElementById('confirm-modal-title');
+            const confirmModalOkBtn = document.getElementById('confirm-modal-ok');
+            const confirmModalCancelBtn = document.getElementById('confirm-modal-cancel');
+            let confirmAction = () => {};
 
-            document.getElementById('ac-tt').textContent = currentAcHrs > 0 ? currentAcHrs.toFixed(2) : "N/A";
-            
-            loadingMessage.classList.add('hidden');
-            renderExpiredInspections();
-        }
+            // --- FIREBASE & APP STATE ---
+            let db, auth;
+            let workOrderDocRef;
+            let workOrderData = []; // Holds the inspection data for the session
+            let isUpdatingFromFirestore = false; // Flag to prevent feedback loops
 
-        // --- CORE LOGIC ---
-        function calculateStatus(lastDateStr, lastHoursStr, freq, base) {
-            let nextDueDate = '---', nextDueHrs = '---', remaining = '---';
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            // --- FIREBASE INITIALIZATION ---
+            async function initializeFirebase() {
+                try {
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                    
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+                    
+                    // Set up the document reference for this specific work order
+                    // Stored in a public collection so all users can see it
+                    const workOrderId = 'FAH-945'; // Using a fixed ID for this aircraft
+                    workOrderDocRef = doc(db, `artifacts/${appId}/public/data/work_orders`, workOrderId);
 
-            if (base.toLowerCase().includes('condition') || base.toLowerCase().includes('preflight') || base.toLowerCase().includes('after')) {
-                return { nextDueDate: 'N/A', nextDueHrs: 'N/A', remaining: 'N/A' };
+                    onAuthStateChanged(auth, async (user) => {
+                        if (user) {
+                            console.log("Authenticated User ID:", user.uid);
+                            initializeApp(); // Now start the main app logic
+                        } else {
+                            console.log("No user signed in, attempting to sign in...");
+                             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                                await signInWithCustomToken(auth, __initial_auth_token);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        }
+                    });
+
+                } catch (error) {
+                    console.error("Firebase Initialization Error:", error);
+                    loadingMessage.textContent = 'Error al conectar a la base de datos.';
+                }
+            }
+
+            // --- MAIN APP INITIALIZATION (AFTER AUTH) ---
+            function initializeApp() {
+                // Set current date
+                const currentDateStr = new Date().toLocaleString('es-HN');
+                document.getElementById('current-date').textContent = currentDateStr;
+
+                // Listen for real-time updates from Firestore
+                onSnapshot(workOrderDocRef, (doc) => {
+                    isUpdatingFromFirestore = true;
+                    console.log("Received data from Firestore.");
+                    loadingMessage.classList.add('hidden');
+                    
+                    if (doc.exists()) {
+                        const data = doc.data();
+                        
+                        // Populate header fields
+                        allEditableFields.forEach(field => {
+                            if (field.id && data[field.id] !== undefined) {
+                                field.textContent = data[field.id];
+                            }
+                        });
+
+                        // Populate footer signatures
+                        renderFooterSignature('supervisor', data.supervisorSignature);
+                        renderFooterSignature('inspector', data.inspectorSignature);
+
+                        // Load inspection data from session or Firestore
+                        const vencidasFromSession = sessionStorage.getItem('vencidas');
+                        if (vencidasFromSession && (!data.inspections || data.inspections.length === 0)) {
+                            // If session has data and Firestore doesn't, migrate it
+                            console.log("Migrating inspections from session storage to Firestore.");
+                            workOrderData = JSON.parse(vencidasFromSession);
+                            updateFirestore({ inspections: workOrderData });
+                        } else {
+                            workOrderData = data.inspections || [];
+                        }
+                        
+                        // Add original index for tracking changes
+                        workOrderData.forEach((item, index) => item.originalIndex = index);
+                        
+                        renderExpiredInspections();
+                    } else {
+                         console.log("No such document! Initializing a new one.");
+                         // Load from session storage on the very first run if available
+                         const vencidasJSON = sessionStorage.getItem('vencidas');
+                         const initialData = {
+                             'fecha-inicio': currentDateStr,
+                             'modelo': 'BELL UH-1H',
+                             'matricula': 'FAH-945',
+                             inspections: vencidasJSON ? JSON.parse(vencidasJSON) : []
+                         };
+                         setDoc(workOrderDocRef, initialData).then(() => {
+                            console.log("New work order document created in Firestore.");
+                         });
+                         workOrderData = initialData.inspections;
+                         document.getElementById('fecha-inicio').textContent = currentDateStr;
+                    }
+
+                    // Populate A/C TT from session storage (as it's transient)
+                    const currentAcHrs = parseFloat(sessionStorage.getItem('currentAcHrs')) || 0;
+                    document.getElementById('ac-tt').textContent = currentAcHrs > 0 ? currentAcHrs.toFixed(2) : "N/A";
+                    
+                    setTimeout(() => { isUpdatingFromFirestore = false; }, 100);
+                }, (error) => {
+                    console.error("Error listening to Firestore document:", error);
+                    loadingMessage.textContent = 'Error de conexión en tiempo real.';
+                });
             }
             
-            const freqs = String(freq).split('/').map(f => parseFloat(f.trim()));
-            const bases = String(base).split('/').map(b => b.trim().toLowerCase());
-            
-            let finalNextDate = null;
-            let finalNextHours = Infinity;
-
-            const lastHours = parseFloat(lastHoursStr);
-            const lastDate = lastDateStr ? new Date(lastDateStr + 'T12:00:00') : null;
-
-            bases.forEach((b, index) => {
-                const f = freqs[index];
-                if (b.includes('hour') && !isNaN(lastHours) && !isNaN(f)) {
-                    const dueHrs = lastHours + f;
-                    if (dueHrs < finalNextHours) finalNextHours = dueHrs;
+            // --- FIRESTORE HELPER ---
+            async function updateFirestore(data) {
+                if (!workOrderDocRef) return;
+                try {
+                    await updateDoc(workOrderDocRef, data);
+                    console.log("Firestore updated with:", data);
+                } catch (error) {
+                    console.error("Error updating Firestore:", error);
+                    // If the doc doesn't exist, create it with setDoc
+                    if (error.code === 'not-found') {
+                        await setDoc(workOrderDocRef, data, { merge: true });
+                    }
                 }
-                if (lastDate) {
-                    const nextDate = new Date(lastDate);
-                    if (b.includes('day')) nextDate.setDate(nextDate.getDate() + f);
-                    else if (b.includes('month')) nextDate.setMonth(nextDate.getMonth() + f);
-                    else if (b.includes('year')) nextDate.setFullYear(nextDate.getFullYear() + f);
-                    
-                    if (!finalNextDate || nextDate < finalNextDate) {
-                        finalNextDate = nextDate;
+            }
+            
+            // --- CORE LOGIC (Mostly Unchanged) ---
+            function calculateStatus(lastDateStr, lastHoursStr, freq, base) {
+                let nextDueDate = '---', nextDueHrs = '---';
+                if (base.toLowerCase().includes('condition') || base.toLowerCase().includes('preflight') || base.toLowerCase().includes('after')) {
+                    return { nextDueDate: 'N/A', nextDueHrs: 'N/A' };
+                }
+                const freqs = String(freq).split('/').map(f => parseFloat(f.trim()));
+                const bases = String(base).split('/').map(b => b.trim().toLowerCase());
+                let finalNextDate = null, finalNextHours = Infinity;
+                const lastHours = parseFloat(lastHoursStr);
+                const lastDate = lastDateStr ? new Date(lastDateStr + 'T12:00:00') : null;
+
+                bases.forEach((b, index) => {
+                    const f = freqs[index];
+                    if (b.includes('hour') && !isNaN(lastHours) && !isNaN(f)) {
+                        const dueHrs = lastHours + f;
+                        if (dueHrs < finalNextHours) finalNextHours = dueHrs;
+                    }
+                    if (lastDate) {
+                        const nextDate = new Date(lastDate);
+                        if (b.includes('day')) nextDate.setDate(nextDate.getDate() + f);
+                        else if (b.includes('month')) nextDate.setMonth(nextDate.getMonth() + f);
+                        else if (b.includes('year')) nextDate.setFullYear(nextDate.getFullYear() + f);
+                        if (!finalNextDate || nextDate < finalNextDate) finalNextDate = nextDate;
+                    }
+                });
+                if (finalNextHours !== Infinity) nextDueHrs = finalNextHours.toFixed(2);
+                if (finalNextDate) nextDueDate = finalNextDate.toLocaleDateString('es-ES', { year: '2-digit', month: '2-digit', day: '2-digit' });
+                return { nextDueDate, nextDueHrs };
+            }
+            
+            // --- RENDERING ---
+            function renderExpiredInspections() {
+                expiredListTableBody.innerHTML = '';
+                let signedCount = 0;
+                
+                if (!workOrderData || workOrderData.length === 0) {
+                    expiredListTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-500">No hay inspecciones.</td></tr>`;
+                    updateProgressBar(0, 0);
+                    return;
+                }
+                
+                const groupedByCategory = workOrderData.reduce((acc, item) => {
+                    const category = item.category || 'Inspecciones Generales';
+                    if (!acc[category]) acc[category] = [];
+                    acc[category].push(item);
+                    return acc;
+                }, {});
+                
+                let itemCounter = 1;
+
+                for (const category in groupedByCategory) {
+                    const themeRow = document.createElement('tr');
+                    themeRow.className = 'bg-blue-100';
+                    themeRow.innerHTML = `<th colspan="5" class="px-4 py-2 text-left text-sm font-bold text-blue-800">${category.toUpperCase()}</th>`;
+                    expiredListTableBody.appendChild(themeRow);
+
+                    groupedByCategory[category].forEach((item) => {
+                        if (item.signature && item.signature.signatureDataUrl) signedCount++;
+                        const { nextDueDate, nextDueHrs } = calculateStatus(item.lastDate, item.lastHours, item.freq, item.base);
+                        
+                        const row = document.createElement('tr');
+                        row.className = 'bg-white border-b hover:bg-red-50';
+                        
+                        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(item.ref)}`;
+                        let signatureContent = (item.signature && item.signature.signatureDataUrl)
+                            ? `<img src="${item.signature.signatureDataUrl}" alt="Firma" /><p class="text-xs mt-1 font-semibold">${item.signature.signatureName || ''}</p>`
+                            : '';
+                        
+                        row.innerHTML = `
+                            <td class="px-4 py-3 text-center font-medium text-gray-900">${itemCounter++}</td>
+                            <td class="px-4 py-3 font-medium text-gray-900">${item.name}<p class="text-xs text-red-600 font-semibold">(Próx. Cumplimiento: ${nextDueHrs}h / ${nextDueDate})</p></td>
+                            <td class="px-4 py-3"><a href="${googleSearchUrl}" target="_blank" class="text-blue-600 hover:underline" title="Buscar referencia en Google">${item.ref}</a></td>
+                            <td class="px-4 py-3 editable-cell signature-cell text-center align-middle" data-index="${item.originalIndex}">${signatureContent}</td>
+                            <td class="px-4 py-3 editable-cell accion-tomada-cell" contenteditable="true" data-index="${item.originalIndex}">${item.accionTomada || ''}</td>
+                        `;
+                        expiredListTableBody.appendChild(row);
+                    });
+                }
+                updateProgressBar(signedCount, workOrderData.length);
+            }
+
+            function renderFooterSignature(type, signatureData) {
+                const area = document.getElementById(`${type}-signature`);
+                if (!area) return;
+                
+                if (signatureData && signatureData.signatureDataUrl) {
+                    area.innerHTML = `<img src="${signatureData.signatureDataUrl}" alt="Firma"><p class="text-xs mt-1 font-semibold">${signatureData.signatureName || ''}</p>`;
+                } else {
+                    area.innerHTML = `<p class="text-gray-500 text-sm no-print">(Haga clic para firmar)</p>`;
+                }
+            }
+
+            function updateProgressBar(signed, total) {
+                const percentage = total > 0 ? Math.round((signed / total) * 100) : 0;
+                const progressBar = document.getElementById('progress-bar');
+                const progressText = document.getElementById('progress-text');
+                if (progressBar && progressText) {
+                    progressBar.style.width = `${percentage}%`;
+                    progressText.textContent = `${percentage}%`;
+                    progressBar.classList.toggle('bg-green-600', percentage === 100);
+                    progressBar.classList.toggle('bg-blue-600', percentage < 100);
+                }
+            }
+
+            // --- EVENT HANDLERS & ACTIONS ---
+            // Save header fields on blur
+            allEditableFields.forEach(field => {
+                field.addEventListener('blur', () => {
+                    if (isUpdatingFromFirestore) return; // Don't save if the change came from Firestore
+                    const fieldId = field.id;
+                    const content = field.textContent;
+                    if (fieldId) {
+                        updateFirestore({ [fieldId]: content });
+                    }
+                });
+            });
+
+            // Save "Accion Tomada" on blur
+            expiredListTableBody.addEventListener('blur', (e) => {
+                if (isUpdatingFromFirestore) return;
+                if (e.target && e.target.classList.contains('accion-tomada-cell')) {
+                    const index = parseInt(e.target.dataset.index, 10);
+                    const text = e.target.textContent.trim();
+                    const item = workOrderData.find(d => d.originalIndex === index);
+                    if (item && item.accionTomada !== text) {
+                        item.accionTomada = text;
+                        updateFirestore({ inspections: workOrderData });
+                    }
+                }
+            }, true);
+            
+            // Signature Handling
+            function openSignatureModal(cell) {
+                activeSignatureCell = cell;
+                const modalTitle = document.getElementById('signature-modal-title');
+                const title = cell.dataset.title;
+                modalTitle.textContent = `Firma del ${title || 'Mecánico'}`;
+                document.querySelector('#signature-modal label[for="signature-name"]').textContent = `Nombre del ${title || 'Mecánico'}`;
+                signatureModal.classList.remove('hidden');
+                signatureNameInput.value = '';
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                signatureCanvas.width = signatureCanvas.offsetWidth * ratio;
+                signatureCanvas.height = signatureCanvas.offsetHeight * ratio;
+                signatureCanvas.getContext("2d").scale(ratio, ratio);
+                signaturePad = new SignaturePad(signatureCanvas, { backgroundColor: 'rgb(255, 255, 255)' });
+            }
+
+            function closeSignatureModal() {
+                signatureModal.classList.add('hidden');
+                if(signaturePad) signaturePad.clear();
+                activeSignatureCell = null;
+            }
+            
+            paperContainer.addEventListener('click', (e) => {
+                const signatureTarget = e.target.closest('.signature-cell, .footer-signature-area');
+                if (signatureTarget) {
+                    if (signatureTarget.querySelector('img')) {
+                         signatureToDeleteData = {
+                            type: signatureTarget.classList.contains('footer-signature-area') ? signatureTarget.dataset.title.toLowerCase() : 'mechanic',
+                            index: signatureTarget.dataset.index 
+                        };
+                        passwordModal.classList.remove('hidden');
+                        passwordInput.value = '';
+                        passwordError.textContent = '';
+                        passwordInput.focus();
+                    } else {
+                        openSignatureModal(signatureTarget);
                     }
                 }
             });
             
-            if (finalNextHours !== Infinity) {
-                nextDueHrs = finalNextHours.toFixed(2);
-            }
-            if (finalNextDate) {
-                nextDueDate = finalNextDate.toLocaleDateString('es-ES', { year: '2-digit', month: '2-digit', day: '2-digit' });
-            }
-
-            return { nextDueDate, nextDueHrs };
-        }
-        
-        // --- RENDERING ---
-        function renderExpiredInspections() {
-            expiredListTableBody.innerHTML = '';
-            let signedCount = 0;
+            signatureClearBtn.addEventListener('click', () => signaturePad.clear());
+            signatureCancelBtn.addEventListener('click', closeSignatureModal);
             
-            if (!workOrderData || workOrderData.length === 0) {
-                expiredListTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-500">No hay inspecciones vencidas.</td></tr>`;
-                updateProgressBar(0, 0);
-                return;
-            }
-            
-            const groupedByCategory = workOrderData.reduce((acc, item) => {
-                const category = item.category || 'Inspecciones Generales';
-                if (!acc[category]) acc[category] = [];
-                acc[category].push(item);
-                return acc;
-            }, {});
-            
-            let itemCounter = 1;
+            signatureSaveBtn.addEventListener('click', () => {
+                const name = signatureNameInput.value.trim();
+                if (signaturePad.isEmpty()) { alert("Por favor, dibuje su firma."); return; }
+                if (!name) { alert("Por favor, escriba su nombre y licencia."); return; }
+                
+                const dataURL = signaturePad.toDataURL('image/png');
+                const signatureData = { signatureDataUrl: dataURL, signatureName: name };
 
-            for (const category in groupedByCategory) {
-                const themeRow = document.createElement('tr');
-                themeRow.className = 'bg-blue-100';
-                themeRow.innerHTML = `<th colspan="5" class="px-4 py-2 text-left text-sm font-bold text-blue-800">${category.toUpperCase()}</th>`;
-                expiredListTableBody.appendChild(themeRow);
-
-                groupedByCategory[category].forEach((item) => {
-                    if (item.signature && item.signature.signatureDataUrl) {
-                        signedCount++;
-                    }
-                    const { nextDueDate, nextDueHrs } = calculateStatus(item.lastDate, item.lastHours, item.freq, item.base);
-                    
-                    const row = document.createElement('tr');
-                    row.className = 'bg-white border-b hover:bg-red-50';
-                    
-                    const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(item.ref)}`;
-
-                    let signatureContent = '';
-                    if (item.signature && item.signature.signatureDataUrl) {
-                        signatureContent = `<img src="${item.signature.signatureDataUrl}" alt="Firma" /><p class="text-xs mt-1 font-semibold">${item.signature.signatureName || ''}</p>`;
-                    }
-                    
-                    const accionTomadaContent = item.accionTomada || '';
-
-                    row.innerHTML = `
-                        <td class="px-4 py-3 text-center font-medium text-gray-900">${itemCounter++}</td>
-                        <td class="px-4 py-3 font-medium text-gray-900">
-                            ${item.name}
-                            <p class="text-xs text-red-600 font-semibold">(Próx. Cumplimiento: ${nextDueHrs}h / ${nextDueDate})</p>
-                        </td>
-                        <td class="px-4 py-3">
-                            <a href="${googleSearchUrl}" target="_blank" class="text-blue-600 hover:underline" title="Buscar referencia en Google">${item.ref}</a>
-                        </td>
-                        <td class="px-4 py-3 editable-cell signature-cell text-center align-middle" data-index="${item.originalIndex}">${signatureContent}</td>
-                        <td class="px-4 py-3 editable-cell accion-tomada-cell" contenteditable="true" data-index="${item.originalIndex}">${accionTomadaContent}</td>
-                    `;
-                    expiredListTableBody.appendChild(row);
-                });
-            }
-            updateProgressBar(signedCount, workOrderData.length);
-        }
-
-        function updateProgressBar(signed, total) {
-            const percentage = total > 0 ? Math.round((signed / total) * 100) : 0;
-            const progressBar = document.getElementById('progress-bar');
-            const progressText = document.getElementById('progress-text');
-
-            if (progressBar && progressText) {
-                progressBar.style.width = `${percentage}%`;
-                progressText.textContent = `${percentage}%`;
-                progressBar.classList.toggle('bg-green-600', percentage === 100);
-                progressBar.classList.toggle('bg-blue-600', percentage < 100);
-            }
-        }
-
-        // --- EVENT HANDLERS & ACTIONS ---
-        
-        // Save "Accion Tomada" on blur
-        expiredListTableBody.addEventListener('blur', (e) => {
-            if (e.target && e.target.classList.contains('accion-tomada-cell')) {
-                const index = parseInt(e.target.dataset.index, 10);
-                const text = e.target.textContent.trim();
-                const item = workOrderData.find(d => d.originalIndex === index);
-                if (item) {
-                    item.accionTomada = text;
-                    console.log(`Accion Tomada for item ${index} updated in memory.`);
-                }
-            }
-        }, true);
-        
-        // Signature Handling
-        function openSignatureModal(cell) {
-            activeSignatureCell = cell;
-            const modalTitle = document.getElementById('signature-modal-title');
-            const nameLabel = document.querySelector('#signature-modal label[for="signature-name"]');
-            const title = cell.dataset.title;
-
-            if (title === 'Inspector' || title === 'Supervisor') {
-                modalTitle.textContent = `Firma del ${title}`;
-                nameLabel.textContent = `Nombre del ${title}`;
-            } else {
-                modalTitle.textContent = 'Firma del Mecánico';
-                nameLabel.textContent = 'Nombre del Mecánico';
-            }
-
-            signatureModal.classList.remove('hidden');
-            signatureNameInput.value = '';
-            
-            // Ajustar el tamaño del canvas al abrir el modal
-            const ratio =  Math.max(window.devicePixelRatio || 1, 1);
-            signatureCanvas.width = signatureCanvas.offsetWidth * ratio;
-            signatureCanvas.height = signatureCanvas.offsetHeight * ratio;
-            signatureCanvas.getContext("2d").scale(ratio, ratio);
-
-            signaturePad = new SignaturePad(signatureCanvas, { backgroundColor: 'rgb(255, 255, 255)' });
-        }
-
-        function closeSignatureModal() {
-            signatureModal.classList.add('hidden');
-            if(signaturePad) signaturePad.clear();
-            activeSignatureCell = null;
-        }
-        
-        paperContainer.addEventListener('click', (e) => {
-            const signatureTarget = e.target.closest('.signature-cell, .footer-signature-area');
-            if (signatureTarget) {
-                if (signatureTarget.querySelector('img')) {
-                    signatureToDeleteIndex = signatureTarget.dataset.index;
-                    passwordModal.classList.remove('hidden');
-                    passwordInput.value = '';
-                    passwordError.textContent = '';
-                    passwordInput.focus();
+                if (activeSignatureCell.classList.contains('footer-signature-area')) {
+                    const type = activeSignatureCell.dataset.title.toLowerCase();
+                    updateFirestore({ [`${type}Signature`]: signatureData });
                 } else {
-                    openSignatureModal(signatureTarget);
-                }
-            }
-        });
-        
-        signatureClearBtn.addEventListener('click', () => signaturePad.clear());
-        signatureCancelBtn.addEventListener('click', closeSignatureModal);
-        
-        signatureSaveBtn.addEventListener('click', () => {
-            const name = signatureNameInput.value.trim();
-            if (signaturePad.isEmpty()) {
-                alert("Por favor, dibuje su firma.");
-                return;
-            }
-            if (!name) {
-                 alert("Por favor, escriba su nombre y licencia.");
-                return;
-            }
-            
-            const dataURL = signaturePad.toDataURL('image/png');
-            const index = parseInt(activeSignatureCell.dataset.index, 10);
-            const item = workOrderData.find(d => d.originalIndex === index);
-
-            if (item) { // Save to in-memory data for table rows
-                item.signature = { signatureDataUrl: dataURL, signatureName: name };
-                renderExpiredInspections(); // Re-render to show signature
-            } else { // Handle footer signatures (UI only)
-                 activeSignatureCell.innerHTML = `<img src="${dataURL}" alt="Firma"><p class="text-xs mt-1 font-semibold">${name}</p>`;
-            }
-            closeSignatureModal();
-        });
-
-        // Password Modal for deleting signatures
-        passwordCancelBtn.addEventListener('click', () => passwordModal.classList.add('hidden'));
-        passwordConfirmBtn.addEventListener('click', () => {
-            if (passwordInput.value === "Kevin") {
-                if (signatureToDeleteIndex !== null) {
-                    const index = parseInt(signatureToDeleteIndex, 10);
+                    const index = parseInt(activeSignatureCell.dataset.index, 10);
                     const item = workOrderData.find(d => d.originalIndex === index);
                     if (item) {
-                       delete item.signature;
-                       renderExpiredInspections();
+                        item.signature = signatureData;
+                        updateFirestore({ inspections: workOrderData });
+                    }
+                }
+                closeSignatureModal();
+            });
+
+            // Password Modal for deleting signatures
+            passwordCancelBtn.addEventListener('click', () => passwordModal.classList.add('hidden'));
+            passwordConfirmBtn.addEventListener('click', () => {
+                if (passwordInput.value === "Kevin") {
+                    if (signatureToDeleteData) {
+                        if(signatureToDeleteData.type === 'mechanic') {
+                            const index = parseInt(signatureToDeleteData.index, 10);
+                            const item = workOrderData.find(d => d.originalIndex === index);
+                            if (item) {
+                                delete item.signature;
+                                updateFirestore({ inspections: workOrderData });
+                            }
+                        } else { // Supervisor or Inspector
+                            updateFirestore({ [`${signatureToDeleteData.type}Signature`]: null });
+                        }
                     }
                     passwordModal.classList.add('hidden');
-                    signatureToDeleteIndex = null;
+                    signatureToDeleteData = null;
+                } else {
+                    passwordError.textContent = "Clave incorrecta.";
+                    setTimeout(() => passwordError.textContent = '', 3000);
                 }
-            } else {
-                passwordError.textContent = "Clave incorrecta.";
-                setTimeout(() => passwordError.textContent = '', 3000);
-            }
-        });
+            });
 
-        // General Confirmation Modal
-        confirmModalCancelBtn.addEventListener('click', () => confirmModal.classList.add('hidden'));
-        confirmModalOkBtn.addEventListener('click', () => {
-            confirmAction();
-            confirmModal.classList.add('hidden');
-        });
+            // General Confirmation Modal
+            confirmModalCancelBtn.addEventListener('click', () => confirmModal.classList.add('hidden'));
+            confirmModalOkBtn.addEventListener('click', () => {
+                confirmAction();
+                confirmModal.classList.add('hidden');
+            });
 
-        // Archive Button
-        document.getElementById('archive-btn').addEventListener('click', () => {
-            confirmModalTitle.textContent = '¿Seguro que desea limpiar la orden? Esto borrará los datos de la sesión actual.';
-            confirmAction = () => {
-                sessionStorage.removeItem('vencidas');
-                sessionStorage.removeItem('currentAcHrs');
-                workOrderData = [];
-                renderExpiredInspections();
-                alert("Orden de trabajo limpiada.");
-            };
-            confirmModal.classList.remove('hidden');
-        });
-        
-        // Report Generation
-        document.getElementById('report-btn').addEventListener('click', () => {
-            if (!workOrderData || workOrderData.length === 0) {
-                alert("No hay inspecciones para generar un reporte.");
-                return;
-            }
-            generateDiscrepancyReport(workOrderData);
-        });
+            // Archive Button - Clears Firestore document
+            document.getElementById('archive-btn').addEventListener('click', () => {
+                confirmModalTitle.textContent = '¿Seguro que desea limpiar la orden? Esto borrará los datos de la base de datos.';
+                confirmAction = () => {
+                    const clearedData = {
+                        inspections: [],
+                        supervisorSignature: null,
+                        inspectorSignature: null,
+                        'fecha-inicio': new Date().toLocaleString('es-HN'),
+                    };
+                    // Clear all editable fields
+                    allEditableFields.forEach(field => {
+                        if (field.id && field.id !== 'fecha-inicio' && field.id !== 'ac-tt') {
+                           clearedData[field.id] = '';
+                        }
+                    });
 
-        function generateDiscrepancyReport(inspections) {
-            const matricula = document.getElementById('matricula').textContent || 'FAH-945';
-            const fecha = new Date().toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: '2-digit' }).replace('.', '').toUpperCase();
-
-            const groupedByCategory = inspections.reduce((acc, item) => {
-                const category = item.category || 'Inspecciones Generales';
-                if (!acc[category]) acc[category] = [];
-                acc[category].push(item);
-                return acc;
-            }, {});
-
-            let discrepancyRows = '';
-            let correctiveRows = '';
-            let themeCounter = 1;
-
-            for (const category in groupedByCategory) {
-                let itemCounter = 1;
-                discrepancyRows += `<tr><td class="num">${themeCounter}.</td><td><strong>${category.toUpperCase()}</strong></td></tr>`;
-                correctiveRows += `<tr><td class="num">${themeCounter}.</td><td colspan="2"><strong>${category.toUpperCase()}</strong></td></tr>`;
-                
-                groupedByCategory[category].forEach(item => {
-                    discrepancyRows += `<tr><td class="num">${themeCounter}.${itemCounter}</td><td>Efectuar ${item.name} / ${item.ref}</td></tr>`;
-                    
-                    const signatureCell = (item.signature && item.signature.signatureDataUrl)
-                        ? `<td class="mechanic-sig"><img src="${item.signature.signatureDataUrl}" alt="Firma"><p>${item.signature.signatureName || ''}</p></td>`
-                        : '<td></td>';
-                    
-                    correctiveRows += `<tr><td class="num">${themeCounter}.${itemCounter++}</td><td>Se completó ${item.name} / ${item.ref}. ${item.accionTomada || ''}</td>${signatureCell}</tr>`;
-                });
-                themeCounter++;
-            }
-
-            const reportContent = `
-            <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte - ${matricula}</title>
-            <style>
-                body { font-family: Arial, sans-serif; font-size: 11px; }
-                .report-container { width: 100%; max-width: 8.5in; margin: auto; }
-                .header { text-align: center; } .header h1, .header h2, .header h3 { margin: 1px 0; font-weight: bold; }
-                .header h1 { font-size: 16px; } .header h2 { font-size: 14px; } .header h3 { font-size: 12px; font-weight: normal; }
-                .info-table { width: 100%; margin: 15px 0; border: none; } .info-table td { font-size: 12px; font-weight: bold; }
-                .notification { font-size: 12px; margin-bottom: 10px; }
-                .data-table { width: 100%; border-collapse: collapse; border: 2px solid black; }
-                .data-table th { color: white; text-align: left; padding: 6px; font-size: 14px; border: 2px solid black; }
-                .data-table td { border: 1.5px solid black; padding: 5px; vertical-align: top; }
-                .data-table .num { font-weight: bold; text-align: center; width: 45px; }
-                .discrepancy-table th { background-color: #2E75B5; } .discrepancy-table td { background-color: #FFC000; }
-                .corrective-table { margin-top: 20px; } .corrective-table th { background-color: #00B050; }
-                .corrective-table td { background-color: #E2EFDA; }
-                .corrective-table .mechanic-sig { text-align: center; width: 150px; }
-                .corrective-table .mechanic-sig img { max-height: 30px; display: block; margin: 0 auto 2px; }
-                .corrective-table .mechanic-sig p { font-size: 9px; margin: 0; line-height: 1; }
-                .official-signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 60px; margin-top: 40px; text-align: center; }
-                .official-signatures div { padding-top: 40px; border-top: 1px solid black; }
-                @media print { .no-print { display: none; } }
-            </style></head><body>
-            <div class="report-container">
-                <div class="header"><h1>FUERZAS ARMADAS DE HONDURAS</h1><h2>FUERZA AÉREA HONDUREÑA</h2><h3>Base Aérea "Coronel Hernán Acosta Mejía"</h3><h2>REPORTE DE TRABAJO EFECTUADO</h2></div>
-                <table class="info-table"><tr><td>AVION No. BELL UH-1H ${matricula}</td><td style="text-align: right;">FECHA: ${fecha}</td></tr></table>
-                <p class="notification">El Taller / Sección Helicópteros notifica que el trabajo:</p>
-                <table class="data-table discrepancy-table"><thead><tr><th colspan="2">Discrepancia:</th></tr></thead><tbody>${discrepancyRows}</tbody></table>
-                <table class="data-table corrective-table"><thead><tr><th colspan="2">Acción Correctiva:</th><th>Técnico Especialista</th></tr></thead><tbody>${correctiveRows}</tbody></table>
-                <footer class="signatures-container"><div class="official-signatures"><div><p>SUPERVISOR</p></div><div><p>INSPECTOR</p></div><div><p>JEFE TALLER / SECCION</p></div><div><p>JEFE DE LOGISTICA A-4</p></div></div></footer>
-            </div>
-            <button class="no-print" onclick="window.print()" style="position: fixed; top: 10px; right: 10px; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 5px;">Imprimir</button>
-            </body></html>`;
+                    setDoc(workOrderDocRef, clearedData).then(() => {
+                        sessionStorage.removeItem('currentAcHrs');
+                        alert("Orden de trabajo limpiada y reiniciada en la base de datos.");
+                    });
+                };
+                confirmModal.classList.remove('hidden');
+            });
             
-            const reportWindow = window.open('', '_blank');
-            reportWindow.document.write(reportContent);
-            reportWindow.document.close();
-        }
+            // Report Generation (should work as before, using in-memory `workOrderData`)
+            document.getElementById('report-btn').addEventListener('click', () => {
+                if (!workOrderData || workOrderData.length === 0) {
+                    alert("No hay inspecciones para generar un reporte.");
+                    return;
+                }
+                generateDiscrepancyReport(workOrderData);
+            });
 
-        // --- START THE APP ---
-        initializeApp();
-    });
+            function generateDiscrepancyReport(inspections) {
+                // ... This function remains unchanged ...
+                 const matricula = document.getElementById('matricula').textContent || 'FAH-945';
+                const fecha = new Date().toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: '2-digit' }).replace('.', '').toUpperCase();
+
+                const groupedByCategory = inspections.reduce((acc, item) => {
+                    const category = item.category || 'Inspecciones Generales';
+                    if (!acc[category]) acc[category] = [];
+                    acc[category].push(item);
+                    return acc;
+                }, {});
+
+                let discrepancyRows = '';
+                let correctiveRows = '';
+                let themeCounter = 1;
+
+                for (const category in groupedByCategory) {
+                    let itemCounter = 1;
+                    discrepancyRows += `<tr><td class="num">${themeCounter}.</td><td><strong>${category.toUpperCase()}</strong></td></tr>`;
+                    correctiveRows += `<tr><td class="num">${themeCounter}.</td><td colspan="2"><strong>${category.toUpperCase()}</strong></td></tr>`;
+                    
+                    groupedByCategory[category].forEach(item => {
+                        discrepancyRows += `<tr><td class="num">${themeCounter}.${itemCounter}</td><td>Efectuar ${item.name} / ${item.ref}</td></tr>`;
+                        
+                        const signatureCell = (item.signature && item.signature.signatureDataUrl)
+                            ? `<td class="mechanic-sig"><img src="${item.signature.signatureDataUrl}" alt="Firma"><p>${item.signature.signatureName || ''}</p></td>`
+                            : '<td></td>';
+                        
+                        correctiveRows += `<tr><td class="num">${themeCounter}.${itemCounter++}</td><td>Se completó ${item.name} / ${item.ref}. ${item.accionTomada || ''}</td>${signatureCell}</tr>`;
+                    });
+                    themeCounter++;
+                }
+
+                const reportContent = `
+                <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte - ${matricula}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; font-size: 11px; }
+                    .report-container { width: 100%; max-width: 8.5in; margin: auto; }
+                    .header { text-align: center; } .header h1, .header h2, .header h3 { margin: 1px 0; font-weight: bold; }
+                    .header h1 { font-size: 16px; } .header h2 { font-size: 14px; } .header h3 { font-size: 12px; font-weight: normal; }
+                    .info-table { width: 100%; margin: 15px 0; border: none; } .info-table td { font-size: 12px; font-weight: bold; }
+                    .notification { font-size: 12px; margin-bottom: 10px; }
+                    .data-table { width: 100%; border-collapse: collapse; border: 2px solid black; }
+                    .data-table th { color: white; text-align: left; padding: 6px; font-size: 14px; border: 2px solid black; }
+                    .data-table td { border: 1.5px solid black; padding: 5px; vertical-align: top; }
+                    .data-table .num { font-weight: bold; text-align: center; width: 45px; }
+                    .discrepancy-table th { background-color: #2E75B5; } .discrepancy-table td { background-color: #FFC000; }
+                    .corrective-table { margin-top: 20px; } .corrective-table th { background-color: #00B050; }
+                    .corrective-table td { background-color: #E2EFDA; }
+                    .corrective-table .mechanic-sig { text-align: center; width: 150px; }
+                    .corrective-table .mechanic-sig img { max-height: 30px; display: block; margin: 0 auto 2px; }
+                    .corrective-table .mechanic-sig p { font-size: 9px; margin: 0; line-height: 1; }
+                    .official-signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 60px; margin-top: 40px; text-align: center; }
+                    .official-signatures div { padding-top: 40px; border-top: 1px solid black; }
+                    @media print { .no-print { display: none; } }
+                </style></head><body>
+                <div class="report-container">
+                    <div class="header"><h1>FUERZAS ARMADAS DE HONDURAS</h1><h2>FUERZA AÉREA HONDUREÑA</h2><h3>Base Aérea "Coronel Hernán Acosta Mejía"</h3><h2>REPORTE DE TRABAJO EFECTUADO</h2></div>
+                    <table class="info-table"><tr><td>AVION No. BELL UH-1H ${matricula}</td><td style="text-align: right;">FECHA: ${fecha}</td></tr></table>
+                    <p class="notification">El Taller / Sección Helicópteros notifica que el trabajo:</p>
+                    <table class="data-table discrepancy-table"><thead><tr><th colspan="2">Discrepancia:</th></tr></thead><tbody>${discrepancyRows}</tbody></table>
+                    <table class="data-table corrective-table"><thead><tr><th colspan="2">Acción Correctiva:</th><th>Técnico Especialista</th></tr></thead><tbody>${correctiveRows}</tbody></table>
+                    <footer class="signatures-container"><div class="official-signatures"><div><p>SUPERVISOR</p></div><div><p>INSPECTOR</p></div><div><p>JEFE TALLER / SECCION</p></div><div><p>JEFE DE LOGISTICA A-4</p></div></div></footer>
+                </div>
+                <button class="no-print" onclick="window.print()" style="position: fixed; top: 10px; right: 10px; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 5px;">Imprimir</button>
+                </body></html>`;
+                
+                const reportWindow = window.open('', '_blank');
+                reportWindow.document.write(reportContent);
+                reportWindow.document.close();
+            }
+
+            // --- START THE APP ---
+            initializeFirebase();
+        });
     </script>
 </body>
 </html>
