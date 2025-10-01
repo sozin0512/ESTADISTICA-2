@@ -375,7 +375,7 @@
                     onAuthStateChanged(auth, async (user) => {
                         if (user) {
                             console.log("Authenticated User ID:", user.uid);
-                            initializeApp(); // Now start the main app logic
+                            startApp(); // Now start the main app logic
                         } else {
                             console.log("No user signed in, attempting to sign in...");
                              if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -393,7 +393,7 @@
             }
 
             // --- MAIN APP INITIALIZATION (AFTER AUTH) ---
-            function initializeApp() {
+            function startApp() {
                 // Set current date
                 const currentDateStr = new Date().toLocaleString('es-HN');
                 document.getElementById('current-date').textContent = currentDateStr;
