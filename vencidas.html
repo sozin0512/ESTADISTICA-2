@@ -245,14 +245,14 @@
         
         <!-- Los botones ahora se envuelven si no caben en una línea -->
         <div class="flex justify-center flex-wrap mt-12 gap-4 no-print">
-             <button onclick="window.history.back()" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-5 rounded-lg transition-colors">
-                Regresar al Control
-            </button>
+            <a href="historial.html" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-5 rounded-lg transition-colors no-underline">
+                Ver Historial
+            </a>
             <button id="report-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
                 Generar Reporte
             </button>
             <button id="archive-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
-                Limpiar Orden
+                Archivar Orden
             </button>
             <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
                 Imprimir / Guardar PDF
@@ -335,6 +335,13 @@
             <div class="p-4 border-b">
                 <h3 class="text-lg font-bold text-gray-800">Nombres para el Reporte</h3>
             </div>
+            <div id="saved-names-confirmation" class="hidden p-4 m-6 mb-0 bg-blue-50 border border-blue-200 rounded-lg">
+                <p class="text-sm font-medium text-gray-800 mb-2">Se encontraron nombres guardados:</p>
+                <ul id="saved-names-list" class="text-sm list-disc list-inside text-gray-600 mb-3 space-y-1">
+                    <!-- JS will populate this -->
+                </ul>
+                <button id="use-saved-names-btn" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg text-sm">Sí, usar estos y generar reporte</button>
+            </div>
             <div class="p-6 space-y-4">
                 <div>
                     <label for="supervisor-name-input" class="block text-sm font-medium text-gray-700">Nombre del Supervisor</label>
@@ -364,7 +371,7 @@
         // --- Firebase SDK Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, setDoc, updateDoc, collection, addDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         document.addEventListener('DOMContentLoaded', () => {
             // --- ELEMENT REFERENCES ---
@@ -403,6 +410,9 @@
             const jefeLogisticaNameInput = document.getElementById('jefe-logistica-name-input');
             const reportNamesCancelBtn = document.getElementById('report-names-cancel');
             const reportNamesGenerateBtn = document.getElementById('report-names-generate');
+            const savedNamesConfirmationDiv = document.getElementById('saved-names-confirmation');
+            const savedNamesList = document.getElementById('saved-names-list');
+            const useSavedNamesBtn = document.getElementById('use-saved-names-btn');
 
             // --- FIREBASE & APP STATE ---
             let db, auth;
@@ -786,27 +796,28 @@
                 confirmModal.classList.add('hidden');
             });
 
-            // Archive Button - Clears Firestore document
+            // Archive Button - Now only archives, does not clean.
             document.getElementById('archive-btn').addEventListener('click', () => {
-                confirmModalTitle.textContent = '¿Seguro que desea limpiar la orden? Esto borrará los datos de la base de datos.';
-                confirmAction = () => {
-                    const clearedData = {
-                        inspections: [],
-                        supervisorSignature: null,
-                        inspectorSignature: null,
-                        'fecha-inicio': new Date().toLocaleString('es-HN'),
-                    };
-                    // Clear all editable fields
-                    allEditableFields.forEach(field => {
-                        if (field.id && field.id !== 'fecha-inicio' && field.id !== 'ac-tt') {
-                           clearedData[field.id] = '';
-                        }
-                    });
+                confirmModalTitle.textContent = '¿Seguro que desea archivar la orden actual? Se guardará un registro permanente en el historial.';
+                confirmAction = async () => {
+                    try {
+                        const currentDoc = await getDoc(workOrderDocRef);
+                        if (currentDoc.exists()) {
+                            const dataToArchive = currentDoc.data();
+                            dataToArchive.archivedAt = new Date().toISOString();
 
-                    setDoc(workOrderDocRef, clearedData).then(() => {
-                        sessionStorage.removeItem('currentAcHrs');
-                        showMessage("Orden de trabajo limpiada y reiniciada en la base de datos.");
-                    });
+                            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                            const historyCollectionRef = collection(db, `artifacts/${appId}/public/data/work_order_history`);
+                            await addDoc(historyCollectionRef, dataToArchive);
+                            
+                            showMessage("Orden archivada correctamente en el historial.");
+                        } else {
+                            showMessage("No se encontró la orden actual para archivar.");
+                        }
+                    } catch (error) {
+                        console.error("Error archiving document: ", error);
+                        showMessage("Ocurrió un error al archivar la orden.");
+                    }
                 };
                 confirmModal.classList.remove('hidden');
             });
@@ -817,7 +828,41 @@
                     showMessage("No hay inspecciones para generar un reporte.");
                     return;
                 }
+                
+                const savedNamesJSON = localStorage.getItem('reportNames');
+                if (savedNamesJSON) {
+                    const savedNames = JSON.parse(savedNamesJSON);
+                    supervisorNameInput.value = savedNames.supervisor || '';
+                    inspectorNameInput.value = savedNames.inspector || '';
+                    jefeTallerNameInput.value = savedNames.jefeTaller || '';
+                    jefeLogisticaNameInput.value = savedNames.jefeLogistica || '';
+                    
+                    savedNamesList.innerHTML = `
+                        <li>Supervisor: ${savedNames.supervisor || 'N/A'}</li>
+                        <li>Inspector: ${savedNames.inspector || 'N/A'}</li>
+                        <li>Jefe Taller: ${savedNames.jefeTaller || 'N/A'}</li>
+                        <li>Jefe Logística: ${savedNames.jefeLogistica || 'N/A'}</li>
+                    `;
+                    savedNamesConfirmationDiv.classList.remove('hidden');
+                } else {
+                    savedNamesConfirmationDiv.classList.add('hidden');
+                    supervisorNameInput.value = '';
+                    inspectorNameInput.value = '';
+                    jefeTallerNameInput.value = '';
+                    jefeLogisticaNameInput.value = '';
+                }
                 reportNamesModal.classList.remove('hidden');
+            });
+            
+            useSavedNamesBtn.addEventListener('click', () => {
+                const names = {
+                    supervisor: supervisorNameInput.value,
+                    inspector: inspectorNameInput.value,
+                    jefeTaller: jefeTallerNameInput.value,
+                    jefeLogistica: jefeLogisticaNameInput.value,
+                };
+                generateDiscrepancyReport(workOrderData, names);
+                reportNamesModal.classList.add('hidden');
             });
 
             reportNamesCancelBtn.addEventListener('click', () => {
@@ -831,6 +876,7 @@
                     jefeTaller: jefeTallerNameInput.value,
                     jefeLogistica: jefeLogisticaNameInput.value,
                 };
+                localStorage.setItem('reportNames', JSON.stringify(names));
                 generateDiscrepancyReport(workOrderData, names);
                 reportNamesModal.classList.add('hidden');
             });
@@ -917,4 +963,5 @@
     </script>
 </body>
 </html>
+
 
