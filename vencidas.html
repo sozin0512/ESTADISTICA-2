@@ -329,6 +329,37 @@
         </div>
     </div>
 
+    <!-- Report Names Modal -->
+    <div id="report-names-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
+            <div class="p-4 border-b">
+                <h3 class="text-lg font-bold text-gray-800">Nombres para el Reporte</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label for="supervisor-name-input" class="block text-sm font-medium text-gray-700">Nombre del Supervisor</label>
+                    <input type="text" id="supervisor-name-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                </div>
+                <div>
+                    <label for="inspector-name-input" class="block text-sm font-medium text-gray-700">Nombre del Inspector</label>
+                    <input type="text" id="inspector-name-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                </div>
+                <div>
+                    <label for="jefe-taller-name-input" class="block text-sm font-medium text-gray-700">Nombre del Jefe de Taller</label>
+                    <input type="text" id="jefe-taller-name-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                </div>
+                <div>
+                    <label for="jefe-logistica-name-input" class="block text-sm font-medium text-gray-700">Nombre del Jefe de Logística A-4</label>
+                    <input type="text" id="jefe-logistica-name-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 p-4 bg-gray-50">
+                <button id="report-names-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
+                <button id="report-names-generate" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg">Generar</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         // --- Firebase SDK Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -365,6 +396,13 @@
             const messageModal = document.getElementById('message-modal');
             const messageModalText = document.getElementById('message-modal-text');
             const messageModalOkBtn = document.getElementById('message-modal-ok');
+            const reportNamesModal = document.getElementById('report-names-modal');
+            const supervisorNameInput = document.getElementById('supervisor-name-input');
+            const inspectorNameInput = document.getElementById('inspector-name-input');
+            const jefeTallerNameInput = document.getElementById('jefe-taller-name-input');
+            const jefeLogisticaNameInput = document.getElementById('jefe-logistica-name-input');
+            const reportNamesCancelBtn = document.getElementById('report-names-cancel');
+            const reportNamesGenerateBtn = document.getElementById('report-names-generate');
 
             // --- FIREBASE & APP STATE ---
             let db, auth;
@@ -773,16 +811,31 @@
                 confirmModal.classList.remove('hidden');
             });
             
-            // Report Generation (should work as before, using in-memory `workOrderData`)
+            // Report Button Logic
             document.getElementById('report-btn').addEventListener('click', () => {
                 if (!workOrderData || workOrderData.length === 0) {
                     showMessage("No hay inspecciones para generar un reporte.");
                     return;
                 }
-                generateDiscrepancyReport(workOrderData);
+                reportNamesModal.classList.remove('hidden');
             });
 
-            function generateDiscrepancyReport(inspections) {
+            reportNamesCancelBtn.addEventListener('click', () => {
+                reportNamesModal.classList.add('hidden');
+            });
+
+            reportNamesGenerateBtn.addEventListener('click', () => {
+                const names = {
+                    supervisor: supervisorNameInput.value,
+                    inspector: inspectorNameInput.value,
+                    jefeTaller: jefeTallerNameInput.value,
+                    jefeLogistica: jefeLogisticaNameInput.value,
+                };
+                generateDiscrepancyReport(workOrderData, names);
+                reportNamesModal.classList.add('hidden');
+            });
+
+            function generateDiscrepancyReport(inspections, names) {
                 const matricula = document.getElementById('matricula').textContent || 'FAH-945';
                 const fecha = new Date().toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: '2-digit' }).replace('.', '').toUpperCase();
 
@@ -843,7 +896,12 @@
                 reportContent += '<p class="notification">El Taller / Sección Helicópteros notifica que el trabajo:</p>';
                 reportContent += '<table class="data-table discrepancy-table"><thead><tr><th colspan="2">Discrepancia:</th></tr></thead><tbody>' + discrepancyRows + '</tbody></table>';
                 reportContent += '<table class="data-table corrective-table"><thead><tr><th colspan="2">Acción Correctiva:</th><th>Técnico Especialista</th></tr></thead><tbody>' + correctiveRows + '</tbody></table>';
-                reportContent += '<footer class="signatures-container"><div class="official-signatures"><div><p>SUPERVISOR</p></div><div><p>INSPECTOR</p></div><div><p>JEFE TALLER / SECCION</p></div><div><p>JEFE DE LOGISTICA A-4</p></div></div></footer>';
+                reportContent += '<footer class="signatures-container"><div class="official-signatures">';
+                reportContent += '<div><p>' + (names.supervisor || 'SUPERVISOR') + '</p></div>';
+                reportContent += '<div><p>' + (names.inspector || 'INSPECTOR') + '</p></div>';
+                reportContent += '<div><p>' + (names.jefeTaller || 'JEFE TALLER / SECCION') + '</p></div>';
+                reportContent += '<div><p>' + (names.jefeLogistica || 'JEFE DE LOGISTICA A-4') + '</p></div>';
+                reportContent += '</div></footer>';
                 reportContent += '</div>';
                 reportContent += '<button class="no-print" onclick="window.print()" style="position: fixed; top: 10px; right: 10px; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 5px;">Imprimir</button>';
                 reportContent += '</body></html>';
