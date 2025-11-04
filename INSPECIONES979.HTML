@@ -620,17 +620,17 @@
 
             // Revisar los últimos 24 meses
             for (let i = 0; i < 24; i++) {
-                // Asumimos esta ruta, que es la estándar para las bitácoras mensuales
-                const path = `artifacts/${sharedProjectId}/public_data/bitacora_mensual/${checkYear}/${checkMonth}/totales/GENERAL`;
+                // CORRECCIÓN: Apuntar a 'AC HRS' y luego leer 'GENERAL'
+                const path = `artifacts/${sharedProjectId}/public_data/bitacora_mensual/${checkYear}/${checkMonth}/totales/AC HRS`;
                 const dataRef = ref(database, path);
                 
                 try {
                     const snapshot = await get(dataRef);
                     const data = snapshot.val();
                     
-                    // Si encontramos datos, usamos el 'AC HRS' de ese mes
-                    if (data && data['AC HRS'] && data['AC HRS'] > 0) {
-                        currentTotalHours = data['AC HRS'];
+                    // CORRECCIÓN: Leer la propiedad 'GENERAL' dentro del objeto 'AC HRS'
+                    if (data && data['GENERAL'] && data['GENERAL'] > 0) {
+                        currentTotalHours = data['GENERAL'];
                         totalFlightHoursDisplay.textContent = parseFloat(currentTotalHours).toFixed(2);
                         console.log(`Horas encontradas: ${currentTotalHours} de ${checkYear}-${checkMonth}`);
                         renderInspectionsTable(); // Re-renderizar todo con las horas correctas
@@ -1364,5 +1364,6 @@
     </script>
 </body>
 </html>
+
 
 
