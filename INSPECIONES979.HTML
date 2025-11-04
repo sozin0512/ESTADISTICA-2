@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Inspecciones FAH-976</title>
+    <title>Control de Inspecciones FAH-979</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -97,9 +97,10 @@
     <div id="auth-container" class="w-full max-w-md mx-auto text-center">
         <div class="bg-white p-8 rounded-lg shadow-2xl">
             <h2 class="text-2xl font-bold mb-4 text-gray-700">Acceso Requerido</h2>
-            <p class="text-gray-600">Por favor, inicia sesión en la página principal para ver esta sección.</p>
-            <button onclick="window.location.href='76.html'" class="mt-6 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
-                Volver a la Bitácora
+            <p class="text-gray-600">Por favor, inicia sesión para ver esta sección.</p>
+            <!-- Este botón debería idealmente llevar a la página principal, si la hay -->
+             <button onclick="window.location.href=''" class="mt-6 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
+                Volver
             </button>
         </div>
     </div>
@@ -117,7 +118,7 @@
             </div>
             <div class="form-header-cell">
                 <label>3. No SERIE</label>
-                <div class="value">FAH-976</div>
+                <div class="value">FAH-979</div>
             </div>
         </div>
          <div class="form-header-grid mt-px">
@@ -310,6 +311,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
         import { getDatabase, ref, onValue, set, get, remove, push } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
+        // Lista de inspecciones por defecto (si la base de datos está vacía)
         const inspectionsList = [
             { type: 'header', name: 'AIRWORTHINESS LIMITATIONS SCHEDULE' },
             { id: 1, name: '1. 25 HORAS INSPECCIÓN DE LOS DAMPER YOKE SET (P/N 412-010-145-101/-146-103) (VER NOTA) - 412', ref: '4-00-00 / TABLA 4-1', freqType: 'HRS', freqValue: 25, freqText: '25 HRS' },
@@ -524,8 +526,10 @@
         const trabajosBtn = document.getElementById('trabajos-btn');
 
         async function initApp() {
-            sharedProjectId = "FAH-976-DATA";
+            // CORREGIDO: Apuntando a los datos del FAH-979
+            sharedProjectId = "FAH-979-DATA";
 
+            // CORREGIDO: Usando la configuración de Firebase para FAH-979
             const firebaseConfig = {
                 apiKey: "AIzaSyCIZjCL34TG4f8WSd3xdbuO8WKbVuI5F2c",
                 authDomain: "fah-979.firebaseapp.com",
@@ -575,7 +579,7 @@
             });
 
             try {
-                // Use custom token if available (Canvas environment)
+                // CORREGIDO: Lógica de autenticación mejorada para Canvas
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     console.log("Signing in with custom token...");
                     await signInWithCustomToken(auth, __initial_auth_token);
@@ -1254,27 +1258,53 @@
             }
         });
 
+        // ==================================================================
+        // CORRECCIÓN DEL BUG:
+        // Se añade la propiedad 'tema' al objeto que se guarda en Firebase.
+        // ==================================================================
         async function goToWorkOrderPage() {
-            const expiredInspections = inspectionsListFromFirebase.filter(item => {
-                if (item.type === 'header' || item.freqType === 'SPECIAL') {
-                    return false;
+            
+            // 1. Crear un mapa para saber a qué sección (tema) pertenece cada inspección
+            const sectionCache = {};
+            let currentSection = 'Inspecciones Generales'; // Tema por defecto
+            
+            for (let i = 0; i < inspectionsListFromFirebase.length; i++) {
+                const item = inspectionsListFromFirebase[i];
+                if (item.type === 'header') {
+                    currentSection = item.name;
+                } else if (item.id) {
+                    sectionCache[item.id] = currentSection;
                 }
-                return getFinalStatus(item) === 'VENCIDA';
-            }).map(item => {
-                const data = inspectionsDataCache[item.id] || {};
-                return {
-                    id: item.id,
-                    name: item.name,
-                    ref: item.ref,
-                    freqText: item.freqText,
-                    lastDone: data.lastDone || ''
-                };
-            });
+            }
+
+            // 2. Filtrar solo las vencidas y Mapear al formato correcto
+            const expiredInspections = inspectionsListFromFirebase
+                .filter(item => {
+                    if (item.type === 'header' || item.freqType === 'SPECIAL') {
+                        return false;
+                    }
+                    // Usar la misma lógica que la pantalla para determinar si está VENCIDA
+                    return getFinalStatus(item) === 'VENCIDA';
+                })
+                .map(item => {
+                    const data = inspectionsDataCache[item.id] || {};
+                    const tema = sectionCache[item.id] || 'Inspecciones Generales'; // Obtener el tema del caché
+
+                    // 3. (LA CORRECCIÓN) Añadir la propiedad 'tema'
+                    return {
+                        id: item.id,
+                        name: item.name,
+                        ref: item.ref,
+                        freqText: item.freqText,
+                        lastDone: data.lastDone || '',
+                        tema: tema // <-- Esta línea es la corrección
+                    };
+                });
             
             const expiredRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos`);
             try {
                  await set(expiredRef, expiredInspections);
-                 console.log("Lista de trabajos vencidos actualizada correctamente.");
+                 console.log("Lista de trabajos vencidos actualizada correctamente:", expiredInspections);
              } catch (error) {
                  console.error("Error al guardar los trabajos vencidos en Firebase:", error);
              }
@@ -1285,5 +1315,4 @@
     </script>
 </body>
 </html>
-
 
