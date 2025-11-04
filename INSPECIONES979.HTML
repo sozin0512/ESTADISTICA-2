@@ -614,37 +614,50 @@
             let found = false;
             let date = new Date(); // Fecha de hoy
             let checkYear = date.getFullYear();
-            let checkMonth = date.getMonth() + 1; // Mes actual (1-12)
+            let checkMonthIndex = date.getMonth(); // 0-11 (0 = Enero, 11 = Diciembre)
 
-            console.log(`Buscando horas... Empezando en: ${checkYear}-${checkMonth}`);
+            // --- CORRECCIÓN CLAVE ---
+            // Usar los nombres de los meses en español, ya que la bitácora los usa.
+            const monthNames = [
+                "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+            ];
+            // --- FIN CORRECCIÓN ---
+
+            console.log(`Buscando horas... Empezando en: ${monthNames[checkMonthIndex]} ${checkYear}`);
 
             // Revisar los últimos 24 meses
             for (let i = 0; i < 24; i++) {
-                // CORRECCIÓN: Apuntar a 'AC HRS' y luego leer 'GENERAL'
-                const path = `artifacts/${sharedProjectId}/public_data/bitacora_mensual/${checkYear}/${checkMonth}/totales/AC HRS`;
+                const monthName = monthNames[checkMonthIndex]; // Obtener el nombre del mes
+                
+                // CORRECCIÓN: Usar el nombre del mes en la ruta
+                const path = `artifacts/${sharedProjectId}/public_data/bitacora_mensual/${checkYear}/${monthName}/totales/AC HRS`;
                 const dataRef = ref(database, path);
                 
                 try {
                     const snapshot = await get(dataRef);
                     const data = snapshot.val();
                     
-                    // CORRECCIÓN: Leer la propiedad 'GENERAL' dentro del objeto 'AC HRS'
-                    if (data && data['GENERAL'] && data['GENERAL'] > 0) {
-                        currentTotalHours = data['GENERAL'];
-                        totalFlightHoursDisplay.textContent = parseFloat(currentTotalHours).toFixed(2);
-                        console.log(`Horas encontradas: ${currentTotalHours} de ${checkYear}-${checkMonth}`);
-                        renderInspectionsTable(); // Re-renderizar todo con las horas correctas
-                        found = true;
-                        break; // Salir del bucle
+                    // Comprobación robusta (por si acaso)
+                    if (data && data['GENERAL'] !== undefined) {
+                         const total = parseFloat(data['GENERAL']);
+                        if (!isNaN(total) && total > 0) {
+                            currentTotalHours = total;
+                            totalFlightHoursDisplay.textContent = parseFloat(currentTotalHours).toFixed(2);
+                            console.log(`Horas encontradas: ${currentTotalHours} de ${monthName} ${checkYear}`);
+                            renderInspectionsTable(); // Re-renderizar todo con las horas correctas
+                            found = true;
+                            break; // Salir del bucle
+                        }
                     }
                 } catch (error) {
                     console.error(`Error buscando en ${path}:`, error.message);
                 }
 
                 // Si no se encontraron datos, ir al mes anterior
-                checkMonth--;
-                if (checkMonth === 0) {
-                    checkMonth = 12;
+                checkMonthIndex--;
+                if (checkMonthIndex < 0) {
+                    checkMonthIndex = 11; // Diciembre
                     checkYear--;
                 }
             }
@@ -1364,6 +1377,7 @@
     </script>
 </body>
 </html>
+
 
 
 
