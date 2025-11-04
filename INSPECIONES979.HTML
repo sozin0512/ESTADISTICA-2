@@ -123,7 +123,7 @@
         </div>
          <div class="form-header-grid mt-px">
              <div class="form-header-cell col-span-2">
-                 <label>HORAS TOTALES DE VUELO (AC HRS)</label>
+                <label>HORAS TOTALES DE VUELO (AC HRS)</label>
                 <div id="total-flight-hours" class="value text-lg font-bold text-blue-600">--.--</div>
             </div>
             <div class="form-header-cell">
@@ -470,7 +470,7 @@
         let activeInspectionForDelete = null;
         let inspectionsListRef = null;
         let inspectionsDataRef = null;
-        let totalHoursRef = null; // Esta variable ya no se usará para el total, pero la dejamos por si otros scripts la usan.
+        let totalHoursRef = null;
         let rolesRef = null;
         let expiredListRef = null;
         let database = null;
@@ -563,10 +563,7 @@
                         addInspectionBtn.classList.remove('hidden');
                         editModeToggle.classList.remove('hidden');
                         
-                        // CORREGIDO: Llamadas separadas
-                        loadInspectionsList();
-                        loadInspectionsData();
-                        findAndSetLatestTotalHours(); // <-- Nueva función
+                        loadInspectionsListAndData();
                     } else {
                         authContainer.style.display = 'block';
                         mainAppContent.classList.add('hidden');
@@ -608,70 +605,7 @@
         
         editModeToggle.addEventListener('click', toggleEditMode);
 
-        // --- NUEVA FUNCIÓN ---
-        // Busca hacia atrás mes por mes para encontrar el último total de AC HRS válido.
-        async function findAndSetLatestTotalHours() {
-            let found = false;
-            let date = new Date(); // Fecha de hoy
-            let checkYear = date.getFullYear();
-            let checkMonthIndex = date.getMonth(); // 0-11 (0 = Enero, 11 = Diciembre)
-
-            // --- CORRECCIÓN CLAVE ---
-            // Usar los nombres de los meses en español, ya que la bitácora los usa.
-            const monthNames = [
-                "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
-                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-            ];
-            // --- FIN CORRECCIÓN ---
-
-            console.log(`Buscando horas... Empezando en: ${monthNames[checkMonthIndex]} ${checkYear}`);
-
-            // Revisar los últimos 24 meses
-            for (let i = 0; i < 24; i++) {
-                const monthName = monthNames[checkMonthIndex]; // Obtener el nombre del mes
-                
-                // CORRECCIÓN: Usar el nombre del mes en la ruta
-                const path = `artifacts/${sharedProjectId}/public_data/bitacora_mensual/${checkYear}/${monthName}/totales/AC HRS`;
-                const dataRef = ref(database, path);
-                
-                try {
-                    const snapshot = await get(dataRef);
-                    const data = snapshot.val();
-                    
-                    // Comprobación robusta (por si acaso)
-                    if (data && data['GENERAL'] !== undefined) {
-                         const total = parseFloat(data['GENERAL']);
-                        if (!isNaN(total) && total > 0) {
-                            currentTotalHours = total;
-                            totalFlightHoursDisplay.textContent = parseFloat(currentTotalHours).toFixed(2);
-                            console.log(`Horas encontradas: ${currentTotalHours} de ${monthName} ${checkYear}`);
-                            renderInspectionsTable(); // Re-renderizar todo con las horas correctas
-                            found = true;
-                            break; // Salir del bucle
-                        }
-                    }
-                } catch (error) {
-                    console.error(`Error buscando en ${path}:`, error.message);
-                }
-
-                // Si no se encontraron datos, ir al mes anterior
-                checkMonthIndex--;
-                if (checkMonthIndex < 0) {
-                    checkMonthIndex = 11; // Diciembre
-                    checkYear--;
-                }
-            }
-
-            if (!found) {
-                console.warn("No se encontraron horas en los últimos 24 meses. Usando 0.00");
-                currentTotalHours = 0;
-                totalFlightHoursDisplay.textContent = '0.00';
-                renderInspectionsTable(); // Renderizar con 0 horas
-            }
-        }
-
-        // --- FUNCIÓN DIVIDIDA 1 ---
-        async function loadInspectionsList() {
+        async function loadInspectionsListAndData() {
             const listSnapshot = await get(inspectionsListRef);
             let firebaseData = listSnapshot.val();
             let firebaseList = [];
@@ -719,10 +653,14 @@
                  inspectionsListFromFirebase = updatedList.filter(i => i != null && typeof i === 'object');
                  renderInspectionsTable();
             });
-        }
 
-        // --- FUNCIÓN DIVIDIDA 2 ---
-        function loadInspectionsData() {
+            onValue(totalHoursRef, (snapshot) => {
+                const totalHoursData = snapshot.val();
+                currentTotalHours = totalHoursData?.['AC HRS'] || 0;
+                totalFlightHoursDisplay.textContent = parseFloat(currentTotalHours).toFixed(2);
+                renderInspectionsTable();
+            });
+
             onValue(inspectionsDataRef, (snapshot) => {
                 inspectionsDataCache = snapshot.val() || {};
                 renderInspectionsTable();
@@ -1377,7 +1315,4 @@
     </script>
 </body>
 </html>
-
-
-
 
