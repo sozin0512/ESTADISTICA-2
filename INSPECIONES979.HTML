@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Inspecciones FAH-979</title>
+    <title>Control de Inspecciones FAH-976</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -117,7 +117,7 @@
             </div>
             <div class="form-header-cell">
                 <label>3. No SERIE</label>
-                <div class="value">FAH-979</div>
+                <div class="value">FAH-976</div>
             </div>
         </div>
          <div class="form-header-grid mt-px">
@@ -137,9 +137,6 @@
         
         <div class="flex justify-end gap-2 my-2 no-print">
             <button id="edit-mode-toggle" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-5 rounded-lg text-sm hidden">Activar Modo Edición</button>
-            <button id="add-section-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg text-sm hidden">
-                + Nueva Sección
-            </button>
             <button id="add-inspection-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg text-sm hidden">
                 + Nueva Inspección
             </button>
@@ -233,7 +230,8 @@
     <div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50">
         <div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-2xl text-center">
             <h3 class="text-lg font-bold text-gray-800 mb-4">Confirmar Borrado</h3>
-            <p id="delete-confirmation-text" class="text-gray-600 mb-6">¿Estás seguro que deseas eliminar este elemento?</p>
+            <p class="text-gray-600 mb-6">¿Estás seguro que deseas eliminar esta inspección?</p>
+            <p id="delete-inspection-name" class="font-bold mb-4"></p>
             <div class="flex justify-center gap-4">
                 <button id="delete-modal-cancel" class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
                 <button id="delete-modal-confirm" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg">Eliminar</button>
@@ -307,40 +305,9 @@
         </div>
     </div>
 
-    <!-- Modal para Editar/Crear Sección (Header) -->
-    <div id="header-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50">
-        <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-2xl">
-            <h3 id="header-modal-title" class="text-lg font-bold text-gray-800 mb-4"></h3>
-            <form id="header-form">
-                <div>
-                    <label for="header-name-input" class="block text-sm font-medium text-gray-700">Nombre de la Sección</label>
-                    <input type="text" id="header-name-input" class="mt-1 block w-full p-2 border rounded-md" required>
-                    <input type="hidden" id="header-index-input">
-                </div>
-                <div class="flex justify-end gap-4 mt-6">
-                    <button type="button" id="header-modal-cancel" class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
-                    <button type="submit" id="header-modal-save" class="px-5 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg">Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal para Sincronizar con Motor 2 -->
-    <div id="engine2-sync-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50">
-        <div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-2xl text-center">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Sincronizar con Motor 2</h3>
-            <p class="text-gray-600 mb-6">Esta inspección pertenece a la sección "ENGINE 1 INSPECCIONES". ¿Deseas aplicar los mismos cambios a "ENGINE 2 INSPECCIONES"?</p>
-            <div class="flex justify-center gap-4">
-                <button id="sync-modal-no" class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">No, solo Motor 1</button>
-                <button id="sync-modal-yes" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg">Sí, aplicar a ambos</button>
-            </div>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
         import { getDatabase, ref, onValue, set, get, remove, push } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
         const inspectionsList = [
@@ -514,7 +481,6 @@
         const totalFlightHoursDisplay = document.getElementById('total-flight-hours');
         
         const addInspectionBtn = document.getElementById('add-inspection-btn');
-        const addSectionBtn = document.getElementById('add-section-btn');
         const editModeToggle = document.getElementById('edit-mode-toggle');
         const editActionsHeader = document.querySelector('.edit-actions-header');
 
@@ -533,7 +499,7 @@
         const addEditModalCancel = document.getElementById('add-edit-modal-cancel');
 
         const deleteModal = document.getElementById('delete-modal');
-        const deleteConfirmationText = document.getElementById('delete-confirmation-text');
+        const deleteInspectionName = document.getElementById('delete-inspection-name');
         const deleteModalCancel = document.getElementById('delete-modal-cancel');
         const deleteModalConfirm = document.getElementById('delete-modal-confirm');
 
@@ -555,37 +521,23 @@
         const dateModalCancel = document.getElementById('date-modal-cancel');
         const dateModalResetCycle = document.getElementById('date-modal-reset-cycle');
 
-        const headerModal = document.getElementById('header-modal');
-        const headerModalTitle = document.getElementById('header-modal-title');
-        const headerForm = document.getElementById('header-form');
-        const headerNameInput = document.getElementById('header-name-input');
-        const headerIndexInput = document.getElementById('header-index-input');
-        const headerModalCancel = document.getElementById('header-modal-cancel');
-
         const trabajosBtn = document.getElementById('trabajos-btn');
 
-        const engine2SyncModal = document.getElementById('engine2-sync-modal');
-        const syncModalYes = document.getElementById('sync-modal-yes');
-        const syncModalNo = document.getElementById('sync-modal-no');
-        let tempInspectionDataForSync = null;
-
-
         async function initApp() {
-            sharedProjectId = "FAH-979-DATA";
+            sharedProjectId = "FAH-976-DATA";
 
             const firebaseConfig = {
-              apiKey: "AIzaSyCIZjCL34TG4f8WSd3xdbuO8WKbVuI5F2c",
-              authDomain: "fah-979.firebaseapp.com",
-              databaseURL: "https://fah-979-default-rtdb.europe-west1.firebasedatabase.app",
-              projectId: "fah-979",
-              storageBucket: "fah-979.firebasestorage.app",
-              messagingSenderId: "48264926465",
-              appId: "1:48264926465:web:546b8c73d4615349ebf700",
-              measurementId: "G-3KRV6FV0FB"
+                apiKey: "AIzaSyCIZjCL34TG4f8WSd3xdbuO8WKbVuI5F2c",
+                authDomain: "fah-979.firebaseapp.com",
+                databaseURL: "https://fah-979-default-rtdb.europe-west1.firebasedatabase.app",
+                projectId: "fah-979",
+                storageBucket: "fah-979.firebasestorage.app",
+                messagingSenderId: "48264926465",
+                appId: "1:48264926465:web:546b8c73d4615349ebf700",
+                measurementId: "G-3KRV6FV0FB"
             };
 
             const app = initializeApp(firebaseConfig);
-            const analytics = getAnalytics(app);
             database = getDatabase(app);
             auth = getAuth(app);
             
@@ -596,61 +548,58 @@
             expiredListRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos`);
 
             onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    authContainer.style.display = 'none';
-                    mainAppContent.classList.remove('hidden');
-                    const roleSnapshot = await get(ref(database, `user_roles/${user.uid}`));
-                    currentUserRole = roleSnapshot.val() || 'viewer';
-                    
-                    // Allow all logged in users to see edit buttons
-                    addInspectionBtn.classList.remove('hidden');
-                    addSectionBtn.classList.remove('hidden');
-                    editModeToggle.classList.remove('hidden');
-                    
-                    loadInspectionsListAndData();
-                } else {
+                try {
+                    if (user) {
+                        authContainer.style.display = 'none';
+                        mainAppContent.classList.remove('hidden');
+                        const roleSnapshot = await get(ref(database, `user_roles/${user.uid}`));
+                        currentUserRole = roleSnapshot.val() || 'viewer';
+                        
+                        // Allow all logged in users to see edit buttons
+                        addInspectionBtn.classList.remove('hidden');
+                        editModeToggle.classList.remove('hidden');
+                        
+                        loadInspectionsListAndData();
+                    } else {
+                        authContainer.style.display = 'block';
+                        mainAppContent.classList.add('hidden');
+                        addInspectionBtn.classList.add('hidden');
+                        editModeToggle.classList.add('hidden');
+                    }
+                } catch (error) {
+                    console.error("Error during auth state change processing:", error);
+                    authContainer.innerHTML = `<p class="text-red-500">Error de autenticación: ${error.message}</p>`;
                     authContainer.style.display = 'block';
                     mainAppContent.classList.add('hidden');
-                    addInspectionBtn.classList.add('hidden');
-                    addSectionBtn.classList.add('hidden');
-                    editModeToggle.classList.add('hidden');
                 }
             });
 
-            signInAnonymously(auth).catch((error) => {
-                console.error("Anonymous sign-in failed:", error);
-            });
+            try {
+                // Use custom token if available (Canvas environment)
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    console.log("Signing in with custom token...");
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    // Fallback to anonymous sign-in
+                    console.log("Signing in anonymously...");
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                 console.error("Authentication failed:", error);
+                 authContainer.innerHTML = `<p class="text-red-500">Fallo la autenticación inicial: ${error.message}</p>`;
+            }
         }
         
         initApp();
         
-        addSectionBtn.addEventListener('click', () => openHeaderModal());
-        headerForm.addEventListener('submit', saveHeader);
-        headerModalCancel.addEventListener('click', closeHeaderModal);
-        
         window.addEventListener('keydown', (e) => {
              if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'e') {
-                 handleEditModeToggle();
+                 toggleEditMode();
                  e.preventDefault(); // Evita que el navegador realice su acción por defecto
              }
         });
         
-        editModeToggle.addEventListener('click', handleEditModeToggle);
-
-        function handleEditModeToggle() {
-            if (editMode) {
-                // Si ya está en modo edición, simplemente lo desactiva sin contraseña.
-                toggleEditMode();
-            } else {
-                // Si no está en modo edición, pide la contraseña.
-                const password = prompt("Por favor, introduce la contraseña para activar el modo edición:");
-                if (password === "Kevin") {
-                    toggleEditMode();
-                } else if (password !== null) { // Se asegura que el usuario no presionó "Cancelar"
-                    alert("Contraseña incorrecta.");
-                }
-            }
-        }
+        editModeToggle.addEventListener('click', toggleEditMode);
 
         async function loadInspectionsListAndData() {
             const listSnapshot = await get(inspectionsListRef);
@@ -717,7 +666,6 @@
         function toggleEditMode() {
             editMode = !editMode;
             editActionsHeader.classList.toggle('hidden', !editMode);
-            addSectionBtn.classList.toggle('hidden', !editMode);
 
             if (editMode) {
                 editModeToggle.textContent = 'Desactivar Modo Edición';
@@ -792,24 +740,8 @@
             inspectionsListFromFirebase.forEach(item => {
                 if (!item) return; // Safeguard against null items in the array
                 if (item.type === 'header') {
-                    const rowIndex = inspectionsListFromFirebase.findIndex(i => i === item);
                     const row = document.createElement('tr');
-                    if (editMode) {
-                        row.innerHTML = `
-                            <td colspan="7" class="p-2 section-header">${item.name}</td>
-                            <td class="p-2 text-center align-middle no-print bg-yellow-300">
-                                <div class="flex items-center justify-center gap-2">
-                                    <button class="action-button edit edit-header" data-index="${rowIndex}" title="Editar Título de Sección">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>
-                                    </button>
-                                    <button class="action-button delete delete-header" data-index="${rowIndex}" title="Borrar Sección Completa">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
-                                    </button>
-                                </div>
-                            </td>`;
-                    } else {
-                        row.innerHTML = `<td colspan="7" class="p-2 section-header">${item.name}</td>`;
-                    }
+                    row.innerHTML = `<td colspan="${editMode ? 8 : 7}" class="p-2 section-header">${item.name}</td>`;
                     inspectionsTableBody.appendChild(row);
                     return;
                 }
@@ -870,11 +802,11 @@
                 const actionsHtml = isConfigurable ? `
                     <td class="p-2 text-center align-middle no-print">
                         <div class="flex flex-col gap-1">
-                            <button class="action-button edit edit-insp" data-id="${item.id}">
+                            <button class="action-button edit-insp" data-id="${item.id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.72-2.19l-4.57 4.57-1.42.36.36-1.42 4.57-4.57a1.5 1.5 0 012.12 2.12z" /></svg>
                                 Editar
                             </button>
-                            <button class="action-button delete delete-insp" data-id="${item.id}">
+                            <button class="action-button delete-insp" data-id="${item.id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1H9a1 1 0 00-1 1v3m0 0H5.5a1 1 0 000 2h13a1 1 0 000-2H16" /></svg>
                                 Borrar
                             </button>
@@ -948,20 +880,6 @@
                     }
                 });
             });
-            
-            document.querySelectorAll('.edit-header').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const index = e.currentTarget.dataset.index;
-                    openHeaderModal(parseInt(index));
-                });
-            });
-
-            document.querySelectorAll('.delete-header').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const index = e.currentTarget.dataset.index;
-                    handleDeleteHeader(parseInt(index));
-                });
-            });
         }
         
         function saveInspectionData(event) {
@@ -999,8 +917,15 @@
 
                 // Find and set the current section
                 const inspectionIndex = inspectionsListFromFirebase.findIndex(item => String(item.id) === String(inspection.id));
-                let currentSectionName = findSectionForIndex(inspectionIndex);
-                
+                let currentSectionName = '';
+                if (inspectionIndex > -1) {
+                    for (let i = inspectionIndex - 1; i >= 0; i--) {
+                        if (inspectionsListFromFirebase[i].type === 'header') {
+                            currentSectionName = inspectionsListFromFirebase[i].name;
+                            break;
+                        }
+                    }
+                }
                 inspectionSectionSelect.value = currentSectionName;
                 inspectionSectionSelect.disabled = true; // Disable changing section on edit
 
@@ -1046,155 +971,92 @@
             event.preventDefault();
             
             const isEditing = !!inspectionIdInput.value;
-            const id = inspectionIdInput.value;
+            let id;
+
+            if (isEditing) {
+                id = inspectionIdInput.value;
+            } else {
+                const maxId = inspectionsListFromFirebase
+                    .reduce((max, item) => {
+                        const numId = parseInt(String(item.id));
+                        return !isNaN(numId) && numId > max ? numId : max;
+                    }, 0);
+                id = maxId + 1;
+            }
 
             const name = inspectionNameInput.value.trim();
-            if (!name) {
-                alert("El nombre de la inspección es obligatorio.");
+            const referenceValue = inspectionRefInput.value.trim();
+            const freqType = inspectionFreqTypeSelect.value;
+            let freqValue = null;
+            let freqText = inspectionFreqTextInput.value.trim();
+            const hasValueInput = !freqValueContainer.classList.contains('hidden');
+            const valueFromInput = parseFloat(inspectionFreqValueInput.value);
+            
+            // FIX: When frequency type changes to one that doesn't use the text input (like HRS),
+            // its old value can persist. We reset it here to ensure it's regenerated correctly.
+            if (freqType.startsWith('HRS') || freqType.includes('CYCLES')) {
+                freqText = '';
+            }
+
+            if (hasValueInput && !isNaN(valueFromInput)) {
+                if (freqType === 'HRS' || freqType === 'DUAL_H' || freqType.includes('CYCLES')) {
+                    freqValue = valueFromInput;
+                    if (!freqText) freqText = `${freqValue} HRS`;
+                } else if (freqType === 'DATE' || freqType === 'DUAL_D') {
+                    freqValue = { days: valueFromInput };
+                    if (!freqText) freqText = `${valueFromInput} DIAS`;
+                } else if (freqType === 'DUAL_M') {
+                    freqValue = { months: valueFromInput };
+                    if (!freqText) freqText = `${valueFromInput} MESES`;
+                } else if (freqType === 'DUAL_Y') {
+                    freqValue = { years: valueFromInput };
+                    if (!freqText) freqText = `${valueFromInput} AÑOS`;
+                }
+            }
+
+            if (!name || (freqType !== 'SPECIAL' && freqType !== 'NONE' && freqValue === null && !freqText)) {
+                console.error("Error de validación: El nombre y la frecuencia son obligatorios. Asegúrese de que el valor de la frecuencia sea un número válido.");
                 return;
             }
             
-            const referenceValue = inspectionRefInput.value.trim();
-            const freqType = inspectionFreqTypeSelect.value;
-            const valueFromInput = parseFloat(inspectionFreqValueInput.value);
+            const newInspection = { id: String(id), name, ref: referenceValue, freqType, freqValue, freqText };
             
-            let freqValue = null;
-            let freqText = '';
+            const inspectionRef = ref(database, `artifacts/${sharedProjectId}/public_data/inspections_list`);
 
-            // This logic block correctly determines freqValue and freqText based on the selected type,
-            // preventing old data from persisting when the type is changed.
-            if (!isNaN(valueFromInput)) {
-                switch(freqType) {
-                    case 'HRS':
-                    case 'DUAL_H':
-                        freqValue = valueFromInput;
-                        freqText = `${valueFromInput} HRS`;
-                        break;
-                    case 'DATE': // This type is ambiguous. Defaulting to Days for new entries.
-                                 // For existing entries, the user should pick a specific DUAL type to be clear.
-                    case 'DUAL_D':
-                        freqValue = { days: valueFromInput };
-                        freqText = `${valueFromInput} DIAS`;
-                        break;
-                    case 'DUAL_M':
-                        freqValue = { months: valueFromInput };
-                        freqText = `${valueFromInput} MESES`;
-                        break;
-                    case 'DUAL_Y':
-                        freqValue = { years: valueFromInput };
-                        freqText = `${valueFromInput} AÑOS`;
-                        break;
-                }
-            }
-            
-            // For types that don't use a numeric value, get text from the text input.
-            if (freqType === 'SPECIAL') {
-                freqText = inspectionFreqTextInput.value.trim();
-                freqValue = freqText; // In 'SPECIAL', the text itself is the value.
-            } else if (freqType === 'NONE') {
-                freqText = inspectionFreqTextInput.value.trim();
-                freqValue = null; // No frequency value.
-            }
-            
-            // If the user filled the text field for a DUAL type, that should take precedence for the display text.
-            if (freqType.startsWith('DUAL') && inspectionFreqTextInput.value.trim() !== '') {
-                freqText = inspectionFreqTextInput.value.trim();
-            }
-
-            const inspectionData = {
-                name,
-                ref: referenceValue,
-                freqType,
-                freqValue,
-                freqText
-            };
-
-            let sectionName;
-             if (isEditing) {
-                const inspectionIndex = inspectionsListFromFirebase.findIndex(item => String(item.id) === String(id));
-                sectionName = findSectionForIndex(inspectionIndex);
-            } else {
-                sectionName = inspectionSectionSelect.value;
-            }
-
-            if (sectionName === 'ENGINE 1 INSPECCIONES') {
-                tempInspectionDataForSync = { ...inspectionData, isEditing, id, sectionName };
-                openEngine2SyncModal();
-            } else {
-                finalizeSave(false, { ...inspectionData, isEditing, id, sectionName });
-            }
-        }
-
-        async function finalizeSave(syncWithEngine2, data) {
-            const { isEditing, id, sectionName, ...newInspectionData } = data;
-            
-            let updatedList = [...inspectionsListFromFirebase];
-            let currentMaxId = updatedList.reduce((max, item) => {
-                if (item && item.id) {
-                    const numId = parseInt(String(item.id).replace(/[a-zA-Z]/g, ''));
-                    if (!isNaN(numId) && numId > max) return numId;
-                }
-                return max;
-            }, 0);
-
-            // --- Part 1: Save for original section (Engine 1 or other) ---
+            let updatedList;
             if (isEditing) {
-                const index = updatedList.findIndex(item => String(item.id) === String(id));
-                if (index !== -1) {
-                    updatedList[index] = { ...updatedList[index], ...newInspectionData };
-                } else {
-                     console.error("Error: No se pudo encontrar la inspección para editar.");
-                     return;
+                const existingIndex = inspectionsListFromFirebase.findIndex(item => String(item.id) === String(id));
+                updatedList = [...inspectionsListFromFirebase];
+                if (existingIndex !== -1) {
+                    updatedList[existingIndex] = newInspection;
                 }
             } else {
-                currentMaxId++;
-                const newInsp = { id: String(currentMaxId), ...newInspectionData };
+                const selectedSectionName = inspectionSectionSelect.value;
+                const sectionHeaderIndex = inspectionsListFromFirebase.findIndex(item => item.type === 'header' && item.name === selectedSectionName);
                 
-                const sectionHeaderIndex = updatedList.findIndex(item => item.type === 'header' && item.name === sectionName);
+                let insertionIndex = inspectionsListFromFirebase.length;
                 if (sectionHeaderIndex !== -1) {
-                    let nextHeaderIndex = updatedList.findIndex((item, i) => i > sectionHeaderIndex && item.type === 'header');
-                    const insertAtIndex = (nextHeaderIndex === -1) ? updatedList.length : nextHeaderIndex;
-                    updatedList.splice(insertAtIndex, 0, newInsp);
-                } else {
-                    updatedList.push(newInsp); // Fallback
+                    let nextSectionHeaderIndex = inspectionsListFromFirebase.findIndex((item, index) => index > sectionHeaderIndex && item.type === 'header');
+                    if (nextSectionHeaderIndex !== -1) {
+                        insertionIndex = nextSectionHeaderIndex;
+                    }
                 }
-            }
-
-            // --- Part 2: Sync with Engine 2 if requested ---
-            if (syncWithEngine2) {
-                const e2HeaderIndex = updatedList.findIndex(h => h.name === 'ENGINE 2 INSPECCIONES');
-                if (e2HeaderIndex > -1) {
-                    const e2PartnerName = newInspectionData.name.startsWith('E1.') 
-                        ? newInspectionData.name.replace('E1.', 'E2.')
-                        : newInspectionData.name;
-
-                    // Based on user request to always be able to add a repeated inspection,
-                    // we will always create a new entry in Engine 2 instead of updating an existing one.
-                    currentMaxId++;
-                    const newPartnerInsp = { ...newInspectionData, id: String(currentMaxId), name: e2PartnerName };
-                    
-                    let nextHeaderAfterE2 = updatedList.findIndex((item, i) => i > e2HeaderIndex && item.type === 'header');
-                    const insertAtIndex = (nextHeaderAfterE2 === -1) ? updatedList.length : nextHeaderAfterE2;
-                    updatedList.splice(insertAtIndex, 0, newPartnerInsp);
-                }
+                
+                updatedList = [...inspectionsListFromFirebase];
+                updatedList.splice(insertionIndex, 0, newInspection);
             }
             
-            // --- Part 3: Commit to Firebase ---
             try {
-                await set(inspectionsListRef, updatedList);
-                console.log("Inspección guardada con éxito.");
+                await set(inspectionRef, updatedList);
+                closeAddEditModal();
             } catch (error) {
                 console.error("Error al guardar la inspección:", error);
-                alert("Hubo un error al guardar los datos.");
-            } finally {
-                closeAddEditModal();
-                closeEngine2SyncModal();
             }
         }
         
         function openDeleteModal(inspection) {
             activeInspectionForDelete = inspection;
-            deleteConfirmationText.innerHTML = `¿Estás seguro que deseas eliminar esta inspección?<br><strong class="text-black">"${inspection.name}"</strong>`;
+            deleteInspectionName.textContent = `"${inspection.name}"`;
             deleteModal.style.display = 'flex';
         }
 
@@ -1206,20 +1068,15 @@
         async function deleteInspection() {
             if (!activeInspectionForDelete) return;
 
-            if (typeof activeInspectionForDelete.deleteFn === 'function') {
-                // Es un borrado de sección
-                await activeInspectionForDelete.deleteFn();
-            } else {
-                // Es un borrado de inspección individual
-                const updatedList = inspectionsListFromFirebase.filter(item => String(item.id) !== String(activeInspectionForDelete.id));
-                const inspectionsListRef = ref(database, `artifacts/${sharedProjectId}/public_data/inspections_list`);
-                try {
-                    await set(inspectionsListRef, updatedList);
-                } catch (error) {
-                    console.error("Error al eliminar la inspección:", error);
-                }
+            const updatedList = inspectionsListFromFirebase.filter(item => String(item.id) !== String(activeInspectionForDelete.id));
+            const inspectionsListRef = ref(database, `artifacts/${sharedProjectId}/public_data/inspections_list`);
+            
+            try {
+                await set(inspectionsListRef, updatedList);
+                closeDeleteModal();
+            } catch (error) {
+                console.error("Error al eliminar la inspección:", error);
             }
-            closeDeleteModal();
         }
 
         function openCalculationModal(inspection) {
@@ -1247,98 +1104,6 @@
         function closeDateModal() {
             dateModal.style.display = 'none';
             activeInspectionForCalc = null;
-        }
-
-        function openHeaderModal(index = null) {
-            headerForm.reset();
-            if (index !== null) {
-                // Editando header existente
-                headerModalTitle.textContent = "Editar Nombre de Sección";
-                headerNameInput.value = inspectionsListFromFirebase[index].name;
-                headerIndexInput.value = index;
-            } else {
-                // Agregando nuevo header
-                headerModalTitle.textContent = "Crear Nueva Sección";
-                headerIndexInput.value = ''; // Sin índice al crear
-            }
-            headerModal.style.display = 'flex';
-            headerNameInput.focus();
-        }
-
-        function closeHeaderModal() {
-            headerModal.style.display = 'none';
-        }
-
-        async function saveHeader(event) {
-            event.preventDefault();
-            const name = headerNameInput.value.trim();
-            if (!name) return;
-
-            const index = headerIndexInput.value;
-            let updatedList = [...inspectionsListFromFirebase];
-
-            if (index) {
-                // Editando
-                updatedList[parseInt(index)].name = name;
-            } else {
-                // Creando
-                updatedList.push({ type: 'header', name: name });
-            }
-
-            try {
-                await set(inspectionsListRef, updatedList);
-                closeHeaderModal();
-            } catch (error) {
-                console.error("Error al guardar la sección:", error);
-            }
-        }
-        
-        function handleDeleteHeader(index) {
-            const headerToDelete = inspectionsListFromFirebase[index];
-            if (!headerToDelete || headerToDelete.type !== 'header') return;
-
-            // Encuentra el rango de items a borrar
-            let endIndex = inspectionsListFromFirebase.findIndex((item, i) => i > index && item.type === 'header');
-            if (endIndex === -1) {
-                endIndex = inspectionsListFromFirebase.length;
-            }
-
-            const sectionName = headerToDelete.name;
-            const itemsToDeleteCount = endIndex - index;
-
-            activeInspectionForDelete = { 
-                deleteFn: async () => {
-                    let updatedList = [...inspectionsListFromFirebase];
-                    updatedList.splice(index, itemsToDeleteCount);
-                    try {
-                        await set(inspectionsListRef, updatedList);
-                        console.log('Sección eliminada con éxito');
-                    } catch (error) {
-                        console.error("Error al eliminar la sección:", error);
-                    }
-                }
-            };
-            
-            deleteConfirmationText.innerHTML = `¿Estás seguro que deseas eliminar la sección completa?<br><strong class="text-black">"${sectionName}"</strong><br><span class="text-sm text-red-600">Esto borrará también ${itemsToDeleteCount - 1} inspecciones dentro de ella.</span>`;
-            deleteModal.style.display = 'flex';
-        }
-
-        function findSectionForIndex(index) {
-            if (index < 0 || index >= inspectionsListFromFirebase.length) return '';
-            for (let i = index; i >= 0; i--) {
-                if (inspectionsListFromFirebase[i] && inspectionsListFromFirebase[i].type === 'header') {
-                    return inspectionsListFromFirebase[i].name;
-                }
-            }
-            return ''; // Not found
-        }
-        
-        function openEngine2SyncModal() {
-            engine2SyncModal.style.display = 'flex';
-        }
-        
-        function closeEngine2SyncModal() {
-            engine2SyncModal.style.display = 'none';
         }
 
         function handleCalculation(option) {
@@ -1472,19 +1237,6 @@
         deleteModalConfirm.addEventListener('click', deleteInspection);
         deleteModalCancel.addEventListener('click', closeDeleteModal);
         
-        syncModalYes.addEventListener('click', () => {
-            if (tempInspectionDataForSync) {
-                finalizeSave(true, tempInspectionDataForSync);
-                tempInspectionDataForSync = null;
-            }
-        });
-        syncModalNo.addEventListener('click', () => {
-             if (tempInspectionDataForSync) {
-                finalizeSave(false, tempInspectionDataForSync);
-                tempInspectionDataForSync = null;
-            }
-        });
-
         inspectionFreqTypeSelect.addEventListener('change', (e) => {
             const type = e.target.value;
             freqValueContainer.classList.add('hidden');
@@ -1533,4 +1285,5 @@
     </script>
 </body>
 </html>
+
 
