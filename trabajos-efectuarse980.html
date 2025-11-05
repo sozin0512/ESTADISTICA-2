@@ -146,7 +146,7 @@
                 <div class="bg-white p-0 border-r border-b border-gray-700"><span id="eng1-sn-csn-cso" class="editable-field" contenteditable="true"></span></div>
                 <!-- Row 4 -->
                 <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">MATRÍCULA</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="matricula" class="editable-field" contenteditable="true">FAH-980</span></div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="matricula" class="editable-field" contenteditable="true">FAH-979</span></div>
                 <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 2  TSN/TSO</div>
                 <div class="bg-white p-0 border-r border-b border-gray-700"><span id="eng2-sn-tsn-tso" class="editable-field" contenteditable="true"></span></div>
                 <!-- Row 5 -->
@@ -311,16 +311,16 @@
         import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
         import { getAuth, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-        // Configuración de Firebase para FAH-980
-        const firebaseConfig = {
-            apiKey: "AIzaSyCIZjCL34TG4f8WSd3xdbuO8WKbVuI5F2c",
-            authDomain: "fah-980.firebaseapp.com",
-            databaseURL: "https://fah-980-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "fah-980",
-            storageBucket: "fah-980.firebasestorage.app",
-            messagingSenderId: "48264926465",
-            appId: "1:48264926465:web:546b8c73d4615349ebf700",
-            measurementId: "G-3KRV6FV0FB"
+        // Configuración de Firebase para FAH-979
+      const firebaseConfig = {
+            apiKey: "AIzaSyC6pUgMRSRCZLZfW0Cy1b00AFN6nkPjsF8",
+            authDomain: "fah-980-ceb96.firebaseapp.com",
+            databaseURL: "https://fah-980-ceb96-default-rtdb.firebaseio.com",
+            projectId: "fah-980-ceb96",
+            storageBucket: "fah-980-ceb96.firebasestorage.app",
+            messagingSenderId: "57890484294",
+            appId: "1:57890484294:web:8a27759a4da0b262e99a47",
+            measurementId: "G-HSZMRM7ZCS"
         };
         
         
@@ -328,8 +328,7 @@
         const database = getDatabase(app);
         const auth = getAuth(app);
         
-        // El ID de proyecto compartido ahora es FAH-980
-        const sharedProjectId = "FAH-980-DATA";
+        const sharedProjectId = "FAH-979-DATA"; // Adaptado para 979
         const paperContainer = document.querySelector('.paper-container');
         const expiredListTableBody = document.getElementById('vencidas-list');
         const loadingMessage = document.getElementById('loading-message');
@@ -814,7 +813,7 @@
         });
 
         function generateDiscrepancyReport(inspections) {
-            const matricula = document.getElementById('matricula').textContent || 'FAH-980'; // Adaptado
+            const matricula = document.getElementById('matricula').textContent || 'FAH-979'; // Adaptado
             const fecha = new Date().toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: '2-digit' }).replace('.', '').toUpperCase();
 
             // --- Start of Report HTML ---
@@ -988,11 +987,7 @@
                     let itemCounter = 1;
                     content += `<tr><td class="num">${themeCounter}.</td><td><strong>${theme}</strong></td></tr>`;
                     groupedByTheme[theme].forEach(item => {
-                        // Asegurar que item.name y item.ref no rompan el string
-                        const name = (item.name || '').replace(/`/g, '\\`').replace(/\$/g, '\\$');
-                        const ref = (item.ref || '').replace(/`/g, '\\`').replace(/\$/g, '\\$');
-
-                        content += `<tr><td class="num">${themeCounter}.${itemCounter++}</td><td>Efectuar ${name} / ${ref}</td></tr>`;
+                        content += `<tr><td class="num">${themeCounter}.${itemCounter++}</td><td>Efectuar ${item.name} / ${item.ref}</td></tr>`;
                     });
                     themeCounter++;
                 }
@@ -1032,15 +1027,11 @@
                                   <p>${item.signature.signatureName || ''}</p>
                                </td>`
                             : '<td></td>';
-                        
-                        // Asegurar que item.name y item.ref no rompan el string
-                        const name = (item.name || '').replace(/`/g, '\\`').replace(/\$/g, '\\$');
-                        const ref = (item.ref || '').replace(/`/g, '\\`').replace(/\$/g, '\\$');
 
                         content += `
                             <tr>
                                 <td class="num">${themeCounter}.${itemCounter++}</td>
-                                <td>Se completó ${name} / ${ref}</td>
+                                <td>Se completó ${item.name} / ${item.ref}</td>
                                 ${signatureCell}
                             </tr>
                         `;
@@ -1072,14 +1063,11 @@
             `;
 
             const reportWindow = window.open('', '_blank');
-            if (reportWindow) {
-                reportWindow.document.open();
-                reportWindow.document.write(reportContent);
-                reportWindow.document.close();
-            } else {
-                console.error("No se pudo abrir la ventana para el reporte. Verifique la configuración de pop-ups.");
-            }
-        } // Cierre de la función generateDiscrepancyReport
+            reportWindow.document.open();
+            reportWindow.document.write(reportContent);
+            reportWindow.document.close();
+        }
     </script>
 </body>
 </html>
+
