@@ -307,28 +307,30 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-        import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
-        import { getAuth, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            onSnapshot, 
+            setDoc, 
+            updateDoc,
+            deleteDoc,
+            query,
+            getDocs,
+            getDoc,
+            orderBy
+        } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
-        // Configuración de Firebase para FAH-979
-      const firebaseConfig = {
-            apiKey: "AIzaSyC6pUgMRSRCZLZfW0Cy1b00AFN6nkPjsF8",
-            authDomain: "fah-980-ceb96.firebaseapp.com",
-            databaseURL: "https://fah-980-ceb96-default-rtdb.firebaseio.com",
-            projectId: "fah-980-ceb96",
-            storageBucket: "fah-980-ceb96.firebasestorage.app",
-            messagingSenderId: "57890484294",
-            appId: "1:57890484294:web:8a27759a4da0b262e99a47",
-            measurementId: "G-HSZMRM7ZCS"
-        };
-        
+        // OBLIGATORIO: Usar variables de entorno para la configuración y el ID de la aplicación.
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
         const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+        const db = getFirestore(app);
         const auth = getAuth(app);
         
-        const sharedProjectId = "FAH-979-DATA"; // Adaptado para 979
         const paperContainer = document.querySelector('.paper-container');
         const expiredListTableBody = document.getElementById('vencidas-list');
         const loadingMessage = document.getElementById('loading-message');
@@ -345,15 +347,15 @@
         let activeSignatureCell = null;
         let isAuthReady = false;
 
-        // NEW: Password Modal elements
+        // Password Modal elements
         const passwordModal = document.getElementById('password-modal');
         const passwordInput = document.getElementById('password-input');
         const passwordError = document.getElementById('password-error');
         const passwordCancelBtn = document.getElementById('password-cancel');
         const passwordConfirmBtn = document.getElementById('password-confirm');
-        let signatureToDeleteIndex = null;
+        let signatureToDeleteDocId = null; // Changed from Index to DocId
 
-        // NEW: Confirmation Modal elements
+        // Confirmation Modal elements
         const confirmModal = document.getElementById('confirm-modal');
         const confirmModalTitle = document.getElementById('confirm-modal-title');
         const confirmModalOkBtn = document.getElementById('confirm-modal-ok');
@@ -362,7 +364,8 @@
 
         // Details Section elements
         const saveDetailsBtn = document.getElementById('save-details-btn');
-        const detailsRef = ref(database, `artifacts/${sharedProjectId}/public_data/orden_detalles`);
+        // Firestore: Tratamos los detalles como un documento único
+        const detailsDocRef = doc(db, `artifacts/${appId}/public_data/orden_detalles`);
         const detailFieldIds = [
             'fecha-inicio', 'fecha-finalizacion', 'modelo', 'eng1-sn-tsn-tso',
             'numero-serie', 'eng1-sn-csn-cso', 'matricula', 'eng2-sn-tsn-tso',
@@ -378,22 +381,17 @@
         // --- AUTHENTICATION & DATA LOADING ---
         async function initializeAppAndData() {
             try {
-                // Lógica de autenticación actualizada para manejar __initial_auth_token
+                // Lógica de autenticación
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    console.log("Signing in with custom token...");
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
-                    // Fallback to anonymous sign-in
-                    console.log("Signing in anonymously...");
                     await signInAnonymously(auth);
                 }
-                console.log("Authentication successful.");
                 isAuthReady = true;
                 loadOrderDetails();
                 loadExpiredInspections();
             } catch (error) {
                 console.error("Authentication failed:", error);
-                // No usar alert()
                 loadingMessage.textContent = `Error de autenticación: ${error.message}. Recargue la página.`;
                 loadingMessage.classList.remove('hidden');
                 loadingMessage.classList.add('text-red-500');
@@ -401,10 +399,10 @@
         }
         initializeAppAndData();
 
-        // --- LOAD AND SAVE ORDER DETAILS ---
+        // --- LOAD AND SAVE ORDER DETAILS (SINGLE DOCUMENT) ---
         function loadOrderDetails() {
-            onValue(detailsRef, (snapshot) => {
-                const data = snapshot.val();
+            onSnapshot(detailsDocRef, (docSnapshot) => {
+                const data = docSnapshot.data();
                 if (data) {
                     detailFieldIds.forEach(id => {
                         const element = document.getElementById(id);
@@ -413,12 +411,13 @@
                         }
                     });
                 }
+            }, (error) => {
+                 console.error("Error al cargar detalles de la orden:", error);
             });
         }
 
         saveDetailsBtn.addEventListener('click', () => {
             if (!isAuthReady) {
-                // No usar alert()
                 console.warn("Conectando... por favor espere un momento.");
                 return;
             }
@@ -428,7 +427,8 @@
                 dataToSave[id] = element ? element.textContent.trim() : '';
             });
 
-            set(detailsRef, dataToSave)
+            // Firestore: Usamos setDoc para crear o reemplazar el documento
+            setDoc(detailsDocRef, dataToSave)
                 .then(() => {
                     saveDetailsBtn.textContent = '¡Guardado!';
                     saveDetailsBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
@@ -441,19 +441,27 @@
                 })
                 .catch((error) => {
                     console.error("Error guardando detalles:", error);
-                    // No usar alert()
                 });
         });
 
-        // --- LOAD EXPIRED INSPECTIONS ---
+        // --- LOAD EXPIRED INSPECTIONS (COLLECTION) ---
         function loadExpiredInspections() {
-            const expiredRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos`);
-            onValue(expiredRef, (snapshot) => {
+            // Firestore: Referencia a la colección
+            const expiredColRef = collection(db, `artifacts/${appId}/public_data/trabajos_vencidos`);
+
+            // Escuchamos los cambios en la colección
+            onSnapshot(expiredColRef, (querySnapshot) => {
                 loadingMessage.classList.add('hidden');
-                const expiredInspecciones = snapshot.val();
+                
+                // Mapeamos los documentos de Firestore a un array de inspecciones
+                const expiredInspecciones = querySnapshot.docs.map(doc => ({
+                    docId: doc.id, // Guardamos el ID del documento para futuras actualizaciones
+                    ...doc.data()
+                }));
+                
                 renderExpiredInspections(expiredInspecciones);
             }, (error) => {
-                console.error("Error fetching data from Firebase:", error);
+                console.error("Error fetching data from Firestore:", error);
                 loadingMessage.textContent = "Error al cargar la lista.";
                 loadingMessage.classList.remove('hidden');
             });
@@ -464,7 +472,10 @@
             let signedCount = 0;
             let totalCount = 0;
             
-            if (!inspections || inspections.length === 0) {
+            const inspectionsWithDocId = inspections.filter(item => item !== null);
+            totalCount = inspectionsWithDocId.length;
+
+            if (totalCount === 0) {
                 expiredListTableBody.innerHTML = `
                     <tr>
                         <td colspan="5" class="text-center py-8 text-gray-500">
@@ -476,13 +487,7 @@
                 return;
             }
             
-            const inspectionsWithOriginalIndex = inspections
-                .map((item, index) => item ? { ...item, originalIndex: index } : null)
-                .filter(item => item !== null);
-
-            totalCount = inspectionsWithOriginalIndex.length;
-
-            const groupedByTheme = inspectionsWithOriginalIndex.reduce((acc, item) => {
+            const groupedByTheme = inspectionsWithDocId.reduce((acc, item) => {
                 const theme = item.tema || 'Inspecciones Generales'; // Default theme
                 if (!acc[theme]) {
                     acc[theme] = [];
@@ -498,7 +503,8 @@
                 'SPECIAL INSPECTIONS',
                 'LUBRICACION',
                 'MISCELLANEOUS',
-                'DIRECTIVAS DE AERONAVEGABILIDAD Y BOLETINES DE SERVICIO'
+                'DIRECTIVAS DE AERONAVEGABILIDAD Y BOLETINES DE SERVICIO',
+                'Inspecciones Generales'
             ];
 
             const sortedThemes = Object.keys(groupedByTheme).sort((a, b) => {
@@ -550,8 +556,8 @@
                                 ${item.ref}
                             </a>
                         </td>
-                        <td class="px-4 py-3 editable-cell signature-cell text-center align-middle" data-index="${item.originalIndex}">${signatureContent}</td>
-                        <td class="px-4 py-3 editable-cell accion-tomada-cell" contenteditable="true" data-index="${item.originalIndex}">${accionTomadaContent}</td>
+                        <td class="px-4 py-3 editable-cell signature-cell text-center align-middle" data-doc-id="${item.docId}">${signatureContent}</td>
+                        <td class="px-4 py-3 editable-cell accion-tomada-cell" contenteditable="true" data-doc-id="${item.docId}">${accionTomadaContent}</td>
                     `;
                     expiredListTableBody.appendChild(row);
                 });
@@ -579,20 +585,27 @@
             }
         }
 
-        // --- SAVE "ACCION TOMADA" ON BLUR ---
+        // --- SAVE "ACCION TOMADA" ON BLUR (UPDATE FIELD IN DOCUMENT) ---
         expiredListTableBody.addEventListener('blur', (e) => {
             if (!isAuthReady) return;
             if (e.target && e.target.classList.contains('accion-tomada-cell')) {
-                const index = e.target.dataset.index;
+                const docId = e.target.dataset.docId;
                 const text = e.target.textContent.trim();
-                if (index !== undefined) {
-                    const accionTomadaRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos/${index}/accionTomada`);
-                    set(accionTomadaRef, text).catch(error => console.error("Error guardando acción tomada:", error));
+                if (docId) {
+                    // Firestore: Usamos updateDoc para actualizar un campo específico del documento
+                    const inspectionDocRef = doc(db, `artifacts/${appId}/public_data/trabajos_vencidos`, docId);
+                    updateDoc(inspectionDocRef, {
+                        accionTomada: text
+                    }).catch(error => console.error("Error guardando acción tomada:", error));
                 }
             }
         }, true);
         
         // --- SIGNATURE HANDLING ---
+        function getInspectionDocRef(docId) {
+            return doc(db, `artifacts/${appId}/public_data/trabajos_vencidos`, docId);
+        }
+
         function openSignatureModal(cell) {
             activeSignatureCell = cell;
             
@@ -646,7 +659,7 @@
                         confirmModal.classList.remove('hidden');
                     } else {
                         // Show password modal to delete a table signature
-                        signatureToDeleteIndex = signatureTarget.dataset.index;
+                        signatureToDeleteDocId = signatureTarget.dataset.docId; // Usamos docId
                         passwordInput.value = '';
                         passwordError.textContent = '';
                         passwordModal.classList.remove('hidden');
@@ -674,21 +687,24 @@
             const name = signatureNameInput.value.trim();
             if (signaturePad && !signaturePad.isEmpty() && activeSignatureCell && name) {
                 const dataURL = signaturePad.toDataURL('image/png');
-                const index = activeSignatureCell.dataset.index;
+                const docId = activeSignatureCell.dataset.docId; // Usamos docId
 
-                if (index !== undefined) {
+                if (docId) {
                     const signatureData = {
                         signatureDataUrl: dataURL,
                         signatureName: name
                     };
-                    const signatureRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos/${index}/signature`);
+                    // Firestore: Usamos updateDoc para guardar la firma en el documento
+                    const inspectionDocRef = getInspectionDocRef(docId);
 
-                    set(signatureRef, signatureData)
+                    updateDoc(inspectionDocRef, {
+                        signature: signatureData
+                    })
                         .then(() => closeSignatureModal())
                         .catch(error => {
                             console.error("Error guardando firma:", error);
                         });
-                } else { // Fallback for footer signatures (UI only)
+                } else { // Fallback for footer signatures (UI only) - NOT persistent
                     activeSignatureCell.innerHTML = '';
                     const img = document.createElement('img');
                     img.src = dataURL;
@@ -701,7 +717,6 @@
                     closeSignatureModal();
                 }
             } else {
-                // No usar alert()
                 console.warn("Por favor, dibuje su firma y escriba su nombre antes de guardar.");
             }
         });
@@ -709,19 +724,22 @@
         // --- NEW MODAL LISTENERS ---
         passwordCancelBtn.addEventListener('click', () => {
             passwordModal.classList.add('hidden');
-            signatureToDeleteIndex = null;
+            signatureToDeleteDocId = null;
         });
 
         passwordConfirmBtn.addEventListener('click', () => {
             const password = passwordInput.value;
             if (password === "Kevin") {
-                if (signatureToDeleteIndex !== null) {
-                    const signatureRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos/${signatureToDeleteIndex}/signature`);
-                    set(signatureRef, null).catch(error => {
+                if (signatureToDeleteDocId) {
+                    // Firestore: Eliminamos el campo 'signature' del documento
+                    const inspectionDocRef = getInspectionDocRef(signatureToDeleteDocId);
+                    updateDoc(inspectionDocRef, {
+                        signature: null // Asignar null para eliminar el campo o setDoc sin el campo
+                    }).catch(error => {
                         console.error("Error al borrar la firma:", error);
                     });
                     passwordModal.classList.add('hidden');
-                    signatureToDeleteIndex = null;
+                    signatureToDeleteDocId = null;
                 }
             } else {
                 passwordError.textContent = "Clave incorrecta.";
@@ -751,70 +769,75 @@
 
             // Usar el modal de confirmación personalizado
             confirmModalTitle.textContent = '¿Seguro que desea archivar? Esto limpiará la lista actual.';
-            confirmAction = () => {
-                const expiredRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos`);
-                onValue(expiredRef, (snapshot) => {
-                    const inspectionsToArchive = snapshot.val();
-                    const detailsToArchive = {};
-                    detailFieldIds.forEach(id => {
-                        const element = document.getElementById(id);
-                        detailsToArchive[id] = element ? element.textContent.trim() : '';
-                    });
+            confirmAction = async () => {
+                // Firestore: Referencia a la colección
+                const expiredColRef = collection(db, `artifacts/${appId}/public_data/trabajos_vencidos`);
+                const querySnapshot = await getDocs(expiredColRef);
+                
+                const inspectionsToArchive = querySnapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
+                
+                const detailsToArchive = {};
+                detailFieldIds.forEach(id => {
+                    const element = document.getElementById(id);
+                    detailsToArchive[id] = element ? element.textContent.trim() : '';
+                });
 
-                    if (inspectionsToArchive && inspectionsToArchive.length > 0) {
-                        const timestamp = new Date().toISOString().replace(/[.:]/g, '-');
-                        const archiveRef = ref(database, `artifacts/${sharedProjectId}/public_data/historial_ordenes/${timestamp}`);
-                        
-                        const archiveData = {
-                            details: detailsToArchive,
-                            inspections: inspectionsToArchive,
-                            archivedAt: new Date().toISOString()
-                        };
+                if (inspectionsToArchive.length > 0) {
+                    const timestamp = new Date().toISOString().replace(/[.:]/g, '-');
+                    // Firestore: Archivar en una nueva colección "historial_ordenes" como un documento único
+                    const archiveDocRef = doc(db, `artifacts/${appId}/public_data/historial_ordenes`, timestamp);
+                    
+                    const archiveData = {
+                        details: detailsToArchive,
+                        inspections: inspectionsToArchive,
+                        archivedAt: new Date().toISOString()
+                    };
 
-                        set(archiveRef, archiveData)
-                            .then(() => {
-                                // Clear the current list after successful archive
-                                return set(expiredRef, null);
-                            })
-                            .then(() => {
-                                console.log("Trabajos archivados con éxito.");
-                            })
-                            .catch((error) => {
-                                console.error("Error al archivar:", error);
-                            });
-                    } else {
-                        console.warn("No hay trabajos para archivar.");
-                    }
-                }, { onlyOnce: true }); // Important: only run this once per click
+                    setDoc(archiveDocRef, archiveData)
+                        .then(async () => {
+                            // Clear the current list after successful archive: Delete all documents in the collection
+                            const deletePromises = querySnapshot.docs.map(d => deleteDoc(d.ref));
+                            await Promise.all(deletePromises);
+                            console.log("Trabajos archivados y lista actual limpiada con éxito.");
+                        })
+                        .catch((error) => {
+                            console.error("Error al archivar:", error);
+                        });
+                } else {
+                    console.warn("No hay trabajos para archivar.");
+                }
             };
             confirmModal.classList.remove('hidden');
         });
 
         // --- REPORT GENERATION ---
         const reportBtn = document.getElementById('report-btn');
-        reportBtn.addEventListener('click', () => {
+        reportBtn.addEventListener('click', async () => {
             if (!isAuthReady) {
                 console.warn("Conectando... por favor espere un momento.");
                 return;
             }
 
-            const expiredRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos`);
-            onValue(expiredRef, (snapshot) => {
-                const inspections = snapshot.val();
-                
-                if (!inspections || inspections.length === 0) {
-                    console.warn("No hay inspecciones en la lista para generar un reporte.");
-                    return;
-                }
+            const expiredColRef = collection(db, `artifacts/${appId}/public_data/trabajos_vencidos`);
+            const querySnapshot = await getDocs(expiredColRef);
+            
+            const inspections = querySnapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
 
-                generateDiscrepancyReport(inspections);
+            if (inspections.length === 0) {
+                console.warn("No hay inspecciones en la lista para generar un reporte.");
+                return;
+            }
 
-            }, { onlyOnce: true });
+            generateDiscrepancyReport(inspections);
+
         });
 
         function generateDiscrepancyReport(inspections) {
             const matricula = document.getElementById('matricula').textContent || 'FAH-979'; // Adaptado
             const fecha = new Date().toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: '2-digit' }).replace('.', '').toUpperCase();
+
+            // Si las inspecciones vienen como objeto (común en RTDB sin array), conviértelas.
+            const inspectionsArray = inspections.filter(item => item !== null);
 
             // --- Start of Report HTML ---
             let reportContent = `
@@ -954,11 +977,8 @@
                                 <tbody>
                 `;
 
-            const inspectionsWithOriginalIndex = inspections
-                .map((item, index) => item ? { ...item, originalIndex: index } : null)
-                .filter(item => item !== null);
-
-            const groupedByTheme = inspectionsWithOriginalIndex.reduce((acc, item) => {
+            
+            const groupedByTheme = inspectionsArray.reduce((acc, item) => {
                 const theme = item.tema || 'Inspecciones Generales';
                 if (!acc[theme]) { acc[theme] = []; }
                 acc[theme].push(item);
@@ -967,7 +987,7 @@
 
             const themeOrder = [
                 'SCHEDULE INSPECTIONS', 'ENGINE 1 INSPECCIONES', 'ENGINE 2 INSPECCIONES', 'SPECIAL INSPECTIONS',
-                'LUBRICACION', 'MISCELLANEOUS', 'DIRECTIVAS DE AERONAVEGABILIDAD Y BOLETINES DE SERVICIO'
+                'LUBRICACION', 'MISCELLANEOUS', 'DIRECTIVAS DE AERONAVEGABILIDAD Y BOLETINES DE SERVICIO', 'Inspecciones Generales'
             ];
             
             const sortedThemes = Object.keys(groupedByTheme).sort((a, b) => {
@@ -1070,4 +1090,3 @@
     </script>
 </body>
 </html>
-
