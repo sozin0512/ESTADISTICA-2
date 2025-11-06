@@ -79,7 +79,7 @@
             color: white;
         }
 
-        #add-edit-modal, #calculation-modal, #date-modal, #delete-modal {
+        #add-edit-modal, #calculation-modal, #date-modal, #delete-modal, #engine-sync-modal, #engine-sync-delete-modal {
             background-color: rgba(0, 0, 0, 0.5);
         }
 
@@ -240,6 +240,35 @@
             </div>
         </div>
     </div>
+
+    <!-- ================================================================== -->
+    <!-- NUEVO: Modal de Sincronización de Motor (Agregar/Editar)             -->
+    <!-- ================================================================== -->
+    <div id="engine-sync-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50">
+        <div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-2xl text-center">
+            <h3 id="engine-sync-title" class="text-lg font-bold text-gray-800 mb-4">Sincronizar Motores</h3>
+            <p id="engine-sync-message" class="text-gray-600 mb-6">Se ha detectado un cambio en un motor. ¿Desea aplicar este mismo cambio al otro motor?</p>
+            <div class="flex justify-center gap-4">
+                <button id="engine-sync-cancel" class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">No, solo este</button>
+                <button id="engine-sync-confirm" class="px-5 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg">Sí, Sincronizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- NUEVO: Modal de Sincronización de Borrado -->
+    <!-- ================================================================== -->
+    <div id="engine-sync-delete-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50">
+        <div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-2xl text-center">
+            <h3 id="engine-sync-delete-title" class="text-lg font-bold text-gray-800 mb-4">Sincronizar Borrado</h3>
+            <p id="engine-sync-delete-message" class="text-gray-600 mb-6">¿Desea eliminar también la inspección correspondiente del otro motor?</p>
+            <div class="flex justify-center gap-4">
+                <button id="engine-sync-delete-cancel" class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">No, solo este</button>
+                <button id="engine-sync-delete-confirm" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg">Sí, Borrar Ambos</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Modal de Opciones de Cálculo -->
     <div id="calculation-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
@@ -478,6 +507,10 @@
         let auth = null;
         let sharedProjectId = null;
 
+        // NUEVAS VARIABLES GLOBALES PARA SINCRONIZACIÓN
+        let pendingSaveData = null;
+        let pendingDeleteData = null;
+
         const authContainer = document.getElementById('auth-container');
         const mainAppContent = document.getElementById('main-app-content');
         const inspectionsTableBody = document.querySelector('#inspections-table tbody');
@@ -505,6 +538,20 @@
         const deleteInspectionName = document.getElementById('delete-inspection-name');
         const deleteModalCancel = document.getElementById('delete-modal-cancel');
         const deleteModalConfirm = document.getElementById('delete-modal-confirm');
+
+        // NUEVOS ELEMENTOS DEL MODAL DE SINCRONIZACIÓN
+        const engineSyncModal = document.getElementById('engine-sync-modal');
+        const engineSyncTitle = document.getElementById('engine-sync-title');
+        const engineSyncMessage = document.getElementById('engine-sync-message');
+        const engineSyncCancel = document.getElementById('engine-sync-cancel');
+        const engineSyncConfirm = document.getElementById('engine-sync-confirm');
+
+        const engineSyncDeleteModal = document.getElementById('engine-sync-delete-modal');
+        const engineSyncDeleteTitle = document.getElementById('engine-sync-delete-title');
+        const engineSyncDeleteMessage = document.getElementById('engine-sync-delete-message');
+        const engineSyncDeleteCancel = document.getElementById('engine-sync-delete-cancel');
+        const engineSyncDeleteConfirm = document.getElementById('engine-sync-delete-confirm');
+
 
         const calculationModal = document.getElementById('calculation-modal');
         const calcModalTitle = document.getElementById('calc-modal-title');
@@ -740,6 +787,65 @@
             }
             return status;
         }
+
+        // ==================================================================
+        // NUEVAS FUNCIONES DE AYUDA PARA SINCRONIZACIÓN
+        // ==================================================================
+        function getSectionName(inspectionId, list) {
+            const inspectionIndex = list.findIndex(item => String(item.id) === String(inspectionId));
+            if (inspectionIndex > -1) {
+                for (let i = inspectionIndex - 1; i >= 0; i--) {
+                    if (list[i] && list[i].type === 'header') {
+                        return list[i].name;
+                    }
+                }
+            }
+            return 'Inspecciones Generales'; // Fallback
+        }
+
+        function findCorrespondingEngineInspection(inspection, list, targetEnginePrefix) {
+            const sourcePrefix = targetEnginePrefix === 'E2.' ? 'E1.' : 'E2.';
+            if (!inspection.name.startsWith(sourcePrefix)) return null;
+            
+            const targetName = inspection.name.replace(sourcePrefix, targetEnginePrefix);
+            return list.find(item => item && item.name === targetName);
+        }
+
+        function closeEngineSyncModal() {
+            engineSyncModal.style.display = 'none';
+            pendingSaveData = null;
+        }
+
+        function closeEngineSyncDeleteModal() {
+            engineSyncDeleteModal.style.display = 'none';
+            pendingDeleteData = null;
+        }
+        
+        async function performSave(updatedList) {
+            const inspectionRef = ref(database, `artifacts/${sharedProjectId}/public_data/inspections_list`);
+            try {
+                await set(inspectionRef, updatedList);
+                closeAddEditModal();
+                closeEngineSyncModal();
+            } catch (error) {
+                console.error("Error al guardar la inspección(es):", error);
+            }
+        }
+
+        async function performDelete(updatedList) {
+            const inspectionsListRef = ref(database, `artifacts/${sharedProjectId}/public_data/inspections_list`);
+            try {
+                await set(inspectionsListRef, updatedList);
+                closeDeleteModal();
+                closeEngineSyncDeleteModal();
+            } catch (error) {
+                console.error("Error al eliminar la inspección(es):", error);
+            }
+        }
+        
+        // ==================================================================
+        // FIN DE NUEVAS FUNCIONES DE AYUDA
+        // ==================================================================
 
         function renderInspectionsTable() {
             const loadingRow = document.getElementById('loading-row');
@@ -977,6 +1083,7 @@
         
         function closeAddEditModal() {
             addEditModal.style.display = 'none';
+            pendingSaveData = null; // Limpiar datos pendientes al cerrar
         }
 
         async function saveInspection(event) {
@@ -984,11 +1091,12 @@
             
             const isEditing = !!inspectionIdInput.value;
             let id;
+            const currentList = [...inspectionsListFromFirebase];
 
             if (isEditing) {
                 id = inspectionIdInput.value;
             } else {
-                const maxId = inspectionsListFromFirebase
+                const maxId = currentList
                     .reduce((max, item) => {
                         const numId = parseInt(String(item.id));
                         return !isNaN(numId) && numId > max ? numId : max;
@@ -1004,8 +1112,6 @@
             const hasValueInput = !freqValueContainer.classList.contains('hidden');
             const valueFromInput = parseFloat(inspectionFreqValueInput.value);
             
-            // FIX: When frequency type changes to one that doesn't use the text input (like HRS),
-            // its old value can persist. We reset it here to ensure it's regenerated correctly.
             if (freqType.startsWith('HRS') || freqType.includes('CYCLES')) {
                 freqText = '';
             }
@@ -1033,37 +1139,60 @@
             
             const newInspection = { id: String(id), name, ref: referenceValue, freqType, freqValue, freqText };
             
-            const inspectionRef = ref(database, `artifacts/${sharedProjectId}/public_data/inspections_list`);
+            // Lógica de Sincronización
+            const selectedSectionName = isEditing 
+                ? getSectionName(id, currentList) // Obtener sección de la lista si se edita
+                : inspectionSectionSelect.value;  // Obtener del dropdown si es nuevo
 
-            let updatedList;
-            if (isEditing) {
-                const existingIndex = inspectionsListFromFirebase.findIndex(item => String(item.id) === String(id));
-                updatedList = [...inspectionsListFromFirebase];
-                if (existingIndex !== -1) {
-                    updatedList[existingIndex] = newInspection;
-                }
-            } else {
-                const selectedSectionName = inspectionSectionSelect.value;
-                const sectionHeaderIndex = inspectionsListFromFirebase.findIndex(item => item.type === 'header' && item.name === selectedSectionName);
-                
-                let insertionIndex = inspectionsListFromFirebase.length;
-                if (sectionHeaderIndex !== -1) {
-                    let nextSectionHeaderIndex = inspectionsListFromFirebase.findIndex((item, index) => index > sectionHeaderIndex && item.type === 'header');
-                    if (nextSectionHeaderIndex !== -1) {
-                        insertionIndex = nextSectionHeaderIndex;
+            let targetEnginePrefix = null;
+            let sourcePrefix = null;
+
+            if (selectedSectionName === 'ENGINE 1 INSPECCIONES') {
+                targetEnginePrefix = 'E2.';
+                sourcePrefix = 'E1.';
+            } else if (selectedSectionName === 'ENGINE 2 INSPECCIONES') {
+                targetEnginePrefix = 'E1.';
+                sourcePrefix = 'E2.';
+            }
+
+            // Si no es una inspección de motor, guardar y salir (comportamiento original)
+            if (!targetEnginePrefix) {
+                let updatedList;
+                if (isEditing) {
+                    const existingIndex = currentList.findIndex(item => String(item.id) === String(id));
+                    updatedList = [...currentList];
+                    if (existingIndex !== -1) {
+                        updatedList[existingIndex] = newInspection;
                     }
+                } else {
+                    const sectionHeaderIndex = currentList.findIndex(item => item.type === 'header' && item.name === selectedSectionName);
+                    let insertionIndex = currentList.length;
+                    if (sectionHeaderIndex !== -1) {
+                        let nextSectionHeaderIndex = currentList.findIndex((item, index) => index > sectionHeaderIndex && item.type === 'header');
+                        if (nextSectionHeaderIndex !== -1) {
+                            insertionIndex = nextSectionHeaderIndex;
+                        }
+                    }
+                    updatedList = [...currentList];
+                    updatedList.splice(insertionIndex, 0, newInspection);
                 }
-                
-                updatedList = [...inspectionsListFromFirebase];
-                updatedList.splice(insertionIndex, 0, newInspection);
+                await performSave(updatedList); // Usar helper de guardado
+                return;
             }
+
+            // Es una inspección de motor, preguntar antes de guardar
+            pendingSaveData = {
+                newInspection,
+                isEditing,
+                currentList,
+                selectedSectionName,
+                targetEnginePrefix,
+                sourcePrefix
+            };
             
-            try {
-                await set(inspectionRef, updatedList);
-                closeAddEditModal();
-            } catch (error) {
-                console.error("Error al guardar la inspección:", error);
-            }
+            engineSyncTitle.textContent = `Sincronizar Motor ${targetEnginePrefix[1]}`;
+            engineSyncMessage.textContent = `Se ha detectado un cambio en el Motor ${sourcePrefix[1]}. ¿Desea aplicar este mismo cambio al Motor ${targetEnginePrefix[1]}?`;
+            engineSyncModal.style.display = 'flex';
         }
         
         function openDeleteModal(inspection) {
@@ -1075,20 +1204,47 @@
         function closeDeleteModal() {
             deleteModal.style.display = 'none';
             activeInspectionForDelete = null;
+            pendingDeleteData = null; // Limpiar datos pendientes
         }
 
         async function deleteInspection() {
             if (!activeInspectionForDelete) return;
 
-            const updatedList = inspectionsListFromFirebase.filter(item => String(item.id) !== String(activeInspectionForDelete.id));
-            const inspectionsListRef = ref(database, `artifacts/${sharedProjectId}/public_data/inspections_list`);
+            const currentList = [...inspectionsListFromFirebase];
+            const section = getSectionName(activeInspectionForDelete.id, currentList);
             
-            try {
-                await set(inspectionsListRef, updatedList);
-                closeDeleteModal();
-            } catch (error) {
-                console.error("Error al eliminar la inspección:", error);
+            let e1Insp = null;
+            let e2Insp = null;
+            let triggerSource = null;
+
+            // Determinar si es una inspección de motor y encontrar su par
+            if (section === 'ENGINE 1 INSPECCIONES') {
+                e1Insp = activeInspectionForDelete;
+                e2Insp = findCorrespondingEngineInspection(e1Insp, currentList, 'E2.');
+                triggerSource = 'Motor 1';
+            } else if (section === 'ENGINE 2 INSPECCIONES') {
+                e2Insp = activeInspectionForDelete;
+                e1Insp = findCorrespondingEngineInspection(e2Insp, currentList, 'E1.');
+                triggerSource = 'Motor 2';
             }
+
+            // Si no es una inspección de motor o no tiene correspondencia, borrar y salir (comportamiento original)
+            if (!e1Insp || !e2Insp) {
+                const updatedList = currentList.filter(item => String(item.id) !== String(activeInspectionForDelete.id));
+                await performDelete(updatedList); // Usar helper de borrado
+                return;
+            }
+
+            // Es una inspección de motor con correspondencia, preguntar antes de borrar
+            pendingDeleteData = { e1Insp, e2Insp, currentList, triggerSource };
+            
+            const targetMotor = triggerSource === 'Motor 1' ? 'Motor 2' : 'Motor 1';
+            engineSyncDeleteTitle.textContent = `Sincronizar Borrado (Motor ${targetMotor[6]})`;
+            engineSyncDeleteMessage.textContent = `Está borrando una inspección del ${triggerSource}. ¿Desea eliminar también la inspección correspondiente del ${targetMotor}?`;
+            
+            // Ocultar el modal de borrado simple y mostrar el de sincronización
+            deleteModal.style.display = 'none';
+            engineSyncDeleteModal.style.display = 'flex';
         }
 
         function openCalculationModal(inspection) {
@@ -1162,6 +1318,136 @@
             }
         }
         
+        // ==================================================================
+        // NUEVAS FUNCIONES HANDLER PARA SINCRONIZACIÓN
+        // ==================================================================
+        
+        async function handleEngineSyncConfirm() {
+            if (!pendingSaveData) return;
+            
+            const { newInspection, isEditing, currentList, selectedSectionName, targetEnginePrefix, sourcePrefix } = pendingSaveData;
+            let updatedList = [...currentList];
+            let correspondingInspection = null;
+
+            if (isEditing) {
+                // 1. Actualizar la inspección original (E1 o E2)
+                const existingIndex = updatedList.findIndex(item => String(item.id) === String(newInspection.id));
+                if (existingIndex !== -1) {
+                    updatedList[existingIndex] = newInspection;
+                }
+
+                // 2. Encontrar y actualizar la inspección correspondiente (E2 o E1)
+                correspondingInspection = findCorrespondingEngineInspection(newInspection, updatedList, targetEnginePrefix);
+                if (correspondingInspection) {
+                    const correspondingIndex = updatedList.findIndex(item => String(item.id) === String(correspondingInspection.id));
+                    if (correspondingIndex !== -1) {
+                        updatedList[correspondingIndex] = {
+                            ...newInspection, // Copiar todos los datos (ref, freq, etc.)
+                            id: correspondingInspection.id, // Mantener el ID original del correspondiente
+                            name: correspondingInspection.name // Mantener el nombre original del correspondiente (E2. o E1.)
+                        };
+                    }
+                }
+            } else {
+                // 1. Añadir la nueva inspección (E1 o E2)
+                const sectionHeaderIndex = updatedList.findIndex(item => item.type === 'header' && item.name === selectedSectionName);
+                let insertionIndex = updatedList.length;
+                if (sectionHeaderIndex !== -1) {
+                    let nextSectionHeaderIndex = updatedList.findIndex((item, index) => index > sectionHeaderIndex && item.type === 'header');
+                    if (nextSectionHeaderIndex !== -1) {
+                        insertionIndex = nextSectionHeaderIndex;
+                    }
+                }
+                updatedList.splice(insertionIndex, 0, newInspection);
+
+                // 2. Crear y añadir la inspección correspondiente (E2 o E1)
+                const correspondingName = newInspection.name.replace(sourcePrefix, targetEnginePrefix);
+                const correspondingSectionName = targetEnginePrefix === 'E2.' ? 'ENGINE 2 INSPECCIONES' : 'ENGINE 1 INSPECCIONES';
+                
+                const maxId = updatedList.reduce((max, item) => {
+                        const numId = parseInt(String(item.id));
+                        return !isNaN(numId) && numId > max ? numId : max;
+                    }, 0);
+                const correspondingId = String(maxId + 1);
+
+                correspondingInspection = {
+                    ...newInspection,
+                    id: correspondingId,
+                    name: correspondingName
+                };
+
+                const correspondingSectionIndex = updatedList.findIndex(item => item.type === 'header' && item.name === correspondingSectionName);
+                let correspondingInsertionIndex = updatedList.length;
+                if (correspondingSectionIndex !== -1) {
+                    let nextSectionHeaderIndex = updatedList.findIndex((item, index) => index > correspondingSectionIndex && item.type === 'header');
+                    if (nextSectionHeaderIndex !== -1) {
+                        correspondingInsertionIndex = nextSectionHeaderIndex;
+                    }
+                }
+                updatedList.splice(correspondingInsertionIndex, 0, correspondingInspection);
+            }
+            
+            await performSave(updatedList);
+        }
+
+        async function handleEngineSyncCancel() {
+             if (!pendingSaveData) return;
+            const { newInspection, isEditing, currentList, selectedSectionName } = pendingSaveData;
+            let updatedList = [...currentList];
+
+            if (isEditing) {
+                const existingIndex = updatedList.findIndex(item => String(item.id) === String(newInspection.id));
+                if (existingIndex !== -1) {
+                    updatedList[existingIndex] = newInspection;
+                }
+            } else {
+                 const sectionHeaderIndex = updatedList.findIndex(item => item.type === 'header' && item.name === selectedSectionName);
+                let insertionIndex = updatedList.length;
+                if (sectionHeaderIndex !== -1) {
+                    let nextSectionHeaderIndex = updatedList.findIndex((item, index) => index > sectionHeaderIndex && item.type === 'header');
+                    if (nextSectionHeaderIndex !== -1) {
+                        insertionIndex = nextSectionHeaderIndex;
+                    }
+                }
+                updatedList.splice(insertionIndex, 0, newInspection);
+            }
+            
+            await performSave(updatedList);
+        }
+
+        async function handleEngineSyncDeleteConfirm() {
+            if (!pendingDeleteData) return;
+            const { e1Insp, e2Insp, currentList } = pendingDeleteData;
+            
+            // Borrar ambas inspecciones
+            const updatedList = currentList.filter(item => 
+                String(item.id) !== String(e1Insp.id) && 
+                String(item.id) !== String(e2Insp.id)
+            );
+            
+            await performDelete(updatedList);
+        }
+
+        async function handleEngineSyncDeleteCancel() {
+            if (!pendingDeleteData) return;
+            const { e1Insp, e2Insp, currentList, triggerSource } = pendingDeleteData;
+            
+            let idToDelete;
+            if (triggerSource === 'Motor 1') {
+                idToDelete = e1Insp.id;
+            } else {
+                idToDelete = e2Insp.id;
+            }
+
+            // Borrar solo la inspección original
+            const updatedList = currentList.filter(item => String(item.id) !== String(idToDelete));
+            await performDelete(updatedList);
+        }
+        
+        // ==================================================================
+        // FIN DE NUEVAS FUNCIONES HANDLER
+        // ==================================================================
+
         async function saveLastDoneValue(id, value) {
             const triggerInspection = inspectionsListFromFirebase.find(item => String(item.id) === String(id));
             if (!triggerInspection) {
@@ -1249,6 +1535,12 @@
         deleteModalConfirm.addEventListener('click', deleteInspection);
         deleteModalCancel.addEventListener('click', closeDeleteModal);
         
+        // NUEVOS LISTENERS PARA LOS MODALES DE SINCRONIZACIÓN
+        engineSyncConfirm.addEventListener('click', handleEngineSyncConfirm);
+        engineSyncCancel.addEventListener('click', handleEngineSyncCancel);
+        engineSyncDeleteConfirm.addEventListener('click', handleEngineSyncDeleteConfirm);
+        engineSyncDeleteCancel.addEventListener('click', handleEngineSyncDeleteCancel);
+
         inspectionFreqTypeSelect.addEventListener('change', (e) => {
             const type = e.target.value;
             freqValueContainer.classList.add('hidden');
@@ -1314,9 +1606,9 @@
             try {
                  await set(expiredRef, expiredInspections);
                  console.log("Lista de trabajos vencidos actualizada correctamente:", expiredInspections);
-             } catch (error) {
+            } catch (error) {
                  console.error("Error al guardar los trabajos vencidos en Firebase:", error);
-             }
+            }
              // CORREGIDO: Redirección a la página con nombre 980
             window.location.href = 'trabajos-efectuarse980.html'; 
         }
