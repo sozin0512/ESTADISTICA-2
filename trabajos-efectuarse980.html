@@ -64,6 +64,13 @@
             display: block;
             margin: 0 auto;
         }
+        /* INICIO: NUEVA REGLA PARA MINI-FIRMA EN LISTA */
+        #missing-items-list img {
+            max-height: 25px;
+            display: block;
+            margin: 0 auto;
+        }
+        /* FIN: NUEVA REGLA */
         .signature-cell p, .footer-signature-area p {
             line-height: 1;
         }
@@ -71,6 +78,33 @@
             border-top: 1px solid #495057;
             margin-top: 0.5rem;
         }
+        
+        /* --- INICIO: NUEVO ESTILO PARA BOTONES DE TABLA --- */
+        .table-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+        .table-action-btn.edit-btn {
+            color: #2563eb; /* text-blue-600 */
+        }
+        .table-action-btn.edit-btn:hover {
+            background-color: #dbeafe; /* bg-blue-100 */
+            color: #1d4ed8; /* text-blue-700 */
+        }
+        .table-action-btn.delete-btn {
+            color: #dc2626; /* text-red-600 */
+        }
+        .table-action-btn.delete-btn:hover {
+            background-color: #fee2e2; /* bg-red-100 */
+            color: #b91c1c; /* text-red-700 */
+        }
+        /* --- FIN: NUEVO ESTILO PARA BOTONES DE TABLA --- */
+
 
         @media print {
             body {
@@ -78,6 +112,14 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+
+            /* --- INICIO: NUEVA REGLA PARA AJUSTAR EL BODY --- */
+            body.printing-missing-list {
+                margin: 0.5in !important; /* Añadir el margen de impresión aquí */
+                padding: 0 !important;
+            }
+            /* --- FIN: NUEVA REGLA --- */
+
             .paper-container {
                 box-shadow: none;
                 margin: 0;
@@ -85,6 +127,18 @@
                 max-width: 100%;
                 border: 1px solid #dee2e6;
             }
+            
+            /* --- INICIO: NUEVA REGLA PARA AJUSTAR EL CONTENEDOR --- */
+            body.printing-missing-list .paper-container {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            /* --- FIN: NUEVA REGLA --- */
+            
             .no-print {
                 display: none !important;
             }
@@ -99,6 +153,38 @@
                 background-color: #1a202c !important; /* Tailwind blue-900 */
                 color: white !important;
             }
+            
+            /* --- INICIO: REGLAS DE IMPRESIÓN --- */
+            
+            /* Ocultar todo por defecto si la clase .printing-missing-list está activa */
+            /* ESTA SECCIÓN HA SIDO REESCRITA PARA CORREGIR EL ERROR DE PÁGINA EN BLANCO */
+            body.printing-missing-list > *:not(.paper-container) {
+                display: none !important;
+            }
+
+            /* Dentro del paper-container, ocultar todos los hijos directos */
+            body.printing-missing-list .paper-container > * {
+                display: none !important;
+                visibility: hidden !important; /* Más fuerte */
+            }
+            
+            /* Pero, mostrar la sección de la lista y darle estilo de impresión */
+            body.printing-missing-list #missing-items-section {
+                display: block !important;
+                visibility: visible !important;
+                box-shadow: none;
+                border: none;
+                margin: 0; /* Quitar el margen de aquí */
+                padding: 0;
+                max-width: 100%;
+                width: 100%;
+            }
+
+            /* Ocultar el botón de la lista siempre que se imprima (en cualquier modo) */
+            #print-list-btn {
+                display: none !important;
+            }
+            /* --- FIN: REGLAS DE IMPRESIÓN --- */
         }
     </style>
 </head>
@@ -161,7 +247,7 @@
                 <div class="bg-white p-0 border-r border-b border-gray-700"><span id="elaborado-por" class="editable-field" contenteditable="true"></span></div>
                 <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ORDEN DE TRABAJO No.</div>
                 <div class="bg-white p-0 border-r border-b border-gray-700"><span id="orden-trabajo-no" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">N/S MOTOR #1</div>
+                <div class_A="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">N/S MOTOR #1</div>
                 <div class="bg-white p-0 border-r border-b border-gray-700"><span id="ns-motor-1" class="editable-field" contenteditable="true"></span></div>
                 <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">N/S MOTOR #2</div>
                 <div class="bg-white p-0 border-r border-b border-gray-700"><span id="ns-motor-2" class="editable-field" contenteditable="true"></span></div>
@@ -203,6 +289,45 @@
             </div>
         </main>
 
+        <!-- INICIO: Tabla de Items Faltantes -->
+        <section id="missing-items-section" class="mt-16 hidden">
+            <!-- INICIO: CAMBIO DE LAYOUT (CSS FIX) -->
+            <div class="flex justify-between items-center text-center mb-4">
+                <h2 class="text-xl font-semibold text-purple-700 flex-grow">
+                    Lista de Consumibles y Repuestos Faltantes
+                </h2>
+                <button id="print-list-btn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-xs no-print shadow-md ml-4 flex-shrink-0">
+                    Imprimir solo esta lista
+                </button>
+            </div>
+            <!-- FIN: CAMBIO DE LAYOUT (CSS FIX) -->
+            
+            <p class="text-center text-sm text-gray-500 mb-4 no-print">
+                Esta tabla se actualiza automáticamente. Puede editar o borrar items (requiere clave).
+            </p>
+            <table class="w-full text-sm text-left text-gray-600">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                    <tr>
+                        <th scope="col" class="px-4 py-3">Trabajo Relacionado</th>
+                        <th scope="col" class="px-4 py-3">Tipo</th>
+                        <th scope="col" class="px-4 py-3">Nombre Item</th>
+                        <th scope="col" class="px-4 py-3">P/N</th>
+                        <th scope="col" class="px-4 py-3 w-20 text-center">Cantidad</th>
+                        <!-- INICIO: NUEVA COLUMNA DE FIRMA -->
+                        <th scope="col" class="px-4 py-3 w-32">Reportado Por</th>
+                        <!-- FIN: NUEVA COLUMNA DE FIRMA -->
+                        <!-- INICIO: NUEVA COLUMNA DE ACCIONES -->
+                        <th scope="col" class="px-4 py-3 w-28 text-center no-print">Acciones</th>
+                        <!-- FIN: NUEVA COLUMNA DE ACCIONES -->
+                    </tr>
+                </thead>
+                <tbody id="missing-items-list">
+                    <!-- Los items se generarán aquí -->
+                </tbody>
+            </table>
+        </section>
+        <!-- FIN: Tabla de Items Faltantes -->
+
         <footer class="mt-16">
             <div class="grid grid-cols-2 gap-12">
                 <div class="text-center">
@@ -240,35 +365,88 @@
         </div>
     </div>
 
-    <div id="signature-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
-        <div class="bg-white rounded-lg shadow-2xl">
-            <div class="p-4 border-b">
-                <h3 id="signature-modal-title" class="text-lg font-bold text-gray-800">Firme en el recuadro</h3>
-            </div>
-            <div class="p-2">
-                <canvas id="signature-canvas" class="border border-gray-300"></canvas>
-            </div>
-            <div class="p-4 border-t">
-                <label for="signature-name" class="block text-sm font-medium text-gray-700">Nombre</label>
-                <input type="text" id="signature-name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Escriba su nombre y licencia">
-            </div>
-            <div class="flex justify-end gap-2 p-4 bg-gray-50">
-                <button id="signature-clear" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Borrar</button>
-                <button id="signature-cancel" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg">Cancelar</button>
-                <button id="signature-save" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg">Guardar Firma</button>
+    <!-- INICIO: Modales para Consumibles y Repuestos -->
+    <div id="ask-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm">
+            <div class="p-6 text-center">
+                <svg class="mx-auto mb-4 h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.79 4 4 0 1.152-.468 2.19-1.228 2.969M12 18v.01M7.97 16l.006-.004m-.012 0l.006.004m-3.464 0l.006-.004m-.012 0l.006.004m7.442-7.42l.006-.004m-.012 0l.006.004m3.464 0l.006-.004m-.012 0l.006.004m-3.463 3.42l.006-.004m-.012 0l.006.004m-3.464 0l.006-.004m-.012 0l.006.004m7.442 0l.006-.004m-.012 0l.006.004" />
+                </svg>
+                <h3 id="ask-modal-title" class="mb-5 text-lg font-normal text-gray-500">¿Pregunta?</h3>
+                <button id="ask-modal-yes" type="button" class="text-white bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                    Sí
+                </button>
+                <button id="ask-modal-no" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
+                    No
+                </button>
             </div>
         </div>
     </div>
-    
+
+    <div id="item-form-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md my-8">
+            <div class="p-4 border-b">
+                <h3 id="item-form-modal-title" class="text-lg font-bold text-gray-800">Añadir Item Faltante</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label for="item-name" class="block text-sm font-medium text-gray-700">Nombre del Item</label>
+                    <input type="text" id="item-name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: Aceite, Tornillo, Filtro...">
+                </div>
+                <div>
+                    <label for="item-part-number" class="block text-sm font-medium text-gray-700">Número de Parte (P/N)</label>
+                    <input type="text" id="item-part-number" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: AN5-10A, 101-345...">
+                </div>
+                <div>
+                    <label for="item-quantity" class="block text-sm font-medium text-gray-700">Cantidad</label>
+                    <input type="number" id="item-quantity" value="1" min="1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <p id="item-form-error" class="text-red-500 text-sm h-4"></p>
+            </div>
+            <div class="flex justify-end gap-2 p-4 bg-gray-50">
+                <button id="item-form-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
+                <button id="item-form-save" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg">Guardar Item</button>
+            </div>
+        </div>
+    </div>
+    <!-- FIN: Modales -->
+
+    <!-- INICIO: Modales Faltantes (Firma, Clave, Confirmar) -->
+    <div id="signature-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg my-8">
+            <div class="p-4 border-b">
+                <h3 id="signature-modal-title" class="text-lg font-bold text-gray-800">Firma del Mecánico</h3>
+            </div>
+            <div class="p-6 flex flex-col items-center">
+                <div class="mb-4">
+                    <label for="signature-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre y Licencia</label>
+                    <input type="text" id="signature-name" class="w-full p-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ej: K. Valladares / H-0123">
+                </div>
+                <div class="mt-4 border-2 border-dashed border-gray-300 rounded-lg">
+                    <canvas id="signature-canvas" class="rounded-lg"></canvas>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Dibuje su firma en el recuadro de arriba</p>
+            </div>
+            <div class="flex justify-between p-4 bg-gray-50">
+                <button id="signature-clear" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg">Limpiar</button>
+                <div>
+                    <button id="signature-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg mr-2">Cancelar</button>
+                    <button id="signature-save" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg">Guardar Firma</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="password-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm">
-            <div class="p-4 border-b">
-                <h3 class="text-lg font-bold text-gray-800">Confirmar Eliminación</h3>
-            </div>
-            <div class="p-4">
-                <label for="password-input" class="block text-sm font-medium text-gray-700">Para borrar la firma, ingrese la clave:</label>
-                <input type="password" id="password-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                <p id="password-error" class="text-red-500 text-sm mt-2 h-4"></p>
+            <div class="p-6">
+                <h3 id="password-modal-title" class="text-lg font-bold text-gray-800 mb-4">Clave Requerida</h3>
+                <p id="password-modal-description" class="text-sm text-gray-600 mb-4">Para esta acción, ingrese la clave de supervisor.</p>
+                <div>
+                    <label for="password-input" class="block text-sm font-medium text-gray-700">Clave</label>
+                    <input type="password" id="password-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                    <p id="password-error" class="text-red-500 text-xs h-4 mt-1"></p>
+                </div>
             </div>
             <div class="flex justify-end gap-2 p-4 bg-gray-50">
                 <button id="password-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
@@ -280,12 +458,12 @@
     <div id="confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm">
             <div class="p-6 text-center">
-                <svg class="mx-auto mb-4 h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <svg class="mx-auto mb-4 h-12 w-12 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                <h3 id="confirm-modal-title" class="mb-5 text-lg font-normal text-gray-500">¿Desea continuar?</h3>
-                <button id="confirm-modal-ok" type="button" class="text-white bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
-                    Sí
+                <h3 id="confirm-modal-title" class="mb-5 text-lg font-normal text-gray-500">¿Está seguro?</h3>
+                <button id="confirm-modal-ok" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                    Sí, estoy seguro
                 </button>
                 <button id="confirm-modal-cancel" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
                     Cancelar
@@ -293,12 +471,11 @@
             </div>
         </div>
     </div>
+    <!-- FIN: Modales Faltantes -->
+
 
     <script type="module">
-        // ***************************************************************
-        // CÓDIGO FINAL CON RUTA SIMPLIFICADA PARA RTDB
-        // ***************************************************************
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { initializeApp, setLogLevel } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
         import { getAuth, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
         import { 
             getDatabase, 
@@ -307,28 +484,26 @@
             set, 
             update, 
             remove, 
-            get
+            get,
+            push
         } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js';
 
-        let firebaseConfig = {};
-        try {
-            firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        } catch (e) {
-            console.error("Error al parsear __firebase_config:", e);
-        }
-        
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        firebaseConfig.projectId = firebaseConfig.projectId || appId; 
-        
-        // URL de Realtime Database confirmada por el usuario
-        firebaseConfig.databaseURL = firebaseConfig.databaseURL || "https://fah-980-ceb96-default-rtdb.firebaseio.com";
+        // --- Configuración de Firebase Hardcodeada ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6pUgMRSRCZLZfW0Cy1b00AFN6nkPjsF8",
+            authDomain: "fah-980-ceb96.firebaseapp.com",
+            databaseURL: "https://fah-980-ceb96-default-rtdb.firebaseio.com",
+            projectId: "fah-980-ceb96",
+            storageBucket: "fah-980-ceb96.firebasestorage.app",
+            messagingSenderId: "57890484294",
+            appId: "1:57890484294:web:8a27759a4da0b262e99a47",
+            measurementId: "G-HSZMRM7ZCS"
+        };
 
-
-        // Inicializamos la app de Firebase y Realtime Database (RTDB)
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app); 
+        setLogLevel('debug'); 
 
-        
         const paperContainer = document.querySelector('.paper-container');
         const expiredListTableBody = document.getElementById('vencidas-list');
         const loadingMessage = document.getElementById('loading-message');
@@ -345,28 +520,59 @@
         let isAuthReady = false; 
 
         const passwordModal = document.getElementById('password-modal');
+        const passwordModalTitle = document.getElementById('password-modal-title');
+        const passwordModalDescription = document.getElementById('password-modal-description');
         const passwordInput = document.getElementById('password-input');
         const passwordError = document.getElementById('password-error');
         const passwordCancelBtn = document.getElementById('password-cancel');
         const passwordConfirmBtn = document.getElementById('password-confirm');
-        let signatureToDeleteDocId = null; 
-
+        
         const confirmModal = document.getElementById('confirm-modal');
         const confirmModalTitle = document.getElementById('confirm-modal-title');
         const confirmModalOkBtn = document.getElementById('confirm-modal-ok');
         const confirmModalCancelBtn = document.getElementById('confirm-modal-cancel');
         let confirmAction = () => {}; 
 
-        // ***************************************************************
-        // RUTAS CORREGIDAS SEGÚN LA ESTRUCTURA DE LA BASE DE DATOS
-        // ***************************************************************
-        const DB_ROOT = "artifacts/FAH-980-DATA"; // <-- CORRECCIÓN: Se añadió "artifacts/"
+        // --- DOM para la tabla de items ---
+        const missingItemsSection = document.getElementById('missing-items-section');
+        const missingItemsList = document.getElementById('missing-items-list');
+
+        // --- Modales para workflow de items ---
+        const askModal = document.getElementById('ask-modal');
+        const askModalTitle = document.getElementById('ask-modal-title');
+        const askModalYesBtn = document.getElementById('ask-modal-yes');
+        const askModalNoBtn = document.getElementById('ask-modal-no');
+
+        const itemFormModal = document.getElementById('item-form-modal');
+        const itemFormModalTitle = document.getElementById('item-form-modal-title');
+        const itemNameInput = document.getElementById('item-name');
+        const itemPartNumberInput = document.getElementById('item-part-number');
+        const itemQuantityInput = document.getElementById('item-quantity');
+        const itemFormError = document.getElementById('item-form-error');
+        const itemFormSaveBtn = document.getElementById('item-form-save');
+        const itemFormCancelBtn = document.getElementById('item-form-cancel');
+
+        // --- INICIO: NUEVAS VARIABLES GLOBALES DE ESTADO ---
+        let activeInspectionDocId = null; // ID de la inspección que se está firmando
+        let currentItemType = null; // 'consumible' o 'repuesto'
         
-        // Apuntamos a la ruta completa vista en la imagen
-        const INSPECTIONS_PATH = `${DB_ROOT}/public_data/trabajos_vencidos`; // <-- CORRECCIÓN
+        // Almacena los datos de la última firma para el log de "No"
+        let lastSignatureData = { name: '', dataUrl: '' }; 
+        
+        // Almacena el item a editar/borrar
+        let itemToManage = { inspectionId: null, itemId: null, docId: null }; 
+        let currentPasswordAction = ''; // 'deleteSignature', 'deleteItem', 'editItem'
+
+        // Caché de datos
+        let allLoadedInspections = []; // Almacena todas las inspecciones cargadas
+        let allLoadedMissingItems = []; // Almacena todos los items faltantes
+        // --- FIN: NUEVAS VARIABLES GLOBALES DE ESTADO ---
+
+
+        const DB_ROOT = "artifacts/FAH-980-DATA";
+        const INSPECTIONS_PATH = `${DB_ROOT}/public_data/trabajos_vencidos`;
         const DETAILS_PATH = `${DB_ROOT}/public_data/orden_detalles`; 
 
-        // Funciones auxiliares para obtener las referencias de la base de datos (RTDB)
         function getDetailsRef() {
             return ref(db, DETAILS_PATH);
         }
@@ -377,9 +583,20 @@
             }
             return ref(db, INSPECTIONS_PATH);
         }
+        
+        // --- Botón de Imprimir Lista ---
+        const printListBtn = document.getElementById('print-list-btn');
+        if (printListBtn) {
+            printListBtn.addEventListener('click', () => {
+                document.body.classList.add('printing-missing-list');
+                window.print();
+            });
+        }
+        window.addEventListener('afterprint', () => {
+            document.body.classList.remove('printing-missing-list');
+        });
 
         const saveDetailsBtn = document.getElementById('save-details-btn');
-        
         const detailFieldIds = [
             'fecha-inicio', 'fecha-finalizacion', 'modelo', 'eng1-sn-tsn-tso',
             'numero-serie', 'eng1-sn-csn-cso', 'matricula', 'eng2-sn-tsn-tso',
@@ -395,13 +612,18 @@
         // --- AUTHENTICATION & DATA LOADING ---
         async function initializeAppAndData() {
             let auth;
+            if (!firebaseConfig || !firebaseConfig.projectId || !firebaseConfig.databaseURL) {
+                console.error("Error: Configuración de Firebase incompleta.", firebaseConfig);
+                loadingMessage.textContent = "Error: Configuración de Firebase incompleta.";
+                loadingMessage.classList.remove('hidden');
+                return;
+            }
             try {
                 auth = getAuth(app); 
             } catch (authError) {
-                console.warn("ADVERTENCIA: Falló la inicialización de Auth. Continuando con la carga de RTDB de forma anónima/pública.");
-                isAuthReady = true;
-                loadOrderDetails();
-                loadExpiredInspections();
+                console.error("Error fatal al inicializar 'getAuth(app)'.", authError);
+                loadingMessage.textContent = "Error al conectar con los servicios de autenticación.";
+                loadingMessage.classList.remove('hidden');
                 return;
             }
             
@@ -411,21 +633,21 @@
                 } else {
                     await signInAnonymously(auth);
                 }
+                
                 isAuthReady = true;
                 console.log("Autenticación exitosa. Iniciando carga de datos de RTDB.");
-            } catch (error) {
-                console.warn("ADVERTENCIA: Falló la autenticación (signIn). Continuando con la carga de RTDB de forma anónima/pública.");
-                isAuthReady = true;
-            }
-            
-            if (isAuthReady) {
                 loadOrderDetails();
                 loadExpiredInspections();
+
+            } catch (error) {
+                console.error("Error durante el proceso de signIn:", error);
+                loadingMessage.textContent = "Error al autenticarse. No se pueden cargar los datos.";
+                loadingMessage.classList.remove('hidden');
             }
         }
         initializeAppAndData();
 
-        // --- LOAD AND SAVE ORDER DETAILS (RTDB: SINGLE NODE) ---
+        // --- LOAD AND SAVE ORDER DETAILS ---
         function loadOrderDetails() {
             const detailsRef = getDetailsRef();
             onValue(detailsRef, (snapshot) => {
@@ -455,7 +677,6 @@
             });
             
             const detailsRef = getDetailsRef();
-
             set(detailsRef, dataToSave)
                 .then(() => {
                     saveDetailsBtn.textContent = '¡Guardado!';
@@ -472,7 +693,7 @@
                 });
         });
 
-        // --- LOAD EXPIRED INSPECTIONS (RTDB: COLLECTION/OBJECTS) ---
+        // --- LOAD EXPIRED INSPECTIONS ---
         function loadExpiredInspections() {
             const inspectionsRef = getInspectionRef();
             console.log(`[RTDB] Intentando cargar datos de la ruta: ${INSPECTIONS_PATH}`);
@@ -480,21 +701,21 @@
             onValue(inspectionsRef, (snapshot) => {
                 loadingMessage.classList.add('hidden');
                 
-                const data = snapshot.val(); // Obtiene todos los objetos hijos
-                let expiredInspecciones = [];
+                const data = snapshot.val();
+                allLoadedInspections = []; // Limpiar caché
 
                 if (data) {
-                    // RTDB devuelve un objeto de objetos (clave: valor). Lo convertimos a array.
-                    expiredInspecciones = Object.keys(data).map(key => ({
-                        docId: key, // La clave del objeto es el ID (0, 1, 2, 3, etc.)
+                    allLoadedInspections = Object.keys(data).map(key => ({
+                        docId: key,
                         ...data[key]
                     }));
                 }
                 
-                renderExpiredInspections(expiredInspecciones);
+                renderExpiredInspections(allLoadedInspections);
+                renderMissingItemsTable(allLoadedInspections); 
             }, (error) => {
                 console.error(`[RTDB ERROR] Fallo al leer la ruta ${INSPECTIONS_PATH}:`, error);
-                loadingMessage.textContent = "Error al cargar la lista. Revise la consola (F12) para ver los detalles del error.";
+                loadingMessage.textContent = "Error al cargar la lista. Revise la consola (F12).";
                 loadingMessage.classList.remove('hidden');
             });
         }
@@ -519,7 +740,6 @@
                 return;
             }
             
-            // Lógica de Agrupación por Tema (similar a la versión anterior)
             const groupedByTheme = inspectionsWithDocId.reduce((acc, item) => {
                 const theme = item.tema || item.name || 'Inspecciones Generales'; 
                 if (!acc[theme]) { acc[theme] = []; }
@@ -590,6 +810,73 @@
             updateProgressBar(signedCount, totalCount);
         }
 
+        // --- Renderizar Tabla de Items Faltantes (con botones de acción) ---
+        function renderMissingItemsTable(inspections) {
+            missingItemsList.innerHTML = '';
+            allLoadedMissingItems = []; // Limpiar caché de items
+
+            inspections.forEach(inspection => {
+                if (inspection.itemsFaltantes) {
+                    // Convertimos el objeto de RTDB a un array, guardando la clave (itemId)
+                    Object.keys(inspection.itemsFaltantes).forEach(key => {
+                        allLoadedMissingItems.push({
+                            ...inspection.itemsFaltantes[key],
+                            itemId: key, // ID del item (push key)
+                            inspectionId: inspection.docId, // ID de la inspección
+                            relatedJobName: inspection.name || 'Tarea desconocida' 
+                        });
+                    });
+                }
+            });
+
+            if (allLoadedMissingItems.length === 0) {
+                missingItemsSection.classList.add('hidden');
+                return;
+            }
+
+            missingItemsSection.classList.remove('hidden'); 
+
+            allLoadedMissingItems.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'bg-white border-b hover:bg-purple-50';
+                
+                const typeLabel = item.type === 'consumible' ? 
+                    '<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium text-xs">Consumible</span>' : 
+                    '<span class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium text-xs">Repuesto</span>';
+
+                // --- INICIO: NUEVA LÓGICA PARA CELDA DE FIRMA ---
+                let reportedByContent = '<span class="text-xs text-gray-400">N/A</span>';
+                if (item.reportedBy && (item.reportedBy.name || item.reportedBy.signatureDataUrl)) {
+                    if (item.reportedBy.signatureDataUrl) {
+                        reportedByContent = `
+                            <img src="${item.reportedBy.signatureDataUrl}" alt="Firma" />
+                            <p class="text-xs mt-1 font-semibold">${item.reportedBy.name || ''}</p>
+                        `;
+                    } else {
+                        // Fallback si solo hay nombre
+                         reportedByContent = `<p class="text-xs mt-1 font-semibold">${item.reportedBy.name}</p>`;
+                    }
+                }
+                // --- FIN: NUEVA LÓGICA PARA CELDA DE FIRMA ---
+
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-gray-700">${item.relatedJobName}</td>
+                    <td class="px-4 py-3">${typeLabel}</td>
+                    <td class="px-4 py-3 font-medium text-gray-900">${item.name || 'N/A'}</td>
+                    <td class="px-4 py-3 text-gray-600">${item.partNumber || 'N/A'}</td>
+                    <td class="px-4 py-3 text-center font-medium text-gray-900">${item.quantity || '1'}</td>
+                    <!-- INICIO: NUEVA CELDA -->
+                    <td class="px-4 py-3 text-center align-middle">${reportedByContent}</td>
+                    <!-- FIN: NUEVA CELDA -->
+                    <td class="px-4 py-3 text-center no-print">
+                        <button class="table-action-btn edit-btn edit-item-btn" data-item-id="${item.itemId}" data-inspection-id="${item.inspectionId}" title="Editar Item">Editar</button>
+                        <button class="table-action-btn delete-btn delete-item-btn" data-item-id="${item.itemId}" data-inspection-id="${item.inspectionId}" title="Borrar Item">Borrar</button>
+                    </td>
+                `;
+                missingItemsList.appendChild(row);
+            });
+        }
+
         function updateProgressBar(signed, total) {
             const percentage = total > 0 ? Math.round((signed / total) * 100) : 0;
             const progressBar = document.getElementById('progress-bar');
@@ -609,7 +896,7 @@
             }
         }
 
-        // --- SAVE "ACCION TOMADA" ON BLUR (RTDB: UPDATE FIELD IN NODE) ---
+        // --- Guardar "Acción Tomada" en Blur ---
         expiredListTableBody.addEventListener('blur', (e) => {
             if (!isAuthReady) return;
             if (e.target && e.target.classList.contains('accion-tomada-cell')) {
@@ -617,7 +904,6 @@
                 const text = e.target.textContent.trim();
                 if (docId) {
                     const inspectionRef = getInspectionRef(docId);
-                    // RTDB: Usamos update para actualizar un campo dentro del nodo
                     update(inspectionRef, {
                         accionTomada: text
                     }).catch(error => console.error("Error guardando acción tomada (RTDB):", error));
@@ -625,7 +911,7 @@
             }
         }, true);
         
-        // --- SIGNATURE HANDLING ---
+        // --- Manejo de Firma (Modal) ---
         function openSignatureModal(cell) {
             activeSignatureCell = cell;
             
@@ -639,7 +925,7 @@
             } else if (title === 'Supervisor') {
                  modalTitle.textContent = 'Firma del Supervisor';
                  nameLabel.textContent = 'Nombre del Supervisor';
-            } else { // Fallback for table cells
+            } else { 
                 modalTitle.textContent = 'Firma del Mecánico';
                 nameLabel.textContent = 'Nombre del Mecánico';
             }
@@ -650,11 +936,45 @@
             signatureCanvas.width = signatureCanvas.offsetWidth * ratio;
             signatureCanvas.height = signatureCanvas.offsetHeight * ratio;
             signatureCanvas.getContext("2d").scale(ratio, ratio);
-            signaturePad = new SignaturePad(signatureCanvas, {
-                backgroundColor: 'rgb(255, 255, 255)'
-            });
+            
+            try {
+                signaturePad = new SignaturePad(signatureCanvas, {
+                    backgroundColor: 'rgb(255, 255, 255)'
+                });
+            } catch (padError) {
+                console.error("Error al inicializar SignaturePad.", padError);
+            }
         }
 
+        // --- INICIO: Lógica de "No reportó faltantes" ---
+        
+        /**
+         * Registra en la celda "Acción Tomada" que no se reportaron items.
+         */
+        function logNoItemsReported() {
+            if (activeInspectionDocId && lastSignatureData.name) {
+                const cell = document.querySelector(`.accion-tomada-cell[data-doc-id="${activeInspectionDocId}"]`);
+                if (cell) {
+                    let newText = cell.textContent.trim();
+                    const logEntry = `No se reportaron faltantes. Firmado: ${lastSignatureData.name}`;
+                    
+                    if (!newText.includes(logEntry)) {
+                        newText = newText ? `${newText}. ${logEntry}` : logEntry;
+                    }
+                    
+                    cell.textContent = newText;
+                    
+                    const inspectionRef = getInspectionRef(activeInspectionDocId);
+                    update(inspectionRef, {
+                        accionTomada: newText
+                    }).catch(error => console.error("Error guardando 'Acción Tomada' por 'No':", error));
+                }
+            }
+        }
+        
+        /**
+         * Cierra el modal de firma y limpia las variables temporales.
+         */
         function closeSignatureModal() {
             signatureModal.classList.add('hidden');
             if(signaturePad){
@@ -663,7 +983,10 @@
             }
             signatureNameInput.value = '';
             activeSignatureCell = null;
+            lastSignatureData = { name: '', dataUrl: '' }; // Limpiar datos de firma temporal
         }
+        // --- FIN: Lógica de "No reportó faltantes" ---
+        
         
         paperContainer.addEventListener('click', (e) => {
             if (!isAuthReady) return;
@@ -677,7 +1000,12 @@
                         confirmAction = () => openSignatureModal(signatureTarget);
                         confirmModal.classList.remove('hidden');
                     } else {
-                        signatureToDeleteDocId = signatureTarget.dataset.docId; 
+                        // --- Lógica de borrado de firma con clave ---
+                        itemToManage = { docId: signatureTarget.dataset.docId };
+                        currentPasswordAction = 'deleteSignature';
+                        passwordModalTitle.textContent = 'Clave Requerida';
+                        passwordModalDescription.textContent = 'Para borrar esta firma, ingrese la clave de supervisor.';
+                        passwordConfirmBtn.textContent = 'Confirmar Borrado';
                         passwordInput.value = '';
                         passwordError.textContent = '';
                         passwordModal.classList.remove('hidden');
@@ -712,17 +1040,34 @@
                         signatureDataUrl: dataURL,
                         signatureName: name
                     };
-                    // RTDB: Usamos update para guardar la firma en el nodo específico
+                    
                     const inspectionRef = getInspectionRef(docId);
                     update(inspectionRef, {
                         signature: signatureData
                     })
-                        .then(() => closeSignatureModal())
+                        .then(() => {
+                            // --- INICIO: Nuevo Workflow ---
+                            // 1. Guardar datos de firma temporalmente
+                            lastSignatureData.name = name;
+                            lastSignatureData.dataUrl = dataURL;
+                            activeInspectionDocId = docId; 
+                            
+                            // --- INICIO: CAMBIO ---
+                            // 1. Cerramos el modal de firma AHORA.
+                            closeSignatureModal(); 
+                            
+                            // 2. Abrimos el siguiente modal.
+                            openAskModal('consumible', '¿Faltó algún consumible para esta tarea?');
+                            // --- FIN: CAMBIO ---
+                            
+                            // 3. Ya no cerramos el modal de firma aquí
+                            // closeSignatureModal() // <-- Removido
+                        })
                         .catch(error => {
                             console.error("Error guardando firma (RTDB):", error);
                         });
                 } else { 
-                    // Fallback for footer signatures (UI only) - NOT persistent in RTDB for simplicity
+                    // Fallback for footer signatures (UI only)
                     activeSignatureCell.innerHTML = '';
                     const img = document.createElement('img');
                     img.src = dataURL;
@@ -739,27 +1084,52 @@
             }
         });
 
-        // --- NEW MODAL LISTENERS ---
+        // --- Manejo de Modales (Contraseña, Confirmar) ---
         passwordCancelBtn.addEventListener('click', () => {
             passwordModal.classList.add('hidden');
-            signatureToDeleteDocId = null;
+            itemToManage = {};
+            currentPasswordAction = '';
         });
 
         passwordConfirmBtn.addEventListener('click', () => {
             const password = passwordInput.value;
-            // Clave 'Kevin' como ejemplo (debería ser una clave segura y centralizada)
-            if (password === "Kevin") { 
-                if (signatureToDeleteDocId) {
-                    // RTDB: Eliminamos el campo 'signature' del nodo
-                    const inspectionRef = getInspectionRef(signatureToDeleteDocId);
-                    update(inspectionRef, {
-                        signature: null
-                    }).catch(error => {
-                        console.error("Error al borrar la firma (RTDB):", error);
-                    });
-                    passwordModal.classList.add('hidden');
-                    signatureToDeleteDocId = null;
+            if (password === "Kevin") { // Clave hardcodeada
+                switch (currentPasswordAction) {
+                    case 'deleteSignature':
+                        if (itemToManage.docId) {
+                            const inspectionRef = getInspectionRef(itemToManage.docId);
+                            update(inspectionRef, { signature: null });
+                        }
+                        break;
+                    
+                    case 'deleteItem':
+                        if (itemToManage.inspectionId && itemToManage.itemId) {
+                            const itemRef = ref(db, `${INSPECTIONS_PATH}/${itemToManage.inspectionId}/itemsFaltantes/${itemToManage.itemId}`);
+                            remove(itemRef);
+                        }
+                        break;
+                        
+                    case 'editItem':
+                        const item = allLoadedMissingItems.find(i => i.itemId === itemToManage.itemId);
+                        if (item) {
+                            itemFormModalTitle.textContent = "Editar Item Faltante";
+                            itemNameInput.value = item.name;
+                            itemPartNumberInput.value = item.partNumber;
+                            itemQuantityInput.value = item.quantity;
+                            itemFormError.textContent = '';
+                            
+                            // Cambiar comportamiento del botón Guardar
+                            itemFormSaveBtn.textContent = 'Actualizar Item';
+                            itemFormSaveBtn.removeEventListener('click', handleSaveNewItem); 
+                            itemFormSaveBtn.addEventListener('click', handleUpdateItem); 
+                            
+                            itemFormModal.classList.remove('hidden');
+                        }
+                        break;
                 }
+                passwordModal.classList.add('hidden');
+                itemToManage = {};
+                currentPasswordAction = '';
             } else {
                 passwordError.textContent = "Clave incorrecta.";
                 passwordInput.value = '';
@@ -778,7 +1148,7 @@
             confirmAction = () => {};
         });
 
-        // --- ARCHIVE HANDLING (RTDB) ---
+        // --- Archivar Trabajos ---
         const archiveBtn = document.getElementById('archive-btn');
         archiveBtn.addEventListener('click', () => {
             if (!isAuthReady) {
@@ -810,8 +1180,6 @@
 
                 if (inspectionsToArchive.length > 0) {
                     const timestamp = new Date().toISOString().replace(/[.:]/g, '-');
-                    
-                    // RTDB: Ruta de archivo FAH-980-DATA/historial_ordenes/timestamp
                     const archivePath = `${DB_ROOT}/historial_ordenes/${timestamp}`;
                     const archiveRef = ref(db, archivePath);
                     
@@ -823,7 +1191,6 @@
 
                     set(archiveRef, archiveData)
                         .then(async () => {
-                            // Clear the current list after successful archive: Delete the entire node
                             await remove(inspectionsRef);
                             console.log("Trabajos archivados y lista actual limpiada con éxito.");
                         })
@@ -835,7 +1202,7 @@
             confirmModal.classList.remove('hidden');
         });
 
-        // --- REPORT GENERATION (RTDB) ---
+        // --- Generar Reporte ---
         const reportBtn = document.getElementById('report-btn');
         reportBtn.addEventListener('click', async () => {
             if (!isAuthReady) {
@@ -843,169 +1210,69 @@
                 return;
             }
             
-            const inspectionsRef = getInspectionRef();
-            const inspectionsSnapshot = await get(inspectionsRef);
-            const inspectionsData = inspectionsSnapshot.val();
-
-            if (!inspectionsData) {
+            // Usamos el caché global
+            if (!allLoadedInspections || allLoadedInspections.length === 0) {
                 console.warn("No hay inspecciones en la lista para generar un reporte.");
                 return;
             }
             
-            const inspections = Object.keys(inspectionsData).map(key => ({
-                docId: key, 
-                ...inspectionsData[key]
-            }));
-
-            generateDiscrepancyReport(inspections);
-
+            generateDiscrepancyReport(allLoadedInspections);
         });
 
         function generateDiscrepancyReport(inspections) {
-            const matricula = document.getElementById('matricula').textContent || 'FAH-980'; // Adaptado
+            const matricula = document.getElementById('matricula').textContent || 'FAH-980'; 
             const fecha = new Date().toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: '2-digit' }).replace('.', '').toUpperCase();
-
-            // Si las inspecciones vienen como objeto (común en RTDB sin array), conviértelas.
             const inspectionsArray = inspections.filter(item => item !== null);
 
-            // --- Start of Report HTML ---
             let reportContent = `
-                <!DOCTYPE html>
-                <html lang="es">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Reporte de Trabajo Efectuado - ${matricula}</title>
-                    <style>
-                        body { 
-                            font-family: Arial, sans-serif; 
-                            font-size: 11px; 
-                            counter-reset: page-counter;
-                        }
-                        .report-container { 
-                            width: 100%; 
-                            max-width: 8.5in; 
-                            margin: auto; 
-                            display: flex;
-                            flex-direction: column;
-                            min-height: 10.5in; /* Approximate letter size minus margins */
-                        }
-                        .report-body {
-                            flex-grow: 1;
-                        }
-                        .header { text-align: center; }
-                        .header h1, .header h2, .header h3 { margin: 1px 0; font-weight: bold; }
-                        .header h1 { font-size: 16px; }
-                        .header h2 { font-size: 14px; }
-                        .header h3 { font-size: 12px; font-weight: normal; }
-                        .info-table { width: 100%; margin-top: 15px; margin-bottom: 15px; border: none; }
-                        .info-table td { font-size: 12px; font-weight: bold; }
-                        .notification { font-size: 12px; margin-bottom: 10px; }
-                        
-                        .data-table { width: 100%; border-collapse: collapse; border: 2px solid black; }
-                        .data-table th { color: white; text-align: left; padding: 6px; font-size: 14px; border: 2px solid black; }
-                        .data-table td { border: 1.5px solid black; padding: 5px; vertical-align: top; }
-                        .data-table .num { font-weight: bold; text-align: center; width: 45px; }
-
-                        .discrepancy-table th { background-color: #2E75B5; }
-                        .discrepancy-table td { background-color: #FFC000; }
-                        
-                        .corrective-table { margin-top: 20px; }
-                        .corrective-table th { background-color: #00B050; }
-                        .corrective-table td { background-color: #E2EFDA; }
-                        .corrective-table .mechanic-sig {
-                            text-align: center;
-                            width: 150px;
-                        }
-                        .corrective-table .mechanic-sig img {
-                            max-height: 30px;
-                            display: block;
-                            margin: 0 auto 2px;
-                        }
-                        .corrective-table .mechanic-sig p {
-                            font-size: 9px;
-                            margin: 0;
-                            line-height: 1;
-                        }
-
-
-                        .signatures-container { 
-                            margin-top: 30px; 
-                            font-size: 10px;
-                        }
-                        .mechanics-list {
-                            columns: 2;
-                            -webkit-columns: 2;
-                            -moz-columns: 2;
-                        }
-                        .mechanic-item {
-                            display: flex;
-                            align-items: center;
-                            margin-bottom: 5px;
-                            break-inside: avoid;
-                        }
-                        .mechanic-item img {
-                            height: 25px;
-                            width: auto;
-                            margin-left: 10px;
-                        }
-
-                        .official-signatures {
-                            display: grid;
-                            grid-template-columns: 1fr 1fr;
-                            gap: 40px 60px;
-                            margin-top: 30px;
-                            text-align: center;
-                        }
-                        .official-signatures div {
-                            padding-top: 40px;
-                            border-top: 1px solid black;
-                        }
-
-                        @media print {
-                            body { margin: 0.5in; }
-                            .no-print { display: none; }
-                            .page-footer {
-                                position: fixed;
-                                bottom: 0.25in;
-                                right: 0.5in;
-                                font-size: 10px;
-                            }
-                            .page-footer::after {
-                                counter-increment: page-counter;
-                                content: "Página " counter(page-counter);
-                            }
-                            .page-break {
-                                page-break-before: always;
-                            }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="report-container">
-                        <div class="report-body">
-                            <div class="header">
-                                <h1>FUERZAS ARMADAS DE HONDURAS</h1>
-                                <h2>FUERZA AÉREA HONDUREÑA</h2>
-                                <h3>Base Aérea "Coronel Hernán Acosta Mejía"</h3>
-                                <h2>REPORTE DE TRABAJO EFECTUADO</h2>
-                            </div>
-                            
-                            <table class="info-table">
-                                <tr>
-                                    <td>AVION No. Bell-412 ${matricula}</td>
-                                    <td style="text-align: right;">FECHA: ${fecha}</td>
-                                </tr>
-                            </table>
-
-                            <p class="notification">El Taller / Sección Helicópteros notifica que el trabajo:</p>
-
-                            <table class="data-table discrepancy-table">
-                                <thead>
-                                    <tr><th colspan="2">Discrepancia:</th></tr>
-                                </thead>
-                                <tbody>
-                `;
-
+                <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte - ${matricula}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; font-size: 11px; counter-reset: page-counter; }
+                    .report-container { width: 100%; max-width: 8.5in; margin: auto; display: flex; flex-direction: column; min-height: 10.5in; }
+                    .report-body { flex-grow: 1; }
+                    .header { text-align: center; }
+                    .header h1, .header h2, .header h3 { margin: 1px 0; font-weight: bold; }
+                    .header h1 { font-size: 16px; } .header h2 { font-size: 14px; } .header h3 { font-size: 12px; font-weight: normal; }
+                    .info-table { width: 100%; margin-top: 15px; margin-bottom: 15px; border: none; }
+                    .info-table td { font-size: 12px; font-weight: bold; }
+                    .notification { font-size: 12px; margin-bottom: 10px; }
+                    .data-table { width: 100%; border-collapse: collapse; border: 2px solid black; }
+                    .data-table th { color: white; text-align: left; padding: 6px; font-size: 14px; border: 2px solid black; }
+                    .data-table td { border: 1.5px solid black; padding: 5px; vertical-align: top; }
+                    .data-table .num { font-weight: bold; text-align: center; width: 45px; }
+                    .discrepancy-table th { background-color: #2E75B5; }
+                    .discrepancy-table td { background-color: #FFC000; }
+                    .corrective-table { margin-top: 20px; }
+                    .corrective-table th { background-color: #00B050; }
+                    .corrective-table td { background-color: #E2EFDA; }
+                    .corrective-table .mechanic-sig { text-align: center; width: 150px; }
+                    .corrective-table .mechanic-sig img { max-height: 30px; display: block; margin: 0 auto 2px; }
+                    .corrective-table .mechanic-sig p { font-size: 9px; margin: 0; line-height: 1; }
+                    .signatures-container { margin-top: 30px; font-size: 10px; }
+                    .official-signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 60px; margin-top: 30px; text-align: center; }
+                    .official-signatures div { padding-top: 40px; border-top: 1px solid black; }
+                    @media print {
+                        body { margin: 0.5in; } .no-print { display: none; }
+                        .page-footer { position: fixed; bottom: 0.25in; right: 0.5in; font-size: 10px; }
+                        .page-footer::after { counter-increment: page-counter; content: "Página " counter(page-counter); }
+                    }
+                </style></head><body>
+                <div class="report-container">
+                    <div class="report-body">
+                        <div class="header">
+                            <h1>FUERZAS ARMADAS DE HONDURAS</h1>
+                            <h2>FUERZA AÉREA HONDUREÑA</h2>
+                            <h3>Base Aérea "Coronel Hernán Acosta Mejía"</h3>
+                            <h2>REPORTE DE TRABAJO EFECTUADO</h2>
+                        </div>
+                        <table class="info-table">
+                            <tr><td>AVION No. Bell-412 ${matricula}</td><td style="text-align: right;">FECHA: ${fecha}</td></tr>
+                        </table>
+                        <p class="notification">El Taller / Sección Helicópteros notifica que el trabajo:</p>
+                        <table class="data-table discrepancy-table">
+                            <thead><tr><th colspan="2">Discrepancia:</th></tr></thead>
+                            <tbody>
+            `;
             
             const groupedByTheme = inspectionsArray.reduce((acc, item) => {
                 const theme = item.tema || item.name || 'Inspecciones Generales';
@@ -1028,10 +1295,8 @@
                 return a.localeCompare(b);
             });
 
-            // --- Function to generate discrepancy table rows ---
             const generateDiscrepancyTableRows = () => {
-                let content = '';
-                let themeCounter = 1;
+                let content = ''; let themeCounter = 1;
                 for (const theme of sortedThemes) {
                     let itemCounter = 1;
                     content += `<tr><td class="num">${themeCounter}.</td><td><strong>${theme}</strong></td></tr>`;
@@ -1044,46 +1309,18 @@
             };
 
             reportContent += generateDiscrepancyTableRows();
-            reportContent += `
-                                </tbody>
-                            </table>
+            reportContent += `</tbody></table><table class="data-table corrective-table"><thead><tr><th colspan="2">Acción Correctiva:</th><th>Técnico Especialista</th></tr></thead><tbody>`;
 
-                            <table class="data-table corrective-table">
-                                <thead>
-                                    <tr>
-                                        <th colspan="2">Acción Correctiva:</th>
-                                        <th>Técnico Especialista</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                `;
-
-            // --- Function to generate corrective action table rows ---
             const generateCorrectiveTableRows = () => {
-                let content = '';
-                let themeCounter = 1;
+                let content = ''; let themeCounter = 1;
                 for (const theme of sortedThemes) {
                     let itemCounter = 1;
-                    content += `
-                            <tr>
-                                <td class="num">${themeCounter}.</td>
-                                <td colspan="2"><strong>${theme}</strong></td>
-                            </tr>`;
+                    content += `<tr><td class="num">${themeCounter}.</td><td colspan="2"><strong>${theme}</strong></td></tr>`;
                     groupedByTheme[theme].forEach(item => {
                         const signatureCell = (item.signature && item.signature.signatureDataUrl)
-                            ? `<td class="mechanic-sig">
-                                <img src="${item.signature.signatureDataUrl}" alt="Firma">
-                                <p>${item.signature.signatureName || ''}</p>
-                              </td>`
+                            ? `<td class="mechanic-sig"><img src="${item.signature.signatureDataUrl}" alt="Firma"><p>${item.signature.signatureName || ''}</p></td>`
                             : '<td></td>';
-
-                        content += `
-                            <tr>
-                                <td class="num">${themeCounter}.${itemCounter++}</td>
-                                <td>Se completó ${item.name} / ${item.ref}</td>
-                                ${signatureCell}
-                            </tr>
-                        `;
+                        content += `<tr><td class="num">${themeCounter}.${itemCounter++}</td><td>Se completó ${item.name} / ${item.ref}</td>${signatureCell}</tr>`;
                     });
                     themeCounter++;
                 }
@@ -1092,23 +1329,16 @@
             
             reportContent += generateCorrectiveTableRows();
             reportContent += `
-                                </tbody>
-                            </table>
-                        </div>
-                        
+                                </tbody></table></div>
                         <footer class="signatures-container">
                              <div class="official-signatures">
-                                  <div><p>SUPERVISOR</p></div>
-                                  <div><p>INSPECTOR</p></div>
-                                  <div><p>JEFE TALLER / SECCION</p></div>
-                                  <div><p>JEFE DE LOGISTICA A-4</p></div>
+                                  <div><p>SUPERVISOR</p></div><div><p>INSPECTOR</p></div>
+                                  <div><p>JEFE TALLER / SECCION</p></div><div><p>JEFE DE LOGISTICA A-4</p></div>
                              </div>
                         </footer>
-                    </div>
-                    <div class="page-footer"></div>
+                    </div><div class="page-footer"></div>
                     <button class."no-print" onclick="window.print()" style="position: fixed; top: 10px; right: 10px; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 5px;">Imprimir Reporte</button>
-                </body>
-                </html>
+                </body></html>
             `;
 
             const reportWindow = window.open('', '_blank');
@@ -1116,6 +1346,236 @@
             reportWindow.document.write(reportContent);
             reportWindow.document.close();
         }
+
+        // --- Lógica para Items Faltantes (Consumibles / Repuestos) ---
+
+        function openAskModal(type, title) {
+            currentItemType = type; 
+            askModalTitle.textContent = title;
+            askModal.classList.remove('hidden');
+        }
+        function closeAskModal() {
+            askModal.classList.add('hidden');
+        }
+        
+        function openItemFormModal() {
+            const title = currentItemType === 'consumible' ? 'Añadir Consumible Faltante' : 'Añadir Repuesto Faltante';
+            itemFormModalTitle.textContent = title;
+            
+            itemNameInput.value = '';
+            itemPartNumberInput.value = '';
+            itemQuantityInput.value = '1';
+            itemFormError.textContent = '';
+            
+            // Asegurar que el botón de guardar esté en modo "Crear"
+            itemFormSaveBtn.textContent = 'Guardar Item';
+            itemFormSaveBtn.removeEventListener('click', handleUpdateItem);
+            itemFormSaveBtn.addEventListener('click', handleSaveNewItem);
+            
+            itemFormModal.classList.remove('hidden');
+            itemNameInput.focus();
+        }
+
+        function closeItemFormModal() {
+            itemFormModal.classList.add('hidden');
+            // Resetear el botón de guardar a su estado original (crear)
+            itemFormSaveBtn.textContent = 'Guardar Item';
+            itemFormSaveBtn.removeEventListener('click', handleUpdateItem);
+            itemFormSaveBtn.addEventListener('click', handleSaveNewItem);
+        }
+
+        // --- Event Listeners para Modales de Items ---
+        askModalYesBtn.addEventListener('click', () => {
+            closeAskModal();
+            openItemFormModal(); 
+        });
+
+        askModalNoBtn.addEventListener('click', () => {
+            closeAskModal();
+            if (currentItemType === 'consumible') {
+                openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
+            } else {
+                logNoItemsReported(); // <-- LOG "NO"
+                // closeSignatureModal(); // <-- ESTA LÍNEA YA NO ES NECESARIA
+                activeInspectionDocId = null;
+                currentItemType = null;
+            }
+        });
+
+        itemFormCancelBtn.addEventListener('click', () => {
+            closeItemFormModal();
+            if (currentItemType === 'consumible') {
+                openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
+            } else {
+                logNoItemsReported(); // <-- LOG "NO" (al cancelar el último paso)
+                // closeSignatureModal(); // <-- ESTA LÍNEA YA NO ES NECESARIA
+                activeInspectionDocId = null;
+                currentItemType = null;
+            }
+        });
+
+        itemFormCancelBtn.addEventListener('click', () => {
+            closeItemFormModal();
+            if (currentItemType === 'consumible') {
+                openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
+            } else {
+                logNoItemsReported(); // <-- LOG "NO" (al cancelar el último paso)
+                closeSignatureModal();
+                activeInspectionDocId = null;
+                currentItemType = null;
+            }
+        });
+
+        // --- INICIO: Lógica separada para Guardar/Actualizar Items ---
+        
+        /**
+         * Manejador para CREAR un nuevo item faltante.
+         */
+        async function handleSaveNewItem() {
+            const name = itemNameInput.value.trim();
+            const partNumber = itemPartNumberInput.value.trim();
+            const quantity = itemQuantityInput.value.trim();
+
+            if (!name || !quantity) {
+                itemFormError.textContent = 'El Nombre y la Cantidad son obligatorios.';
+                setTimeout(() => { itemFormError.textContent = ''; }, 3000);
+                return;
+            }
+
+            if (!activeInspectionDocId || !currentItemType) {
+                console.error("Error: No se encontró activeInspectionDocId o currentItemType.");
+                closeItemFormModal();
+                return;
+            }
+
+            await saveMissingItem(activeInspectionDocId, currentItemType, { name, partNumber, quantity });
+            
+            closeItemFormModal();
+
+            if (currentItemType === 'consumible') {
+                openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
+            } else {
+                // closeSignatureModal(); // <-- ESTA LÍNEA YA NO ES NECESARIA
+                activeInspectionDocId = null;
+                currentItemType = null;
+            }
+        }
+        
+        /**
+         * Manejador para ACTUALIZAR un item existente (desde el modal de clave).
+         */
+        async function handleUpdateItem() {
+            const name = itemNameInput.value.trim();
+            const partNumber = itemPartNumberInput.value.trim();
+            const quantity = itemQuantityInput.value.trim();
+
+            if (!name || !quantity) {
+                itemFormError.textContent = 'El Nombre y la Cantidad son obligatorios.';
+                setTimeout(() => { itemFormError.textContent = ''; }, 3000);
+                return;
+            }
+
+            if (!itemToManage.inspectionId || !itemToManage.itemId) {
+                console.error("Error: No se encontró itemToManage.inspectionId o itemId para actualizar.");
+                closeItemFormModal();
+                return;
+            }
+
+            // Referencia al item específico
+            const itemRef = ref(db, `${INSPECTIONS_PATH}/${itemToManage.inspectionId}/itemsFaltantes/${itemToManage.itemId}`);
+            
+            try {
+                // Actualizamos solo los campos del formulario
+                await update(itemRef, {
+                    name: name,
+                    partNumber: partNumber,
+                    quantity: quantity
+                });
+                console.log("Item actualizado con éxito.");
+            } catch (error) {
+                console.error("Error actualizando item (RTDB):", error);
+            }
+            
+            closeItemFormModal();
+            itemToManage = {}; // Limpiar el item en gestión
+        }
+        
+        // Asignar el manejador de "crear" por defecto
+        itemFormSaveBtn.addEventListener('click', handleSaveNewItem);
+
+
+        /**
+         * Guarda un nuevo item en RTDB usando push.
+         */
+        async function saveMissingItem(docId, type, item) {
+            if (!docId) return;
+            const itemsListRef = ref(db, `${INSPECTIONS_PATH}/${docId}/itemsFaltantes`);
+            const newItem = {
+                type: type,
+                name: item.name,
+                partNumber: item.partNumber,
+                quantity: item.quantity,
+                addedAt: new Date().toISOString(),
+                // --- INICIO: NUEVOS CAMPOS ---
+                reportedBy: {
+                    name: lastSignatureData.name || 'N/A',
+                    signatureDataUrl: lastSignatureData.dataUrl || null
+                }
+                // --- FIN: NUEVOS CAMPOS ---
+            };
+            try {
+                await push(itemsListRef, newItem);
+                console.log("Item faltante guardado con éxito.");
+            } catch (error) {
+                console.error("Error guardando item faltante (RTDB):", error);
+            }
+        }
+        
+        // --- FIN: Lógica separada Guardar/Actualizar ---
+
+
+        // --- INICIO: Event Listener para botones de Editar/Borrar Item ---
+        
+        missingItemsList.addEventListener('click', (e) => {
+            const target = e.target;
+            
+            // Botón BORRAR
+            if (target.classList.contains('delete-item-btn')) {
+                itemToManage = {
+                    inspectionId: target.dataset.inspectionId,
+                    itemId: target.dataset.itemId
+                };
+                currentPasswordAction = 'deleteItem';
+                
+                passwordModalTitle.textContent = 'Confirmar Borrado';
+                passwordModalDescription.textContent = 'Para borrar este item, ingrese la clave de supervisor.';
+                passwordConfirmBtn.textContent = 'Confirmar Borrado';
+                passwordInput.value = '';
+                passwordError.textContent = '';
+                passwordModal.classList.remove('hidden');
+                passwordInput.focus();
+            }
+            
+            // Botón EDITAR
+            if (target.classList.contains('edit-item-btn')) {
+                itemToManage = {
+                    inspectionId: target.dataset.inspectionId,
+                    itemId: target.dataset.itemId
+                };
+                currentPasswordAction = 'editItem';
+                
+                passwordModalTitle.textContent = 'Confirmar Edición';
+                passwordModalDescription.textContent = 'Para editar este item, ingrese la clave de supervisor.';
+                passwordConfirmBtn.textContent = 'Confirmar';
+                passwordInput.value = '';
+                passwordError.textContent = '';
+                passwordModal.classList.remove('hidden');
+                passwordInput.focus();
+            }
+        });
+        
+        // --- FIN: Event Listener para botones de Editar/Borrar Item ---
+
     </script>
 </body>
 </html>
