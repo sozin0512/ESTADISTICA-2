@@ -733,6 +733,12 @@
         // Nuevo botón de estado de componentes
         const btnComponentStatus = document.getElementById('btnComponentStatus');
 
+        // === INICIO: Icono de Mecánico (para Tooltip) ===
+        const iconoMecanicoHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-3 w-3 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+        </svg>`;
+        // === FIN: Icono de Mecánico ===
+
 
         // Helper para extraer la nomenclatura base y la variante (Ya no es estrictamente necesario sin límites, pero se mantiene si hay nombres con formato similar)
         function parseNomenclatura(nombreCompleto) {
@@ -1244,20 +1250,35 @@
                         if (headerRow) {
                             // Limpiar tooltips antiguos (días 1-31, que son th:nth-child(3) en adelante)
                             headerRow.querySelectorAll('th:nth-child(n+3)').forEach(th => {
+                                th.innerHTML = th.textContent.trim(); // Restaura solo el número (quita el icono)
                                 th.title = '';
                                 th.style.cursor = '';
-                                th.style.textDecoration = '';
+                                // th.style.textDecoration = ''; // Ya no se usa
                             });
 
                             // Aplicar nuevos tooltips
                             for (const dia in mecanicos) {
-                                const nombre = mecanicos[dia];
+                                const data = mecanicos[dia]; // Puede ser string (antiguo) o array (nuevo)
+                                let nombres = '';
+
+                                // --- INICIO: Lógica para múltiples mecánicos ---
+                                if (Array.isArray(data)) {
+                                    nombres = data.join(', '); // Unir lista
+                                } else if (typeof data === 'string') {
+                                    nombres = data; // Compatibilidad con datos antiguos
+                                }
+                                // --- FIN: Lógica para múltiples mecánicos ---
+
                                 const diaIndex = parseInt(dia) + 2; // +2 porque 1=Nomenclatura, 2=Vienen, 3=Dia 1
                                 const th = headerRow.querySelector(`th:nth-child(${diaIndex})`);
-                                if (th) {
-                                    th.title = `Reporte por: ${nombre}`;
+                                if (th && nombres) { // Asegurarse de que 'nombres' no esté vacío
+                                    th.title = `Reporte(s) por: ${nombres}`;
                                     th.style.cursor = 'help';
-                                    th.style.textDecoration = 'underline dotted';
+                                    // --- INICIO: Añadir icono ---
+                                    const diaNum = th.textContent.trim(); // Guardar el número del día
+                                    th.innerHTML = `${diaNum} ${iconoMecanicoHTML}`; // Añadir el icono
+                                    // th.style.textDecoration = 'underline dotted'; // Quitar subrayado
+                                    // --- FIN: Añadir icono ---
                                 }
                             }
                         }
@@ -1696,24 +1717,46 @@
             // Ruta para guardar el nombre del mecánico
             const mechanicPath = `artifacts/${appId}/public_data/FAH-906/${añoActual}/${mesActual}/mecanicos/${targetDay}`;
 
-            set(ref(database, mechanicPath), mechanicName)
-                .then(() => {
-                    // 1. Ocultar modal de mecánico
-                    mechanicNameModal.style.display = 'none';
-                    modalMechanicName.value = ''; // Limpiar el campo
+            // --- INICIO: Lógica para múltiples mecánicos ---
+            // 1. Leer los nombres existentes primero
+            get(ref(database, mechanicPath)).then(snapshot => {
+                const existingData = snapshot.val();
+                const nameSet = new Set();
 
-                    // 2. Mostrar modal de despedida
-                    goodbyeMessage.textContent = `¡Gracias, ${mechanicName}! Tu reporte ha sido guardado.`;
-                    goodbyeModal.style.display = 'flex';
+                if (Array.isArray(existingData)) {
+                    existingData.forEach(name => nameSet.add(name));
+                } else if (typeof existingData === 'string' && existingData) {
+                    nameSet.add(existingData); // Compatibilidad con datos antiguos
+                }
+                
+                nameSet.add(mechanicName); // Añadir el nuevo nombre
 
-                    // 3. Redirigir/Cerrar la página después de 3 segundos
-                    setTimeout(() => {
-                        window.location.href = 'about:blank';
-                    }, 3000);
-                })
-                .catch((error) => {
-                    showCustomAlert(`Error al guardar el nombre del mecánico: ${error.message}`);
-                });
+                const updatedNameList = Array.from(nameSet); // Lista de nombres únicos
+
+                // 2. Guardar la nueva lista (array)
+                set(ref(database, mechanicPath), updatedNameList)
+                    .then(() => {
+                        // 3. Ocultar modal de mecánico
+                        mechanicNameModal.style.display = 'none';
+                        modalMechanicName.value = ''; // Limpiar el campo
+
+                        // 4. Mostrar modal de despedida
+                        goodbyeMessage.textContent = `¡Gracias, ${mechanicName}! Tu reporte ha sido guardado.`;
+                        goodbyeModal.style.display = 'flex';
+
+                        // 5. Redirigir/Cerrar la página después de 3 segundos
+                        setTimeout(() => {
+                            window.location.href = 'about:blank';
+                        }, 3000);
+                    })
+                    .catch((error) => {
+                        showCustomAlert(`Error al guardar la lista de mecánicos: ${error.message}`);
+                    });
+
+            }).catch(error => {
+                showCustomAlert(`Error al leer los mecánicos existentes: ${error.message}`);
+            });
+            // --- FIN: Lógica para múltiples mecánicos ---
         }
         // === FIN: NUEVA FUNCIÓN PARA GUARDAR MECÁNICO Y SALIR ===
 
