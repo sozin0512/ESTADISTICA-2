@@ -916,12 +916,25 @@
                     const isNomenclatura = celda.classList.contains('nomenclatura');
                     const isTotalCell = celda.classList.contains('fila-total') || celda.classList.contains('fila-general');
                     const isMotorHeader = celda.classList.contains('motor-header');
+                    const isVienenCell = celda.classList.contains('fila-vienen'); // <<< NUEVO CHECK
+
                     
                     // No hay más celdas de "Restante" o "Label" específicas después de la eliminación
                     if (isNomenclatura || isTotalCell || isMotorHeader) {
                         celda.contentEditable = 'false';
                         celda.classList.add('read-only-cell');
                         celda.classList.remove('editable-cell');
+                    } else if (isVienenCell) { // <<< NUEVO BLOQUE
+                        // La celda "VIENEN" solo es editable en Enero
+                        if (mesActual === 0 && isAuthenticated) {
+                            celda.contentEditable = 'true';
+                            celda.classList.add('editable-cell');
+                            celda.classList.remove('read-only-cell');
+                        } else {
+                            celda.contentEditable = 'false';
+                            celda.classList.add('read-only-cell');
+                            celda.classList.remove('editable-cell');
+                        }
                     } else {
                         celda.contentEditable = isAuthenticated ? 'true' : 'false';
                         if (isAuthenticated) {
@@ -1192,12 +1205,18 @@
 
                             // Calcular "Vienen" (Total General del mes anterior)
                             let vienen = 0;
-                            if (datosFilaVienen.dias) {
-                                const totalMesVienen = Object.values(datosFilaVienen.dias).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
-                                vienen = (parseFloat(datosFilaVienen.vienen) || 0) + totalMesVienen;
-                            } else {
-                                vienen = parseFloat(datosFilaVienen.general) || 0; // Fallback
+                            /* --- INICIO DE LA MODIFICACIÓN (LÓGICA "VIENEN" INTELIGENTE) --- */
+                            const vienen_calculado = parseFloat(datosFilaVienen.general) || 0;
+                            const vienen_guardado = parseFloat(datosFila.vienen); // Leer el valor guardado este mes
+
+                            if (mesActual === 0) { // Es Enero
+                                // En Enero, priorizar el valor guardado. Si no existe, usar el calculado (de Dic. año anterior).
+                                vienen = !isNaN(vienen_guardado) ? vienen_guardado : vienen_calculado;
+                            } else { // Es Feb - Dic
+                                // En otros meses, SIEMPRE usar el calculado para mantener la cadena.
+                                vienen = vienen_calculado;
                             }
+                            /* --- FIN DE LA MODIFICACIÓN --- */
                             
                             // Casos especiales para AC HRS, ATERRIZAJES, RINS (se acumulan)
                             /* --- INICIO DEL BLOQUE A ELIMINAR ---
@@ -1272,7 +1291,7 @@
                     // La propiedad 'vienen' se elimina de aquí.
                     // Ya no leemos 'vienen' de la tabla para guardarlo.
                     // 'vienen' ahora es un valor 100% calculado en 'cargarDatosDelMes'.
-                    /* vienen: parseFloat(fila.querySelector('.fila-vienen').textContent) || 0, */ // <-- LÍNEA ELIMINADA
+                    vienen: parseFloat(fila.querySelector('.fila-vienen').textContent) || 0, // <-- LÍNEA RESTAURADA
                     /* --- FIN DE LA MODIFICACIÓN --- */
                     dias: {},
                     total: parseFloat(fila.querySelector('.fila-total').textContent) || 0,
