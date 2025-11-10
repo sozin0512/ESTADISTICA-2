@@ -1162,6 +1162,7 @@
             const rutaVienen = `artifacts/${appId}/public_data/FAH-906/${año}/${mes === 0 ? 11 : mes - 1}`;
             const añoVienen = mes === 0 ? año - 1 : año;
             const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-906-Overall`;
+            const rutaMecanicos = `artifacts/${appId}/public_data/FAH-906/${año}/${mes}/mecanicos`; // <<< NUEVA RUTA
 
             const tablaActiva = document.querySelector(`.tabla-mes[data-mes="${mes}"] .tabla-vuelo tbody`);
             if (!tablaActiva) return Promise.resolve();
@@ -1172,14 +1173,16 @@
                 const p2_datosActuales = get(ref(database, rutaDatosMes));
                 const p3_recordatorio = get(ref(database, rutaRecordatorio));
                 const p4_totalesGenerales = get(ref(database, rutaTotalesGenerales));
+                const p5_mecanicos = get(ref(database, rutaMecanicos)); // <<< NUEVA PROMESA
 
-                Promise.all([p1_datosVienen, p2_datosActuales, p3_recordatorio, p4_totalesGenerales])
-                    .then(([snapshotVienen, snapshotActual, snapshotRecordatorio, snapshotGeneral]) => {
+                Promise.all([p1_datosVienen, p2_datosActuales, p3_recordatorio, p4_totalesGenerales, p5_mecanicos])
+                    .then(([snapshotVienen, snapshotActual, snapshotRecordatorio, snapshotGeneral, snapshotMecanicos]) => {
                         
                         const datosVienen = snapshotVienen.val() || {};
                         const datosActuales = snapshotActual.val() || {};
                         recordatorioTextarea.value = snapshotRecordatorio.val() || '';
                         const totalesGenerales = snapshotGeneral.val() || {};
+                        const mecanicos = snapshotMecanicos.val() || {}; // <<< NUEVOS DATOS
 
                         // 4. Poblar la tabla
                         tablaActiva.querySelectorAll('tr[data-nomenclatura]').forEach(fila => {
@@ -1216,6 +1219,30 @@
 
                         // 5. Calcular totales
                         actualizarTotales();
+
+                        // 6. Aplicar tooltips de mecánicos (NUEVO)
+                        const headerRow = tablaActiva.closest('table').querySelector('thead tr');
+                        if (headerRow) {
+                            // Limpiar tooltips antiguos (días 1-31, que son th:nth-child(3) en adelante)
+                            headerRow.querySelectorAll('th:nth-child(n+3)').forEach(th => {
+                                th.title = '';
+                                th.style.cursor = '';
+                                th.style.textDecoration = '';
+                            });
+
+                            // Aplicar nuevos tooltips
+                            for (const dia in mecanicos) {
+                                const nombre = mecanicos[dia];
+                                const diaIndex = parseInt(dia) + 2; // +2 porque 1=Nomenclatura, 2=Vienen, 3=Dia 1
+                                const th = headerRow.querySelector(`th:nth-child(${diaIndex})`);
+                                if (th) {
+                                    th.title = `Reporte por: ${nombre}`;
+                                    th.style.cursor = 'help';
+                                    th.style.textDecoration = 'underline dotted';
+                                }
+                            }
+                        }
+
                         resolve(); // Resolver la promesa principal
 
                     })
