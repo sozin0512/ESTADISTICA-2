@@ -54,6 +54,12 @@
             outline-offset: -2px;
         }
 
+        /* --- INICIO: NUEVA REGLA PARA FILA SELECCIONADA --- */
+        tr.selected-row {
+            background-color: #eff6ff !important; /* bg-blue-50 */
+        }
+        /* --- FIN: NUEVA REGLA --- */
+
         #signature-canvas {
             width: 400px;
             height: 200px;
@@ -261,13 +267,28 @@
         </section>
 
         <main class="flex-grow">
-            <h2 class="text-xl font-semibold text-center mb-4 text-red-700">Listado de Inspecciones Vencidas</h2>
+            <!-- INICIO: NUEVO CONTENEDOR PARA TÍTULO Y BOTÓN DE LOTE -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-center text-red-700">Listado de Inspecciones Vencidas</h2>
+                <div id="batch-actions-container" class="hidden no-print">
+                    <span id="selection-count" class="text-sm font-medium text-gray-700 mr-4">0 seleccionadas</span>
+                    <button id="batch-sign-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm shadow-md">
+                        Firmar Seleccionadas
+                    </button>
+                </div>
+            </div>
+            <!-- FIN: NUEVO CONTENEDOR -->
             
             <div id="loading-message" class="text-center text-gray-500 my-8">Cargando lista de trabajos...</div>
             
             <table class="w-full text-sm text-left text-gray-600">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                     <tr>
+                        <!-- INICIO: NUEVO ENCABEZADO DE CHECKBOX -->
+                        <th scope="col" class="px-4 py-3 w-10 text-center">
+                            <input type="checkbox" id="select-all-checkbox" class="rounded border-gray-300 shadow-sm focus:ring-blue-500">
+                        </th>
+                        <!-- FIN: NUEVO ENCABEZADO -->
                         <th scope="col" class="px-4 py-3 w-10 text-center">#</th>
                         <th scope="col" class="px-4 py-3">Descripción del Trabajo / Inspección</th>
                         <th scope="col" class="px-4 py-3 w-40">Referencia</th>
@@ -474,6 +495,27 @@
     <!-- FIN: Modales Faltantes -->
 
 
+    <!-- INICIO: NUEVO MODAL PARA ASIGNAR ITEMS EN LOTE -->
+    <div id="assign-item-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg my-8">
+            <div class="p-4 border-b">
+                <h3 id="assign-item-modal-title" class="text-lg font-bold text-gray-800">Asignar Item a Tareas</h3>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-600 mb-4">Seleccione las tareas (del lote que firmó) a las que desea añadir este item:</p>
+                <div id="assign-item-list" class="h-64 overflow-y-auto border rounded-md p-2 space-y-1 bg-gray-50">
+                    <!-- La lista de tareas seleccionadas se generará aquí -->
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 p-4 bg-gray-50">
+                <button id="assign-item-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar Asignación</button>
+                <button id="assign-item-save" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg">Asignar y Continuar</button>
+            </div>
+        </div>
+    </div>
+    <!-- FIN: NUEVO MODAL -->
+
+
     <script type="module">
         import { initializeApp, setLogLevel } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
         import { getAuth, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
@@ -552,6 +594,15 @@
         const itemFormSaveBtn = document.getElementById('item-form-save');
         const itemFormCancelBtn = document.getElementById('item-form-cancel');
 
+        // --- INICIO: NUEVO MODAL DE ASIGNACIÓN ---
+        const assignItemModal = document.getElementById('assign-item-modal');
+        const assignItemModalTitle = document.getElementById('assign-item-modal-title');
+        const assignItemList = document.getElementById('assign-item-list');
+        const assignItemCancelBtn = document.getElementById('assign-item-cancel');
+        const assignItemSaveBtn = document.getElementById('assign-item-save');
+        // --- FIN: NUEVO MODAL DE ASIGNACIÓN ---
+
+
         // --- INICIO: NUEVAS VARIABLES GLOBALES DE ESTADO ---
         let activeInspectionDocId = null; // ID de la inspección que se está firmando
         let currentItemType = null; // 'consumible' o 'repuesto'
@@ -563,10 +614,27 @@
         let itemToManage = { inspectionId: null, itemId: null, docId: null }; 
         let currentPasswordAction = ''; // 'deleteSignature', 'deleteItem', 'editItem'
 
+        // --- INICIO: NUEVO ESTADO PARA ASIGNACIÓN EN LOTE ---
+        let itemBeingAssigned = null; // Almacena {name, partNumber, quantity}
+        // --- FIN: NUEVO ESTADO PARA ASIGNACIÓN EN LOTE ---
+
+        // --- INICIO: NUEVAS VARIABLES PARA SELECCIÓN MÚLTIPLE ---
+        let selectedInspections = new Set();
+        let isBatchSigning = false;
+        // --- FIN: NUEVAS VARIABLES PARA SELECCIÓN MÚLTIPLE ---
+
         // Caché de datos
         let allLoadedInspections = []; // Almacena todas las inspecciones cargadas
         let allLoadedMissingItems = []; // Almacena todos los items faltantes
         // --- FIN: NUEVAS VARIABLES GLOBALES DE ESTADO ---
+
+
+        // --- INICIO: NUEVOS ELEMENTOS DOM PARA SELECCIÓN MÚLTIPLE ---
+        const batchActionsContainer = document.getElementById('batch-actions-container');
+        const selectionCountEl = document.getElementById('selection-count');
+        const batchSignBtn = document.getElementById('batch-sign-btn');
+        const selectAllCheckbox = document.getElementById('select-all-checkbox');
+        // --- FIN: NUEVOS ELEMENTOS DOM ---
 
 
         const DB_ROOT = "artifacts/FAH-980-DATA";
@@ -790,6 +858,11 @@
                     const accionTomadaContent = item.accionTomada || '';
 
                     row.innerHTML = `
+                        <!-- INICIO: NUEVA CELDA DE CHECKBOX -->
+                        <td class="px-4 py-3 text-center">
+                            <input type="checkbox" class="row-checkbox rounded border-gray-300 shadow-sm focus:ring-blue-500" data-doc-id="${item.docId}">
+                        </td>
+                        <!-- FIN: NUEVA CELDA -->
                         <td class="px-4 py-3 text-center font-medium text-gray-900">${itemCounter++}</td>
                         <td class="px-4 py-3 font-medium text-gray-900">
                             ${item.name}
@@ -808,6 +881,13 @@
             }
             
             updateProgressBar(signedCount, totalCount);
+
+            // --- INICIO: NUEVO ---
+            // Re-vincular listeners para la selección
+            setupSelectionListeners();
+            // Actualizar la UI de selección (en caso de que la lista se recargue)
+            updateSelectionUI();
+            // --- FIN: NUEVO ---
         }
 
         // --- Renderizar Tabla de Items Faltantes (con botones de acción) ---
@@ -896,6 +976,54 @@
             }
         }
 
+        // --- INICIO: NUEVO EVENT LISTENER PARA ABRIR MODAL DE FIRMA ---
+        
+        /**
+         * Listener delegado para las celdas de firma en la tabla.
+         * Abre el modal para firmar o el modal de clave para borrar.
+         */
+        expiredListTableBody.addEventListener('click', (e) => {
+            const signatureCell = e.target.closest('.signature-cell');
+            if (signatureCell) {
+                // Prevenir que se abra si hay una firma (para borrar, se usará otro método)
+                const hasSignature = signatureCell.querySelector('img');
+                
+                if (!hasSignature) {
+                    // No hay firma, abrir modal para firmar
+                    openSignatureModal(signatureCell);
+                } else {
+                    // Ya hay firma, abrir modal de clave para borrar
+                    itemToManage = { docId: signatureCell.dataset.docId };
+                    currentPasswordAction = 'deleteSignature';
+                    
+                    passwordModalTitle.textContent = 'Borrar Firma';
+                    passwordModalDescription.textContent = 'Para borrar esta firma, ingrese la clave de supervisor.';
+                    passwordConfirmBtn.textContent = 'Confirmar Borrado';
+                    passwordInput.value = '';
+                    passwordError.textContent = '';
+                    passwordModal.classList.remove('hidden');
+                    passwordInput.focus();
+                }
+            }
+        });
+
+        /**
+         * Listeners para las firmas del footer (Supervisor / Inspector).
+         */
+        document.querySelectorAll('.footer-signature-area').forEach(area => {
+            area.addEventListener('click', () => {
+                const hasSignature = area.querySelector('img');
+                if (!hasSignature) {
+                    openSignatureModal(area);
+                }
+                // Nota: No se implementa borrado en firmas de footer,
+                // ya que son solo UI y no están ligadas a un docId.
+                // Se sobreescriben si se vuelve a firmar.
+            });
+        });
+        // --- FIN: NUEVO EVENT LISTENER ---
+
+
         // --- Guardar "Acción Tomada" en Blur ---
         expiredListTableBody.addEventListener('blur', (e) => {
             if (!isAuthReady) return;
@@ -983,102 +1111,119 @@
             }
             signatureNameInput.value = '';
             activeSignatureCell = null;
-            lastSignatureData = { name: '', dataUrl: '' }; // Limpiar datos de firma temporal
+            // --- INICIO: MODIFICACIÓN ---
+            // Limpiar solo si NO estamos en modo de firma en lote
+            // (porque en lote, necesitamos los datos de la firma para el reporte de items).
+            if (!isBatchSigning) {
+                lastSignatureData = { name: '', dataUrl: '' }; // Limpiar datos de firma temporal
+            }
+            // --- FIN: MODIFICACIÓN ---
         }
         // --- FIN: Lógica de "No reportó faltantes" ---
         
-        
-        paperContainer.addEventListener('click', (e) => {
-            if (!isAuthReady) return;
-            const signatureTarget = e.target.closest('.signature-cell, .footer-signature-area');
-            if (signatureTarget) {
-                const isFooterSignature = signatureTarget.classList.contains('footer-signature-area');
-
-                if (signatureTarget.querySelector('img')) {
-                    if (isFooterSignature) {
-                        confirmModalTitle.textContent = '¿Desea reemplazar esta firma?';
-                        confirmAction = () => openSignatureModal(signatureTarget);
-                        confirmModal.classList.remove('hidden');
-                    } else {
-                        // --- Lógica de borrado de firma con clave ---
-                        itemToManage = { docId: signatureTarget.dataset.docId };
-                        currentPasswordAction = 'deleteSignature';
-                        passwordModalTitle.textContent = 'Clave Requerida';
-                        passwordModalDescription.textContent = 'Para borrar esta firma, ingrese la clave de supervisor.';
-                        passwordConfirmBtn.textContent = 'Confirmar Borrado';
-                        passwordInput.value = '';
-                        passwordError.textContent = '';
-                        passwordModal.classList.remove('hidden');
-                        passwordInput.focus();
-                    }
-                } else {
-                    openSignatureModal(signatureTarget);
-                }
-            }
+        signatureCancelBtn.addEventListener('click', () => {
+            isBatchSigning = false; // <-- AÑADIDO
+            closeSignatureModal();
         });
         
-        signatureClearBtn.addEventListener('click', () => {
-            if (signaturePad) {
-                signaturePad.clear();
-            }
-        });
-        
-        signatureCancelBtn.addEventListener('click', closeSignatureModal);
-        
-        signatureSaveBtn.addEventListener('click', () => {
+        signatureSaveBtn.addEventListener('click', async () => { // <-- AÑADIDO 'async'
             if (!isAuthReady) {
                 console.warn("Conectando... por favor espere un momento.");
                 return;
             }
             const name = signatureNameInput.value.trim();
-            if (signaturePad && !signaturePad.isEmpty() && activeSignatureCell && name) {
+            if (signaturePad && !signaturePad.isEmpty() && name) {
+                
                 const dataURL = signaturePad.toDataURL('image/png');
-                const docId = activeSignatureCell.dataset.docId; 
+                const signatureData = {
+                    signatureDataUrl: dataURL,
+                    signatureName: name
+                };
 
-                if (docId) {
-                    const signatureData = {
-                        signatureDataUrl: dataURL,
-                        signatureName: name
-                    };
+                // --- INICIO: NUEVA LÓGICA DE FIRMA EN LOTE ---
+                if (isBatchSigning) {
                     
-                    const inspectionRef = getInspectionRef(docId);
-                    update(inspectionRef, {
-                        signature: signatureData
-                    })
-                        .then(() => {
-                            // --- INICIO: Nuevo Workflow ---
-                            // 1. Guardar datos de firma temporalmente
-                            lastSignatureData.name = name;
-                            lastSignatureData.dataUrl = dataURL;
-                            activeInspectionDocId = docId; 
-                            
-                            // --- INICIO: CAMBIO ---
-                            // 1. Cerramos el modal de firma AHORA.
-                            closeSignatureModal(); 
-                            
-                            // 2. Abrimos el siguiente modal.
-                            openAskModal('consumible', '¿Faltó algún consumible para esta tarea?');
-                            // --- FIN: CAMBIO ---
-                            
-                            // 3. Ya no cerramos el modal de firma aquí
-                            // closeSignatureModal() // <-- Removido
+                    // 1. Guardar datos de firma temporalmente (para reporte de items en lote)
+                    lastSignatureData.name = name;
+                    lastSignatureData.dataUrl = dataURL;
+                    
+                    // 2. Deshabilitar botones para evitar clics múltiples
+                    signatureSaveBtn.textContent = 'Firmando...';
+                    
+                    const promises = [];
+                    for (const docId of selectedInspections) {
+                        const inspectionRef = getInspectionRef(docId);
+                        promises.push(
+                            update(inspectionRef, { signature: signatureData })
+                        );
+                    }
+                    
+                    try {
+                        await Promise.all(promises);
+                        console.log(`Firmadas ${promises.length} tareas.`);
+                        
+                        // --- INICIO: MODIFICACIÓN ---
+                        // 3. NO limpiar la selección todavía.
+                        // selectedInspections.clear(); <-- REMOVIDO
+                        // updateSelectionUI(); <-- REMOVIDO
+                        
+                        // 4. Cerrar modal de firma e iniciar reporte de items en lote
+                        closeSignatureModal(); 
+                        openAskModal('consumible', '¿Faltó algún consumible para este LOTE de tareas?');
+                        // --- FIN: MODIFICACIÓN ---
+
+                    } catch (error) {
+                        console.error("Error durante la firma en lote:", error);
+                        // Si falla, limpiar todo
+                        cleanupBatchMode();
+                    } 
+                    // --- INICIO: MODIFICACIÓN ---
+                    // Se ha quitado el bloque 'finally' de aquí, 
+                    // la limpieza se hará con cleanupBatchMode() al final del workflow de items.
+                    // --- FIN: MODIFICACIÓN ---
+
+                // --- FIN: NUEVA LÓGICA DE FIRMA EN LOTE ---
+
+                } else if (activeSignatureCell) { 
+                    // --- INICIO: LÓGICA ANTERIOR (FIRMA ÚNICA) ---
+                    const docId = activeSignatureCell.dataset.docId; 
+
+                    if (docId) {
+                        update(getInspectionRef(docId), {
+                            signature: signatureData
                         })
-                        .catch(error => {
-                            console.error("Error guardando firma (RTDB):", error);
-                        });
-                } else { 
-                    // Fallback for footer signatures (UI only)
-                    activeSignatureCell.innerHTML = '';
-                    const img = document.createElement('img');
-                    img.src = dataURL;
-                    img.alt = 'Firma';
-                    const nameElement = document.createElement('p');
-                    nameElement.className = 'text-xs mt-1 font-semibold';
-                    nameElement.textContent = name;
-                    activeSignatureCell.appendChild(img);
-                    activeSignatureCell.appendChild(nameElement);
-                    closeSignatureModal();
+                            .then(() => {
+                                // --- INICIO: Nuevo Workflow ---
+                                // 1. Guardar datos de firma temporalmente
+                                lastSignatureData.name = name;
+                                lastSignatureData.dataUrl = dataURL;
+                                activeInspectionDocId = docId; 
+                                
+                                // 1. Cerramos el modal de firma AHORA.
+                                closeSignatureModal(); 
+                                
+                                // 2. Abrimos el siguiente modal.
+                                openAskModal('consumible', '¿Faltó algún consumible para esta tarea?');
+                            })
+                            .catch(error => {
+                                console.error("Error guardando firma (RTDB):", error);
+                            });
+                    } else { 
+                        // Fallback for footer signatures (UI only)
+                        activeSignatureCell.innerHTML = '';
+                        const img = document.createElement('img');
+                        img.src = dataURL;
+                        img.alt = 'Firma';
+                        const nameElement = document.createElement('p');
+                        nameElement.className = 'text-xs mt-1 font-semibold';
+                        nameElement.textContent = name;
+                        activeSignatureCell.appendChild(img);
+                        activeSignatureCell.appendChild(nameElement);
+                        closeSignatureModal();
+                    }
+                    // --- FIN: LÓGICA ANTERIOR (FIRMA ÚNICA) ---
                 }
+
             } else {
                 console.warn("Por favor, dibuje su firma y escriba su nombre antes de guardar.");
             }
@@ -1392,37 +1537,46 @@
 
         askModalNoBtn.addEventListener('click', () => {
             closeAskModal();
-            if (currentItemType === 'consumible') {
-                openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
-            } else {
-                logNoItemsReported(); // <-- LOG "NO"
-                // closeSignatureModal(); // <-- ESTA LÍNEA YA NO ES NECESARIA
-                activeInspectionDocId = null;
-                currentItemType = null;
+            
+            // --- INICIO: LÓGICA DE LOTE ---
+            if (isBatchSigning) {
+                if (currentItemType === 'consumible') {
+                    openAskModal('repuesto', '¿Faltó algún repuesto para este LOTE de tareas?');
+                } else {
+                    // Último paso (repuestos)
+                    logNoItemsReportedBatch(); // <-- Nueva función
+                    cleanupBatchMode(); // <-- Nueva función
+                }
+            // --- FIN: LÓGICA DE LOTE ---
+            
+            } else { // --- LÓGICA ORIGINAL (SINGLE) ---
+                if (currentItemType === 'consumible') {
+                    openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
+                } else {
+                    logNoItemsReported();
+                    activeInspectionDocId = null;
+                    currentItemType = null;
+                }
             }
         });
 
         itemFormCancelBtn.addEventListener('click', () => {
             closeItemFormModal();
-            if (currentItemType === 'consumible') {
-                openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
-            } else {
-                logNoItemsReported(); // <-- LOG "NO" (al cancelar el último paso)
-                // closeSignatureModal(); // <-- ESTA LÍNEA YA NO ES NECESARIA
-                activeInspectionDocId = null;
-                currentItemType = null;
-            }
-        });
+            
+            // --- INICIO: LÓGICA DE LOTE ---
+            if (isBatchSigning) {
+                // Si cancelamos el formulario, continuamos al siguiente paso
+                continueBatchWorkflow();
+            // --- FIN: LÓGICA DE LOTE ---
 
-        itemFormCancelBtn.addEventListener('click', () => {
-            closeItemFormModal();
-            if (currentItemType === 'consumible') {
-                openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
-            } else {
-                logNoItemsReported(); // <-- LOG "NO" (al cancelar el último paso)
-                closeSignatureModal();
-                activeInspectionDocId = null;
-                currentItemType = null;
+            } else { // --- LÓGICA ORIGINAL (SINGLE) ---
+                if (currentItemType === 'consumible') {
+                    openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
+                } else {
+                    logNoItemsReported(); // <-- LOG "NO" (al cancelar el último paso)
+                    activeInspectionDocId = null;
+                    currentItemType = null;
+                }
             }
         });
 
@@ -1442,22 +1596,38 @@
                 return;
             }
 
-            if (!activeInspectionDocId || !currentItemType) {
-                console.error("Error: No se encontró activeInspectionDocId o currentItemType.");
+            // --- INICIO: LÓGICA DE LOTE (MODIFICADA) ---
+            if (isBatchSigning) {
+                if (!currentItemType) {
+                    console.error("Error: currentItemType es nulo en modo lote.");
+                    return;
+                }
+                
+                // 1. Guardar datos del item temporalmente
+                itemBeingAssigned = { name, partNumber, quantity };
+                
+                // 2. Cerrar modal de formulario
                 closeItemFormModal();
-                return;
-            }
+                
+                // 3. Abrir nuevo modal para asignar el item
+                openAssignItemModal();
 
-            await saveMissingItem(activeInspectionDocId, currentItemType, { name, partNumber, quantity });
+                // (La lógica de 'promises' se movió a 'handleAssignItemSave')
+            // --- FIN: LÓGICA DE LOTE ---
             
-            closeItemFormModal();
+            } else if (activeInspectionDocId) { // --- LÓGICA ORIGINAL (SINGLE) ---
+                await saveMissingItem(activeInspectionDocId, currentItemType, { name, partNumber, quantity });
+                
+                closeItemFormModal();
 
-            if (currentItemType === 'consumible') {
-                openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
+                if (currentItemType === 'consumible') {
+                    openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
+                } else {
+                    activeInspectionDocId = null;
+                    currentItemType = null;
+                }
             } else {
-                // closeSignatureModal(); // <-- ESTA LÍNEA YA NO ES NECESARIA
-                activeInspectionDocId = null;
-                currentItemType = null;
+                console.error("Error: No se encontró activeInspectionDocId y no está en modo lote.");
             }
         }
         
@@ -1575,6 +1745,315 @@
         });
         
         // --- FIN: Event Listener para botones de Editar/Borrar Item ---
+
+
+        // --- INICIO: NUEVAS FUNCIONES DE LOTE ---
+        
+        /**
+         * Registra "No se reportaron faltantes" en la celda "Acción Tomada"
+         * para TODAS las inspecciones seleccionadas en el lote.
+         */
+        function logNoItemsReportedBatch() {
+            if (!lastSignatureData.name) return; // No hay firma, no se puede loggear
+
+            const logEntry = `No se reportaron faltantes. Firmado: ${lastSignatureData.name}`;
+            const promises = [];
+
+            for (const docId of selectedInspections) {
+                let newText = '';
+                // Intentar actualizar la UI si la celda está visible
+                const cell = document.querySelector(`.accion-tomada-cell[data-doc-id="${docId}"]`);
+                if (cell) {
+                    newText = cell.textContent.trim();
+                } else {
+                    // Si no está visible, buscar en el caché
+                    const inspection = allLoadedInspections.find(insp => insp.docId === docId);
+                    if (inspection) {
+                        newText = inspection.accionTomada || '';
+                    }
+                }
+                
+                if (!newText.includes(logEntry)) {
+                    newText = newText ? `${newText}. ${logEntry}` : logEntry;
+                }
+                
+                if (cell) {
+                    cell.textContent = newText; // Actualizar UI
+                }
+                
+                const inspectionRef = getInspectionRef(docId);
+                promises.push(update(inspectionRef, { accionTomada: newText }));
+            }
+
+            Promise.all(promises)
+                .then(() => console.log(`'No Faltantes' loggeado para ${promises.length} tareas.`))
+                .catch(error => console.error("Error loggeando 'No Faltantes' en lote:", error));
+        }
+
+        /**
+         * Limpia y resetea el estado después de completar un workflow en lote.
+         */
+        function cleanupBatchMode() {
+            console.log("Finalizando modo de firma en lote.");
+            isBatchSigning = false;
+            selectedInspections.clear();
+            updateSelectionUI(); // Esto des-seleccionará todo y ocultará el botón
+            
+            // Limpiar variables globales
+            currentItemType = null;
+            lastSignatureData = { name: '', dataUrl: '' }; // Ahora sí limpiamos
+            itemBeingAssigned = null; // <-- NUEVO
+            
+            // Volver a habilitar botones del modal de firma (que ya está cerrado)
+            signatureSaveBtn.disabled = false;
+            signatureCancelBtn.disabled = false;
+            signatureSaveBtn.textContent = 'Guardar Firma';
+        }
+        
+        /**
+         * Función helper para continuar el workflow de lote 
+         * (ir a repuestos o finalizar).
+         */
+        function continueBatchWorkflow() {
+            if (currentItemType === 'consumible') {
+                openAskModal('repuesto', '¿Faltó algún repuesto para este LOTE de tareas?');
+            } else {
+                // Este era el último paso (repuestos)
+                cleanupBatchMode();
+            }
+        }
+
+        // --- FIN: NUEVAS FUNCIONES DE LOTE ---
+
+
+        // --- INICIO: NUEVAS FUNCIONES PARA ASIGNAR ITEMS EN LOTE ---
+        
+        /**
+         * Abre el modal para seleccionar a qué tareas del lote 
+         * se asignará el item recién creado.
+         */
+        function openAssignItemModal() {
+            if (!itemBeingAssigned) return;
+
+            assignItemModalTitle.textContent = `Asignar: "${itemBeingAssigned.name}" (Cant: ${itemBeingAssigned.quantity})`;
+            assignItemList.innerHTML = ''; // Limpiar lista
+
+            let hasItems = false;
+            for (const docId of selectedInspections) {
+                const inspection = allLoadedInspections.find(insp => insp.docId === docId);
+                if (inspection) {
+                    hasItems = true;
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center p-2 rounded hover:bg-gray-100 cursor-pointer';
+                    li.innerHTML = `
+                        <input type="checkbox" data-doc-id="${docId}" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-3" checked>
+                        <label class="text-sm font-medium text-gray-800 flex-1 cursor-pointer">${inspection.name}</label>
+                    `;
+                    // Permitir clic en toda la fila
+                    li.addEventListener('click', (e) => {
+                        const cb = li.querySelector('input');
+                        if (e.target !== cb) {
+                            cb.checked = !cb.checked;
+                        }
+                    });
+                    assignItemList.appendChild(li);
+                }
+            }
+            
+            // Añadir helpers de "Seleccionar Todo / Ninguno"
+            if (hasItems) {
+                const helperRow = document.createElement('div');
+                helperRow.className = 'flex justify-end gap-4 mt-2 pt-2 border-t';
+                helperRow.innerHTML = `
+                    <button id="assign-select-all" class="text-xs text-blue-600 font-medium hover:underline">Seleccionar Todos</button>
+                    <button id="assign-select-none" class="text-xs text-gray-600 font-medium hover:underline">No Seleccionar Ninguno</button>
+                `;
+                assignItemList.prepend(helperRow);
+                
+                // Asignar listeners a los nuevos botones (solo una vez)
+                helperRow.querySelector('#assign-select-all').addEventListener('click', () => {
+                    assignItemList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+                });
+                helperRow.querySelector('#assign-select-none').addEventListener('click', () => {
+                    assignItemList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                });
+            }
+
+            assignItemModal.classList.remove('hidden');
+        }
+        
+        /**
+         * Cierra el modal de asignación y limpia el item temporal.
+         */
+        function closeAssignItemModal() {
+            assignItemModal.classList.add('hidden');
+            itemBeingAssigned = null;
+            assignItemList.innerHTML = ''; // Limpiar para la próxima vez
+        }
+        
+        /**
+         * Manejador para el botón "Asignar y Continuar" del nuevo modal.
+         * Guarda el item solo en las tareas seleccionadas.
+         */
+        async function handleAssignItemSave() {
+            if (!itemBeingAssigned || !isBatchSigning) return;
+
+            const checkedBoxes = assignItemList.querySelectorAll('input[type="checkbox"]:checked');
+            const promises = [];
+
+            for (const cb of checkedBoxes) {
+                const docId = cb.dataset.docId;
+                if (docId) {
+                    promises.push(saveMissingItem(docId, currentItemType, itemBeingAssigned));
+                }
+            }
+
+            if (promises.length > 0) {
+                try {
+                    await Promise.all(promises);
+                    console.log(`Item '${itemBeingAssigned.name}' asignado a ${promises.length} tareas.`);
+                } catch (error) {
+                    console.error("Error asignando item en lote:", error);
+                }
+            }
+
+            closeAssignItemModal();
+            continueBatchWorkflow(); // <-- Continuar a repuestos o finalizar
+        }
+
+        /**
+         * Manejador para el botón "Cancelar" del nuevo modal.
+         * Simplemente continúa al siguiente paso sin guardar el item.
+         */
+        function handleAssignItemCancel() {
+            closeAssignItemModal();
+            continueBatchWorkflow(); // <-- Continuar a repuestos o finalizar
+        }
+        
+        // Asignar los nuevos listeners
+        assignItemSaveBtn.addEventListener('click', handleAssignItemSave);
+        assignItemCancelBtn.addEventListener('click', handleAssignItemCancel);
+        
+        // --- FIN: NUEVAS FUNCIONES PARA ASIGNAR ITEMS EN LOTE ---
+
+
+        // --- INICIO: NUEVAS FUNCIONES PARA SELECCIÓN MÚLTIPLE ---
+
+        /**
+         * Vincula los event listeners para las casillas de selección.
+         * Se llama cada vez que se renderiza la tabla.
+         */
+        function setupSelectionListeners() {
+            // Eliminar listeners antiguos para evitar duplicados
+            selectAllCheckbox.removeEventListener('change', handleSelectAll);
+            expiredListTableBody.removeEventListener('change', handleRowCheckbox);
+            batchSignBtn.removeEventListener('click', handleBatchSign);
+
+            // Añadir nuevos listeners
+            selectAllCheckbox.addEventListener('change', handleSelectAll);
+            expiredListTableBody.addEventListener('change', handleRowCheckbox);
+            batchSignBtn.addEventListener('click', handleBatchSign);
+        }
+
+        /**
+         * Maneja el clic en la casilla "Seleccionar Todo".
+         */
+        function handleSelectAll(e) {
+            const isChecked = e.target.checked;
+            const allCheckboxes = expiredListTableBody.querySelectorAll('.row-checkbox');
+            
+            allCheckboxes.forEach(cb => {
+                cb.checked = isChecked;
+                const docId = cb.dataset.docId;
+                if (isChecked) {
+                    selectedInspections.add(docId);
+                } else {
+                    selectedInspections.delete(docId);
+                }
+            });
+            updateSelectionUI();
+        }
+
+        /**
+         * Maneja el clic en la casilla de una fila individual.
+         */
+        function handleRowCheckbox(e) {
+            if (!e.target.classList.contains('row-checkbox')) return;
+            
+            const cb = e.target;
+            const docId = cb.dataset.docId;
+            
+            if (cb.checked) {
+                selectedInspections.add(docId);
+            } else {
+                selectedInspections.delete(docId);
+            }
+            updateSelectionUI();
+        }
+
+        /**
+         * Actualiza la UI (contador, botón de lote, estado de "Seleccionar Todo" y resaltado de filas).
+         */
+        function updateSelectionUI() {
+            const allCheckboxes = expiredListTableBody.querySelectorAll('.row-checkbox');
+            const totalRows = allCheckboxes.length;
+            const selectedCount = selectedInspections.size;
+
+            // Mostrar/Ocultar el contenedor de acciones en lote
+            if (selectedCount > 0) {
+                batchActionsContainer.classList.remove('hidden');
+                selectionCountEl.textContent = `${selectedCount} seleccionada(s)`;
+            } else {
+                batchActionsContainer.classList.add('hidden');
+            }
+
+            // Actualizar el estado de la casilla "Seleccionar Todo"
+            if (totalRows > 0) {
+                 if (selectedCount === 0) {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = false;
+                } else if (selectedCount === totalRows) {
+                    selectAllCheckbox.checked = true;
+                    selectAllCheckbox.indeterminate = false;
+                } else {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = true;
+                }
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            }
+           
+            // Resaltar filas seleccionadas
+            allCheckboxes.forEach(cb => {
+                const row = cb.closest('tr');
+                if (row) {
+                    if (selectedInspections.has(cb.dataset.docId)) {
+                        row.classList.add('selected-row');
+                    } else {
+                        row.classList.remove('selected-row');
+                    }
+                }
+            });
+        }
+        
+        /**
+         * Maneja el clic en el botón "Firmar Seleccionadas".
+         */
+        function handleBatchSign() {
+            if (selectedInspections.size === 0) return;
+            isBatchSigning = true;
+            
+            // "Simulamos" una celda de mecánico para que el modal de firma
+            // sepa qué título poner ("Firma del Mecánico").
+            const mockCell = { 
+                dataset: { 
+                    title: 'Mecánico' 
+                } 
+            }; 
+            openSignatureModal(mockCell);
+        }
+        // --- FIN: NUEVAS FUNCIONES PARA SELECCIÓN MÚLTIPLE ---
 
     </script>
 </body>
