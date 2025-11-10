@@ -568,6 +568,24 @@
     <!-- ==== FIN: NUEVO MODAL DE ALERTA PERSONALIZADA ==== -->
     <!-- ==================================================== -->
 
+    <!-- ====================================================== -->
+    <!-- ==== INICIO: NUEVO MODAL DE CONFLICTO DE DATOS (QR) ==== -->
+    <!-- ====================================================== -->
+    <div id="dataConflictModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full text-center">
+            <h3 class="text-2xl font-bold mb-4 text-yellow-600">Datos Existentes Detectados</h3>
+            <p class="text-lg mb-6">Ya tienes datos registrados para este día. ¿Qué deseas hacer?</p>
+            <div classE="flex flex-col sm:flex-row justify-center gap-4">
+                <button id="overwriteDataBtn" class="w-full sm:w-auto px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors mb-2 sm:mb-0">Borrar y Reemplazar</button>
+                <button id="sumDataBtn" class="w-full sm:w-auto px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors mb-2 sm:mb-0">Sumar a lo Existente</button>
+                <button id="cancelConflictBtn" class="w-full sm:w-auto px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    <!-- ==================================================== -->
+    <!-- ==== FIN: NUEVO MODAL DE CONFLICTO DE DATOS (QR) ==== -->
+    <!-- ==================================================== -->
+
     <script type="module">
         // Importa las funciones necesarias de Firebase SDK
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
@@ -604,6 +622,7 @@
         let añoActual = new Date().getFullYear(); // Define el año actual. ¡Declaración faltante!
         // Intenta obtener el último mes activo de localStorage, o usa el mes actual
         let mesActual = localStorage.getItem('lastActiveMonth') ? parseInt(localStorage.getItem('lastActiveMonth')) : new Date().getMonth();
+        let pendingFlightData = null; // Variable global para guardar datos de QR temporalmente
 
         // Definición de meses
         const meses = [
@@ -1394,11 +1413,15 @@
 
         /**
          * Maneja el guardado de datos del modal de ingreso rápido (QR).
+         * Ahora detecta conflictos antes de guardar.
          */
-        function handleFlightDataSave() { // ELIMINADO ASYNC
+        function handleFlightDataSave() { // MODIFICADO
             const acHrs = modalAcHrs.value;
             const aterrizajes = modalAterrizajes.value;
             const rins = modalRins.value;
+
+            // Guardar datos temporalmente
+            pendingFlightData = { acHrs, aterrizajes, rins };
 
             const today = new Date();
             const targetDay = today.getDate(); // 1-31
@@ -1411,6 +1434,55 @@
                 return;
             }
 
+            const dataToCheck = [
+                { nomenclatura: "AC HRS", value: acHrs },
+                { nomenclatura: "ATERRIZAJES", value: aterrizajes },
+                { nomenclatura: "RINS", value: rins }
+            ];
+
+            let hasConflict = false;
+            
+            dataToCheck.forEach(item => {
+                const newValue = parseFloat(item.value.trim()) || 0;
+                if (newValue === 0) return; // Si el nuevo valor es 0, no hay conflicto
+
+                const row = activeTable.querySelector(`tr[data-nomenclatura="${item.nomenclatura}"]`);
+                const cell = row ? row.querySelectorAll('td')[cellIndex] : null;
+                const existingValue = parseFloat(cell?.textContent.trim()) || 0;
+
+                if (existingValue > 0) {
+                    hasConflict = true;
+                }
+            });
+
+            if (hasConflict) {
+                // Conflicto detectado: mostrar el modal de elección
+                document.getElementById('dataConflictModal').style.display = 'flex';
+                // Ocultar el modal de ingreso
+                flightDataModal.style.display = 'none';
+            } else {
+                // Sin conflicto: aplicar los datos directamente (modo 'overwrite')
+                applyFlightData('overwrite');
+            }
+        }
+
+        /**
+         * Aplica los datos de vuelo (guardados en pendingFlightData) a la tabla
+         * según el modo (sumar o reemplazar).
+         * @param {string} mode - 'sum' (sumar) o 'overwrite' (reemplazar)
+         */
+        function applyFlightData(mode = 'overwrite') {
+            if (!pendingFlightData) return; // No hay nada que aplicar
+
+            const { acHrs, aterrizajes, rins } = pendingFlightData;
+
+            const today = new Date();
+            const targetDay = today.getDate();
+            const cellIndex = targetDay + 1;
+
+            const activeTable = document.querySelector(`.tabla-mes[style*="display: block"] .tabla-vuelo tbody`);
+            if (!activeTable) { showCustomAlert("Error: Tabla no activa."); return; }
+
             const dataToUpdate = [
                 { nomenclatura: "AC HRS", value: acHrs },
                 { nomenclatura: "ATERRIZAJES", value: aterrizajes },
@@ -1418,25 +1490,50 @@
             ];
 
             // 1. Actualizar las celdas en la tabla HTML
-            activeTable.querySelectorAll('tr').forEach(fila => {
-                const nom = fila.querySelector('.nomenclatura')?.textContent.trim();
-                const updateItem = dataToUpdate.find(item => item.nomenclatura === nom);
+            dataToUpdate.forEach(item => {
+                const nom = item.nomenclatura;
+                const newValue = parseFloat(item.value.trim()) || 0;
+
+                // No hacer nada si el nuevo valor es 0 y el modo es 'sumar'
+                if (newValue === 0 && mode === 'sum') return;
+
+                const row = activeTable.querySelector(`tr[data-nomenclatura="${nom}"]`);
+                const cell = row ? row.querySelectorAll('td')[cellIndex] : null;
                 
-                if (updateItem && updateItem.value !== "") {
-                    const cell = fila.querySelectorAll('td')[cellIndex];
-                    if (cell) {
-                        cell.textContent = updateItem.value;
+                if (cell) {
+                    const existingValue = parseFloat(cell.textContent.trim()) || 0;
+                    let finalValue = 0;
+
+                    if (mode === 'sum') {
+                        finalValue = existingValue + newValue;
+                    } else { // 'overwrite'
+                        finalValue = newValue;
+                    }
+
+                    // Formatear y establecer el valor final
+                    let formattedValue;
+                    if (nom === "AC HRS") {
+                        formattedValue = finalValue > 0 ? finalValue.toFixed(1) : '';
+                    } else {
+                        formattedValue = finalValue > 0 ? finalValue.toFixed(0) : '';
+                    }
+                    cell.textContent = formatNumber(formattedValue); // formatNumber se encarga de formatear
+                    
+                    if (finalValue > 0) {
                         cell.classList.add("led-persistente"); // Añadir efecto
+                    } else {
+                        cell.classList.remove("led-persistente");
                     }
                 }
             });
 
             // 2. Recalcular y guardar en Firebase
             actualizarTotales();
-            guardarDatosEnFirebase(añoActual, mesActual, obtenerDatosTabla(mesActual), recordatorioTextarea.value) // ELIMINADO AWAIT
-                .then(() => { // AÑADIDO .THEN
-                    // 3. Ocultar modal de ingreso
+            guardarDatosEnFirebase(añoActual, mesActual, obtenerDatosTabla(mesActual), recordatorioTextarea.value)
+                .then(() => {
+                    // 3. Ocultar modal de ingreso (si sigue abierto) y el de conflicto
                     flightDataModal.style.display = 'none';
+                    document.getElementById('dataConflictModal').style.display = 'none';
                     modalAcHrs.value = '';
                     modalAterrizajes.value = '';
                     modalRins.value = '';
@@ -1444,7 +1541,11 @@
                     // 4. Mostrar modal de confirmación con los datos actualizados
                     showConfirmationModal(activeTable);
                 });
+            
+            // 5. Limpiar los datos pendientes
+            pendingFlightData = null;
         }
+
 
         /**
          * Muestra el modal de confirmación con los totales generales actualizados.
@@ -1485,11 +1586,21 @@
             saveFlightDataBtn.addEventListener('click', handleFlightDataSave);
             cancelFlightDataBtn.addEventListener('click', () => {
                 flightDataModal.style.display = 'none';
+                pendingFlightData = null; // Limpiar datos pendientes si cancela
             });
             closeConfirmationBtn.addEventListener('click', () => {
                 confirmationModal.style.display = 'none';
             });
             // === FIN: NUEVOS EVENT LISTENERS PARA MODALES QR ===
+
+            // === INICIO: EVENT LISTENERS PARA MODAL DE CONFLICTO (NUEVO) ===
+            document.getElementById('overwriteDataBtn').addEventListener('click', () => applyFlightData('overwrite'));
+            document.getElementById('sumDataBtn').addEventListener('click', () => applyFlightData('sum'));
+            document.getElementById('cancelConflictBtn').addEventListener('click', () => {
+                document.getElementById('dataConflictModal').style.display = 'none';
+                pendingFlightData = null; // Limpiar datos pendientes
+            });
+            // === FIN: EVENT LISTENERS PARA MODAL DE CONFLICTO ===
 
             // === INICIO: LISTENER PARA ALERTA PERSONALIZADA ===
             customAlertCloseBtn.addEventListener('click', () => {
