@@ -1241,7 +1241,12 @@
             tablaActiva.querySelectorAll('tr[data-nomenclatura]').forEach(fila => {
                 const nom = fila.dataset.nomenclatura;
                 datos[nom] = {
-                    vienen: parseFloat(fila.querySelector('.fila-vienen').textContent) || 0,
+                    /* --- INICIO DE LA MODIFICACIÓN (VIENEN INTOCABLE) --- */
+                    // La propiedad 'vienen' se elimina de aquí.
+                    // Ya no leemos 'vienen' de la tabla para guardarlo.
+                    // 'vienen' ahora es un valor 100% calculado en 'cargarDatosDelMes'.
+                    /* vienen: parseFloat(fila.querySelector('.fila-vienen').textContent) || 0, */ // <-- LÍNEA ELIMINADA
+                    /* --- FIN DE LA MODIFICACIÓN --- */
                     dias: {},
                     total: parseFloat(fila.querySelector('.fila-total').textContent) || 0,
                     general: parseFloat(fila.querySelector('.fila-general').textContent) || 0,
@@ -1615,6 +1620,16 @@
             document.getElementById('confirmRins').textContent = totals["RINS"];
 
             confirmationModal.style.display = 'flex';
+
+            /* --- INICIO DE LA MODIFICACIÓN (FORZAR MODAL DE NOMBRE) --- */
+            // Re-asignamos el listener aquí para asegurar que siempre esté activo
+            // y apunte al modal de mecánico.
+            closeConfirmationBtn.onclick = () => { // Usamos .onclick para sobreescribir cualquier listener anterior
+                confirmationModal.style.display = 'none';
+                mechanicNameModal.style.display = 'flex'; // Abre el siguiente modal
+                modalMechanicName.focus(); // Pone el cursor en el campo de nombre
+            };
+            /* --- FIN DE LA MODIFICACIÓN --- */
         }
 
         // === INICIO: NUEVA FUNCIÓN PARA GUARDAR MECÁNICO Y SALIR ===
@@ -1674,11 +1689,17 @@
                 pendingFlightData = null; // Limpiar datos pendientes si cancela
             });
             // --- MODIFICADO: El botón "Confirmado" ahora abre el modal de mecánico ---
+            /* --- INICIO DE LA MODIFICACIÓN (FORZAR MODAL DE NOMBRE) --- */
+            // El listener de 'closeConfirmationBtn' se elimina de 'iniciar()'
+            // y se mueve a 'showConfirmationModal()' para asegurar que funcione.
+            /*
             closeConfirmationBtn.addEventListener('click', () => {
                 confirmationModal.style.display = 'none';
                 mechanicNameModal.style.display = 'flex'; // Abre el siguiente modal
                 modalMechanicName.focus(); // Pone el cursor en el campo de nombre
             });
+            */
+            /* --- FIN DE LA MODIFICACIÓN --- */
             // === FIN: NUEVOS EVENT LISTENERS PARA MODALES QR ===
 
             // === INICIO: EVENT LISTENERS PARA MODAL DE CONFLICTO (NUEVO) ===
