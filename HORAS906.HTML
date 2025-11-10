@@ -1197,11 +1197,13 @@
                             }
                             
                             // Casos especiales para AC HRS, ATERRIZAJES, RINS (se acumulan)
+                            /* --- INICIO DEL BLOQUE A ELIMINAR ---
                             if (nom === "AC HRS" || nom === "ATERRIZAJES" || nom === "RINS") {
                                 // El "Vienen" de este mes es el Total General menos lo de este mes
                                 const totalMesActual = Object.values(datosFila.dias || {}).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
                                 vienen = (totalesGenerales[nom] || 0) - totalMesActual;
                             }
+                            --- FIN DEL BLOQUE A ELIMINAR --- */
 
                             fila.querySelector('.fila-vienen').textContent = formatNumber(vienen.toFixed(nom === "AC HRS" ? 1 : 0));
 
