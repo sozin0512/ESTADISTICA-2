@@ -586,6 +586,42 @@
     <!-- ==== FIN: NUEVO MODAL DE CONFLICTO DE DATOS (QR) ==== -->
     <!-- ==================================================== -->
 
+    <!-- ====================================================== -->
+    <!-- ==== INICIO: NUEVO MODAL DE NOMBRE DE MECÁNICO (QR) ==== -->
+    <!-- ====================================================== -->
+    <div id="mechanicNameModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full text-center">
+            <h3 class="text-2xl font-bold mb-4">Registro de Mecánico</h3>
+            <p class="text-lg mb-4">Por último, ¿quién está llenando el reporte?</p>
+            <div class="space-y-4 text-left">
+                <div>
+                    <label for="modalMechanicName" class="block text-sm font-medium text-gray-700">Nombre de Mecánico a Bordo</label>
+                    <input type="text" id="modalMechanicName" placeholder="Ej: Juan Pérez" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            <div class="flex justify-center gap-4 mt-6">
+                <button id="saveMechanicNameBtn" class="w-full px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Guardar y Salir</button>
+            </div>
+        </div>
+    </div>
+    <!-- ==================================================== -->
+    <!-- ==== FIN: NUEVO MODAL DE NOMBRE DE MECÁNICO (QR) ==== -->
+    <!-- ==================================================== -->
+
+    <!-- ====================================================== -->
+    <!-- ==== INICIO: NUEVO MODAL DE DESPEDIDA (QR) ==== -->
+    <!-- ====================================================== -->
+    <div id="goodbyeModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full text-center">
+            <h3 class="text-2xl font-bold mb-4 text-green-600">Registro Completo</h3>
+            <p id="goodbyeMessage" class="text-lg mb-6">¡Gracias, Juan Pérez! Tu reporte ha sido guardado.</p>
+        </div>
+    </div>
+    <!-- ==================================================== -->
+    <!-- ==== FIN: NUEVO MODAL DE DESPEDIDA (QR) ==== -->
+    <!-- ==================================================== -->
+
+
     <script type="module">
         // Importa las funciones necesarias de Firebase SDK
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
@@ -685,6 +721,14 @@
         const modalAcHrs = document.getElementById('modalAcHrs');
         const modalAterrizajes = document.getElementById('modalAterrizajes');
         const modalRins = document.getElementById('modalRins');
+
+        // === INICIO: Elementos de los nuevos modales de Mecánico y Despedida ===
+        const mechanicNameModal = document.getElementById('mechanicNameModal');
+        const modalMechanicName = document.getElementById('modalMechanicName');
+        const saveMechanicNameBtn = document.getElementById('saveMechanicNameBtn');
+        const goodbyeModal = document.getElementById('goodbyeModal');
+        const goodbyeMessage = document.getElementById('goodbyeMessage');
+        // === FIN: Elementos de los nuevos modales ===
 
         // Nuevo botón de estado de componentes
         const btnComponentStatus = document.getElementById('btnComponentStatus');
@@ -1549,7 +1593,7 @@
 
         /**
          * Muestra el modal de confirmación con los totales generales actualizados.
-         */
+        // =CAMBIADO: Ahora abre el modal de mecánico
         function showConfirmationModal(activeTable) {
             const totals = {
                 "AC HRS": "0.0",
@@ -1571,6 +1615,45 @@
             confirmationModal.style.display = 'flex';
         }
 
+        // === INICIO: NUEVA FUNCIÓN PARA GUARDAR MECÁNICO Y SALIR ===
+        /**
+         * Maneja el guardado del nombre del mecánico y cierra la sesión de QR.
+         */
+        function handleSaveMechanicName() {
+            const mechanicName = modalMechanicName.value.trim();
+            if (!mechanicName) {
+                showCustomAlert("Por favor, ingresa un nombre.");
+                return;
+            }
+
+            const today = new Date();
+            const targetDay = today.getDate();
+
+            // Ruta para guardar el nombre del mecánico
+            const mechanicPath = `artifacts/${appId}/public_data/FAH-906/${añoActual}/${mesActual}/mecanicos/${targetDay}`;
+
+            set(ref(database, mechanicPath), mechanicName)
+                .then(() => {
+                    // 1. Ocultar modal de mecánico
+                    mechanicNameModal.style.display = 'none';
+                    modalMechanicName.value = ''; // Limpiar el campo
+
+                    // 2. Mostrar modal de despedida
+                    goodbyeMessage.textContent = `¡Gracias, ${mechanicName}! Tu reporte ha sido guardado.`;
+                    goodbyeModal.style.display = 'flex';
+
+                    // 3. Redirigir/Cerrar la página después de 3 segundos
+                    setTimeout(() => {
+                        window.location.href = 'about:blank';
+                    }, 3000);
+                })
+                .catch((error) => {
+                    showCustomAlert(`Error al guardar el nombre del mecánico: ${error.message}`);
+                });
+        }
+        // === FIN: NUEVA FUNCIÓN PARA GUARDAR MECÁNICO Y SALIR ===
+
+
         // ====================================================
         // ==== FIN: NUEVAS FUNCIONES PARA MODO QR ====
         // ====================================================
@@ -1588,8 +1671,11 @@
                 flightDataModal.style.display = 'none';
                 pendingFlightData = null; // Limpiar datos pendientes si cancela
             });
+            // --- MODIFICADO: El botón "Confirmado" ahora abre el modal de mecánico ---
             closeConfirmationBtn.addEventListener('click', () => {
                 confirmationModal.style.display = 'none';
+                mechanicNameModal.style.display = 'flex'; // Abre el siguiente modal
+                modalMechanicName.focus(); // Pone el cursor en el campo de nombre
             });
             // === FIN: NUEVOS EVENT LISTENERS PARA MODALES QR ===
 
@@ -1601,6 +1687,10 @@
                 pendingFlightData = null; // Limpiar datos pendientes
             });
             // === FIN: EVENT LISTENERS PARA MODAL DE CONFLICTO ===
+
+            // === INICIO: EVENT LISTENER PARA MODAL DE MECÁNICO (NUEVO) ===
+            saveMechanicNameBtn.addEventListener('click', handleSaveMechanicName);
+            // === FIN: EVENT LISTENER PARA MODAL DE MECÁNICO ===
 
             // === INICIO: LISTENER PARA ALERTA PERSONALIZADA ===
             customAlertCloseBtn.addEventListener('click', () => {
