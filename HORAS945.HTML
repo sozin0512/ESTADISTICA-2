@@ -808,6 +808,12 @@
         let mesActual = localStorage.getItem('lastActiveMonth') ? parseInt(localStorage.getItem('lastActiveMonth')) : new Date().getMonth();
         let pendingFlightData = null; // Variable global para guardar datos de QR temporalmente
 
+        // === INICIO: NUEVA LÓGICA DE QR ===
+        // 1. Capturar el parámetro de la URL INMEDIATAMENTE al cargar la página.
+        const urlParamsOnLoad = new URLSearchParams(window.location.search);
+        const globalQrActionPending = urlParamsOnLoad.get('action') === 'addFlightData';
+        // === FIN: NUEVA LÓGICA DE QR ===
+
         // Definición de meses
         const meses = [
             "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -1024,9 +1030,16 @@
                     })
                     .then(() => { // AÑADIDO .THEN (se ejecuta después de cargar los datos)
                         agregarEventosDeEdicion();
-                        // --- INICIO: LÓGICA DE QR ---
-                        // Mover la comprobación del QR aquí para asegurar que se ejecute después de la carga
-                        return checkURLParamsForQR(); 
+                        
+                        // --- INICIO: LÓGICA DE QR MODIFICADA ---
+                        // 3. Comprobar si la acción QR estaba pendiente.
+                        if (globalQrActionPending) {
+                            // Devolver la promesa de checkURLParamsForQR
+                            return checkURLParamsForQR(); 
+                        }
+                        // Si no, devolver una promesa resuelta
+                        return Promise.resolve();
+                        // --- FIN: LÓGICA DE QR MODIFICADA ---
                     })
                     .catch((error) => { // AÑADIDO .CATCH (Maneja errores de get(role), set(role), o cargarDatosDelMes)
                         authStatus.textContent = `Error crítico: ${error.message}. Por favor, recarga.`;
@@ -1048,14 +1061,25 @@
                 
                 authContainer.style.display = 'block';
                 mainAppContent.style.display = 'none';
-                authStatus.textContent = 'Por favor, inicia sesión o regístrate para acceder.';
-                authStatus.style.color = 'red';
+
+                // === INICIO: NUEVA LÓGICA DE QR PARA LOGOUT ===
+                // Si la acción QR estaba pendiente pero no hay sesión,
+                // mostramos un mensaje en el login.
+                if (globalQrActionPending) {
+                    authStatus.textContent = 'Por favor, inicia sesión para registrar tu vuelo.';
+                    authStatus.style.color = 'blue'; // Un color informativo
+                } else {
+                    authStatus.textContent = 'Por favor, inicia sesión o regístrate para acceder.';
+                    authStatus.style.color = 'red';
+                }
+                // === FIN: NUEVA LÓGICA DE QR PARA LOGOUT ===
+                
                 currentUserRole = null;
                 applyRolePermissions(null);
             }
             
             // --- LÓGICA DE QR MOVIDA ---
-            // Se movió dentro del .then() de onAuthStateChanged para asegurar el orden de ejecución
+            // La llamada a checkURLParamsForQR() se movió al .then() de onAuthStateChanged
         });
 
         /**
@@ -1619,11 +1643,17 @@
          * Si es así, inicia el flujo de ingreso rápido.
          */
         function checkURLParamsForQR() { // ELIMINADO ASYNC
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('action') === 'addFlightData') {
+            // const urlParams = new URLSearchParams(window.location.search); // <-- ELIMINADO
+            // if (urlParams.get('action') === 'addFlightData') { // <-- ELIMINADO
+
+            // === INICIO: NUEVA LÓGICA DE QR ===
+            // 1. Limpiar la URL para que no se re-active en un F5
+            // Lo hacemos aquí para asegurar que solo se limpie si el flujo QR se inicia
+            window.history.replaceState({}, document.title, window.location.pathname);
+            // === FIN: NUEVA LÓGICA DE QR ===
                 
-                // 1. Obtener fecha actual
-                const today = new Date();
+            // 1. Obtener fecha actual
+            const today = new Date();
                 const targetYear = today.getFullYear();
                 const targetMonth = today.getMonth(); // 0-11
                 const targetDay = today.getDate(); // 1-31
@@ -1668,7 +1698,7 @@
                     flightDataModal.style.display = 'flex';
 
                     // Limpiar historial de URL para que no se active de nuevo al recargar
-                    window.history.replaceState({}, document.title, window.location.pathname);
+                    // window.history.replaceState({}, document.title, window.location.pathname); // <-- ELIMINADO (se movió al inicio de la función)
                 });
             }
             return Promise.resolve(); // Si no hay 'action', devolver promesa resuelta
