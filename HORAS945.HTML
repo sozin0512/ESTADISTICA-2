@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Datos de Vuelo FAH-945</title>
+    <title>Datos de Vuelo FAH-945 (UH-1H)</title>
+    <!-- Favicon placeholder para evitar el error 404 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚁</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Chosen Palette: Warm Neutrals with Subtle Accents */
@@ -329,97 +331,136 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%) translateY(-100%);
-            width: 60px;
-            height: auto;
-            object-fit: contain;
-            filter: drop-shadow(3px 5px 2px rgba(0, 0, 0, 0.2));
-            z-index: 15;
-            opacity: 0;
-            pointer-events: none;
-            animation: dropAndRiseMask 4s ease-in-out forwards 2.5s;
-        }
-        @keyframes dropAndRiseMask {
-            0% { opacity: 0; transform: translateX(-50%) translateY(-100%); }
-            10% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            35% { transform: translateX(-50%) translateY(var(--mask-drop-distance)); }
-            65% { transform: translateX(-50%) translateY(var(--mask-drop-distance)); }
-            90% { transform: translateX(-50%) translateY(0); }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-100%); }
         }
 
-        /* Estilos del efecto de revelación (círculo blanco) */
-        #reveal-circle {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%) scale(0);
-            width: 100px;
-            height: 100px;
-            background-color: white;
-            border-radius: 50%;
-            opacity: 0;
-            z-index: 12;
-            pointer-events: none;
-            animation: revealEffect 1s ease-out forwards 3.9s;
+        /* --- INICIO: Estilos del modal de REPORTE (NUEVO) --- */
+        #reportModal {
+            display: none; /* Oculto por defecto */
         }
-        @keyframes revealEffect {
-            0% { opacity: 0; transform: translateX(-50%) scale(0); }
-            50% { opacity: 0.8; transform: translateX(-50%) scale(1); }
-            100% { opacity: 0; transform: translateX(-50%) scale(1.5); }
-        }
+        /* --- FIN: Estilos del modal de REPORTE (NUEVO) --- */
+
 
         /* Estilos de impresión */
         @media print {
-            body {
-                margin: 0;
-                padding: 10mm;
-                font-size: 10px;
+            /* --- INICIO: Lógica de impresión modificada --- */
+            
+            /* 1. Ocultar todo por defecto */
+            body > *:not(.printable-report-area) {
+                display: none;
             }
-            .button-container, .tab-container, .year-container, 
-            #auth-container, #helicopter-svg, #anonymous-mask-img, #reveal-circle,
-            #main-app-header, .print-options-container, .user-id-container,
-            #motorStatusModal { /* Ocultar el modal de estado del motor en la impresión principal */
+
+            /* 2. Reglas para cuando se imprime el REPORTE (usando el modal) */
+            body.imprimiendo-reporte {
+                margin: 0;
+                padding: 0;
+                background: none;
+            }
+            
+            body.imprimiendo-reporte #reportModal {
+                display: flex !important;
+                flex-direction: column;
+                position: static !important;
+                background: white !important;
+                inset: 0 !important;
+                padding: 10mm !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            body.imprimiendo-reporte #printableReportArea {
+                display: block !important;
+                overflow: visible !important;
+            }
+            
+            /* Ocultar los botones del modal de reporte al imprimirlo */
+            body.imprimiendo-reporte .report-modal-buttons {
+                display: none !important;
+            }
+
+            /* Asegurar que el contenido del reporte use todo el ancho */
+            body.imprimiendo-reporte #reportModalContent table {
+                width: 100% !important;
+                font-size: 10pt !important;
+                border-collapse: collapse !important;
+            }
+             body.imprimiendo-reporte #reportModalContent th,
+             body.imprimiendo-reporte #reportModalContent td {
+                border: 1px solid #000 !important;
+                padding: 4px !important;
+                color: #000 !important;
+             }
+
+            
+            body.imprimiendo-reporte #reportModalTitle {
+                font-size: 18pt !important;
+                text-align: center !important;
+                margin-bottom: 20px !important;
+                color: #000 !important;
+            }
+
+            /* 3. Reglas para cuando se imprime la TABLA PRINCIPAL (lógica original) */
+            body:not(.imprimiendo-reporte) {
+                 margin: 0;
+                 padding: 10mm;
+                 font-size: 10px;
+            }
+            body:not(.imprimiendo-reporte) .button-container, 
+            body:not(.imprimiendo-reporte) .tab-container, 
+            body:not(.imprimiendo-reporte) .year-container, 
+            body:not(.imprimiendo-reporte) #auth-container, 
+            body:not(.imprimiendo-reporte) #helicopter-svg, 
+            body:not(.imprimiendo-reporte) #anonymous-mask-img, 
+            body:not(.imprimiendo-reporte) #reveal-circle,
+            body:not(.imprimiendo-reporte) #main-app-header, 
+            body:not(.imprimiendo-reporte) .print-options-container, 
+            body:not(.imprimiendo-reporte) .user-id-container,
+            body:not(.imprimiendo-reporte) #motorStatusModal,
+            body:not(.imprimiendo-reporte) #reportModal { /* Ocultar el modal de reporte si no es su impresión */
                 display: none !important; 
             }
-            .print-header { display: block !important; }
-            table {
+
+            body:not(.imprimiendo-reporte) .print-header { display: block !important; }
+            body:not(.imprimiendo-reporte) table {
                 page-break-inside: avoid;
-                width: 100%; 
-                border-collapse: collapse;
+                width: 100% !important; 
+                border-collapse: collapse !important;
             }
-            th, td {
+            body:not(.imprimiendo-reporte) th, 
+            body:not(.imprimiendo-reporte) td {
                 page-break-inside: avoid;
                 page-break-after: auto;
                 border: 1px solid #000 !important;
-                padding: 2px;
-                font-size: 9px; 
+                padding: 2px !important;
+                font-size: 9px !important; 
             }
-            .nomenclatura {
+            body:not(.imprimiendo-reporte) .nomenclatura {
                 text-align: left !important;
                 padding-left: 2px !important;
                 min-width: 120px !important; 
             }
-            /* Eliminados estilos de impresión para restantes y etiquetas */
-            .recordatorio-global-container, #recordatorio-textarea {
+            body:not(.imprimiendo-reporte) .recordatorio-global-container, 
+            body:not(.imprimiendo-reporte) #recordatorio-textarea {
                 display: block !important; 
                 -webkit-print-color-adjust: exact !important;
                 color-adjust: exact !important;
                 background-color: #e0e0e0 !important;
                 border: 1px solid #000 !important;
             }
-            #recordatorio-textarea::placeholder {
+            body:not(.imprimiendo-reporte) #recordatorio-textarea::placeholder {
                 text-shadow: none !important; 
                 color: #000 !important;
             }
-            /* Eliminado .blinking de impresión */
             /* Reglas específicas para ocultar elementos según la clase del body */
-            body.print-no-reminders .recordatorio-global-container {
+            body:not(.imprimiendo-reporte).print-no-reminders .recordatorio-global-container {
                 display: none !important;
             }
-            /* Eliminado print-no-yellow-labels de impresión */
+
             @page {
+                /* La impresión del reporte usará esto, la principal también */
                 size: A4 landscape;
                 margin: 10mm;
             }
+            /* --- FIN: Lógica de impresión modificada --- */
         }
 
         /* Estilos del modal de estado de motores */
@@ -489,7 +530,7 @@
 
     <div id="main-app-content">
         <div id="main-app-header" class="flex justify-between items-center mb-4">
-            <h2 class="flex-grow text-center sm:text-left">DATOS DE VUELO FAH-945</h2>
+            <h2 class="flex-grow text-center sm:text-left">DATOS DE VUELO FAH-945 (UH-1H)</h2>
             <button id="logout-btn" class="px-4 py-2 bg-red-500 text-white rounded-md shadow-md hover:bg-red-600 transition-colors">Cerrar Sesión</button>
         </div>
 
@@ -511,14 +552,15 @@
         </div>
 
         <div class="print-options-container">
-            <strong>Opciones de Impresión:</strong>
+            <strong>Opciones de Impresión (Para Tabla Principal):</strong>
             <label><input type="radio" name="printOption" value="full" checked> Tabla Completa</label>
             <label><input type="radio" name="printOption" value="no-reminders"> Sin Recordatorios</label>
             <!-- Eliminado "Sin Columnas Amarillas" ya que no existen -->
         </div>
 
         <div class="button-container flex justify-center gap-4 mt-4">
-            <button id="btnImprimir" class="px-6 py-2 bg-gray-700 text-white rounded-md shadow-md hover:bg-gray-800 transition-colors">Imprimir Tabla</button>
+            <!-- *** MODIFICADO: El ID sigue siendo el mismo, pero ahora tiene una nueva función *** -->
+            <button id="btnImprimir" class="px-6 py-2 bg-gray-700 text-white rounded-md shadow-md hover:bg-gray-800 transition-colors">Generar Reporte del Mes</button>
             <!-- Eliminado el botón "Estado de Motores" -->
             <button id="btnComponentStatus" class="px-6 py-2 bg-purple-500 text-white rounded-md shadow-md hover:bg-purple-600 transition-colors">Estado de Componentes</button>
             <button id="btnInspecciones" class="px-6 py-2 bg-teal-500 text-white rounded-md shadow-md hover:bg-teal-600 transition-colors">Inspecciones</button>
@@ -526,6 +568,207 @@
     </div>
 
     <!-- Eliminado el modal de estado de motores completamente -->
+
+    <!-- ====================================================== -->
+    <!-- ==== INICIO: NUEVO MODAL DE REPORTE DETALLADO ==== -->
+    <!-- ====================================================== -->
+    <div id="reportModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
+        <!-- Contenedor del modal -->
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-3xl w-full text-center flex flex-col max-h-[90vh]">
+            
+            <!-- Área de contenido imprimible -->
+            <div id="printableReportArea" class="overflow-y-auto flex-grow">
+                <h3 id="reportModalTitle" class="text-2xl font-bold mb-4">Reporte Detallado</h3>
+                <div id="reportModalContent" class="text-left">
+                    <!-- El contenido del reporte se generará aquí con JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Botones (no se imprimen) -->
+            <div class="report-modal-buttons flex justify-center gap-4 mt-6 flex-shrink-0">
+                <button id="printReportBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Imprimir Reporte</button>
+                <button id="closeReportBtn" class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    <!-- ==================================================== -->
+    <!-- ==== FIN: NUEVO MODAL DE REPORTE DETALLADO ==== -->
+    <!-- ==================================================== -->
+
+
+    <!-- ====================================================== -->
+    <!-- ==== INICIO: NUEVO MODAL DE INGRESO RÁPIDO (QR) ==== -->
+    <!-- ====================================================== -->
+    <div id="flightDataModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4" style="display: none;">
+        <!-- --- MODIFICADO: Contenedor de modal con flex-col y max-h --- -->
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full text-center flex flex-col max-h-[90vh]">
+            <!-- --- INICIO: Encabezado (no se desplaza) --- -->
+            <div class="flex-shrink-0">
+                <h3 class="text-2xl font-bold mb-4">Ingreso de Vuelo Rápido</h3>
+                <p class="text-lg mb-4">Datos para el día: <strong id="flightModalDate"></strong></p>
+            </div>
+            <!-- --- FIN: Encabezado --- -->
+
+            <!-- --- MODIFICADO: Contenedor de campos (ahora se desplaza) --- -->
+            <div class="space-y-4 text-left overflow-y-auto flex-grow pr-2">
+                <div>
+                    <label for="modalAcHrs" class="block text-sm font-medium text-gray-700">AC HRS</label>
+                    <input type="number" id="modalAcHrs" placeholder="Ej: 1.5" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="modalAterrizajes" class="block text-sm font-medium text-gray-700">ATERRIZAJES</label>
+                    <input type="number" id="modalAterrizajes" placeholder="Ej: 3" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="modalRins" class="block text-sm font-medium text-gray-700">RINS</label>
+                    <input type="number" id="modalRins" placeholder="Ej: 3" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <!-- ==== INICIO: NUEVOS CAMPOS (ENGINE HRS) ==== -->
+                <div>
+                    <label for="modalEngineHrs1" class="block text-sm font-medium text-gray-700">Engine Hrs</label>
+                    <input type="number" id="modalEngineHrs1" placeholder="Ej: 1.5" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <!-- ==== FIN: NUEVOS CAMPOS (ENGINE HRS) ==== -->
+                <div>
+                    <label for="modalEngineStarts1" class="block text-sm font-medium text-gray-700">Ciclos Motor (Starts)</label>
+                    <input type="number" id="modalEngineStarts1" placeholder="Ej: 2" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="modalFlights1" class="block text-sm font-medium text-gray-700">Vuelos (Flights)</label>
+                    <input type="number" id="modalFlights1" placeholder="Ej: 3" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <!-- ==== FIN: NUEVOS CAMPOS QR ==== -->
+            </div>
+            <!-- --- FIN: Contenedor de campos --- -->
+
+            <!-- --- INICIO: Pie de modal (botones, no se desplaza) --- -->
+            <div class="flex justify-center gap-4 mt-6 flex-shrink-0">
+                <button id="saveFlightDataBtn" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">Guardar</button>
+                <button id="cancelFlightDataBtn" class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">Cancelar</button>
+            </div>
+            <!-- --- FIN: Pie de modal --- -->
+        </div>
+    </div>
+    <!-- ==================================================== -->
+    <!-- ==== FIN: NUEVO MODAL DE INGRESO RÁPIDO (QR) ==== -->
+    <!-- ==================================================== -->
+
+    <!-- ====================================================== -->
+    <!-- ==== INICIO: NUEVO MODAL DE CONFIRMACIÓN (QR) ==== -->
+    <!-- ====================================================== -->
+    <div id="confirmationModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full text-center">
+            <h3 class="text-2xl font-bold mb-4">Confirmar Totales</h3>
+            <p class="text-lg mb-4">¿Coincide esto con tu reporte de vuelo?</p>
+            
+            <!-- ==== INICIO: MODAL DE CONFIRMACIÓN RECONSTRUIDO ==== -->
+            <!-- Contenedor scrollable para la lista de todos los campos -->
+            <div id="confirmationListContainer" class="max-h-64 overflow-y-auto space-y-3 text-left bg-gray-50 p-4 rounded-md mb-3">
+                <!-- JavaScript llenará esta sección dinámicamente -->
+                <!-- Ejemplo de cómo se verá un ítem:
+                <div class="space-y-1">
+                    <h4 class="font-bold text-lg text-blue-700">AC HRS</h4>
+                    <div>
+                        <span class="font-medium text-gray-700">Total Anterior (Vienen):</span>
+                        <strong class="text-lg float-right text-gray-800">223.0</strong>
+                    </div>
+                    <div>
+                        <span class="font-medium text-gray-700">Reporte de Hoy:</span>
+                        <strong class="text-lg float-right text-gray-800">+1.5</strong>
+                    </div>
+                    <hr class="my-1">
+                    <div>
+                        <span class="font-bold text-gray-900">NUEVO TOTAL GENERAL:</span>
+                        <strong class="text-2xl float-right text-blue-700">224.5</strong>
+                    </div>
+                </div>
+                -->
+            </div>
+            <!-- ==== FIN: MODAL DE CONFIRMACIÓN RECONSTRUIDO ==== -->
+
+            <!-- ==== INICIO: NUEVO RECORDATORIO DE CAPTURA ==== -->
+            <p class="text-sm font-medium text-gray-800 mt-5 bg-yellow-100 border border-yellow-300 rounded-md p-3 shadow-sm">
+                <strong>Recordatorio:</strong> ¡REVISA BIEN LOS DATOS ANTES DE CONTINUAR FIJATE BIEN EN TU REPORTE DE VUELO ATT:ESTADISTICA 
+                POWERED HACKER-01!
+            </p>
+            <!-- ==== FIN: NUEVO RECORDATORIO DE CAPTURA ==== -->
+
+            <div class="mt-6">
+                <button id="closeConfirmationBtn" class="w-full px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Confirmado</button>
+            </div>
+        </div>
+    </div>
+    <!-- ==================================================== -->
+    <!-- ==== FIN: NUEVO MODAL DE CONFIRMACIÓN (QR) ==== -->
+    <!-- ==================================================== -->
+
+    <!-- ====================================================== -->
+    <!-- ==== INICIO: NUEVO MODAL DE ALERTA PERSONALIZADA ==== -->
+    <!-- ====================================================== -->
+    <div id="customAlertModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full text-center">
+            <h3 class="text-2xl font-bold mb-4 text-red-600">Error</h3>
+            <p id="customAlertMessage" class="text-lg mb-6">Este es un mensaje de error.</p>
+            <button id="customAlertCloseBtn" class="w-full px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Entendido</button>
+        </div>
+    </div>
+    <!-- ==================================================== -->
+    <!-- ==== FIN: NUEVO MODAL DE ALERTA PERSONALIZADA ==== -->
+    <!-- ==================================================== -->
+
+    <!-- ====================================================== -->
+    <!-- ==== INICIO: NUEVO MODAL DE CONFLICTO DE DATOS (QR) ==== -->
+    <!-- ====================================================== -->
+    <div id="dataConflictModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full text-center">
+            <h3 class="text-2xl font-bold mb-4 text-yellow-600">Datos Existentes Detectados</h3>
+            <p class="text-lg mb-6">Ya tienes datos registrados para este día. ¿Qué deseas hacer?</p>
+            <div classE="flex flex-col sm:flex-row justify-center gap-4">
+                <button id="overwriteDataBtn" class="w-full sm:w-auto px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors mb-2 sm:mb-0">Borrar y Reemplazar</button>
+                <button id="sumDataBtn" class="w-full sm:w-auto px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors mb-2 sm:mb-0">Sumar a lo Existente</button>
+                <button id="cancelConflictBtn" class="w-full sm:w-auto px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    <!-- ==================================================== -->
+    <!-- ==== FIN: NUEVO MODAL DE CONFLICTO DE DATOS (QR) ==== -->
+    <!-- ==================================================== -->
+
+    <!-- ====================================================== -->
+    <!-- ==== INICIO: NUEVO MODAL DE NOMBRE DE MECÁNICO (QR) ==== -->
+    <!-- ====================================================== -->
+    <div id="mechanicNameModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full text-center">
+            <h3 class="text-2xl font-bold mb-4">Registro de Mecánico</h3>
+            <p class="text-lg mb-4">Por último, ¿quién está llenando el reporte?</p>
+            <div class="space-y-4 text-left">
+                <div>
+                    <label for="modalMechanicName" class="block text-sm font-medium text-gray-700">Nombre de Mecánico a Bordo</label>
+                    <input type="text" id="modalMechanicName" placeholder="Ej: Juan Pérez" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            <div class="flex justify-center gap-4 mt-6">
+                <button id="saveMechanicNameBtn" class="w-full px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Guardar y Salir</button>
+            </div>
+        </div>
+    </div>
+    <!-- ==================================================== -->
+    <!-- ==== FIN: NUEVO MODAL DE NOMBRE DE MECÁNICO (QR) ==== -->
+    <!-- ==================================================== -->
+
+    <!-- ====================================================== -->
+    <!-- ==== INICIO: NUEVO MODAL DE DESPEDIDA (QR) ==== -->
+    <!-- ====================================================== -->
+    <div id="goodbyeModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full text-center">
+            <h3 class="text-2xl font-bold mb-4 text-green-600">Registro Completo</h3>
+            <p id="goodbyeMessage" class="text-lg mb-6">¡Gracias, Juan Pérez! Tu reporte ha sido guardado.</p>
+        </div>
+    </div>
+    <!-- ==================================================== -->
+    <!-- ==== FIN: NUEVO MODAL DE DESPEDIDA (QR) ==== -->
+    <!-- ==================================================== -->
+
 
     <script type="module">
         // Importa las funciones necesarias de Firebase SDK
@@ -540,7 +783,7 @@
             authDomain: "fah-945.firebaseapp.com",
             databaseURL: "https://fah-945-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "fah-945",
-            storageBucket: "fah-945.firebase-storage.app",
+            storageBucket: "fah-945.firebasestorage.app",
             messagingSenderId: "789748725591",
             appId: "1:789748725591:web:f7f551a77be0092531f012",
             measurementId: "G-3JW0YYE2QQ"
@@ -556,28 +799,31 @@
         let appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         appId = appId.replace(/[.#$\[\]]/g, '_'); // Reemplaza caracteres inválidos con guion bajo
 
-        // Variables globales
-        let añoActual = new Date().getFullYear();
-        // Cargar mesActual desde localStorage, o usar el mes actual del sistema si no está guardado
-        let mesActual = parseInt(localStorage.getItem('lastActiveMonth')) || new Date().getMonth();
-        let userId = "anonimo";
-        let currentUserRole = null;
+        // --- Variables Globales de Estado ---
+        let userId = "anonimo"; // Almacena el ID del usuario. ¡Declaración faltante!
+        let currentUserRole = "viewer"; // Almacena el rol del usuario. ¡Declaración faltante!
+        const años = [2023, 2024, 2025, 2026, 2027]; // Define la lista de años. ¡Declaración faltante!
+        let añoActual = new Date().getFullYear(); // Define el año actual. ¡Declaración faltante!
+        // Intenta obtener el último mes activo de localStorage, o usa el mes actual
+        let mesActual = localStorage.getItem('lastActiveMonth') ? parseInt(localStorage.getItem('lastActiveMonth')) : new Date().getMonth();
+        let pendingFlightData = null; // Variable global para guardar datos de QR temporalmente
 
-        const años = [2024, 2025, 2026, 2027, 2028];
+        // Definición de meses
         const meses = [
             "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
             "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
         ];
 
-        // Definición de todas las filas en el ORDEN FINAL DESEADO (solo para MOTOR #1)
+        // Definición de todas las filas en el ORDEN FINAL DESEADO (para MOTOR #1 y #2)
         const nombresFilasOrdenadas = [
             "AC HRS",
             "ATERRIZAJES",
             "RINS",
-            "CONTINGENCY EXCURSIONS 1",
-            "ENGINE HRS 1", 
-            "ENGINE STARTS 1", 
-            "FLIGHTS 1", 
+            // --- Motor ---
+            "CONTINGENCY EXCURSIONS",
+            "ENGINE HRS", 
+            "ENGINE STARTS", 
+            "FLIGHTS", 
             "IMPELLER",
             "COMPRESOR COMPONENTS", 
             "GAS PRODUCER COMPONENTS", 
@@ -602,10 +848,42 @@
         const authStatus = document.getElementById('auth-status');
         const authContainer = document.getElementById('auth-container');
         const mainAppContent = document.getElementById('main-app-content');
+        
+        // --- MODIFICADO: Referencia al botón de imprimir/reporte ---
         const btnImprimir = document.getElementById('btnImprimir');
+
+        // Elementos del nuevo modal de QR
+        const flightDataModal = document.getElementById('flightDataModal');
+        const confirmationModal = document.getElementById('confirmationModal');
+        const flightModalDate = document.getElementById('flightModalDate');
+        const saveFlightDataBtn = document.getElementById('saveFlightDataBtn');
+        const cancelFlightDataBtn = document.getElementById('cancelFlightDataBtn');
+        const closeConfirmationBtn = document.getElementById('closeConfirmationBtn');
+        const modalAcHrs = document.getElementById('modalAcHrs');
+        const modalAterrizajes = document.getElementById('modalAterrizajes');
+        const modalRins = document.getElementById('modalRins');
+        // === INICIO: NUEVOS ELEMENTOS MODAL QR ===
+        const modalEngineHrs1 = document.getElementById('modalEngineHrs1'); // <-- AÑADIDO
+        const modalEngineStarts1 = document.getElementById('modalEngineStarts1');
+        const modalFlights1 = document.getElementById('modalFlights1');
+        // === FIN: NUEVOS ELEMENTOS MODAL QR ===
+ 
+        // === INICIO: Elementos de los nuevos modales de Mecánico y Despedida ===
+        const mechanicNameModal = document.getElementById('mechanicNameModal');
+        const modalMechanicName = document.getElementById('modalMechanicName');
+        const saveMechanicNameBtn = document.getElementById('saveMechanicNameBtn');
+        const goodbyeModal = document.getElementById('goodbyeModal');
+        const goodbyeMessage = document.getElementById('goodbyeMessage');
+        // === FIN: Elementos de los nuevos modales ===
 
         // Nuevo botón de estado de componentes
         const btnComponentStatus = document.getElementById('btnComponentStatus');
+
+        // === INICIO: Icono de Mecánico (para Tooltip) ===
+        const iconoMecanicoHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-3 w-3 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+        </svg>`;
+        // === FIN: Icono de Mecánico ===
 
 
         // Helper para extraer la nomenclatura base y la variante (Ya no es estrictamente necesario sin límites, pero se mantiene si hay nombres con formato similar)
@@ -645,66 +923,78 @@
         // Funciones de Autenticación
         // -----------------------------------------------------------
 
-        signupBtn.addEventListener('click', async () => {
+        signupBtn.addEventListener('click', () => { // ELIMINADO ASYNC
             const email = emailInput.value;
             const password = passwordInput.value;
             if (!email || !password) { authStatus.textContent = 'Por favor, introduce un correo y una contraseña.'; return; }
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                authStatus.textContent = 'Registro exitoso. ¡Bienvenido!';
-                authStatus.style.color = 'green';
-                emailInput.value = '';
-                passwordInput.value = '';
-                await set(ref(database, `user_roles/${user.uid}`), 'viewer');
-            } catch (error) {
-                authStatus.textContent = `Error al registrar: ${error.message}`;
-                authStatus.style.color = 'red';
-            }
+            
+            createUserWithEmailAndPassword(auth, email, password) // ELIMINADO AWAIT
+                .then((userCredential) => { // AÑADIDO .THEN
+                    const user = userCredential.user;
+                    authStatus.textContent = 'Registro exitoso. ¡Bienvenido!';
+                    authStatus.style.color = 'green';
+                    emailInput.value = '';
+                    passwordInput.value = '';
+                    // Devuelve la promesa de set
+                    // *** MODIFICADO: Añadido el path de 'artifacts' ***
+                    return set(ref(database, `artifacts/${appId}/user_roles/${user.uid}`), 'viewer'); 
+                })
+                .catch((error) => { // AÑADIDO .CATCH
+                    authStatus.textContent = `Error al registrar: ${error.message}`;
+                    authStatus.style.color = 'red';
+                });
         });
 
-        loginBtn.addEventListener('click', async () => {
+        loginBtn.addEventListener('click', () => { // ELIMINADO ASYNC
             const email = emailInput.value;
             const password = passwordInput.value;
             if (!email || !password) { authStatus.textContent = 'Por favor, introduce un correo y una contraseña.'; return; }
-            try {
-                await setPersistence(auth, browserLocalPersistence);
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                authStatus.textContent = 'Sesión iniciada. ¡Bienvenido!';
-                authStatus.style.color = 'green';
-                emailInput.value = '';
-                passwordInput.value = '';
-            } catch (error) {
-                authStatus.textContent = `Error al iniciar sesión: ${error.message}`;
-                authStatus.style.color = 'red';
-            }
+            
+            setPersistence(auth, browserLocalPersistence) // ELIMINADO AWAIT
+                .then(() => { // AÑADIDO .THEN
+                    // Devuelve la promesa de signIn
+                    return signInWithEmailAndPassword(auth, email, password); 
+                })
+                .then((userCredential) => { // AÑADIDO .THEN
+                    authStatus.textContent = 'Sesión iniciada. ¡Bienvenido!';
+                    authStatus.style.color = 'green';
+                    emailInput.value = '';
+                    passwordInput.value = '';
+                })
+                .catch((error) => { // AÑADIDO .CATCH
+                    authStatus.textContent = `Error al iniciar sesión: ${error.message}`;
+                    authStatus.style.color = 'red';
+                });
         });
 
-        forgotPasswordBtn.addEventListener('click', async () => {
+        forgotPasswordBtn.addEventListener('click', () => { // ELIMINADO ASYNC
             const email = emailInput.value;
             if (!email) { authStatus.textContent = 'Por favor, introduce tu correo electrónico para restablecer la contraseña.'; authStatus.style.color = 'red'; return; }
-            try {
-                await sendPasswordResetEmail(auth, email);
-                authStatus.textContent = 'Se ha enviado un correo de restablecimiento de contraseña a tu dirección.';
-                authStatus.style.color = 'green';
-            } catch (error) {
-                authStatus.textContent = `Error al restablecer contraseña: ${error.message}`;
-                authStatus.style.color = 'red';
-            }
+            
+            sendPasswordResetEmail(auth, email) // ELIMINADO AWAIT
+                .then(() => { // AÑADIDO .THEN
+                    authStatus.textContent = 'Se ha enviado un correo de restablecimiento de contraseña a tu dirección.';
+                    authStatus.style.color = 'green';
+                })
+                .catch((error) => { // AÑADIDO .CATCH
+                    authStatus.textContent = `Error al restablecer contraseña: ${error.message}`;
+                    authStatus.style.color = 'red';
+                });
         });
 
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                authStatus.textContent = 'Sesión cerrada.';
-                authStatus.style.color = 'red';
-            } catch (error) {
-                authStatus.textContent = `Error al cerrar sesión: ${error.message}`;
-                authStatus.style.color = 'red';
-            }
+        logoutBtn.addEventListener('click', () => { // ELIMINADO ASYNC
+            signOut(auth) // ELIMINADO AWAIT
+                .then(() => { // AÑADIDO .THEN
+                    authStatus.textContent = 'Sesión cerrada.';
+                    authStatus.style.color = 'red';
+                })
+                .catch((error) => { // AÑADIDO .CATCH
+                    authStatus.textContent = `Error al cerrar sesión: ${error.message}`;
+                    authStatus.style.color = 'red';
+                });
         });
 
-        onAuthStateChanged(auth, async (user) => {
+        onAuthStateChanged(auth, (user) => { // ELIMINADO ASYNC
             if (user) {
                 userId = user.uid;
                 userIdDisplay.textContent = userId;
@@ -713,26 +1003,44 @@
                 mainAppContent.style.display = 'block';
                 authStatus.textContent = '';
 
-                try {
-                    const rolePath = `user_roles/${userId}`;
-                    const snapshot = await get(ref(database, rolePath));
-                    currentUserRole = snapshot.val() || 'viewer';
-                    
-                    if (!snapshot.exists()) {
-                        await set(ref(database, rolePath), 'viewer');
-                    }
-                    
-                    applyRolePermissions(currentUserRole);
-                    await cargarDatosDeFirebase();
-                    agregarEventosDeEdicion();
-                } catch (error) {
-                    authStatus.textContent = `Error crítico: ${error.message}. Por favor, recarga.`;
-                    authStatus.style.color = 'red';
-                    currentUserRole = 'viewer';
-                    applyRolePermissions(currentUserRole);
-                    await cargarDatosDeFirebase();
-                    agregarEventosDeEdicion();
-                }
+                // --- Lógica de autenticación reescrita con .then() ---
+                // *** MODIFICADO: Añadido el path de 'artifacts' ***
+                const rolePath = `artifacts/${appId}/user_roles/${userId}`;
+                get(ref(database, rolePath)) // ELIMINADO AWAIT
+                    .then((snapshot) => { // AÑADIDO .THEN
+                        currentUserRole = snapshot.val() || 'viewer';
+                        
+                        let roleSetPromise = Promise.resolve(); // Crear promesa resuelta
+                        if (!snapshot.exists()) {
+                            // Si no existe, la promesa será la escritura
+                            // *** MODIFICADO: Añadido el path de 'artifacts' ***
+                            roleSetPromise = set(ref(database, rolePath), 'viewer');
+                        }
+                        return roleSetPromise; // Devolver la promesa (resuelta o de escritura)
+                    })
+                    .then(() => { // AÑADIDO .THEN (se ejecuta después de establecer el rol si era necesario)
+                        applyRolePermissions(currentUserRole);
+                        return cargarDatosDelMes(añoActual, mesActual); // Devolver la promesa de cargar datos
+                    })
+                    .then(() => { // AÑADIDO .THEN (se ejecuta después de cargar los datos)
+                        agregarEventosDeEdicion();
+                        // --- INICIO: LÓGICA DE QR ---
+                        // Mover la comprobación del QR aquí para asegurar que se ejecute después de la carga
+                        return checkURLParamsForQR(); 
+                    })
+                    .catch((error) => { // AÑADIDO .CATCH (Maneja errores de get(role), set(role), o cargarDatosDelMes)
+                        authStatus.textContent = `Error crítico: ${error.message}. Por favor, recarga.`;
+                        authStatus.style.color = 'red';
+                        currentUserRole = 'viewer';
+                        applyRolePermissions(currentUserRole);
+                        
+                        // Intentar cargar datos de todos modos en caso de error de rol
+                        cargarDatosDelMes(añoActual, mesActual)
+                            .then(() => {
+                                agregarEventosDeEdicion();
+                            });
+                    });
+                // --- Fin de la lógica reescrita ---
 
             } else {
                 userId = "anonimo";
@@ -745,6 +1053,9 @@
                 currentUserRole = null;
                 applyRolePermissions(null);
             }
+            
+            // --- LÓGICA DE QR MOVIDA ---
+            // Se movió dentro del .then() de onAuthStateChanged para asegurar el orden de ejecución
         });
 
         /**
@@ -760,12 +1071,25 @@
                     const isNomenclatura = celda.classList.contains('nomenclatura');
                     const isTotalCell = celda.classList.contains('fila-total') || celda.classList.contains('fila-general');
                     const isMotorHeader = celda.classList.contains('motor-header');
+                    const isVienenCell = celda.classList.contains('fila-vienen'); // <<< NUEVO CHECK
+
                     
                     // No hay más celdas de "Restante" o "Label" específicas después de la eliminación
                     if (isNomenclatura || isTotalCell || isMotorHeader) {
                         celda.contentEditable = 'false';
                         celda.classList.add('read-only-cell');
                         celda.classList.remove('editable-cell');
+                    } else if (isVienenCell) { // <<< NUEVO BLOQUE
+                        // La celda "VIENEN" solo es editable en Enero
+                        if (mesActual === 0 && isAuthenticated) {
+                            celda.contentEditable = 'true';
+                            celda.classList.add('editable-cell');
+                            celda.classList.remove('read-only-cell');
+                        } else {
+                            celda.contentEditable = 'false';
+                            celda.classList.add('read-only-cell');
+                            celda.classList.remove('editable-cell');
+                        }
                     } else {
                         celda.contentEditable = isAuthenticated ? 'true' : 'false';
                         if (isAuthenticated) {
@@ -794,517 +1118,1036 @@
             }
         }
 
+        // ==================================================================
+        // ==== INICIO: LÓGICA DE APLICACIÓN PRINCIPAL (FUNCIONES FALTANTES) ====
+        // ==================================================================
 
-        // -----------------------------------------------------------
-        // Funciones de Base de Datos (Firebase Realtime Database)
-        // -----------------------------------------------------------
+        // --- Alerta personalizada ---
+        const customAlertModal = document.getElementById('customAlertModal');
+        const customAlertMessage = document.getElementById('customAlertMessage');
+        const customAlertCloseBtn = document.getElementById('customAlertCloseBtn');
+        
+        if (customAlertCloseBtn) {
+            customAlertCloseBtn.addEventListener('click', () => {
+                customAlertModal.style.display = 'none';
+            });
+        }
 
-        async function guardarDatosEnFirebase(año, mesIndex, datosTabla, recordatorio) {
-            if (!auth.currentUser) {
-                authStatus.textContent = 'Acceso denegado: Debes iniciar sesión para guardar datos.';
-                authStatus.style.color = 'orange';
-                return;
-            }
-
-            const rutaDatosMes = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesIndex}`;
-            const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${año}/${mesIndex}`;
-            const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-945-Overall`;
-
-            console.log(`Intentando guardar datos para el año: ${año}, mes: ${meses[mesIndex]}`);
-            console.log("Datos a guardar:", datosTabla);
-            console.log("Recordatorio a guardar:", recordatorio);
-
-            try {
-                await set(ref(database, rutaDatosMes), datosTabla);
-                await set(ref(database, rutaRecordatorio), recordatorio);
-
-                await calcularYGuardarTotalesGenerales();
-
-                authStatus.textContent = `Datos guardados para ${meses[mesIndex]} de ${año}.`;
-                authStatus.style.color = 'green';
-                console.log(`Guardado exitoso para ${meses[mesIndex]} de ${año}.`);
-            } catch (error) {
-                authStatus.textContent = `Error al guardar los datos: ${error.message}`;
-                authStatus.style.color = 'red';
-                console.error(`Error al guardar los datos para ${meses[mesIndex]} de ${año}:`, error);
+        /**
+         * Muestra un modal de alerta personalizado en lugar de window.alert()
+         * @param {string} message El mensaje a mostrar.
+         */
+        function showCustomAlert(message) {
+            console.error(message); // Siempre registra el error en la consola
+            if (customAlertMessage && customAlertModal) {
+                customAlertMessage.textContent = message;
+                customAlertModal.style.display = 'flex';
+            } else {
+                // Fallback si el modal no existe (aunque no debería pasar)
+                alert(message);
             }
         }
 
-        async function calcularYGuardarTotalesGenerales() {
-            const allYearsDataRef = ref(database, `artifacts/${appId}/public_data/datos_vuelo`);
-            let allMonthsData = {};
-
-            try {
-                const snapshot = await get(allYearsDataRef);
-                if (snapshot.exists()) {
-                    allMonthsData = snapshot.val();
+        // --- Carga de Años ---
+        function cargarAños() {
+            selectYear.innerHTML = '';
+            años.forEach(año => {
+                const option = document.createElement('option');
+                option.value = año;
+                option.textContent = año;
+                if (año === añoActual) {
+                    option.selected = true;
                 }
+                selectYear.appendChild(option);
+            });
+        }
 
-                let newCumulativeTotals = {
-                    'AC HRS': 0,
-                    'ATERRIZAJES': 0,
-                    'RINS': 0
+        // --- Creación de Botones de Meses ---
+        function crearBotonesMeses() {
+            contenedorMeses.innerHTML = '';
+            meses.forEach((nombreMes, index) => {
+                const button = document.createElement('button');
+                button.textContent = nombreMes;
+                button.className = 'tab-button';
+                button.dataset.mes = index;
+                if (index === mesActual) {
+                    button.classList.add('active');
+                }
+                button.addEventListener('click', () => cambiarMes(index));
+                contenedorMeses.appendChild(button);
+            });
+        }
+
+        // --- Creación de Tablas HTML ---
+        function crearTablasParaAño(año) {
+            contenedorTablas.innerHTML = ''; // Limpiar tablas existentes
+            const diasEnMeses = [31, (año % 4 === 0 && año % 100 !== 0) || año % 400 === 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+            meses.forEach((nombreMes, indexMes) => {
+                const dias = diasEnMeses[indexMes];
+                const tablaContainer = document.createElement('div');
+                tablaContainer.className = 'tabla-mes';
+                tablaContainer.style.display = indexMes === mesActual ? 'block' : 'none';
+                tablaContainer.dataset.mes = indexMes;
+
+                const tabla = document.createElement('table');
+                tabla.className = 'tabla-vuelo w-full';
+                tabla.id = `tabla-${nombreMes.toLowerCase()}`;
+                
+                // Encabezado de la tabla
+                let headerHTML = '<thead><tr><th>NOMENCLATURA</th><th>VIENEN</th>';
+                for (let i = 1; i <= dias; i++) {
+                    headerHTML += `<th>${i}</th>`;
+                }
+                headerHTML += '<th>MES TOTAL</th><th>GENERAL</th></tr></thead>';
+                tabla.innerHTML = headerHTML;
+
+                // Cuerpo de la tabla
+                const tbody = document.createElement('tbody');
+                
+                nombresFilasOrdenadas.forEach((nombreFila, filaIndex) => {
+                    // Insertar cabeceras de motor
+                    if (nombreFila === "CONTINGENCY EXCURSIONS") {
+                        const trHeader = document.createElement('tr');
+                        trHeader.innerHTML = `<td colspan="${dias + 4}" class="motor-header">MOTOR</td>`;
+                        tbody.appendChild(trHeader);
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.dataset.nomenclatura = nombreFila;
+                    
+                    let rowHTML = `<td class="nomenclatura">${nombreFila}</td>`;
+                    
+                    // Celda "VIENEN" (Solo lectura)
+                    rowHTML += `<td class="fila-vienen read-only-cell">0</td>`;
+
+                    // Celdas de Días (Editables)
+                    for (let i = 1; i <= dias; i++) {
+                        rowHTML += `<td class="editable-cell" data-dia="${i}"></td>`;
+                    }
+                    
+                    // Celda "MES TOTAL" (Solo lectura)
+                    rowHTML += `<td class="fila-total read-only-cell">0</td>`;
+                    
+                    // Celda "GENERAL" (Solo lectura)
+                    rowHTML += `<td class="fila-general read-only-cell">0</td>`;
+                    
+                    tr.innerHTML = rowHTML;
+                    tbody.appendChild(tr);
+                });
+                
+                tabla.appendChild(tbody);
+                tablaContainer.appendChild(tabla);
+                contenedorTablas.appendChild(tablaContainer);
+            });
+        }
+        
+        // --- Lógica de Navegación de Tablas ---
+        function cambiarMes(nuevoMes) { // ELIMINADO ASYNC
+            if (nuevoMes === mesActual) return;
+
+            // Guardar datos del mes actual antes de cambiar
+            let savePromise = Promise.resolve(); // Empezar con una promesa resuelta
+            if (auth.currentUser && userId !== "anonimo") {
+                const currentMonthData = obtenerDatosTabla(mesActual);
+                const currentMonthRecordatorio = recordatorioTextarea.value;
+                // Asignar la promesa de guardado
+                savePromise = guardarDatosEnFirebase(añoActual, mesActual, currentMonthData, currentMonthRecordatorio); 
+            }
+
+            // Encadenar el resto de la lógica al guardado
+            savePromise.then(() => {
+                mesActual = nuevoMes;
+                localStorage.setItem('lastActiveMonth', mesActual.toString()); // Guardar el mes activo
+                mostrarTabla(mesActual);
+                
+                // Cargar datos del nuevo mes
+                return cargarDatosDelMes(añoActual, mesActual); // Devolver promesa
+            })
+            .then(() => {
+                agregarEventosDeEdicion();
+                applyRolePermissions(currentUserRole); // Re-aplicar permisos a la nueva tabla
+            });
+        }
+
+        function mostrarTabla(mesIndex) {
+            document.querySelectorAll('.tabla-mes').forEach(tabla => {
+                tabla.style.display = 'none';
+            });
+            const tablaActiva = document.querySelector(`.tabla-mes[data-mes="${mesIndex}"]`);
+            if (tablaActiva) {
+                tablaActiva.style.display = 'block';
+            }
+
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            const botonActivo = document.querySelector(`.tab-button[data-mes="${mesIndex}"]`);
+            if (botonActivo) {
+                botonActivo.classList.add('active');
+            }
+            
+            // Actualizar cabecera de impresión
+            printMonthHeader.textContent = `${meses[mesIndex]} ${añoActual}`;
+        }
+
+        selectYear.addEventListener('change', () => { // ELIMINADO ASYNC
+            const nuevoAño = parseInt(selectYear.value);
+            if (nuevoAño === añoActual) return;
+
+            // Guardar datos del mes actual antes de cambiar de año
+            let savePromise = Promise.resolve();
+            if (auth.currentUser && userId !== "anonimo") {
+                const currentMonthData = obtenerDatosTabla(mesActual);
+                const currentMonthRecordatorio = recordatorioTextarea.value;
+                savePromise = guardarDatosEnFirebase(añoActual, mesActual, currentMonthData, currentMonthRecordatorio); // ELIMINADO AWAIT
+            }
+
+            savePromise.then(() => { // AÑADIDO .THEN
+                añoActual = nuevoAño;
+                crearTablasParaAño(añoActual); // Recrear las tablas para el nuevo año (días bisiestos)
+                mostrarTabla(mesActual); // Mostrar el mes que estaba activo
+                
+                // Cargar datos del nuevo año/mes
+                return cargarDatosDelMes(añoActual, mesActual); // Devolver promesa
+            })
+            .then(() => { // AÑADIDO .THEN
+                agregarEventosDeEdicion();
+                applyRolePermissions(currentUserRole); // Re-aplicar permisos
+            });
+        });
+
+        // --- Lógica de Carga de Datos (Firebase) ---
+        function cargarDatosDelMes(año, mes) { // ELIMINADO ASYNC
+            if (!auth.currentUser) return Promise.resolve(); // No cargar nada si no hay usuario
+
+            const rutaDatosMes = `artifacts/${appId}/public_data/FAH-945/${año}/${mes}`;
+            const rutaRecordatorio = `artifacts/${appId}/public_data/FAH-945/${año}/${mes}/recordatorio`;
+            const rutaVienen = `artifacts/${appId}/public_data/FAH-945/${año}/${mes === 0 ? 11 : mes - 1}`;
+            const añoVienen = mes === 0 ? año - 1 : año;
+            const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-945-Overall`;
+            const rutaMecanicos = `artifacts/${appId}/public_data/FAH-945/${año}/${mes}/mecanicos`; // <<< NUEVA RUTA
+
+            const tablaActiva = document.querySelector(`.tabla-mes[data-mes="${mes}"] .tabla-vuelo tbody`);
+            if (!tablaActiva) return Promise.resolve();
+
+            // Reescrito con Promise.all para cargar todo en paralelo sin awaits
+            return new Promise((resolve, reject) => {
+                const p1_datosVienen = get(ref(database, rutaVienen.replace(año, añoVienen)));
+                const p2_datosActuales = get(ref(database, rutaDatosMes));
+                const p3_recordatorio = get(ref(database, rutaRecordatorio));
+                const p4_totalesGenerales = get(ref(database, rutaTotalesGenerales));
+                const p5_mecanicos = get(ref(database, rutaMecanicos)); // <<< NUEVA PROMESA
+
+                Promise.all([p1_datosVienen, p2_datosActuales, p3_recordatorio, p4_totalesGenerales, p5_mecanicos])
+                    .then(([snapshotVienen, snapshotActual, snapshotRecordatorio, snapshotGeneral, snapshotMecanicos]) => {
+                        
+                        const datosVienen = snapshotVienen.val() || {};
+                        const datosActuales = snapshotActual.val() || {};
+                        recordatorioTextarea.value = snapshotRecordatorio.val() || '';
+                        const totalesGenerales = snapshotGeneral.val() || {};
+                        const mecanicos = snapshotMecanicos.val() || {}; // <<< NUEVOS DATOS
+
+                        // 4. Poblar la tabla
+                        tablaActiva.querySelectorAll('tr[data-nomenclatura]').forEach(fila => {
+                            const nom = fila.dataset.nomenclatura;
+                            const datosFila = datosActuales[nom] || {};
+                            const datosFilaVienen = datosVienen[nom] || {};
+
+                            // Calcular "Vienen" (Total General del mes anterior)
+                            let vienen = 0;
+                            /* --- INICIO DE LA MODIFICACIÓN (LÓGICA "VIENEN" INTELIGENTE) --- */
+                            const vienen_calculado = parseFloat(datosFilaVienen.general) || 0;
+                            const vienen_guardado = parseFloat(datosFila.vienen); // Leer el valor guardado este mes
+
+                            if (mesActual === 0) { // Es Enero
+                                // En Enero, priorizar el valor guardado. Si no existe, usar el calculado (de Dic. año anterior).
+                                vienen = !isNaN(vienen_guardado) ? vienen_guardado : vienen_calculado;
+                            } else { // Es Feb - Dic
+                                // En otros meses, SIEMPRE usar el calculado para mantener la cadena.
+                                vienen = vienen_calculado;
+                            }
+                            /* --- FIN DE LA MODIFICACIÓN --- */
+                            
+                            // Casos especiales para AC HRS, ATERRIZAJES, RINS (se acumulan)
+                            /* --- INICIO DEL BLOQUE A ELIMINAR ---
+                            if (nom === "AC HRS" || nom === "ATERRIZAJES" || nom === "RINS") {
+                                // El "Vienen" de este mes es el Total General menos lo de este mes
+                                const totalMesActual = Object.values(datosFila.dias || {}).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+                                vienen = (totalesGenerales[nom] || 0) - totalMesActual;
+                            }
+                            --- FIN DEL BLOQUE A ELIMINAR --- */
+
+                            fila.querySelector('.fila-vienen').textContent = formatNumber(vienen.toFixed(nom === "AC HRS" ? 1 : 0));
+
+                            // Poblar días
+                            fila.querySelectorAll('td.editable-cell').forEach(celda => {
+                                const dia = celda.dataset.dia;
+                                celda.textContent = formatNumber(datosFila.dias?.[dia] || '');
+                            });
+                        });
+
+                        // 5. Calcular totales
+                        actualizarTotales();
+
+                        // 6. Aplicar tooltips de mecánicos (NUEVO)
+                        const headerRow = tablaActiva.closest('table').querySelector('thead tr');
+                        if (headerRow) {
+                            // Limpiar tooltips antiguos (días 1-31, que son th:nth-child(3) en adelante)
+                            headerRow.querySelectorAll('th:nth-child(n+3)').forEach(th => {
+                                th.innerHTML = th.textContent.trim(); // Restaura solo el número (quita el icono)
+                                th.title = '';
+                                th.style.cursor = '';
+                                // th.style.textDecoration = ''; // Ya no se usa
+                            });
+
+                            // Aplicar nuevos tooltips
+                            for (const dia in mecanicos) {
+                                const data = mecanicos[dia]; // Puede ser string (antiguo) o array (nuevo)
+                                let nombres = '';
+
+                                // --- INICIO: Lógica para múltiples mecánicos ---
+                                if (Array.isArray(data)) {
+                                    nombres = data.join(', '); // Unir lista
+                                } else if (typeof data === 'string') {
+                                    nombres = data; // Compatibilidad con datos antiguos
+                                }
+                                // --- FIN: Lógica para múltiples mecánicos ---
+
+                                const diaIndex = parseInt(dia) + 2; // +2 porque 1=Nomenclatura, 2=Vienen, 3=Dia 1
+                                const th = headerRow.querySelector(`th:nth-child(${diaIndex})`);
+                                if (th && nombres) { // Asegurarse de que 'nombres' no esté vacío
+                                    th.title = `Reporte(s) por: ${nombres}`;
+                                    th.style.cursor = 'help';
+                                    // --- INICIO: Añadir icono ---
+                                    const diaNum = th.textContent.trim(); // Guardar el número del día
+                                    th.innerHTML = `${diaNum} ${iconoMecanicoHTML}`; // Añadir el icono
+                                    // th.style.textDecoration = 'underline dotted'; // Quitar subrayado
+                                    // --- FIN: Añadir icono ---
+                                }
+                            }
+                        }
+
+                        resolve(); // Resolver la promesa principal
+
+                    })
+                    .catch(error => {
+                        showCustomAlert(`Error al cargar datos: ${error.message}`);
+                        reject(error);
+                    });
+            });
+        }
+        
+        // --- Lógica de Guardado de Datos (Firebase) ---
+
+        /**
+         * Recoge todos los datos de la tabla activa.
+         * @param {number} mesIndex - El índice del mes (0-11).
+         * @returns {object} - Un objeto con los datos de la tabla.
+         */
+        function obtenerDatosTabla(mesIndex) {
+            const tablaActiva = document.querySelector(`.tabla-mes[data-mes="${mesIndex}"] .tabla-vuelo tbody`);
+            if (!tablaActiva) return {};
+
+            const datos = {};
+            tablaActiva.querySelectorAll('tr[data-nomenclatura]').forEach(fila => {
+                const nom = fila.dataset.nomenclatura;
+                datos[nom] = {
+                    /* --- INICIO DE LA MODIFICACIÓN (VIENEN INTOCABLE) --- */
+                    // La propiedad 'vienen' se elimina de aquí.
+                    // Ya no leemos 'vienen' de la tabla para guardarlo.
+                    // 'vienen' ahora es un valor 100% calculado en 'cargarDatosDelMes'.
+                    vienen: parseFloat(fila.querySelector('.fila-vienen').textContent) || 0, // <-- LÍNEA RESTAURADA
+                    /* --- FIN DE LA MODIFICACIÓN --- */
+                    dias: {},
+                    total: parseFloat(fila.querySelector('.fila-total').textContent) || 0,
+                    general: parseFloat(fila.querySelector('.fila-general').textContent) || 0,
                 };
 
-                for (const yearKey in allMonthsData) {
-                    if (Object.hasOwnProperty.call(allMonthsData, yearKey)) {
-                        const yearData = allMonthsData[yearKey];
-                        for (const monthKey in yearData) {
-                            if (Object.hasOwnProperty.call(yearData, monthKey)) {
-                                const monthData = yearData[monthKey];
-                                // Los índices 0, 1, 2 corresponden a AC HRS, ATERRIZAJES, RINS respectivamente.
-                                // La columna 34 es la "GENERAL" para estas filas.
-                                if (monthData && Array.isArray(monthData) && monthData[0] && !isNaN(parseFloat(monthData[0][34]))) {
-                                    newCumulativeTotals['AC HRS'] += parseFloat(monthData[0][34]) || 0; 
-                                }
-                                if (monthData && Array.isArray(monthData) && monthData[1] && !isNaN(parseFloat(monthData[1][34]))) {
-                                    newCumulativeTotals['ATERRIZAJES'] += parseFloat(monthData[1][34]) || 0; 
-                                }
-                                if (monthData && Array.isArray(monthData) && monthData[2] && !isNaN(parseFloat(monthData[2][34]))) {
-                                    newCumulativeTotals['RINS'] += parseFloat(monthData[2][34]) || 0; 
-                                }
-                            }
-                        }
+                fila.querySelectorAll('td.editable-cell').forEach(celda => {
+                    const dia = celda.dataset.dia;
+                    const valor = celda.textContent.trim();
+                    if (valor !== '') {
+                        datos[nom].dias[dia] = parseFloat(valor) || 0;
                     }
-                }
-                
-                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-945-Overall`;
-                await set(ref(database, rutaTotalesGenerales), newCumulativeTotals);
-
-            } catch (error) {
-                console.error("Error al calcular y guardar totales generales:", error);
-            }
-        }
-
-
-        async function cargarDatosDeFirebase() {
-            if (!userId || userId === "anonimo") {
-                return;
-            }
-
-            const rutaDatosMes = `artifacts/${appId}/public_data/datos_vuelo/${añoActual}/${mesActual}`;
-            const rutaRecordatorio = `artifacts/${appId}/public_data/recordatorios/${añoActual}/${mesActual}`;
-
-            console.log(`Cargando datos para el año: ${añoActual}, mes: ${meses[mesActual]}`);
-
-            try {
-                const datosSnapshot = await get(ref(database, rutaDatosMes));
-                const datos = datosSnapshot.val();
-
-                console.log("Datos recuperados de Firebase para el mes actual:", datos);
-
-                // Siempre limpiar la tabla para el mes actual, para asegurar un estado fresco
-                limpiarTablaHTML(mesActual);
-
-                if (datos) {
-                    // Si existen datos para el mes actual, cargarlos en la tabla.
-                    cargarDatosEnTablaHTML(datos, mesActual);
-                } else {
-                    // Si no existen datos para el mes actual,
-                    // Y si no es el primer mes (Enero, índice 0),
-                    // intentar copiar "GENERAL" del mes anterior a "VIENEN" del mes actual.
-                    if (mesActual > 0) {
-                        console.log(`No hay datos guardados para ${meses[mesActual]}, intentando copiar de ${meses[mesActual - 1]}.`);
-                        await copiarValorGeneralAMesSiguiente(añoActual, mesActual - 1, mesActual);
-                    } else {
-                        console.log(`No hay datos guardados para ${meses[mesActual]} (primer mes).`);
-                    }
-                }
-
-                const recordatorioSnapshot = await get(ref(database, rutaRecordatorio));
-                const recordatorio = recordatorioSnapshot.val();
-                if (recordatorio !== null) {
-                    recordatorioTextarea.value = recordatorio;
-                } else {
-                    recordatorioTextarea.value = "";
-                }
-                actualizarTotales(); // Recalcular totales después de la posible carga/copia de datos
-            } catch (error) {
-                authStatus.textContent = `Error al cargar los datos: ${error.message}`;
-                authStatus.style.color = 'red';
-                console.error(`Error al cargar los datos para ${meses[mesActual]} de ${añoActual}:`, error);
-            }
-        }
-
-        function limpiarTablaHTML(indiceTabla) {
-            const tabla = document.querySelectorAll(".tabla-vuelo")[indiceTabla];
-            if (tabla) {
-                tabla.querySelectorAll('tbody tr').forEach(fila => {
-                    fila.querySelectorAll('td').forEach((celda) => {
-                        const isNomenclatura = celda.classList.contains('nomenclatura');
-                        const isTotalCell = celda.classList.contains('fila-total') || celda.classList.contains('fila-general');
-                        const isMotorHeader = celda.classList.contains('motor-header');
-                        
-                        if (isMotorHeader || isNomenclatura || isTotalCell) {
-                            // No hacer nada, son celdas de solo lectura o encabezados
-                            return; 
-                        }
-                        
-                        // Limpiar el contenido de todas las celdas de datos
-                        celda.textContent = "";
-                        celda.classList.remove("led-persistente");
-                    });
                 });
-                actualizarTotales();
-            }
-        }
-
-        function cargarDatosEnTablaHTML(datos, indiceTabla) {
-            console.log(`Cargando estos datos en la tabla HTML para el mes ${meses[indiceTabla]}:`, datos);
-            const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
-            if (tabla) {
-                const filasHTML = Array.from(tabla.querySelectorAll('tr'));
-                let datosIndex = 0; 
-
-                filasHTML.forEach((filaHTML) => {
-                    // Solo procesar filas que no sean encabezados de motor
-                    if (filaHTML.querySelector('.motor-header')) {
-                        return;
-                    }
-
-                    const datosFila = datos[datosIndex];
-                    if (datosFila) {
-                        filaHTML.querySelectorAll('td').forEach((celda, indexCelda) => {
-                            const isNomenclatura = celda.classList.contains('nomenclatura');
-                            if (celda && !isNomenclatura && datosFila[indexCelda] !== undefined) {
-                                celda.textContent = formatNumber(datosFila[indexCelda]);
-                                if (celda.textContent.trim() !== "") {
-                                    celda.classList.add("led-persistente");
-                                } else {
-                                    celda.classList.remove("led-persistente");
-                                }
-                            }
-                        });
-                    }
-                    datosIndex++; 
-                });
-            }
-        }
-
-        function obtenerDatosTabla(indiceTabla) {
-            const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
-            const datos = [];
-            if (tabla) {
-                tabla.querySelectorAll('tr').forEach(fila => {
-                    // Ignorar filas de encabezado de motor al obtener datos para guardar
-                    if (fila.querySelector('.motor-header')) {
-                        return; 
-                    }
-                    const filaData = [];
-                    fila.querySelectorAll('td').forEach(celda => {
-                        filaData.push(celda.textContent);
-                    });
-                    datos.push(filaData);
-                });
-            }
+            });
             return datos;
         }
 
-        // -----------------------------------------------------------
-        // Funciones de Interfaz de Usuario y Lógica de Tabla
-        // -----------------------------------------------------------
+        /**
+         * Guarda los datos del mes y el recordatorio en Firebase.
+         * @param {number} año - Año actual
+         * @param {number} mes - Mes actual (0-11)
+         * @param {object} datos - Datos de la tabla del mes
+         * @param {string} recordatorio - Texto del recordatorio
+         */
+        function guardarDatosEnFirebase(año, mes, datos, recordatorio) { // ELIMINADO ASYNC
+            if (!auth.currentUser || userId === "anonimo") return Promise.resolve(); // Devolver promesa resuelta
 
-        function cargarAños() {
-            selectYear.innerHTML = "";
-            años.forEach((año) => {
-                const option = document.createElement("option");
-                option.value = año;
-                option.textContent = año;
-                selectYear.appendChild(option);
-            });
-            selectYear.value = añoActual;
-            selectYear.onchange = async () => {
-                // Guardar datos del mes actual antes de cambiar de año
-                if (auth.currentUser && userId !== "anonimo") {
-                    const currentMonthData = obtenerDatosTabla(mesActual);
-                    const currentMonthRecordatorio = recordatorioTextarea.value;
-                    await guardarDatosEnFirebase(añoActual, mesActual, currentMonthData, currentMonthRecordatorio);
+            const rutaDatosMes = `artifacts/${appId}/public_data/FAH-945/${año}/${mes}`;
+            const rutaRecordatorio = `${rutaDatosMes}/recordatorio`;
+            const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-945-Overall`;
+
+            try {
+                // Guardar datos del mes (excluyendo el recordatorio)
+                const datosParaGuardar = { ...datos };
+                delete datosParaGuardar.recordatorio; // Asegurarse de que no esté anidado
+                const p1 = set(ref(database, rutaDatosMes), datosParaGuardar); // ELIMINADO AWAIT
+                
+                // Guardar recordatorio por separado
+                const p2 = set(ref(database, rutaRecordatorio), recordatorio); // ELIMINADO AWAIT
+
+                // Actualizar los totales generales globales
+                const totalesGenerales = {
+                    "AC HRS": datos["AC HRS"]?.general || 0,
+                    "ATERRIZAJES": datos["ATERRIZAJES"]?.general || 0,
+                    "RINS": datos["RINS"]?.general || 0,
+                };
+                const p3 = set(ref(database, rutaTotalesGenerales), totalesGenerales); // ELIMINADO AWAIT
+                
+                // Devolver una promesa que se resuelve cuando todas las escrituras terminan
+                return Promise.all([p1, p2, p3])
+                    .then(() => {
+                        // console.log("Datos guardados exitosamente.");
+                    })
+                    .catch((error) => {
+                        showCustomAlert(`Error al guardar datos: ${error.message}`);
+                        throw error; // Relanzar el error para que las cadenas .then() fallen
+                    });
+
+            } catch (error) {
+                showCustomAlert(`Error al guardar datos: ${error.message}`);
+                return Promise.reject(error); // Devolver promesa rechazada
+            }
+        }
+        
+        // --- Lógica de Cálculo de Totales ---
+        function actualizarTotales() {
+            const tablaActiva = document.querySelector(`.tabla-mes[style*="display: block"] .tabla-vuelo tbody`);
+            if (!tablaActiva) return;
+
+            tablaActiva.querySelectorAll('tr[data-nomenclatura]').forEach(fila => {
+                const nom = fila.dataset.nomenclatura;
+                let totalMes = 0;
+                
+                fila.querySelectorAll('td.editable-cell').forEach(celda => {
+                    totalMes += parseFloat(celda.textContent) || 0;
+                });
+
+                const vienen = parseFloat(fila.querySelector('.fila-vienen').textContent) || 0;
+                const totalGeneral = vienen + totalMes;
+                
+                // Formatear AC HRS con 1 decimal, el resto como enteros
+                if (nom.includes("AC HRS") || nom.includes("ENGINE HRS")) {
+                    fila.querySelector('.fila-total').textContent = formatNumber(totalMes.toFixed(1));
+                    fila.querySelector('.fila-general').textContent = formatNumber(totalGeneral.toFixed(1));
+                } else {
+                    fila.querySelector('.fila-total').textContent = formatNumber(totalMes);
+                    fila.querySelector('.fila-general').textContent = formatNumber(totalGeneral);
                 }
+            });
+        }
+        
+        // --- Lógica de Edición en Celdas ---
 
-                añoActual = parseInt(selectYear.value);
-                crearTablasParaAño(añoActual);
-                await cargarDatosDeFirebase();
-                agregarEventosDeEdicion();
-                applyRolePermissions(currentUserRole);
+        // Función Debounce para no guardar en cada pulsación de tecla
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
             };
         }
 
-        function crearBotonesMeses() {
-            contenedorMeses.innerHTML = "";
-            meses.forEach((mes, i) => {
-                const btn = document.createElement("button");
-                btn.className = "tab-button";
-                btn.textContent = mes;
-                btn.onclick = async () => {
-                    // Guardar datos del mes ACTUALMENTE activo (mesActual) antes de cambiar
+        const guardarDebounced = debounce(() => { // ELIMINADO ASYNC
+            if (auth.currentUser && userId !== "anonimo") {
+                const currentMonthData = obtenerDatosTabla(mesActual);
+                const currentMonthRecordatorio = recordatorioTextarea.value;
+                guardarDatosEnFirebase(añoActual, mesActual, currentMonthData, currentMonthRecordatorio); // ELIMINADO AWAIT
+                // No se necesita .then o .catch aquí, es "disparar y olvidar"
+            }
+        }, 1500); // Guardar 1.5 segundos después de la última edición
+
+        function agregarEventosDeEdicion() {
+            const tablaActiva = document.querySelector(`.tabla-mes[style*="display: block"] .tabla-vuelo`);
+            if (!tablaActiva) return;
+
+            // Evento para celdas editables
+            tablaActiva.querySelectorAll('.editable-cell').forEach(celda => {
+                celda.addEventListener('input', (e) => {
+                    // Solo permitir números y un punto decimal
+                    let valor = e.target.textContent;
+                    valor = valor.replace(/[^0-9.]/g, '');
+                    // Asegurar que solo haya un punto decimal
+                    if (valor.indexOf('.') !== valor.lastIndexOf('.')) {
+                        valor = valor.substring(0, valor.lastIndexOf('.'));
+                    }
+                    
+                    if (e.target.textContent !== valor) {
+                         e.target.textContent = valor;
+                         // (Manejar la posición del cursor sería complejo, se omite por simplicidad)
+                    }
+
+                    actualizarTotales();
+                    guardarDebounced();
+                    
+                    // Efecto LED
+                    celda.classList.remove('celda-modificada'); // Reiniciar animación
+                    void celda.offsetWidth; // Truco para reiniciar la animación
+                    celda.classList.add('celda-modificada');
+                });
+            });
+
+            // Evento para el recordatorio
+            recordatorioTextarea.addEventListener('input', () => {
+                guardarDebounced();
+            });
+        }
+
+        // ================================================================
+        // ==== FIN: LÓGICA DE APLICACIÓN PRINCIPAL (FUNCIONES FALTANTES) ====
+        // ================================================================
+        
+        // ======================================================
+        // ==== INICIO: NUEVAS FUNCIONES PARA MODO QR ====
+        // ======================================================
+
+        /**
+         * Revisa si la URL contiene el parámetro 'action=addFlightData'.
+         * Si es así, inicia el flujo de ingreso rápido.
+         */
+        function checkURLParamsForQR() { // ELIMINADO ASYNC
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('action') === 'addFlightData') {
+                
+                // 1. Obtener fecha actual
+                const today = new Date();
+                const targetYear = today.getFullYear();
+                const targetMonth = today.getMonth(); // 0-11
+                const targetDay = today.getDate(); // 1-31
+
+                // 2. Comprobar si el año está en la lista
+                if (!años.includes(targetYear)) {
+                    showCustomAlert(`El año ${targetYear} no está configurado en la aplicación.`);
+                    return Promise.resolve(); // Devolver promesa resuelta
+                }
+
+                // 3. Forzar el cambio al mes y año actuales
+                
+                let savePromise = Promise.resolve(); // Empezar con promesa resuelta
+                if (añoActual !== targetYear || mesActual !== targetMonth) {
                     if (auth.currentUser && userId !== "anonimo") {
                         const currentMonthData = obtenerDatosTabla(mesActual);
                         const currentMonthRecordatorio = recordatorioTextarea.value;
-                        await guardarDatosEnFirebase(añoActual, mesActual, currentMonthData, currentMonthRecordatorio);
+                        // Asignar la promesa de guardado
+                        savePromise = guardarDatosEnFirebase(añoActual, mesActual, currentMonthData, currentMonthRecordatorio); // ELIMINADO AWAIT
                     }
+                }
 
-                    // Ahora cambia al nuevo mes
-                    mesActual = i;
-                    mostrarTabla(i); 
-                    await cargarDatosDeFirebase(); // Esto cargará los datos para el nuevo mesActual
+                // Encadenar toda la lógica a la promesa de guardado
+                return savePromise.then(() => { // AÑADIDO .THEN
+                    añoActual = targetYear;
+                    mesActual = targetMonth;
+
+                    // Actualizar el UI (selector de año y pestañas de mes)
+                    selectYear.value = añoActual;
+                    crearTablasParaAño(añoActual); // Recrear tablas para el año correcto
+                    mostrarTabla(mesActual); // Activar la pestaña del mes correcto
+
+                    // 4. Cargar los datos del mes actual
+                    return cargarDatosDelMes(añoActual, mesActual); // Devolver promesa
+                })
+                .then(() => { // AÑADIDO .THEN
                     agregarEventosDeEdicion();
                     applyRolePermissions(currentUserRole);
-                };
-                contenedorMeses.appendChild(btn);
-            });
-            mostrarTabla(mesActual);
-        }
 
-        function crearTablasParaAño(año) {
-            contenedorTablas.innerHTML = "";
-            meses.forEach((mes, i) => {
-                const div = document.createElement("div");
-                div.className = "tabla-mes";
-                div.style.display = i === mesActual ? "block" : "none";
+                    // 5. Mostrar el modal de ingreso
+                    flightModalDate.textContent = `${targetDay} de ${meses[targetMonth]} de ${targetYear}`;
+                    flightDataModal.style.display = 'flex';
 
-                const tabla = document.createElement("table");
-                tabla.className = "tabla-vuelo";
-
-                const thead = document.createElement("thead");
-                const encabezado = document.createElement("tr");
-                encabezado.innerHTML = `
-                    <th>NOMENCLATURA</th>
-                    <th>VIENEN</th>
-                `;
-                for (let d = 1; d <= 31; d++) {
-                    encabezado.innerHTML += `<th>${d}</th>`;
-                }
-                encabezado.innerHTML += `
-                    <th>MES TOTAL</th>
-                    <th>GENERAL</th>
-                `;
-                thead.appendChild(encabezado);
-                tabla.appendChild(thead);
-
-                const tbody = document.createElement("tbody");
-                
-                nombresFilasOrdenadas.forEach((nombre) => {
-                    const totalColsInHeader = 35; 
-                    
-                    if (nombre === "ENGINE HRS 1") { // Cambiado a ENGINE HRS 1 para que aparezca después de RINS
-                        const separador1 = document.createElement("tr");
-                        separador1.innerHTML = `<td colspan="${totalColsInHeader}" class="motor-header" contenteditable="false">MOTOR # 1</td>`;
-                        tbody.appendChild(separador1);
-                    }
-                    
-                    const fila = crearFilaTabla(nombre);
-                    tbody.appendChild(fila);
+                    // Limpiar historial de URL para que no se active de nuevo al recargar
+                    window.history.replaceState({}, document.title, window.location.pathname);
                 });
-
-                tabla.appendChild(tbody);
-                div.appendChild(tabla);
-                contenedorTablas.appendChild(div);
-            });
-        }
-
-        function crearFilaTabla(nombre) {
-            const fila = document.createElement("tr");
-            
-            let rowHtml = `
-                <td class="nomenclatura" contenteditable="false">${nombre}</td>
-                <td contenteditable="true" class="viene-celda"></td>
-                ${Array.from({ length: 31 }, (_, d) => `<td contenteditable="true"></td>`).join('')}
-                <td class="fila-total" contenteditable="false">0.0</td>
-                <td class="fila-general" contenteditable="false">0.0</td>
-            `;
-
-            fila.innerHTML = rowHtml;
-            return fila;
-        }
-
-        async function mostrarTabla(index) {
-            mesActual = index;
-            // Guardar el mes activo en localStorage
-            localStorage.setItem('lastActiveMonth', index); 
-            document.querySelectorAll(".tabla-mes").forEach((div, i) => {
-                div.style.display = i === index ? "block" : "none";
-            });
-            document.querySelectorAll(".tab-button").forEach((btn, i) => {
-                btn.classList.toggle("active", i === index);
-            });
-            document.title = `Datos de Vuelo - ${meses[index]} ${añoActual}`;
-            printMonthHeader.textContent = `DATOS DE VUELO - ${meses[index].toUpperCase()} ${añoActual}`;
-        }
-
-        async function copiarValorGeneralAMesSiguiente(año, mesOrigenIndex, mesDestinoIndex) {
-            if (!userId || userId === "anonimo") return;
-
-            const rutaOrigen = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesOrigenIndex}`; 
-            try {
-                const snapshot = await get(ref(database, rutaOrigen));
-                const datosOrigen = snapshot.val();
-                if (datosOrigen) {
-                    const tablaDestino = document.querySelectorAll(".tabla-vuelo")[mesDestinoIndex];
-                    if (tablaDestino) {
-                        const nombresFilasEnTabla = Array.from(tablaDestino.querySelectorAll('.nomenclatura')).map(td => td.textContent.trim());
-
-                        datosOrigen.forEach((filaDatosOrigen, indexFilaOrigen) => {
-                            const originalRowName = nombresFilasOrdenadas[indexFilaOrigen];
-                            if (originalRowName) {
-                                const indexFilaDestino = nombresFilasEnTabla.indexOf(originalRowName);
-
-                                if (indexFilaDestino !== -1) {
-                                    // La columna 34 es la columna "GENERAL" en la estructura de datos de la tabla (ahora simplificada)
-                                    const valorGeneral = filaDatosOrigen[34]; 
-                                    if (valorGeneral !== undefined && valorGeneral !== null && valorGeneral.toString().trim() !== "") {
-                                        const filaDestino = tablaDestino.querySelectorAll("tbody tr")[indexFilaDestino];
-                                        if (filaDestino) {
-                                            const celdaVienen = filaDestino.querySelector(".viene-celda");
-                                            if (celdaVienen) {
-                                                celdaVienen.textContent = formatNumber(valorGeneral);
-                                                if (celdaVienen.textContent.trim() !== "") {
-                                                    celdaVienen.classList.add("led-persistente");
-                                                } else {
-                                                    celdaVienen.classList.remove("led-persistente");
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                        actualizarTotales();
-                        // No llamar a guardarDatosEnFirebase aquí, ya que cargarDatosDeFirebase
-                        // es quien decide si se cargan datos existentes o se copian del mes anterior.
-                        // Si se copian, se guardarán cuando el usuario edite la tabla.
-                    }
-                }
-            } catch (error) {
-                console.error("Error al copiar datos entre meses:", error.code, error.message);
             }
+            return Promise.resolve(); // Si no hay 'action', devolver promesa resuelta
         }
 
-        // Calcula y actualiza todos los totales en la tabla (ahora simplificado para todas las filas)
-        function actualizarTotales() {
-            document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
-                const filas = Array.from(tabla.querySelectorAll("tbody tr"));
-                const generalValuesMap = new Map(); 
+        /**
+         * Maneja el guardado de datos del modal de ingreso rápido (QR).
+         * Ahora detecta conflictos antes de guardar.
+         */
+        function handleFlightDataSave() { // MODIFICADO
+            const acHrs = modalAcHrs.value;
+            const aterrizajes = modalAterrizajes.value;
+            const rins = modalRins.value;
+            // === INICIO: NUEVOS VALORES QR ===
+            const engineHrs1 = modalEngineHrs1.value; // <-- AÑADIDO
+            const engineStarts1 = modalEngineStarts1.value;
+            const flights1 = modalFlights1.value;
+            // === FIN: NUEVOS VALORES QR ===
 
-                filas.forEach((fila) => {
-                    const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
-                    if (!nomenclaturaCompleta || fila.querySelector('.motor-header')) {
-                        return;
-                    }
+            // Guardar datos temporalmente
+            pendingFlightData = { acHrs, aterrizajes, rins, engineHrs1, engineStarts1, flights1 }; // <-- MODIFICADO
 
-                    const vieneCelda = fila.querySelector('.viene-celda');
-                    const dailyCells = fila.querySelectorAll("td:nth-child(n+3):nth-child(-n+33)"); 
-                    const mesTotalCelda = fila.querySelector('.fila-total');
-                    const generalCelda = fila.querySelector('.fila-general');
-                    
-                    const viene = parseFloat(vieneCelda?.textContent.trim()) || 0;
-                    const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
-                    
-                    const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
-                    let totalGeneral = totalMes + viene;
-                    
-                    mesTotalCelda.textContent = formatNumber(totalMes);
-                    generalCelda.textContent = formatNumber(totalGeneral);
+            const today = new Date();
+            const targetDay = today.getDate(); // 1-31
+            const cellIndex = targetDay + 1; // 0: Nomenclatura, 1: Vienen, 2: Día 1 ...
 
-                    // Almacenar los totales generales de las filas clave para el modal de componentes
-                    if (nomenclaturaCompleta === 'AC HRS' || nomenclaturaCompleta === 'ATERRIZAJES' || nomenclaturaCompleta === 'RINS') {
-                        generalValuesMap.set(nomenclaturaCompleta, totalGeneral);
-                    }
-                });
-            });
-            calcularYGuardarTotalesGenerales(); // Llamada para actualizar los totales acumulados en Firebase
-        }
-
-        function agregarEventosDeEdicion() {
-            document.querySelectorAll(".tabla-vuelo td[contenteditable='true']").forEach((celda) => {
-                celda.removeEventListener("input", handleTableCellInput);
-                celda.addEventListener("input", handleTableCellInput);
-                celda.dataset.originalContent = celda.textContent;
-            });
-
-            recordatorioTextarea.removeEventListener("input", handleRecordatorioInput);
-            recordatorioTextarea.addEventListener("input", handleRecordatorioInput);
-        }
-
-        async function handleTableCellInput(e) {
-            const celda = e.target;
-            if (celda.contentEditable === 'true') {
-                if (!auth.currentUser) {
-                    authStatus.textContent = 'Acceso denegado: Debes iniciar sesión para editar datos.';
-                    authStatus.style.color = 'orange';
-                    celda.textContent = celda.dataset.originalContent || '';
-                    return;
-                }
-
-                celda.dataset.originalContent = celda.textContent;
-
-                if (celda.textContent.trim() !== "") {
-                    celda.classList.add("led-persistente");
-                } else {
-                    celda.classList.remove("led-persistente");
-                }
-
-                actualizarTotales();
-                await guardarDatosEnFirebase(añoActual, mesActual, obtenerDatosTabla(mesActual), recordatorioTextarea.value);
-            }
-        }
-
-        async function handleRecordatorioInput() {
-            if (!auth.currentUser) {
-                authStatus.textContent = 'Acceso denegado: Debes iniciar sesión para editar recordatorios.';
-                authStatus.style.color = 'orange';
+            // Encuentra la tabla activa
+            const activeTable = document.querySelector(`.tabla-mes[style*="display: block"] .tabla-vuelo tbody`);
+            if (!activeTable) {
+                showCustomAlert("Error: No se encontró la tabla activa.");
                 return;
             }
-            await guardarDatosEnFirebase(añoActual, mesActual, obtenerDatosTabla(mesActual), recordatorioTextarea.value);
-        }
 
-        document.querySelectorAll('input[name="printOption"]').forEach(radio => {
-            radio.addEventListener('change', () => {
-                document.body.classList.remove('print-no-reminders');
-                if (radio.value === 'no-reminders') {
-                    document.body.classList.add('print-no-reminders');
+            const dataToCheck = [
+                { nomenclatura: "AC HRS", value: acHrs },
+                { nomenclatura: "ATERRIZAJES", value: aterrizajes },
+                { nomenclatura: "RINS", value: rins },
+                // === INICIO: NUEVOS CHEQUEOS QR ===
+                { nomenclatura: "ENGINE HRS", value: engineHrs1 }, // <-- AÑADIDO
+                { nomenclatura: "ENGINE STARTS", value: engineStarts1 },
+                { nomenclatura: "FLIGHTS", value: flights1 }
+                // === FIN: NUEVOS CHEQUEOS QR ===
+            ];
+
+            let hasConflict = false;
+            
+            dataToCheck.forEach(item => {
+                const newValue = parseFloat(item.value.trim()) || 0;
+                if (newValue === 0) return; // Si el nuevo valor es 0, no hay conflicto
+
+                const row = activeTable.querySelector(`tr[data-nomenclatura="${item.nomenclatura}"]`);
+                const cell = row ? row.querySelectorAll('td')[cellIndex] : null;
+                const existingValue = parseFloat(cell?.textContent.trim()) || 0;
+
+                if (existingValue > 0) {
+                    hasConflict = true;
                 }
             });
-        });
 
-        btnImprimir.addEventListener('click', () => {
-            window.print();
-        });
-        
-        // Función para mostrar un mensaje personalizado en lugar de alert()
-        function showCustomAlert(message) {
-            const alertModal = document.createElement('div');
-            alertModal.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4';
-            alertModal.innerHTML = `
-                <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center">
-                    <p class="text-lg mb-4">${message}</p>
-                    <button id="closeCustomAlert" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Aceptar</button>
-                </div>
-            `;
-            document.body.appendChild(alertModal);
-
-            document.getElementById('closeCustomAlert').addEventListener('click', () => {
-                document.body.removeChild(alertModal);
-            });
+            if (hasConflict) {
+                // Conflicto detectado: mostrar el modal de elección
+                document.getElementById('dataConflictModal').style.display = 'flex';
+                // Ocultar el modal de ingreso
+                flightDataModal.style.display = 'none';
+            } else {
+                // Sin conflicto: aplicar los datos directamente (modo 'overwrite')
+                applyFlightData('overwrite');
+            }
         }
+
+        /**
+         * Aplica los datos de vuelo (guardados en pendingFlightData) a la tabla
+         * según el modo (sumar o reemplazar).
+         * @param {string} mode - 'sum' (sumar) o 'overwrite' (reemplazar)
+         */
+        function applyFlightData(mode = 'overwrite') {
+            if (!pendingFlightData) return; // No hay nada que aplicar
+
+            const { acHrs, aterrizajes, rins, engineHrs1, engineStarts1, flights1 } = pendingFlightData; // <-- MODIFICADO
+
+            const today = new Date();
+            const targetDay = today.getDate();
+            const cellIndex = targetDay + 1;
+
+            const activeTable = document.querySelector(`.tabla-mes[style*="display: block"] .tabla-vuelo tbody`);
+            if (!activeTable) { showCustomAlert("Error: Tabla no activa."); return; }
+
+            const dataToUpdate = [
+                { nomenclatura: "AC HRS", value: acHrs },
+                { nomenclatura: "ATERRIZAJES", value: aterrizajes },
+                { nomenclatura: "RINS", value: rins },
+                // === INICIO: NUEVOS DATOS A ACTUALIZAR ===
+                { nomenclatura: "ENGINE HRS", value: engineHrs1 }, // <-- AÑADIDO
+                { nomenclatura: "ENGINE STARTS", value: engineStarts1 },
+                { nomenclatura: "FLIGHTS", value: flights1 }
+                // === FIN: NUEVOS DATOS A ACTUALIZAR ===
+            ];
+
+            // 1. Actualizar las celdas en la tabla HTML
+            dataToUpdate.forEach(item => {
+                const nom = item.nomenclatura;
+                const newValue = parseFloat(item.value.trim()) || 0;
+
+                // No hacer nada si el nuevo valor es 0 y el modo es 'sumar'
+                if (newValue === 0 && mode === 'sum') return;
+
+                const row = activeTable.querySelector(`tr[data-nomenclatura="${nom}"]`);
+                const cell = row ? row.querySelectorAll('td')[cellIndex] : null;
+                
+                if (cell) {
+                    const existingValue = parseFloat(cell.textContent.trim()) || 0;
+                    let finalValue = 0;
+
+                    if (mode === 'sum') {
+                        finalValue = existingValue + newValue;
+                    } else { // 'overwrite'
+                        finalValue = newValue;
+                    }
+
+                    // Formatear y establecer el valor final
+                    let formattedValue;
+                    // --- MODIFICADO: Formateo decimal solo para AC HRS y ENGINE HRS ---
+                    if (nom === "AC HRS" || nom === "ENGINE HRS") {
+                        formattedValue = finalValue > 0 ? finalValue.toFixed(1) : '';
+                    } else {
+                        formattedValue = finalValue > 0 ? finalValue.toFixed(0) : '';
+                    }
+                    cell.textContent = formatNumber(formattedValue); // formatNumber se encarga de formatear
+                    
+                    if (finalValue > 0) {
+                        cell.classList.add("led-persistente"); // Añadir efecto
+                    } else {
+                        cell.classList.remove("led-persistente");
+                    }
+                }
+            });
+
+            // 2. Recalcular y guardar en Firebase
+            actualizarTotales();
+            // --- INICIO DE LA MODIFICACIÓN (Arreglar bug de 0.0) ---
+            // Guardamos los datos pendientes en una variable local ANTES de que se borren
+            const dataParaConfirmar = pendingFlightData; 
+            
+            guardarDatosEnFirebase(añoActual, mesActual, obtenerDatosTabla(mesActual), recordatorioTextarea.value)
+                .then(() => {
+                    // 3. Ocultar modal de ingreso (si sigue abierto) y el de conflicto
+                    flightDataModal.style.display = 'none';
+                    document.getElementById('dataConflictModal').style.display = 'none';
+                    modalAcHrs.value = '';
+                    modalAterrizajes.value = '';
+                    modalRins.value = '';
+                    // === INICIO: LIMPIAR NUEVOS CAMPOS ===
+                    modalEngineHrs1.value = ''; // <-- AÑADIDO
+                    modalEngineStarts1.value = '';
+                    modalFlights1.value = '';
+                    // === FIN: LIMPIAR NUEVOS CAMPOS ===
+
+                    // 4. Mostrar modal de confirmación con los datos actualizados
+                    showConfirmationModal(activeTable, dataParaConfirmar); // <-- Pasamos los datos como argumento
+                });
+            
+            // 5. Limpiar los datos pendientes
+            pendingFlightData = null;
+        }
+
+
+        /**
+         * Muestra el modal de confirmación con los totales generales actualizados.
+         */ // <-- AÑADÍ ESTE CIERRE DE COMENTARIO
+        // =CAMBIADO: Ahora abre el modal de mecánico
+        function showConfirmationModal(activeTable, qrData) { // <-- Se añade argumento 'qrData'
+            // Obtener los datos del formulario QR que están pendientes
+            // const qrData = pendingFlightData || { acHrs: 0, aterrizajes: 0, rins: 0 }; // <-- LÍNEA ELIMINADA
+            
+            // Si qrData no se pasó (un caso raro), usar un objeto vacío
+            const datosDelReporte = qrData || {}; // <-- Objeto vacío por defecto
+            
+            // === INICIO: LÓGICA RECONSTRUIDA PARA 9 CAMPOS ===
+            
+            // Definir todos los campos que queremos mostrar
+            const itemsAMostrar = [
+                { nom: "AC HRS", suma: parseFloat(datosDelReporte.acHrs) || 0, decimales: 1 },
+                { nom: "ATERRIZAJES", suma: parseFloat(datosDelReporte.aterrizajes) || 0, decimales: 0 },
+                { nom: "RINS", suma: parseFloat(datosDelReporte.rins) || 0, decimales: 0 },
+                { nom: "ENGINE HRS", suma: parseFloat(datosDelReporte.engineHrs1) || 0, decimales: 1 },
+                { nom: "ENGINE STARTS", suma: parseFloat(datosDelReporte.engineStarts1) || 0, decimales: 0 },
+                { nom: "FLIGHTS", suma: parseFloat(datosDelReporte.flights1) || 0, decimales: 0 }
+            ];
+
+            const listContainer = document.getElementById('confirmationListContainer');
+            listContainer.innerHTML = ''; // Limpiar el contenedor
+
+            // Recorrer cada item y construir su HTML
+            itemsAMostrar.forEach(item => {
+                const fila = activeTable.querySelector(`tr[data-nomenclatura="${item.nom}"]`);
+                if (!fila) return; // Si no se encuentra la fila, saltar
+
+                // Leemos el "GENERAL" (que ya fue actualizado en applyFlightData)
+                const generalStr = fila.querySelector('.fila-general')?.textContent.trim() || '0';
+                const generalNum = parseFloat(generalStr) || 0;
+                
+                // Calculamos el "VIENEN" restando la suma de hoy del total general
+                const vienenNum = generalNum - item.suma;
+                
+                // Formatear los strings
+                const vienenStr = vienenNum.toFixed(item.decimales);
+                const sumaStr = `+${item.suma.toFixed(item.decimales)}`;
+                const generalFinalStr = generalNum.toFixed(item.decimales);
+                
+                // Crear el HTML para este ítem
+                const itemHTML = `
+                    <div class="space-y-1${item.suma === 0 ? ' opacity-60' : ''}"> <!-- Atenuar si no se reportó nada -->
+                        <h4 class="font-bold text-lg text-blue-700">${item.nom}</h4>
+                        <div>
+                            <span class="font-medium text-gray-700">Total Anterior (Vienen):</span>
+                            <strong class="text-lg float-right text-gray-800">${formatNumber(vienenStr)}</strong>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">Reporte de Hoy:</span>
+                            <strong class="text-lg float-right text-gray-800">${formatNumber(sumaStr)}</strong>
+                        </div>
+                        <hr class="my-1">
+                        <div>
+                            <span class="font-bold text-gray-900">NUEVO TOTAL GENERAL:</span>
+                            <strong class="text-2xl float-right text-blue-700">${formatNumber(generalFinalStr)}</strong>
+                        </div>
+                    </div>
+                `;
+                listContainer.innerHTML += itemHTML;
+            });
+            
+            // === FIN: LÓGICA RECONSTRUIDA PARA 9 CAMPOS ===
+
+            confirmationModal.style.display = 'flex';
+
+            /* --- INICIO DE LA MODIFICACIÓN (FORZAR MODAL DE NOMBRE) --- */
+            // Re-asignamos el listener aquí para asegurar que siempre esté activo
+            // y apunte al modal de mecánico.
+            closeConfirmationBtn.onclick = () => { // Usamos .onclick para sobreescribir cualquier listener anterior
+                confirmationModal.style.display = 'none';
+                mechanicNameModal.style.display = 'flex'; // Abre el siguiente modal
+                modalMechanicName.focus(); // Pone el cursor en el campo de nombre
+            };
+            /* --- FIN DE LA MODIFICACIÓN --- */
+        }
+
+        // === INICIO: NUEVA FUNCIÓN PARA GUARDAR MECÁNICO Y SALIR ===
+        /**
+         * Maneja el guardado del nombre del mecánico y cierra la sesión de QR.
+         */
+        function handleSaveMechanicName() {
+            const mechanicName = modalMechanicName.value.trim();
+            if (!mechanicName) {
+                showCustomAlert("Por favor, ingresa un nombre.");
+                return;
+            }
+
+            const today = new Date();
+            const targetDay = today.getDate();
+
+            // Ruta para guardar el nombre del mecánico
+            const mechanicPath = `artifacts/${appId}/public_data/FAH-906/${añoActual}/${mesActual}/mecanicos/${targetDay}`;
+
+            // --- INICIO: Lógica para múltiples mecánicos ---
+            // 1. Leer los nombres existentes primero
+            get(ref(database, mechanicPath)).then(snapshot => {
+                const existingData = snapshot.val();
+                const nameSet = new Set();
+
+                if (Array.isArray(existingData)) {
+                    existingData.forEach(name => nameSet.add(name));
+                } else if (typeof existingData === 'string' && existingData) {
+                    nameSet.add(existingData); // Compatibilidad con datos antiguos
+                }
+                
+                nameSet.add(mechanicName); // Añadir el nuevo nombre
+
+                const updatedNameList = Array.from(nameSet); // Lista de nombres únicos
+
+                // 2. Guardar la nueva lista (array)
+                set(ref(database, mechanicPath), updatedNameList)
+                    .then(() => {
+                        // 3. Ocultar modal de mecánico
+                        mechanicNameModal.style.display = 'none';
+                        modalMechanicName.value = ''; // Limpiar el campo
+
+                        // 4. Mostrar modal de despedida
+                        goodbyeMessage.textContent = `¡Gracias, ${mechanicName}! Tu reporte ha sido guardado.`;
+                        goodbyeModal.style.display = 'flex';
+
+                        // 5. Redirigir/Cerrar la página después de 3 segundos
+                        setTimeout(() => {
+                            window.location.href = 'about:blank';
+                        }, 3000);
+                    })
+                    .catch((error) => {
+                        showCustomAlert(`Error al guardar la lista de mecánicos: ${error.message}`);
+                    });
+
+            }).catch(error => {
+                showCustomAlert(`Error al leer los mecánicos existentes: ${error.message}`);
+            });
+            // --- FIN: Lógica para múltiples mecánicos ---
+        }
+        // === FIN: NUEVA FUNCIÓN PARA GUARDAR MECÁNICO Y SALIR ===
+
+
+        // ====================================================
+        // ==== FIN: NUEVAS FUNCIONES PARA MODO QR ====
+        // ====================================================
+
+        // =========================================================
+        // ==== INICIO: NUEVAS FUNCIONES PARA REPORTE DETALLADO ====
+        // =========================================================
+
+        /**
+         * Genera un reporte detallado (Totales de Mes y General) para el mes activo
+         * y lo muestra en un modal.
+         */
+        function generarReporteDetallado() {
+            const activeTable = document.querySelector(`.tabla-mes[style*="display: block"] .tabla-vuelo tbody`);
+            if (!activeTable) {
+                showCustomAlert("No se encontró la tabla activa para generar el reporte.");
+                return;
+            }
+
+            const mesNombre = meses[mesActual];
+            const año = añoActual;
+
+            // 1. Obtener los elementos del modal de reporte
+            const reportModal = document.getElementById('reportModal');
+            const reportContentEl = document.getElementById('reportModalContent');
+            const reportTitleEl = document.getElementById('reportModalTitle');
+            
+            if (!reportModal || !reportContentEl || !reportTitleEl) {
+                showCustomAlert("Error: No se encontraron los elementos del modal de reporte.");
+                return;
+            }
+
+            // 2. Establecer el título del reporte
+            reportTitleEl.textContent = `Reporte Detallado de Totales - ${mesNombre} ${año}`;
+
+            // 3. Construir el HTML del reporte
+            let reportHTML = `<table class="w-full text-sm border-collapse border border-gray-400">`;
+            reportHTML += `<thead class="bg-gray-100">
+                            <tr class="bg-gray-200">
+                                <th class="border border-gray-400 p-2 text-left">Nomenclatura</th>
+                                <th class="border border-gray-400 p-2 text-right">Total Mes</th>
+                                <th class="border border-gray-400 p-2 text-right">Total General</th>
+                            </tr>
+                           </thead>
+                           <tbody>`;
+
+            // 4. Iterar a través de la lista de filas ordenadas
+            nombresFilasOrdenadas.forEach(nom => {
+                const fila = activeTable.querySelector(`tr[data-nomenclatura="${nom}"]`);
+                
+                // Añadir cabeceras de motor para separación visual
+                if (nom === "CONTINGENCY EXCURSIONS") {
+                    reportHTML += `<tr><td colspan="3" class="font-bold bg-gray-100 p-2 border border-gray-400">MOTOR</td></tr>`;
+                }
+
+                if (fila) {
+                    const totalMes = fila.querySelector('.fila-total')?.textContent.trim() || '0';
+                    const totalGeneral = fila.querySelector('.fila-general')?.textContent.trim() || '0';
+
+                    reportHTML += `<tr>
+                                    <td class="border border-gray-400 p-2 text-left">${nom}</td>
+                                    <td class="border border-gray-400 p-2 text-right">${totalMes}</td>
+                                    <td class="border border-gray-400 p-2 text-right">${totalGeneral}</td>
+                                  </tr>`;
+                }
+            });
+
+            reportHTML += `</tbody></table>`;
+
+            // 5. Inyectar el HTML en el modal
+            reportContentEl.innerHTML = reportHTML;
+
+            // 6. Mostrar el modal
+            reportModal.style.display = 'flex';
+        }
+
+        /**
+         * Activa la impresión del sistema, usando estilos CSS para imprimir solo el modal de reporte.
+         */
+        function imprimirReporte() {
+            // Añade una clase al body para activar los estilos de impresión correctos
+            document.body.classList.add('imprimiendo-reporte');
+            
+            window.print();
+            
+            // Elimina la clase después de que se abra el diálogo de impresión
+            // (se ejecutará después de que `print()` bloquee el hilo)
+            setTimeout(() => {
+                 document.body.classList.remove('imprimiendo-reporte');
+            }, 100); // Un pequeño retardo
+        }
+
+        // =======================================================
+        // ==== FIN: NUEVAS FUNCIONES PARA REPORTE DETALLADO ====
+        // =======================================================
 
 
         // --- Función de inicialización de la aplicación ---
-        async function iniciar() {
+        function iniciar() { // ELIMINADO ASYNC
             cargarAños();
             crearTablasParaAño(añoActual);
             crearBotonesMeses();
 
-            // Event listener para el botón "Estado de Componentes"
-            btnComponentStatus.addEventListener('click', async () => {
+            // === INICIO: NUEVOS EVENT LISTENERS PARA MODALES QR ===
+            saveFlightDataBtn.addEventListener('click', handleFlightDataSave);
+            cancelFlightDataBtn.addEventListener('click', () => {
+                flightDataModal.style.display = 'none';
+                pendingFlightData = null; // Limpiar datos pendientes si cancela
+                window.location.href = 'about:blank'; // <-- AÑADIDO: Cierra la página
+            });
+            // --- MODIFICADO: El botón "Confirmado" ahora abre el modal de mecánico ---
+            /* --- INICIO DE LA MODIFICACIÓN (FORZAR MODAL DE NOMBRE) --- */
+            // El listener de 'closeConfirmationBtn' se elimina de 'iniciar()'
+            // y se mueve a 'showConfirmationModal()' para asegurar que funcione.
+            /*
+            closeConfirmationBtn.addEventListener('click', () => {
+                confirmationModal.style.display = 'none';
+                mechanicNameModal.style.display = 'flex'; // Abre el siguiente modal
+                modalMechanicName.focus(); // Pone el cursor en el campo de nombre
+            });
+            */
+            /* --- FIN DE LA MODIFICACIÓN --- */
+            // === FIN: NUEVOS EVENT LISTENERS PARA MODALES QR ===
+
+            // === INICIO: EVENT LISTENERS PARA MODAL DE CONFLICTO (NUEVO) ===
+            document.getElementById('overwriteDataBtn').addEventListener('click', () => applyFlightData('overwrite'));
+            document.getElementById('sumDataBtn').addEventListener('click', () => applyFlightData('sum'));
+            document.getElementById('cancelConflictBtn').addEventListener('click', () => {
+                document.getElementById('dataConflictModal').style.display = 'none';
+                pendingFlightData = null; // Limpiar datos pendientes
+            });
+            // === FIN: EVENT LISTENERS PARA MODAL DE CONFLICTO ===
+
+            // === INICIO: EVENT LISTENER PARA MODAL DE MECÁNICO (NUEVO) ===
+            saveMechanicNameBtn.addEventListener('click', handleSaveMechanicName);
+            // === FIN: EVENT LISTENER PARA MODAL DE MECÁNICO ===
+
+            // === INICIO: LISTENER PARA ALERTA PERSONALIZADA ===
+            customAlertCloseBtn.addEventListener('click', () => {
+                customAlertModal.style.display = 'none';
+            });
+            // === FIN: LISTENER PARA ALERTA PERSONALIZADA ===
+
+            // === INICIO: NUEVOS LISTENERS PARA EL MODAL DE REPORTE ===
+            btnImprimir.addEventListener('click', generarReporteDetallado);
+            
+            const printReportBtn = document.getElementById('printReportBtn');
+            if(printReportBtn) {
+                printReportBtn.addEventListener('click', imprimirReporte);
+            }
+            
+            const closeReportBtn = document.getElementById('closeReportBtn');
+            if(closeReportBtn) {
+                closeReportBtn.addEventListener('click', () => {
+                    document.getElementById('reportModal').style.display = 'none';
+                });
+            }
+            // === FIN: NUEVOS LISTENERS PARA EL MODAL DE REPORTE ===
+
+
+            // Event listener para el botón "Estado de Componentes" (reescrito sin async/await)
+            btnComponentStatus.addEventListener('click', () => { // <--- QUITÉ EL ASYNC
                 if (!auth.currentUser) {
                     showCustomAlert('Debes iniciar sesión para ver el estado de los componentes.');
                     return;
                 }
 
                 // Obtener los totales generales directamente de Firebase Realtime Database
-                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-94-Overall`;
-                try {
-                    const snapshot = await get(ref(database, rutaTotalesGenerales));
+                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-945-Overall`;
+                
+                // --- Reescrito con .then() y .catch() ---
+                get(ref(database, rutaTotalesGenerales)).then((snapshot) => {
                     let generalTotals = { 'AC HRS': 0, 'ATERRIZAJES': 0, 'RINS': 0 };
                     if (snapshot.exists()) {
                         generalTotals = snapshot.val();
@@ -1316,74 +2159,30 @@
                         { name: "RINS", current: generalTotals['RINS'] || 0, type: "general_total" }
                     ];
                     
-                    // Guardar los datos en localStorage (para compatibilidad si COMPONENTES945.HTML aún lo usa)
+                    // Guardar los datos en localStorage (para compatibilidad si COMPONENTES906.HTML lo usa)
                     localStorage.setItem('componentStatusData', JSON.stringify(componentsData));
                     
-                    window.location.href = 'COMPONENTES945.HTML'; // Redirige a la nueva página
-                } catch (error) {
+                    window.location.href = 'COMPONENTES906.HTML'; // Redirige a la nueva página
+                }).catch((error) => {
                     showCustomAlert(`Error al cargar datos para la página de componentes: ${error.message}`);
-                }
+                });
+                // --- Fin de la reescritura ---
             });
 
             // Event listener para el nuevo botón "Inspecciones"
             const btnInspecciones = document.getElementById('btnInspecciones');
             btnInspecciones.addEventListener('click', () => {
-                if (!auth.currentUser) {
-                    showCustomAlert('Debes iniciar sesión para ver las inspecciones.');
-                    return;
-                }
-
-                // Encuentra la tabla actualmente activa
-                const activeTable = document.querySelector(`.tabla-mes[style*="display: block"] .tabla-vuelo`);
-                if (activeTable) {
-                    let acHrsGeneralValue = '0';
-                    const filas = activeTable.querySelectorAll('tbody tr');
-                    filas.forEach(fila => {
-                        const nomenclatura = fila.querySelector('.nomenclatura')?.textContent.trim();
-                        if (nomenclatura === 'AC HRS') {
-                            acHrsGeneralValue = fila.querySelector('.fila-general')?.textContent.trim() || '0';
-                        }
-                    });
-                    
-                    // Usar sessionStorage para pasar las horas. Es más robusto que los parámetros URL.
-                    sessionStorage.setItem('acHrsForInspection', acHrsGeneralValue);
-                    window.location.href = 'inspecciones945.html';
-                } else {
-                    showCustomAlert('No se pudo encontrar la tabla de datos activa.');
-                }
+                // Redirigir a la nueva página de inspecciones
+                window.location.href = 'inspecciones945.html';
             });
-        }
 
-        // Configura la posición y la distancia de caída de la careta de Anonymous.
-        function animateIntroElements() {
-            const helicopter = document.getElementById('helicopter-svg');
-            const authContainer = document.getElementById('auth-container');
-            const anonymousMask = document.getElementById('anonymous-mask-img');
-            const revealCircle = document.getElementById('reveal-circle');
+        } // <-- Cierre de la función iniciar()
 
-            if (!helicopter || !authContainer || !anonymousMask || !revealCircle) {
-                return;
-            }
+        // --- LLAMADA DE INICIALIZACIÓN ---
+        // Esto ejecuta toda la configuración, incluyendo los listeners de login.
+        iniciar();
 
-            const heliRect = helicopter.getBoundingClientRect();
-            const authRect = authContainer.getBoundingClientRect();
-            
-            const maskDropDistance = authRect.top - heliRect.bottom - (anonymousMask.offsetHeight / 2);
-
-            document.documentElement.style.setProperty('--mask-drop-distance', `${maskDropDistance}px`);
-
-            revealCircle.style.top = `${authRect.top + (authRect.height / 2)}px`;
-            revealCircle.style.left = `50%`;
-        }
-
-        // Iniciar la aplicación cuando la ventana esté completamente cargada
-        window.addEventListener("load", () => {
-            iniciar();
-            setTimeout(animateIntroElements, 100);
-        });
     </script>
+
 </body>
 </html>
-
-
-
