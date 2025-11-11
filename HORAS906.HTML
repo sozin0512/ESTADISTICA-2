@@ -513,6 +513,24 @@
                     <label for="modalRins" class="block text-sm font-medium text-gray-700">RINS</label>
                     <input type="number" id="modalRins" placeholder="Ej: 3" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
+                <!-- ==== INICIO: NUEVOS CAMPOS QR ==== -->
+                <div>
+                    <label for="modalEngineStarts1" class="block text-sm font-medium text-gray-700">Ciclos Motor 1 (Starts 1)</label>
+                    <input type="number" id="modalEngineStarts1" placeholder="Ej: 2" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="modalEngineStarts2" class="block text-sm font-medium text-gray-700">Ciclos Motor 2 (Starts 2)</label>
+                    <input type="number" id="modalEngineStarts2" placeholder="Ej: 2" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="modalFlights1" class="block text-sm font-medium text-gray-700">Vuelos 1 (Flights 1)</label>
+                    <input type="number" id="modalFlights1" placeholder="Ej: 3" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="modalFlights2" class="block text-sm font-medium text-gray-700">Vuelos 2 (Flights 2)</label>
+                    <input type="number" id="modalFlights2" placeholder="Ej: 3" class="w-full p-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <!-- ==== FIN: NUEVOS CAMPOS QR ==== -->
             </div>
             <div class="flex justify-center gap-4 mt-6">
                 <button id="saveFlightDataBtn" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">Guardar</button>
@@ -530,21 +548,68 @@
     <div id="confirmationModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4" style="display: none;">
         <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full text-center">
             <h3 class="text-2xl font-bold mb-4">Confirmar Totales</h3>
-            <p class="text-lg mb-4">Tus datos totales quedan así. ¿Coincide con tu reporte de vuelo?</p>
-            <div class="space-y-3 text-left bg-gray-50 p-4 rounded-md">
+            <p class="text-lg mb-4">¿Coincide esto con tu reporte de vuelo?</p>
+            
+            <!-- AC HRS -->
+            <div class="space-y-1 text-left bg-gray-50 p-4 rounded-md mb-3">
+                <h4 class="font-bold text-lg text-blue-700">AC HRS</h4>
                 <div>
-                    <span class="font-medium text-gray-700">AC HRS (General):</span>
-                    <strong id="confirmAcHrs" class="text-xl float-right text-blue-600">0.0</strong>
+                    <span class="font-medium text-gray-700">Total Anterior (Vienen):</span>
+                    <strong id="confirmAcHrsVienen" class="text-lg float-right text-gray-800">0.0</strong>
                 </div>
                 <div>
-                    <span class="font-medium text-gray-700">ATERRIZAJES (General):</span>
-                    <strong id="confirmAterrizajes" class="text-xl float-right text-blue-600">0</strong>
+                    <span class="font-medium text-gray-700">Reporte de Hoy:</span>
+                    <strong id="confirmAcHrsSuma" class="text-lg float-right text-gray-800">+0.0</strong>
                 </div>
+                <hr class="my-1">
                 <div>
-                    <span class="font-medium text-gray-700">RINS (General):</span>
-                    <strong id="confirmRins" class="text-xl float-right text-blue-600">0</strong>
+                    <span class="font-bold text-gray-900">NUEVO TOTAL GENERAL:</span>
+                    <strong id="confirmAcHrs" class="text-2xl float-right text-blue-700">0.0</strong>
                 </div>
             </div>
+
+            <!-- ATERRIZAJES -->
+            <div class="space-y-1 text-left bg-gray-50 p-4 rounded-md mb-3">
+                <h4 class="font-bold text-lg text-blue-700">ATERRIZAJES</h4>
+                <div>
+                    <span class="font-medium text-gray-700">Total Anterior (Vienen):</span>
+                    <strong id="confirmAterrizajesVienen" class="text-lg float-right text-gray-800">0</strong>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Reporte de Hoy:</span>
+                    <strong id="confirmAterrizajesSuma" class="text-lg float-right text-gray-800">+0</strong>
+                </div>
+                <hr class="my-1">
+                <div>
+                    <span class="font-bold text-gray-900">NUEVO TOTAL GENERAL:</span>
+                    <strong id="confirmAterrizajes" class="text-2xl float-right text-blue-700">0</strong>
+                </div>
+            </div>
+
+            <!-- RINS -->
+            <div class="space-y-1 text-left bg-gray-50 p-4 rounded-md">
+                <h4 class="font-bold text-lg text-blue-700">RINS</h4>
+                <div>
+                    <span class="font-medium text-gray-700">Total Anterior (Vienen):</span>
+                    <strong id="confirmRinsVienen" class="text-lg float-right text-gray-800">0</strong>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Reporte de Hoy:</span>
+                    <strong id="confirmRinsSuma" class="text-lg float-right text-gray-800">+0</strong>
+                </div>
+                <hr class="my-1">
+                <div>
+                    <span class="font-bold text-gray-900">NUEVO TOTAL GENERAL:</span>
+                    <strong id="confirmRins" class="text-2xl float-right text-blue-700">0</strong>
+                </div>
+            </div>
+
+            <!-- ==== INICIO: NUEVO RECORDATORIO DE CAPTURA ==== -->
+            <p class="text-sm font-medium text-gray-800 mt-5 bg-yellow-100 border border-yellow-300 rounded-md p-3 shadow-sm">
+                <strong>Recordatorio:</strong> ¡Toma una captura de pantalla de este recibo antes de confirmar!
+            </p>
+            <!-- ==== FIN: NUEVO RECORDATORIO DE CAPTURA ==== -->
+
             <div class="mt-6">
                 <button id="closeConfirmationBtn" class="w-full px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Confirmado</button>
             </div>
@@ -721,6 +786,12 @@
         const modalAcHrs = document.getElementById('modalAcHrs');
         const modalAterrizajes = document.getElementById('modalAterrizajes');
         const modalRins = document.getElementById('modalRins');
+        // === INICIO: NUEVOS ELEMENTOS MODAL QR ===
+        const modalEngineStarts1 = document.getElementById('modalEngineStarts1');
+        const modalEngineStarts2 = document.getElementById('modalEngineStarts2');
+        const modalFlights1 = document.getElementById('modalFlights1');
+        const modalFlights2 = document.getElementById('modalFlights2');
+        // === FIN: NUEVOS ELEMENTOS MODAL QR ===
 
         // === INICIO: Elementos de los nuevos modales de Mecánico y Despedida ===
         const mechanicNameModal = document.getElementById('mechanicNameModal');
@@ -1537,9 +1608,15 @@
             const acHrs = modalAcHrs.value;
             const aterrizajes = modalAterrizajes.value;
             const rins = modalRins.value;
+            // === INICIO: NUEVOS VALORES QR ===
+            const engineStarts1 = modalEngineStarts1.value;
+            const engineStarts2 = modalEngineStarts2.value;
+            const flights1 = modalFlights1.value;
+            const flights2 = modalFlights2.value;
+            // === FIN: NUEVOS VALORES QR ===
 
             // Guardar datos temporalmente
-            pendingFlightData = { acHrs, aterrizajes, rins };
+            pendingFlightData = { acHrs, aterrizajes, rins, engineStarts1, engineStarts2, flights1, flights2 }; // <-- MODIFICADO
 
             const today = new Date();
             const targetDay = today.getDate(); // 1-31
@@ -1555,7 +1632,13 @@
             const dataToCheck = [
                 { nomenclatura: "AC HRS", value: acHrs },
                 { nomenclatura: "ATERRIZAJES", value: aterrizajes },
-                { nomenclatura: "RINS", value: rins }
+                { nomenclatura: "RINS", value: rins },
+                // === INICIO: NUEVOS CHEQUEOS QR ===
+                { nomenclatura: "ENGINE STARTS 1", value: engineStarts1 },
+                { nomenclatura: "ENGINE STARTS 2", value: engineStarts2 },
+                { nomenclatura: "FLIGHTS 1", value: flights1 },
+                { nomenclatura: "FLIGHTS 2", value: flights2 }
+                // === FIN: NUEVOS CHEQUEOS QR ===
             ];
 
             let hasConflict = false;
@@ -1592,7 +1675,7 @@
         function applyFlightData(mode = 'overwrite') {
             if (!pendingFlightData) return; // No hay nada que aplicar
 
-            const { acHrs, aterrizajes, rins } = pendingFlightData;
+            const { acHrs, aterrizajes, rins, engineStarts1, engineStarts2, flights1, flights2 } = pendingFlightData; // <-- MODIFICADO
 
             const today = new Date();
             const targetDay = today.getDate();
@@ -1604,7 +1687,13 @@
             const dataToUpdate = [
                 { nomenclatura: "AC HRS", value: acHrs },
                 { nomenclatura: "ATERRIZAJES", value: aterrizajes },
-                { nomenclatura: "RINS", value: rins }
+                { nomenclatura: "RINS", value: rins },
+                // === INICIO: NUEVOS DATOS A ACTUALIZAR ===
+                { nomenclatura: "ENGINE STARTS 1", value: engineStarts1 },
+                { nomenclatura: "ENGINE STARTS 2", value: engineStarts2 },
+                { nomenclatura: "FLIGHTS 1", value: flights1 },
+                { nomenclatura: "FLIGHTS 2", value: flights2 }
+                // === FIN: NUEVOS DATOS A ACTUALIZAR ===
             ];
 
             // 1. Actualizar las celdas en la tabla HTML
@@ -1630,7 +1719,8 @@
 
                     // Formatear y establecer el valor final
                     let formattedValue;
-                    if (nom === "AC HRS") {
+                    // --- MODIFICADO: Formateo decimal solo para AC HRS y ENGINE HRS ---
+                    if (nom === "AC HRS" || nom === "ENGINE HRS 1" || nom === "ENGINE HRS 2") {
                         formattedValue = finalValue > 0 ? finalValue.toFixed(1) : '';
                     } else {
                         formattedValue = finalValue > 0 ? finalValue.toFixed(0) : '';
@@ -1655,6 +1745,12 @@
                     modalAcHrs.value = '';
                     modalAterrizajes.value = '';
                     modalRins.value = '';
+                    // === INICIO: LIMPIAR NUEVOS CAMPOS ===
+                    modalEngineStarts1.value = '';
+                    modalEngineStarts2.value = '';
+                    modalFlights1.value = '';
+                    modalFlights2.value = '';
+                    // === FIN: LIMPIAR NUEVOS CAMPOS ===
 
                     // 4. Mostrar modal de confirmación con los datos actualizados
                     showConfirmationModal(activeTable);
@@ -1670,22 +1766,54 @@
          */ // <-- AÑADÍ ESTE CIERRE DE COMENTARIO
         // =CAMBIADO: Ahora abre el modal de mecánico
         function showConfirmationModal(activeTable) {
+            // Obtener los datos del formulario QR que están pendientes
+            const qrData = pendingFlightData || { acHrs: 0, aterrizajes: 0, rins: 0 };
+            const sumaAcHrs = parseFloat(qrData.acHrs) || 0;
+            const sumaAterrizajes = parseFloat(qrData.aterrizajes) || 0;
+            const sumaRins = parseFloat(qrData.rins) || 0;
+            
             const totals = {
-                "AC HRS": "0.0",
-                "ATERRIZAJES": "0",
-                "RINS": "0"
+                "AC HRS": { vienen: "0.0", general: "0.0" },
+                "ATERRIZAJES": { vienen: "0", general: "0" },
+                "RINS": { vienen: "0", general: "0" }
             };
 
             activeTable.querySelectorAll('tr').forEach(fila => {
                 const nom = fila.querySelector('.nomenclatura')?.textContent.trim();
                 if (totals.hasOwnProperty(nom)) {
-                    totals[nom] = fila.querySelector('.fila-general')?.textContent.trim() || '0';
+                    // Leemos el "GENERAL" (que ya fue actualizado en applyFlightData)
+                    totals[nom].general = fila.querySelector('.fila-general')?.textContent.trim() || '0';
+                    
+                    // Calculamos el "VIENEN" restando la suma de hoy del total general
+                    // (Esto es más preciso que leer la celda 'vienen', que podría no estar actualizada)
+                    const generalNum = parseFloat(totals[nom].general) || 0;
+                    let vienenNum = 0;
+
+                    if (nom === "AC HRS") {
+                        vienenNum = generalNum - sumaAcHrs;
+                        totals[nom].vienen = vienenNum.toFixed(1);
+                    } else {
+                        vienenNum = generalNum - (nom === "ATERRIZAJES" ? sumaAterrizajes : sumaRins);
+                        totals[nom].vienen = vienenNum.toFixed(0);
+                    }
                 }
             });
 
-            document.getElementById('confirmAcHrs').textContent = totals["AC HRS"];
-            document.getElementById('confirmAterrizajes').textContent = totals["ATERRIZAJES"];
-            document.getElementById('confirmRins').textContent = totals["RINS"];
+            // AC HRS
+            document.getElementById('confirmAcHrsVienen').textContent = totals["AC HRS"].vienen;
+            document.getElementById('confirmAcHrsSuma').textContent = `+${sumaAcHrs.toFixed(1)}`;
+            document.getElementById('confirmAcHrs').textContent = totals["AC HRS"].general;
+
+            // ATERRIZAJES
+            document.getElementById('confirmAterrizajesVienen').textContent = totals["ATERRIZAJES"].vienen;
+            document.getElementById('confirmAterrizajesSuma').textContent = `+${sumaAterrizajes.toFixed(0)}`;
+            document.getElementById('confirmAterrizajes').textContent = totals["ATERRIZAJES"].general;
+
+            // RINS
+            document.getElementById('confirmRinsVienen').textContent = totals["RINS"].vienen;
+            document.getElementById('confirmRinsSuma').textContent = `+${sumaRins.toFixed(0)}`;
+            document.getElementById('confirmRins').textContent = totals["RINS"].general;
+
 
             confirmationModal.style.display = 'flex';
 
@@ -1777,6 +1905,7 @@
             cancelFlightDataBtn.addEventListener('click', () => {
                 flightDataModal.style.display = 'none';
                 pendingFlightData = null; // Limpiar datos pendientes si cancela
+                window.location.href = 'about:blank'; // <-- AÑADIDO: Cierra la página
             });
             // --- MODIFICADO: El botón "Confirmado" ahora abre el modal de mecánico ---
             /* --- INICIO DE LA MODIFICACIÓN (FORZAR MODAL DE NOMBRE) --- */
