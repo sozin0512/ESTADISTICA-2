@@ -1965,7 +1965,7 @@
             const targetDay = today.getDate();
 
             // Ruta para guardar el nombre del mecánico
-            const mechanicPath = `artifacts/${appId}/public_data/FAH-906/${añoActual}/${mesActual}/mecanicos/${targetDay}`;
+            const mechanicPath = `artifacts/${appId}/public_data/FAH-945/${añoActual}/${mesActual}/mecanicos/${targetDay}`;
 
             // --- INICIO: Lógica para múltiples mecánicos ---
             // 1. Leer los nombres existentes primero
@@ -2197,7 +2197,7 @@
                     // Guardar los datos en localStorage (para compatibilidad si COMPONENTES906.HTML lo usa)
                     localStorage.setItem('componentStatusData', JSON.stringify(componentsData));
                     
-                    window.location.href = 'COMPONENTES906.HTML'; // Redirige a la nueva página
+                    window.location.href = 'COMPONENTES945.HTML'; // Redirige a la nueva página
                 }).catch((error) => {
                     showCustomAlert(`Error al cargar datos para la página de componentes: ${error.message}`);
                 });
