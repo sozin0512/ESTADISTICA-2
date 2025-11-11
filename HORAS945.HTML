@@ -552,7 +552,7 @@
         </div>
 
         <div class="print-options-container">
-            <strong>Opciones de Impresión (Para Tabla Principal SSSS:</strong>
+            <strong>Opciones de Impresión (Para Tabla Principal):</strong>
             <label><input type="radio" name="printOption" value="full" checked> Tabla Completa</label>
             <label><input type="radio" name="printOption" value="no-reminders"> Sin Recordatorios</label>
             <!-- Eliminado "Sin Columnas Amarillas" ya que no existen -->
@@ -1026,11 +1026,23 @@
                     })
                     .then(() => { // AÑADIDO .THEN (se ejecuta después de establecer el rol si era necesario)
                         applyRolePermissions(currentUserRole);
-                        return cargarDatosDelMes(añoActual, mesActual); // Devolver la promesa de cargar datos
+                        
+                        // --- INICIO: LÓGICA DE QR REESTRUCTURADA ---
+                        // Si la acción QR está pendiente, la ejecutamos PRIMERO.
+                        // Esta función se encargará de cargar los datos del mes actual.
+                        if (globalQrActionPending) {
+                            return checkURLParamsForQR();
+                        } else {
+                            // Si no hay acción QR, cargamos los datos del mes guardado (normal).
+                            return cargarDatosDelMes(añoActual, mesActual); // Devolver la promesa de cargar datos
+                        }
+                        // --- FIN: LÓGICA DE QR REESTRUCTURADA ---
                     })
-                    .then(() => { // AÑADIDO .THEN (se ejecuta después de cargar los datos)
+                    .then(() => { // AÑADIDO .THEN (se ejecuta después de cargarDatosDelMes O checkURLParamsForQR)
                         agregarEventosDeEdicion();
                         
+                        // Esta lógica ya no es necesaria aquí, se manejó en el .then() anterior.
+                        /*
                         // --- INICIO: LÓGICA DE QR MODIFICADA ---
                         // 3. Comprobar si la acción QR estaba pendiente.
                         if (globalQrActionPending) {
@@ -1040,6 +1052,7 @@
                         // Si no, devolver una promesa resuelta
                         return Promise.resolve();
                         // --- FIN: LÓGICA DE QR MODIFICADA ---
+                        */
                     })
                     .catch((error) => { // AÑADIDO .CATCH (Maneja errores de get(role), set(role), o cargarDatosDelMes)
                         authStatus.textContent = `Error crítico: ${error.message}. Por favor, recarga.`;
@@ -1047,11 +1060,25 @@
                         currentUserRole = 'viewer';
                         applyRolePermissions(currentUserRole);
                         
-                        // Intentar cargar datos de todos modos en caso de error de rol
-                        cargarDatosDelMes(añoActual, mesActual)
-                            .then(() => {
+                        // --- INICIO: LÓGICA DE QR EN CATCH (MODIFICADA) ---
+                        // Intentar ejecutar el flujo de todos modos en caso de error de rol
+                        // (el error de cargarDatosDelMes se manejará dentro de la función)
+                        let flowPromise;
+                        if (globalQrActionPending) {
+                            // Si el flujo de QR está pendiente, ese es más importante
+                            flowPromise = checkURLParamsForQR();
+                        } else {
+                            // Si no, intentar cargar los datos del mes normal
+                            flowPromise = cargarDatosDelMes(añoActual, mesActual);
+                        }
+
+                        flowPromise.then(() => {
                                 agregarEventosDeEdicion();
-                            });
+                        }).catch(flowError => {
+                            // El error ya debería haberse mostrado con showCustomAlert
+                            console.error("Error en el flujo de carga (dentro del catch):", flowError);
+                        });
+                        // --- FIN: LÓGICA DE QR EN CATCH (MODIFICADA) ---
                     });
                 // --- Fin de la lógica reescrita ---
 
