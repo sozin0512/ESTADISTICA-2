@@ -1405,20 +1405,25 @@
                             const datosFila = datosActuales[nom] || {};
                             const datosFilaVienen = datosVienen[nom] || {};
 
-                            // Calcular "Vienen" (Total General del mes anterior)
+                            // Calcular "Vienen"
                             let vienen = 0;
-                            /* --- INICIO DE LA MODIFICACIÓN (LÓGICA "VIENEN" INTELIGENTE) --- */
-                            const vienen_calculado = parseFloat(datosFilaVienen.general) || 0;
-                            const vienen_guardado = parseFloat(datosFila.vienen); // Leer el valor guardado este mes
+                            
+                            /* --- INICIO DE LA LÓGICA DE "VIENEN" CORREGIDA (REVERTIDA) --- */
+                            // Se elimina el IF especial para AC HRS, ATERRIZAJES y RINS.
+                            // TODAS las filas usarán la misma lógica de cadena.
 
+                            // Todos los valores se leen del "general" del mes anterior
+                            const vienen_calculado = parseFloat(datosFilaVienen.general) || 0;
+                            
                             if (mesActual === 0) { // Es Enero
-                                // En Enero, priorizar el valor guardado. Si no existe, usar el calculado (de Dic. año anterior).
-                                vienen = !isNaN(vienen_guardado) ? vienen_guardado : vienen_calculado;
+                                // En Enero, leer el valor guardado si existe, si no, usar el calculado
+                                const vienen_guardado_enero = parseFloat(datosFila.vienen);
+                                vienen = !isNaN(vienen_guardado_enero) ? vienen_guardado_enero : vienen_calculado;
                             } else { // Es Feb - Dic
                                 // En otros meses, SIEMPRE usar el calculado para mantener la cadena.
                                 vienen = vienen_calculado;
                             }
-                            /* --- FIN DE LA MODIFICACIÓN --- */
+                            /* --- FIN DE LA LÓGICA DE "VIENEN" CORREGIDA (REVERTIDA) --- */
                             
                             // Casos especiales para AC HRS, ATERRIZAJES, RINS (se acumulan)
                             /* --- INICIO DEL BLOQUE A ELIMINAR ---
@@ -1429,7 +1434,7 @@
                             }
                             --- FIN DEL BLOQUE A ELIMINAR --- */
 
-                            fila.querySelector('.fila-vienen').textContent = formatNumber(vienen.toFixed(nom === "AC HRS" ? 1 : 0));
+                            fila.querySelector('.fila-vienen').textContent = formatNumber(vienen.toFixed(nom.includes("AC HRS") || nom.includes("ENGINE HRS") ? 1 : 0));
 
                             // Poblar días
                             fila.querySelectorAll('td.editable-cell').forEach(celda => {
@@ -1503,8 +1508,21 @@
             const datos = {};
             tablaActiva.querySelectorAll('tr[data-nomenclatura]').forEach(fila => {
                 const nom = fila.dataset.nomenclatura;
+
+                // --- INICIO DE LA LÓGICA "VIENEN" CORREGIDA (GUARDADO) ---
+                let vienenData = {};
+                if (mesActual === 0) { 
+                    // Solo en Enero guardamos el "vienen" ya que es editable.
+                    // Para Feb-Dic, 'vienenData' será un objeto vacío
+                    // y la propiedad 'vienen' no se guardará en la base de datos para ese mes.
+                    // Esto fuerza a que 'vienen' sea siempre calculado al cargar.
+                    vienenData = { vienen: parseFloat(fila.querySelector('.fila-vienen').textContent) || 0 };
+                }
+                // --- FIN DE LA LÓGICA "VIENEN" CORREGIDA (GUARDADO) ---
+
                 datos[nom] = {
-                    /* --- INICIO DE LA MODIFICACIÓN (VIENEN INTOCABLE) --- */
+                    ...vienenData, // Añade la propiedad 'vienen' solo si es Enero
+                    /* --- INICIO DE LA MODIFICACIÓN (VIENEN INTOCABLE) ---
                     // La propiedad 'vienen' se elimina de aquí.
                     // Ya no leemos 'vienen' de la tabla para guardarlo.
                     // 'vienen' ahora es un valor 100% calculado en 'cargarDatosDelMes'.
