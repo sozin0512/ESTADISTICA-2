@@ -1700,9 +1700,14 @@
                     // Limpiar historial de URL para que no se active de nuevo al recargar
                     // window.history.replaceState({}, document.title, window.location.pathname); // <-- ELIMINADO (se movió al inicio de la función)
                 });
-            }
-            return Promise.resolve(); // Si no hay 'action', devolver promesa resuelta
-        }
+        } // <-- Esta es la llave de cierre correcta para checkURLParamsForQR (Línea 1736)
+
+        // --- INICIO DE LA CORRECCIÓN ---
+        // Las siguientes 2 líneas eran un error de una edición anterior y causaban el 'SyntaxError'.
+        // Han sido eliminadas.
+        // return Promise.resolve(); 
+        // } 
+        // --- FIN DE LA CORRECCIÓN ---
 
         /**
          * Maneja el guardado de datos del modal de ingreso rápido (QR).
