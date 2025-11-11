@@ -1737,6 +1737,10 @@
 
             // 2. Recalcular y guardar en Firebase
             actualizarTotales();
+            // --- INICIO DE LA MODIFICACIÓN (Arreglar bug de 0.0) ---
+            // Guardamos los datos pendientes en una variable local ANTES de que se borren
+            const dataParaConfirmar = pendingFlightData; 
+            
             guardarDatosEnFirebase(añoActual, mesActual, obtenerDatosTabla(mesActual), recordatorioTextarea.value)
                 .then(() => {
                     // 3. Ocultar modal de ingreso (si sigue abierto) y el de conflicto
@@ -1753,7 +1757,7 @@
                     // === FIN: LIMPIAR NUEVOS CAMPOS ===
 
                     // 4. Mostrar modal de confirmación con los datos actualizados
-                    showConfirmationModal(activeTable);
+                    showConfirmationModal(activeTable, dataParaConfirmar); // <-- Pasamos los datos como argumento
                 });
             
             // 5. Limpiar los datos pendientes
@@ -1765,12 +1769,16 @@
          * Muestra el modal de confirmación con los totales generales actualizados.
          */ // <-- AÑADÍ ESTE CIERRE DE COMENTARIO
         // =CAMBIADO: Ahora abre el modal de mecánico
-        function showConfirmationModal(activeTable) {
+        function showConfirmationModal(activeTable, qrData) { // <-- Se añade argumento 'qrData'
             // Obtener los datos del formulario QR que están pendientes
-            const qrData = pendingFlightData || { acHrs: 0, aterrizajes: 0, rins: 0 };
-            const sumaAcHrs = parseFloat(qrData.acHrs) || 0;
-            const sumaAterrizajes = parseFloat(qrData.aterrizajes) || 0;
-            const sumaRins = parseFloat(qrData.rins) || 0;
+            // const qrData = pendingFlightData || { acHrs: 0, aterrizajes: 0, rins: 0 }; // <-- LÍNEA ELIMINADA
+            
+            // Si qrData no se pasó (un caso raro), usar un objeto vacío
+            const datosDelReporte = qrData || { acHrs: 0, aterrizajes: 0, rins: 0 };
+            
+            const sumaAcHrs = parseFloat(datosDelReporte.acHrs) || 0;
+            const sumaAterrizajes = parseFloat(datosDelReporte.aterrizajes) || 0;
+            const sumaRins = parseFloat(datosDelReporte.rins) || 0;
             
             const totals = {
                 "AC HRS": { vienen: "0.0", general: "0.0" },
