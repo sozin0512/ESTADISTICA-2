@@ -1112,39 +1112,24 @@
                 userIdDisplay.textContent = userId;
                 console.log('Usuario actual:', user.email, 'UID:', userId);
                 
-                authContainer.style.display = 'none';
-                mainAppContent.style.display = 'block';
-                authStatus.textContent = '';
+                applyRolePermissions(currentUserRole);
+                await cargarDatosDeFirebase();
+                agregarEventosDeEdicion();
+                // ELIMINADO DE AQUÍ:
+                // await checkURLParamsForQR(); // <-- AÑADIDO: Comprobar QR después de cargar todo
+            } catch (error) {
+                console.error("Error en onAuthStateChanged al obtener o asignar el rol del usuario o cargar datos:", error.code, error.message);
+                // Try to load data again, even if role failed
+                await cargarDatosDeFirebase();
+                agregarEventosDeEdicion();
+            } finally { // <-- BLOQUE AÑADIDO
+                // Esto se ejecutará DESPUÉS del try O del catch
+                console.log("Bloque finally: Comprobando parámetros de URL...");
+                await checkURLParamsForQR(); // <-- LLAMADA MOVIDA AQUÍ
+            }
 
-                try {
-                    const rolePath = `user_roles/${userId}`;
-                    console.log("Ruta de rol de usuario:", rolePath);
-                    const snapshot = await get(ref(database, rolePath));
-                    currentUserRole = snapshot.val() || 'viewer';
-                    console.log('Rol del usuario (obtenido de DB):', currentUserRole); 
-                    
-                    if (!snapshot.exists()) {
-                        console.log('Asignando rol por defecto "viewer" al nuevo usuario:', userId);
-                        await set(ref(database, rolePath), 'viewer');
-                        console.log('Rol "viewer" asignado exitosamente.');
-                    }
-                    
-                    applyRolePermissions(currentUserRole);
-                    await cargarDatosDeFirebase();
-                    agregarEventosDeEdicion();
-                    await checkURLParamsForQR(); // <-- AÑADIDO: Comprobar QR después de cargar todo
-                } catch (error) {
-                    console.error("Error en onAuthStateChanged al obtener o asignar el rol del usuario o cargar datos:", error.code, error.message);
-                    authStatus.textContent = `Error crítico: ${error.message}. Por favor, recarga.`;
-                    authStatus.style.color = 'red';
-                    currentUserRole = 'viewer';
-                    applyRolePermissions(currentUserRole);
-                    await cargarDatosDeFirebase();
-                    agregarEventosDeEdicion();
-                }
-
-            } else {
-                userId = "anonimo";
+        } else {
+            userId = "anonimo";
                 userIdDisplay.textContent = userId;
                 console.log('No hay usuario logueado');
                 
