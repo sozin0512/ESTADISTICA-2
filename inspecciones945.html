@@ -174,6 +174,10 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, getDocs, writeBatch, updateDoc, deleteDoc, deleteField, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // --- INICIO: Modificación ---
+        // Importar la Realtime Database (RTDB) y la función 'set' para escribir
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        // --- FIN: Modificación ---
 
         let app, auth, db, userId;
         let currentAcHrs = 0;
@@ -216,6 +220,44 @@
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         userId = user.uid;
+
+                        // --- INICIO: Modificación ---
+                        // Configurar el listener para las horas de vuelo (AC HRS) desde RTDB
+                        try {
+                            const rtDB = getDatabase(app);
+                            // Esta es la ruta que me mostraste en la imagen
+                            // NOTA: Tuve que cambiar 'default-app-id' por el que usas en el resto del código ('FAH-945-SHARED-CONTROL')
+                            // y 'public_data' por 'public/data'
+                            // Si no funciona, revisamos esta ruta. Usaré la de la imagen primero.
+                            const acHrsRef = ref(rtDB, 'artifacts/default-app-id/public_data/totales_generales/FAH-945-Overall/AC HRS');
+                            
+                            onValue(acHrsRef, (snapshot) => {
+                                const acHrs = snapshot.val();
+                                if (acHrs !== null) {
+                                    currentAcHrs = parseFloat(acHrs) || 0;
+                                    acHrsDisplay.textContent = currentAcHrs.toFixed(2);
+                                    
+                                    // Guardar en sessionStorage para compatibilidad con la lógica de "Vencidas"
+                                    sessionStorage.setItem('acHrsForInspection', currentAcHrs);
+                                    
+                                    // Volver a calcular toda la tabla, ya que las horas han cambiado
+                                    if (tableBody.querySelectorAll('tr[data-id]').length > 0) {
+                                        tableBody.querySelectorAll('tr[data-id]').forEach(updateRowUI);
+                                    }
+                                } else {
+                                    acHrsDisplay.textContent = "Error RTDB";
+                                    console.warn("No se pudo leer el valor de AC HRS desde la ruta: ", acHrsRef.toString());
+                                }
+                            }, (error) => {
+                                console.error("Error al leer de Realtime Database:", error);
+                                acHrsDisplay.textContent = "Error RTDB";
+                            });
+                        } catch (rtdbError) {
+                            console.error("Error al configurar Realtime Database listener:", rtdbError);
+                            acHrsDisplay.textContent = "Error RTDB";
+                        }
+                        // --- FIN: Modificación ---
+
                         await initialize();
                     } else {
                         if (initialAuthToken) { await signInWithCustomToken(auth, initialAuthToken); } 
@@ -233,8 +275,12 @@
             loaderContainer.classList.remove('hidden');
             inspectionsTable.classList.add('hidden');
 
-            currentAcHrs = parseFloat(sessionStorage.getItem('acHrsForInspection')) || 0;
-            acHrsDisplay.textContent = currentAcHrs > 0 ? currentAcHrs.toFixed(2) : "N/A";
+            // --- INICIO: Modificación ---
+            // Se elimina la carga de 'currentAcHrs' desde sessionStorage
+            // porque ahora se carga dinámicamente desde la Realtime Database (RTDB)
+            // con el listener en main().
+            // acHrsDisplay.textContent = currentAcHrs > 0 ? currentAcHrs.toFixed(2) : "N/A";
+            // --- FIN: Modificación ---
             
             const defsRef = collection(db, `artifacts/${appId}/public/data/inspection_definitions`);
             const dataDocRef = doc(db, `artifacts/${appId}/public/data/inspection_data/all_inspections`);
@@ -707,7 +753,6 @@
             const category = button.dataset.category;
             const newRow = document.createElement('tr');
             newRow.className = 'new-inspection-row';
-            newRow.dataset.category = category; // Pass category to the new row
             newRow.innerHTML = `
                 <td><button class="btn btn-green save-new-btn"><i class="fas fa-save"></i></button></td>
                 <td contenteditable="true" class="task-name">Nueva Inspección</td>
@@ -725,7 +770,7 @@
             const name = row.cells[1].textContent.trim();
             const ref = row.cells[2].textContent.trim();
             const freqText = row.cells[3].textContent.trim();
-            const category = row.dataset.category; // Read category directly from the row
+            const category = row.previousElementSibling.querySelector('.add-inspection-btn').dataset.category;
 
             if (!name || !ref || !freqText) {
                 showToast("Por favor complete todos los campos.", "error");
@@ -948,7 +993,7 @@
         document.getElementById('btn-opcion-d-date').addEventListener('click', () => { const pastStr = document.getElementById('input-past-date').value; if(pastStr) updateDateAndSave(new Date(pastStr + 'T12:00:00')); });
 
 
-        document.getElementById('btnVerVencidas').addEventListener('click', () => {
+        document.getElementById('btnVerVencidas').addEventListener('click', async () => { // <-- Añadido 'async'
              const vencidas = [];
             tableBody.querySelectorAll('tr[data-id]').forEach(row => {
                 const statusCell = row.cells[7];
@@ -965,6 +1010,41 @@
             });
 
             if (vencidas.length > 0) {
+                // --- INICIO: Modificación para guardar en REALTIME DATABASE (RTDB) ---
+                try {
+                    
+                    // *** INICIO: NUEVA ESTRUCTURA TIPO LISTA (Array) ***
+                    // Creamos un "encabezado" para el reporte, similar al ejemplo del 980
+                    const reportHeader = {
+                        name: `REPORTE VENCIDAS - ${new Date().toLocaleDateString('es-ES')}`,
+                        type: "report_header",
+                        generatedAt: new Date().toISOString(),
+                        acHrsAtReport: currentAcHrs,
+                        totalVencidas: vencidas.length
+                    };
+
+                    // Creamos la lista final, combinando el encabezado con las inspecciones
+                    // Esto creará un array: [ reportHeader, ...vencidas ]
+                    const reportDataAsList = [reportHeader, ...vencidas];
+                    // *** FIN: NUEVA ESTRUCTURA ***
+
+
+                    // 1. Obtener la instancia de RTDB
+                    const rtDB = getDatabase(app);
+                    // 2. Crear la referencia (ruta) en la base de datos de tu imagen
+                    // Voy a crear un nuevo nodo "overdue_report_list" para que sea como el "inspections_list" del 980
+                    const reportRef = ref(rtDB, 'artifacts/default-app-id/public_data/overdue_report_list');
+                    
+                    // 3. Guardar los datos en esa ruta
+                    await set(reportRef, reportDataAsList); // Guardamos el array directamente
+                    
+                    showToast('Reporte de vencidas guardado (formato lista)', 'success');
+                } catch (error) {
+                    console.error("Error al guardar reporte de vencidas en RTDB:", error);
+                    showToast('Error al guardar reporte en RTDB', 'error');
+                }
+                // --- FIN: Modificación ---
+
                 sessionStorage.setItem('vencidas', JSON.stringify(vencidas));
                 sessionStorage.setItem('currentAcHrs', currentAcHrs);
                 window.location.href = 'vencidas.html'; 
@@ -980,4 +1060,3 @@
     </script>
 </body>
 </html>
-
