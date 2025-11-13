@@ -377,6 +377,9 @@
             <button id="report-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
                 Generar Reporte
             </button>
+            <button id="load-history-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-5 rounded-lg transition-colors">
+                Cargar Historial
+            </button>
             <button id="archive-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
                 Archivar Trabajos
             </button>
@@ -405,25 +408,65 @@
     </div>
 
     <div id="item-form-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print overflow-y-auto">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md my-8">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg my-8"> <!-- Hecho un poco más ancho (max-w-lg) -->
             <div class="p-4 border-b">
                 <h3 id="item-form-modal-title" class="text-lg font-bold text-gray-800">Añadir Item Faltante</h3>
             </div>
-            <div class="p-6 space-y-4">
-                <div>
-                    <label for="item-name" class="block text-sm font-medium text-gray-700">Nombre del Item</label>
-                    <input type="text" id="item-name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: Aceite, Tornillo, Filtro...">
+            
+            <!-- INICIO: CONTENEDOR MODIFICADO -->
+            <div class="p-6">
+                <!-- Contenedor 1: Formulario para Lote (Batch) -->
+                <div id="single-item-form-container" class="space-y-4">
+                    <div>
+                        <label for="item-name" class="block text-sm font-medium text-gray-700">Nombre del Item</label>
+                        <input type="text" id="item-name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: Aceite, Tornillo, Filtro...">
+                    </div>
+                    <div>
+                        <label for="item-part-number" class="block text-sm font-medium text-gray-700">Número de Parte (P/N)</label>
+                        <input type="text" id="item-part-number" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: AN5-10A, 101-345...">
+                    </div>
+                    <div>
+                        <label for="item-quantity" class="block text-sm font-medium text-gray-700">Cantidad</label>
+                        <input type="number" id="item-quantity" value="1" min="1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
                 </div>
-                <div>
-                    <label for="item-part-number" class="block text-sm font-medium text-gray-700">Número de Parte (P/N)</label>
-                    <input type="text" id="item-part-number" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: AN5-10A, 101-345...">
+                
+                <!-- Contenedor 2: Formulario para Lista (Single Sign) -->
+                <div id="multi-item-form-container" class="hidden">
+                    <!-- Formulario para agregar ítems -->
+                    <div class="mb-4 p-4 border rounded-lg bg-gray-50">
+                        <h4 class="text-lg font-medium mb-3">Agregar Ítem a la Lista</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="md:col-span-3">
+                                <label for="multi-item-name" class="block text-sm font-medium text-gray-700">Nombre del Ítem</label>
+                                <input type="text" id="multi-item-name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="multi-item-part-number" class="block text-sm font-medium text-gray-700">P/N</label>
+                                <input type="text" id="multi-item-part-number" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="multi-item-quantity" class="block text-sm font-medium text-gray-700">Cant</label>
+                                <input type="number" id="multi-item-quantity" value="1" min="1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div class="flex items-end">
+                                <button id="addItemToListBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                                    <i class="fas fa-plus mr-1"></i> Agregar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Lista de ítems agregados -->
+                    <h4 class="text-lg font-medium mb-2">Lista de Faltantes para esta Tarea</h4>
+                    <div id="temp-item-list-container" class="mb-4 border rounded-lg p-3 min-h-[100px] bg-white max-h-48 overflow-y-auto">
+                        <p classs="text-gray-500 italic">No se han agregado ítems.</p>
+                    </div>
                 </div>
-                <div>
-                    <label for="item-quantity" class="block text-sm font-medium text-gray-700">Cantidad</label>
-                    <input type="number" id="item-quantity" value="1" min="1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
+                
                 <p id="item-form-error" class="text-red-500 text-sm h-4"></p>
             </div>
+            <!-- FIN: CONTENEDOR MODIFICADO -->
+            
             <div class="flex justify-end gap-2 p-4 bg-gray-50">
                 <button id="item-form-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
                 <button id="item-form-save" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg">Guardar Item</button>
@@ -516,6 +559,46 @@
     <!-- FIN: NUEVO MODAL -->
 
 
+    <!-- INICIO: NUEVO MODAL PARA CARGAR HISTORIAL -->
+    <div id="archive-list-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl my-8">
+            <div class="p-4 border-b">
+                <h3 class="text-lg font-bold text-gray-800">Historial de Órdenes Archivadas</h3>
+            </div>
+            <div class="p-6">
+                <p id="archive-loading-msg" class="text-gray-600">Cargando historial...</p>
+                <div id="archive-list-container" class="max-h-96 overflow-y-auto space-y-2">
+                    <!-- El historial se cargará aquí -->
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 p-4 bg-gray-50">
+                <button id="archive-list-close" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    <!-- FIN: NUEVO MODAL -->
+
+    <!-- INICIO: NUEVO MODAL DE CONFLICTO DE SESIÓN -->
+    <div id="session-conflict-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-gray-900 bg-opacity-75 no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
+            <div class="p-6 text-center">
+                <svg class="mx-auto mb-4 h-12 w-12 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <h3 class="mb-4 text-lg font-bold text-gray-900">¡Doble Sesión Detectada!</h3>
+                <p class="mb-6 text-sm text-gray-600">
+                    Otra sesión (en su PC o iPad) acaba de guardar cambios.
+                    Para evitar perder su trabajo, debe recargar la página ahora.
+                </p>
+                <button id="conflict-reload-btn" type="button" class="text-white bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                    Recargar Página
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- FIN: NUEVO MODAL DE CONFLICTO DE SESIÓN -->
+
+
     <script type="module">
         import { initializeApp, setLogLevel } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
         import { getAuth, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
@@ -560,6 +643,7 @@
         let signaturePad;
         let activeSignatureCell = null;
         let isAuthReady = false; 
+        let currentUserId = null; // <-- NUEVO
 
         const passwordModal = document.getElementById('password-modal');
         const passwordModalTitle = document.getElementById('password-modal-title');
@@ -602,6 +686,23 @@
         const assignItemSaveBtn = document.getElementById('assign-item-save');
         // --- FIN: NUEVO MODAL DE ASIGNACIÓN ---
 
+        // --- INICIO: NUEVO MODAL DE HISTORIAL ---
+        const archiveListModal = document.getElementById('archive-list-modal');
+        const archiveListContainer = document.getElementById('archive-list-container');
+        const archiveLoadingMsg = document.getElementById('archive-loading-msg');
+        const archiveListCloseBtn = document.getElementById('archive-list-close');
+        const loadHistoryBtn = document.getElementById('load-history-btn');
+        // --- FIN: NUEVO MODAL DE HISTORIAL ---
+
+        // --- INICIO: NUEVO MODAL DE CONFLICTO ---
+        const sessionConflictModal = document.getElementById('session-conflict-modal');
+        const conflictReloadBtn = document.getElementById('conflict-reload-btn');
+
+        conflictReloadBtn.addEventListener('click', () => {
+            location.reload();
+        });
+        // --- FIN: NUEVO MODAL DE CONFLICTO ---
+
 
         // --- INICIO: NUEVAS VARIABLES GLOBALES DE ESTADO ---
         let activeInspectionDocId = null; // ID de la inspección que se está firmando
@@ -613,10 +714,25 @@
         // Almacena el item a editar/borrar
         let itemToManage = { inspectionId: null, itemId: null, docId: null }; 
         let currentPasswordAction = ''; // 'deleteSignature', 'deleteItem', 'editItem'
+        let selectedArchiveKey = null; // Almacena la clave del historial a restaurar
+
+        // --- INICIO: NUEVA VARIABLE PARA LISTA TEMPORAL ---
+        let tempMissingItemsList = []; // Para el constructor de listas (firma única)
+        // --- FIN: NUEVA VARIABLE PARA LISTA TEMPORAL ---
 
         // --- INICIO: NUEVO ESTADO PARA ASIGNACIÓN EN LOTE ---
         let itemBeingAssigned = null; // Almacena {name, partNumber, quantity}
-        // --- FIN: NUEVO ESTADO PARA ASIGNACIÓN EN LOTE ---
+        // --- INICIO: NUEVOS ELEMENTOS DOM PARA FORMULARIO MÚLTIPLE ---
+        const singleItemFormContainer = document.getElementById('single-item-form-container');
+        const multiItemFormContainer = document.getElementById('multi-item-form-container');
+        
+        const multiItemNameInput = document.getElementById('multi-item-name');
+        const multiItemPartNumberInput = document.getElementById('multi-item-part-number');
+        const multiItemQuantityInput = document.getElementById('multi-item-quantity');
+        const addItemToListBtn = document.getElementById('addItemToListBtn');
+        const tempItemListContainer = document.getElementById('temp-item-list-container');
+        // --- FIN: NUEVOS ELEMENTOS DOM ---
+
 
         // --- INICIO: NUEVAS VARIABLES PARA SELECCIÓN MÚLTIPLE ---
         let selectedInspections = new Set();
@@ -640,6 +756,7 @@
         const DB_ROOT = "artifacts/FAH-980-DATA";
         const INSPECTIONS_PATH = `${DB_ROOT}/public_data/trabajos_vencidos`;
         const DETAILS_PATH = `${DB_ROOT}/public_data/orden_detalles`; 
+        const HISTORY_PATH = `${DB_ROOT}/historial_ordenes`; 
 
         function getDetailsRef() {
             return ref(db, DETAILS_PATH);
@@ -652,6 +769,23 @@
             return ref(db, INSPECTIONS_PATH);
         }
         
+        // --- INICIO: NUEVA FUNCIÓN STAMP ---
+        /**
+         * Sella la orden con el ID del usuario actual para detectar conflictos de sesión.
+         * Se llama después de CUALQUIER escritura exitosa en la BD.
+         */
+        function stampLastUpdate(actionName = 'update') {
+            if (!currentUserId || !isAuthReady) return;
+            // console.log(`Stamping update from ${currentUserId} for action: ${actionName}`);
+            
+            // Usamos el nodo de 'detalles' como el "sello" maestro
+            const detailsRef = getDetailsRef();
+            update(detailsRef, { 
+                lastUpdatedBy: currentUserId 
+            }).catch(err => console.error("Error stamping update:", err));
+        }
+        // --- FIN: NUEVA FUNCIÓN STAMP ---
+
         // --- Botón de Imprimir Lista ---
         const printListBtn = document.getElementById('print-list-btn');
         if (printListBtn) {
@@ -703,7 +837,9 @@
                 }
                 
                 isAuthReady = true;
-                console.log("Autenticación exitosa. Iniciando carga de datos de RTDB.");
+                currentUserId = auth.currentUser ? auth.currentUser.uid : null; // <-- NUEVO
+                console.log(`Autenticación exitosa. UserID: ${currentUserId}`);
+                
                 loadOrderDetails();
                 loadExpiredInspections();
 
@@ -727,6 +863,13 @@
                             element.textContent = data[id];
                         }
                     });
+
+                    // --- INICIO: NUEVO CHECK DE CONFLICTO ---
+                    if (currentUserId && data.lastUpdatedBy && data.lastUpdatedBy !== currentUserId) {
+                        console.warn(`¡CONFLICTO DE SESIÓN DETECTADO! MyID: ${currentUserId}, TheirID: ${data.lastUpdatedBy}`);
+                        sessionConflictModal.classList.remove('hidden');
+                    }
+                    // --- FIN: NUEVO CHECK DE CONFLICTO ---
                 }
             }, (error) => {
                  console.error("Error al cargar detalles de la orden (RTDB):", error);
@@ -747,6 +890,7 @@
             const detailsRef = getDetailsRef();
             set(detailsRef, dataToSave)
                 .then(() => {
+                    stampLastUpdate('saveDetails'); // <-- NUEVO
                     saveDetailsBtn.textContent = '¡Guardado!';
                     saveDetailsBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
                     saveDetailsBtn.classList.add('bg-green-500');
@@ -1024,6 +1168,13 @@
         // --- FIN: NUEVO EVENT LISTENER ---
 
 
+        /*
+            INICIO: CORRECCIÓN DE ERROR DE SINTAXIS
+            El error que me mostraste estaba en esta función.
+            La he reescrito por completo para arreglar el .then() y .catch()
+            que estaban mal colocados.
+        */
+        
         // --- Guardar "Acción Tomada" en Blur ---
         expiredListTableBody.addEventListener('blur', (e) => {
             if (!isAuthReady) return;
@@ -1032,12 +1183,19 @@
                 const text = e.target.textContent.trim();
                 if (docId) {
                     const inspectionRef = getInspectionRef(docId);
+                    
+                    // La corrección es encadenar el .then() y .catch()
+                    // DIRECTAMENTE a la función update(), DENTRO del if.
                     update(inspectionRef, {
                         accionTomada: text
-                    }).catch(error => console.error("Error guardando acción tomada (RTDB):", error));
+                    })
+                    .then(() => stampLastUpdate('accionTomada')) // <-- Así es como va
+                    .catch(error => console.error("Error guardando acción tomada (RTDB):", error));
                 }
             }
         }, true);
+        
+        /* --- FIN DE LA CORRECCIÓN --- */
         
         // --- Manejo de Firma (Modal) ---
         function openSignatureModal(cell) {
@@ -1115,6 +1273,8 @@
             // Limpiar solo si NO estamos en modo de firma en lote
             // (porque en lote, necesitamos los datos de la firma para el reporte de items).
             if (!isBatchSigning) {
+                activeInspectionDocId = null; // <-- AÑADIDO
+                currentItemType = null; // <-- AÑADIDO
                 lastSignatureData = { name: '', dataUrl: '' }; // Limpiar datos de firma temporal
             }
             // --- FIN: MODIFICACIÓN ---
@@ -1161,6 +1321,7 @@
                     try {
                         await Promise.all(promises);
                         console.log(`Firmadas ${promises.length} tareas.`);
+                        stampLastUpdate('batchSign'); // <-- NUEVO
                         
                         // --- INICIO: MODIFICACIÓN ---
                         // 3. NO limpiar la selección todavía.
@@ -1193,6 +1354,7 @@
                             signature: signatureData
                         })
                             .then(() => {
+                                stampLastUpdate('singleSign'); // <-- NUEVO
                                 // --- INICIO: Nuevo Workflow ---
                                 // 1. Guardar datos de firma temporalmente
                                 lastSignatureData.name = name;
@@ -1234,23 +1396,30 @@
             passwordModal.classList.add('hidden');
             itemToManage = {};
             currentPasswordAction = '';
+            selectedArchiveKey = null; // <-- AÑADIDO
         });
 
-        passwordConfirmBtn.addEventListener('click', () => {
+        passwordConfirmBtn.addEventListener('click', async () => { // <-- AÑADIDO ASYNC
             const password = passwordInput.value;
+            // Resetear estilos del botón de confirmar (por si se cambió a azul)
+            passwordConfirmBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+            passwordConfirmBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+
             if (password === "Kevin") { // Clave hardcodeada
                 switch (currentPasswordAction) {
                     case 'deleteSignature':
                         if (itemToManage.docId) {
                             const inspectionRef = getInspectionRef(itemToManage.docId);
-                            update(inspectionRef, { signature: null });
+                            update(inspectionRef, { signature: null })
+                                .then(() => stampLastUpdate('deleteSign')); // <-- NUEVO
                         }
                         break;
                     
                     case 'deleteItem':
                         if (itemToManage.inspectionId && itemToManage.itemId) {
                             const itemRef = ref(db, `${INSPECTIONS_PATH}/${itemToManage.inspectionId}/itemsFaltantes/${itemToManage.itemId}`);
-                            remove(itemRef);
+                            remove(itemRef)
+                                .then(() => stampLastUpdate('deleteItem')); // <-- NUEVO
                         }
                         break;
                         
@@ -1271,81 +1440,128 @@
                             itemFormModal.classList.remove('hidden');
                         }
                         break;
+                    
+                    case 'restoreArchive': // <-- NUEVO CASE
+                        if (selectedArchiveKey) {
+                            try {
+                                const archiveDataRef = ref(db, `${HISTORY_PATH}/${selectedArchiveKey}`);
+                                const snapshot = await get(archiveDataRef);
+                                const archiveData = snapshot.val();
+
+                                if (archiveData && archiveData.inspections && archiveData.details) {
+                                    // El historial guarda un ARRAY. 
+                                    // La base de datos activa (trabajos_vencidos) espera un OBJETO 
+                                    // donde la clave es el 'docId' (que está en el item).
+                                    const inspectionsToRestore = archiveData.inspections.reduce((acc, item) => {
+                                        if (item && item.docId) {
+                                            acc[item.docId] = item;
+                                        }
+                                        return acc;
+                                    }, {});
+                                    
+                                    const detailsToRestore = archiveData.details;
+
+                                    // Sobreescribir los datos activos
+                                    await set(getInspectionRef(), inspectionsToRestore);
+                                    await set(getDetailsRef(), detailsToRestore);
+                                    
+                                    console.log("¡Orden restaurada con éxito!");
+                                    // Los listeners onValue se encargarán de recargar la UI.
+                                } else {
+                                    console.error("Datos de historial corruptos o incompletos.");
+                                }
+                            } catch (error) {
+                                console.error("Error al restaurar la orden (RTDB):", error);
+                            }
+                            selectedArchiveKey = null; // Limpiar
+                        }
+                        break;
                 }
                 passwordModal.classList.add('hidden');
-                itemToManage = {};
-                currentPasswordAction = '';
             } else {
-                passwordError.textContent = "Clave incorrecta.";
-                passwordInput.value = '';
-                setTimeout(() => { passwordError.textContent = ''; }, 3000);
+                passwordError.textContent = 'Clave incorrecta';
             }
         });
 
         confirmModalCancelBtn.addEventListener('click', () => {
             confirmModal.classList.add('hidden');
-            confirmAction = () => {};
+            confirmAction = () => {}; // Reset confirm action
         });
 
-        confirmModalOkBtn.addEventListener('click', () => {
-            confirmAction();
-            confirmModal.classList.add('hidden');
-            confirmAction = () => {};
+        archiveListCloseBtn.addEventListener('click', () => {
+            archiveListModal.classList.add('hidden');
         });
 
-        // --- Archivar Trabajos ---
-        const archiveBtn = document.getElementById('archive-btn');
-        archiveBtn.addEventListener('click', () => {
-            if (!isAuthReady) {
-                console.warn("Conectando... por favor espere un momento.");
-                return;
-            }
+        loadHistoryBtn.addEventListener('click', async () => {
+            archiveListModal.classList.remove('hidden');
+            archiveLoadingMsg.classList.remove('hidden');
+            archiveListContainer.innerHTML = '';
 
-            confirmModalTitle.textContent = '¿Seguro que desea archivar? Esto limpiará la lista actual.';
-            confirmAction = async () => {
-                const inspectionsRef = getInspectionRef();
-                const inspectionsSnapshot = await get(inspectionsRef);
-                const inspectionsData = inspectionsSnapshot.val();
+            try {
+                const historyRef = ref(db, HISTORY_PATH);
+                const snapshot = await get(historyRef);
+                const historyData = snapshot.val();
 
-                if (!inspectionsData) {
-                    console.warn("No hay trabajos para archivar.");
-                    return;
-                }
-                
-                const inspectionsToArchive = Object.keys(inspectionsData).map(key => ({
-                    docId: key, 
-                    ...inspectionsData[key]
-                }));
-
-                const detailsToArchive = {};
-                detailFieldIds.forEach(id => {
-                    const element = document.getElementById(id);
-                    detailsToArchive[id] = element ? element.textContent.trim() : '';
-                });
-
-                if (inspectionsToArchive.length > 0) {
-                    const timestamp = new Date().toISOString().replace(/[.:]/g, '-');
-                    const archivePath = `${DB_ROOT}/historial_ordenes/${timestamp}`;
-                    const archiveRef = ref(db, archivePath);
+                if (historyData) {
+                    // Ordenar por clave (timestamp) descendente
+                    const sortedKeys = Object.keys(historyData).sort().reverse();
                     
-                    const archiveData = {
-                        details: detailsToArchive,
-                        inspections: inspectionsToArchive,
-                        archivedAt: new Date().toISOString()
-                    };
+                    if (sortedKeys.length === 0) {
+                        archiveListContainer.innerHTML = '<p class="text-gray-500">No hay órdenes en el historial.</p>';
+                    }
 
-                    set(archiveRef, archiveData)
-                        .then(async () => {
-                            await remove(inspectionsRef);
-                            console.log("Trabajos archivados y lista actual limpiada con éxito.");
-                        })
-                        .catch((error) => {
-                            console.error("Error al archivar (RTDB):", error);
+                    sortedKeys.forEach(key => {
+                        const item = historyData[key];
+                        // Formatear la fecha para que sea legible
+                        const date = new Date(item.archivedAt || key.replace(/-/g, ':'));
+                        const formattedDate = date.toLocaleString('es-HN', { 
+                            day: '2-digit', month: '2-digit', year: 'numeric', 
+                            hour: '2-digit', minute: '2-digit' 
                         });
-                } 
-            };
-            confirmModal.classList.remove('hidden');
+                        
+                        const details = item.details;
+                        const summary = `Matrícula: ${details.matricula || 'N/A'}, O.T.: ${details['orden-trabajo-no'] || 'N/A'}`;
+
+                        const btn = document.createElement('button');
+                        btn.className = 'w-full text-left p-4 bg-white border rounded-lg hover:bg-gray-100 shadow-sm transition-all';
+                        btn.innerHTML = `
+                            <p class="font-semibold text-blue-700">Archivado: ${formattedDate}</p>
+                            <p class="text-sm text-gray-600">${summary}</p>
+                        `;
+                        btn.setAttribute('data-archive-key', key);
+                        btn.addEventListener('click', () => {
+                            handleArchiveSelection(key);
+                        });
+                        archiveListContainer.appendChild(btn);
+                    });
+                } else {
+                    archiveListContainer.innerHTML = '<p class="text-gray-500">No hay órdenes en el historial.</p>';
+                }
+            } catch (error) {
+                console.error("Error al cargar el historial (RTDB):", error);
+                archiveListContainer.innerHTML = '<p class="text-red-500">Error al cargar el historial.</p>';
+            } finally {
+                archiveLoadingMsg.classList.add('hidden');
+            }
         });
+
+        function handleArchiveSelection(key) {
+            selectedArchiveKey = key;
+            archiveListModal.classList.add('hidden');
+            
+            currentPasswordAction = 'restoreArchive';
+            passwordModalTitle.textContent = 'Restaurar Orden';
+            passwordModalDescription.textContent = '¡ADVERTENCIA! Esto SOBREESCRIBIRÁ la lista de trabajo actual. Ingrese la clave para confirmar.';
+            passwordConfirmBtn.textContent = 'Confirmar Restauración';
+            passwordConfirmBtn.classList.remove('bg-red-600', 'hover:bg-red-700'); // No es tan "destructivo" como un borrado
+            passwordConfirmBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            passwordInput.value = '';
+            passwordError.textContent = '';
+            passwordModal.classList.remove('hidden');
+            passwordInput.focus();
+        }
+        // --- FIN: NUEVOS LISTENERS PARA HISTORIAL ---
+
 
         // --- Generar Reporte ---
         const reportBtn = document.getElementById('report-btn');
@@ -1507,26 +1723,64 @@
             const title = currentItemType === 'consumible' ? 'Añadir Consumible Faltante' : 'Añadir Repuesto Faltante';
             itemFormModalTitle.textContent = title;
             
-            itemNameInput.value = '';
-            itemPartNumberInput.value = '';
-            itemQuantityInput.value = '1';
             itemFormError.textContent = '';
             
             // Asegurar que el botón de guardar esté en modo "Crear"
-            itemFormSaveBtn.textContent = 'Guardar Item';
+            // (La lógica de "Actualizar" se añade dinámicamente)
             itemFormSaveBtn.removeEventListener('click', handleUpdateItem);
             itemFormSaveBtn.addEventListener('click', handleSaveNewItem);
+
+            // --- INICIO: LÓGICA DE UI (MOSTRAR/OCULTAR FORMULARIO) ---
+            if (isBatchSigning) {
+                // MODO LOTE: Usar el formulario simple
+                singleItemFormContainer.style.display = 'block';
+                multiItemFormContainer.style.display = 'none';
+                
+                // Limpiar campos del formulario simple
+                itemNameInput.value = '';
+                itemPartNumberInput.value = '';
+                itemQuantityInput.value = '1';
+                
+                itemFormSaveBtn.textContent = 'Guardar Item';
+                
+            } else {
+                // MODO FIRMA ÚNICA: Usar el constructor de listas
+                singleItemFormContainer.style.display = 'none';
+                multiItemFormContainer.style.display = 'block';
+                
+                // Limpiar lista temporal y campos del constructor
+                tempMissingItemsList = [];
+                renderTempItemsList();
+                multiItemNameInput.value = '';
+                multiItemPartNumberInput.value = '';
+                multiItemQuantityInput.value = '1';
+                
+                itemFormSaveBtn.textContent = 'Guardar Lista de Items';
+            }
+            // --- FIN: LÓGICA DE UI ---
             
             itemFormModal.classList.remove('hidden');
-            itemNameInput.focus();
+            
+            // Enfocar el campo correspondiente
+            if (isBatchSigning) {
+                itemNameInput.focus();
+            } else {
+                multiItemNameInput.focus();
+            }
         }
 
         function closeItemFormModal() {
             itemFormModal.classList.add('hidden');
+            
+            // --- INICIO: NUEVA LÓGICA DE CIERRE ---
+            // Limpiar lista temporal al cerrar
+            tempMissingItemsList = [];
+            
             // Resetear el botón de guardar a su estado original (crear)
-            itemFormSaveBtn.textContent = 'Guardar Item';
+            // (La lógica de "Actualizar" se añade dinámicamente)
             itemFormSaveBtn.removeEventListener('click', handleUpdateItem);
             itemFormSaveBtn.addEventListener('click', handleSaveNewItem);
+            // --- FIN: NUEVA LÓGICA DE CIERRE ---
         }
 
         // --- Event Listeners para Modales de Items ---
@@ -1561,15 +1815,14 @@
         });
 
         itemFormCancelBtn.addEventListener('click', () => {
+            // --- INICIO: LÓGICA DE CANCELAR FORMULARIO ---
             closeItemFormModal();
             
-            // --- INICIO: LÓGICA DE LOTE ---
             if (isBatchSigning) {
-                // Si cancelamos el formulario, continuamos al siguiente paso
+                // Si cancelamos el formulario en modo LOTE, continuamos al siguiente paso
                 continueBatchWorkflow();
-            // --- FIN: LÓGICA DE LOTE ---
-
-            } else { // --- LÓGICA ORIGINAL (SINGLE) ---
+            } else {
+                // Si cancelamos en modo ÚNICO, preguntamos por el siguiente tipo
                 if (currentItemType === 'consumible') {
                     openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
                 } else {
@@ -1578,6 +1831,7 @@
                     currentItemType = null;
                 }
             }
+            // --- FIN: LÓGICA DE CANCELAR FORMULARIO ---
         });
 
         // --- INICIO: Lógica separada para Guardar/Actualizar Items ---
@@ -1586,46 +1840,61 @@
          * Manejador para CREAR un nuevo item faltante.
          */
         async function handleSaveNewItem() {
-            const name = itemNameInput.value.trim();
-            const partNumber = itemPartNumberInput.value.trim();
-            const quantity = itemQuantityInput.value.trim();
-
-            if (!name || !quantity) {
-                itemFormError.textContent = 'El Nombre y la Cantidad son obligatorios.';
-                setTimeout(() => { itemFormError.textContent = ''; }, 3000);
-                return;
-            }
-
-            // --- INICIO: LÓGICA DE LOTE (MODIFICADA) ---
+            
+            // --- INICIO: LÓGICA DE LOTE (SIN CAMBIOS) ---
             if (isBatchSigning) {
-                if (!currentItemType) {
-                    console.error("Error: currentItemType es nulo en modo lote.");
+                const name = itemNameInput.value.trim();
+                const partNumber = itemPartNumberInput.value.trim();
+                const quantity = itemQuantityInput.value.trim();
+
+                if (!name || !quantity) {
+                    itemFormError.textContent = 'El Nombre y la Cantidad son obligatorios.';
+                    setTimeout(() => { itemFormError.textContent = ''; }, 3000);
                     return;
                 }
                 
-                // 1. Guardar datos del item temporalmente
                 itemBeingAssigned = { name, partNumber, quantity };
-                
-                // 2. Cerrar modal de formulario
                 closeItemFormModal();
-                
-                // 3. Abrir nuevo modal para asignar el item
                 openAssignItemModal();
-
-                // (La lógica de 'promises' se movió a 'handleAssignItemSave')
+            
             // --- FIN: LÓGICA DE LOTE ---
             
-            } else if (activeInspectionDocId) { // --- LÓGICA ORIGINAL (SINGLE) ---
-                await saveMissingItem(activeInspectionDocId, currentItemType, { name, partNumber, quantity });
+            // --- INICIO: LÓGICA DE FIRMA ÚNICA (MODIFICADA) ---
+            } else if (activeInspectionDocId) {
                 
-                closeItemFormModal();
+                if (tempMissingItemsList.length === 0) {
+                    itemFormError.textContent = 'Debe agregar al menos un ítem a la lista.';
+                    setTimeout(() => { itemFormError.textContent = ''; }, 3000);
+                    return;
+                }
+                
+                const promises = [];
+                for (const item of tempMissingItemsList) {
+                    // Usamos el TIPO DE MODAL (Consumible o Repuesto)
+                    promises.push(saveMissingItem(activeInspectionDocId, currentItemType, item));
+                }
+                
+                try {
+                    await Promise.all(promises);
+                    console.log(`Guardados ${promises.length} items para la tarea ${activeInspectionDocId}`);
+                    stampLastUpdate('saveMultiItems'); // Nuevo Sello
+                } catch (error) {
+                    console.error("Error guardando lista de items (RTDB):", error);
+                }
+                
+                closeItemFormModal(); // Cierra al guardar la lista
 
+                // Continuar el workflow
                 if (currentItemType === 'consumible') {
                     openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
                 } else {
                     activeInspectionDocId = null;
                     currentItemType = null;
+                    lastSignatureData = { name: '', dataUrl: '' }; // Limpiar firma
                 }
+            
+            // --- FIN: LÓGICA DE FIRMA ÚNICA ---
+                
             } else {
                 console.error("Error: No se encontró activeInspectionDocId y no está en modo lote.");
             }
@@ -1661,6 +1930,7 @@
                     partNumber: partNumber,
                     quantity: quantity
                 });
+                stampLastUpdate('updateItem'); // <-- NUEVO
                 console.log("Item actualizado con éxito.");
             } catch (error) {
                 console.error("Error actualizando item (RTDB):", error);
@@ -1695,6 +1965,7 @@
             };
             try {
                 await push(itemsListRef, newItem);
+                stampLastUpdate('newItem'); // <-- NUEVO
                 console.log("Item faltante guardado con éxito.");
             } catch (error) {
                 console.error("Error guardando item faltante (RTDB):", error);
@@ -1702,6 +1973,85 @@
         }
         
         // --- FIN: Lógica separada Guardar/Actualizar ---
+
+
+        // --- INICIO: NUEVAS FUNCIONES PARA EL CONSTRUCTOR DE LISTAS ---
+        
+        /**
+         * Agrega un ítem a la lista temporal 'tempMissingItemsList'
+         * (usado en el modo de firma única).
+         */
+        function addItemToList() {
+            const name = multiItemNameInput.value.trim();
+            const partNumber = multiItemPartNumberInput.value.trim();
+            const quantity = multiItemQuantityInput.valueAsNumber;
+
+            if (!name || !quantity || quantity <= 0) {
+                alert("Por favor, complete el nombre y la cantidad (mayor a 0) del ítem.");
+                return;
+            }
+
+            const item = {
+                name: name,
+                partNumber: partNumber || 'N/A',
+                quantity: quantity
+            };
+
+            tempMissingItemsList.push(item);
+            
+            // Re-renderizar la lista en el modal
+            renderTempItemsList();
+
+            // Limpiar campos para el próximo ítem
+            multiItemNameInput.value = '';
+            multiItemPartNumberInput.value = '';
+            multiItemQuantityInput.value = 1;
+            multiItemNameInput.focus();
+        }
+
+        /**
+         * "Dibuja" la lista de ítems temporales en el modal.
+         */
+        function renderTempItemsList() {
+            if (tempMissingItemsList.length === 0) {
+                tempItemListContainer.innerHTML = '<p class="text-gray-500 italic">No se han agregado ítems.</p>';
+                return;
+            }
+
+            tempItemListContainer.innerHTML = ''; // Limpiar
+            const list = document.createElement('ul');
+            list.className = 'divide-y divide-gray-200';
+
+            tempMissingItemsList.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'py-2 flex justify-between items-center';
+                li.innerHTML = `
+                    <div>
+                        <span class="font-medium">${item.name}</span>
+                        <span class="block text-sm text-gray-600">P/N: ${item.partNumber} (Cant: ${item.quantity})</span>
+                    </div>
+                    <button class="text-red-500 hover:text-red-700 p-1" onclick="removeTempItem(${index})" title="Eliminar ítem">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                `;
+                list.appendChild(li);
+            });
+            tempItemListContainer.appendChild(list);
+        }
+        
+        /**
+         * Elimina un ítem de la lista temporal.
+         * (Debe ser global para que el 'onclick' funcione).
+         */
+        window.removeTempItem = (index) => {
+            tempMissingItemsList.splice(index, 1); // Elimina el ítem del array
+            renderTempItemsList(); // Vuelve a dibujar la lista
+        };
+        
+        // Asignar el listener al nuevo botón de agregar
+        addItemToListBtn.addEventListener('click', addItemToList);
+        
+        // --- FIN: NUEVAS FUNCIONES PARA EL CONSTRUCTOR DE LISTAS ---
 
 
         // --- INICIO: Event Listener para botones de Editar/Borrar Item ---
