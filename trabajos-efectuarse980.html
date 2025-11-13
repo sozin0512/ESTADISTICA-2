@@ -1281,11 +1281,19 @@
             // --- INICIO: MODIFICACIÓN ---
             // Limpiar solo si NO estamos en modo de firma en lote
             // (porque en lote, necesitamos los datos de la firma para el reporte de items).
+            
+            // ¡CORRECCIÓN! Se elimina este bloque 'if' completo.
+            // La lógica dentro de este bloque estaba borrando 'activeInspectionDocId'
+            // y 'lastSignatureData' demasiado pronto, causando el error
+            // al guardar la lista de items en modo de firma única.
+            
+            /* ESTAS LÍNEAS SE ELIMINAN:
             if (!isBatchSigning) {
-                activeInspectionDocId = null; // <-- AÑADIDO
-                currentItemType = null; // <-- AÑADIDO
-                lastSignatureData = { name: '', dataUrl: '' }; // Limpiar datos de firma temporal
+                activeInspectionDocId = null; // <-- ¡EL ERROR!
+                currentItemType = null; 
+                lastSignatureData = { name: '', dataUrl: '' }; 
             }
+            */
             // --- FIN: MODIFICACIÓN ---
         }
         // --- FIN: Lógica de "No reportó faltantes" ---
@@ -1445,6 +1453,13 @@
                             itemFormSaveBtn.textContent = 'Actualizar Item';
                             itemFormSaveBtn.removeEventListener('click', handleSaveNewItem); 
                             itemFormSaveBtn.addEventListener('click', handleUpdateItem); 
+                            
+                            // --- INICIO: ¡AQUÍ ESTÁ LA CORRECCIÓN! ---
+                            // Forzar que se muestre el formulario de un solo item
+                            // y se oculte el de multi-item.
+                            singleItemFormContainer.style.display = 'block';
+                            multiItemFormContainer.style.display = 'none';
+                            // --- FIN: ¡AQUÍ ESTÁ LA CORRECCIÓN! ---
                             
                             itemFormModal.classList.remove('hidden');
                         }
@@ -1928,12 +1943,25 @@
                 closeItemFormModal();
                 return;
             }
+            
+            // --- INICIO: NUEVA LÓGICA DE CONTINUACIÓN ---
+            
+            // 1. Obtener los datos necesarios ANTES de limpiar itemToManage
+            const inspectionId = itemToManage.inspectionId;
+            const itemId = itemToManage.itemId;
+            
+            // 2. Encontrar el tipo de item que acabamos de editar
+            const editedItem = allLoadedMissingItems.find(i => i.itemId === itemId);
+            // 3. Si no lo encontramos, asumimos 'consumible' para no romper el flujo
+            const itemType = editedItem ? editedItem.type : 'consumible'; 
+            // --- FIN: NUEVA LÓGICA DE CONTINUACIÓN ---
 
-            // Referencia al item específico
-            const itemRef = ref(db, `${INSPECTIONS_PATH}/${itemToManage.inspectionId}/itemsFaltantes/${itemToManage.itemId}`);
+
+            // 4. Referencia al item específico
+            const itemRef = ref(db, `${INSPECTIONS_PATH}/${inspectionId}/itemsFaltantes/${itemId}`);
             
             try {
-                // Actualizamos solo los campos del formulario
+                // 5. Actualizar el item
                 await update(itemRef, {
                     name: name,
                     partNumber: partNumber,
@@ -1945,8 +1973,19 @@
                 console.error("Error actualizando item (RTDB):", error);
             }
             
+            // 6. Limpiar el item en gestión
+            itemToManage = {}; 
+            
+            // 7. Cerrar el modal de edición
             closeItemFormModal();
-            itemToManage = {}; // Limpiar el item en gestión
+
+            // 8. ¡NUEVO! Reiniciar el workflow para "agregar otro"
+            // Aseguramos que el estado global esté listo para el "ask-modal"
+            activeInspectionDocId = inspectionId; 
+            currentItemType = itemType; 
+            
+            // 9. Preguntar si quiere añadir OTRO item del MISMO tipo
+            openAskModal(itemType, `¿Desea agregar OTRO ${itemType} a esta tarea?`);
         }
         
         // Asignar el manejador de "crear" por defecto
