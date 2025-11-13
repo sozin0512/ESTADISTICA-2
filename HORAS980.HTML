@@ -1162,8 +1162,9 @@
          * @param {string|null} role - El rol del usuario ('admin', 'viewer' o null si no está autenticado).
          */
         function applyRolePermissions(role) {
-            const isAdministrator = (role === 'admin');
-            const isAuthenticated = (role !== null);
+            // --- MODIFICADO: Cambiamos 'isAdministrator' por 'isAuthenticated' ---
+            // const isAdministrator = (role === 'admin'); 
+            const isAuthenticated = (role !== null); // <-- LÍNEA MODIFICADA
 
             document.querySelectorAll('.tabla-vuelo tbody tr').forEach(fila => {
                 fila.querySelectorAll('td').forEach((celda, indexCelda) => {
@@ -1180,8 +1181,9 @@
                         celda.classList.add('read-only-cell');
                         celda.classList.remove('editable-cell');
                     } else {
-                        celda.contentEditable = isAdministrator ? 'true' : 'false';
-                        if (isAdministrator) {
+                        // --- MODIFICADO: Usar 'isAuthenticated' ---
+                        celda.contentEditable = isAuthenticated ? 'true' : 'false'; // <-- LÍNEA MODIFICADA
+                        if (isAuthenticated) { // <-- LÍNEA MODIFICADA
                             celda.classList.add('editable-cell');
                             celda.classList.remove('read-only-cell');
                         } else {
@@ -1194,7 +1196,8 @@
 
             selectYear.disabled = !isAuthenticated; 
             document.querySelectorAll('.tab-button').forEach(btn => { btn.disabled = !isAuthenticated; });
-            recordatorioTextarea.readOnly = !isAdministrator;
+            // --- MODIFICADO: Usar 'isAuthenticated' ---
+            recordatorioTextarea.readOnly = !isAuthenticated; // <-- LÍNEA MODIFICADA
             btnImprimir.disabled = !isAuthenticated;
             btnMotorStatus.disabled = !isAuthenticated;
             btnComponentStatus.disabled = !isAuthenticated;
@@ -1218,9 +1221,18 @@
         // -----------------------------------------------------------
 
         async function guardarDatosEnFirebase(año, mesIndex, datosTabla, recordatorio) {
-            if (currentUserRole !== 'admin') {
-                console.warn('Acceso denegado: Solo los administradores pueden guardar datos.');
-                authStatus.textContent = 'Acceso denegado: Solo los administradores pueden guardar datos.';
+            // --- MODIFICADO: Se elimina la comprobación de 'admin' para guardar ---
+            // if (currentUserRole !== 'admin') {
+            //     console.warn('Acceso denegado: Solo los administradores pueden guardar datos.');
+            //     authStatus.textContent = 'Acceso denegado: Solo los administradores pueden guardar datos.';
+            //     authStatus.style.color = 'orange';
+            //     return;
+            // }
+
+            // --- AÑADIDO: Comprobar si está autenticado ---
+            if (!auth.currentUser || userId === "anonimo") {
+                console.warn('Acceso denegado: Usuario no autenticado.');
+                authStatus.textContent = 'Acceso denegado: Debes iniciar sesión para guardar.';
                 authStatus.style.color = 'orange';
                 return;
             }
@@ -1552,9 +1564,15 @@
          * Detecta conflictos antes de guardar.
          */
         function handleFlightDataSave() {
-            // --- AÑADIDO: Comprobación de permisos de administrador ---
-            if (currentUserRole !== 'admin') {
-                showCustomAlert('Acceso denegado: Solo los administradores pueden ingresar datos de vuelo.');
+            // --- MODIFICADO: Se elimina la comprobación de 'admin' ---
+            // if (currentUserRole !== 'admin') {
+            //     showCustomAlert('Acceso denegado: Solo los administradores pueden ingresar datos de vuelo.');
+            //     return;
+            // }
+
+            // --- AÑADIDO: Comprobar si está autenticado ---
+            if (!auth.currentUser || userId === "anonimo") {
+                showCustomAlert('Acceso denegado: Debes iniciar sesión para ingresar datos de vuelo.');
                 return;
             }
 
@@ -1797,9 +1815,15 @@
         * Maneja el guardado del nombre del mecánico y cierra la sesión de QR.
         */
         function handleSaveMechanicName() {
-            // --- AÑADIDO: Comprobación de permisos de administrador ---
-            if (currentUserRole !== 'admin') {
-                showCustomAlert('Acceso denegado: Solo los administradores pueden registrar mecánicos.');
+            // --- MODIFICADO: Se elimina la comprobación de 'admin' ---
+            // if (currentUserRole !== 'admin') {
+            //     showCustomAlert('Acceso denegado: Solo los administradores pueden registrar mecánicos.');
+            //     return;
+            // }
+
+            // --- AÑADIDO: Comprobar si está autenticado ---
+            if (!auth.currentUser || userId === "anonimo") {
+                showCustomAlert('Acceso denegado: Debes iniciar sesión para registrar mecánicos.');
                 return;
             }
 
