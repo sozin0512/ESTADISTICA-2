@@ -840,6 +840,15 @@
                 currentUserId = auth.currentUser ? auth.currentUser.uid : null; // <-- NUEVO
                 console.log(`Autenticación exitosa. UserID: ${currentUserId}`);
                 
+                // --- INICIO: ¡NUEVA LÓGICA DE TOMA DE SESIÓN! ---
+                // Al recargar, esta función toma control de la sesión
+                // y se asegura de que este 'currentUserId' sea el 'lastUpdatedBy'.
+                // Esto rompe el bucle de "doble sesión".
+                if (currentUserId) {
+                    stampLastUpdate('session_takeover');
+                }
+                // --- FIN: NUEVA LÓGICA DE TOMA DE SESIÓN! ---
+                
                 loadOrderDetails();
                 loadExpiredInspections();
 
