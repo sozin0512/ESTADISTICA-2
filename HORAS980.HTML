@@ -1108,28 +1108,50 @@
         onAuthStateChanged(auth, async (user) => {
             console.log('onAuthStateChanged disparado. Usuario:', user ? user.email : 'null');
             if (user) {
-                userId = user.uid;
-                userIdDisplay.textContent = userId;
-                console.log('Usuario actual:', user.email, 'UID:', userId);
-                
-                applyRolePermissions(currentUserRole);
-                await cargarDatosDeFirebase();
-                agregarEventosDeEdicion();
-                // ELIMINADO DE AQUÍ:
-                // await checkURLParamsForQR(); // <-- AÑADIDO: Comprobar QR después de cargar todo
-            } catch (error) {
-                console.error("Error en onAuthStateChanged al obtener o asignar el rol del usuario o cargar datos:", error.code, error.message);
-                // Try to load data again, even if role failed
-                await cargarDatosDeFirebase();
-                agregarEventosDeEdicion();
-            } finally { // <-- BLOQUE AÑADIDO
-                // Esto se ejecutará DESPUÉS del try O del catch
-                console.log("Bloque finally: Comprobando parámetros de URL...");
-                await checkURLParamsForQR(); // <-- LLAMADA MOVIDA AQUÍ
-            }
+                // --- INICIO DEL BLOQUE 'if (user)' ---
+                try {
+                    userId = user.uid;
+                    userIdDisplay.textContent = userId;
+                    console.log('Usuario actual:', user.email, 'UID:', userId);
 
-        } else {
-            userId = "anonimo";
+                    // --- INICIO: Lógica de Roles (Re-añadida) ---
+                    // Esta lógica es necesaria para definir 'currentUserRole'
+                    const rolePath = `user_roles/${user.uid}`;
+                    console.log('Obteniendo rol de:', rolePath);
+                    const snapshot = await get(ref(database, rolePath));
+                    if (snapshot.exists()) {
+                        currentUserRole = snapshot.val();
+                    } else {
+                        console.log('No se encontró rol, asignando "viewer" por defecto.');
+                        currentUserRole = 'viewer';
+                        await set(ref(database, `user_roles/${user.uid}`), 'viewer');
+                    }
+                    console.log('Rol del usuario:', currentUserRole);
+                    // --- FIN: Lógica de Roles ---
+
+                    applyRolePermissions(currentUserRole);
+                    await cargarDatosDeFirebase();
+                    agregarEventosDeEdicion();
+                    
+                } catch (error) {
+                    console.error("Error en onAuthStateChanged al obtener o asignar el rol del usuario o cargar datos:", error.code, error.message);
+                    authStatus.textContent = `Error crítico: ${error.message}. Por favor, recarga.`;
+                    authStatus.style.color = 'red';
+                    currentUserRole = 'viewer'; // Falla a un rol seguro
+                    applyRolePermissions(currentUserRole);
+                    // Intenta cargar los datos de todos modos, incluso si el rol falló
+                    await cargarDatosDeFirebase();
+                    agregarEventosDeEdicion();
+                } finally { 
+                    // Esto se ejecutará DESPUÉS del try O del catch
+                    console.log("Bloque finally: Comprobando parámetros de URL...");
+                    await checkURLParamsForQR(); // <-- La llamada al QR se queda aquí
+                }
+                // --- FIN DEL BLOQUE 'if (user)' ---
+
+            } else {
+                // --- INICIO DEL BLOQUE 'else' (usuario no logueado) ---
+                userId = "anonimo";
                 userIdDisplay.textContent = userId;
                 console.log('No hay usuario logueado');
                 
@@ -1139,6 +1161,11 @@
                 authStatus.style.color = 'red';
                 currentUserRole = null;
                 applyRolePermissions(null);
+                
+                // --- AÑADIDO: Comprobar QR también si está deslogueado ---
+                // (Esto asegura que la URL se limpie y la app se prepare)
+                await checkURLParamsForQR();
+                // --- FIN DEL BLOQUE 'else' ---
             }
         });
 
