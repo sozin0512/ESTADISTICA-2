@@ -891,7 +891,7 @@
     </div>
     <!-- ====================================================== -->
     <!-- ==== FIN: MODAL DE ESTADO DE MOTORES (RESTAURADO) ==== -->
-    <!-- ====================================================== -->
+    <!-- ==================================================== -->
 
 
     <script type="module">
@@ -1482,6 +1482,11 @@
 
                     // Celdas de Días (Editables)
                     for (let i = 1; i <= dias; i++) {
+                        const isCiclosRow = filasConColumnasAdicionalesSoloEtiquetas.includes(nombreFila);
+                        
+                        // Si es una fila de ciclos, la celda del día debe ser editable
+                        // *CORRECCIÓN* Si es una fila de ciclos, sigue siendo una celda de input normal.
+                        // Todas las celdas de días deben ser inicialmente editables, y el permiso se aplica después.
                         rowHTML += `<td class="editable-cell" data-dia="${i}"></td>`;
                     }
                     
@@ -1499,6 +1504,7 @@
                         const { nomenclaturaBase, varianteClave } = parseNomenclatura(nombreFila);
                         let config = limitesConfig[nomenclaturaBase];
                         
+                        // FIX: Se corrigió la referencia a 'varivarianteClave' por 'varianteClave'
                         // Si tiene variante (ej: 1.1), toma la configuración específica
                         if (varianteClave && config && config[varianteClave]) {
                             config = config[varianteClave];
@@ -1512,11 +1518,12 @@
                         rowHTML += `<td class="fila-restante read-only-cell">0</td>`;
                     } else if (isLabelRow) {
                         // Las filas de CICLOS tienen los encabezados de las columnas.
-                        rowHTML += `<td class="limite-label label-yellow" contenteditable="false">LIMITE</td>`;
-                        rowHTML += `<td class="abbrd-label label-yellow" contenteditable="false">ABBR'D</td>`;
-                        rowHTML += `<td class="extd-label label-yellow" contenteditable="false">EXT'D</td>`;
-                        rowHTML += `<td class="flight-count-factor-label label-yellow" contenteditable="false">FACTOR</td>`;
-                        rowHTML += `<td class="restante-label label-red blinking" contenteditable="false">RESTANTE</td>`;
+                        // Estas celdas son de solo lectura
+                        rowHTML += `<td class="limite-label label-yellow read-only-cell" contenteditable="false">LIMITE</td>`;
+                        rowHTML += `<td class="abbrd-label label-yellow read-only-cell" contenteditable="false">ABBR'D</td>`;
+                        rowHTML += `<td class="extd-label label-yellow read-only-cell" contenteditable="false">EXT'D</td>`;
+                        rowHTML += `<td class="flight-count-factor-celda label-yellow read-only-cell" contenteditable="false">FACTOR</td>`;
+                        rowHTML += `<td class="restante-label label-red blinking read-only-cell" contenteditable="false">RESTANTE</td>`;
                     } else {
                         // Filas normales (AC HRS, ATERRIZAJES, RINS, ENGINE HRS, STARTS, FLIGHTS, CONTINGENCY)
                         rowHTML += `<td class="read-only-cell"></td>`;
@@ -1658,15 +1665,14 @@
                             const vienen_guardado = parseFloat(datosFila.vienen); 
                             
                             const isComponentRow = filasConColumnasAdicionalesEditables.includes(nom);
+                            const isCiclosRow = filasConColumnasAdicionalesSoloEtiquetas.includes(nom);
 
-                            if (mesActual === 0 && !isComponentRow) { 
-                                // En Enero, el campo VIENEN es editable para filas NO componente. Usamos el valor guardado
-                                vienen = !isNaN(vienen_guardado) ? vienen_guardado : vienen_calculado;
-                            } else if (!isComponentRow) { 
-                                // Es Feb - Dic para filas NO componente. SIEMPRE usamos el calculado del mes anterior
-                                vienen = vienen_calculado;
+                            // --- LÓGICA DE CARGA DE VIENEN ---
+                            // PRIORIDAD 1: Si hay un valor 'vienen' guardado en este mes (editable en Enero), úsalo.
+                            // PRIORIDAD 2: Si no es Enero, o no hay valor guardado, usa el calculado del mes anterior.
+                            if (mesActual === 0 && !isComponentRow && !isNaN(vienen_guardado)) {
+                                vienen = vienen_guardado; 
                             } else {
-                                // Filas de Componentes: VIENEN es el valor GENERAL del mes anterior
                                 vienen = vienen_calculado;
                             }
                             
@@ -1756,6 +1762,7 @@
                 const isComponentRow = filasConColumnasAdicionalesEditables.includes(nom);
 
                 datos[safeKey] = { // GUARDAR CON CLAVE SEGURA
+                    // FIX: Aseguramos que el valor de VIENEN se extrae de la celda de la tabla para ser guardado.
                     vienen: parseFloat(fila.querySelector('.fila-vienen').textContent) || 0,
                     dias: {},
                     total: parseFloat(fila.querySelector('.fila-total').textContent) || 0,
@@ -1867,16 +1874,17 @@
             const generalValuesMap = new Map();
             const componentTotals = {}; // Para almacenar los cálculos intermedios de los componentes
 
-            // PASO 1: Calcular totales para filas básicas (AC HRS, ATERRIZAJES, RINS, ENGINE HRS, STARTS, FLIGHTS, CONTINGENCY EXCURSIONS)
+            // PASO 1: Calcular totales para filas básicas y Ciclos (MES TOTAL = Suma de días)
             tablaActiva.querySelectorAll('tr[data-nomenclatura]').forEach(fila => {
                 const nom = fila.dataset.nomenclatura;
-                const isComponentRow = filasConColumnasAdicionalesEditables.includes(nom) || filasConColumnasAdicionalesSoloEtiquetas.includes(nom);
+                
+                // Una fila es un contador simple si NO está en la lista de componentes con cálculo (filasConColumnasAdicionalesEditables)
+                const isComponentEditableRow = filasConColumnasAdicionalesEditables.includes(nom);
 
-                if (!isComponentRow) {
+                if (!isComponentEditableRow) { // Esto incluye AC HRS, ENGINE HRS, STARTS, FLIGHTS, CONTINGENCY, y CICLOS
                     let totalMes = 0;
                     
-                    // Sumar las celdas de los días (editable-cell)
-                    // Las celdas de días son editables, pero las de ENGINE HRS/STARTS/FLIGHTS/CONTINGENCY no son componentes calculables en sí mismas, solo sus días.
+                    // Sumar las celdas de los días (MES TOTAL)
                     fila.querySelectorAll('td[data-dia]').forEach(celda => { 
                         totalMes += parseFloat(celda.textContent) || 0;
                     });
@@ -1887,8 +1895,18 @@
                     // Determinar decimales
                     const decimales = nom.includes("AC HRS") || nom.includes("ENGINE HRS") ? 1 : 0;
                     
-                    // Actualizar Mes Total y General
-                    fila.querySelector('.fila-total').textContent = formatNumber(totalMes.toFixed(decimales));
+                    // Actualizar Mes Total
+                    let displayTotalMes = '';
+                    if (totalMes > 0) {
+                         displayTotalMes = formatNumber(totalMes.toFixed(decimales));
+                    } else {
+                        // FIX: Si no hay suma de días (totalMes === 0), la celda MES TOTAL debe estar vacía.
+                         displayTotalMes = '';
+                    }
+
+                    fila.querySelector('.fila-total').textContent = displayTotalMes;
+                    
+                    // Actualizar Total General
                     fila.querySelector('.fila-general').textContent = formatNumber(totalGeneral.toFixed(decimales));
 
                     generalValuesMap.set(nom, totalGeneral);
@@ -1903,6 +1921,7 @@
                     const motorNumero = nom.match(/\s(\d)/)?.[1] || null;
 
                     const vieneCelda = fila.querySelector('.fila-vienen');
+                    const mesTotalCelda = fila.querySelector('.fila-total');
                     const generalCelda = fila.querySelector('.fila-general');
                     const limiteCelda = fila.querySelector('.limite-celda');
                     const abbrdCelda = fila.querySelector('.abbrd-celda');
@@ -1910,34 +1929,34 @@
                     const flightCountFactorCelda = fila.querySelector('.flight-count-factor-celda');
                     const restanteCelda = fila.querySelector('.fila-restante');
 
-                    // No es necesario sumar días aquí, ya se hizo para ENGINE STARTS, FLIGHTS, etc.
-
                     // Obtener factores y límite
                     const ABBREVIATED_CYCLE_FACTOR = parseFloat(abbrdCelda?.textContent.trim()) || 0;
                     const EXTENDED_CYCLE_FACTOR = parseFloat(extdCelda?.textContent.trim()) || 0;
                     const FLIGHT_COUNT_FACTOR = parseFloat(flightCountFactorCelda?.textContent.trim()) || 0;
                     const limite = parseFloat(limiteCelda?.textContent.trim()) || 0;
 
-                    let accumulatedTotalCycles = parseFloat(vieneCelda?.textContent.trim()) || 0; // Usamos VIENEN (Total General Mes Anterior) como base
+                    let accumulatedTotalCycles = 0; 
 
                     if (motorNumero !== null) {
-                        // Obtener los TOTALES DEL MES (columna "MES TOTAL") calculados en el PASO 1
-                        const startsMes = parseFloat(tablaActiva.querySelector(`tr[data-nomenclatura="ENGINE STARTS ${motorNumero}"] .fila-total`)?.textContent) || 0;
-                        const flightsMes = parseFloat(tablaActiva.querySelector(`tr[data-nomenclatura="FLIGHTS ${motorNumero}"] .fila-total`)?.textContent) || 0;
-                        const contingencyMes = parseFloat(tablaActiva.querySelector(`tr[data-nomenclatura="CONTINGENCY EXCURSIONS ${motorNumero}"] .fila-total`)?.textContent) || 0;
+                        // Leer los totales generales del Map, que fueron actualizados en el Paso 1 
+                        const startsTotalGeneral = generalValuesMap.get(`ENGINE STARTS ${motorNumero}`) || 0;
+                        const flightsTotalGeneral = generalValuesMap.get(`FLIGHTS ${motorNumero}`) || 0;
+                        const contingencyTotalGeneral = generalValuesMap.get(`CONTINGENCY EXCURSIONS ${motorNumero}`) || 0;
 
-                        const termStartsMes = startsMes;
-                        let termFlightsStartsMes = 0;
-                        if (ABBREVIATED_CYCLE_FACTOR !== 0) {
-                            termFlightsStartsMes = (flightsMes - startsMes) / ABBREVIATED_CYCLE_FACTOR;
-                        }
-                        const termContingencyMes = contingencyMes * EXTENDED_CYCLE_FACTOR;
-                        const sumOfTermsMes = termStartsMes + termFlightsStartsMes + termContingencyMes;
+                        // La base del cálculo (Total General Acumulado) es SIEMPRE la suma de 3 términos
                         
-                        const cyclesThisMonthCalculated = sumOfTermsMes * FLIGHT_COUNT_FACTOR;
+                        const termStarts = startsTotalGeneral;
+                        let termFlightsStarts = 0;
+                        if (ABBREVIATED_CYCLE_FACTOR !== 0) {
+                            termFlightsStarts = (flightsTotalGeneral - startsTotalGeneral) / ABBREVIATED_CYCLE_FACTOR;
+                        }
+                        const termContingency = contingencyTotalGeneral * EXTENDED_CYCLE_FACTOR;
+                        const sumOfTerms = termStarts + termFlightsStarts + termContingency;
+                        
+                        accumulatedTotalCycles = sumOfTerms * FLIGHT_COUNT_FACTOR;
 
-                        // Sumamos el valor 'VIENEN' (acumulado anterior) más los ciclos calculados de este mes
-                        accumulatedTotalCycles = (parseFloat(vieneCelda?.textContent.trim()) || 0) + cyclesThisMonthCalculated;
+                        // El Mes Total de un componente es CERO
+                        mesTotalCelda.textContent = "0"; 
                     }
                     
                     // Actualizar Total General y Restante
@@ -1945,25 +1964,6 @@
                     const restante = limite - accumulatedTotalCycles;
                     
                     aplicarEstiloRestante(restanteCelda, restante.toFixed(0), limite);
-                    
-                    // Almacenar el valor GENERAL calculado para las filas de CICLOS
-                    if (motorNumero !== null) {
-                        generalValuesMap.set(`CICLOS ${motorNumero}`, accumulatedTotalCycles);
-                    }
-
-                } else if (filasConColumnasAdicionalesSoloEtiquetas.includes(nom)) {
-                    // Lógica para filas CICLOS (solo total mes y general)
-                    const motorNumero = nom.match(/\s(\d)/)?.[1] || null;
-
-                    // El total mes de CICLOS es el mismo que ENGINE STARTS
-                    const startsMes = parseFloat(tablaActiva.querySelector(`tr[data-nomenclatura="ENGINE STARTS ${motorNumero}"] .fila-total`)?.textContent) || 0;
-                    fila.querySelector('.fila-total').textContent = formatNumber(startsMes.toFixed(0));
-
-                    // El total general de CICLOS es el valor calculado en el PASO 2.
-                    const ciclosCalculados = generalValuesMap.get(nom) || 0;
-                    
-                    // Actualizar el valor GENERAL (Total Acumulado Calculado)
-                    fila.querySelector('.fila-general').textContent = formatNumber(ciclosCalculados.toFixed(0));
                 }
             });
             
@@ -2285,7 +2285,6 @@
                 if (newValue === 0) return; 
 
                 const row = activeTable.querySelector(`tr[data-nomenclatura="${item.nomenclatura}"]`);
-                // Asegurarse de que el índice de la celda es correcto
                 const cell = row ? row.querySelector(`td[data-dia="${targetDay}"]`) : null; 
                 const existingValue = parseFloat(cell?.textContent.trim()) || 0;
 
@@ -2299,7 +2298,7 @@
                 document.getElementById('dataConflictModal').style.display = 'flex';
                 flightDataModal.style.display = 'none';
             } else {
-                // Sin conflicto: aplicar los datos directamente (modo 'overwrite' es igual a 'sum' si el valor actual es 0)
+                // Sin conflicto: aplicar los datos directamente (modo 'overwrite' es igual a 'sum' if el valor actual es 0)
                 applyFlightData('sum'); 
             }
         }
@@ -2366,26 +2365,27 @@
                 }
             });
 
-            // 2. Recalcular y guardar en Firebase
-            actualizarTotales(); // CORREGIDO: Llamar a la actualización antes del guardado
+            // 2. Recalcular y guardar en Firebase (CRUCIAL para que los ciclos se actualicen antes de la confirmación)
+            actualizarTotales(); 
             
+            // 3. Guardar en Firebase (con los nuevos totales ya calculados)
             guardarDatosEnFirebase(añoActual, mesActual, obtenerDatosTabla(mesActual), recordatorioTextarea.value)
                 .then(() => {
-                    // 3. Ocultar modales de ingreso y conflicto y limpiar inputs
+                    // 4. Ocultar modales de ingreso y conflicto y limpiar inputs
                     flightDataModal.style.display = 'none';
                     document.getElementById('dataConflictModal').style.display = 'none';
                     
                     // Limpiar inputs (uso de allInputs corregido)
                     allInputs.forEach(input => input.value = ''); 
 
-                    // 4. Mostrar modal de confirmación con los datos originales del QR
+                    // 5. Mostrar modal de confirmación con los datos originales del QR
                     showConfirmationModal(activeTable, dataParaConfirmar); 
                 })
                 .catch(error => {
                     showCustomAlert(`Error al guardar datos después de conflicto: ${error.message}`);
                 });
             
-            // 5. Limpiar los datos pendientes (la copia local ya fue pasada al modal de confirmación)
+            // 6. Limpiar los datos pendientes (la copia local ya fue pasada al modal de confirmación)
             pendingFlightData = null;
         }
 
@@ -2432,7 +2432,7 @@
                 
                 // Formatear los strings
                 const vienenStr = vienenNum.toFixed(item.decimales);
-                const sumaStr = `+${item.suma.toFixed(item.decimales)}`;
+                const sumaStr = `${item.suma > 0 ? '+' : ''}${item.suma.toFixed(item.decimales)}`;
                 const generalFinalStr = generalNum.toFixed(item.decimales);
                 
                 // Crear el HTML para este ítem
