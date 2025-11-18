@@ -111,8 +111,8 @@
         <!-- Header banner with logo and text -->
         <div class="bg-custom-yellow p-4 text-center rounded-t-lg border-2 border-black border-b-0">
             <div id="image-viewer" class="mb-2">
-                 <p class="font-bold text-gray-700 mb-2"></p>
-              
+                   <p class="font-bold text-gray-700 mb-2"></p>
+               
             </div>
             <p class="text-sm font-bold text-gray-800 mt-1">ESCN. HELICÓPTEROS</p>
             <p class="text-xs text-gray-800">FUERZA AÉREA HONDUREÑA</p>
@@ -192,7 +192,7 @@
 
                 <!-- Data below the signature -->
                 <div class="flex justify-between items-center w-full mt-4 text-xs">
-                   
+                    
                     <div class="flex items-center space-x-2">
                         <p class="font-bold">Serie</p>
                         <p id="serie" class="editable-cell text-sm font-bold" contenteditable="true"></p>
@@ -213,6 +213,26 @@
     <!-- Buttons and records container, outside the sticker -->
     <div class="no-print w-full max-w-lg mt-4 flex flex-col items-center space-y-4">
         <div id="userInfo" class="text-xs text-center text-gray-600 p-2 bg-gray-200 rounded-md w-full"></div>
+        
+        <!-- Custom Inspection Management (New Feature) -->
+        <div class="w-full p-4 border rounded-md border-gray-300 bg-gray-200">
+            <h3 class="font-bold text-lg text-gray-700 mb-3">Añadir Nueva Plantilla de Inspección</h3>
+            <p class="text-xs text-gray-500 mb-2">Crea una inspección que estará disponible para todos los usuarios. El **Título** será el texto de la inspección.</p>
+
+            <div class="space-y-2">
+                <select id="newModelSelect" class="w-full px-2 py-1 border border-black rounded-md bg-white text-base font-bold">
+                    <option value="bell412">Bell 412</option>
+                    <option value="uh1h">UH-1H</option>
+                </select>
+                <input type="text" id="newGroupLabel" placeholder="Nombre del Grupo (Ej: Inspecciones Custom)" class="w-full px-2 py-1 border border-black rounded-md">
+                <input type="text" id="newItemTitle" placeholder="Título de la Inspección (Ej: Chequeo de Batería)" class="w-full px-2 py-1 border border-black rounded-md">
+                <input type="text" id="newItemHours" placeholder="Horas (Opcional, Ej: 100)" class="w-full px-2 py-1 border border-black rounded-md">
+            </div>
+            <button id="addCustomInspectionBtn" class="w-full mt-3 px-6 py-2 bg-purple-600 text-white font-bold rounded-md hover:bg-purple-700 transition-colors duration-200">
+                Guardar Plantilla
+            </button>
+        </div>
+
         <!-- New file upload and scan buttons -->
         <div class="flex flex-col items-center space-y-2 w-full p-4 border rounded-md border-gray-300 bg-gray-200">
             <h3 class="font-bold text-lg text-gray-700">Escanear Documento (IA)</h3>
@@ -230,7 +250,7 @@
             <button id="showRecordsButton" class="px-6 py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 transition-colors duration-200">
                 Mostrar Registros
             </button>
-             <button onclick="window.print()" class="px-6 py-2 bg-gray-600 text-white font-bold rounded-md transition-colors duration-200">
+            <button onclick="window.print()" class="px-6 py-2 bg-gray-600 text-white font-bold rounded-md transition-colors duration-200">
                 Imprimir
             </button>
         </div>
@@ -274,16 +294,9 @@
         setLogLevel('debug');
         
         // --- Canvas Global Variables (MANDATORY) ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'reportesti-41047';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyAnDAVVRTnl_SHejO7lyqrkGbPcFNyIBHc",
-            authDomain: "reportesti-41047.firebaseapp.com",
-            projectId: "reportesti-41047",
-            storageBucket: "reportesti-41047.appspot.com",
-            messagingSenderId: "997680984231",
-            appId: "1:997680984231:web:d9c27e1ac8eaf9473feb82"
-        };
-         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : undefined;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : undefined;
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -293,6 +306,9 @@
         // State management
         let currentDocId = null;
         let userId = null;
+        let customInspections = {}; // To hold user-added templates
+        const customInspectionsCollectionPath = `/artifacts/${appId}/public/data/custom_inspections`;
+
 
         // UI Elements
         const modelSelect = document.getElementById('model-select');
@@ -308,9 +324,15 @@
         const clearBtn = document.getElementById('clearSignatureBtn');
         const imageUpload = document.getElementById('imageUpload');
         const scanImageBtn = document.getElementById('scanImageBtn');
-        const mainImage = document.getElementById('main-image');
         const userInfo = document.getElementById('userInfo');
         
+        // New Custom Inspection UI Elements
+        const newModelSelect = document.getElementById('newModelSelect');
+        const newGroupLabel = document.getElementById('newGroupLabel');
+        const newItemTitle = document.getElementById('newItemTitle');
+        const newItemHours = document.getElementById('newItemHours');
+        const addCustomInspectionBtn = document.getElementById('addCustomInspectionBtn');
+
         const signatureModal = document.getElementById('signatureModal');
         const modalSignatureCanvas = document.getElementById('modalSignatureCanvas');
         const modalCtx = modalSignatureCanvas.getContext('2d');
@@ -319,10 +341,11 @@
         const clearModalSignatureBtn = document.getElementById('clearModalSignatureBtn');
 
 
-        // --- Data Structure for Inspections ---
+        // --- Data Structure for Inspections (Static/Predefined) ---
         const inspections = {
+            
             bell412: {
-                 label: "Bell 412",
+                label: "Bell 412",
                 scheduled_inspections_a: {
                     label: "Scheduled Inspections - Part A",
                     items: {
@@ -378,6 +401,7 @@
                         '3600_hours_airframe': { title: "3600 Hours Total Airframe Time and Each 300 Hours/12 Months Inspection (DMC-412-A-05-47-00-24A-283A-A / 00059)", hours: 3600 },
                         '3000_hours_transmission_mount': { title: "Each 3000 Hours or 5 Years Of Transmission Mount Assembly (204-031-927) And Friction Damper Assembly (204-031-920) Operation (DMC-412-A-05-47-00-28A-283A-A / 00060)", hours: 3000 },
                         '2500_hours_collective_stick_tube': { title: "Each 2500 Hours or 10 Years Inspection Of Collective Stick Tube (DMC-412-A-05-47-00-29A-283A-A / 00061)", hours: 2500 },
+                        
                     }
                 },
                 remi: {
@@ -425,7 +449,7 @@
                 },
                 phase_b: {
                     label: "Inspección de Fase B (Cada 50 Horas)",
-                     items: {
+                    items: {
                         phase_b_1: { title: "Lubricacion general de la aeronave." },
                         phase_b_2: { title: "Chequeo de las baterias." },
                         phase_b_3: { title: "Inspeccion del sistema de extincion de incendios." },
@@ -451,7 +475,7 @@
                         phase_d_4: { title: "Inspeccion detallada de la estructura de la aeronave." }
                     }
                 },
-                 phase_e: {
+                phase_e: {
                     label: "Inspección de Fase E (Cada 600 Horas)",
                     items: {
                         phase_e_1: { title: "Reemplazo de los filtros del sistema hidraulico." },
@@ -460,7 +484,7 @@
                         phase_e_4: { title: "Chequeo del sistema de calefaccion y ventilacion." }
                     }
                 },
-                 phase_f: {
+                phase_f: {
                     label: "Inspección de Fase F (Cada 1200 Horas)",
                     items: {
                         phase_f_1: { title: "Inspeccion estructural profunda (NDI segun sea requerido)." },
@@ -491,6 +515,7 @@
                     saveButton.disabled = false;
                     showRecordsButton.disabled = false;
                     scanImageBtn.disabled = false;
+                    addCustomInspectionBtn.disabled = false;
                 } else {
                     userId = null;
                     statusMessage.textContent = 'No autenticado. Por favor, recargue la página.';
@@ -499,6 +524,7 @@
                     saveButton.disabled = true;
                     showRecordsButton.disabled = true;
                     scanImageBtn.disabled = true;
+                    addCustomInspectionBtn.disabled = true;
                 }
             });
 
@@ -508,33 +534,143 @@
                 } else {
                     await signInAnonymously(auth);
                 }
+                await loadCustomInspections(); // Load custom templates on start
             } catch (error) {
                 console.error("Error de autenticación: ", error);
+            }
+        }
+        
+        // --- Custom Inspections Logic ---
+        async function loadCustomInspections() {
+            if (!userId) return; // Wait for authentication
+
+            try {
+                const q = query(collection(db, customInspectionsCollectionPath));
+                const querySnapshot = await getDocs(q);
+                customInspections = {}; // Reset
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const modelKey = data.model;
+                    const groupKey = data.groupKey;
+                    const itemKey = data.itemKey;
+
+                    if (!customInspections[modelKey]) customInspections[modelKey] = {};
+                    if (!customInspections[modelKey][groupKey]) {
+                        customInspections[modelKey][groupKey] = {
+                            label: data.groupLabel,
+                            items: {}
+                        };
+                    }
+                    customInspections[modelKey][groupKey].items[itemKey] = {
+                        title: data.itemTitle,
+                        hours: data.hours ? parseInt(data.hours, 10) : undefined,
+                        isCustom: true // Mark as custom
+                    };
+                });
+                console.log("Custom inspections loaded:", customInspections);
+                // After loading, re-populate the selector
+                populateTaskSelector(modelSelect.value);
+            } catch (error) {
+                console.error("Error loading custom inspections:", error);
+            }
+        }
+
+        async function saveCustomInspection() {
+            if (!userId) {
+                statusMessage.textContent = 'Error: No se ha identificado al usuario.';
+                statusMessage.style.color = 'red';
+                return;
+            }
+
+            const model = newModelSelect.value.trim();
+            const groupLabel = newGroupLabel.value.trim();
+            const itemTitle = newItemTitle.value.trim();
+            const hours = newItemHours.value.trim() ? parseInt(newItemHours.value.trim(), 10) : null;
+
+            if (!model || !groupLabel || !itemTitle) {
+                statusMessage.textContent = 'Por favor, rellena el modelo, nombre del grupo y título.';
+                statusMessage.style.color = 'orange';
+                return;
+            }
+
+            // Create machine-friendly keys
+            const groupKey = groupLabel.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+            const itemKey = itemTitle.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+            
+            // Basic check for existence
+            if (inspections[model]?.[groupKey]?.items?.[itemKey] || customInspections[model]?.[groupKey]?.items?.[itemKey]) {
+                statusMessage.textContent = 'Error: Esta plantilla ya existe.';
+                statusMessage.style.color = 'red';
+                return;
+            }
+
+            const dataToSave = {
+                model,
+                groupKey,
+                groupLabel,
+                itemKey,
+                itemTitle,
+                hours: hours,
+                createdBy: userId,
+                timestamp: new Date()
+            };
+
+            try {
+                statusMessage.textContent = 'Guardando nueva plantilla...';
+                await addDoc(collection(db, customInspectionsCollectionPath), dataToSave);
+                statusMessage.textContent = '¡Plantilla guardada y disponible para todos los usuarios!';
+                statusMessage.style.color = 'green';
+                
+                // Clear inputs
+                newGroupLabel.value = '';
+                newItemTitle.value = '';
+                newItemHours.value = '';
+
+                await loadCustomInspections(); // Reload custom inspections and update the selector
+            } catch (e) {
+                statusMessage.textContent = 'Error al guardar la plantilla.';
+                statusMessage.style.color = 'red';
+                console.error("Error al guardar plantilla: ", e);
             }
         }
 
         // --- Form generation functions ---
         function populateTaskSelector(modelKey) {
             taskTypeSelect.innerHTML = '<option value="none">Seleccionar y Añadir Trabajo</option>';
-            const modelData = inspections[modelKey];
+            
+            const staticData = inspections[modelKey] || {};
+            const customData = customInspections[modelKey] || {};
 
-            for (const groupKey in modelData) {
-                if (groupKey === 'label') continue; // Skip the model label
+            // Combine the keys from both static and custom groups
+            const allGroupKeys = new Set([...Object.keys(staticData), ...Object.keys(customData)]);
 
-                const group = modelData[groupKey];
+            allGroupKeys.forEach(groupKey => {
+                if (groupKey === 'label') return;
+
+                const staticGroup = staticData[groupKey] || { items: {} };
+                const customGroup = customData[groupKey] || { items: {} };
+                
+                // Determine the final group object (prefer static label if exists, otherwise custom)
+                const group = {
+                    label: staticGroup.label || customGroup.label,
+                    items: { ...staticGroup.items, ...customGroup.items }
+                };
+
+                if (!group.label || Object.keys(group.items).length === 0) return;
+
                 const optgroup = document.createElement('optgroup');
                 optgroup.label = group.label;
 
                 for (const itemKey in group.items) {
                     const item = group.items[itemKey];
                     const option = document.createElement('option');
-                    // The value now needs to include the model key
                     option.value = `${modelKey}.${groupKey}.${itemKey}`;
                     option.textContent = item.title;
                     optgroup.appendChild(option);
                 }
                 taskTypeSelect.appendChild(optgroup);
-            }
+            });
         }
 
         function createItemElement(text, itemKey) {
@@ -556,45 +692,55 @@
         }
         
         function addItemToGroupBlock(modelKey, groupKey, itemKey) {
-             const groupData = inspections[modelKey][groupKey];
-             const itemData = groupData.items[itemKey];
-             if (!itemData) return;
+            // Merge static and custom data for the current model
+            const mergedGroups = {
+                ...(inspections[modelKey] || {}),
+                ...(customInspections[modelKey] || {})
+            };
+            
+            const groupData = mergedGroups[groupKey];
+            const itemData = groupData?.items[itemKey];
+            
+            if (!itemData) return;
 
-             let groupBlock = document.getElementById(`trabajo-group-${groupKey}`);
-             if (!groupBlock) {
-                 groupBlock = document.createElement('div');
-                 groupBlock.id = `trabajo-group-${groupKey}`;
-                 groupBlock.dataset.groupKey = groupKey;
-                 groupBlock.classList.add('mt-4');
-                 const header = document.createElement('div');
-                 header.classList.add('flex', 'justify-between', 'items-center', 'font-bold', 'text-sm', 'text-white', 'bg-custom-blue', 'p-1', 'rounded-t-md');
-                 header.innerHTML = `
-                     <p>${groupData.label}</p>
-                     <button class="remove-block-btn text-white hover:text-red-300 font-bold px-2 no-print text-xl">&times;</button>
-                 `;
-                 header.querySelector('.remove-block-btn').onclick = () => { groupBlock.remove(); updateItemNumbers(); };
-                 groupBlock.appendChild(header);
+            let groupBlock = document.getElementById(`trabajo-group-${groupKey}`);
+            if (!groupBlock) {
+                groupBlock = document.createElement('div');
+                groupBlock.id = `trabajo-group-${groupKey}`;
+                groupBlock.dataset.groupKey = groupKey;
+                groupBlock.classList.add('mt-4');
+                const header = document.createElement('div');
+                header.classList.add('flex', 'justify-between', 'items-center', 'font-bold', 'text-sm', 'text-white', 'bg-custom-blue', 'p-1', 'rounded-t-md');
+                header.innerHTML = `
+                    <p>${groupData.label}</p>
+                    <button class="remove-block-btn text-white hover:text-red-300 font-bold px-2 no-print text-xl">&times;</button>
+                `;
+                header.querySelector('.remove-block-btn').onclick = () => { groupBlock.remove(); updateItemNumbers(); };
+                groupBlock.appendChild(header);
 
-                 const contentContainer = document.createElement('div');
-                 contentContainer.classList.add('border-2', 'border-t-0', 'border-black', 'rounded-b-md', 'p-2', 'bg-white', 'space-y-2');
-                 const listContent = document.createElement('div');
-                 listContent.classList.add('list-content', 'space-y-1');
-                 contentContainer.appendChild(listContent);
-                 groupBlock.appendChild(contentContainer);
-                 trabajosContainer.appendChild(groupBlock);
-             }
+                const contentContainer = document.createElement('div');
+                contentContainer.classList.add('border-2', 'border-t-0', 'border-black', 'rounded-b-md', 'p-2', 'bg-white', 'space-y-2');
+                const listContent = document.createElement('div');
+                listContent.classList.add('list-content', 'space-y-1');
+                contentContainer.appendChild(listContent);
+                groupBlock.appendChild(contentContainer);
+                trabajosContainer.appendChild(groupBlock);
+            }
 
-             const listContent = groupBlock.querySelector('.list-content');
-             if (listContent.querySelector(`[data-item-key="${itemKey}"]`)) return;
-
-             if (groupKey === 'remi') {
-                  listContent.appendChild(createItemElement(removalDescription, 'remi_remocion'));
-                  listContent.appendChild(createItemElement(installationDescription, 'remi_instalacion'));
-             } else {
-                  listContent.appendChild(createItemElement(itemData.title, itemKey));
-             }
-             updateItemNumbers();
-         }
+            const listContent = groupBlock.querySelector('.list-content');
+            
+            // Logic to prevent adding duplicate items
+            if (listContent.querySelector(`[data-item-key="${itemKey}"]`)) return;
+            
+            // Special handling for R/I (Remoción/Instalación)
+            if (groupKey === 'remi') {
+                listContent.appendChild(createItemElement(removalDescription, 'remi_remocion'));
+                listContent.appendChild(createItemElement(installationDescription, 'remi_instalacion'));
+            } else {
+                listContent.appendChild(createItemElement(itemData.title, itemKey));
+            }
+            updateItemNumbers();
+        }
 
         function updateItemNumbers() {
             const allItems = document.querySelectorAll('#trabajos-container .item-number');
@@ -610,26 +756,38 @@
         });
 
         taskTypeSelect.addEventListener('change', () => {
-             const selectedValue = taskTypeSelect.value;
-             if (selectedValue === 'none') return;
-             const [modelKey, groupKey, itemKey] = selectedValue.split('.');
-             const selectedItemData = inspections[modelKey]?.[groupKey]?.items[itemKey];
+              const selectedValue = taskTypeSelect.value;
+              if (selectedValue === 'none') return;
+              const [modelKey, groupKey, itemKey] = selectedValue.split('.');
 
-             if (selectedItemData && typeof selectedItemData.hours === 'number') {
-                 const parentGroup = inspections[modelKey][groupKey].items;
-                 for (const currentItemKey in parentGroup) {
-                     const currentItemData = parentGroup[currentItemKey];
-                     if (typeof currentItemData.hours === 'number' && currentItemData.hours <= selectedItemData.hours) {
-                         addItemToGroupBlock(modelKey, groupKey, currentItemKey);
-                     }
-                 }
-             } else {
-                 addItemToGroupBlock(modelKey, groupKey, itemKey);
-             }
-             taskTypeSelect.value = 'none';
-         });
+              // Combine static and custom data to find the selected item
+              const mergedGroups = {
+                  ...(inspections[modelKey] || {}),
+                  ...(customInspections[modelKey] || {})
+              };
 
-        // --- Signature Pad functionality ---
+              const groupData = mergedGroups[groupKey];
+              const selectedItemData = groupData?.items[itemKey];
+
+              if (selectedItemData && typeof selectedItemData.hours === 'number' && groupKey !== 'remi') {
+                  const parentGroupItems = groupData.items;
+                  for (const currentItemKey in parentGroupItems) {
+                      const currentItemData = parentGroupItems[currentItemKey];
+                      if (typeof currentItemData.hours === 'number' && currentItemData.hours <= selectedItemData.hours) {
+                          addItemToGroupBlock(modelKey, groupKey, currentItemKey);
+                      }
+                  }
+              } else {
+                  addItemToGroupBlock(modelKey, groupKey, itemKey);
+              }
+              taskTypeSelect.value = 'none';
+        });
+
+        // Event listener for adding custom inspection
+        addCustomInspectionBtn.addEventListener('click', saveCustomInspection);
+
+
+        // --- Signature Pad functionality (Unchanged) ---
         let drawing = false;
         let modalDrawing = false;
         
@@ -643,7 +801,15 @@
             targetCtx.fillStyle = '#fff';
             targetCtx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
         }
-        window.addEventListener('resize', () => resizeCanvas(canvas, ctx));
+        window.addEventListener('resize', () => {
+            resizeCanvas(canvas, ctx);
+            // Re-load the signature if it exists
+            const img = new Image();
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            };
+            img.src = canvas.toDataURL();
+        });
         resizeCanvas(canvas, ctx);
 
         function startPosition(e, targetCtx, isModal) { 
@@ -674,6 +840,10 @@
         canvas.addEventListener('click', () => {
             signatureModal.classList.remove('hidden');
             resizeCanvas(modalSignatureCanvas, modalCtx);
+            // Copy existing signature to modal canvas
+            modalCtx.clearRect(0, 0, modalSignatureCanvas.width, modalSignatureCanvas.height);
+            modalCtx.fillStyle = '#fff';
+            modalCtx.fillRect(0, 0, modalSignatureCanvas.width, modalSignatureCanvas.height);
             modalCtx.drawImage(canvas, 0, 0, modalSignatureCanvas.width, modalSignatureCanvas.height);
         });
         
@@ -703,10 +873,13 @@
                 mechanicInfo += ` / ${licNoText}`;
             }
 
+            // Draw mechanic info on modal canvas before copying
             if (mechanicInfo) {
                 modalCtx.font = "16px Inter";
                 modalCtx.fillStyle = "black";
                 modalCtx.textAlign = "center";
+                // Clear the bottom area first to avoid text overlap on redraw
+                modalCtx.clearRect(0, modalSignatureCanvas.height - 30, modalSignatureCanvas.width, 30); 
                 modalCtx.fillText(mechanicInfo, modalSignatureCanvas.width / 2, modalSignatureCanvas.height - 10);
             }
 
@@ -731,7 +904,7 @@
             img.src = base64Data;
         }
 
-        // --- Firestore save and update functionality ---
+        // --- Firestore save and update functionality (Unchanged) ---
         async function saveToFirestore() {
             if (!userId) {
                 statusMessage.textContent = 'Error: No se ha identificado al usuario.';
@@ -751,9 +924,9 @@
                     });
                 });
                 if (items.length > 0) {
-                     // Find the group label dynamically
+                     // Find the group label dynamically (using static or custom data)
                     const modelKey = modelSelect.value;
-                    const groupLabel = inspections[modelKey]?.[groupKey]?.label || groupKey;
+                    const groupLabel = (inspections[modelKey]?.[groupKey]?.label || customInspections[modelKey]?.[groupKey]?.label) || groupKey;
                     trabajos_realizados.push({ groupKey, groupLabel, items });
                 }
             });
@@ -818,11 +991,11 @@
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const fileDataUrl = e.target.result;
-                mainImage.src = fileDataUrl;
                 const base64Data = fileDataUrl.split(',')[1];
                 
+                // --- Model Update ---
                 const apiKey = ""; 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
                 const prompt = "Extrae los datos de la etiqueta de mantenimiento en la imagen. No incluyas los títulos de las celdas, solo los valores. Si un campo está vacío, déjalo como una cadena vacía. Devuelve los datos como un objeto JSON con las siguientes claves: 'fecha_inicio', 'fecha_finalizacion', 'modelo', 'eng1_tsn_tso', 'numero_de_serie', 'eng1_csn_cso', 'matricula', 'eng2_tsn_tso', 'ac_tt', 'eng2_csn_cso', 'tq', 'cbox_tsn_tso', 'landings', 'cbox_csn_cso', 'serie', 'licencia', 'jefe_taller'.";
                 
@@ -914,7 +1087,8 @@
 
             // Set model selector first
             modelSelect.value = data.selectedModel || 'bell412';
-            populateTaskSelector(modelSelect.value);
+            // Reload task selector to include custom tasks if they were added after this record was created
+            populateTaskSelector(modelSelect.value); 
 
             Object.keys(initialValues).forEach(key => {
                 const element = document.getElementById(key);
@@ -928,16 +1102,20 @@
             trabajosContainer.innerHTML = '';
             if (data.trabajos_realizados && Array.isArray(data.trabajos_realizados)) {
                 data.trabajos_realizados.forEach(groupData => {
-                     if (groupData.items && Array.isArray(groupData.items)) {
-                         groupData.items.forEach(item => {
-                             addItemToGroupBlock(data.selectedModel, groupData.groupKey, item.key);
-                             const addedElement = trabajosContainer.querySelector(`[data-item-key="${item.key}"] p`);
-                             if(addedElement) {
-                                 addedElement.textContent = item.text;
-                             }
-                         });
-                     }
-                 });
+                     // Ensure the necessary group block is created first
+                    if (groupData.items && Array.isArray(groupData.items)) {
+                        groupData.items.forEach(item => {
+                            // addItemToGroupBlock will find the group/item template and add the skeleton
+                            addItemToGroupBlock(data.selectedModel, groupData.groupKey, item.key);
+                            
+                            // Now find the specific element (p tag) and inject the saved custom text
+                            const addedElement = trabajosContainer.querySelector(`[data-item-key="${item.key}"] p`);
+                            if(addedElement) {
+                                addedElement.textContent = item.text;
+                            }
+                        });
+                    }
+                });
             }
             updateItemNumbers();
         }
@@ -960,5 +1138,3 @@
     </script>
 </body>
 </html>
-
-
