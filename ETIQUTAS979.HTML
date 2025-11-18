@@ -294,8 +294,20 @@
         setLogLevel('debug');
         
         // --- Canvas Global Variables (MANDATORY) ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'vitacoradevuelo-b0522';
+        
+        // ** CONFIGURACIÓN DE FIREBASE PROPORCIONADA POR EL USUARIO **
+        const firebaseConfig = {
+            apiKey: "AIzaSyD05kS-mmrEMVR0MVOZBumEa4d398h-Q9U",
+            authDomain: "vitacoradevuelo-b0522.firebaseapp.com",
+            projectId: "vitacoradevuelo-b0522",
+            storageBucket: "vitacoradevuelo-b0522.firebasestorage.app",
+            messagingSenderId: "376011034335",
+            appId: "1:376011034335:web:54b2d391fc7c228097636a",
+            measurementId: "G-C56989L229"
+        };
+        // ** NOTA: Usamos esta configuración directamente, ignorando __firebase_config por la instrucción del usuario. **
+        
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : undefined;
 
         // Initialize Firebase
