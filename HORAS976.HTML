@@ -4,9 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Datos de Vuelo FAH-976</title>
+    <!-- Carga de Tailwind CSS para el diseño responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Estilos generales del cuerpo y fondo */
+        /* Estilos generales del cuerpo y fondo, incluyendo la fuente Inter */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -138,6 +140,7 @@
         #main-app-content {
             display: none; /* Oculto por defecto */
             width: 100%;
+            max-width: 100%; /* Asegurar ancho responsivo */
         }
         #main-app-header {
             display: flex;
@@ -653,7 +656,7 @@
         import { getDatabase, ref, set, onValue, get } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
         import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js';
 
-        // Tu configuración de Firebase (actualizada con la que proporcionaste)
+        // Configuración de Firebase (Se asume que esta configuración es la deseada por el usuario)
         const firebaseConfig = {
             apiKey: "AIzaSyASg6fgH-Lo6PXLnnw_p8LzHl-WNDiuHrU",
             authDomain: "fah-901-ba5f4.firebaseapp.com",
@@ -666,14 +669,13 @@
         };
         // Inicializa Firebase
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app); // Opcional, si no lo usas puedes quitarlo
-        const database = getDatabase(app); // Obtiene la instancia de Realtime Database
-        const auth = getAuth(app); // Obtiene la instancia de Autenticación
+        const analytics = getAnalytics(app); // Opcional
+        const database = getDatabase(app); // Realtime Database
+        const auth = getAuth(app); // Autenticación
 
-        // --- CORRECCIÓN AQUÍ ---
-        // Usamos un ID de proyecto fijo y compartido para que ambas páginas (principal e inspecciones)
-        // se comuniquen con la misma ubicación, respetando la estructura de tus reglas de seguridad.
-        const sharedProjectId = "FAH-976-DATA";
+        // --- ID de Proyecto Compartido (Base de Datos 976) ---
+        // Este ID es crucial para la base de datos pública de FAH-976.
+        const sharedProjectId = "FAH-976-DATA"; 
 
         // Define __app_id con un valor por defecto si no está definida
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -682,7 +684,7 @@
         // Variables globales
         let añoActual = new Date().getFullYear(); // Inicia con el año actual
         let mesActual = new Date().getMonth(); // Inicia con el mes actual (0-11)
-        let userId = "anonimo"; // Valor por defecto, se actualizará con el UID de Firebase Auth
+        let userId = "anonimo"; // Valor por defecto
         let currentUserRole = null; // Rol del usuario actual
 
         const años = [2024, 2025, 2026, 2027, 2028];
@@ -753,7 +755,7 @@
             }
         };
 
-        // Referencias a elementos del DOM
+        // Referencias a elementos del DOM (se mantienen igual)
         const contenedorTablas = document.getElementById("contenedor-tablas");
         const contenedorMeses = document.getElementById("meses");
         const selectYear = document.getElementById("select-year");
@@ -784,7 +786,7 @@
         // Botón de inspecciones
         const btnInspections = document.getElementById('inspections-btn');
 
-        // Helper para extraer la nomenclatura base y la variante (ej. "HUB COMPRESOR" y "1.1")
+        // Helper para extraer la nomenclatura base y la variante
         function parseNomenclatura(nombreCompleto) {
             let nomenclaturaBase = '';
             let varianteClave = ''; 
@@ -799,8 +801,7 @@
         }
 
         /**
-         * Formatea un número para mostrarlo sin decimales si es un entero,
-         * o con decimales si tiene parte fraccionaria.
+         * Formatea un número para mostrarlo sin decimales si es un entero.
          * @param {number|string} value El valor a formatear.
          * @returns {string} El valor formateado como string.
          */
@@ -810,16 +811,21 @@
                 return '';
             }
             // Si el número es un entero (no tiene parte decimal), lo devuelve como entero.
-            // De lo contrario, lo devuelve con sus decimales originales.
             if (num % 1 === 0) {
                 return num.toString();
             } else {
-                return num.toString();
+                // Limitar a 2 decimales para AC HRS si no es entero, pero mantener los decimales originales si son más
+                const valueStr = num.toString();
+                if (valueStr.includes('.')) {
+                    // Si el valor original tiene más de 2 decimales, lo devuelve tal cual
+                    return valueStr;
+                }
+                return num.toFixed(1).replace(/\.0$/, ''); 
             }
         }
 
         // -----------------------------------------------------------
-        // Funciones de Autenticación
+        // Funciones de Autenticación (Se mantienen igual)
         // -----------------------------------------------------------
 
         signupBtn.addEventListener('click', async () => {
@@ -958,8 +964,8 @@
                     const isRestanteCell = celda.classList.contains('fila-restante');
                     const isMotorHeader = celda.classList.contains('motor-header');
                     const isLabelCell = celda.classList.contains('limite-label') || celda.classList.contains('abbrd-label') || 
-                                        celda.classList.contains('extd-label') || celda.classList.contains('flight-count-factor-label') || 
-                                        celda.classList.contains('restante-label');
+                                             celda.classList.contains('extd-label') || celda.classList.contains('flight-count-factor-label') || 
+                                             celda.classList.contains('restante-label');
 
                     if (isNomenclatura || isTotalCell || isRestanteCell || isMotorHeader || isLabelCell) {
                         celda.contentEditable = 'false';
@@ -1011,6 +1017,7 @@
                 return;
             }
 
+            // Usando sharedProjectId para guardar los datos de vuelo y recordatorios
             const rutaDatosMes = `artifacts/${sharedProjectId}/public_data/datos_vuelo/${año}/${mesIndex}`;
             const rutaRecordatorio = `artifacts/${sharedProjectId}/public_data/recordatorios/${año}/${mesIndex}`;
 
@@ -1045,26 +1052,36 @@
                     'RINS': 0
                 };
 
+                // Búsqueda de índices para AC HRS (0), ATERRIZAJES (1), RINS (2)
+                const acHrsIndex = nombresFilasOrdenadas.indexOf('AC HRS');
+                const aterrizajesIndex = nombresFilasOrdenadas.indexOf('ATERRIZAJES');
+                const rinsIndex = nombresFilasOrdenadas.indexOf('RINS');
+
                 for (const yearKey in allMonthsData) {
                     if (Object.hasOwnProperty.call(allMonthsData, yearKey)) {
                         const yearData = allMonthsData[yearKey];
                         for (const monthKey in yearData) {
                             if (Object.hasOwnProperty.call(yearData, monthKey)) {
                                 const monthData = yearData[monthKey];
-                                if (monthData && Array.isArray(monthData) && monthData[0] && !isNaN(parseFloat(monthData[0][34]))) {
-                                    newCumulativeTotals['AC HRS'] += parseFloat(monthData[0][34]) || 0; 
-                                }
-                                if (monthData && Array.isArray(monthData) && monthData[1] && !isNaN(parseFloat(monthData[1][34]))) {
-                                    newCumulativeTotals['ATERRIZAJES'] += parseFloat(monthData[1][34]) || 0; 
-                                }
-                                if (monthData && Array.isArray(monthData) && monthData[2] && !isNaN(parseFloat(monthData[2][34]))) {
-                                    newCumulativeTotals['RINS'] += parseFloat(monthData[2][34]) || 0; 
+                                
+                                // Se asume que el índice 34 es la columna GENERAL
+                                if (monthData && Array.isArray(monthData)) {
+                                    if (acHrsIndex !== -1 && monthData[acHrsIndex] && !isNaN(parseFloat(monthData[acHrsIndex][34]))) {
+                                        newCumulativeTotals['AC HRS'] += parseFloat(monthData[acHrsIndex][34]) || 0; 
+                                    }
+                                    if (aterrizajesIndex !== -1 && monthData[aterrizajesIndex] && !isNaN(parseFloat(monthData[aterrizajesIndex][34]))) {
+                                        newCumulativeTotals['ATERRIZAJES'] += parseFloat(monthData[aterrizajesIndex][34]) || 0; 
+                                    }
+                                    if (rinsIndex !== -1 && monthData[rinsIndex] && !isNaN(parseFloat(monthData[rinsIndex][34]))) {
+                                        newCumulativeTotals['RINS'] += parseFloat(monthData[rinsIndex][34]) || 0; 
+                                    }
                                 }
                             }
                         }
                     }
                 }
                 
+                // Usando sharedProjectId para guardar los totales generales
                 const rutaTotalesGenerales = `artifacts/${sharedProjectId}/public_data/totales_generales/Overall`;
                 await set(ref(database, rutaTotalesGenerales), newCumulativeTotals);
                 console.log("Totales generales acumulados guardados:", newCumulativeTotals);
@@ -1080,6 +1097,7 @@
                 return;
             }
 
+            // Usando sharedProjectId para cargar los datos de vuelo y recordatorios
             const rutaDatosMes = `artifacts/${sharedProjectId}/public_data/datos_vuelo/${añoActual}/${mesActual}`;
             const rutaRecordatorio = `artifacts/${sharedProjectId}/public_data/recordatorios/${añoActual}/${mesActual}`;
 
@@ -1119,6 +1137,11 @@
             const tabla = document.querySelectorAll(".tabla-vuelo")[indiceTabla];
             if (tabla) {
                 tabla.querySelectorAll('tbody tr').forEach(fila => {
+                    const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
+                    if (!nomenclaturaCompleta) return; // Saltar si no hay nomenclatura (ej: filas de encabezado de motor)
+
+                    const isEditableComponentRow = filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta);
+                    
                     fila.querySelectorAll('td').forEach((celda, indexCelda) => {
                         const isNomenclatura = celda.classList.contains('nomenclatura');
                         const isTotalCell = celda.classList.contains('fila-total') || celda.classList.contains('fila-general');
@@ -1129,36 +1152,33 @@
                                                     celda.classList.contains('extd-label') || celda.classList.contains('flight-count-factor-label') || 
                                                     celda.classList.contains('restante-label');
 
-                        if (isMotorHeader || isNomenclatura || isTotalCell || isRestanteCell || isSpecificLabelCell) {
+                        if (isMotorHeader || isNomenclatura || isSpecificLabelCell) {
+                            // Celdas de solo lectura que deben mantener su valor fijo (nomenclatura o etiquetas)
                             if (isSpecificLabelCell) {
-                                if (celda.classList.contains('limite-label')) {
-                                    celda.textContent = 'LIMITE';
-                                    celda.classList.add('label-yellow');
-                                }
-                                if (celda.classList.contains('abbrd-label')) {
-                                    celda.textContent = 'ABBR\'D';
-                                    celda.classList.add('label-yellow');
-                                }
-                                if (celda.classList.contains('extd-label')) {
-                                    celda.textContent = 'EXT\'D';
-                                    celda.classList.add('label-yellow');
-                                }
-                                if (celda.classList.contains('flight-count-factor-label')) {
-                                    celda.textContent = 'FLIGHT COUNT FACTOR';
-                                    celda.classList.add('label-yellow');
-                                }
-                                if (celda.classList.contains('restante-label')) {
-                                    celda.textContent = 'RESTANTE';
-                                    celda.classList.add('label-red', 'blinking');
-                                }
+                                // Reiniciar etiquetas
+                                const originalText = celda.classList.contains('limite-label') ? 'LIMITE' :
+                                                     celda.classList.contains('abbrd-label') ? 'ABBR\'D' :
+                                                     celda.classList.contains('extd-label') ? 'EXT\'D' :
+                                                     celda.classList.contains('flight-count-factor-label') ? 'FLIGHT COUNT FACTOR' :
+                                                     'RESTANTE';
+                                celda.textContent = originalText;
+                                celda.classList.toggle('label-yellow', ['LIMITE', 'ABBR\'D', 'EXT\'D', 'FLIGHT COUNT FACTOR'].includes(originalText));
+                                celda.classList.toggle('label-red', originalText === 'RESTANTE');
+                                celda.classList.toggle('blinking', originalText === 'RESTANTE');
                             }
                             return; 
                         }
 
-                        const nomenclaturaCompleta = fila.querySelector('.nomenclatura')?.textContent.trim();
-                        const isEditableComponentRow = filasConColumnasAdicionalesEditables.includes(nomenclaturaCompleta);
-                        const isLabelRow = filasConColumnasAdicionalesSoloEtiquetas.includes(nomenclaturaCompleta);
-
+                        // Reiniciar valores de datos
+                        if (!isTotalCell && !isRestanteCell) {
+                            // Celdas de datos (VIENEN y DÍAS)
+                            celda.textContent = "";
+                        } else if (isTotalCell || isRestanteCell) {
+                            // Celdas de cálculo
+                            celda.textContent = "0.0";
+                        }
+                        
+                        // Si es fila de componente editable, reinicia los valores fijos
                         if (isEditableComponentRow) {
                             const { nomenclaturaBase, varianteClave } = parseNomenclatura(nomenclaturaCompleta);
                             let config = limitesConfig[nomenclaturaBase];
@@ -1170,35 +1190,23 @@
 
                             if (celda.classList.contains('limite-celda')) {
                                 celda.textContent = config?.limitCycles !== undefined ? formatNumber(config.limitCycles) : '';
-                                celda.classList.remove("led-persistente");
                             } else if (celda.classList.contains('abbrd-celda')) {
                                 celda.textContent = config?.abbreviated !== undefined ? formatNumber(config.abbreviated) : '';
-                                celda.classList.remove("led-persistente");
                             } else if (celda.classList.contains('extd-celda')) {
                                 celda.textContent = config?.extended !== undefined ? formatNumber(config.extended) : '';
-                                celda.classList.remove("led-persistente");
                             } else if (celda.classList.contains('flight-count-factor-celda')) {
                                 celda.textContent = config?.flightCount !== undefined ? formatNumber(config.flightCount) : '';
-                                celda.classList.remove("led-persistente");
-                            } else {
-                                celda.textContent = "";
-                                celda.classList.remove("led-persistente");
                             }
-                        } else {
-                            celda.textContent = "";
-                            celda.classList.remove("led-persistente");
                         }
+
+                        celda.classList.remove("led-persistente", "celda-modificada", 'restante-verde', 'restante-amarillo', 'restante-rojo');
+                        celda.style.color = '';
                     });
-                    if (isEditableComponentRow) {
-                        const restanteCelda = fila.querySelector('.fila-restante');
-                        const limiteCelda = fila.querySelector('.limite-celda');
-                        const limite = parseFloat(limiteCelda?.textContent.trim()) || 0;
-                        aplicarEstiloRestante(restanteCelda, limite, limite); 
-                    }
                 });
                 actualizarTotales();
             }
         }
+
 
         function cargarDatosEnTablaHTML(datos, indiceTabla) {
             const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
@@ -1216,8 +1224,8 @@
                         filaHTML.querySelectorAll('td').forEach((celda, indexCelda) => {
                             const isNomenclatura = celda.classList.contains('nomenclatura');
                             const isLabelCell = celda.classList.contains('limite-label') || celda.classList.contains('abbrd-label') || 
-                                                celda.classList.contains('extd-label') || celda.classList.contains('flight-count-factor-label') || 
-                                                celda.classList.contains('restante-label');
+                                                 celda.classList.contains('extd-label') || celda.classList.contains('flight-count-factor-label') || 
+                                                 celda.classList.contains('restante-label');
 
                             if (celda && !isNomenclatura && !isLabelCell && datosFila[indexCelda] !== undefined) {
                                 celda.textContent = formatNumber(datosFila[indexCelda]);
@@ -1227,6 +1235,7 @@
                                     celda.classList.remove("led-persistente");
                                 }
                             } else if (isLabelCell) {
+                                // Lógica de reinicio de etiquetas (debe ir en limpiarTablaHTML, pero se mantiene aquí por si acaso)
                                 if (celda.classList.contains('limite-label')) {
                                     celda.textContent = 'LIMITE';
                                     celda.classList.add('label-yellow');
@@ -1347,10 +1356,14 @@
 
                 const tbody = document.createElement("tbody");
                 
+                // Mapeo para manejar la inserción de las filas de encabezado y las filas de motores
+                let motor1Inserted = false;
+                let motor2Inserted = false;
+                const totalColsInHeader = 35 + 5; // Nomenclatura(1) + Vienen(1) + Días(31) + MesTotal(1) + General(1) + 5 adicionales = 40
+
                 nombresFilasOrdenadas.forEach((nombre) => {
-                    const totalColsInHeader = 35 + 5;
                     
-                    if (nombre === "HUB COMPRESOR 1.1") {
+                    if (nombre === "HUB COMPRESOR 1.1" && !motor1Inserted) {
                         const separador1 = document.createElement("tr");
                         separador1.innerHTML = `<td colspan="${totalColsInHeader}" class="motor-header" contenteditable="false">MOTOR # 1</td>`;
                         tbody.appendChild(separador1);
@@ -1359,9 +1372,10 @@
                             const filaMotor = crearFilaTabla(motorRowName);
                             tbody.appendChild(filaMotor);
                         });
+                        motor1Inserted = true;
                     }
 
-                    if (nombre === "HUB COMPRESOR 2.1") {
+                    if (nombre === "HUB COMPRESOR 2.1" && !motor2Inserted) {
                         const separador2 = document.createElement("tr");
                         separador2.innerHTML = `<td colspan="${totalColsInHeader}" class="motor-header" contenteditable="false">MOTOR # 2</td>`;
                         tbody.appendChild(separador2);
@@ -1370,6 +1384,7 @@
                             const filaMotor = crearFilaTabla(motorRowName);
                             tbody.appendChild(filaMotor);
                         });
+                        motor2Inserted = true;
                     }
                     
                     const fila = crearFilaTabla(nombre);
@@ -1463,7 +1478,8 @@
                 return;
             }
 
-            const rutaOrigen = `artifacts/${appId}/public_data/datos_vuelo/${año}/${mesOrigenIndex}`; 
+            // Usando sharedProjectId para la ruta de origen
+            const rutaOrigen = `artifacts/${sharedProjectId}/public_data/datos_vuelo/${año}/${mesOrigenIndex}`; 
             try {
                 console.log(`DEBUG: Intentando obtener datos del mes de origen: ${rutaOrigen}`);
                 const snapshot = await get(ref(database, rutaOrigen));
@@ -1565,28 +1581,12 @@
                         
                         const viene = parseFloat(vieneCelda?.textContent.trim()) || 0;
                         const valoresDiarios = Array.from(dailyCells).map((td) => parseFloat(td.textContent.trim()) || 0);
-
-                        // --- NUEVOS LOGS DE DEPURACIÓN PARA AC HRS ---
-                        if (nomenclaturaCompleta === "AC HRS") {
-                            console.log(`DEBUG: Procesando fila: ${nomenclaturaCompleta}`);
-                            console.log(`DEBUG: Contenido de vieneCelda: '${vieneCelda?.textContent.trim()}' -> ${viene}`);
-                            console.log(`DEBUG: dailyCells (NodeList):`, dailyCells);
-                            console.log(`DEBUG: valoresDiarios (Array parsed):`, valoresDiarios);
-                        }
-                        // --- FIN NUEVOS LOGS DE DEPURACIÓN ---
                         
                         const totalMes = valoresDiarios.reduce((acc, val) => acc + val, 0);
                         let totalGeneral = totalMes + viene; // El total general de la fila actual es la suma del mes y el "vienen"
                         
                         mesTotalCelda.textContent = formatNumber(totalMes); // Usar formatNumber
                         generalCelda.textContent = formatNumber(totalGeneral); // Usar formatNumber
-
-                        // --- NUEVOS LOGS DE DEPURACIÓN PARA AC HRS ---
-                        if (nomenclaturaCompleta === "AC HRS") {
-                            console.log(`DEBUG: totalMes calculado para ${nomenclaturaCompleta}: ${totalMes}`);
-                            console.log(`DEBUG: totalGeneral calculado para ${nomenclaturaCompleta}: ${totalGeneral}`);
-                        }
-                        // --- FIN NUEVOS LOGS DE DEPURACIÓN ---
 
                         generalValuesMap.set(nomenclaturaCompleta, totalGeneral);
                     }
@@ -1641,7 +1641,7 @@
                             }
                             const termContingency = noOfContingencyExcursions * EXTENDED_CYCLE_FACTOR;
                             const sumOfTerms = termStarts + termFlightsStarts + termContingency;
-                            accumulatedTotalCycles = sumOfTerms * FLIGHT_COUNT_FACTOR;
+                            accumulatedTotalCycles = (sumOfTerms * FLIGHT_COUNT_FACTOR) + viene; // Añadir el valor de la columna VIENEN
                         }
 
                         generalCelda.textContent = formatNumber(accumulatedTotalCycles); // Usar formatNumber
@@ -1667,8 +1667,11 @@
                         }
 
                         if (nomenclaturaCompleta.startsWith("CICLOS") && motorNumero !== null) {
+                            // El total de ciclos general para esta fila es el acumulado total calculado previamente
+                            // O se establece en el valor de ENGINE STARTS, según la necesidad.
+                            // Si el objetivo es mostrar el total de arranques, se usa ENGINE STARTS.
                             const noOfStarts = generalValuesMap.get(`ENGINE STARTS ${motorNumero}`) || 0;
-                            generalCelda.textContent = formatNumber(noOfStarts); // Establece el valor GENERAL de CICLOS al de ENGINE STARTS
+                            generalCelda.textContent = formatNumber(noOfStarts + viene); 
                         }
                         // Las filas de CICLOS no tienen celda 'restante', así que no se llama a aplicarEstiloRestante aquí.
                     }
@@ -1700,7 +1703,7 @@
                     return;
                 }
 
-                // Al guardar, simplemente guardamos el texto tal cual para preservar el punto decimal si existe.
+                // Al guardar, simplemente guardamos el texto tal cual
                 celda.dataset.originalContent = celda.textContent; // Actualiza el contenido original
 
                 if (celda.textContent.trim() !== "") {
@@ -1823,7 +1826,7 @@
             });
 
             if (componentsToDisplay.length === 0 || (printOption === 'critical-only' && motorStatusContent.children.length === 0)) {
-                 motorStatusContent.innerHTML = '<p class="text-center text-gray-600">No hay componentes para mostrar con los filtros actuales.</p>';
+                   motorStatusContent.innerHTML = '<p class="text-center text-gray-600">No hay componentes para mostrar con los filtros actuales.</p>';
             }
         }
 
@@ -1876,15 +1879,15 @@
             });
             
 
-            // Event listener para el nuevo botón "Estado de Componentes"
+            // Event listener para el nuevo botón "Estado de Componentes" (simula redirección)
             btnComponentStatus.addEventListener('click', async () => {
                 if (!auth.currentUser) {
                     showCustomAlert('Debes iniciar sesión para ver el estado de los componentes.');
                     return;
                 }
 
-                // Obtener los totales generales directamente de Firebase Realtime Database
-                const rutaTotalesGenerales = `artifacts/${appId}/public_data/totales_generales/FAH-976-Overall`;
+                // Obtener los totales generales directamente de Realtime Database (usando sharedProjectId)
+                const rutaTotalesGenerales = `artifacts/${sharedProjectId}/public_data/totales_generales/Overall`;
                 try {
                     const snapshot = await get(ref(database, rutaTotalesGenerales));
                     let generalTotals = { 'AC HRS': 0, 'ATERRIZAJES': 0, 'RINS': 0 };
@@ -1898,26 +1901,23 @@
                         { name: "RINS", current: generalTotals['RINS'] || 0, type: "general_total" }
                     ];
                     
-                    // Guardar los datos en localStorage (para compatibilidad si COMPONENTES976.HTML aún lo usa)
-                    // Aunque ahora COMPONENTES976.HTML leerá directamente de Firebase, mantener esto
-                    // por si acaso o para otros usos futuros.
-                    localStorage.setItem('componentStatusData', JSON.stringify(componentsData));
-                    
-                    window.location.href = 'COMPONENTES976.HTML'; // Redirige a la nueva página
-
+                    // Nota: Aquí se redirigiría a COMPONENTES976.HTML
+                    showCustomAlert(`Redirigiendo a COMPONENTES976.HTML. Totales obtenidos: AC HRS: ${formatNumber(componentsData[0].current)}, ATERRIZAJES: ${formatNumber(componentsData[1].current)}`);
+                    // window.location.href = 'COMPONENTES976.HTML'; // Descomentar en un entorno real
                 } catch (error) {
                     console.error("Error al obtener los totales generales para COMPONENTES976.HTML:", error);
                     showCustomAlert(`Error al cargar datos para la página de componentes: ${error.message}`);
                 }
             });
 
-            // Event listener para el botón de Inspecciones
+            // Event listener para el botón de Inspecciones (simula redirección)
             btnInspections.addEventListener('click', () => {
                 if (!auth.currentUser) {
                     showCustomAlert('Debes iniciar sesión para ver las inspecciones.');
                     return;
                 }
-                window.location.href = 'INSPECCIONES.HTML';
+                showCustomAlert('Redirigiendo a INSPECCIONES.HTML.');
+                // window.location.href = 'INSPECCIONES.HTML'; // Descomentar en un entorno real
             });
         }
 
@@ -1936,6 +1936,7 @@
             const heliRect = helicopter.getBoundingClientRect();
             const authRect = authContainer.getBoundingClientRect();
             
+            // Calcula la distancia de caída de la máscara para que caiga justo antes del contenedor de auth
             const maskDropDistance = authRect.top - heliRect.bottom - (anonymousMask.offsetHeight / 2);
 
             document.documentElement.style.setProperty('--mask-drop-distance', `${maskDropDistance}px`);
@@ -1947,9 +1948,9 @@
         // Iniciar la aplicación cuando la ventana esté completamente cargada
         window.addEventListener("load", () => {
             iniciar();
-            setTimeout(animateIntroElements, 100);
+            // Retraso para dar tiempo a que los elementos carguen y se calculen las dimensiones
+            setTimeout(animateIntroElements, 100); 
         });
     </script>
 </body>
 </html>
-
