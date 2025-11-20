@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -54,6 +55,17 @@
             outline-offset: -2px;
         }
 
+        /* --- FILA SELECCIONADA --- */
+        tr.selected-row {
+            background-color: #eff6ff !important; /* bg-blue-50 */
+        }
+        /* --- TAREA COMPLETADA --- */
+        tr.completed-task {
+            background-color: #f7fff7 !important; /* Light green tint */
+            opacity: 0.7;
+            color: #4a5568;
+        }
+
         #signature-canvas {
             width: 400px;
             height: 200px;
@@ -64,6 +76,12 @@
             display: block;
             margin: 0 auto;
         }
+        /* MINI-FIRMA EN LISTA */
+        #missing-items-list img {
+            max-height: 25px;
+            display: block;
+            margin: 0 auto;
+        }
         .signature-cell p, .footer-signature-area p {
             line-height: 1;
         }
@@ -71,6 +89,43 @@
             border-top: 1px solid #495057;
             margin-top: 0.5rem;
         }
+        
+        /* --- ESTILO PARA BOTONES DE TABLA --- */
+        .table-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+            margin: 0 4px; /* Espacio para botones de borrar/editar */
+        }
+        .table-action-btn.edit-btn {
+            color: #2563eb; /* text-blue-600 */
+        }
+        .table-action-btn.edit-btn:hover {
+            background-color: #dbeafe; /* bg-blue-100 */
+            color: #1d4ed8; /* text-blue-700 */
+        }
+        .table-action-btn.delete-btn {
+            color: #dc2626; /* text-red-600 */
+        }
+        .table-action-btn.delete-btn:hover {
+            background-color: #fee2e2; /* bg-red-100 */
+            color: #b91c1c; /* text-red-700 */
+        }
+        .table-action-btn.task-delete-btn {
+            color: #991b1b; /* text-red-800 */
+            padding: 0.2rem 0.4rem;
+            font-size: 0.75rem;
+            border: 1px solid #991b1b;
+        }
+        .table-action-btn.task-delete-btn:hover {
+            background-color: #fef2f2;
+        }
+        /* --- FIN: NUEVO ESTILO PARA BOTONES DE TABLA --- */
+
 
         @media print {
             body {
@@ -78,6 +133,43 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+
+            /* Regla para imprimir solo la lista faltante */
+            body.printing-missing-list {
+                margin: 0.5in !important; 
+                padding: 0 !important;
+            }
+            body.printing-missing-list .paper-container {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            body.printing-missing-list > *:not(.paper-container) {
+                display: none !important;
+            }
+            body.printing-missing-list .paper-container > * {
+                display: none !important;
+                visibility: hidden !important; 
+            }
+            body.printing-missing-list #missing-items-section {
+                display: block !important;
+                visibility: visible !important;
+                box-shadow: none;
+                border: none;
+                margin: 0; 
+                padding: 0;
+                max-width: 100%;
+                width: 100%;
+            }
+            body.printing-missing-list #missing-items-section h2,
+            body.printing-missing-list #missing-items-section table {
+                display: block !important;
+                visibility: visible !important;
+            }
+            
             .paper-container {
                 box-shadow: none;
                 margin: 0;
@@ -85,6 +177,7 @@
                 max-width: 100%;
                 border: 1px solid #dee2e6;
             }
+            
             .no-print {
                 display: none !important;
             }
@@ -98,6 +191,9 @@
                 border: 1px solid #4a5568 !important;
                 background-color: #1a202c !important; /* Tailwind blue-900 */
                 color: white !important;
+            }
+            #print-list-btn {
+                display: none !important;
             }
         }
     </style>
@@ -142,17 +238,17 @@
                 <!-- Row 3 -->
                 <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">NÚMERO DE SERIE</div>
                 <div class="bg-white p-0 border-r border-b border-gray-700"><span id="numero-serie" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 1  CSN/CSO</div>
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 1 CSN/CSO</div>
                 <div class="bg-white p-0 border-r border-b border-gray-700"><span id="eng1-sn-csn-cso" class="editable-field" contenteditable="true"></span></div>
                 <!-- Row 4 -->
                 <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">MATRÍCULA</div>
                 <div class="bg-white p-0 border-r border-b border-gray-700"><span id="matricula" class="editable-field" contenteditable="true">FAH-979</span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 2  TSN/TSO</div>
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 2 TSN/TSO</div>
                 <div class="bg-white p-0 border-r border-b border-gray-700"><span id="eng2-sn-tsn-tso" class="editable-field" contenteditable="true"></span></div>
                 <!-- Row 5 -->
                 <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">A/C TT</div>
                 <div class="bg-white p-0 border-r border-b border-gray-700"><span id="ac-tt" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 2  CSN/CSO</div>
+                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 2 CSN/CSO</div>
                 <div class="bg-white p-0 border-r border-b border-gray-700"><span id="eng2-sn-csn-cso" class="editable-field" contenteditable="true"></span></div>
                 <!-- Row 6 -->
                 <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">TQ EVENTS</div>
@@ -169,11 +265,11 @@
                 <div class="bg-white p-0 border-r border-b border-gray-700"><span id="elaborado-por" class="editable-field" contenteditable="true"></span></div>
                 <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ORDEN DE TRABAJO No.</div>
                 <div class="bg-white p-0 border-r border-b border-gray-700"><span id="orden-trabajo-no" class="editable-field" contenteditable="true"></span></div>
-                <!-- Row 9 -->
+                <!-- Row 9 (Corregido para usar IDs correctos para el JS) -->
                 <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">N/S MOTOR #1</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="tipo-mantenimiento" class="editable-field" contenteditable="true"></span></div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="ns-motor-1" class="editable-field" contenteditable="true"></span></div>
                 <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">N/S MOTOR #2</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="accion-tomada" class="editable-field" contenteditable="true"></span></div>
+                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="ns-motor-2" class="editable-field" contenteditable="true"></span></div>
             </div>
 
             <div class="mt-6 text-right no-print">
@@ -184,33 +280,86 @@
         </section>
 
         <main class="flex-grow">
-            <h2 class="text-xl font-semibold text-center mb-4 text-red-700">Listado de Inspecciones Vencidas</h2>
+            <!-- INICIO: CONTENEDOR PARA TÍTULO Y BOTÓN DE LOTE -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-center text-red-700">Listado de Inspecciones Vencidas</h2>
+                <div id="batch-actions-container" class="hidden no-print transition-opacity duration-300 flex items-center p-2 rounded-lg bg-blue-50 border border-blue-200">
+                    <span id="selection-count" class="text-sm font-medium text-blue-700 mr-4">0 seleccionadas</span>
+                    <button id="batch-sign-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm shadow-md">
+                        Firmar Seleccionadas
+                    </button>
+                </div>
+            </div>
+            <!-- FIN: CONTENEDOR -->
             
             <div id="loading-message" class="text-center text-gray-500 my-8">Cargando lista de trabajos...</div>
             
             <table class="w-full text-sm text-left text-gray-600">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                     <tr>
+                        <!-- INICIO: ENCABEZADO DE CHECKBOX -->
+                        <th scope="col" class="px-4 py-3 w-10 text-center no-print">
+                            <input type="checkbox" id="select-all-checkbox" class="rounded border-gray-300 shadow-sm focus:ring-blue-500">
+                        </th>
+                        <!-- FIN: ENCABEZADO -->
                         <th scope="col" class="px-4 py-3 w-10 text-center">#</th>
                         <th scope="col" class="px-4 py-3">Descripción del Trabajo / Inspección</th>
                         <th scope="col" class="px-4 py-3 w-40">Referencia</th>
                         <th scope="col" class="px-4 py-3 w-32">Mecánico</th>
-                        <th scope="col" class="px-4 py-3 w-32">ACCION TOMADA</th>
+                        <th scope="col" class="px-4 py-3 w-32">ACCION TOMADA / Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="vencidas-list">
-                    </tbody>
+                    <!-- Filas generadas por JS -->
+                </tbody>
             </table>
             
-            <div class="mt-8 no-print">
-                <h3 class="text-lg font-semibold text-center text-gray-700">Progreso de Tareas</h3>
-                <div class="w-full bg-gray-200 rounded-full h-6 mt-2 shadow-inner">
+            <div class="mt-8 no-print flex justify-between items-center">
+                <div id="toggle-info" class="text-sm text-gray-500 cursor-pointer hover:text-blue-600 p-2 rounded-lg transition-colors">
+                    <span id="toggle-status" class="font-semibold">Ocultar Completadas</span> (<span id="hidden-count">0</span>) 
+                    <i class="fas fa-eye-slash ml-1"></i>
+                </div>
+                <div class="w-1/2 bg-gray-200 rounded-full h-6 shadow-inner">
                     <div id="progress-bar" class="bg-blue-600 h-6 rounded-full text-center text-white text-sm leading-6 transition-all duration-500" style="width: 0%;">
                         <span id="progress-text">0%</span>
                     </div>
                 </div>
             </div>
         </main>
+
+        <!-- INICIO: Tabla de Items Faltantes (NUEVO) -->
+        <section id="missing-items-section" class="mt-16 hidden">
+            <div class="flex justify-between items-center text-center mb-4">
+                <h2 class="text-xl font-semibold text-purple-700 flex-grow">
+                    Lista de Consumibles y Repuestos Faltantes
+                </h2>
+                <button id="print-list-btn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-xs no-print shadow-md ml-4 flex-shrink-0">
+                    <i class="fas fa-print mr-1"></i> Imprimir solo esta lista
+                </button>
+            </div>
+            
+            <p class="text-center text-sm text-gray-500 mb-4 no-print">
+                Esta tabla se actualiza automáticamente. (Requiere clave para editar o borrar items).
+            </p>
+            <table class="w-full text-sm text-left text-gray-600">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                    <tr>
+                        <th scope="col" class="px-4 py-3">Trabajo Relacionado</th>
+                        <th scope="col" class="px-4 py-3">Tipo</th>
+                        <th scope="col" class="px-4 py-3">Nombre Item</th>
+                        <th scope="col" class="px-4 py-3">P/N</th>
+                        <th scope="col" class="px-4 py-3 w-20 text-center">Cantidad</th>
+                        <th scope="col" class="px-4 py-3 w-32">Reportado Por</th>
+                        <th scope="col" class="px-4 py-3 w-28 text-center no-print">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="missing-items-list">
+                    <!-- Los items se generarán aquí -->
+                </tbody>
+            </table>
+        </section>
+        <!-- FIN: Tabla de Items Faltantes -->
+
 
         <footer class="mt-16">
             <div class="grid grid-cols-2 gap-12">
@@ -224,7 +373,7 @@
                 </div>
                 <div class="text-center">
                     <div class="footer-signature-area cursor-pointer min-h-[70px] flex flex-col justify-end items-center" data-title="Inspector">
-                         <p class="text-gray-500 text-sm no-print">(Haga clic para firmar)</p>
+                           <p class="text-gray-500 text-sm no-print">(Haga clic para firmar)</p>
                     </div>
                     <div class="signature-line"></div>
                     <p class="mt-2 font-semibold">Inspector</p>
@@ -234,84 +383,295 @@
         </footer>
         
         <div class="flex justify-center mt-12 gap-4 no-print">
-            <!-- BOTÓN NUEVO -->
             <button onclick="window.location.href=''" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-5 rounded-lg transition-colors">
-                Ir al Control de Talleres
+                <i class="fas fa-tools mr-1"></i> Ir al Control de Talleres
             </button>
             <button id="report-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
-                Generar Reporte
+                <i class="fas fa-file-pdf mr-1"></i> Generar Reporte
+            </button>
+            <button id="load-history-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-5 rounded-lg transition-colors">
+                <i class="fas fa-history mr-1"></i> Cargar Historial
             </button>
             <button id="archive-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
-                Archivar Trabajos
+                <i class="fas fa-archive mr-1"></i> Archivar Trabajos
             </button>
             <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
-                Imprimir / Guardar PDF
+                <i class="fas fa-print mr-1"></i> Imprimir / Guardar PDF
             </button>
         </div>
     </div>
 
-    <div id="signature-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
-        <div class="bg-white rounded-lg shadow-2xl">
-            <div class="p-4 border-b">
-                <h3 id="signature-modal-title" class="text-lg font-bold text-gray-800">Firme en el recuadro</h3>
-            </div>
-            <div class="p-2">
-                <canvas id="signature-canvas" class="border border-gray-300"></canvas>
-            </div>
-            <div class="p-4 border-t">
-                <label for="signature-name" class="block text-sm font-medium text-gray-700">Nombre</label>
-                <input type="text" id="signature-name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Escriba su nombre y licencia">
-            </div>
-            <div class="flex justify-end gap-2 p-4 bg-gray-50">
-                <button id="signature-clear" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Borrar</button>
-                <button id="signature-cancel" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg">Cancelar</button>
-                <button id="signature-save" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg">Guardar Firma</button>
+    <!-- INICIO: Modales de flujo de trabajo -->
+    <!-- Modales de Pregunta (Ask) para Items Faltantes -->
+    <div id="ask-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm">
+            <div class="p-6 text-center">
+                <svg class="mx-auto mb-4 h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.79 4 4 0 1.152-.468 2.19-1.228 2.969M12 18v.01M7.97 16l.006-.004m-.012 0l.006.004m-3.464 0l.006-.004m-.012 0l.006.004m7.442-7.42l.006-.004m-.012 0l.006.004m3.464 0l.006-.004m-.012 0l.006.004m-3.463 3.42l.006-.004m-.012 0l.006.004m-3.464 0l.006-.004m-.012 0l.006.004m7.442 0l.006-.004m-.012 0l.006.004" />
+                </svg>
+                <h3 id="ask-modal-title" class="mb-5 text-lg font-normal text-gray-500">¿Pregunta?</h3>
+                <button id="ask-modal-yes" type="button" class="text-white bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                    <i class="fas fa-check-circle mr-1"></i> Sí
+                </button>
+                <button id="ask-modal-no" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
+                    <i class="fas fa-times-circle mr-1"></i> No
+                </button>
             </div>
         </div>
     </div>
     
-    <!-- Password Modal for Deletion -->
-    <div id="password-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm">
-            <div class="p-4 border-b">
-                <h3 class="text-lg font-bold text-gray-800">Confirmar Eliminación</h3>
+    <!-- Modales de Pregunta AD/ASB - Discrepancia del Supervisor -->
+    <div id="ad-ask-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
+            <div class="p-6 text-center">
+                <svg class="mx-auto mb-4 h-12 w-12 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-3-3v6m-9 9h18a2 2 0 002-2V5a2 2 0 00-2-2H3a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <h3 id="ad-ask-modal-title" class="mb-5 text-lg font-bold text-gray-800">Revisión de Discrepancias</h3>
+                <p class="text-sm text-gray-600 mb-4">¿Se encontraron discrepancias en el último libro de vuelo/reporte del piloto?</p>
+                <button id="ad-ask-modal-yes" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                    <i class="fas fa-exclamation-triangle mr-1"></i> Sí, agregar discrepancia
+                </button>
+                <button id="ad-ask-modal-no" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
+                    <i class="fas fa-thumbs-up mr-1"></i> No, continuar
+                </button>
             </div>
-            <div class="p-4">
-                <label for="password-input" class="block text-sm font-medium text-gray-700">Para borrar la firma, ingrese la clave:</label>
-                <input type="password" id="password-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                <p id="password-error" class="text-red-500 text-sm mt-2 h-4"></p>
+        </div>
+    </div>
+    
+    <!-- Modal de Formulario de Discrepancia (AD/ASB/Fallo de Piloto) - FALTABA -->
+    <div id="discrepancy-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg my-8">
+            <div class="p-4 border-b bg-red-500 text-white">
+                <h3 class="text-lg font-bold"><i class="fas fa-exclamation-triangle mr-2"></i> Reportar Discrepancia</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-sm text-gray-600">Ingrese los detalles de la discrepancia encontrada en el libro de vuelo o la inspección de AD/ASB. Esta se guardará como una nueva tarea correctiva *firmada por el supervisor*.</p>
+                <div>
+                    <label for="discrepancy-name" class="block text-sm font-medium text-gray-700">Descripción del Problema/Discrepancia</label>
+                    <textarea id="discrepancy-name" rows="3" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500" placeholder="Ej: Se reporta vibración excesiva en el rotor de cola (T/R)."></textarea>
+                </div>
+                <div>
+                    <label for="discrepancy-ref" class="block text-sm font-medium text-gray-700">Referencia / TSB / AD / ASB (Opcional)</label>
+                    <input type="text" id="discrepancy-ref" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500" placeholder="Ej: ASB 412-24-197, AD 2024-16-01">
+                </div>
+                <p id="discrepancy-error" class="text-red-500 text-sm h-4"></p>
             </div>
             <div class="flex justify-end gap-2 p-4 bg-gray-50">
-                <button id="password-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
-                <button id="password-confirm" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg">Confirmar</button>
+                <button id="discrepancy-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg"><i class="fas fa-ban mr-1"></i> Cancelar</button>
+                <button id="discrepancy-save" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg"><i class="fas fa-plus-circle mr-1"></i> Agregar como Tarea Correctiva</button>
             </div>
         </div>
     </div>
 
-    <!-- Confirmation Modal -->
+    <!-- Modal de Formulario de Items (Único y Lista) -->
+    <div id="item-form-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg my-8"> <!-- Hecho un poco más ancho (max-w-lg) -->
+            <div class="p-4 border-b">
+                <h3 id="item-form-modal-title" class="text-lg font-bold text-gray-800">Añadir Item Faltante</h3>
+            </div>
+            
+            <!-- INICIO: CONTENEDOR MODIFICADO -->
+            <div class="p-6">
+                <!-- Contenedor 1: Formulario Único (Usado para Lote y Edición) -->
+                <div id="single-item-form-container" class="space-y-4">
+                    <div>
+                        <label for="item-name" class="block text-sm font-medium text-gray-700">Nombre del Item</label>
+                        <input type="text" id="item-name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: Aceite, Tornillo, Filtro...">
+                    </div>
+                    <div>
+                        <label for="item-part-number" class="block text-sm font-medium text-gray-700">Número de Parte (P/N)</label>
+                        <input type="text" id="item-part-number" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: AN5-10A, 101-345...">
+                    </div>
+                    <div>
+                        <label for="item-quantity" class="block text-sm font-medium text-gray-700">Cantidad</label>
+                        <input type="number" id="item-quantity" value="1" min="1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+                
+                <!-- Contenedor 2: Constructor de Listas (Usado en modo de Firma Única) -->
+                <div id="multi-item-form-container" class="hidden">
+                    <!-- Formulario para agregar ítems -->
+                    <div class="mb-4 p-4 border rounded-lg bg-gray-50">
+                        <h4 class="text-lg font-medium mb-3">Agregar Ítem a la Lista</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="md:col-span-3">
+                                <label for="multi-item-name" class="block text-sm font-medium text-gray-700">Nombre del Ítem</label>
+                                <input type="text" id="multi-item-name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="multi-item-part-number" class="block text-sm font-medium text-gray-700">P/N</label>
+                                <input type="text" id="multi-item-part-number" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="multi-item-quantity" class="block text-sm font-medium text-gray-700">Cant</label>
+                                <input type="number" id="multi-item-quantity" value="1" min="1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div class="flex items-end">
+                                <button id="addItemToListBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                                    <i class="fas fa-plus mr-1"></i> Agregar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Lista de ítems agregados -->
+                    <h4 class="text-lg font-medium mb-2">Lista de Faltantes para esta Tarea</h4>
+                    <div id="temp-item-list-container" class="mb-4 border rounded-lg p-3 min-h-[100px] bg-white max-h-48 overflow-y-auto">
+                        <p class="text-gray-500 italic">No se han agregado ítems.</p>
+                    </div>
+                </div>
+                
+                <p id="item-form-error" class="text-red-500 text-sm h-4"></p>
+            </div>
+            <!-- FIN: CONTENEDOR MODIFICADO -->
+            
+            <div class="flex justify-end gap-2 p-4 bg-gray-50">
+                <button id="item-form-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg"><i class="fas fa-times mr-1"></i> Cancelar</button>
+                <button id="item-form-save" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg"><i class="fas fa-save mr-1"></i> Guardar Item</button>
+            </div>
+        </div>
+    </div>
+    <!-- FIN: Modales -->
+
+    <!-- INICIO: Modales Faltantes (Firma, Clave, Confirmar) -->
+    <div id="signature-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg my-8">
+            <div class="p-4 border-b">
+                <h3 id="signature-modal-title" class="text-lg font-bold text-gray-800">Firma del Mecánico</h3>
+            </div>
+            <div class="p-6 flex flex-col items-center">
+                <div class="mb-4 w-full px-4">
+                    <label for="signature-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre y Licencia</label>
+                    <input type="text" id="signature-name" class="w-full p-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ej: K. Valladares / H-0123">
+                </div>
+                <div class="mt-4 border-2 border-dashed border-gray-300 rounded-lg">
+                    <canvas id="signature-canvas" class="rounded-lg"></canvas>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Dibuje su firma en el recuadro de arriba</p>
+            </div>
+            <div class="flex justify-between p-4 bg-gray-50">
+                <button id="signature-clear" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg"><i class="fas fa-eraser mr-1"></i> Limpiar</button>
+                <div>
+                    <button id="signature-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg mr-2"><i class="fas fa-ban mr-1"></i> Cancelar</button>
+                    <button id="signature-save" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg"><i class="fas fa-signature mr-1"></i> Guardar Firma</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="password-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm">
+            <div class="p-6">
+                <h3 id="password-modal-title" class="text-lg font-bold text-gray-800 mb-4">Clave Requerida</h3>
+                <p id="password-modal-description" class="text-sm text-gray-600 mb-4">Para esta acción, ingrese la clave de supervisor.</p>
+                <div>
+                    <label for="password-input" class="block text-sm font-medium text-gray-700">Clave</label>
+                    <input type="password" id="password-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                    <p id="password-error" class="text-red-500 text-xs h-4 mt-1"></p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 p-4 bg-gray-50">
+                <button id="password-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg"><i class="fas fa-times mr-1"></i> Cancelar</button>
+                <button id="password-confirm" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg"><i class="fas fa-lock-open mr-1"></i> Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm">
             <div class="p-6 text-center">
-                <svg class="mx-auto mb-4 h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <svg class="mx-auto mb-4 h-12 w-12 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                <h3 id="confirm-modal-title" class="mb-5 text-lg font-normal text-gray-500">¿Desea continuar?</h3>
-                <button id="confirm-modal-ok" type="button" class="text-white bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
-                    Sí
+                <h3 id="confirm-modal-title" class="mb-5 text-lg font-normal text-gray-500">¿Está seguro?</h3>
+                <button id="confirm-modal-ok" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                    <i class="fas fa-exclamation-triangle mr-1"></i> Sí, estoy seguro
                 </button>
                 <button id="confirm-modal-cancel" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
-                    Cancelar
+                    <i class="fas fa-ban mr-1"></i> Cancelar
                 </button>
             </div>
         </div>
     </div>
+    <!-- FIN: Modales Faltantes -->
+
+
+    <!-- INICIO: NUEVO MODAL PARA ASIGNAR ITEMS EN LOTE -->
+    <div id="assign-item-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg my-8">
+            <div class="p-4 border-b">
+                <h3 id="assign-item-modal-title" class="text-lg font-bold text-gray-800"><i class="fas fa-boxes mr-2 text-purple-600"></i> Asignar Item a Tareas</h3>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-600 mb-4">Seleccione las tareas (del lote que firmó) a las que desea añadir este item:</p>
+                <div id="assign-item-list" class="h-64 overflow-y-auto border rounded-md p-2 space-y-1 bg-gray-50">
+                    <!-- La lista de tareas seleccionadas se generará aquí -->
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 p-4 bg-gray-50">
+                <button id="assign-item-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg"><i class="fas fa-angle-right mr-1"></i> No Asignar y Continuar</button>
+                <button id="assign-item-save" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg"><i class="fas fa-share-square mr-1"></i> Asignar y Continuar</button>
+            </div>
+        </div>
+    </div>
+    <!-- FIN: NUEVO MODAL -->
+
+
+    <!-- INICIO: NUEVO MODAL PARA CARGAR HISTORIAL -->
+    <div id="archive-list-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl my-8">
+            <div class="p-4 border-b">
+                <h3 class="text-lg font-bold text-gray-800"><i class="fas fa-history mr-2 text-gray-600"></i> Historial de Órdenes Archivadas</h3>
+            </div>
+            <div class="p-6">
+                <p id="archive-loading-msg" class="text-gray-600">Cargando historial...</p>
+                <div id="archive-list-container" class="max-h-96 overflow-y-auto space-y-2">
+                    <!-- El historial se cargará aquí -->
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 p-4 bg-gray-50">
+                <button id="archive-list-close" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg"><i class="fas fa-times mr-1"></i> Cerrar</button>
+            </div>
+        </div>
+    </div>
+    <!-- FIN: NUEVO MODAL -->
+
+    <!-- INICIO: NUEVO MODAL DE CONFLICTO DE SESIÓN -->
+    <div id="session-conflict-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-gray-900 bg-opacity-75 no-print">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
+            <div class="p-6 text-center">
+                <svg class="mx-auto mb-4 h-12 w-12 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <h3 class="mb-4 text-lg font-bold text-gray-900">¡Doble Sesión Detectada!</h3>
+                <p class="mb-6 text-sm text-gray-600">
+                    Otra sesión (en su PC o iPad) acaba de guardar cambios.
+                    Para evitar perder su trabajo, debe recargar la página ahora.
+                </p>
+                <button id="conflict-reload-btn" type="button" class="text-white bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                    <i class="fas fa-sync-alt mr-1"></i> Recargar Página
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- FIN: NUEVO MODAL DE CONFLICTO DE SESIÓN -->
+
 
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-        import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
-        import { getAuth, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { initializeApp, setLogLevel } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { 
+            getDatabase, 
+            ref, 
+            onValue, 
+            set, 
+            update, 
+            remove, 
+            get,
+            push
+        } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js';
 
-        // Configuración de Firebase para FAH-979
+        // --- Configuración de Firebase para FAH-979 (Conservada del input del usuario) ---
         const firebaseConfig = {
             apiKey: "AIzaSyCIZjCL34TG4f8WSd3xdbuO8WKbVuI5F2c",
             authDomain: "fah-979.firebaseapp.com",
@@ -323,18 +683,22 @@
             measurementId: "G-3KRV6FV0FB"
         };
         
-        
         const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-        const auth = getAuth(app);
+        const db = getDatabase(app); 
+        setLogLevel('debug'); 
+
+        // --- CONSTANTES DE RUTA Y REFERENCIAS DOM ---
         
-        const sharedProjectId = "FAH-979-DATA"; // Adaptado para 979
-        const paperContainer = document.querySelector('.paper-container');
+        // ** RUTA CRÍTICA **: Cambiado a FAH-979-DATA
+        const DB_ROOT = "artifacts/FAH-979-DATA"; 
+        const INSPECTIONS_PATH = `${DB_ROOT}/public_data/trabajos_vencidos`;
+        const DETAILS_PATH = `${DB_ROOT}/public_data/orden_detalles`; 
+        const HISTORY_PATH = `${DB_ROOT}/historial_ordenes`; 
+
         const expiredListTableBody = document.getElementById('vencidas-list');
         const loadingMessage = document.getElementById('loading-message');
         const dateDisplay = document.getElementById('current-date');
         
-        // Signature Modal elements
         const signatureModal = document.getElementById('signature-modal');
         const signatureCanvas = document.getElementById('signature-canvas');
         const signatureNameInput = document.getElementById('signature-name');
@@ -343,66 +707,352 @@
         const signatureSaveBtn = document.getElementById('signature-save');
         let signaturePad;
         let activeSignatureCell = null;
-        let isAuthReady = false;
+        let isAuthReady = false; 
+        let currentUserId = null;
 
-        // NEW: Password Modal elements
         const passwordModal = document.getElementById('password-modal');
+        const passwordModalTitle = document.getElementById('password-modal-title');
+        const passwordModalDescription = document.getElementById('password-modal-description');
         const passwordInput = document.getElementById('password-input');
         const passwordError = document.getElementById('password-error');
         const passwordCancelBtn = document.getElementById('password-cancel');
         const passwordConfirmBtn = document.getElementById('password-confirm');
-        let signatureToDeleteIndex = null;
+        
+        const missingItemsSection = document.getElementById('missing-items-section');
+        const missingItemsList = document.getElementById('missing-items-list');
 
-        // NEW: Confirmation Modal elements
-        const confirmModal = document.getElementById('confirm-modal');
-        const confirmModalTitle = document.getElementById('confirm-modal-title');
-        const confirmModalOkBtn = document.getElementById('confirm-modal-ok');
-        const confirmModalCancelBtn = document.getElementById('confirm-modal-cancel');
-        let confirmAction = () => {}; // A function to run on confirmation
+        const askModal = document.getElementById('ask-modal');
+        const askModalTitle = document.getElementById('ask-modal-title');
+        const askModalYesBtn = document.getElementById('ask-modal-yes');
+        const askModalNoBtn = document.getElementById('ask-modal-no');
+        
+        // Nuevos elementos para la Discrepancia del Supervisor
+        const adAskModal = document.getElementById('ad-ask-modal');
+        const adAskModalYesBtn = document.getElementById('ad-ask-modal-yes');
+        const adAskModalNoBtn = document.getElementById('ad-ask-modal-no');
+        const discrepancyModal = document.getElementById('discrepancy-modal');
+        const discrepancyNameInput = document.getElementById('discrepancy-name');
+        const discrepancyRefInput = document.getElementById('discrepancy-ref');
+        const discrepancyErrorEl = document.getElementById('discrepancy-error');
+        const discrepancySaveBtn = document.getElementById('discrepancy-save');
+        const discrepancyCancelBtn = document.getElementById('discrepancy-cancel');
 
-        // Details Section elements
+
+        const itemFormModal = document.getElementById('item-form-modal');
+        const itemFormModalTitle = document.getElementById('item-form-modal-title');
+        const itemNameInput = document.getElementById('item-name');
+        const itemPartNumberInput = document.getElementById('item-part-number');
+        const itemQuantityInput = document.getElementById('item-quantity');
+        const itemFormError = document.getElementById('item-form-error');
+        const itemFormSaveBtn = document.getElementById('item-form-save');
+        const itemFormCancelBtn = document.getElementById('item-form-cancel');
+
+        const singleItemFormContainer = document.getElementById('single-item-form-container');
+        const multiItemFormContainer = document.getElementById('multi-item-form-container');
+        const multiItemNameInput = document.getElementById('multi-item-name');
+        const multiItemPartNumberInput = document.getElementById('multi-item-part-number');
+        const multiItemQuantityInput = document.getElementById('multi-item-quantity');
+        const addItemToListBtn = document.getElementById('addItemToListBtn');
+        const tempItemListContainer = document.getElementById('temp-item-list-container');
+        
+        const assignItemModal = document.getElementById('assign-item-modal');
+        const assignItemModalTitle = document.getElementById('assign-item-modal-title');
+        const assignItemList = document.getElementById('assign-item-list');
+        const assignItemCancelBtn = document.getElementById('assign-item-cancel');
+        const assignItemSaveBtn = document.getElementById('assign-item-save');
+
+        const archiveListModal = document.getElementById('archive-list-modal');
+        const archiveListContainer = document.getElementById('archive-list-container');
+        const archiveLoadingMsg = document.getElementById('archive-loading-msg');
+        const archiveListCloseBtn = document.getElementById('archive-list-close');
+        const loadHistoryBtn = document.getElementById('load-history-btn');
+        const printListBtn = document.getElementById('print-list-btn');
+
+        const sessionConflictModal = document.getElementById('session-conflict-modal');
+        const conflictReloadBtn = document.getElementById('conflict-reload-btn');
+        const batchActionsContainer = document.getElementById('batch-actions-container');
+        const selectionCountEl = document.getElementById('selection-count');
+        const batchSignBtn = document.getElementById('batch-sign-btn');
+        const selectAllCheckbox = document.getElementById('select-all-checkbox');
         const saveDetailsBtn = document.getElementById('save-details-btn');
-        const detailsRef = ref(database, `artifacts/${sharedProjectId}/public_data/orden_detalles`);
+        const toggleStatusEl = document.getElementById('toggle-status');
+        const hiddenCountEl = document.getElementById('hidden-count');
+        const toggleInfoEl = document.getElementById('toggle-info');
+
+
+        // --- VARIABLES DE ESTADO GLOBAL ---
+        let activeInspectionDocId = null; 
+        let currentItemType = null; 
+        let lastSignatureData = { name: '', dataUrl: '' }; 
+        let itemToManage = { inspectionId: null, itemId: null, docId: null, element: null }; 
+        let currentPasswordAction = ''; 
+        let selectedArchiveKey = null; 
+
+        let tempMissingItemsList = []; 
+        let itemBeingAssigned = null; 
+        let selectedInspections = new Set(); 
+        let isBatchSigning = false; 
+
+        let allLoadedInspections = []; 
+        let allLoadedMissingItems = []; 
+        let showCompleted = false; // Estado inicial: OCULTAR completadas
+        let showDeleteButtons = false; // NUEVO: Estado para mostrar/ocultar botones de borrar tarea
+        const SUPERVISOR_KEY = "Kevin"; 
+
         const detailFieldIds = [
             'fecha-inicio', 'fecha-finalizacion', 'modelo', 'eng1-sn-tsn-tso',
             'numero-serie', 'eng1-sn-csn-cso', 'matricula', 'eng2-sn-tsn-tso',
             'ac-tt', 'eng2-sn-csn-cso', 'tq-events', 'cbox-sn-tsn-tso',
             'landings', 'cbox-sn-csn-cs', 'elaborado-por', 'orden-trabajo-no',
-            'tipo-mantenimiento', 'accion-tomada'
+            'ns-motor-1', 'ns-motor-2' 
         ];
 
-        const currentDateStr = new Date().toLocaleString('es-HN');
+        // --- MASTER INSPECTIONS LIST (SEEDED DATA) ---
+        // Lista maestra de 115 inspecciones (solo se muestra un extracto por brevedad)
+        const MASTER_INSPECTIONS = [
+            // SCHEDULED INSPECTIONS - 25 HR / 30 DAY (Bell 412 Series)
+            { tema: 'SCHEDULED INSPECTIONS', name: 'Establecer programa de control de corrosión.', ref: 'CSSD-PSE-87-001', freqText: '25 Hrs/30 Días' },
+            { tema: 'SCHEDULED INSPECTIONS', name: 'Reemplazar componentes con vida finita completada.', ref: 'DMC-412-A-04-00-00-00A-288A-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'SCHEDULED INSPECTIONS', name: 'Overhaul de componentes que completaron periodos de overhaul.', ref: 'DMC-412-A-05-11-00-00A-042A-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'SCHEDULED INSPECTIONS', name: 'Lubricar y dar servicio al helicóptero según sea necesario.', ref: 'DMC-412-A-12-01-00-00A-040A-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'SCHEDULED INSPECTIONS', name: 'Revisar Inspecciones Especiales y realizar inspecciones aplicables.', ref: 'DMC-412-A-05-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'SCHEDULED INSPECTIONS', name: 'Examinar ventanas de inspección y mirillas por grietas, etc.', ref: 'Service Instruction (SI)', freqText: '25 Hrs/30 Días' },
+            // FUSELAGE - NOSE SECTION (7 items)
+            { tema: 'FUSELAGE - NOSE SECTION', name: 'Pitot y puertos estáticos por obstrucción y daño visible.', ref: 'DMC-412-A-95-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - NOSE SECTION', name: 'Puertas de nariz por daño, corrosión, seguridad, sellos.', ref: 'DMC-412-A-52-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - NOSE SECTION', name: 'Fuselage área frontal y piel por daño, corrosión y acabado protector.', ref: 'DMC-412-A-53-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - NOSE SECTION', name: 'Compartimento de aviónica/eléctrico por agua atrapada.', ref: 'DMC-412-A-53-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - NOSE SECTION', name: 'Batería y conexiones externas por seguridad, corrosión y condición.', ref: 'DMC-412-A-96-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - NOSE SECTION', name: 'Revisar Montajes de batería por corrosión y servicio (c/4ta Insp).', ref: 'DMC-412-A-96-00-00-00A-00SA-A', freqText: '100 Hrs/4ta Insp.' },
+            { tema: 'FUSELAGE - NOSE SECTION', name: 'Equipo eléctrico y aviónica por condición y seguridad.', ref: 'DMC-412-A-96-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            // FUSELAGE - CABIN SECTION (29 items)
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Estructura y compartimentos por corrosión, agua atrapada y daño.', ref: 'DMC-412-A-53-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Parte inferior del fuselaje por fugas de combustible/hidráulico.', ref: 'DMC-412-A-53-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Muestras de combustible por contaminación.', ref: 'DMC-412-A-28-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Tren de aterrizaje, tubo transversal frontal y tapones por condición y seguridad.', ref: 'DMC-412-A-32-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Tren de aterrizaje, tubo transversal trasero, tapones y tiras de desgaste.', ref: 'DMC-412-A-32-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Tubo de deslizamiento y zapatas por condición y seguridad.', ref: 'DMC-412-A-32-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Soportes del fuselaje por desgaste, daño y seguridad.', ref: 'DMC-412-A-32-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Pasajeros/Puertas de carga por daño, corrosión y operación.', ref: 'DMC-412-A-52-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Asientos de tripulación por condición, seguridad y operación.', ref: 'DMC-412-A-25-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Asientos de tripulación: atenuador por compresión (testigo).', ref: 'DMC-412-A-25-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Luces de precaución/advertencia (Master Caution, Fire Test, Smoke Detector).', ref: 'DMC-412-A-96-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Extintores portátiles (2) por condición y certificado de inspección.', ref: 'DMC-412-A-26-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Transmisión principal: nivel de aceite y filtro externo por bypass.', ref: 'DMC-412-A-63-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Transmisión principal: estuches por daño, corrosión y fugas.', ref: 'DMC-412-A-63-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Transmisión principal: líneas y mangueras externas por condición, daño, fugas.', ref: 'DMC-412-A-63-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Transmisión principal: temp-plates de acoplamiento de cola por sobrecalentamiento.', ref: 'DMC-412-A-63-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Sistemas hidráulicos 1 y 2: indicador de bypass de filtro.', ref: 'DMC-412-A-29-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Actuadores de servo (cyclic/collective) por fugas, corrosión, seguridad.', ref: 'DMC-412-A-29-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Líneas y mangueras hidráulicas por fugas, daño, rozamiento.', ref: 'DMC-412-A-29-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Tubos de control de vuelo por condición, corrosión, seguridad.', ref: 'DMC-412-A-29-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE - CABIN SECTION', name: 'Inspección de las paredes laterales del pilón por daños/grietas (c/4ta Insp).', ref: 'DMC-412-A-63-00-00-00A-00SA-A', freqText: '100 Hrs/4ta Insp.' },
+            // FUSELAGE AFT OF CABIN (16 items)
+            { tema: 'FUSELAGE AFT OF CABIN', name: 'Puertas de compartimentos (Aviónica/Calefacción) por condición y seguridad.', ref: 'DMC-412-A-52-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE AFT OF CABIN', name: 'Compartimentos (Aviónica/Calefacción) por agua atrapada.', ref: 'DMC-412-A-53-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE AFT OF CABIN', name: 'Cubiertas del motor por condición y delaminación.', ref: 'DMC-412-A-53-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE AFT OF CABIN', name: 'Actuador hidráulico de rotor de cola y mangueras por fugas, corrosión.', ref: 'DMC-412-A-29-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE AFT OF CABIN', name: 'Tubos de control de rotor de cola por condición, corrosión.', ref: 'DMC-412-A-67-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE AFT OF CABIN', name: 'Sistema de enfriamiento de aceite de transmisión: enfriadores por fugas, obstrucción.', ref: 'DMC-412-A-63-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE AFT OF CABIN', name: 'Sistema de aceite del motor: enfriadores por fugas, obstrucción.', ref: 'DMC-412-A-79-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE AFT OF CABIN', name: 'Sistema de aceite del motor: filtro reductor por bypass (botón).', ref: 'DMC-412-A-79-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE AFT OF CABIN', name: 'Nivel de aceite Sección de Potencia 1 y 2 (Power Section).', ref: 'DMC-412-A-79-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE AFT OF CABIN', name: 'Extintores de fuego de compartimento de motor por carga/condición.', ref: 'DMC-412-A-26-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE AFT OF CABIN', name: 'Motor No.1 (izq): eyector de escape, caja generadora de gas por grietas.', ref: 'DMC-412-A-71-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE AFT OF CABIN', name: 'Motor No.2 (der): eyector de escape, caja generadora de gas por grietas.', ref: 'DMC-412-A-71-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE AFT OF CABIN', name: 'Cortafuegos del motor, ductos de aire por grietas/distorsión.', ref: 'DMC-412-A-71-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'FUSELAGE AFT OF CABIN', name: 'Carenado del motor por sujetadores faltantes y grietas.', ref: 'DMC-412-A-71-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            // TAILBOOM ATTACHMENT (11 items)
+            { tema: 'TAILBOOM ATTACHMENT', name: 'Inspeccionar puntos de fijación del Tailboom por seguridad y fretting.', ref: 'DMC-412-A-53-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'TAILBOOM ATTACHMENT', name: 'Estructura exterior del Tailboom por condición, daño y corrosión.', ref: 'DMC-412-A-53-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'TAILBOOM ATTACHMENT', name: 'Puerta del compartimento de equipaje por daño y operación.', ref: 'DMC-412-A-52-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'TAILBOOM ATTACHMENT', name: 'Cubiertas de driveshaft y caja intermedia por daño y seguridad.', ref: 'DMC-412-A-52-00-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'TAILBOOM ATTACHMENT', name: 'Elevadores por daño y seguridad. Tubo de control por acción de resorte.', ref: 'DMC-412-A-67-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'TAILBOOM ATTACHMENT', name: 'Inspeccionar estructura interior del Tailboom por grietas (c/4ta Insp).', ref: 'DMC-412-A-53-00-00-00A-00SA-A', freqText: '100 Hrs/4ta Insp.' },
+            { tema: 'TAILBOOM ATTACHMENT', name: 'Verificar torque de tuercas de montaje de T/R Gearbox (no exceder 200 in-lb).', ref: 'DMC-412-A-65-00-00A-00SA-A', freqText: '100 Hrs/4ta Insp.' },
+            { tema: 'TAILBOOM ATTACHMENT', name: 'Driveshaft de rotor de cola: rodamientos y áreas por sobrecalentamiento.', ref: 'DMC-412-A-65-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'TAILBOOM ATTACHMENT', name: 'Driveshaft de rotor de cola: secciones por grietas, remaches, corrosión.', ref: 'DMC-412-A-65-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'TAILBOOM ATTACHMENT', name: 'Caja intermedia (IGB) y acoplamientos flexibles por sobrecalentamiento/fugas.', ref: 'DMC-412-A-65-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'TAILBOOM ATTACHMENT', name: 'Caja de rotor de cola (T/R GB) y acoplamiento flexible por sobrecalentamiento/fugas.', ref: 'DMC-412-A-65-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            // TAIL ROTOR HUB AND BLADE ASSEMBLY (7 items)
+            { tema: 'TAIL ROTOR', name: 'Palas del rotor de cola por condición de líneas de unión, grietas, corrosión.', ref: 'DMC-412-A-64-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'TAIL ROTOR', name: 'Buje del rotor de cola por seguridad, corrosión y condición.', ref: 'DMC-412-A-64-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'TAIL ROTOR', name: 'Rodamientos de aleteo (flapping) y cambio de paso por holgura.', ref: 'DMC-412-A-64-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'TAIL ROTOR', name: 'Links de cambio de paso, cruceta, cuernos por seguridad, corrosión.', ref: 'DMC-412-A-64-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'TAIL ROTOR', name: 'Holgura axial de rodamientos de pitch link y contrapeso (no > 0.015 in).', ref: 'DMC-412-A-64-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'TAIL ROTOR', name: 'Links de cambio de paso por atascamiento (binding) en posición de aleteo total.', ref: 'DMC-412-A-64-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'TAIL ROTOR', name: 'Inspección de la tuerca de retención del bellcrank de contrapeso (c/4ta Insp).', ref: 'DMC-412-A-64-00-00A-00SA-A / ASB 412-00-102', freqText: '100 Hrs/4ta Insp.' },
+            // MAIN ROTOR - CABIN ROOF (16 items)
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'Estructura de cabina y carenados por condición.', ref: 'DMC-412-A-52-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'Transmisión y líneas de aceite por condición, corrosión, y fugas.', ref: 'DMC-412-A-63-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'Freno del rotor: quill, disco y ensamble de freno por condición/seguridad.', ref: 'DMC-412-A-63-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'Freno del rotor: verificar torque de pernos de disco (50-70 in-lb) (c/4ta Insp).', ref: 'DMC-412-A-63-00-00A-00SA-A', freqText: '100 Hrs/4ta Insp.' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'Bombas hidráulicas (1 y 2) por fugas, daño y seguridad.', ref: 'DMC-412-A-29-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'Reservorios hidráulicos (1 y 2) por nivel de fluido, daño, seguridad.', ref: 'DMC-412-A-29-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'Lavar y aplicar cera a las palas del rotor principal (MR Blades).', ref: 'DMC-412-A-62-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'Buje del rotor principal (MR Hub) por condición, corrosión y sellado.', ref: 'DMC-412-A-62-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'Cuernos de paso (Pitch Horns) por corrosión y grietas (NO se permiten grietas).', ref: 'DMC-412-A-62-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'Rodamientos de pivote, amortiguadores (damper) por delaminación/grietas.', ref: 'DMC-412-A-62-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'MR Hub: Chequeo funcional de conjuntos de brazo y rodamiento (Pendulum).', ref: 'DMC-412-A-62-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'MR Hub: Chequeo funcional del sistema de restricción de droop.', ref: 'DMC-412-A-62-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'MR Controls: Chequear swashplate, palanca colectiva y buje de transmisión.', ref: 'DMC-412-A-62-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'MR Controls: Chequear links de paso por condición, seguridad y holgura.', ref: 'DMC-412-A-62-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'MR Controls: Inspeccionar rodamientos de gimbal ring, trunnion, drive links (c/4ta Insp).', ref: 'DMC-412-A-62-00-00A-00SA-A', freqText: '100 Hrs/4ta Insp.' },
+            { tema: 'MAIN ROTOR - CABIN ROOF', name: 'Driveshaft principal (Engine-to-Transmission) por corrosión, acoplamientos y TEMP-PLATES.', ref: 'DMC-412-A-63-00-00A-00SA-A', freqText: '25 Hrs/30 Días' },
+
+            // SPECIAL INSPECTIONS (Uniques)
+            { tema: 'SPECIAL INSPECTIONS', name: 'Inspección de la fijación del Tailboom (remover sellador/inspeccionar grietas).', ref: 'ASB 412-24-197 / DMC-412-A-04-00-00-00A-288A-A', freqText: 'Cada 25 Horas' },
+            { tema: 'SPECIAL INSPECTIONS', name: 'Inspección de tope estático del rotor de cola (212-011-713) por deformación.', ref: 'ASB 412-96-89 / MC-412-A-64-00-00-00A-00SA-A', freqText: 'Cada 25 Horas' },
+            { tema: 'SPECIAL INSPECTIONS', name: 'Inspección detallada de las palas del rotor de cola (212-010-750-ALL ONLY).', ref: 'ASB 412-13-155 / MC-412-A-64-00-00-00A-00SA-A', freqText: 'Cada 25 Horas' },
+            { tema: 'SPECIAL INSPECTIONS', name: 'Inspección de torque en el soporte de campana Anti-Torque (75-95 in-lb).', ref: 'DMC-412-A-53-00-00-00A-00SA-A', freqText: '50 Hrs después de Inst.' },
+            { tema: 'SPECIAL INSPECTIONS', name: 'Inspección de torque en pernos de sujeción del freno del rotor (caliper/disco).', ref: 'DMC-412-A-53-00-00-00A-00SA-A', freqText: '50 Hrs después de Inst.' },
+            { tema: 'SPECIAL INSPECTIONS', name: 'Inspección por penetrantes fluorescentes de la palanca colectiva (412-010-408-101/-105).', ref: 'ASB 412-11-148', freqText: 'Cada 100 Horas' },
+            { tema: 'SPECIAL INSPECTIONS', name: 'Inspección del larguero vertical izquierdo del Tailboom (212-030-447-117) por grietas.', ref: 'DMC-412-A-53-50-00-00A-280A-A / ASB 412-20-180', freqText: 'Cada 100 Horas' },
+            
+            // DIRECTIVAS DE AERONAVEGABILIDAD Y BOLETINES DE SERVICIO (AD/ASB)
+            { tema: 'DIRECTIVAS DE AERONAVEGABILIDAD Y BOLETINES DE SERVICIO', name: 'AD 92-13-10: Inspección de rodamientos de la horquilla del rotor de cola (Witness Marks).', ref: 'AD 92-13-10 / ASB 412-95-84', freqText: '25 Hrs/100 Hrs' },
+            { tema: 'DIRECTIVAS DE AERONAVEGABILIDAD Y BOLETINES DE SERVICIO', name: 'AD 2001-13-01: Inspección de la tuerca de retención del contrapeso del rotor de cola (Torque/CPC).', ref: 'AD 2001-13-01 / ASB 412-00-102', freqText: 'Cada 100 Hrs' },
+            { tema: 'DIRECTIVAS DE AERONAVEGABILIDAD Y BOLETINES DE SERVICIO', name: 'AD 2024-16-01: Inspección de fijación del Tailboom por grietas (similar a ASB 412-24-197).', ref: 'AD 2024-16-01 / ASB 412-24-197', freqText: 'Cada 25 Hrs' },
+            // ADICIONALES (PT6T-3B/D)
+            { tema: 'ENGINE INSPECTIONS (PT6T-3B/D)', name: 'Contenido de aceite (Oil Contents): Verificar nivel de aceite y reponer.', ref: '72-00-00, ENGINE- SERVICING', freqText: 'Diario' },
+            { tema: 'ENGINE INSPECTIONS (PT6T-3B/D)', name: 'Ducto de escape (Exhaust Duct): Inspeccionar por grietas o distorsión.', ref: 'N/A', freqText: '50 Hrs/6 Mths' },
+            { tema: 'ENGINE INSPECTIONS (PT6T-3B/D)', name: 'Filtro de aire P3: Limpiar y verificar elemento (Post-SBs).', ref: '73-10-07', freqText: '100 Hrs' },
+            { tema: 'ENGINE INSPECTIONS (PT6T-3B/D)', name: 'Válvula de drenaje de filtro P3: Limpiar e Inspeccionar.', ref: '73-10-07', freqText: '100 Hrs' },
+            { tema: 'ENGINE INSPECTIONS (PT6T-3B/D)', name: 'Acumulador de oleaje de combustible (Fuel Surge Accumulator): Inspección visual (pop-out).', ref: '73-10-03', freqText: '150 Hrs' },
+            { tema: 'ENGINE INSPECTIONS (PT6T-3B/D)', name: 'Cableado (Wiring): Seguridad de conexiones, abrazaderas; verificar desgaste, rozamiento.', ref: 'N/A', freqText: '150 Hrs/6 Mths' },
+            { tema: 'ENGINE INSPECTIONS (PT6T-3B/D)', name: 'Malla de entrada de aire (Inlet Screen): Limpieza, condición de malla; verificar corrosión, depósitos de suciedad.', ref: '9.B. / 72-20-00', freqText: '150 Hrs' },
+            { tema: 'ENGINE INSPECTIONS (PT6T-3B/D)', name: 'Caja del generador de gas (Gas Generator Case): Grietas, distorsión, corrosión (NO se permiten grietas).', ref: 'N/A', freqText: '150 Hrs/6 Mths' },
+            { tema: 'ENGINE INSPECTIONS (PT6T-3B/D)', name: 'Sello de eje de salida RGB: Verificar fugas de aceite.', ref: 'N/A', freqText: '150 Hrs/12 Mths' },
+            { tema: 'ENGINE INSPECTIONS (PT6T-3B/D)', name: 'Tubería (Tubing): Seguridad de conexiones, verificar desgaste, rozamiento y fugas.', ref: '73-10-08', freqText: '150 Hrs/6 Mths' }
+        ];
+
+        // --- FUNCIONES DE UTILIDAD FIREBASE ---
+
+        function getDetailsRef() {
+            return ref(db, DETAILS_PATH);
+        }
+        
+        function getInspectionRef(docId = null) {
+            if (docId) {
+                return ref(db, `${INSPECTIONS_PATH}/${docId}`);
+            }
+            return ref(db, INSPECTIONS_PATH);
+        }
+        
+        /**
+         * Sella la orden con el ID del usuario actual para detectar conflictos de sesión.
+         */
+        function stampLastUpdate(actionName = 'update') {
+            if (!currentUserId || !isAuthReady) return;
+            const detailsRef = getDetailsRef();
+            update(detailsRef, { 
+                lastUpdatedBy: currentUserId 
+            }).catch(err => console.error("Error stamping update:", err));
+        }
+
+        // --- AUTHENTICATION & DATA LOADING ---
+
+        async function initializeAppAndData() {
+            let auth;
+            try {
+                auth = getAuth(app); 
+            } catch (authError) {
+                console.error("Error fatal al inicializar 'getAuth(app)'.", authError);
+                loadingMessage.textContent = "Error al conectar con los servicios de autenticación.";
+                loadingMessage.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                // Usamos la variable global __initial_auth_token si existe, de lo contrario, anónimo.
+                const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                if (authToken) {
+                    await signInWithCustomToken(auth, authToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                isAuthReady = true;
+                currentUserId = auth.currentUser ? auth.currentUser.uid : 'anonymous-' + Math.random().toString(36).substring(2, 9);
+                console.log(`Autenticación exitosa. UserID: ${currentUserId}`);
+                
+                // Tomar control de la sesión al inicio
+                if (currentUserId) {
+                    stampLastUpdate('session_takeover');
+                }
+                
+                loadOrderDetails();
+                await loadExpiredInspections();
+
+            } catch (error) {
+                console.error("Error durante el proceso de signIn:", error);
+                loadingMessage.textContent = "Error al autenticarse. No se pueden cargar los datos.";
+                loadingMessage.classList.remove('hidden');
+            }
+        }
+
+        // --- INICIALIZACIÓN ---
+        const currentDateStr = new Date().toLocaleString('es-HN', { timeZone: 'America/Tegucigalpa' });
         dateDisplay.textContent = currentDateStr;
         document.getElementById('fecha-inicio').textContent = currentDateStr;
 
-        // --- AUTHENTICATION & DATA LOADING ---
-        async function initializeAppAndData() {
-            try {
-                // Lógica de autenticación actualizada para manejar __initial_auth_token
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    console.log("Signing in with custom token...");
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    // Fallback to anonymous sign-in
-                    console.log("Signing in anonymously...");
-                    await signInAnonymously(auth);
-                }
-                console.log("Authentication successful.");
-                isAuthReady = true;
-                loadOrderDetails();
-                loadExpiredInspections();
-            } catch (error) {
-                console.error("Authentication failed:", error);
-                // No usar alert()
-                loadingMessage.textContent = `Error de autenticación: ${error.message}. Recargue la página.`;
-                loadingMessage.classList.remove('hidden');
-                loadingMessage.classList.add('text-red-500');
-            }
-        }
+        conflictReloadBtn.addEventListener('click', () => location.reload());
+        
         initializeAppAndData();
 
+        // --- LISTENERS GLOBALES (TECLADO) ---
+        document.addEventListener('keydown', (e) => {
+            // Combinación: Ctrl/Cmd + Enter (Alternar completadas)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                showCompleted = !showCompleted;
+                renderExpiredInspections(allLoadedInspections);
+            }
+             // Combinación: Ctrl/Cmd + Alt + B (Alternar botón de borrar tarea)
+            if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'b' || e.key === 'B')) {
+                e.preventDefault();
+                showDeleteButtons = !showDeleteButtons;
+                renderExpiredInspections(allLoadedInspections); // Forzar re-renderizado
+                console.log(`Botones de borrado de tarea: ${showDeleteButtons ? 'Visibles' : 'Ocultos'}`);
+            }
+        });
+        toggleInfoEl.addEventListener('click', () => {
+            showCompleted = !showCompleted;
+            renderExpiredInspections(allLoadedInspections);
+        });
+        
+        // --- Fix 6: Implementar printListBtn (Imprimir solo lista de faltantes)
+        printListBtn.addEventListener('click', () => {
+            // Esconder la lista completa, mostrar solo la sección de items faltantes y forzar la impresión
+            document.body.classList.add('printing-missing-list');
+            window.print();
+            // Retraso para que la impresión se active antes de restaurar la vista
+            setTimeout(() => {
+                document.body.classList.remove('printing-missing-list');
+            }, 100); 
+        });
+
         // --- LOAD AND SAVE ORDER DETAILS ---
+        
+        function applyFooterSignature(element, signatureData) {
+            if (element && signatureData && signatureData.signatureDataUrl) {
+                // Eliminar el placeholder "Haga clic para firmar"
+                element.innerHTML = ''; 
+                
+                const img = document.createElement('img');
+                img.src = signatureData.signatureDataUrl;
+                img.alt = `Firma ${element.dataset.title}`;
+                const nameElement = document.createElement('p');
+                nameElement.className = 'text-xs mt-1 font-semibold';
+                nameElement.textContent = signatureData.signatureName || '';
+                
+                element.appendChild(img);
+                element.appendChild(nameElement);
+            }
+        }
+
         function loadOrderDetails() {
+            const detailsRef = getDetailsRef();
             onValue(detailsRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -412,13 +1062,28 @@
                             element.textContent = data[id];
                         }
                     });
+
+                    // NUEVA LOGICA: Cargar firmas del footer
+                    if (data.supervisorSignature) {
+                        applyFooterSignature(document.querySelector('.footer-signature-area[data-title="Supervisor"]'), data.supervisorSignature);
+                    }
+                    if (data.inspectorSignature) {
+                        applyFooterSignature(document.querySelector('.footer-signature-area[data-title="Inspector"]'), data.inspectorSignature);
+                    }
+
+                    // Check de conflicto de sesión
+                    if (currentUserId && data.lastUpdatedBy && data.lastUpdatedBy !== currentUserId && !sessionConflictModal.classList.contains('hidden')) {
+                        console.warn(`¡CONFLICTO DE SESIÓN DETECTADO!`);
+                        sessionConflictModal.classList.remove('hidden');
+                    }
                 }
+            }, (error) => {
+                 console.error("Error al cargar detalles de la orden (RTDB):", error);
             });
         }
 
         saveDetailsBtn.addEventListener('click', () => {
             if (!isAuthReady) {
-                // No usar alert()
                 console.warn("Conectando... por favor espere un momento.");
                 return;
             }
@@ -427,9 +1092,11 @@
                 const element = document.getElementById(id);
                 dataToSave[id] = element ? element.textContent.trim() : '';
             });
-
+            
+            const detailsRef = getDetailsRef();
             set(detailsRef, dataToSave)
                 .then(() => {
+                    stampLastUpdate('saveDetails'); 
                     saveDetailsBtn.textContent = '¡Guardado!';
                     saveDetailsBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
                     saveDetailsBtn.classList.add('bg-green-500');
@@ -440,71 +1107,167 @@
                     }, 2000);
                 })
                 .catch((error) => {
-                    console.error("Error guardando detalles:", error);
-                    // No usar alert()
+                    console.error("Error guardando detalles (RTDB):", error);
                 });
         });
 
         // --- LOAD EXPIRED INSPECTIONS ---
-        function loadExpiredInspections() {
-            const expiredRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos`);
-            onValue(expiredRef, (snapshot) => {
+
+        async function loadExpiredInspections() {
+            const inspectionsRef = getInspectionRef();
+            console.log(`[RTDB] Intentando cargar datos de la ruta: ${INSPECTIONS_PATH}`);
+
+            // 1. Fetch current data from RTDB
+            const snapshot = await get(inspectionsRef);
+            let currentData = snapshot.val();
+            const inspectionsToSave = {};
+
+            // 2. Map existing data for quick lookup and preservation
+            const existingMap = {};
+            if (currentData) {
+                Object.keys(currentData).forEach(key => {
+                    existingMap[currentData[key].docId || key] = currentData[key];
+                });
+            }
+
+            // 3. Merge MASTER_INSPECTIONS with existing data 
+            MASTER_INSPECTIONS.forEach((masterItem, index) => {
+                // Generate predictable DocId (I001, I002, ...)
+                const docId = `I${String(index + 1).padStart(3, '0')}`;
+
+                if (existingMap[docId]) {
+                    // Item existe. Usamos los datos de Firebase para el estado (firma, acción, etc.)
+                    inspectionsToSave[docId] = {
+                        ...masterItem, // Base structure from master list (tema, name, ref, freqText)
+                        ...existingMap[docId], // Overwrite with actual signatures, actions, etc.
+                        docId: docId 
+                    };
+                    delete existingMap[docId]; 
+                } else {
+                    // Item es nuevo de la lista maestra. Usar defaults.
+                    inspectionsToSave[docId] = { 
+                        ...masterItem, 
+                        docId: docId, 
+                        signature: null, 
+                        accionTomada: '',
+                        lastDone: 'N/A' 
+                    }; 
+                }
+            });
+
+            // 4. Add back any remaining existing items that are NOT in the master list 
+            // Esto incluye tareas creadas por el Supervisor (Discrepancias)
+            Object.keys(existingMap).forEach(docId => {
+                 if (!inspectionsToSave[docId]) {
+                    inspectionsToSave[docId] = existingMap[docId];
+                }
+            });
+
+            // 5. Save the merged, current list back to RTDB
+            await set(getInspectionRef(), inspectionsToSave)
+                .then(() => {
+                    console.log(`Fusion y guardado de ${Object.keys(inspectionsToSave).length} inspecciones completado.`);
+                })
+                .catch(error => {
+                    console.error("Error saving merged list:", error);
+                });
+            
+            // 6. Attach real-time listener for constant updates
+            onValue(inspectionsRef, (snapshot) => {
                 loadingMessage.classList.add('hidden');
-                const expiredInspecciones = snapshot.val();
-                renderExpiredInspections(expiredInspecciones);
+                
+                const finalData = snapshot.val();
+                allLoadedInspections = []; 
+
+                if (finalData) {
+                    // Convertir el objeto fusionado de nuevo a array para renderizado
+                    allLoadedInspections = Object.keys(finalData).map(key => ({
+                        docId: key,
+                        ...finalData[key]
+                    })).filter(item => item !== null); 
+                }
+                
+                renderExpiredInspections(allLoadedInspections);
+                renderMissingItemsTable(allLoadedInspections); 
             }, (error) => {
-                console.error("Error fetching data from Firebase:", error);
-                loadingMessage.textContent = "Error al cargar la lista.";
+                console.error(`[RTDB ERROR] Fallo al leer la ruta ${INSPECTIONS_PATH}:`, error);
+                loadingMessage.textContent = "Error al cargar la lista. Revise la consola (F12).";
                 loadingMessage.classList.remove('hidden');
             });
         }
         
+        function updateToggleUI() {
+            const completedTasks = allLoadedInspections.filter(item => item.signature && item.signature.signatureDataUrl).length;
+            
+            if (showCompleted) {
+                toggleStatusEl.textContent = 'Ocultar Completadas';
+                document.querySelector('#toggle-info i').classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                toggleStatusEl.textContent = 'Mostrar Completadas';
+                document.querySelector('#toggle-info i').classList.replace('fa-eye-slash', 'fa-eye');
+            }
+            hiddenCountEl.textContent = completedTasks;
+        }
+
         function renderExpiredInspections(inspections) {
             expiredListTableBody.innerHTML = '';
             let signedCount = 0;
-            let totalCount = 0;
+            let totalCount = inspections.length;
             
-            if (!inspections || inspections.length === 0) {
-                expiredListTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="text-center py-8 text-gray-500">
-                            No hay inspecciones vencidas en este momento. ¡Buen trabajo!
-                        </td>
-                    </tr>
-                `;
-                updateProgressBar(0, 0); // Reset progress bar
-                return;
+            // 1. Filtrar inspecciones
+            const filteredInspections = inspections.filter(item => {
+                const isSigned = item.signature && item.signature.signatureDataUrl;
+                if (isSigned) signedCount++;
+                
+                // Si showCompleted es false (ocultar), solo mostramos si NO está firmado
+                if (!showCompleted && isSigned) {
+                    return false;
+                }
+                return true;
+            });
+            
+            // Actualizar el estado de la UI de alternancia
+            updateToggleUI();
+            
+            if (filteredInspections.length === 0 && totalCount > 0) {
+                 expiredListTableBody.innerHTML = `
+                     <tr>
+                         <td colspan="6" class="text-center py-8 text-gray-500">
+                             Todas las tareas están completadas. (${signedCount} ocultas)
+                         </td>
+                     </tr>
+                 `;
+                 updateProgressBar(signedCount, totalCount); 
+                 return;
+            } else if (totalCount === 0) {
+                 expiredListTableBody.innerHTML = `
+                     <tr>
+                         <td colspan="6" class="text-center py-8 text-gray-500">
+                             No hay inspecciones en este momento.
+                         </td>
+                     </tr>
+                 `;
+                 updateProgressBar(0, 0); 
+                 return;
             }
             
-            const inspectionsWithOriginalIndex = inspections
-                .map((item, index) => item ? { ...item, originalIndex: index } : null)
-                .filter(item => item !== null);
-
-            totalCount = inspectionsWithOriginalIndex.length;
-
-            const groupedByTheme = inspectionsWithOriginalIndex.reduce((acc, item) => {
-                const theme = item.tema || 'Inspecciones Generales'; // Default theme
-                if (!acc[theme]) {
-                    acc[theme] = [];
-                }
+            const groupedByTheme = filteredInspections.reduce((acc, item) => {
+                const theme = item.tema || item.name || 'Inspecciones Generales'; 
+                if (!acc[theme]) { acc[theme] = []; }
                 acc[theme].push(item);
                 return acc;
             }, {});
             
+            // Orden de temas para el reporte
             const themeOrder = [
-                'SCHEDULE INSPECTIONS',
-                'ENGINE 1 INSPECCIONES',
-                'ENGINE 2 INSPECCIONES',
-                'SPECIAL INSPECTIONS',
-                'LUBRICACION',
-                'MISCELLANEOUS',
-                'DIRECTIVAS DE AERONAVEGABILIDAD Y BOLETINES DE SERVICIO'
+                'SCHEDULED INSPECTIONS', 'SPECIAL INSPECTIONS', 'FUSELAGE - NOSE SECTION', 'FUSELAGE - CABIN SECTION', 
+                'FUSELAGE AFT OF CABIN', 'TAILBOOM ATTACHMENT', 'TAIL ROTOR', 'MAIN ROTOR - CABIN ROOF', 
+                'ENGINE INSPECTIONS (PT6T-3B/D)', 'DIRECTIVAS DE AERONAVEGABILIDAD Y BOLETINES DE SERVICIO', 'DISCREPANCIAS DEL LIBRO DE VUELO', 'Inspecciones Generales'
             ];
 
             const sortedThemes = Object.keys(groupedByTheme).sort((a, b) => {
                 const indexA = themeOrder.indexOf(a);
                 const indexB = themeOrder.indexOf(b);
-
                 if (indexA !== -1 && indexB !== -1) return indexA - indexB;
                 if (indexA !== -1) return -1;
                 if (indexB !== -1) return 1;
@@ -517,20 +1280,27 @@
             for (const theme of sortedThemes) {
                 const themeRow = document.createElement('tr');
                 themeRow.className = 'bg-blue-100';
-                themeRow.innerHTML = `<th colspan="5" class="px-4 py-2 text-left text-sm font-bold text-blue-800">${theme}</th>`;
+                themeRow.innerHTML = `<th colspan="6" class="px-4 py-2 text-left text-sm font-bold text-blue-800">${theme}</th>`;
                 expiredListTableBody.appendChild(themeRow);
 
                 groupedByTheme[theme].forEach((item) => {
-                    if (item.signature && item.signature.signatureDataUrl) {
-                        signedCount++;
-                    }
-                    const row = document.createElement('tr');
-                    row.className = 'bg-white border-b hover:bg-red-50';
+                    const isSigned = item.signature && item.signature.signatureDataUrl;
                     
-                    const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(item.ref)}`;
+                    const row = document.createElement('tr');
+                    if (selectedInspections.has(item.docId)) {
+                        row.classList.add('selected-row');
+                    }
+                    if (isSigned) {
+                        row.classList.add('completed-task');
+                    }
+
+                    row.className += ' bg-white border-b hover:bg-red-50';
+                    
+                    // --- CAMBIO CLAVE: USAR URL DEL PORTAL BELL ---
+                    const bellPortalUrl = `https://www.bellhelicopter.net/tp/${encodeURIComponent(item.ref)}`;
 
                     let signatureContent = '';
-                    if (item.signature && item.signature.signatureDataUrl) {
+                    if (isSigned) {
                         signatureContent = `
                             <img src="${item.signature.signatureDataUrl}" alt="Firma" />
                             <p class="text-xs mt-1 font-semibold">${item.signature.signatureName || ''}</p>
@@ -538,26 +1308,146 @@
                     }
                     
                     const accionTomadaContent = item.accionTomada || '';
+                    
+                    const deleteButtonHtml = `
+                        <span class="delete-btn-container ${showDeleteButtons ? '' : 'hidden'}">
+                            <button class="table-action-btn task-delete-btn delete-task-btn no-print" 
+                                        data-doc-id="${item.docId}" 
+                                        title="Borrar Tarea: ${item.name}">
+                                <i class="fas fa-trash-alt"></i> Borrar
+                            </button>
+                        </span>`;
 
                     row.innerHTML = `
+                        <!-- INICIO: CELDA DE CHECKBOX -->
+                        <td class="px-4 py-3 text-center no-print">
+                            <input type="checkbox" class="row-checkbox rounded border-gray-300 shadow-sm focus:ring-blue-500" data-doc-id="${item.docId}" ${selectedInspections.has(item.docId) ? 'checked' : ''}>
+                        </td>
+                        <!-- FIN: CELDA -->
                         <td class="px-4 py-3 text-center font-medium text-gray-900">${itemCounter++}</td>
                         <td class="px-4 py-3 font-medium text-gray-900">
                             ${item.name}
                             <p class="text-xs text-red-600 font-semibold">(Frecuencia: ${item.freqText} / Última vez: ${item.lastDone || 'N/A'})</p>
                         </td>
                         <td class="px-4 py-3">
-                            <a href="${googleSearchUrl}" target="_blank" class="text-blue-600 hover:underline" title="Buscar referencia en Google">
+                            <a href="${bellPortalUrl}" target="_blank" class="text-blue-600 hover:underline" title="Buscar referencia en el portal de Bell">
                                 ${item.ref}
                             </a>
                         </td>
-                        <td class="px-4 py-3 editable-cell signature-cell text-center align-middle" data-index="${item.originalIndex}">${signatureContent}</td>
-                        <td class="px-4 py-3 editable-cell accion-tomada-cell" contenteditable="true" data-index="${item.originalIndex}">${accionTomadaContent}</td>
+                        <td class="px-4 py-3 editable-cell signature-cell text-center align-middle" data-doc-id="${item.docId}" data-title="Mecánico">${signatureContent}</td>
+                        <td class="px-4 py-3 editable-cell accion-tomada-cell" contenteditable="true" data-doc-id="${item.docId}">
+                            <div class="flex flex-col justify-between h-full">
+                                <span class="flex-grow">${accionTomadaContent}</span>
+                                <div class="mt-1 flex justify-end">
+                                    ${deleteButtonHtml}
+                                </div>
+                            </div>
+                        </td>
                     `;
                     expiredListTableBody.appendChild(row);
                 });
             }
             
             updateProgressBar(signedCount, totalCount);
+            setupSelectionListeners();
+            updateSelectionUI();
+            
+            // Reasignar el listener de eliminación de tarea (ahora que el DOM está listo)
+            expiredListTableBody.querySelectorAll('.delete-task-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const docId = e.currentTarget.dataset.docId;
+                    itemToManage = { docId: docId };
+                    currentPasswordAction = 'deleteTask';
+                    
+                    passwordModalTitle.textContent = 'Eliminar Tarea';
+                    passwordModalDescription.textContent = `Para eliminar la tarea ${docId}, ingrese la clave de supervisor.`;
+                    passwordConfirmBtn.textContent = 'Confirmar Eliminación';
+                    passwordInput.value = '';
+                    passwordError.textContent = '';
+                    passwordModal.classList.remove('hidden');
+                    passwordInput.focus();
+                });
+            });
+        }
+        
+        /**
+         * Manejador de la lógica de borrado de Tarea.
+         */
+        function handleDeleteTask() {
+            if (!itemToManage.docId) return;
+
+            const taskRef = getInspectionRef(itemToManage.docId);
+            remove(taskRef)
+                .then(() => {
+                    stampLastUpdate('deleteTask');
+                    console.log(`Tarea ${itemToManage.docId} eliminada correctamente.`);
+                })
+                .catch(error => console.error("Error al eliminar la tarea:", error));
+            
+            itemToManage = {};
+        }
+
+        // --- Renderizar Tabla de Items Faltantes (con botones de acción) ---
+        function renderMissingItemsTable(inspections) {
+            missingItemsList.innerHTML = '';
+            allLoadedMissingItems = []; 
+
+            inspections.forEach(inspection => {
+                if (inspection.itemsFaltantes) {
+                    Object.keys(inspection.itemsFaltantes).forEach(key => {
+                        allLoadedMissingItems.push({
+                            ...inspection.itemsFaltantes[key],
+                            itemId: key, // ID del item (push key)
+                            inspectionId: inspection.docId, // ID de la inspección
+                            relatedJobName: inspection.name || 'Tarea desconocida' 
+                        });
+                    });
+                }
+            });
+
+            if (allLoadedMissingItems.length === 0) {
+                missingItemsSection.classList.add('hidden');
+                return;
+            }
+
+            missingItemsSection.classList.remove('hidden'); 
+
+            allLoadedMissingItems.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'bg-white border-b hover:bg-purple-50';
+                
+                const typeLabel = item.type === 'consumible' ? 
+                    '<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium text-xs">Consumible</span>' : 
+                    '<span class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium text-xs">Repuesto</span>';
+
+                let reportedByContent = '<span class="text-xs text-gray-400">N/A</span>';
+                if (item.reportedBy && (item.reportedBy.name || item.reportedBy.signatureDataUrl)) {
+                    if (item.reportedBy.signatureDataUrl) {
+                        reportedByContent = `
+                            <img src="${item.reportedBy.signatureDataUrl}" alt="Firma" />
+                            <p class="text-xs mt-1 font-semibold">${item.reportedBy.name || ''}</p>
+                        `;
+                    } else {
+                           // Fallback si solo hay nombre
+                           reportedByContent = `<p class="text-xs mt-1 font-semibold">${item.reportedBy.name}</p>`;
+                    }
+                }
+
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-gray-700">${item.relatedJobName}</td>
+                    <td class="px-4 py-3">${typeLabel}</td>
+                    <td class="px-4 py-3 font-medium text-gray-900">${item.name || 'N/A'}</td>
+                    <td class="px-4 py-3 text-gray-600">${item.partNumber || 'N/A'}</td>
+                    <td class="px-4 py-3 text-center font-medium text-gray-900">${item.quantity || '1'}</td>
+                    <td class="px-4 py-3 text-center align-middle">${reportedByContent}</td>
+                    <td class="px-4 py-3 text-center no-print">
+                        <button class="table-action-btn edit-btn edit-item-btn" data-item-id="${item.itemId}" data-inspection-id="${item.inspectionId}" title="Editar Item">Editar</button>
+                        <button class="table-action-btn delete-btn delete-item-btn" data-item-id="${item.itemId}" data-inspection-id="${item.inspectionId}" title="Borrar Item">Borrar</button>
+                    </td>
+                `;
+                missingItemsList.appendChild(row);
+            });
         }
 
         function updateProgressBar(signed, total) {
@@ -578,49 +1468,112 @@
                 }
             }
         }
+        
+        // --- INICIO: LÓGICA DE FIRMA Y WORKFLOW ---
 
-        // --- SAVE "ACCION TOMADA" ON BLUR ---
+        /**
+         * Manejador de clic para celdas de firma (Delegado en el body de la tabla)
+         */
+        expiredListTableBody.addEventListener('click', (e) => {
+            const signatureCell = e.target.closest('.signature-cell');
+            if (signatureCell) {
+                const hasSignature = signatureCell.querySelector('img');
+                
+                if (!hasSignature) {
+                    // No hay firma, abrir modal para firmar
+                    openSignatureModal(signatureCell);
+                } else {
+                    // Ya hay firma, abrir modal de clave para borrar
+                    itemToManage = { docId: signatureCell.dataset.docId };
+                    currentPasswordAction = 'deleteSignature';
+                    
+                    passwordModalTitle.textContent = 'Borrar Firma';
+                    passwordModalDescription.textContent = 'Para borrar esta firma, ingrese la clave de supervisor.';
+                    passwordConfirmBtn.textContent = 'Confirmar Borrado';
+                    passwordInput.value = '';
+                    passwordError.textContent = '';
+                    passwordModal.classList.remove('hidden');
+                    passwordInput.focus();
+                }
+            }
+        });
+
+        // Listeners para las firmas del footer (Supervisor / Inspector).
+        document.querySelectorAll('.footer-signature-area').forEach(area => {
+            area.addEventListener('click', () => {
+                const hasSignature = area.querySelector('img');
+                if (!hasSignature) {
+                    openSignatureModal(area);
+                } else {
+                    // Si ya está firmada (solo el supervisor puede borrar su firma del footer)
+                    if (area.dataset.title === 'Supervisor') {
+                        itemToManage = { element: area };
+                        currentPasswordAction = 'deleteSupervisorSignature';
+                        passwordModalTitle.textContent = 'Borrar Firma Supervisor';
+                        passwordModalDescription.textContent = 'Ingrese la clave para borrar esta firma.';
+                        passwordConfirmBtn.textContent = 'Confirmar Borrado';
+                        passwordInput.value = '';
+                        passwordError.textContent = '';
+                        passwordModal.classList.remove('hidden');
+                        passwordInput.focus();
+                    } else if (area.dataset.title === 'Inspector') {
+                        // El inspector puede reemplazar su firma sin clave
+                        openSignatureModal(area);
+                    }
+                }
+            });
+        });
+
+        // Guardar "Acción Tomada" en Blur
         expiredListTableBody.addEventListener('blur', (e) => {
             if (!isAuthReady) return;
             if (e.target && e.target.classList.contains('accion-tomada-cell')) {
-                const index = e.target.dataset.index;
+                const docId = e.target.dataset.docId;
                 const text = e.target.textContent.trim();
-                if (index !== undefined) {
-                    const accionTomadaRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos/${index}/accionTomada`);
-                    set(accionTomadaRef, text).catch(error => console.error("Error guardando acción tomada:", error));
+                if (docId) {
+                    const inspectionRef = getInspectionRef(docId);
+                    
+                    update(inspectionRef, {
+                        accionTomada: text
+                    })
+                    .then(() => stampLastUpdate('accionTomada'))
+                    .catch(error => console.error("Error guardando acción tomada (RTDB):", error));
                 }
             }
         }, true);
         
-        // --- SIGNATURE HANDLING ---
+        // Manejo de Firma (Modal)
         function openSignatureModal(cell) {
             activeSignatureCell = cell;
             
             const modalTitle = document.getElementById('signature-modal-title');
             const nameLabel = document.querySelector('#signature-modal label[for="signature-name"]');
-            const title = cell.dataset.title;
+            const title = cell.dataset.title || 'Mecánico';
 
-            if (title === 'Inspector') {
-                modalTitle.textContent = 'Firma del Inspector';
-                nameLabel.textContent = 'Nombre del Inspector';
-            } else if (title === 'Supervisor') {
-                 modalTitle.textContent = 'Firma del Supervisor';
-                 nameLabel.textContent = 'Nombre del Supervisor';
-            } else { // Fallback for table cells
-                modalTitle.textContent = 'Firma del Mecánico';
-                nameLabel.textContent = 'Nombre del Mecánico';
-            }
+            modalTitle.textContent = `Firma del ${title}`;
+            nameLabel.textContent = `Nombre del ${title}`;
 
             signatureModal.classList.remove('hidden');
             signatureNameInput.value = '';
-            const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+            
+            // Redimensionar el canvas para alta resolución
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
             signatureCanvas.width = signatureCanvas.offsetWidth * ratio;
             signatureCanvas.height = signatureCanvas.offsetHeight * ratio;
             signatureCanvas.getContext("2d").scale(ratio, ratio);
-            signaturePad = new SignaturePad(signatureCanvas, {
-                backgroundColor: 'rgb(255, 255, 255)'
-            });
+            
+            try {
+                signaturePad = new SignaturePad(signatureCanvas, {
+                    backgroundColor: 'rgb(255, 255, 255)'
+                });
+            } catch (padError) {
+                console.error("Error al inicializar SignaturePad.", padError);
+            }
         }
+
+        signatureClearBtn.addEventListener('click', () => {
+            if (signaturePad) signaturePad.clear();
+        });
 
         function closeSignatureModal() {
             signatureModal.classList.add('hidden');
@@ -632,333 +1585,1173 @@
             activeSignatureCell = null;
         }
         
-        paperContainer.addEventListener('click', (e) => {
-            if (!isAuthReady) return;
-            const signatureTarget = e.target.closest('.signature-cell, .footer-signature-area');
-            if (signatureTarget) {
-                const isFooterSignature = signatureTarget.classList.contains('footer-signature-area');
-
-                if (signatureTarget.querySelector('img')) {
-                    if (isFooterSignature) {
-                        // Show confirmation modal to replace footer signature
-                        confirmModalTitle.textContent = '¿Desea reemplazar esta firma?';
-                        confirmAction = () => openSignatureModal(signatureTarget);
-                        confirmModal.classList.remove('hidden');
-                    } else {
-                        // Show password modal to delete a table signature
-                        signatureToDeleteIndex = signatureTarget.dataset.index;
-                        passwordInput.value = '';
-                        passwordError.textContent = '';
-                        passwordModal.classList.remove('hidden');
-                        passwordInput.focus();
-                    }
-                } else {
-                    openSignatureModal(signatureTarget);
-                }
-            }
+        signatureCancelBtn.addEventListener('click', () => {
+            isBatchSigning = false; 
+            cleanupBatchMode(); // Limpiar todo si cancela la firma del lote
+            closeSignatureModal();
         });
         
-        signatureClearBtn.addEventListener('click', () => {
-            if (signaturePad) {
-                signaturePad.clear();
-            }
-        });
-        
-        signatureCancelBtn.addEventListener('click', closeSignatureModal);
-        
-        signatureSaveBtn.addEventListener('click', () => {
+        signatureSaveBtn.addEventListener('click', async () => { 
             if (!isAuthReady) {
                 console.warn("Conectando... por favor espere un momento.");
                 return;
             }
             const name = signatureNameInput.value.trim();
-            if (signaturePad && !signaturePad.isEmpty() && activeSignatureCell && name) {
-                const dataURL = signaturePad.toDataURL('image/png');
-                const index = activeSignatureCell.dataset.index;
+            if (!signaturePad || signaturePad.isEmpty() || !name) {
+                alert("Por favor, dibuje su firma y escriba su nombre antes de guardar.");
+                return;
+            }
+            
+            const dataURL = signaturePad.toDataURL('image/png');
+            const signatureData = {
+                signatureDataUrl: dataURL,
+                signatureName: name
+            };
 
-                if (index !== undefined) {
-                    const signatureData = {
-                        signatureDataUrl: dataURL,
-                        signatureName: name
-                    };
-                    const signatureRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos/${index}/signature`);
+            // 1. Guardar datos de firma temporalmente (para reporte de items/discrepancias)
+            lastSignatureData.name = name;
+            lastSignatureData.dataUrl = dataURL;
 
-                    set(signatureRef, signatureData)
-                        .then(() => closeSignatureModal())
-                        .catch(error => {
-                            console.error("Error guardando firma:", error);
-                        });
-                } else { // Fallback for footer signatures (UI only)
-                    activeSignatureCell.innerHTML = '';
-                    const img = document.createElement('img');
-                    img.src = dataURL;
-                    img.alt = 'Firma';
-                    const nameElement = document.createElement('p');
-                    nameElement.className = 'text-xs mt-1 font-semibold';
-                    nameElement.textContent = name;
-                    activeSignatureCell.appendChild(img);
-                    activeSignatureCell.appendChild(nameElement);
-                    closeSignatureModal();
+            const title = activeSignatureCell ? activeSignatureCell.dataset.title : 'Mecánico';
+            
+            if (isBatchSigning) {
+                // LÓGICA DE FIRMA EN LOTE (MECÁNICO)
+                signatureSaveBtn.textContent = 'Firmando...';
+                
+                const promises = [];
+                for (const docId of selectedInspections) {
+                    const inspectionRef = getInspectionRef(docId);
+                    promises.push(
+                        update(inspectionRef, { signature: signatureData })
+                    );
                 }
+                
+                try {
+                    await Promise.all(promises);
+                    stampLastUpdate('batchSign'); 
+                    
+                    closeSignatureModal(); 
+                    openAskModal('consumible', `¿Faltó algún consumible para este LOTE de ${selectedInspections.size} tareas?`);
+
+                } catch (error) {
+                    console.error("Error durante la firma en lote:", error);
+                    cleanupBatchMode();
+                }
+
+            } else if (activeSignatureCell && title === 'Supervisor') {
+                // *** LOGICA: FIRMA DEL SUPERVISOR ***
+                
+                closeSignatureModal();
+
+                // 1. Persistir firma en detalles de la orden
+                const detailsRef = getDetailsRef();
+                update(detailsRef, {
+                    supervisorSignature: signatureData
+                }).then(() => {
+                    stampLastUpdate('signSupervisor');
+                    // 2. Abrir modal de pregunta de Discrepancias
+                    adAskModal.classList.remove('hidden');
+                }).catch(err => console.error("Error guardando firma de supervisor:", err));
+
+            } else if (activeSignatureCell && title === 'Inspector') { 
+                // *** LOGICA: FIRMA DEL INSPECTOR ***
+                
+                closeSignatureModal();
+                
+                // 1. Persistir firma en detalles de la orden
+                const detailsRef = getDetailsRef();
+                update(detailsRef, {
+                    inspectorSignature: signatureData
+                }).then(() => {
+                    stampLastUpdate('signInspector');
+                    lastSignatureData = { name: '', dataUrl: '' }; // Limpiar datos temporales
+                }).catch(err => console.error("Error guardando firma de inspector:", err));
+                
+            } else if (activeSignatureCell) { 
+                const docId = activeSignatureCell.dataset.docId; 
+                const isTaskSignature = activeSignatureCell.classList.contains('signature-cell');
+                
+                if (isTaskSignature && docId) {
+                    // Firma de tarea única (MECÁNICO)
+                    activeInspectionDocId = docId; // Setear el ID para el workflow
+                    update(getInspectionRef(docId), { signature: signatureData })
+                        .then(() => {
+                            stampLastUpdate('singleSign');
+                            closeSignatureModal(); 
+                            // Iniciar el workflow de preguntas
+                            openAskModal('consumible', '¿Faltó algún consumible para esta tarea?');
+                        })
+                        .catch(error => {
+                            console.error("Error guardando firma (RTDB):", error);
+                        });
+                } else { 
+                    // Fallback para firmas de Inspector/Supervisor (Deberían usar el flujo de footer, esto es solo por seguridad)
+                    console.warn("Firma no asociada a tarea o footer. Ignorando.");
+                    closeSignatureModal();
+                    lastSignatureData = { name: '', dataUrl: '' }; 
+                }
+            }
+        });
+        
+        // --- FIN: LÓGICA DE FIRMA Y WORKFLOW ---
+
+        // --- INICIO: LÓGICA DE DISCREPANCIAS DEL SUPERVISOR ---
+        
+        // Listener: Supervisor dice SÍ hay discrepancias
+        adAskModalYesBtn.addEventListener('click', () => {
+            adAskModal.classList.add('hidden');
+            discrepancyNameInput.value = '';
+            discrepancyRefInput.value = '';
+            discrepancyErrorEl.textContent = '';
+            discrepancyModal.classList.remove('hidden');
+            discrepancyNameInput.focus();
+        });
+
+        // Listener: Supervisor dice NO hay discrepancias (o cancela después de firmar)
+        adAskModalNoBtn.addEventListener('click', () => {
+            adAskModal.classList.add('hidden');
+            // Log en el encabezado de la OT
+            const elaboradoPor = document.getElementById('elaborado-por');
+            if (elaboradoPor) {
+                let currentText = elaboradoPor.textContent;
+                const logEntry = `[Rev. Discrepancias: OK por ${lastSignatureData.name}]`;
+                if (!currentText.includes(logEntry)) {
+                    elaboradoPor.textContent = `${currentText} ${logEntry}`.trim();
+                    // Guardar el detalle actualizado en Firebase
+                    saveDetailsBtn.click();
+                }
+            }
+            // Limpiar datos temporales del supervisor
+            lastSignatureData = { name: '', dataUrl: '' }; 
+        });
+
+        // Listener: Cancelar Modal de Discrepancia
+        discrepancyCancelBtn.addEventListener('click', () => {
+            discrepancyModal.classList.add('hidden');
+            // Volver al modal de pregunta, o simplemente limpiar
+            adAskModal.classList.remove('hidden');
+        });
+        
+        /**
+         * Guarda la discrepancia como una nueva tarea ya firmada por el supervisor.
+         */
+        discrepancySaveBtn.addEventListener('click', async () => {
+            const name = discrepancyNameInput.value.trim();
+            const ref = discrepancyRefInput.value.trim() || 'N/A';
+            
+            if (!name) {
+                discrepancyErrorEl.textContent = 'La descripción del problema es obligatoria.';
+                setTimeout(() => discrepancyErrorEl.textContent = '', 3000);
+                return;
+            }
+            
+            // Generar un ID basado en timestamp inverso para que aparezca al inicio de la lista
+            const newDocId = `D${(9999999999999 - Date.now()).toString()}`; 
+            
+            const newInspection = {
+                docId: newDocId,
+                tema: 'DISCREPANCIAS DEL LIBRO DE VUELO',
+                name: `DISCREPANCIA PILOTO: ${name}`,
+                ref: ref,
+                freqText: 'CORRECTIVO',
+                lastDone: new Date().toLocaleDateString('es-HN'),
+                accionTomada: `Investigar y corregir: ${name}`,
+                signature: lastSignatureData // Firma del Supervisor
+            };
+
+            const inspectionRef = getInspectionRef(newDocId);
+            
+            try {
+                // Guardar la nueva tarea
+                await set(inspectionRef, newInspection);
+                stampLastUpdate('newDiscrepancy');
+                
+                discrepancyModal.classList.add('hidden');
+                
+                // Si el Supervisor quiere agregar más, volver al modal de pregunta
+                adAskModal.classList.remove('hidden');
+                adAskModalTitle.textContent = '¡Discrepancia agregada! ¿Hay otra?';
+                
+            } catch (error) {
+                console.error("Error al guardar la nueva discrepancia:", error);
+                discrepancyErrorEl.textContent = 'Error al guardar la tarea.';
+            }
+        });
+        
+        // --- FIN: LÓGICA DE DISCREPANCIAS DEL SUPERVISOR ---
+        
+        // --- MANEJO DE ITEMS FALTANTES (WORKFLOW) ---
+
+        function logNoItemsReported() {
+            if (activeInspectionDocId && lastSignatureData.name) {
+                const cell = document.querySelector(`.accion-tomada-cell[data-doc-id="${activeInspectionDocId}"]`);
+                const logEntry = `No se reportaron faltantes. Firmado: ${lastSignatureData.name}`;
+                
+                if (cell) {
+                    let newText = cell.textContent.trim();
+                    if (!newText.includes(logEntry)) {
+                        newText = newText ? `${newText}. ${logEntry}` : logEntry;
+                    }
+                    cell.textContent = newText;
+                    
+                    const inspectionRef = getInspectionRef(activeInspectionDocId);
+                    update(inspectionRef, {
+                        accionTomada: newText
+                    }).catch(error => console.error("Error guardando 'Acción Tomada' por 'No':", error));
+                }
+            }
+        }
+
+        /**
+         * Limpia y resetea el estado después de completar un workflow.
+         */
+        function cleanupBatchMode() {
+            console.log("Finalizando modo de firma en lote.");
+            isBatchSigning = false;
+            selectedInspections.clear();
+            updateSelectionUI(); // Des-seleccionar todo
+            
+            // Limpiar variables globales (aplica a modo único también)
+            currentItemType = null;
+            lastSignatureData = { name: '', dataUrl: '' }; 
+            activeInspectionDocId = null; // Limpiar para modo único también
+            itemBeingAssigned = null;
+            
+            // Resetear el botón del modal de firma
+            signatureSaveBtn.textContent = 'Guardar Firma';
+        }
+        
+        /**
+         * Función helper para continuar el workflow de lote (ir a repuestos o finalizar).
+         */
+        function continueBatchWorkflow() {
+            if (currentItemType === 'consumible') {
+                openAskModal('repuesto', `¿Faltó algún repuesto para este LOTE de ${selectedInspections.size} tareas?`);
             } else {
-                // No usar alert()
-                console.warn("Por favor, dibuje su firma y escriba su nombre antes de guardar.");
+                // Último paso (repuestos)
+                logNoItemsReportedBatch();
+                cleanupBatchMode();
+            }
+        }
+
+        // ----------------------------------------------------
+        // Lógica de Modales Ask/Form (Consumible/Repuesto)
+        // ----------------------------------------------------
+        function openAskModal(type, title) {
+            currentItemType = type; 
+            askModalTitle.textContent = title;
+            askModal.classList.remove('hidden');
+        }
+        function closeAskModal() {
+            askModal.classList.add('hidden');
+        }
+        
+        askModalYesBtn.addEventListener('click', () => {
+            closeAskModal();
+            openItemFormModal(); 
+        });
+
+        askModalNoBtn.addEventListener('click', () => {
+            closeAskModal();
+            
+            if (isBatchSigning) {
+                continueBatchWorkflow();
+            } else {
+                if (currentItemType === 'consumible') {
+                    openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
+                } else {
+                    logNoItemsReported();
+                    cleanupBatchMode();
+                }
             }
         });
 
-        // --- NEW MODAL LISTENERS ---
+        itemFormCancelBtn.addEventListener('click', () => {
+            closeItemFormModal();
+            itemToManage = {}; // Limpiar estado de edición
+
+            if (isBatchSigning) {
+                continueBatchWorkflow();
+            } else {
+                // Volvemos a preguntar para el siguiente tipo (o terminamos)
+                if (currentItemType === 'consumible') {
+                    openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
+                } else {
+                    logNoItemsReported(); 
+                    cleanupBatchMode();
+                }
+            }
+        });
+
+        function openItemFormModal() {
+            const title = currentItemType === 'consumible' ? 'Añadir Consumible Faltante' : 'Añadir Repuesto Faltante';
+            itemFormModalTitle.textContent = title;
+            itemFormError.textContent = '';
+            
+            // Resetear a modo "Crear"
+            itemFormSaveBtn.removeEventListener('click', handleUpdateItem);
+            itemFormSaveBtn.addEventListener('click', handleSaveNewItem);
+
+            // LÓGICA DE UI
+            if (isBatchSigning) {
+                // MODO LOTE: Usar el formulario simple (para un solo item que se asignará)
+                singleItemFormContainer.style.display = 'block';
+                multiItemFormContainer.style.display = 'none';
+                
+                itemNameInput.value = '';
+                itemPartNumberInput.value = '';
+                itemQuantityInput.value = '1';
+                itemFormSaveBtn.textContent = 'Guardar Item';
+                itemNameInput.focus();
+                
+            } else {
+                // MODO FIRMA ÚNICA: Usar el constructor de listas
+                singleItemFormContainer.style.display = 'none';
+                multiItemFormContainer.style.display = 'block';
+                
+                // Limpiar lista temporal y campos del constructor
+                tempMissingItemsList = [];
+                renderTempItemsList();
+                multiItemNameInput.value = '';
+                multiItemPartNumberInput.value = '';
+                multiItemQuantityInput.value = '1';
+                itemFormSaveBtn.textContent = 'Guardar Lista de Items';
+                multiItemNameInput.focus();
+            }
+            
+            itemFormModal.classList.remove('hidden');
+        }
+
+        function closeItemFormModal() {
+            itemFormModal.classList.add('hidden');
+            tempMissingItemsList = [];
+            itemFormSaveBtn.removeEventListener('click', handleUpdateItem);
+            itemFormSaveBtn.addEventListener('click', handleSaveNewItem);
+        }
+
+        // --- LÓGICA DE GUARDADO/ACTUALIZACIÓN ---
+
+        /**
+         * Guarda un nuevo item en RTDB usando push.
+         */
+        async function saveMissingItem(docId, type, item) {
+            if (!docId) return;
+            const itemsListRef = ref(db, `${INSPECTIONS_PATH}/${docId}/itemsFaltantes`);
+            const newItem = {
+                type: type,
+                name: item.name,
+                partNumber: item.partNumber,
+                quantity: item.quantity,
+                addedAt: new Date().toISOString(),
+                reportedBy: {
+                    name: lastSignatureData.name || 'N/A',
+                    signatureDataUrl: lastSignatureData.dataUrl || null
+                }
+            };
+            try {
+                await push(itemsListRef, newItem);
+                stampLastUpdate('newItem');
+                console.log(`Item faltante guardado en ${docId}.`);
+            } catch (error) {
+                console.error("Error guardando item faltante (RTDB):", error);
+            }
+        }
+        
+        /**
+         * Manejador para CREAR un nuevo item faltante (modo único o lote).
+         */
+        async function handleSaveNewItem() {
+            
+            if (isBatchSigning) {
+                // MODO LOTE (Item Único para Asignar)
+                const name = itemNameInput.value.trim();
+                const partNumber = itemPartNumberInput.value.trim();
+                const quantity = itemQuantityInput.value.trim();
+
+                if (!name || !quantity || parseInt(quantity) <= 0) {
+                    itemFormError.textContent = 'El Nombre y la Cantidad (mayor a 0) son obligatorios.';
+                    setTimeout(() => { itemFormError.textContent = ''; }, 3000);
+                    return;
+                }
+                
+                itemBeingAssigned = { name, partNumber, quantity };
+                closeItemFormModal();
+                openAssignItemModal(); // Abrir modal de asignación
+            
+            } else if (activeInspectionDocId) {
+                // MODO FIRMA ÚNICA (Constructor de Listas)
+                
+                if (tempMissingItemsList.length === 0) {
+                    itemFormError.textContent = 'Debe agregar al menos un ítem a la lista.';
+                    setTimeout(() => { itemFormError.textContent = ''; }, 3000);
+                    return;
+                }
+                
+                const promises = [];
+                for (const item of tempMissingItemsList) {
+                    promises.push(saveMissingItem(activeInspectionDocId, currentItemType, item));
+                }
+                
+                try {
+                    await Promise.all(promises);
+                    stampLastUpdate('saveMultiItems');
+                } catch (error) {
+                    console.error("Error guardando lista de items (RTDB):", error);
+                }
+                
+                closeItemFormModal(); 
+
+                // Continuar el workflow
+                if (currentItemType === 'consumible') {
+                    openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
+                } else {
+                    cleanupBatchMode(); // Finalizar el workflow único
+                }
+            } else {
+                console.error("Error: Estado de firma único o lote inválido.");
+            }
+        }
+        
+        /**
+         * Manejador para ACTUALIZAR un item existente (desde el modal de clave).
+         */
+        async function handleUpdateItem() {
+            const name = itemNameInput.value.trim();
+            const partNumber = itemPartNumberInput.value.trim();
+            const quantity = itemQuantityInput.value.trim();
+
+            if (!name || !quantity || parseInt(quantity) <= 0) {
+                itemFormError.textContent = 'El Nombre y la Cantidad (mayor a 0) son obligatorios.';
+                setTimeout(() => { itemFormError.textContent = ''; }, 3000);
+                return;
+            }
+
+            if (!itemToManage.inspectionId || !itemToManage.itemId) {
+                console.error("Error: No se encontró itemToManage.inspectionId o itemId para actualizar.");
+                closeItemFormModal();
+                return;
+            }
+            
+            const inspectionId = itemToManage.inspectionId;
+            const itemId = itemToManage.itemId;
+            
+            // Encontrar el tipo y nombre de la tarea (para reanudar el flujo)
+            const editedItem = allLoadedMissingItems.find(i => i.itemId === itemId);
+            const itemType = editedItem ? editedItem.type : 'consumible'; 
+            const relatedJobName = editedItem ? editedItem.relatedJobName : 'Tarea';
+
+            const itemRef = ref(db, `${INSPECTIONS_PATH}/${inspectionId}/itemsFaltantes/${itemId}`);
+            
+            try {
+                await update(itemRef, {
+                    name: name,
+                    partNumber: partNumber,
+                    quantity: quantity
+                });
+                stampLastUpdate('updateItem');
+                console.log("Item actualizado con éxito.");
+            } catch (error) {
+                console.error("Error actualizando item (RTDB):", error);
+            }
+            
+            // Limpiar el item en gestión
+            itemToManage = {}; 
+            
+            // Cerrar el modal de edición
+            closeItemFormModal();
+
+            // Preguntar si quiere añadir OTRO item a la TAREA original
+            // Usamos la información del item recién editado para saber a qué tarea pertenece
+            activeInspectionDocId = inspectionId; 
+            currentItemType = itemType; 
+            
+            // Preguntar si quiere continuar agregando items del mismo tipo a la misma tarea.
+            openAskModal(itemType, `¿Desea agregar OTRO ${itemType} a la tarea "${relatedJobName}"?`);
+        }
+        
+        // Asignar el manejador de "crear" por defecto
+        itemFormSaveBtn.addEventListener('click', handleSaveNewItem);
+
+
+        // --- LÓGICA PARA ASIGNACIÓN EN LOTE (MODAL) ---
+
+        /**
+         * Abre el modal para seleccionar a qué tareas del lote
+         * se asignará el item recién creado.
+         */
+        function openAssignItemModal() {
+            if (!itemBeingAssigned) return;
+
+            assignItemModalTitle.textContent = `Asignar: "${itemBeingAssigned.name}" (Cant: ${itemBeingAssigned.quantity})`;
+            assignItemList.innerHTML = ''; 
+
+            let hasItems = false;
+            for (const docId of selectedInspections) {
+                const inspection = allLoadedInspections.find(insp => insp.docId === docId);
+                if (inspection) {
+                    hasItems = true;
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center p-2 rounded hover:bg-gray-100 cursor-pointer';
+                    li.innerHTML = `
+                        <input type="checkbox" data-doc-id="${docId}" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-3" checked>
+                        <label class="text-sm font-medium text-gray-800 flex-1 cursor-pointer">${inspection.name}</label>
+                    `;
+                    // Manejar el clic para toggler el checkbox
+                    li.addEventListener('click', (e) => {
+                        const cb = li.querySelector('input');
+                        // Toggler si no se hizo clic directamente en el checkbox
+                        if (e.target.tagName !== 'INPUT') { 
+                            cb.checked = !cb.checked;
+                        }
+                    });
+                    assignItemList.appendChild(li);
+                }
+            }
+            
+            // Añadir helpers de "Seleccionar Todo / Ninguno"
+            if (hasItems) {
+                const helperRow = document.createElement('div');
+                helperRow.className = 'flex justify-end gap-4 mt-2 pt-2 border-t';
+                helperRow.innerHTML = `
+                    <button id="assign-select-all" class="text-xs text-blue-600 font-medium hover:underline">Seleccionar Todos</button>
+                    <button id="assign-select-none" class="text-xs text-gray-600 font-medium hover:underline">No Seleccionar Ninguno</button>
+                `;
+                assignItemList.prepend(helperRow);
+                
+                // Asignar listeners
+                helperRow.querySelector('#assign-select-all').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    assignItemList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+                });
+                helperRow.querySelector('#assign-select-none').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    assignItemList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                });
+            }
+
+            assignItemModal.classList.remove('hidden');
+        }
+        
+        function closeAssignItemModal() {
+            assignItemModal.classList.add('hidden');
+            itemBeingAssigned = null;
+            assignItemList.innerHTML = '';
+        }
+        
+        /**
+         * Guarda el item solo en las tareas seleccionadas y continúa el flujo de lote.
+         */
+        async function handleAssignItemSave() {
+            if (!itemBeingAssigned || !isBatchSigning) return;
+
+            const checkedBoxes = assignItemList.querySelectorAll('input[type="checkbox"]:checked');
+            const promises = [];
+
+            for (const cb of checkedBoxes) {
+                const docId = cb.dataset.docId;
+                if (docId) {
+                    promises.push(saveMissingItem(docId, currentItemType, itemBeingAssigned));
+                }
+            }
+
+            if (promises.length > 0) {
+                try {
+                    await Promise.all(promises);
+                    console.log(`Item '${itemBeingAssigned.name}' asignado a ${promises.length} tareas.`);
+                    stampLastUpdate('batchAssign');
+                } catch (error) {
+                    console.error("Error asignando item en lote:", error);
+                }
+            }
+
+            closeAssignItemModal();
+            continueBatchWorkflow(); // <-- Continuar a repuestos o finalizar
+        }
+
+        assignItemSaveBtn.addEventListener('click', handleAssignItemSave);
+        assignItemCancelBtn.addEventListener('click', () => {
+            closeAssignItemModal();
+            continueBatchWorkflow(); // Continuar sin guardar el item actual
+        });
+
+
+        // --- LÓGICA PARA CONSTRUCTOR DE LISTAS (MODO ÚNICO) ---
+        
+        /**
+         * Agrega un ítem a la lista temporal 'tempMissingItemsList'
+         */
+        function addItemToList() {
+            const name = multiItemNameInput.value.trim();
+            const partNumber = multiItemPartNumberInput.value.trim();
+            const quantity = multiItemQuantityInput.valueAsNumber;
+
+            if (!name || !quantity || quantity <= 0) {
+                alert("Por favor, complete el nombre y la cantidad (mayor a 0) del ítem.");
+                return;
+            }
+
+            const item = {
+                name: name,
+                partNumber: partNumber || 'N/A',
+                quantity: quantity
+            };
+
+            tempMissingItemsList.push(item);
+            
+            // Re-renderizar la lista en el modal
+            renderTempItemsList();
+
+            // Limpiar campos para el próximo ítem
+            multiItemNameInput.value = '';
+            multiItemPartNumberInput.value = '';
+            multiItemQuantityInput.value = 1;
+            multiItemNameInput.focus();
+        }
+
+        function renderTempItemsList() {
+            if (tempMissingItemsList.length === 0) {
+                tempItemListContainer.innerHTML = '<p class="text-gray-500 italic">No se han agregado ítems.</p>';
+                return;
+            }
+
+            tempItemListContainer.innerHTML = ''; // Limpiar
+            const list = document.createElement('ul');
+            list.className = 'divide-y divide-gray-200';
+
+            tempMissingItemsList.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'py-2 flex justify-between items-center';
+                li.innerHTML = `
+                    <div>
+                        <span class="font-medium">${item.name}</span>
+                        <span class="block text-sm text-gray-600">P/N: ${item.partNumber} (Cant: ${item.quantity})</span>
+                    </div>
+                    <button class="text-red-500 hover:text-red-700 p-1" data-index="${index}" title="Eliminar ítem">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                `;
+                li.querySelector('button').addEventListener('click', (e) => {
+                    const idx = parseInt(e.currentTarget.dataset.index);
+                    tempMissingItemsList.splice(idx, 1);
+                    renderTempItemsList();
+                });
+                list.appendChild(li);
+            });
+            tempItemListContainer.appendChild(list);
+        }
+        
+        // Asignar el listener al nuevo botón de agregar
+        addItemToListBtn.addEventListener('click', addItemToList);
+
+
+        // --- LÓGICA DE MANEJO DE SELECCIÓN MÚLTIPLE ---
+
+        /**
+         * Registra "No se reportaron faltantes" en la celda "Acción Tomada"
+         * para TODAS las inspecciones seleccionadas en el lote.
+         */
+        function logNoItemsReportedBatch() {
+            if (!lastSignatureData.name) return; // No hay firma, no se puede loggear
+
+            const logEntry = `No se reportaron faltantes. Firmado: ${lastSignatureData.name}`;
+            const promises = [];
+
+            for (const docId of selectedInspections) {
+                let newText = '';
+                // Intentar actualizar la UI si la celda está visible
+                const cell = document.querySelector(`.accion-tomada-cell[data-doc-id="${docId}"]`);
+                if (cell) {
+                    newText = cell.textContent.trim();
+                } else {
+                    const inspection = allLoadedInspections.find(insp => insp.docId === docId);
+                    if (inspection) {
+                        newText = inspection.accionTomada || '';
+                    }
+                }
+                
+                if (!newText.includes(logEntry)) {
+                    newText = newText ? `${newText}. ${logEntry}` : logEntry;
+                }
+                
+                if (cell) {
+                    cell.textContent = newText; // Actualizar UI
+                }
+                
+                const inspectionRef = getInspectionRef(docId);
+                promises.push(update(inspectionRef, { accionTomada: newText }));
+            }
+
+            Promise.all(promises)
+                .then(() => stampLastUpdate('logBatchNoItems'))
+                .catch(error => console.error("Error loggeando 'No Faltantes' en lote:", error));
+        }
+
+        function setupSelectionListeners() {
+            // Se añaden los listeners en cada render (y se asume que el onValue de Firebase
+            // se encargará de limpiar el DOM viejo y se conectará al nuevo)
+            selectAllCheckbox.removeEventListener('change', handleSelectAll);
+            selectAllCheckbox.addEventListener('change', handleSelectAll);
+
+            // Re-vincular manejador de checkbox a nivel de tabla
+            expiredListTableBody.removeEventListener('change', handleRowCheckbox);
+            expiredListTableBody.addEventListener('change', handleRowCheckbox);
+        }
+
+        function handleSelectAll(e) {
+            const isChecked = e.target.checked;
+            const allCheckboxes = expiredListTableBody.querySelectorAll('.row-checkbox');
+            
+            selectedInspections.clear();
+
+            allCheckboxes.forEach(cb => {
+                cb.checked = isChecked;
+                if (isChecked) {
+                    selectedInspections.add(cb.dataset.docId);
+                }
+            });
+            updateSelectionUI();
+        }
+
+        function handleRowCheckbox(e) {
+            if (!e.target.classList.contains('row-checkbox')) return;
+            
+            const cb = e.target;
+            const docId = cb.dataset.docId;
+            
+            if (cb.checked) {
+                selectedInspections.add(docId);
+            } else {
+                selectedInspections.delete(docId);
+            }
+            updateSelectionUI();
+        }
+
+        function updateSelectionUI() {
+            const allCheckboxes = expiredListTableBody.querySelectorAll('.row-checkbox');
+            const totalRows = allCheckboxes.length;
+            const selectedCount = selectedInspections.size;
+
+            // Mostrar/Ocultar el contenedor de acciones en lote
+            if (selectedCount > 0) {
+                batchActionsContainer.classList.remove('hidden');
+                selectionCountEl.textContent = `${selectedCount} seleccionada(s)`;
+            } else {
+                batchActionsContainer.classList.add('hidden');
+            }
+
+            // Actualizar el estado de la casilla "Seleccionar Todo"
+            if (totalRows > 0) {
+                 if (selectedCount === 0) {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = false;
+                } else if (selectedCount === totalRows) {
+                    selectAllCheckbox.checked = true;
+                    selectAllCheckbox.indeterminate = false;
+                } else {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = true;
+                }
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            }
+            
+            // Resaltar filas seleccionadas
+            expiredListTableBody.querySelectorAll('tr').forEach(row => {
+                const cb = row.querySelector('.row-checkbox');
+                if (cb && selectedInspections.has(cb.dataset.docId)) {
+                    row.classList.add('selected-row');
+                } else {
+                    row.classList.remove('selected-row');
+                }
+            });
+        }
+        
+        function handleBatchSign() {
+            if (selectedInspections.size === 0) return;
+            isBatchSigning = true;
+            
+            const mockCell = { 
+                dataset: { 
+                    title: 'Mecánico' 
+                } 
+            }; 
+            openSignatureModal(mockCell);
+        }
+        batchSignBtn.addEventListener('click', handleBatchSign);
+
+
+        // --- LÓGICA DE EDICIÓN/BORRADO DE ITEM FALTANTE ---
+
+        missingItemsList.addEventListener('click', (e) => {
+            const target = e.target;
+            
+            // Botón BORRAR
+            if (target.classList.contains('delete-item-btn')) {
+                itemToManage = {
+                    inspectionId: target.dataset.inspectionId,
+                    itemId: target.dataset.itemId
+                };
+                currentPasswordAction = 'deleteItem';
+                
+                passwordModalTitle.textContent = 'Confirmar Borrado';
+                passwordModalDescription.textContent = 'Para borrar este item, ingrese la clave de supervisor.';
+                passwordConfirmBtn.textContent = 'Confirmar Borrado';
+                passwordInput.value = '';
+                passwordError.textContent = '';
+                passwordModal.classList.remove('hidden');
+                passwordInput.focus();
+            }
+            
+            // Botón EDITAR
+            if (target.classList.contains('edit-item-btn')) {
+                const item = allLoadedMissingItems.find(i => i.itemId === target.dataset.itemId);
+                
+                if (item) {
+                    itemToManage = {
+                        inspectionId: target.dataset.inspectionId,
+                        itemId: target.dataset.itemId
+                    };
+                    currentPasswordAction = 'editItem';
+                    
+                    passwordModalTitle.textContent = 'Confirmar Edición';
+                    passwordModalDescription.textContent = 'Para editar este item, ingrese la clave de supervisor.';
+                    passwordConfirmBtn.textContent = 'Confirmar';
+                    passwordInput.value = '';
+                    passwordError.textContent = '';
+                    passwordModal.classList.remove('hidden');
+                    passwordInput.focus();
+                } else {
+                    console.error("Item no encontrado para editar.");
+                }
+            }
+        });
+
+
+        // --- MANEJO DE MODALES DE CLAVE Y CONFIRMACIÓN ---
+
+
         passwordCancelBtn.addEventListener('click', () => {
             passwordModal.classList.add('hidden');
-            signatureToDeleteIndex = null;
+            itemToManage = {};
+            currentPasswordAction = '';
+            selectedArchiveKey = null; 
+            // Asegurar que el botón de clave vuelva al color de borrado
+            passwordConfirmBtn.classList.add('bg-red-600', 'hover:bg-red-700'); 
+            passwordConfirmBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
         });
 
-        passwordConfirmBtn.addEventListener('click', () => {
+        passwordConfirmBtn.addEventListener('click', async () => { 
             const password = passwordInput.value;
-            if (password === "Kevin") {
-                if (signatureToDeleteIndex !== null) {
-                    const signatureRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos/${signatureToDeleteIndex}/signature`);
-                    set(signatureRef, null).catch(error => {
-                        console.error("Error al borrar la firma:", error);
-                    });
-                    passwordModal.classList.add('hidden');
-                    signatureToDeleteIndex = null;
-                }
-            } else {
-                passwordError.textContent = "Clave incorrecta.";
-                passwordInput.value = '';
-                setTimeout(() => { passwordError.textContent = ''; }, 3000);
-            }
-        });
-
-        confirmModalCancelBtn.addEventListener('click', () => {
-            confirmModal.classList.add('hidden');
-            confirmAction = () => {};
-        });
-
-        confirmModalOkBtn.addEventListener('click', () => {
-            confirmAction();
-            confirmModal.classList.add('hidden');
-            confirmAction = () => {};
-        });
-
-        // --- ARCHIVE HANDLING ---
-        const archiveBtn = document.getElementById('archive-btn');
-        archiveBtn.addEventListener('click', () => {
-            if (!isAuthReady) {
-                console.warn("Conectando... por favor espere un momento.");
-                return;
-            }
-
-            // Usar el modal de confirmación personalizado
-            confirmModalTitle.textContent = '¿Seguro que desea archivar? Esto limpiará la lista actual.';
-            confirmAction = () => {
-                const expiredRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos`);
-                onValue(expiredRef, (snapshot) => {
-                    const inspectionsToArchive = snapshot.val();
-                    const detailsToArchive = {};
-                    detailFieldIds.forEach(id => {
-                        const element = document.getElementById(id);
-                        detailsToArchive[id] = element ? element.textContent.trim() : '';
-                    });
-
-                    if (inspectionsToArchive && inspectionsToArchive.length > 0) {
-                        const timestamp = new Date().toISOString().replace(/[.:]/g, '-');
-                        const archiveRef = ref(database, `artifacts/${sharedProjectId}/public_data/historial_ordenes/${timestamp}`);
+            passwordError.textContent = '';
+            
+            if (password === SUPERVISOR_KEY) { 
+                passwordModal.classList.add('hidden');
+                switch (currentPasswordAction) {
+                    case 'deleteSignature':
+                        if (itemToManage.docId) {
+                            const inspectionRef = getInspectionRef(itemToManage.docId);
+                            update(inspectionRef, { signature: null })
+                                .then(() => stampLastUpdate('deleteSign')); 
+                        }
+                        break;
+                    
+                    case 'deleteItem':
+                        if (itemToManage.inspectionId && itemToManage.itemId) {
+                            const itemRef = ref(db, `${INSPECTIONS_PATH}/${itemToManage.inspectionId}/itemsFaltantes/${itemToManage.itemId}`);
+                            remove(itemRef)
+                                .then(() => stampLastUpdate('deleteItem')); 
+                        }
+                        break;
+                    
+                    case 'deleteTask':
+                        // LÓGICA DE BORRADO DE TAREA
+                        if (itemToManage.docId) {
+                            handleDeleteTask(); 
+                        }
+                        break;
                         
-                        const archiveData = {
-                            details: detailsToArchive,
-                            inspections: inspectionsToArchive,
-                            archivedAt: new Date().toISOString()
-                        };
+                    case 'editItem':
+                        // Resetear a modo de edición
+                        itemFormSaveBtn.removeEventListener('click', handleSaveNewItem); 
+                        itemFormSaveBtn.addEventListener('click', handleUpdateItem); 
+                        
+                        const itemToEdit = allLoadedMissingItems.find(i => i.itemId === itemToManage.itemId);
+                        if (itemToEdit) {
+                            itemFormModalTitle.textContent = "Editar Item Faltante";
+                            itemNameInput.value = itemToEdit.name;
+                            itemPartNumberInput.value = itemToEdit.partNumber;
+                            itemQuantityInput.value = itemToEdit.quantity;
+                            itemFormSaveBtn.textContent = 'Actualizar Item';
+                            
+                            // Mostrar solo el formulario de ítem único para edición
+                            singleItemFormContainer.style.display = 'block';
+                            multiItemFormContainer.style.display = 'none';
+                            
+                            itemFormModal.classList.remove('hidden');
+                            itemNameInput.focus();
+                        }
+                        break;
 
-                        set(archiveRef, archiveData)
-                            .then(() => {
-                                // Clear the current list after successful archive
-                                return set(expiredRef, null);
-                            })
-                            .then(() => {
-                                console.log("Trabajos archivados con éxito.");
-                            })
-                            .catch((error) => {
-                                console.error("Error al archivar:", error);
-                            });
-                    } else {
-                        console.warn("No hay trabajos para archivar.");
-                    }
-                }, { onlyOnce: true }); // Important: only run this once per click
-            };
-            confirmModal.classList.remove('hidden');
+                    case 'restoreArchive': 
+                        if (selectedArchiveKey) {
+                            try {
+                                const archiveDataRef = ref(db, `${HISTORY_PATH}/${selectedArchiveKey}`);
+                                const snapshot = await get(archiveDataRef);
+                                const archiveData = snapshot.val();
+
+                                if (archiveData && archiveData.inspecciones && archiveData.details) {
+                                    // Transformar array de inspecciones a objeto key-value (RTDB structure)
+                                    const inspectionsToRestore = archiveData.inspecciones.reduce((acc, item) => {
+                                        if (item && item.docId) {
+                                            // Limpiar campos temporales de firma/acciones si existen
+                                            item.signature = null;
+                                            item.accionTomada = '';
+                                            acc[item.docId] = item;
+                                        }
+                                        return acc;
+                                    }, {});
+                                    
+                                    const detailsToRestore = archiveData.details;
+
+                                    // Sobreescribir los datos activos y detalles
+                                    await set(getInspectionRef(), inspectionsToRestore);
+                                    await set(getDetailsRef(), detailsToRestore);
+                                    
+                                    stampLastUpdate('restoreArchive');
+                                    alert("¡Orden restaurada con éxito!");
+                                } else {
+                                    console.error("Datos de historial corruptos o incompletos.");
+                                    alert("Error: Datos de historial corruptos o incompletos.");
+                                }
+                            } catch (error) {
+                                console.error("Error al restaurar la orden (RTDB):", error);
+                                alert("Error al restaurar la orden: " + error.message);
+                            }
+                            selectedArchiveKey = null; // Limpiar
+                        }
+                        break;
+                    case 'deleteSupervisorSignature':
+                        // LÓGICA DE BORRADO DE FIRMA DEL SUPERVISOR
+                        if (itemToManage.element.dataset.title === 'Supervisor') {
+                            const detailsRef = getDetailsRef();
+                            update(detailsRef, {
+                                supervisorSignature: null
+                            }).then(() => {
+                                stampLastUpdate('deleteSupervisorSign');
+                                // UI update is handled by loadOrderDetails listener
+                                itemToManage = {};
+                            }).catch(err => console.error("Error al borrar firma de supervisor:", err));
+                        }
+                        break;
+                }
+                
+            } else {
+                passwordError.textContent = 'Clave incorrecta';
+            }
         });
 
-        // --- REPORT GENERATION ---
-        const reportBtn = document.getElementById('report-btn');
-        reportBtn.addEventListener('click', () => {
+
+        // --- MANEJO DE HISTORIAL Y ARCHIVO ---
+
+        const archiveBtn = document.getElementById('archive-btn');
+
+        archiveBtn.addEventListener('click', async () => {
+            if (!isAuthReady) return;
+            
+            // 1. Obtener los datos actuales de la orden
+            const inspectionsSnapshot = await get(getInspectionRef());
+            const detailsSnapshot = await get(getDetailsRef());
+            
+            const inspectionsData = inspectionsSnapshot.val();
+            const detailsData = detailsSnapshot.val();
+
+            if (!inspectionsData || Object.keys(inspectionsData).length === 0) {
+                alert("No hay trabajos activos para archivar.");
+                return;
+            }
+
+            // 2. Transformar los datos a una estructura de array (más fácil de manejar en historial)
+            const inspectionsArray = Object.keys(inspectionsData).map(key => ({ 
+                docId: key, 
+                ...inspectionsData[key] 
+            })).filter(item => item !== null);
+            
+            // 3. Crear el objeto de archivo
+            const archiveEntry = {
+                archivedAt: new Date().toISOString(),
+                inspecciones: inspectionsArray, // Cambiado a 'inspecciones' para consistencia con la lógica de restauración
+                details: detailsData,
+                archivedBy: lastSignatureData.name || currentUserId
+            };
+
+            // 4. Pedir confirmación (no usamos el modal de clave ya que la acción NO es destructiva)
+            if (!confirm(`¿Está seguro de archivar la orden actual (${detailsData['orden-trabajo-no'] || 'N/A'})? Esto borrará la lista de trabajos actual (pero conservará el historial).`)) {
+                return;
+            }
+
+            // 5. Guardar en el historial (usando un timestamp como clave)
+            const historyRef = ref(db, HISTORY_PATH);
+            try {
+                // Usamos el timestamp inverso para que el historial se ordene automáticamente de nuevo a viejo
+                const timestampKey = (9999999999999 - Date.now()).toString(); 
+                await set(ref(historyRef, timestampKey), archiveEntry);
+                console.log("Orden archivada con éxito.");
+
+                // 6. Borrar la lista de trabajos activos (para que la próxima OT esté limpia)
+                await remove(getInspectionRef());
+                // Mantenemos los detalles de la orden para que el encabezado no se borre
+                // await remove(getDetailsRef()); 
+
+                stampLastUpdate('archiveOrder');
+                alert("¡Orden archivada y lista de trabajos reiniciada con éxito!");
+                
+            } catch (error) {
+                console.error("Error al archivar la orden (RTDB):", error);
+                alert("Error al archivar la orden: " + error.message);
+            }
+        });
+
+        // --- MANEJO DE HISTORIAL (Load History) ---
+
+        /**
+         * Función para manejar la carga y visualización del historial.
+         */
+        async function handleLoadHistoryModal() {
             if (!isAuthReady) {
                 console.warn("Conectando... por favor espere un momento.");
                 return;
             }
-
-            const expiredRef = ref(database, `artifacts/${sharedProjectId}/public_data/trabajos_vencidos`);
-            onValue(expiredRef, (snapshot) => {
-                const inspections = snapshot.val();
+            
+            archiveListModal.classList.remove('hidden');
+            archiveLoadingMsg.classList.remove('hidden');
+            archiveListContainer.innerHTML = '';
+            
+            try {
+                const historyRef = ref(db, HISTORY_PATH);
+                const snapshot = await get(historyRef);
+                const historyData = snapshot.val();
                 
-                if (!inspections || inspections.length === 0) {
+                archiveLoadingMsg.classList.add('hidden');
+                
+                if (!historyData) {
+                    archiveListContainer.innerHTML = '<p class="text-gray-500 text-center py-4">No se encontró historial archivado.</p>';
+                    return;
+                }
+                
+                // Convertir a array de objetos y asegurar el orden por clave (timestamp inverso)
+                const sortedHistory = Object.keys(historyData).map(key => ({
+                    key: key,
+                    ...historyData[key]
+                })).sort((a, b) => parseInt(a.key) - parseInt(b.key)); // Ordenar del más nuevo (menor clave) al más viejo
+                
+                renderArchiveList(sortedHistory);
+                
+            } catch (error) {
+                console.error("Error al cargar el historial:", error);
+                archiveLoadingMsg.textContent = "Error al cargar el historial.";
+            }
+        }
+
+        function renderArchiveList(historyItems) {
+            archiveListContainer.innerHTML = '';
+            
+            historyItems.forEach(item => {
+                const archivedDate = new Date(item.archivedAt).toLocaleString('es-HN');
+                const numInspections = item.inspecciones ? item.inspecciones.length : 0;
+                const otNumber = item.details && item.details['orden-trabajo-no'] ? item.details['orden-trabajo-no'] : 'N/A';
+                
+                const card = document.createElement('div');
+                card.className = 'p-4 border rounded-lg shadow-md bg-white flex justify-between items-center transition-shadow hover:shadow-lg';
+                card.innerHTML = `
+                    <div>
+                        <p class="text-md font-bold text-gray-800">Orden de Trabajo No. ${otNumber}</p>
+                        <p class="text-sm text-gray-600">Archivado: ${archivedDate}</p>
+                        <p class="text-xs text-gray-500">Tareas: ${numInspections} / Archivado por: ${item.archivedBy}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-lg restore-archive-btn" data-key="${item.key}" title="Restaurar esta orden y sobreescribir la activa">
+                            <i class="fas fa-undo mr-1"></i> Restaurar
+                        </button>
+                    </div>
+                `;
+                archiveListContainer.appendChild(card);
+            });
+            
+            // Asignar listeners a los botones de restaurar
+            archiveListContainer.querySelectorAll('.restore-archive-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    selectedArchiveKey = e.currentTarget.dataset.key;
+                    currentPasswordAction = 'restoreArchive';
+                    
+                    // Reconfigurar modal de clave para Restauración
+                    passwordModalTitle.textContent = 'Confirmar Restauración';
+                    passwordModalDescription.textContent = 'Restaurar el historial SOBRESCRIBIRÁ la orden activa. Ingrese la clave de supervisor para confirmar.';
+                    passwordConfirmBtn.textContent = 'Restaurar Orden';
+                    passwordConfirmBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                    passwordConfirmBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                    passwordInput.value = '';
+                    passwordError.textContent = '';
+                    passwordModal.classList.remove('hidden');
+                    passwordInput.focus();
+                    
+                    archiveListModal.classList.add('hidden'); // Ocultar el listado
+                });
+            });
+        }
+        
+        // Attach listeners
+        loadHistoryBtn.addEventListener('click', handleLoadHistoryModal);
+        archiveListCloseBtn.addEventListener('click', () => archiveListModal.classList.add('hidden'));
+
+
+        // --- Generar Reporte ---
+        const reportBtn = document.getElementById('report-btn');
+        reportBtn.addEventListener('click', async () => {
+            if (!isAuthReady) {
+                console.warn("Conectando... por favor espere un momento.");
+                return;
+            }
+            
+            try {
+                // Obtener datos de inspección y detalles
+                const inspectionsSnapshot = await get(getInspectionRef());
+                const detailsSnapshot = await get(getDetailsRef());
+                
+                const inspections = inspectionsSnapshot.val();
+                const details = detailsSnapshot.val();
+
+                if (!inspections || Object.keys(inspections).length === 0) {
                     console.warn("No hay inspecciones en la lista para generar un reporte.");
+                    alert("No hay trabajos firmados para generar un reporte de acción correctiva.");
                     return;
                 }
 
-                generateDiscrepancyReport(inspections);
+                // Transformar objeto en array y filtrar solo las que tienen firma (completadas)
+                const inspectionsArray = Object.keys(inspections).map(key => ({ 
+                    docId: key, 
+                    ...inspections[key] 
+                })).filter(item => item !== null && item.signature && item.signature.signatureDataUrl); // Filtra por firma
+                
+                if (inspectionsArray.length === 0) {
+                    alert("No hay tareas completadas (firmadas) para generar un reporte de acción correctiva.");
+                    return;
+                }
 
-            }, { onlyOnce: true });
+                generateDiscrepancyReport(inspectionsArray, details);
+
+            } catch (error) {
+                console.error("Error al generar el reporte (RTDB fetch falló):", error);
+                alert("Error al obtener datos para el reporte. Verifique la conexión.");
+            }
         });
 
-        function generateDiscrepancyReport(inspections) {
-            const matricula = document.getElementById('matricula').textContent || 'FAH-979'; // Adaptado
+        function generateDiscrepancyReport(inspections, details) {
+            const matricula = details && details.matricula || 'FAH-979';
             const fecha = new Date().toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: '2-digit' }).replace('.', '').toUpperCase();
 
-            // --- Start of Report HTML ---
-            let reportContent = `
-                <!DOCTYPE html>
-                <html lang="es">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Reporte de Trabajo Efectuado - ${matricula}</title>
-                    <style>
-                        body { 
-                            font-family: Arial, sans-serif; 
-                            font-size: 11px; 
-                            counter-reset: page-counter;
-                        }
-                        .report-container { 
-                            width: 100%; 
-                            max-width: 8.5in; 
-                            margin: auto; 
-                            display: flex;
-                            flex-direction: column;
-                            min-height: 10.5in; /* Approximate letter size minus margins */
-                        }
-                        .report-body {
-                            flex-grow: 1;
-                        }
-                        .header { text-align: center; }
-                        .header h1, .header h2, .header h3 { margin: 1px 0; font-weight: bold; }
-                        .header h1 { font-size: 16px; }
-                        .header h2 { font-size: 14px; }
-                        .header h3 { font-size: 12px; font-weight: normal; }
-                        .info-table { width: 100%; margin-top: 15px; margin-bottom: 15px; border: none; }
-                        .info-table td { font-size: 12px; font-weight: bold; }
-                        .notification { font-size: 12px; margin-bottom: 10px; }
-                        
-                        .data-table { width: 100%; border-collapse: collapse; border: 2px solid black; }
-                        .data-table th { color: white; text-align: left; padding: 6px; font-size: 14px; border: 2px solid black; }
-                        .data-table td { border: 1.5px solid black; padding: 5px; vertical-align: top; }
-                        .data-table .num { font-weight: bold; text-align: center; width: 45px; }
-
-                        .discrepancy-table th { background-color: #2E75B5; }
-                        .discrepancy-table td { background-color: #FFC000; }
-                        
-                        .corrective-table { margin-top: 20px; }
-                        .corrective-table th { background-color: #00B050; }
-                        .corrective-table td { background-color: #E2EFDA; }
-                        .corrective-table .mechanic-sig {
-                            text-align: center;
-                            width: 150px;
-                        }
-                        .corrective-table .mechanic-sig img {
-                            max-height: 30px;
-                            display: block;
-                            margin: 0 auto 2px;
-                        }
-                        .corrective-table .mechanic-sig p {
-                            font-size: 9px;
-                            margin: 0;
-                            line-height: 1;
-                        }
-
-
-                        .signatures-container { 
-                            margin-top: 30px; 
-                            font-size: 10px;
-                        }
-                        .mechanics-list {
-                            columns: 2;
-                            -webkit-columns: 2;
-                            -moz-columns: 2;
-                        }
-                        .mechanic-item {
-                            display: flex;
-                            align-items: center;
-                            margin-bottom: 5px;
-                            break-inside: avoid;
-                        }
-                        .mechanic-item img {
-                            height: 25px;
-                            width: auto;
-                            margin-left: 10px;
-                        }
-
-                        .official-signatures {
-                            display: grid;
-                            grid-template-columns: 1fr 1fr;
-                            gap: 40px 60px;
-                            margin-top: 30px;
-                            text-align: center;
-                        }
-                        .official-signatures div {
-                            padding-top: 40px;
-                            border-top: 1px solid black;
-                        }
-
-                        @media print {
-                            body { margin: 0.5in; }
-                            .no-print { display: none; }
-                            .page-footer {
-                                position: fixed;
-                                bottom: 0.25in;
-                                right: 0.5in;
-                                font-size: 10px;
-                            }
-                            .page-footer::after {
-                                counter-increment: page-counter;
-                                content: "Página " counter(page-counter);
-                            }
-                            .page-break {
-                                page-break-before: always;
-                            }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="report-container">
-                        <div class="report-body">
-                            <div class="header">
-                                <h1>FUERZAS ARMADAS DE HONDURAS</h1>
-                                <h2>FUERZA AÉREA HONDUREÑA</h2>
-                                <h3>Base Aérea "Coronel Hernán Acosta Mejía"</h3>
-                                <h2>REPORTE DE TRABAJO EFECTUADO</h2>
-                            </div>
-                            
-                            <table class="info-table">
-                                <tr>
-                                    <td>AVION No. Bell-412 ${matricula}</td>
-                                    <td style="text-align: right;">FECHA: ${fecha}</td>
-                                </tr>
-                            </table>
-
-                            <p class="notification">El Taller / Sección Helicópteros notifica que el trabajo:</p>
-
-                            <table class="data-table discrepancy-table">
-                                <thead>
-                                    <tr><th colspan="2">Discrepancia:</th></tr>
-                                </thead>
-                                <tbody>
-                `;
-
-            const inspectionsWithOriginalIndex = inspections
-                .map((item, index) => item ? { ...item, originalIndex: index } : null)
-                .filter(item => item !== null);
-
-            const groupedByTheme = inspectionsWithOriginalIndex.reduce((acc, item) => {
+            // 1. Agrupar todas las inspecciones (discrepancia y acción correctiva) por Tema.
+            const groupedByTheme = inspections.reduce((acc, item) => {
                 const theme = item.tema || 'Inspecciones Generales';
                 if (!acc[theme]) { acc[theme] = []; }
                 acc[theme].push(item);
@@ -966,8 +2759,9 @@
             }, {});
 
             const themeOrder = [
-                'SCHEDULE INSPECTIONS', 'ENGINE 1 INSPECCIONES', 'ENGINE 2 INSPECCIONES', 'SPECIAL INSPECTIONS',
-                'LUBRICACION', 'MISCELLANEOUS', 'DIRECTIVAS DE AERONAVEGABILIDAD Y BOLETINES DE SERVICIO'
+                'SCHEDULED INSPECTIONS', 'SPECIAL INSPECTIONS', 'FUSELAGE - NOSE SECTION', 'FUSELAGE - CABIN SECTION', 
+                'FUSELAGE AFT OF CABIN', 'TAILBOOM ATTACHMENT', 'TAIL ROTOR', 'MAIN ROTOR - CABIN ROOF', 
+                'ENGINE INSPECTIONS (PT6T-3B/D)', 'DIRECTIVAS DE AERONAVEGABILIDAD Y BOLETINES DE SERVICIO', 'DISCREPANCIAS DEL LIBRO DE VUELO', 'Inspecciones Generales'
             ];
             
             const sortedThemes = Object.keys(groupedByTheme).sort((a, b) => {
@@ -978,88 +2772,107 @@
                 if (indexB !== -1) return 1;
                 return a.localeCompare(b);
             });
-
-            // --- Function to generate discrepancy table rows ---
-            const generateDiscrepancyTableRows = () => {
-                let content = '';
-                let themeCounter = 1;
-                for (const theme of sortedThemes) {
-                    let itemCounter = 1;
-                    content += `<tr><td class="num">${themeCounter}.</td><td><strong>${theme}</strong></td></tr>`;
-                    groupedByTheme[theme].forEach(item => {
-                        content += `<tr><td class="num">${themeCounter}.${itemCounter++}</td><td>Efectuar ${item.name} / ${item.ref}</td></tr>`;
-                    });
-                    themeCounter++;
-                }
-                return content;
-            };
-
-            reportContent += generateDiscrepancyTableRows();
-            reportContent += `
-                                </tbody>
-                            </table>
-
-                            <table class="data-table corrective-table">
-                                <thead>
-                                    <tr>
-                                        <th colspan="2">Acción Correctiva:</th>
-                                        <th>Técnico Especialista</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                `;
-
-            // --- Function to generate corrective action table rows ---
-            const generateCorrectiveTableRows = () => {
-                let content = '';
-                let themeCounter = 1;
-                for (const theme of sortedThemes) {
-                    let itemCounter = 1;
-                    content += `
-                            <tr>
-                                <td class="num">${themeCounter}.</td>
-                                <td colspan="2"><strong>${theme}</strong></td>
-                            </tr>`;
-                    groupedByTheme[theme].forEach(item => {
-                        const signatureCell = (item.signature && item.signature.signatureDataUrl)
-                            ? `<td class="mechanic-sig">
-                                  <img src="${item.signature.signatureDataUrl}" alt="Firma">
-                                  <p>${item.signature.signatureName || ''}</p>
-                               </td>`
-                            : '<td></td>';
-
-                        content += `
-                            <tr>
-                                <td class="num">${themeCounter}.${itemCounter++}</td>
-                                <td>Se completó ${item.name} / ${item.ref}</td>
-                                ${signatureCell}
-                            </tr>
-                        `;
-                    });
-                    themeCounter++;
-                }
-                return content;
-            };
             
-            reportContent += generateCorrectiveTableRows();
-            reportContent += `
-                                </tbody>
-                            </table>
-                        </div>
+            let discrepancyRows = '';
+            let correctiveRows = '';
+            let globalItemCounter = 1;
+
+            // 2. Generar filas
+            for (const theme of sortedThemes) {
+                let themeCounter = globalItemCounter++;
+                let itemCounter = 1;
+                
+                // Fila de Título para la sección de Discrepancia
+                discrepancyRows += `<tr><td class="num">${themeCounter}.</td><td><strong>${theme}</strong></td></tr>`;
+                // Fila de Título para la sección de Acción Correctiva
+                correctiveRows += `<tr><td class="num">${themeCounter}.</td><td colspan="2"><strong>${theme}</strong></td></tr>`;
+
+                groupedByTheme[theme].forEach(item => {
+                    // Contenido de la Discrepancia (lo que se debía hacer o el reporte de fallo)
+                    discrepancyRows += `<tr><td class="num">${themeCounter}.${itemCounter}</td><td>Efectuar ${item.name} / ${item.ref}</td></tr>`;
+                    
+                    // Contenido de la Acción Correctiva
+                    const signatureCell = (item.signature && item.signature.signatureDataUrl)
+                        ? `<td class="mechanic-sig"><img src="${item.signature.signatureDataUrl}" alt="Firma"><p>${item.signature.signatureName || ''}</p></td>`
+                        : '<td></td>';
                         
+                    const actionText = item.accionTomada && item.accionTomada.length > 0
+                        ? item.accionTomada
+                        : `Se completó ${item.name} / ${item.ref}`;
+                        
+                    correctiveRows += `<tr><td class="num">${themeCounter}.${itemCounter}</td><td>${actionText}</td>${signatureCell}</tr>`;
+
+                    itemCounter++;
+                });
+            }
+
+
+            // 3. Ensamblar el Reporte HTML
+            let reportContent = `
+                <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte - ${matricula}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; font-size: 11px; counter-reset: page-counter; }
+                    .report-container { width: 100%; max-width: 8.5in; margin: auto; display: flex; flex-direction: column; min-height: 10.5in; }
+                    .report-body { flex-grow: 1; }
+                    .header { text-align: center; }
+                    .header h1, .header h2, .header h3 { margin: 1px 0; font-weight: bold; }
+                    .header h1 { font-size: 16px; } .header h2 { font-size: 14px; } .header h3 { font-size: 12px; font-weight: normal; }
+                    .info-table { width: 100%; margin-top: 15px; margin-bottom: 15px; border: none; }
+                    .info-table td { font-size: 12px; font-weight: bold; }
+                    .notification { font-size: 12px; margin-bottom: 10px; }
+                    .data-table { width: 100%; border-collapse: collapse; border: 2px solid black; }
+                    .data-table th { color: white; text-align: left; padding: 6px; font-size: 14px; border: 2px solid black; }
+                    .data-table td { border: 1.5px solid black; padding: 5px; vertical-align: top; }
+                    .data-table .num { font-weight: bold; text-align: center; width: 45px; }
+                    .discrepancy-table th { background-color: #2E75B5; }
+                    .discrepancy-table td { background-color: #FFC000; }
+                    .corrective-table { margin-top: 20px; }
+                    .corrective-table th { background-color: #00B050; }
+                    .corrective-table td { background-color: #E2EFDA; }
+                    .corrective-table .mechanic-sig { text-align: center; width: 150px; }
+                    .corrective-table .mechanic-sig img { max-height: 30px; display: block; margin: 0 auto 2px; }
+                    .corrective-table .mechanic-sig p { font-size: 9px; margin: 0; line-height: 1; }
+                    .signatures-container { margin-top: 30px; font-size: 10px; }
+                    .official-signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 60px; margin-top: 30px; text-align: center; }
+                    .official-signatures div { padding-top: 40px; border-top: 1px solid black; }
+                    @media print {
+                        body { margin: 0.5in; } .no-print { display: none; }
+                        .page-footer { position: fixed; bottom: 0.25in; right: 0.5in; font-size: 10px; }
+                        .page-footer::after { counter-increment: page-counter; content: "Página " counter(page-counter); }
+                    }
+                </style></head><body>
+                <div class="report-container">
+                    <div class="report-body">
+                        <div class="header">
+                            <h1>FUERZAS ARMADAS DE HONDURAS</h1>
+                            <h2>FUERZA AÉREA HONDUREÑA</h2>
+                            <h3>Base Aérea "Coronel Hernán Acosta Mejía"</h3>
+                            <h2>REPORTE DE TRABAJO EFECTUADO</h2>
+                        </div>
+                        <table class="info-table">
+                            <tr><td>AVION No. Bell-412 ${matricula}</td><td style="text-align: right;">FECHA: ${fecha}</td></tr>
+                        </table>
+                        <p class="notification">El Taller / Sección Helicópteros notifica que el trabajo:</p>
+                        <table class="data-table discrepancy-table">
+                            <thead><tr><th colspan="2">Discrepancia:</th></tr></thead>
+                            <tbody>
+                                ${discrepancyRows}
+                            </tbody></table>
+                        <table class="data-table corrective-table">
+                            <thead><tr><th colspan="2">Acción Correctiva:</th><th>Técnico Especialista</th></tr></thead>
+                            <tbody>
+                                ${correctiveRows}
+                            </tbody></table>
+                    </div>
                         <footer class="signatures-container">
                              <div class="official-signatures">
-                                 <div><p>SUPERVISOR</p></div>
-                                 <div><p>INSPECTOR</p></div>
-                                 <div><p>JEFE TALLER / SECCION</p></div>
-                                 <div><p>JEFE DE LOGISTICA A-4</p></div>
+                                 <div><p>SUPERVISOR</p></div><div><p>INSPECTOR</p></div>
+                                 <div><p>JEFE TALLER / SECCION</p></div><div><p>JEFE DE LOGISTICA A-4</p></div>
                             </div>
                         </footer>
-                    </div>
-                    <div class="page-footer"></div>
+                    </div><div class="page-footer"></div>
                     <button class="no-print" onclick="window.print()" style="position: fixed; top: 10px; right: 10px; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 5px;">Imprimir Reporte</button>
-                </body>
-                </html>
+                </body></html>
             `;
 
             const reportWindow = window.open('', '_blank');
@@ -1070,4 +2883,3 @@
     </script>
 </body>
 </html>
-
