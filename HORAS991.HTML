@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+}<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
@@ -1193,51 +1193,35 @@
          * @param {Array<Array<string>>} datos - Los datos a cargar.
          * @param {number} indiceTabla - El índice de la tabla HTML a actualizar.
          */
-        function cargarDatosEnTablaHTML(datos, indiceTabla) {
-            const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
-            console.log('DEBUG: Elemento de tabla HTML encontrado para cargar datos:', tabla); 
-            if (tabla) {
-                tabla.querySelectorAll('tr').forEach((fila, indexFila) => {
-                    const datosFila = datos[indexFila];
-                    if (datosFila) {
-                        fila.querySelectorAll('td').forEach((celda, indexCelda) => {
-                            if (indexCelda !== 0 && datosFila[indexCelda] !== undefined) {
-                                celda.textContent = datosFila[indexCelda];
-                                if (celda.textContent.trim() !== "") {
-                                    celda.classList.add("led-persistente");
-                                } else {
-                                    celda.classList.remove("led-persistente");
-                                }
-                                // Asegurarse de quitar la clase de invalidación si el dato es válido al cargar
-                                celda.classList.remove('invalid-input');
-                            }
-                        });
+       function cargarDatosEnTablaHTML(datos, mesIndex) {
+    // Si no hay datos, limpiamos la tabla y salimos sin dar error
+    if (!datos) {
+        const tabla = document.querySelectorAll(".tabla-vuelo")[mesIndex];
+        if (tabla) {
+            tabla.querySelectorAll("tbody tr").forEach(fila => {
+                fila.querySelectorAll("td").forEach((celda, i) => {
+                    if (i > 0) celda.textContent = ""; // Limpia celdas excepto la del día
+                });
+            });
+        }
+        return; 
+    }
+
+    const tabla = document.querySelectorAll(".tabla-vuelo")[mesIndex];
+    if (tabla) {
+        const filas = tabla.querySelectorAll("tbody tr");
+        datos.forEach((filaDatos, indexFila) => {
+            if (filas[indexFila] && filaDatos) { // Verificamos que la fila existe
+                const celdas = filas[indexFila].querySelectorAll("td");
+                filaDatos.forEach((valor, indexCelda) => {
+                    if (celdas[indexCelda]) {
+                        celdas[indexCelda].textContent = valor || "";
                     }
                 });
-                actualizarTotales(); 
             }
-        }
-
-        /**
-         * Obtiene los datos actuales de una tabla HTML específica.
-         * @param {number} indiceTabla - El índice de la tabla HTML de la que obtener los datos.
-         * @returns {Array<Array<string>>} Los datos de la tabla.
-         */
-        function obtenerDatosTabla(indiceTabla) {
-            const tabla = document.querySelectorAll(`#contenedor-tablas > div`)[indiceTabla]?.querySelector('table tbody');
-            const datos = [];
-            if (tabla) {
-                tabla.querySelectorAll('tr').forEach(fila => {
-                    const filaData = [];
-                    fila.querySelectorAll('td').forEach(celda => {
-                        filaData.push(celda.textContent);
-                    });
-                    datos.push(filaData);
-                });
-            }
-            return datos;
-        }
-
+        });
+    }
+}
         // -----------------------------------------------------------
         // Funciones de Interfaz de Usuario y Lógica de Tabla
         // -----------------------------------------------------------
@@ -1375,38 +1359,31 @@
          * También carga los datos de Firebase para el mes seleccionado y maneja la copia de datos del mes anterior.
          * @param {number} index - El índice del mes a mostrar.
          */
-        async function mostrarTabla(index) {
-            mesActual = index;
-            document.querySelectorAll(".tabla-mes").forEach((div, i) => {
-                div.style.display = i === index ? "block" : "none";
-            });
-            document.querySelectorAll(".tab-button").forEach((btn, i) => {
-                btn.classList.toggle("active", i === index);
-            });
-            document.title = `Datos de Vuelo - ${meses[index]} ${añoActual}`;
+      async function mostrarTabla(index) {
+    mesActual = index;
+    document.querySelectorAll(".tabla-mes").forEach((div, i) => {
+        div.style.display = i === index ? "block" : "none";
+    });
+    document.querySelectorAll(".tab-button").forEach((btn, i) => {
+        btn.classList.toggle("active", i === index);
+    });
 
-            // Actualizar estado de los botones de navegación de mes
-            prevMonthBtn.disabled = mesActual === 0;
-            nextMonthBtn.disabled = mesActual === meses.length - 1;
+    if (auth.currentUser) {
+        // 1. Primero cargamos lo que ya existe en ese mes
+        const currentMonthData = await dbRef.child(`${añoActual}/${mesActual}`).once('value');
+        cargarDatosEnTablaHTML(currentMonthData.val(), mesActual);
 
-            // Ocultar reporte estadístico al cambiar de mes
-            statisticalReport.classList.add('hidden');
-            noReportDataMessage.classList.add('hidden'); // Asegurarse de ocultar el mensaje de no datos
-            reportTypeSelection.classList.add('hidden'); // Ocultar los selectores de tipo de reporte
-            statisticalReportToggleBtn.textContent = 'Ver Reporte Estadístico';
-
-
-            if (auth.currentUser) {
-                // No mostrar loading para la carga de datos de tabla al cambiar de mes
-                const currentMonthData = await dbRef.child(`${añoActual}/${meses.indexOf(meses[mesActual])}`).once('value');
-                cargarDatosEnTablaHTML(currentMonthData.val(), mesActual);
-            }
-
-            if (mesActual > 0 && auth.currentUser) {
-                await copiarValorGeneralAMesSiguiente(añoActual, mesActual - 1, mesActual);
-            }
-            applyRolePermissions(currentUserRole); // Re-aplicar permisos después de cargar/copiar
+        // 2. Luego forzamos el arrastre de valores
+        if (mesActual > 0) {
+            // De febrero en adelante, arrastra del mes anterior del mismo año
+            await copiarValorGeneralAMesSiguiente(añoActual, mesActual - 1, mesActual, añoActual);
+        } else {
+            // Si es ENERO, arrastra de Diciembre del AÑO ANTERIOR
+            await copiarValorGeneralAMesSiguiente(añoActual - 1, 11, 0, añoActual);
         }
+    }
+    applyRolePermissions(currentUserRole);
+}
 
         /**
          * Copia el valor de la columna "GENERAL" del mes de origen a la columna "VIENEN" del mes de destino.
@@ -1415,173 +1392,187 @@
          * @param {number} mesOrigenIndex - El índice del mes de donde se copian los datos.
          * @param {number} mesDestinoIndex - El índice del mes a donde se copian los datos.
          */
-        async function copiarValorGeneralAMesSiguiente(año, mesOrigenIndex, mesDestinoIndex) {
-            const rutaOrigen = `${año}/${mesOrigenIndex}`; 
-            try {
-                const snapshot = await dbRef.child(rutaOrigen).once('value');
-                const datosOrigen = snapshot.val();
-                if (datosOrigen) {
-                    const tablaDestino = document.querySelectorAll(".tabla-vuelo")[mesDestinoIndex];
-                    if (tablaDestino) {
-                        datosOrigen.forEach((filaDatos, indexFila) => {
-                            const valorGeneral = filaDatos[34];
-                            if (valorGeneral !== undefined && valorGeneral !== null && valorGeneral.toString().trim() !== "") {
-                                const filaDestino = tablaDestino.querySelectorAll("tbody tr")[indexFila];
-                                if (filaDestino) {
-                                    const celdaVienen = filaDestino.querySelectorAll("td")[1];
-                                    if (celdaVienen) {
-                                        celdaVienen.textContent = valorGeneral;
-                                    }
-                                }
+        // Añadimos 'añoDestino' como parámetro
+async function copiarValorGeneralAMesSiguiente(añoOrigen, mesOrigenIndex, mesDestinoIndex, añoDestino = añoActual) {
+    const rutaOrigen = `${añoOrigen}/${mesOrigenIndex}`; 
+    
+    try {
+        const snapshot = await dbRef.child(rutaOrigen).once('value');
+        const datosOrigen = snapshot.val();
+        
+        if (datosOrigen) {
+            const tablaDestino = document.querySelectorAll(".tabla-vuelo")[mesDestinoIndex];
+            
+            if (tablaDestino) {
+                datosOrigen.forEach((filaDatos, indexFila) => {
+                    const filaDestino = tablaDestino.querySelectorAll("tbody tr")[indexFila];
+                    if (filaDestino) {
+                        const celdas = filaDestino.querySelectorAll("td");
+                        
+                        /** * Mapeo completo: 
+                         * [Columna General del mes pasado, Columna Vienen del mes nuevo]
+                         */
+                        const traslados = [
+                            [34, 1], // Horas de Vuelo
+                            [35, 3], // Ciclos Engine N1
+                            [36, 5], // Ciclos Engine N2
+                            [37, 7]  // CREEP
+                        ];
+
+                        traslados.forEach(([colGen, colVienen]) => {
+                            if (filaDatos[colGen] !== undefined && filaDatos[colGen] !== null && filaDatos[colGen] !== "") {
+                                // 1. Ponemos el valor en la columna VIENEN
+                                celdas[colVienen].textContent = filaDatos[colGen];
+                                
+                                // 2. IMPORTANTE: Para filas de motores/creep, si no hay vuelo,
+                                // el GENERAL debe ser igual al VIENEN para que no se vea vacío.
+                                // La columna General es la colVienen + 33 (basado en tu estructura 1->34, 3->35, etc.)
+                                const colGenActual = colGen; 
+                                celdas[colGenActual].textContent = filaDatos[colGen];
                             }
                         });
-                        actualizarTotales();
-                        // Guardar los datos del mes destino en Firebase después de la copia si el usuario es admin
-                        if (currentUserRole === 'admin') {
-                            await guardarDatosEnFirebase(añoActual, meses[mesDestinoIndex], obtenerDatosTabla(mesDestinoIndex));
-                        }
                     }
+                });
+                
+                // Recalculamos todos los totales de la tabla para asegurar consistencia
+                actualizarTotales(); 
+
+                // Guardar inmediatamente en Firebase para que el siguiente mes (ej. Marzo) encuentre datos en este (ej. Febrero)
+                if (currentUserRole === 'admin') {
+                    const datosParaGuardar = obtenerDatosTabla(mesDestinoIndex);
+                    await dbRef.child(`${añoDestino}/${mesDestinoIndex}`).set(datosParaGuardar);
                 }
-            } catch (error) {
-                console.error("Error al copiar datos entre meses:", error);
             }
         }
-
+    } catch (error) {
+        console.error("Error en el arrastre de datos:", error);
+    }
+}
         /**
          * Recalcula y actualiza los valores de "MES TOTAL" y "GENERAL" para todas las filas de todas las tablas.
          * Maneja tanto valores numéricos como de tiempo (HH:MM).
          */
-        function actualizarTotales() {
-            document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
-                const filas = tabla.querySelectorAll("tbody tr");
-                filas.forEach((fila, filaIndex) => {
-                    const celdas = fila.querySelectorAll("td");
-                    const vienenStr = celdas[1].textContent.trim();
-                    const valoresCeldas = [...celdas].slice(2, 33).map(td => td.textContent.trim());
+    function actualizarTotales() {
+    document.querySelectorAll(".tabla-vuelo").forEach((tabla) => {
+        const filas = tabla.querySelectorAll("tbody tr");
+        filas.forEach((fila, filaIndex) => {
+            const celdas = fila.querySelectorAll("td");
+            const vienenStr = celdas[1].textContent.trim();
+            const valoresCeldas = [...celdas].slice(2, 33).map(td => td.textContent.trim());
 
-                    const todasVacias = [vienenStr, ...valoresCeldas].every(val => val === "");
-                    if (todasVacias) {
-                        celdas[33].textContent = "";
-                        celdas[34].textContent = "";
-                        return;
+            // Solo si TODO está vacío ocultamos los totales
+            const todasVacias = vienenStr === "" && valoresCeldas.every(val => val === "");
+            if (todasVacias) {
+                celdas[33].textContent = "";
+                celdas[34].textContent = "";
+                return;
+            }
+
+            // --- TUS HELPERS ORIGINALES ---
+            const timeToMinutes = (val) => {
+                if (!val || val.trim() === "") return 0;
+                val = val.trim().replace(",", ".");
+                if (val.includes(":")) {
+                    const parts = val.split(":");
+                    if (parts.length === 2) {
+                        const h = parseInt(parts[0]);
+                        const m = parseInt(parts[1]);
+                        if (!isNaN(h) && !isNaN(m)) return h * 60 + m;
                     }
+                } else {
+                    const num = parseFloat(val);
+                    if (!isNaN(num) && num >= 0) return num;
+                }
+                return 0;
+            };
 
-                    // Helper to convert HH:MM string to minutes, or pure number to minutes
-                    const timeToMinutes = (val) => {
-                        if (!val || val.trim() === "") return 0;
-                        val = val.trim().replace(",", "."); // Sanitize and replace comma with dot for float parsing
+            const minutesToTime = (minutos) => {
+                if (minutos === 0) return "00:00"; // Cambiado para que no desaparezca el total
+                const h = Math.floor(minutos / 60);
+                const m = Math.round(minutos % 60);
+                return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+            };
 
-                        if (val.includes(":")) {
-                            const parts = val.split(":");
-                            if (parts.length === 2) {
-                                const h = parseInt(parts[0]);
-                                const m = parseInt(parts[1]);
-                                if (!isNaN(h) && !isNaN(m) && h >= 0 && m >= 0 && m < 60) {
-                                    return h * 60 + m;
-                                }
-                            }
-                        } else {
-                            // If no colon, try to parse as a number. Assume it's minutes directly for HRS rows.
-                            const num = parseFloat(val);
-                            if (!isNaN(num) && num >= 0) {
-                                return num; // Treat as minutes directly
-                            }
-                        }
-                        return 0; // Invalid format
-                    };
+            const rowName = nombresFilas[filaIndex] || "";
+            const isTimeRow = rowName.includes("HRS");
+            const isSpecialCalculationRow = [
+                nombresFilas.indexOf("CREEP 1"),
+                nombresFilas.indexOf("CREEP 2"),
+                nombresFilas.indexOf("ENGINE N1 CYCLES 1"),
+                nombresFilas.indexOf("ENGINE N2 CYCLES 1"),
+                nombresFilas.indexOf("ENGINE N1 CYCLES 2"),
+                nombresFilas.indexOf("ENGINE N2 CYCLES 2")
+            ].includes(filaIndex);
 
-                    // Helper to convert minutes to HH:MM string
-                    const minutesToTime = (minutos) => {
-                        if (minutos === 0) return "";
-                        const h = Math.floor(minutos / 60);
-                        const m = Math.round(minutos % 60);
-                        return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-                    };
+            const forceDecimalDisplayRows = [nombresFilas.indexOf("HOIST RESCUE OP HRS")];
+            const hoistRescueCycleIndex = nombresFilas.indexOf("HOIST RESCUE CYCLE");
 
-                    const rowName = nombresFilas[filaIndex];
-                    const isTimeRow = rowName.includes("HRS"); // General check for time rows
-                    const isSpecialCalculationRow = [
-                        nombresFilas.indexOf("CREEP 1"),
-                        nombresFilas.indexOf("CREEP 2"),
-                        nombresFilas.indexOf("ENGINE N1 CYCLES 1"),
-                        nombresFilas.indexOf("ENGINE N2 CYCLES 1"),
-                        nombresFilas.indexOf("ENGINE N1 CYCLES 2"),
-                        nombresFilas.indexOf("ENGINE N2 CYCLES 2")
-                    ].includes(filaIndex);
+            // --- LÓGICA DE CÁLCULO ADAPTADA ---
+            if (forceDecimalDisplayRows.includes(filaIndex)) {
+                const vienen = vienenStr ? parseFloat(vienenStr.replace(",", ".")) : 0;
+                const valoresNumericos = valoresCeldas.map(v => parseFloat(v.replace(",", "."))).filter(num => !isNaN(num));
+                const totalMes = valoresNumericos.reduce((acc, val) => acc + val, 0);
+                const general = totalMes + vienen;
 
-                    // Rows that should always be treated as decimal numbers, regardless of "HRS" in name
-                    const forceDecimalDisplayRows = [
-                        nombresFilas.indexOf("HOIST RESCUE OP HRS")
-                    ];
+                celdas[33].textContent = totalMes > 0 ? totalMes.toFixed(1) : "0.0";
+                celdas[34].textContent = general.toFixed(1);
+            } 
+            else if (isTimeRow) {
+                const vienenMin = vienenStr ? timeToMinutes(vienenStr) : 0;
+                const totalMin = valoresCeldas.reduce((acc, val) => acc + (val ? timeToMinutes(val) : 0), 0);
+                const generalMin = vienenMin + totalMin;
 
-                    const hoistRescueCycleIndex = nombresFilas.indexOf("HOIST RESCUE CYCLE");
+                celdas[33].textContent = minutesToTime(totalMin);
+                celdas[34].textContent = minutesToTime(generalMin);
+            } 
+            else {
+                const vienen = vienenStr ? parseFloat(vienenStr.replace(",", ".")) : 0;
+                const valoresNumericos = valoresCeldas.map(v => parseFloat(v.replace(",", "."))).filter(num => !isNaN(num));
+                
+                let general;
+                let mesTotal;
 
-                    if (forceDecimalDisplayRows.includes(filaIndex)) {
-                        const vienen = vienenStr ? parseFloat(vienenStr.replace(",", ".")) : 0;
-                        const valoresNumericos = valoresCeldas.map(v => parseFloat(v.replace(",", "."))).filter(num => !isNaN(num));
-                        const total = valoresNumericos.reduce((acc, val) => acc + val, 0);
-                        const general = total + vienen;
+                if (isSpecialCalculationRow) {
+                    // Si hay datos nuevos, el general es el máximo. Si no, el general es lo que viene.
+                    const maxMes = valoresNumericos.length > 0 ? Math.max(...valoresNumericos) : vienen;
+                    general = Math.max(vienen, maxMes); 
+                    mesTotal = general - vienen;
+                } else {
+                    const totalSuma = valoresNumericos.reduce((acc, val) => acc + val, 0);
+                    general = totalSuma + vienen;
+                    mesTotal = totalSuma;
+                }
 
-                        celdas[33].textContent = total > 0 ? total.toFixed(1) : "";
-                        celdas[34].textContent = general > 0 ? general.toFixed(1) : "";
-                    } else if (isTimeRow) {
-                        // Debugging logs for time rows
-                        console.log(`DEBUG (TimeRow - ${rowName}):`);
-                        console.log(`  Vienen String: "${vienenStr}"`);
-                        const vienenMin = vienenStr ? timeToMinutes(vienenStr) : 0;
-                        console.log(`  Vienen Minutes: ${vienenMin}`);
+                // Formateo de salida según tus reglas de Hoist y Decimales
+                const formatVal = (n) => {
+                    if (filaIndex === hoistRescueCycleIndex) return Math.round(n).toString();
+                    return Number.isInteger(n) ? n.toString() : n.toFixed(1);
+                };
 
-                        const totalMin = valoresCeldas.reduce((acc, val, dayIndex) => {
-                            const valMinutes = val ? timeToMinutes(val) : 0;
-                            console.log(`    Day ${dayIndex + 1} ("${val}") -> ${valMinutes} minutes`);
-                            return acc + valMinutes;
-                        }, 0);
-                        console.log(`  Total Mes Minutes: ${totalMin}`);
+                celdas[33].textContent = mesTotal > 0 ? formatVal(mesTotal) : "0";
+                celdas[34].textContent = general > 0 ? formatVal(general) : formatVal(vienen);
+            }
+        });
+    });
+}
 
-                        const generalMin = vienenMin + totalMin;
-                        console.log(`  General Minutes: ${generalMin}`);
-
-                        celdas[33].textContent = minutesToTime(totalMin);
-                        celdas[34].textContent = minutesToTime(generalMin);
-                        console.log(`  MES TOTAL display: ${celdas[33].textContent}`);
-                        console.log(`  GENERAL display: ${celdas[34].textContent}`);
-                    } else {
-                        // Handle standard numerical rows (e.g., LANDINGS, CARGO HOOK CYCLE, etc.)
-                        const vienen = vienenStr ? parseFloat(vienenStr.replace(",", ".")) : 0;
-                        const valoresNumericos = valoresCeldas.map(v => parseFloat(v.replace(",", "."))).filter(num => !isNaN(num));
-
-                        let general;
-                        let mesTotalDisplayValue;
-
-                        if (isSpecialCalculationRow) {
-                            general = valoresNumericos.length > 0 ? Math.max(...valoresNumericos) : 0;
-                            let calculatedMesTotal = general - vienen;
-                            mesTotalDisplayValue = calculatedMesTotal > 0 ? (Number.isInteger(calculatedMesTotal) ? calculatedMesTotal : calculatedMesTotal.toFixed(1)) : "";
-                        } else {
-                            const total = valoresNumericos.reduce((acc, val) => acc + val, 0);
-                            general = total + vienen;
-
-                            if (filaIndex === hoistRescueCycleIndex) {
-                                // Specific handling for HOIST RESCUE CYCLE: round to nearest integer
-                                mesTotalDisplayValue = total > 0 ? Math.round(total).toString() : "";
-                                general = Math.round(general); // Round general here
-                            } else {
-                                // This is the general numerical row handling
-                                mesTotalDisplayValue = total > 0 ? (Number.isInteger(total) ? total : total.toFixed(1)) : "";
-                            }
-                        }
-
-                        // Ensure general is also rounded for display if it's HOIST RESCUE CYCLE
-                        const mostrarGeneral = (filaIndex === hoistRescueCycleIndex) ?
-                                               (general > 0 ? Math.round(general).toString() : "") :
-                                               (general > 0 ? (Number.isInteger(general) ? general : general.toFixed(1)) : "");
-
-                        celdas[33].textContent = mesTotalDisplayValue;
-                        celdas[34].textContent = mostrarGeneral;
-                    }
-                });
+        function obtenerDatosTabla(mesIndex) {
+    const tabla = document.querySelectorAll(".tabla-vuelo")[mesIndex];
+    const datos = [];
+    if (tabla) {
+        const filas = tabla.querySelectorAll("tbody tr");
+        filas.forEach((fila) => {
+            const celdas = fila.querySelectorAll("td");
+            const filaDatos = [];
+            celdas.forEach((celda) => {
+                filaDatos.push(celda.textContent.trim());
             });
-        }
+            datos.push(filaDatos);
+        });
+    }
+    return datos;
+}
+
 
         /**
          * Activa el event listener para el evento 'input' en todas las tablas de vuelo.
