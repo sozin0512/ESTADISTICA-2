@@ -96,6 +96,14 @@
             <fieldset class="border border-gray-300 p-4 rounded-md shadow-sm">
                 <div class="grid grid-cols-1 gap-4 mt-4">
                     <div class="form-group">
+                        <div class="form-group">
+  <label for="anio_informe" class="block text-sm font-medium text-gray-700 mb-1">Año:</label>
+  <select id="anio_informe" name="anio_informe" required
+          class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white">
+    <!-- Se llena por JS -->
+  </select>
+</div>
+
                         <label for="numero_informe" class="block text-sm font-medium text-gray-700 mb-1">N° de Informe o documento:</label>
                         <input type="text" id="numero_informe" name="numero_informe" required placeholder="N°067"
                                class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
@@ -478,6 +486,13 @@
                 }
 
                 onAuthStateChanged(auth, (user) => {
+                    fillYearSelect();
+
+document.getElementById('anio_informe')?.addEventListener('change', () => {
+  // Recalcula sugerencia cuando cambias el año
+  suggestNextReportNumber(reportsData);
+});
+
                     if (user) {
                         userId = user.uid;
                         document.getElementById('userIdDisplay').textContent = userId;
@@ -497,6 +512,33 @@
                 window.showModal(`Error al inicializar la aplicación: ${error.message}. Asegúrate de que Firebase Auth está habilitado y la API Key es correcta.`);
             }
         };
+function getSelectedYear() {
+  const sel = document.getElementById('anio_informe');
+  return sel ? parseInt(sel.value, 10) : new Date().getFullYear();
+}
+
+function formatNumeroInforme(year, seq) {
+  // Ej: 2026-0005 (recomendado para evitar choques entre años)
+  return `${year}-${seq.toString().padStart(4, '0')}`;
+}
+
+function fillYearSelect() {
+  const yearSelect = document.getElementById('anio_informe');
+  if (!yearSelect) return;
+
+  const currentYear = new Date().getFullYear();
+  const start = currentYear - 5;
+  const end = currentYear + 1;
+
+  yearSelect.innerHTML = '';
+  for (let y = end; y >= start; y--) {
+    const opt = document.createElement('option');
+    opt.value = String(y);
+    opt.textContent = String(y);
+    if (y === currentYear) opt.selected = true;
+    yearSelect.appendChild(opt);
+  }
+}
 
 
         // Function to save a new report
@@ -513,8 +555,14 @@
 
             // --- Validar Número de Informe Duplicado ---
             const publicReportsCollectionRef = collection(db, `artifacts/${appId}/public/data/reports-public`);
-            const q = query(publicReportsCollectionRef, where('numero_informe', '==', numeroInforme));
-            
+           const selectedYear = getSelectedYear();
+
+const q = query(
+  publicReportsCollectionRef,
+  where('anio_informe', '==', selectedYear),
+  where('numero_informe', '==', numeroInforme)
+);
+
             try {
                 const querySnapshot = await getDocs(q);
                 if (!querySnapshot.empty) {
@@ -547,19 +595,18 @@
                 }
             }
 
+const reportData = {
+  numero_informe: numeroInforme,
+  titulo_informe: form.titulo_informe.value,
+  descripcion_informe: form.descripcion_informe.value,
+  fecha_informe: form.fecha_informe.value,
+  estado_informe: form.estado_informe.value,
+  anio_informe: selectedYear,
+  driveFileId: driveFileId,
+  driveFileName: fileInput.files[0] ? fileInput.files[0].name : null,
+  createdAt: new Date(),
+};
 
-            const reportData = {
-                numero_informe: numeroInforme, // Usar el número de informe limpio
-                titulo_informe: form.titulo_informe.value,
-                descripcion_informe: form.descripcion_informe.value,
-                fecha_informe: form.fecha_informe.value,
-                estado_informe: form.estado_informe.value,
-                driveFileId: driveFileId,
-                driveFileName: fileInput.files[0] ? fileInput.files[0].name : null,
-                createdAt: new Date(),
-                // Se guarda en una colección pública, no específica del usuario
-                // userId: userId // Ya no se necesita userId en la ruta de guardado
-            };
 
             try {
                 // Guarda el informe en una colección pública para que todos lo vean
@@ -608,11 +655,24 @@
             }
 
             // Sort reports by numero_informe (descending)
-            reportsToDisplay.sort((a, b) => {
-                const numA = parseInt(a.numero_informe.replace('N°', ''), 10);
-                const numB = parseInt(b.numero_informe.replace('N°', ''), 10);
-                return numB - numA; // Sort numerically in descending order
-            });
+         reportsToDisplay.sort((a, b) => {
+  const aStr = (a.numero_informe || '').toString();
+  const bStr = (b.numero_informe || '').toString();
+
+  const aParts = aStr.split('-');
+  const bParts = bStr.split('-');
+
+  const aYear = aParts.length === 2 ? parseInt(aParts[0], 10) : (a.anio_informe ? parseInt(a.anio_informe, 10) : 0);
+  const bYear = bParts.length === 2 ? parseInt(bParts[0], 10) : (b.anio_informe ? parseInt(b.anio_informe, 10) : 0);
+
+  const aSeq = aParts.length === 2 ? parseInt(aParts[1], 10) : parseInt(aStr.replace(/\D/g, ''), 10);
+  const bSeq = bParts.length === 2 ? parseInt(bParts[1], 10) : parseInt(bStr.replace(/\D/g, ''), 10);
+
+  // Orden: año desc, luego sec desc
+  if (bYear !== aYear) return bYear - aYear;
+  return (bSeq || 0) - (aSeq || 0);
+});
+
 
             reportsToDisplay.forEach(report => {
                 const reportElement = document.createElement('div');
@@ -649,22 +709,50 @@
         }
 
         // NEW FUNCTION: Suggest the next report number
-        function suggestNextReportNumber(reports) {
-            let maxNum = 0;
-            reports.forEach(report => {
-                const num = parseInt(report.numero_informe.replace('N°', ''), 10);
-                if (!isNaN(num) && num > maxNum) {
-                    maxNum = num;
-                }
-            });
-            const nextNum = maxNum + 1;
-            const numeroInformeInput = document.getElementById('numero_informe');
-            // Check if the input is currently empty or contains the old placeholder
-            // This prevents overwriting a number the user might have manually typed
-            if (!numeroInformeInput.value || numeroInformeInput.value === numeroInformeInput.placeholder) {
-                 numeroInformeInput.value = `N°${nextNum.toString().padStart(3, '0')}`; // Format as N°077
-            }
-        }
+      function suggestNextReportNumber(reports) {
+  const year = getSelectedYear();
+
+  // Filtra solo registros del año seleccionado
+  const reportsOfYear = reports.filter(r => {
+    // compatibilidad si ya tienes registros viejos sin anio_informe
+    if (r.anio_informe) return parseInt(r.anio_informe, 10) === year;
+
+    // fallback: intentar inferir año desde fecha_informe "YYYY-MM-DD"
+    if (r.fecha_informe && typeof r.fecha_informe === 'string' && r.fecha_informe.length >= 4) {
+      const y = parseInt(r.fecha_informe.substring(0, 4), 10);
+      return y === year;
+    }
+    return false;
+  });
+
+  let maxSeq = -1;
+
+  for (const r of reportsOfYear) {
+    // Esperamos formato: YYYY-0005
+    if (typeof r.numero_informe === 'string') {
+      const parts = r.numero_informe.split('-');
+      if (parts.length === 2) {
+        const seq = parseInt(parts[1], 10);
+        if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
+      } else {
+        // fallback si alguna vez guardaste "N°005" o similar
+        const seq = parseInt(r.numero_informe.replace(/\D/g, ''), 10);
+        if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
+      }
+    }
+  }
+
+  // Si no hay reportes: maxSeq=-1 => next=0 (inicia 0000)
+  const nextSeq = maxSeq + 1;
+
+  const numeroInformeInput = document.getElementById('numero_informe');
+  if (!numeroInformeInput) return;
+
+  // No pisar lo que el usuario esté escribiendo
+  if (!numeroInformeInput.value) {
+    numeroInformeInput.value = formatNumeroInforme(year, nextSeq);
+  }
+}
 
         // Function to delete a report
         async function deleteReport(event) {
