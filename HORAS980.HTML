@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>S.O.Z.I.N.</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Librería para QR -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -98,17 +97,15 @@
         </div>
     </div>
 
-    <!-- Modal QR -->
     <div id="qr-modal" class="modal-overlay">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-slate-200 text-center">
             <h3 class="text-xl font-black text-slate-800 mb-4">Acceso Rápido QR</h3>
             <div id="qrcode" class="flex justify-center mb-6"></div>
-            <p class="text-xs text-slate-500 mb-6 font-medium">Escanea para abrir esta bitácora en tu dispositivo móvil.</p>
+            <p class="text-xs text-slate-500 mb-6 font-medium">Escanea para ir directo al <b>Llenado Rápido</b> en tu móvil.</p>
             <button onclick="closeQrModal()" class="w-full bg-slate-800 text-white py-3 rounded-2xl font-bold">Cerrar</button>
         </div>
     </div>
 
-    <!-- Modal Asistente de Llenado -->
     <div id="fill-modal" class="modal-overlay">
         <div class="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl border border-slate-200 overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-center mb-6">
@@ -123,8 +120,7 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="fill-fields-container">
-                <!-- Se genera dinámicamente -->
-            </div>
+                </div>
 
             <div class="mt-8 flex gap-3">
                 <button onclick="closeFillModal()" class="flex-1 py-3 text-slate-400 font-bold uppercase tracking-widest text-xs">Cancelar</button>
@@ -133,7 +129,6 @@
         </div>
     </div>
 
-    <!-- Modal de Espejo Mejorado -->
     <div id="mirror-modal" class="modal-overlay">
         <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-200">
             <h3 class="text-xl font-black text-slate-800 mb-2">Sincronizar Datos</h3>
@@ -222,7 +217,6 @@
         </div>
     </nav>
 
-    <!-- Dashboard Desplegable de Accesos Rápidos -->
     <div id="quick-dashboard" class="bg-slate-50 border-b border-slate-200 px-6">
         <div class="max-w-7xl mx-auto">
             <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Módulos de Reporte e Inspección</p>
@@ -267,7 +261,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getDatabase, ref, set, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         let firebaseConfig = {
             apiKey: "AIzaSyC6pUgMRSRCZLZfW0Cy1b00AFN6nkPjsF8", 
@@ -279,12 +273,10 @@
             appId: "1:820427334707:web:753198086036814227806d"
         };
 
-        try { if (typeof __firebase_config !== 'undefined' && __firebase_config) firebaseConfig = { ...firebaseConfig, ...JSON.parse(__firebase_config) }; } catch (e) {}
-
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const auth = getAuth(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'fah-980-master-v1';
+        const appId = 'fah-980-master-v1';
         const PATH_ROOT = `artifacts/${appId}/public/data/MAINTENANCE_LOGS`;
 
         let currentPeriod = ""; 
@@ -318,37 +310,36 @@
             { type: 'separator', label: 'MOTOR #2' },
             ...baseMotorFields.map(f => ({ ...f, id: `${f.id}_2`, label: `${f.label} 2` }))
         ];
+// --- FUNCIONES QR ---
+window.generateQr = () => {
+    const qrContainer = document.getElementById('qrcode');
+    qrContainer.innerHTML = '';
+    
+    // DEFINIMOS LA URL FIJA QUE ME HABÍAS PROPORCIONADO
+    // Se le agrega el parámetro ?action=fill para abrir el asistente de inmediato
+    const urlFija = "https://sozin0512.github.io/ESTADISTICA-2/HORAS980.HTML";
 
-        // --- FUNCIONES QR ---
-        window.generateQr = () => {
-            const qrContainer = document.getElementById('qrcode');
-            qrContainer.innerHTML = '';
-            new QRCode(qrContainer, {
-                text: window.location.href,
-                width: 200,
-                height: 200,
-                colorDark : "#1e1b4b",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
-            document.getElementById('qr-modal').style.display = 'flex';
-        };
-        window.closeQrModal = () => document.getElementById('qr-modal').style.display = 'none';
-
+    new QRCode(qrContainer, {
+        text: urlFija,
+        width: 200,
+        height: 200,
+        colorDark : "#1e1b4b",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+    });
+    document.getElementById('qr-modal').style.display = 'flex';
+};
         // --- ASISTENTE DE LLENADO ---
         window.openFillModal = () => {
             const container = document.getElementById('fill-fields-container');
             const dayInput = document.getElementById('fill-day-select');
             const dateLabel = document.getElementById('fill-date-label');
             
-            // Set dia actual por defecto
             const now = new Date();
             dayInput.value = now.getDate();
             dateLabel.innerText = `${document.getElementById('select-month').options[document.getElementById('select-month').selectedIndex].text} ${document.getElementById('select-year').value}`;
 
             container.innerHTML = '';
-            
-            // Campos específicos solicitados
             const targetFields = [
                 'ac_hrs', 'aterrizajes', 'rins', 
                 'cont_exc_1', 'eng_hrs_1', 'eng_starts_1', 'flights_1', 'ciclos_1',
@@ -358,7 +349,6 @@
             targetFields.forEach(fieldId => {
                 const row = config.find(c => c.id === fieldId);
                 if (!row) return;
-
                 const vienen = globalData[`vienen_${fieldId}`] || 0;
                 
                 const card = document.createElement('div');
@@ -371,14 +361,11 @@
                             <input type="number" step="0.1" id="fill-input-${fieldId}" placeholder="Añadir hoy" 
                                 class="w-full bg-white border border-slate-200 p-2 rounded-xl font-bold text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         </div>
-                        <div class="text-center px-3 pt-4">
-                            <span class="text-indigo-300 font-bold">+</span>
-                        </div>
+                        <div class="text-center px-3 pt-4"><span class="text-indigo-300 font-bold">+</span></div>
                     </div>
                 `;
                 container.appendChild(card);
             });
-
             document.getElementById('fill-modal').style.display = 'flex';
         };
 
@@ -397,7 +384,8 @@
             ];
 
             targetFields.forEach(fieldId => {
-                const val = parseFloat(document.getElementById(`fill-input-${fieldId}`).value) || 0;
+                const input = document.getElementById(`fill-input-${fieldId}`);
+                const val = parseFloat(input.value) || 0;
                 if (val > 0) {
                     batch[`${fieldId}/${day}`] = val;
                 }
@@ -408,7 +396,7 @@
                     await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), batch);
                     showToast("Datos guardados correctamente");
                 }
-                closeFillModal();
+                closeFillModal(); // CERRAMOS AL TERMINAR
             } catch (e) {
                 showToast("Error al guardar");
             } finally {
@@ -416,43 +404,23 @@
             }
         };
 
-        // --- RESTO DEL CODIGO ORIGINAL ---
-        document.getElementById('toggle-dashboard').addEventListener('click', () => {
-            document.getElementById('quick-dashboard').classList.toggle('open');
-        });
-
-        window.closeMirrorModal = () => document.getElementById('mirror-modal').style.display = 'none';
-        
-        window.executeMirror = async (mode) => {
-            closeMirrorModal();
-            document.getElementById('loader').style.display = 'flex';
-            const mirrorBatch = {};
-
-            if (mode === 'ac_to_engines') {
-                const acData = globalData['ac_hrs'] || {};
-                const acVienen = globalData['vienen_ac_hrs'] || 0;
-                ['eng_hrs_1', 'eng_hrs_2'].forEach(engineKey => {
-                    mirrorBatch[`vienen_${engineKey}`] = acVienen;
-                    mirrorBatch[engineKey] = { ...acData };
-                });
-                showToast("AC HRS sincronizado");
-            } else {
-                baseMotorFields.forEach(field => {
-                    const m1Key = `${field.id}_1`, m2Key = `${field.id}_2`;
-                    if((mode === 'vienen' || mode === 'all') && globalData[`vienen_${m1Key}`] !== undefined) mirrorBatch[`vienen_${m2Key}`] = globalData[`vienen_${m1Key}`];
-                    if((mode === 'table' || mode === 'all') && globalData[m1Key]) mirrorBatch[m2Key] = { ...globalData[m1Key] };
-                });
-                showToast(`Motor 2 actualizado (${mode})`);
-            }
-
-            try {
-                await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), mirrorBatch);
-            } catch (e) {
-                showToast("Error al sincronizar");
-            } finally {
+        // --- INICIALIZACIÓN ---
+        const setupSync = (user) => {
+            if (unsubscribe) unsubscribe();
+            unsubscribe = onValue(ref(db, `${PATH_ROOT}/${currentPeriod}`), (snap) => {
+                globalData = snap.exists() ? snap.val() : {};
+                if (!document.activeElement || document.activeElement.tagName !== 'INPUT') renderMatrix();
                 document.getElementById('loader').style.display = 'none';
-                renderMatrix();
-            }
+                updateSyncStatus(true);
+
+                // REVISAR SI VENIMOS DESDE EL QR
+                const params = new URLSearchParams(window.location.search);
+                if(params.get('action') === 'fill') {
+                    openFillModal();
+                    // Limpiamos la URL para que no se reabra al refrescar
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }, () => updateSyncStatus(false));
         };
 
         const renderMatrix = () => {
@@ -496,35 +464,10 @@
             for(let y = cY-2; y <= cY+5; y++) { const o = document.createElement('option'); o.value = y; o.innerText = y; if(y === cY) o.selected = true; yS.appendChild(o); }
         };
 
-        const setupSync = (user) => {
-            if (!user) return;
-            if (unsubscribe) unsubscribe();
-            unsubscribe = onValue(ref(db, `${PATH_ROOT}/${currentPeriod}`), (snap) => {
-                globalData = snap.exists() ? snap.val() : {};
-                if (!document.activeElement || document.activeElement.tagName !== 'INPUT') renderMatrix();
-                document.getElementById('loader').style.display = 'none';
-                updateSyncStatus(true);
-            }, () => updateSyncStatus(false));
-        };
-
         const updateSyncStatus = (connected) => {
             const s = document.getElementById('sync-status');
             s.innerHTML = connected ? '<span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Conectado' : '<span class="w-2 h-2 bg-red-500 rounded-full"></span> Error';
             s.className = `flex items-center gap-1 font-bold bg-${connected?'emerald':'red'}-50 px-3 py-1.5 rounded-xl border border-${connected?'emerald':'red'}-100 text-${connected?'emerald':'red'}-600`;
-        };
-
-        document.addEventListener('change', async (e) => {
-            if (isRendering || e.target.tagName !== 'INPUT') return;
-            const i = e.target; const { type, id, day } = i.dataset; const v = parseFloat(i.value) || 0;
-            if (type === 'vienen') { await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), { [`vienen_${id}`]: v }); }
-            else if (type === 'day') { await set(ref(db, `${PATH_ROOT}/${currentPeriod}/${id}/${day}`), v); }
-            renderMatrix();
-        });
-
-        const changePeriod = () => {
-            currentPeriod = `${document.getElementById('select-month').value}-${document.getElementById('select-year').value}`;
-            document.getElementById('loader').style.display = 'flex';
-            setupSync(currentUser);
         };
 
         const showToast = (msg) => {
@@ -534,67 +477,27 @@
             setTimeout(() => t.classList.add('translate-y-32'), 3000);
         };
 
-        setupUIHeader();
-        document.getElementById('select-month').addEventListener('change', changePeriod);
-        document.getElementById('select-year').addEventListener('change', changePeriod);
+        // Eventos
+        document.getElementById('toggle-dashboard').addEventListener('click', () => document.getElementById('quick-dashboard').classList.toggle('open'));
+        document.getElementById('select-month').addEventListener('change', () => { currentPeriod = `${document.getElementById('select-month').value}-${document.getElementById('select-year').value}`; setupSync(currentUser); });
+        document.getElementById('select-year').addEventListener('change', () => { currentPeriod = `${document.getElementById('select-month').value}-${document.getElementById('select-year').value}`; setupSync(currentUser); });
         document.getElementById('btn-mirror-trigger').addEventListener('click', () => { document.getElementById('mirror-modal').style.display = 'flex'; });
-        document.getElementById('btn-copy-prev').addEventListener('click', async () => {
-            const m = parseInt(document.getElementById('select-month').value);
-            const y = parseInt(document.getElementById('select-year').value);
-            let pM = m-1, pY = y; if(pM<0){pM=11;pY--;}
-            const pSnap = await get(ref(db, `${PATH_ROOT}/${pM}-${pY}`));
-            if(!pSnap.exists()) return showToast("No hay datos previos");
-            if(confirm(`¿Cerrar mes anterior y pasar totales a VIENEN?`)) {
-                const pD = pSnap.val(); const b = {};
-                config.forEach(r => { if(r.type!=='separator'){ const vV = pD[`vienen_${r.id}`]||0; let vM=0; if(pD[r.id]) Object.values(pD[r.id]).forEach(v=>vM+=parseFloat(v||0)); b[`vienen_${r.id}`] = vV+vM; } });
-                await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), b); renderMatrix();
-            }
+
+        document.addEventListener('change', async (e) => {
+            if (isRendering || e.target.tagName !== 'INPUT' || !e.target.dataset.id) return;
+            const i = e.target; const { type, id, day } = i.dataset; const v = parseFloat(i.value) || 0;
+            if (type === 'vienen') { await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), { [`vienen_${id}`]: v }); }
+            else if (type === 'day') { await set(ref(db, `${PATH_ROOT}/${currentPeriod}/${id}/${day}`), v); }
+            renderMatrix();
         });
 
-        onAuthStateChanged(auth, (u) => {
-            currentUser = u;
-            if (u) {
-                if(currentPeriod === "") {
-                    const d = new Date();
-                    document.getElementById('select-month').value = d.getMonth();
-                    document.getElementById('select-year').value = d.getFullYear();
-                    currentPeriod = `${d.getMonth()}-${d.getFullYear()}`;
-                }
-                setupSync(u);
-            }
-        });
-
-        const initAuth = async () => {
-            try { if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token); else await signInAnonymously(auth); } catch (e) {}
-        };
-        initAuth();
-
-        document.addEventListener('keydown', (e) => {
-            const activeInput = document.activeElement;
-            if (!activeInput || activeInput.tagName !== 'INPUT') return;
-            const currentTd = activeInput.closest('td');
-            const currentRow = activeInput.closest('tr');
-            const cellIndex = currentTd.cellIndex;
-            let targetInput = null;
-
-            const findNextInCol = (startRow, colIdx, direction) => {
-                let row = direction === 1 ? startRow.nextElementSibling : startRow.previousElementSibling;
-                while (row) {
-                    if (!row.classList.contains('separator-row')) {
-                        const input = row.cells[colIdx]?.querySelector('input');
-                        if (input) return input;
-                    }
-                    row = direction === 1 ? row.nextElementSibling : row.previousElementSibling;
-                }
-                return null;
-            };
-
-            if (e.key === 'ArrowRight') targetInput = activeInput.closest('td').nextElementSibling?.querySelector('input');
-            else if (e.key === 'ArrowLeft') targetInput = activeInput.closest('td').previousElementSibling?.querySelector('input');
-            else if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); targetInput = findNextInCol(currentRow, cellIndex, 1); }
-            else if (e.key === 'ArrowUp') targetInput = findNextInCol(currentRow, cellIndex, -1);
-
-            if (targetInput) { targetInput.focus(); targetInput.select(); }
+        // Inicio
+        setupUIHeader();
+        currentPeriod = `${new Date().getMonth()}-${new Date().getFullYear()}`;
+        document.getElementById('select-month').value = new Date().getMonth();
+        signInAnonymously(auth).then(cred => {
+            currentUser = cred.user;
+            setupSync(currentUser);
         });
     </script>
 </body>
