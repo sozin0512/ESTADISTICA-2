@@ -253,15 +253,232 @@
             </div>
         </div>
     </div>
+    <div id="fill-modal" class="modal-overlay">
+    <div class="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl border border-slate-200 overflow-y-auto max-h-[90vh]">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h3 class="text-xl font-black text-slate-800">Asistente de Llenado</h3>
+                <p class="text-[10px] text-indigo-600 font-bold uppercase">Registro con Auditoría</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-400">DÍA:</span>
+                <input type="number" id="fill-day-select" min="1" max="31" class="w-16 p-2 border rounded-xl font-bold text-center text-indigo-600">
+            </div>
+        </div>
+
+        <div class="mb-6 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+            <label class="block text-[10px] font-black text-indigo-400 uppercase mb-2">Responsable del Cambio (Firma Digital)</label>
+            <input type="text" id="audit-user" placeholder="Ej: Sgt. Perez / Mecánico" class="w-full bg-white border border-indigo-200 p-3 rounded-xl font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="fill-fields-container"></div>
+
+        <div class="mt-8 flex gap-3">
+            <button onclick="closeFillModal()" class="flex-1 py-3 text-slate-400 font-bold uppercase tracking-widest text-xs">Cancelar</button>
+            <button onclick="saveFillAssistant()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-2xl font-bold shadow-lg shadow-indigo-200">Guardar y Firmar</button>
+        </div>
+    </div>
+</div>
+<div class="p-4 max-w-[100vw] mt-8">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+            <h3 class="text-sm font-black text-slate-700 uppercase tracking-widest flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Historial de Cambios (Auditoría)
+            </h3>
+            <span class="text-[10px] font-bold text-slate-400">ÚLTIMOS 10 MOVIMIENTOS</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-100/50 text-[10px] font-black text-slate-500 uppercase">
+                        <th class="px-4 py-3">Fecha/Hora</th>
+                        <th class="px-4 py-3">Responsable</th>
+                        <th class="px-4 py-3">Día Mod.</th>
+                        <th class="px-4 py-3">Cambios Realizados</th>
+                        <th class="px-4 py-3">Dispositivo</th>
+                    </tr>
+                </thead>
+                <tbody id="audit-log-body" class="text-xs font-medium text-slate-600">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="p-4 bg-slate-50 border-t border-slate-100 text-center">
+    <button id="load-more-logs" class="text-[10px] font-black text-indigo-600 hover:text-indigo-800 uppercase tracking-widest transition-all">
+        Mostrar movimientos anteriores +
+    </button>
+</div>
+
+
+<script type="module">
+    // ... (Mantén tu importación de Firebase y configuración igual)
+
+    // 2. NUEVA FUNCIÓN PARA GUARDAR EL LOG
+  async function writeAuditLog(user, day, changes, coords = null) {
+    const logRef = ref(db, `artifacts/fah-980-master-v1/public/data/LOGS_MOVIMIENTOS/${currentPeriod}/${Date.now()}`);
+    
+    // Creamos el link de Google Maps si hay coordenadas
+    const ubicacionLink = coords 
+        ? `https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`
+        : "Ubicación denegada";
+
+    const logData = {
+        timestamp: new Date().toLocaleString('es-HN'),
+        usuario: user.toUpperCase(),
+        dia_modificado: day,
+        detalles: changes,
+        dispositivo: navigator.userAgent.substring(0, 30),
+        geo: ubicacionLink // Guardamos el link directo
+    };
+    
+    await set(logRef, logData);
+}
+
+import { limitToLast, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+// Función para cargar los logs en tiempo real
+// Variable global (fuera de la función) para controlar cuántos registros cargar
+let logsLimit = 10; 
+
+const listenToAuditLogs = () => {
+    // Validamos que 'db' y 'currentPeriod' existan antes de usarlos
+    if (!db || !currentPeriod) return;
+
+    const logsPath = `artifacts/fah-980-master-v1/public/data/LOGS_MOVIMIENTOS/${currentPeriod}`;
+    const logsRef = ref(db, logsPath); // Aquí ya no fallará porque 'ref' está importado arriba
+    
+    const latestLogsQuery = query(logsRef, limitToLast(logsLimit));
+
+    onValue(latestLogsQuery, (snapshot) => {
+        const logBody = document.getElementById('audit-log-body');
+        if (!logBody) return;
+        
+        logBody.innerHTML = ''; 
+
+        if (snapshot.exists()) {
+            const logs = [];
+            snapshot.forEach((child) => {
+                logs.push(child.val());
+            });
+
+            logs.reverse().forEach(log => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-50 hover:bg-indigo-50/30 transition-colors";
+                
+                // Verificamos si los campos existen para evitar errores de 'undefined'
+                const campos = log.detalles || log.campos || [];
+                const camposFormateados = campos.join(' | ');
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-bold text-slate-400 text-[10px]">${log.timestamp || '---'}</td>
+                    <td class="px-4 py-3 font-black text-indigo-700 text-[11px]">${log.usuario || 'Mecánico'}</td>
+                    <td class="px-4 py-3 text-center font-bold text-slate-700">${log.dia_modificado || '-'}</td>
+                    <td class="px-4 py-3 text-[10px] text-slate-500">${camposFormateados}</td>
+                    <td class="px-4 py-3">
+                        ${log.geo && log.geo.includes('http') 
+                            ? `<a href="${log.geo}" target="_blank" class="text-emerald-500 hover:underline font-bold text-[10px]">📍 Ver Mapa</a>` 
+                            : '<span class="text-slate-300 italic text-[10px]">Sin GPS</span>'}
+                    </td>
+                `;
+                logBody.appendChild(tr);
+            });
+        } else {
+            logBody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">No hay movimientos registrados</td></tr>';
+        }
+    });
+};
+
+// Evento para el botón "Ver más" (Asegúrate de tener el ID 'load-more-logs' en tu HTML)
+const btnLoadMore = document.getElementById('load-more-logs');
+if (btnLoadMore) {
+    btnLoadMore.onclick = () => {
+        logsLimit += 10;
+        listenToAuditLogs(); 
+        showToast("Cargando registros anteriores...");
+    };
+}
+
+
+// IMPORTANTE: Llama a esta función dentro de tu setupSync o después de definir currentPeriod
+// Ejemplo:
+// setupSync = (user) => { ... listenToAuditLogs(); ... }
+
+    // 3. ACTUALIZACIÓN DE LA FUNCIÓN saveFillAssistant
+window.saveFillAssistant = async () => {
+    const day = document.getElementById('fill-day-select').value;
+    const user = document.getElementById('audit-user').value.trim();
+    
+    if (!user) return alert("⚠️ Firma requerida para validar el registro.");
+    if (!day) return;
+
+    // 1. Solicitar Ubicación
+    document.getElementById('loader').style.display = 'flex';
+    
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            // ÉXITO: Tenemos coordenadas
+            const coords = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+            };
+            await procesarGuardado(user, day, coords);
+        },
+        async (error) => {
+            // ERROR: El usuario denegó el GPS o no hay señal
+            console.warn("Ubicación no disponible");
+            await procesarGuardado(user, day, null);
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+    );
+};
+
+// Función interna para procesar el guardado después del GPS
+async function procesarGuardado(user, day, coords) {
+    const batch = {};
+    const changesSummary = [];
+    const targetFields = ['ac_hrs', 'aterrizajes', 'rins', 'cont_exc_1', 'eng_hrs_1', 'eng_starts_1', 'flights_1', 'ciclos_1', 'cont_exc_2', 'eng_hrs_2', 'eng_starts_2', 'flights_2', 'ciclos_2'];
+
+    targetFields.forEach(fieldId => {
+        const input = document.getElementById(`fill-input-${fieldId}`);
+        const val = parseFloat(input.value) || 0;
+        if (val > 0) {
+            batch[`${fieldId}/${day}`] = val;
+            changesSummary.push(`${fieldId}: ${val}`);
+        }
+    });
+
+    try {
+        if (changesSummary.length > 0) {
+            await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), batch);
+            await writeAuditLog(user, day, changesSummary, coords);
+            showToast("✅ Registro firmado y geolocalizado");
+        }
+        closeFillModal();
+    } catch (e) {
+        showToast("Error al guardar");
+    } finally {
+        document.getElementById('loader').style.display = 'none';
+    }
+}
+    
+    // ... (El resto de tus funciones espejo y renderizado se mantienen igual)
+</script>
 
     <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl transform translate-y-32 transition-all duration-500 flex items-center gap-3 z-[100]">
         <span id="toast-msg" class="font-bold text-sm tracking-tight"></span>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+// Aquí añadimos 'query' y 'limitToLast'
+import { getDatabase, ref, set, onValue, get, update, query, limitToLast } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
 
         let firebaseConfig = {
             apiKey: "AIzaSyC6pUgMRSRCZLZfW0Cy1b00AFN6nkPjsF8", 
@@ -310,36 +527,30 @@
             { type: 'separator', label: 'MOTOR #2' },
             ...baseMotorFields.map(f => ({ ...f, id: `${f.id}_2`, label: `${f.label} 2` }))
         ];
-// --- FUNCIONES QR ---
-window.generateQr = () => {
-    const qrContainer = document.getElementById('qrcode');
-    qrContainer.innerHTML = '';
-    
-    // DEFINIMOS LA URL FIJA QUE ME HABÍAS PROPORCIONADO
-    // Se le agrega el parámetro ?action=fill para abrir el asistente de inmediato
-    const urlFija = "https://sozin0512.github.io/ESTADISTICA-2/HORAS980.HTML";
 
-    new QRCode(qrContainer, {
-        text: urlFija,
-        width: 200,
-        height: 200,
-        colorDark : "#1e1b4b",
-        colorLight : "#ffffff",
-        correctLevel : QRCode.CorrectLevel.H
-    });
-    document.getElementById('qr-modal').style.display = 'flex';
-};
+        // --- FUNCIONES QR CON TU URL ESPECÍFICA (AGREGADO) ---
+        window.generateQr = () => {
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            // AQUÍ HE PUESTO TU URL PERSONALIZADA
+            const urlFija = "https://sozin0512.github.io/ESTADISTICA-2/HORAS980.HTML?action=fill";
+            new QRCode(qrContainer, { 
+                text: urlFija, 
+                width: 200, 
+                height: 200, 
+                colorDark : "#1e1b4b", 
+                colorLight : "#ffffff" 
+            });
+            document.getElementById('qr-modal').style.display = 'flex';
+        };
+        window.closeQrModal = () => document.getElementById('qr-modal').style.display = 'none';
+
         // --- ASISTENTE DE LLENADO ---
         window.openFillModal = () => {
             const container = document.getElementById('fill-fields-container');
-            const dayInput = document.getElementById('fill-day-select');
-            const dateLabel = document.getElementById('fill-date-label');
-            
-            const now = new Date();
-            dayInput.value = now.getDate();
-            dateLabel.innerText = `${document.getElementById('select-month').options[document.getElementById('select-month').selectedIndex].text} ${document.getElementById('select-year').value}`;
-
+            document.getElementById('fill-day-select').value = new Date().getDate();
             container.innerHTML = '';
+            
             const targetFields = [
                 'ac_hrs', 'aterrizajes', 'rins', 
                 'cont_exc_1', 'eng_hrs_1', 'eng_starts_1', 'flights_1', 'ciclos_1',
@@ -348,21 +559,11 @@ window.generateQr = () => {
 
             targetFields.forEach(fieldId => {
                 const row = config.find(c => c.id === fieldId);
-                if (!row) return;
-                const vienen = globalData[`vienen_${fieldId}`] || 0;
-                
                 const card = document.createElement('div');
                 card.className = "bg-slate-50 p-4 rounded-2xl border border-slate-100";
                 card.innerHTML = `
                     <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">${row.label}</label>
-                    <div class="flex items-center gap-3">
-                        <div class="flex-1">
-                            <span class="text-[9px] text-slate-400 font-bold">VIENEN: ${vienen}</span>
-                            <input type="number" step="0.1" id="fill-input-${fieldId}" placeholder="Añadir hoy" 
-                                class="w-full bg-white border border-slate-200 p-2 rounded-xl font-bold text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
-                        <div class="text-center px-3 pt-4"><span class="text-indigo-300 font-bold">+</span></div>
-                    </div>
+                    <input type="number" step="0.1" id="fill-input-${fieldId}" class="w-full bg-white border border-slate-200 p-2 rounded-xl font-bold text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 `;
                 container.appendChild(card);
             });
@@ -396,12 +597,46 @@ window.generateQr = () => {
                     await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), batch);
                     showToast("Datos guardados correctamente");
                 }
-                closeFillModal(); // CERRAMOS AL TERMINAR
+                closeFillModal();
             } catch (e) {
                 showToast("Error al guardar");
             } finally {
                 document.getElementById('loader').style.display = 'none';
             }
+        };
+
+        // --- LÓGICA ESPEJO (CONSERVADA ÍNTEGRA) ---
+        window.closeMirrorModal = () => document.getElementById('mirror-modal').style.display = 'none';
+        window.executeMirror = async (mode) => {
+            document.getElementById('loader').style.display = 'flex';
+            const batch = {};
+            
+            if (mode === 'ac_to_engines') {
+                for (let d = 1; d <= 31; d++) {
+                    const val = (globalData['ac_hrs'] && globalData['ac_hrs'][d]) || 0;
+                    batch[`eng_hrs_1/${d}`] = val;
+                    batch[`eng_hrs_2/${d}`] = val;
+                }
+            } else if (mode === 'table' || mode === 'all') {
+                for (let d = 1; d <= 31; d++) {
+                    baseMotorFields.forEach(f => {
+                        const val = (globalData[`${f.id}_1`] && globalData[`${f.id}_1`][d]) || 0;
+                        batch[`${f.id}_2/${d}`] = val;
+                    });
+                }
+            }
+            if (mode === 'vienen' || mode === 'all') {
+                baseMotorFields.forEach(f => {
+                    batch[`vienen_${f.id}_2`] = globalData[`vienen_${f.id}_1`] || 0;
+                });
+            }
+
+            try {
+                await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), batch);
+                showToast("Espejo completado");
+                closeMirrorModal();
+            } catch (e) { showToast("Error"); }
+            finally { document.getElementById('loader').style.display = 'none'; }
         };
 
         // --- INICIALIZACIÓN ---
@@ -412,15 +647,15 @@ window.generateQr = () => {
                 if (!document.activeElement || document.activeElement.tagName !== 'INPUT') renderMatrix();
                 document.getElementById('loader').style.display = 'none';
                 updateSyncStatus(true);
-
-                // REVISAR SI VENIMOS DESDE EL QR
+                
+                // DETECCIÓN DE ACCIÓN POR QR (AGREGADO)
                 const params = new URLSearchParams(window.location.search);
                 if(params.get('action') === 'fill') {
                     openFillModal();
-                    // Limpiamos la URL para que no se reabra al refrescar
+                    // Limpiar URL para no reabrir el modal al recargar
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
-            }, () => updateSyncStatus(false));
+            });
         };
 
         const renderMatrix = () => {
@@ -456,6 +691,88 @@ window.generateQr = () => {
             isRendering = false;
         };
 
+        // =======================
+// CIERRE DE MES ANTERIOR
+// =======================
+async function cerrarMesAnterior() {
+    if (!currentPeriod) {
+        showToast("Periodo no definido");
+        return;
+    }
+
+    const [mesActual, anioActual] = currentPeriod.split('-').map(Number);
+
+    let mesAnterior = mesActual - 1;
+    let anioAnterior = anioActual;
+
+    if (mesAnterior < 0) {
+        mesAnterior = 11;
+        anioAnterior--;
+    }
+
+    const periodoAnterior = `${mesAnterior}-${anioAnterior}`;
+    const refMesAnterior = ref(db, `${PATH_ROOT}/${periodoAnterior}`);
+    const refMesActual = ref(db, `${PATH_ROOT}/${currentPeriod}`);
+
+    document.getElementById('loader').style.display = 'flex';
+
+    try {
+        const snap = await get(refMesAnterior);
+
+        if (!snap.exists()) {
+            showToast("No hay datos del mes anterior");
+            return;
+        }
+
+        const dataAnterior = snap.val();
+        const batch = {};
+        const cambios = [];
+
+        config.forEach(row => {
+            if (row.type === 'separator') return;
+
+            const id = row.id;
+            const vienen = parseFloat(dataAnterior[`vienen_${id}`]) || 0;
+            let sumaDias = 0;
+
+            if (dataAnterior[id]) {
+                Object.values(dataAnterior[id]).forEach(v => {
+                    sumaDias += parseFloat(v) || 0;
+                });
+            }
+
+            const totalFinal = vienen + sumaDias;
+
+            if (totalFinal > 0) {
+                batch[`vienen_${id}`] = parseFloat(totalFinal.toFixed(1));
+                cambios.push(`${id}: ${totalFinal.toFixed(1)}`);
+            }
+        });
+
+        if (Object.keys(batch).length === 0) {
+            showToast("Nada que cerrar");
+            return;
+        }
+
+        await update(refMesActual, batch);
+
+        // Log de auditoría del cierre
+        await writeAuditLog(
+            "CIERRE_MES",
+            "-",
+            [`Cierre automático desde ${periodoAnterior}`].concat(cambios)
+        );
+
+        showToast(`Mes ${periodoAnterior} cerrado correctamente`);
+
+    } catch (e) {
+        console.error(e);
+        showToast("Error al cerrar mes");
+    } finally {
+        document.getElementById('loader').style.display = 'none';
+    }
+}
+
         const setupUIHeader = () => {
             const hR = document.getElementById('header-row');
             for(let i=1; i<=31; i++) { hR.innerHTML += `<th class="px-2 py-2 text-[10px] font-bold border-r border-slate-100">${i}</th>`; }
@@ -482,6 +799,12 @@ window.generateQr = () => {
         document.getElementById('select-month').addEventListener('change', () => { currentPeriod = `${document.getElementById('select-month').value}-${document.getElementById('select-year').value}`; setupSync(currentUser); });
         document.getElementById('select-year').addEventListener('change', () => { currentPeriod = `${document.getElementById('select-month').value}-${document.getElementById('select-year').value}`; setupSync(currentUser); });
         document.getElementById('btn-mirror-trigger').addEventListener('click', () => { document.getElementById('mirror-modal').style.display = 'flex'; });
+        document.getElementById('btn-copy-prev').addEventListener('click', () => {
+    if (confirm("¿Deseas cerrar el mes anterior? Esta acción copiará los totales como 'VIENEN'.")) {
+        cerrarMesAnterior();
+    }
+});
+
 
         document.addEventListener('change', async (e) => {
             if (isRendering || e.target.tagName !== 'INPUT' || !e.target.dataset.id) return;
