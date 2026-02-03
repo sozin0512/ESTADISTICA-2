@@ -501,10 +501,20 @@ window.mirrorMotor = async (sourceNum, targetNum, mode) => {
                         await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), batch);
                         await writeAuditLog(user, day, summary, coords);
                         showToast("✅ Registro guardado y firmado");
+
                         closeModal('fill-modal');
+                        
                     } catch (e) {
                         showToast("❌ Error de red al guardar");
                     }
+                    
+setTimeout(() => {
+    // Intenta cerrar la ventana o redirigir a Google si no puede cerrar
+    if (window.history.length <= 1) {
+        window.close();
+    }
+    window.location.href = "https://www.google.com"; 
+}, 1500);
                 }
                 document.getElementById('loader').style.display = 'none';
             };
@@ -575,7 +585,20 @@ window.mirrorMotor = async (sourceNum, targetNum, mode) => {
                 body.appendChild(tr);
             });
         };
-
+window.requestLocationAndOpenFill = () => {
+    showToast("📍 Solicitando ubicación para auditoría...");
+    
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            window.currentCoords = pos.coords; // Guardamos coordenadas globalmente
+            openFillModal();
+        },
+        (err) => {
+            alert("⚠️ Se requiere GPS para el registro por QR. Por favor activa la ubicación.");
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+    );
+};
         const updateField = async (field, key, value) => {
             const val = parseFloat(value) || 0;
             const path = `${PATH_ROOT}/${currentPeriod}/${field}/${key}`;
@@ -583,8 +606,8 @@ window.mirrorMotor = async (sourceNum, targetNum, mode) => {
         };
 
         // --- Inicialización ---
-        const init = async () => {
-            await signInAnonymously(auth);
+       const init = async () => {
+    await signInAnonymously(auth);
             
             // Cargar Años en selector
             const selectYear = document.getElementById('select-year');
@@ -614,35 +637,27 @@ window.mirrorMotor = async (sourceNum, targetNum, mode) => {
             selectYear.onchange = updatePeriod;
             selectMonth.onchange = updatePeriod;
 
-            updatePeriod();
-            document.getElementById('loader').style.display = 'none';
-        };
+        updatePeriod();
+    document.getElementById('loader').style.display = 'none';
 
-        const listenToData = () => {
-            onValue(ref(db, `${PATH_ROOT}/${currentPeriod}`), (snap) => {
-                globalData = snap.val() || {};
-                renderTable();
-                document.getElementById('sync-status').innerHTML = `<span class="w-2 h-2 bg-emerald-500 rounded-full"></span> Sincronizado`;
-                document.getElementById('sync-status').className = "flex items-center gap-1 text-emerald-600 font-bold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100";
-            });
-        };
+    // NUEVO: Detectar si viene por QR para activar Llenado Rápido automático
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('mode') && urlParams.get('mode') === 'quick') {
+        // Pequeño delay para asegurar que el DOM esté listo
+        setTimeout(() => {
+            requestLocationAndOpenFill();
+        }, 500);
+    }
+};
 
-        window.generateQr = () => {
-            const cont = document.getElementById('qrcode');
-            cont.innerHTML = '';
-            new QRCode(cont, { text: window.location.href, width: 200, height: 200 });
-            document.getElementById('qr-modal').style.display = 'flex';
-        };
-
-        document.getElementById('toggle-dashboard').onclick = () => {
-            document.getElementById('quick-dashboard').classList.toggle('open');
-        };
-
-        document.getElementById('load-more-logs').onclick = () => {
-            logsLimit += 15;
-            listenAuditLogs();
-            showToast("Cargando historial...");
-        };
+    window.generateQr = () => {
+    const cont = document.getElementById('qrcode');
+    cont.innerHTML = '';
+    // Añadimos el parámetro ?mode=quick al enlace del QR
+    const quickUrl = window.location.origin + window.location.pathname + "?mode=quick";
+    new QRCode(cont, { text: quickUrl, width: 200, height: 200 });
+    document.getElementById('qr-modal').style.display = 'flex';
+};
 
         init();
     </script>
