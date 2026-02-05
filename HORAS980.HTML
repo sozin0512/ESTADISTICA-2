@@ -24,6 +24,7 @@ video#webcam { width: 100%; border-radius: 1rem; background: #000; transform: sc
 }
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
+        
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #f8fafc;
@@ -121,50 +122,90 @@ video#webcam { width: 100%; border-radius: 1rem; background: #000; transform: sc
 </div>
 
 <div id="quick-fill-panel" class="modal-overlay">
-    <div class="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl overflow-y-auto style-scrollbar" style="max-height: 90vh;">
-        <h2 class="text-2xl font-black mb-2 text-slate-800">LLENADO DE VUELO</h2>
-        <p class="text-xs text-slate-500 mb-6 uppercase">Control de Componentes Principales</p>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <h3 class="font-bold text-indigo-600 text-sm">AERONAVE (AC)</h3>
-                <div><label class="text-[10px] font-bold">AC HRS</label><input type="number" id="q_ac_hrs" class="quick-input" step="0.1"></div>
-                <div><label class="text-[10px] font-bold">ATERRIZAJES</label><input type="number" id="q_aterrizajes" class="quick-input"></div>
-                <div><label class="text-[10px] font-bold">RINS (OPCIONAL)</label><input type="number" id="q_rins" class="quick-input"></div>
+    <div class="bg-white rounded-3xl p-6 max-w-4xl w-full shadow-2xl overflow-y-auto" style="max-height: 95vh;">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h2 class="text-2xl font-black text-slate-800">SISTEMA DE VERIFICACIÓN</h2>
+                <p class="text-xs text-indigo-600 font-bold uppercase tracking-wider">Cálculo Automático vs Forma 13</p>
             </div>
-
-            <div class="space-y-4 bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                <h3 class="font-bold text-blue-600 text-sm">MOTOR 1</h3>
-                <div><label class="text-[10px] font-bold">ENGINE HRS 1</label><input type="number" id="q_eng_1" class="quick-input" step="0.1"></div>
-                <div><label class="text-[10px] font-bold">STARTS 1</label><input type="number" id="q_starts_1" class="quick-input"></div>
-                <div><label class="text-[10px] font-bold">FLIGHTS 1</label><input type="number" id="q_flights_1" class="quick-input" value="1"></div>
-                <div><label class="text-[10px] font-bold">CICLOS 1</label><input type="number" id="q_ciclos_1" class="quick-input"></div>
-            </div>
-
-            <div class="space-y-4 bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-emerald-600 text-sm">MOTOR 2</h3>
-                    <button onclick="copyM1toM2()" class="text-[9px] bg-emerald-200 text-emerald-700 px-2 py-1 rounded-lg font-bold">COPIAR M1</button>
-                </div>
-                <div><label class="text-[10px] font-bold">ENGINE HRS 2</label><input type="number" id="q_eng_2" class="quick-input" step="0.1"></div>
-                <div><label class="text-[10px] font-bold">STARTS 2</label><input type="number" id="q_starts_2" class="quick-input"></div>
-                <div><label class="text-[10px] font-bold">FLIGHTS 2</label><input type="number" id="q_flights_2" class="quick-input" value="1"></div>
-                <div><label class="text-[10px] font-bold">CICLOS 2</label><input type="number" id="q_ciclos_2" class="quick-input"></div>
+            <div class="text-right">
+                <span id="current-day-label" class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-black">DÍA: --</span>
             </div>
         </div>
 
-        <button id="btn-save-quick" class="w-full mt-8 bg-slate-900 text-white py-4 rounded-2xl font-black shadow-lg hover:bg-black transition-all">FINALIZAR Y GUARDAR EN BITÁCORA</button>
-        <button onclick="location.reload()" class="w-full mt-3 text-slate-400 text-xs font-bold">CANCELAR</button>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                <h3 class="text-center font-black text-slate-700 mb-4 border-b pb-2">AERONAVE</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-black">AC HRS (VUELO)</label>
+                        <input type="number" id="q_ac_hrs" class="quick-input" step="0.1" oninput="calcQuick('ac_hrs')">
+                        <div class="flex justify-between text-[10px] mt-1 font-bold">
+                            <span class="text-slate-400">VIENEN: <b id="v_ac_hrs">0</b></span>
+                            <span class="text-indigo-600">TOTAL: <b id="t_ac_hrs">0</b></span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black">ATERRIZAJES</label>
+                        <input type="number" id="q_aterrizajes" class="quick-input" oninput="calcQuick('aterrizajes')">
+                        <div class="flex justify-between text-[10px] mt-1 font-bold">
+                            <span class="text-slate-400">VIENEN: <b id="v_aterrizajes">0</b></span>
+                            <span class="text-indigo-600">TOTAL: <b id="t_aterrizajes">0</b></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 p-4 rounded-2xl border border-blue-200">
+                <h3 class="text-center font-black text-blue-700 mb-4 border-b border-blue-200 pb-2">MOTOR #1</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-[10px] font-bold">ENG HRS 1</label>
+                        <input type="number" id="q_eng_hrs_1" class="quick-input" step="0.1" oninput="calcQuick('eng_hrs_1')">
+                        <div class="text-[9px] font-bold text-blue-600">TOTAL: <b id="t_eng_hrs_1">0</b></div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold">STARTS 1</label>
+                        <input type="number" id="q_eng_starts_1" class="quick-input" oninput="calcQuick('eng_starts_1')">
+                        <div class="text-[9px] font-bold text-blue-600">TOTAL: <b id="t_eng_starts_1">0</b></div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold">CICLOS 1</label>
+                        <input type="number" id="q_ciclos_1" class="quick-input" oninput="calcQuick('ciclos_1')">
+                        <div class="text-[9px] font-bold text-blue-600">TOTAL: <b id="t_ciclos_1">0</b></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+                <div class="flex justify-between border-b border-emerald-200 mb-4 pb-2">
+                    <h3 class="font-black text-emerald-700">MOTOR #2</h3>
+                    <button onclick="syncM1toM2()" class="text-[9px] bg-emerald-600 text-white px-2 py-0.5 rounded font-bold">SYNC M1</button>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-[10px] font-bold">ENG HRS 2</label>
+                        <input type="number" id="q_eng_hrs_2" class="quick-input" step="0.1" oninput="calcQuick('eng_hrs_2')">
+                        <div class="text-[9px] font-bold text-emerald-600">TOTAL: <b id="t_eng_hrs_2">0</b></div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold">STARTS 2</label>
+                        <input type="number" id="q_eng_starts_2" class="quick-input" oninput="calcQuick('eng_starts_2')">
+                        <div class="text-[9px] font-bold text-emerald-600">TOTAL: <b id="t_eng_starts_2">0</b></div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold">CICLOS 2</label>
+                        <input type="number" id="q_ciclos_2" class="quick-input" oninput="calcQuick('ciclos_2')">
+                        <div class="text-[9px] font-bold text-emerald-600">TOTAL: <b id="t_ciclos_2">0</b></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button id="btn-save-quick" class="w-full mt-6 bg-slate-900 text-white py-4 rounded-2xl font-black shadow-xl">GUARDAR Y SINCRONIZAR DATOS</button>
+        <button onclick="location.reload()" class="w-full mt-2 text-slate-400 text-xs">CANCELAR</button>
     </div>
 </div>
-
-    <div id="loader" class="loading-overlay">
-        <div class="flex flex-col items-center gap-4">
-            <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Sincronizando...</p>
-        </div>
-    </div>
-
     <!-- Modal de Espejo Mejorado -->
     <div id="mirror-modal" class="modal-overlay">
         <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-200">
@@ -247,6 +288,46 @@ video#webcam { width: 100%; border-radius: 1rem; background: #000; transform: sc
         </div>
     </nav>
 
+  <div class="mt-12 max-w-7xl mx-auto px-4 pb-20">
+    <div class="bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
+        <div onclick="toggleAuditPanel()" class="p-6 cursor-pointer hover:bg-slate-800/50 transition-all flex justify-between items-center">
+            <div>
+                <h3 class="text-xl font-black text-white">🕵️ REGISTRO DE AUDITORÍA</h3>
+                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">GPS, Fotos y Verificación de Ingresos</p>
+            </div>
+            <span id="audit-icon" class="text-white text-2xl">➕</span>
+        </div>
+
+        <div id="audit-content" style="display: none;" class="p-6 border-t border-slate-800">
+            <div class="flex flex-wrap gap-4 mb-6 items-end">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="text-[10px] text-slate-500 font-bold ml-2">BUSCAR POR FECHA (Día/Mes/Año)</label>
+                    <input type="text" id="audit-search" oninput="filterAuditLogs()" placeholder="Ej: 22/5/2025..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:border-indigo-500 outline-none">
+                </div>
+                <button onclick="loadAuditLogs()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-xs font-bold transition-all">
+                    ACTUALIZAR DATOS
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto rounded-2xl border border-slate-800">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800 text-slate-400 text-[10px] uppercase font-black">
+                            <th class="p-4">Fecha/Hora</th>
+                            <th class="p-4">Foto</th>
+                            <th class="p-4">Usuario</th>
+                            <th class="p-4">Ubicación GPS</th>
+                            <th class="p-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="audit-logs-body" class="text-slate-300 text-sm">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
     <!-- Dashboard Desplegable de Accesos Rápidos -->
     <div id="quick-dashboard" class="bg-slate-50 border-b border-slate-200 px-6">
         <div class="max-w-7xl mx-auto">
@@ -291,8 +372,12 @@ video#webcam { width: 100%; border-radius: 1rem; background: #000; transform: sc
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, get, remove, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+// Agrega "remove" a la lista de importaciones de database
+
+
+
 
         let firebaseConfig = {
             apiKey: "AIzaSyC6pUgMRSRCZLZfW0Cy1b00AFN6nkPjsF8", 
@@ -742,6 +827,170 @@ document.getElementById('btn-save-quick')?.addEventListener('click', async () =>
         alert("Error al guardar: " + e.message);
     }
 });
+
+// Variable para almacenar los "Vienen" temporalmente
+let vienenSuma = {};
+
+window.setupQuickCalculator = () => {
+    const day = new Date().getDate();
+    document.getElementById('current-day-label').innerText = `DÍA: ${day}`;
+    
+    // Lista de parámetros a calcular
+    const params = ['ac_hrs', 'aterrizajes', 'rins', 'eng_hrs_1', 'eng_hrs_2', 'eng_starts_1', 'eng_starts_2', 'ciclos_1', 'ciclos_2'];
+    
+    params.forEach(p => {
+        // 1. Obtener lo que "Viene" (vienen_ + suma del mes hasta ayer)
+        const baseVienen = parseFloat(globalData[`vienen_${p}`] || 0);
+        let sumaMes = 0;
+        if(globalData[p]) {
+            Object.keys(globalData[p]).forEach(d => {
+                if(parseInt(d) < day) sumaMes += parseFloat(globalData[p][d] || 0);
+            });
+        }
+        
+        vienenSuma[p] = baseVienen + sumaMes;
+        
+        // 2. Mostrar el valor "Vienen" en la interfaz
+        const labelV = document.getElementById(`v_${p}`);
+        if(labelV) labelV.innerText = vienenSuma[p].toFixed(1);
+        
+        // 3. Resetear el total actual
+        const labelT = document.getElementById(`t_${p}`);
+        if(labelT) labelT.innerText = vienenSuma[p].toFixed(1);
+    });
+};
+
+// Función que suma mientras escribes
+window.calcQuick = (id) => {
+    const inputVal = parseFloat(document.getElementById(`q_${id}`).value) || 0;
+    const total = vienenSuma[id] + inputVal;
+    const labelT = document.getElementById(`t_${id}`);
+    if(labelT) labelT.innerText = total.toFixed(1);
+};
+
+// Sincronizar M1 a M2
+window.syncM1toM2 = () => {
+    const m1Fields = ['eng_hrs_1', 'eng_starts_1', 'ciclos_1'];
+    const m2Fields = ['eng_hrs_2', 'eng_starts_2', 'ciclos_2'];
+    
+    m1Fields.forEach((id, index) => {
+        const val = document.getElementById(`q_${id}`).value;
+        const targetId = m2Fields[index];
+        document.getElementById(`q_${targetId}`).value = val;
+        calcQuick(targetId);
+    });
+};
+// Función para cargar los registros de auditoría desde Firebase
+window.loadAuditLogs = async function() {
+    const tbody = document.getElementById('audit-logs-body');
+    tbody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-500 font-bold">Cargando registros...</td></tr>';
+    
+    const auditRef = ref(db, `artifacts/fah-980-master-v1/public/audit_logs`);
+    
+    try {
+        const snapshot = await get(auditRef);
+        if (snapshot.exists()) {
+            tbody.innerHTML = '';
+            const logs = [];
+            
+            // Convertir objeto a array y ordenar por fecha (el más reciente primero)
+            snapshot.forEach((child) => {
+                logs.unshift({ id: child.key, ...child.val() });
+            });
+
+            logs.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-800 hover:bg-slate-800/30 transition-colors";
+                
+                // Formatear GPS para Google Maps
+                const mapsUrl = log.coords 
+                    ? `https://www.google.com/maps?q=${log.coords.lat},${log.coords.lng}`
+                    : '#';
+// Dentro del bucle de loadAuditLogs, cambia el tr.innerHTML por esto:
+tr.innerHTML = `
+    <td class="p-4 font-mono text-xs log-date">${log.ts || ''}</td>
+    <td class="p-4">
+        <img src="${log.photo}" class="w-10 h-10 rounded-lg object-cover border border-slate-700 hover:scale-[4] cursor-pointer transition-all">
+    </td>
+    <td class="p-4 text-xs font-bold text-indigo-400">${log.user || 'Anon'}</td>
+    <td class="p-4">
+        <a href="https://www.google.com/maps?q=${log.coords?.lat},${log.coords?.lng}" target="_blank" class="text-emerald-400 font-bold text-[10px] hover:underline">
+            📍 VER MAPA
+        </a>
+    </td>
+    <td class="p-4">
+        <button onclick="deleteAuditLog('${log.id}')" class="bg-rose-500/10 text-rose-500 px-3 py-1 rounded-lg text-[10px] font-black hover:bg-rose-500 hover:text-white transition-all">
+            BORRAR
+        </button>
+    </td>
+`;
+                tbody.appendChild(tr);
+            });
+        } else {
+            tbody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-600 italic">No hay registros de auditoría aún.</td></tr>';
+        }
+    } catch (error) {
+        console.error("Error cargando logs:", error);
+        tbody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-rose-400 font-bold">Error al conectar con la base de datos.</td></tr>';
+    }
+};
+
+// Función para borrar un log si es necesario
+window.deleteAuditLog = async function(id) {
+    if(confirm("¿Seguro que deseas eliminar este registro de auditoría?")) {
+        await remove(ref(db, `artifacts/fah-980-master-v1/public/audit_logs/${id}`));
+        loadAuditLogs();
+    }
+};
+// 1. Función para abrir/cerrar el panel
+window.toggleAuditPanel = () => {
+    const content = document.getElementById('audit-content');
+    const icon = document.getElementById('audit-icon');
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.innerText = '➖';
+        loadAuditLogs(); // Carga datos al abrir
+    } else {
+        content.style.display = 'none';
+        icon.innerText = '➕';
+    }
+};
+
+// 2. Buscador en tiempo real
+window.filterAuditLogs = () => {
+    const term = document.getElementById('audit-search').value.toLowerCase();
+    const rows = document.querySelectorAll('#audit-logs-body tr');
+    
+    rows.forEach(row => {
+        const dateText = row.querySelector('.log-date').innerText.toLowerCase();
+        row.style.display = dateText.includes(term) ? '' : 'none';
+    });
+};
+
+// 3. Borrado con Contraseña "sozin"
+window.deleteAuditLog = async (id) => {
+    const pass = prompt("INTRODUZCA LA CONTRASEÑA DE ADMINISTRADOR PARA BORRAR:");
+    
+    if (pass === "sozin") {
+        if (confirm("¿Confirmar eliminación permanente de este registro?")) {
+            try {
+                await remove(ref(db, `artifacts/fah-980-master-v1/public/audit_logs/${id}`));
+                loadAuditLogs();
+            } catch (e) {
+                alert("Error al borrar: " + e.message);
+            }
+        }
+    } else if (pass !== null) {
+        alert("❌ CONTRASEÑA INCORRECTA. ACCESO DENEGADO.");
+    }
+};
+
+// 4. Modificación a loadAuditLogs para incluir la clase de búsqueda
+// Asegúrate de que en tu función loadAuditLogs, la celda de la fecha tenga:
+// <td class="p-4 font-mono text-xs log-date">${log.ts}</td>
+
+// Cargar logs al iniciar la página si el usuario está logueado
+// (Agrega esto dentro de tu onAuthStateChanged)
     </script>
 </body>
 </html>
