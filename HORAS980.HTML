@@ -154,6 +154,14 @@ video#webcam { width: 100%; border-radius: 1rem; background: #000; transform: sc
                         </div>
                     </div>
                 </div>
+                  <label class="block text-[10px] font-black">RINS</label>
+                        <input type="number" id="q_aterrizajes" class="quick-input" oninput="calcQuick('aterrizajes')">
+                        <div class="flex justify-between text-[10px] mt-1 font-bold">
+                            <span class="text-slate-400">VIENEN: <b id="v_aterrizajes">0</b></span>
+                            <span class="text-indigo-600">TOTAL: <b id="t_aterrizajes">0</b></span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="bg-blue-50 p-4 rounded-2xl border border-blue-200">
@@ -835,28 +843,46 @@ window.setupQuickCalculator = () => {
     const day = new Date().getDate();
     document.getElementById('current-day-label').innerText = `DÍA: ${day}`;
     
-    // Lista de parámetros a calcular
-    const params = ['ac_hrs', 'aterrizajes', 'rins', 'eng_hrs_1', 'eng_hrs_2', 'eng_starts_1', 'eng_starts_2', 'ciclos_1', 'ciclos_2'];
+    // Estos son los IDs de los parámetros que queremos calcular
+    const params = [
+        { id: 'ac_hrs', label: 'ac_hrs' },
+        { id: 'aterrizajes', label: 'aterrizajes' },
+        { id: 'eng_hrs_1', label: 'eng_hrs_1' },
+        { id: 'eng_hrs_2', label: 'eng_hrs_2' },
+        { id: 'eng_starts_1', label: 'eng_starts_1' },
+        { id: 'eng_starts_2', label: 'eng_starts_2' },
+        { id: 'ciclos_1', label: 'ciclos_1' },
+        { id: 'ciclos_2', label: 'ciclos_2' }
+    ];
     
     params.forEach(p => {
-        // 1. Obtener lo que "Viene" (vienen_ + suma del mes hasta ayer)
-        const baseVienen = parseFloat(globalData[`vienen_${p}`] || 0);
-        let sumaMes = 0;
-        if(globalData[p]) {
-            Object.keys(globalData[p]).forEach(d => {
-                if(parseInt(d) < day) sumaMes += parseFloat(globalData[p][d] || 0);
+        // 1. SACAMOS EL VALOR "VIENEN" INICIAL (El total con el que empezó el mes)
+        // Buscamos en globalData el campo 'vienen_ac_hrs', 'vienen_eng_hrs_1', etc.
+        const baseVienen = parseFloat(globalData[`vienen_${p.label}`] || 0);
+        
+        // 2. SUMAMOS TODO LO QUE SE HA VOLADO EN EL MES HASTA AYER
+        let sumaMesHastaAyer = 0;
+        if(globalData[p.label]) {
+            Object.keys(globalData[p.label]).forEach(d => {
+                const diaNum = parseInt(d);
+                // Solo sumamos los días menores al día actual
+                if(diaNum < day) {
+                    sumaMesHastaAyer += parseFloat(globalData[p.label][d] || 0);
+                }
             });
         }
         
-        vienenSuma[p] = baseVienen + sumaMes;
+        // 3. EL TOTAL GENERAL ANTERIOR ES LA SUMA DE AMBOS
+        const totalAnteriorReal = baseVienen + sumaMesHastaAyer;
+        vienenSuma[p.id] = totalAnteriorReal;
         
-        // 2. Mostrar el valor "Vienen" en la interfaz
-        const labelV = document.getElementById(`v_${p}`);
-        if(labelV) labelV.innerText = vienenSuma[p].toFixed(1);
+        // 4. ACTUALIZAMOS LA INTERFAZ
+        const labelV = document.getElementById(`v_${p.id}`);
+        if(labelV) labelV.innerText = totalAnteriorReal.toFixed(1);
         
-        // 3. Resetear el total actual
-        const labelT = document.getElementById(`t_${p}`);
-        if(labelT) labelT.innerText = vienenSuma[p].toFixed(1);
+        // El total (T) empieza siendo igual al vienen hasta que el usuario escriba algo
+        const labelT = document.getElementById(`t_${p.id}`);
+        if(labelT) labelT.innerText = totalAnteriorReal.toFixed(1);
     });
 };
 
