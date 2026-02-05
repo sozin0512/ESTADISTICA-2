@@ -1,12 +1,12 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AeroLog Pro - Gestión de Mantenimiento</title>
+    <title>S</title>
     <script src="https://cdn.tailwindcss.com"></script>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
@@ -92,6 +92,31 @@
     </style>
 </head>
 <body class="text-slate-900 overflow-x-hidden">
+    <div id="qr-modal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; overflow-y:auto; padding:20px;">
+    <div style="background:white; border-radius:20px; padding:20px; max-width:500px; margin:auto;">
+        <h2 class="text-xl font-black mb-4">Auditoría de Vuelo</h2>
+
+        <div id="qr-container" class="flex flex-col items-center bg-white p-4 rounded-2xl shadow-lg border border-slate-200 w-fit mx-auto my-4">
+    <p class="text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Escanear para Llenado Rápido</p>
+    <div id="qrcode"></div> </div>
+        
+        <div id="step-1">
+            <input type="text" id="audit-user" placeholder="Nombre de Responsable" class="w-full p-3 border rounded-xl mb-3">
+            <label class="block p-4 border-2 border-dashed text-center rounded-xl cursor-pointer bg-slate-50">
+                <span id="photo-label">📸 Tomar Foto de Evidencia</span>
+                <input type="file" id="audit-photo" accept="image/*" capture="camera" class="hidden" onchange="document.getElementById('photo-label').innerText='✅ Foto Capturada'">
+            </label>
+            <button onclick="validaAcceso()" class="w-full bg-indigo-600 text-white p-4 rounded-xl mt-4 font-bold">Validar Identidad</button>
+        </div>
+
+        <div id="step-2" style="display:none;">
+            <div id="quick-inputs" class="space-y-3 mt-4">
+                </div>
+            <button onclick="guardarTodo()" class="w-full bg-emerald-600 text-white p-4 rounded-xl mt-6 font-bold">Guardar y Sincronizar</button>
+        </div>
+        <button onclick="document.getElementById('qr-modal').style.display='none'" class="w-full text-slate-400 mt-4 text-sm">Cerrar</button>
+    </div>
+</div>
 
     <div id="loader" class="loading-overlay">
         <div class="flex flex-col items-center gap-4">
@@ -145,40 +170,6 @@
             <button onclick="closeMirrorModal()" class="w-full mt-6 text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600">Cancelar</button>
         </div>
     </div>
-    <!-- Modal de Acceso QR y Llenado Rápido -->
-<div id="quick-fill-modal" class="modal-overlay">
-    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200">
-        <h3 class="text-xl font-black text-slate-800 mb-2">Acceso Rápido</h3>
-        <p class="text-sm text-slate-500 mb-4">Escanea tu QR para acceder y registrar auditoría</p>
-
-    <div id="qr-reader" style="width:100%; display:flex; justify-content:center;"></div>
-
-        <div id="quick-fill-form" class="hidden mt-4">
-            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-2">Rellenar rápidamente:</p>
-            <div class="grid grid-cols-2 gap-2">
-                <input type="number" id="quick-ac-hrs" placeholder="AC HRS" class="input-cell">
-                <input type="number" id="quick-aterrizajes" placeholder="ATERRIZAJES" class="input-cell">
-                <input type="number" id="quick-rins" placeholder="RINS" class="input-cell">
-                <input type="number" id="quick-eng1-hrs" placeholder="ENGINE HRS 1" class="input-cell">
-                <input type="number" id="quick-eng1-starts" placeholder="ENGINE STARTS 1" class="input-cell">
-                <input type="number" id="quick-flights1" placeholder="FLIGHTS 1" class="input-cell">
-                <input type="number" id="quick-ciclos1" placeholder="CICLOS 1" class="input-cell">
-                <input type="number" id="quick-eng2-hrs" placeholder="ENGINE HRS 2" class="input-cell">
-                <input type="number" id="quick-eng2-starts" placeholder="ENGINE STARTS 2" class="input-cell">
-                <input type="number" id="quick-flights2" placeholder="FLIGHTS 2" class="input-cell">
-                <input type="number" id="quick-ciclos2" placeholder="CICLOS 2" class="input-cell">
-            </div>
-
-            <div class="mt-4 flex flex-col gap-2">
-                <button id="btn-capture" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold">Tomar Foto y Ubicación</button>
-                <button id="btn-save-quick" class="bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold">Guardar y Registrar Auditoría</button>
-            </div>
-        </div>
-
-        <button onclick="closeQuickFillModal()" class="w-full mt-4 text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600">Cancelar</button>
-    </div>
-</div>
-
 
     <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50 shadow-sm flex flex-wrap justify-between items-center gap-4">
         <div class="flex items-center gap-3">
@@ -233,8 +224,9 @@
                 <a href="#" class="flex items-center justify-center text-center p-6 bg-[#14b8a6] hover:bg-[#0d9488] text-white rounded-xl shadow-lg transition-all transform hover:-translate-y-1">
                     <span class="font-bold text-sm">Inspecciones</span>
                 </a>
-                <button onclick="openQuickFillModal()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold">Llenado Rápido con QR</button>
-
+                <button onclick="document.getElementById('qr-modal').style.display='flex'" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold">
+   Acceso QR
+</button>
             </div>
         </div>
     </div>
@@ -259,10 +251,6 @@
     <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl transform translate-y-32 transition-all duration-500 flex items-center gap-3 z-[100]">
         <span id="toast-msg" class="font-bold text-sm tracking-tight"></span>
     </div>
-<!-- Librería QR -->
-
-
-
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -319,6 +307,66 @@
             ...baseMotorFields.map(f => ({ ...f, id: `${f.id}_2`, label: `${f.label} 2` }))
         ];
 
+        // Variables para auditoría
+let userCoords = null;
+
+window.validaAcceso = () => {
+    const user = document.getElementById('audit-user').value;
+    const photo = document.getElementById('audit-photo').files[0];
+    if(!user || !photo) return alert("Nombre y Foto obligatorios");
+
+    // Capturar ubicación
+    navigator.geolocation.getCurrentPosition(pos => {
+        userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    });
+
+    document.getElementById('step-1').style.display = 'none';
+    document.getElementById('step-2').style.display = 'block';
+    generarInputsRapidos();
+};
+
+function generarInputsRapidos() {
+    const campos = ['ac_hrs', 'aterrizajes', 'rins', 'eng_hrs_1', 'eng_starts_1', 'flights_1', 'ciclos_1', 'eng_hrs_2', 'eng_starts_2', 'flights_2', 'ciclos_2'];
+    const container = document.getElementById('quick-inputs');
+    container.innerHTML = '<p class="text-[10px] font-bold text-slate-400 uppercase">Ingresar valores de hoy:</p>';
+    
+    campos.forEach(id => {
+        container.innerHTML += `
+            <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-lg">
+                <span class="text-[10px] font-bold w-24">${id.replace('_', ' ').toUpperCase()}</span>
+                <input type="number" step="0.1" id="q-${id}" class="flex-1 p-1 border rounded text-center font-bold" placeholder="0.0">
+            </div>`;
+    });
+}
+
+window.guardarTodo = async () => {
+    const day = new Date().getDate();
+    const updates = {};
+    const auditLog = {
+        inspector: document.getElementById('audit-user').value,
+        fecha: new Date().toLocaleString(),
+        ubicacion: userCoords,
+        cambios: {}
+    };
+
+    const campos = ['ac_hrs', 'aterrizajes', 'rins', 'eng_hrs_1', 'eng_starts_1', 'flights_1', 'ciclos_1', 'eng_hrs_2', 'eng_starts_2', 'flights_2', 'ciclos_2'];
+    
+    campos.forEach(id => {
+        const val = parseFloat(document.getElementById(`q-${id}`).value) || 0;
+        if(val > 0) {
+            updates[`${id}/${day}`] = val;
+            auditLog.cambios[id] = val;
+        }
+    });
+
+    // Guardar en Firebase (usando tus variables db y PATH_ROOT)
+    await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), updates);
+    // Guardar log de auditoría en una rama nueva
+    await push(ref(db, `audit_logs/${currentPeriod}`), auditLog);
+    
+    alert("Datos guardados con éxito.");
+    location.reload();
+};
         // Toggle Dashboard Logic
         document.getElementById('toggle-dashboard').addEventListener('click', () => {
             document.getElementById('quick-dashboard').classList.toggle('open');
@@ -530,118 +578,29 @@
                 targetInput.select();
             }
         });
-        // --- Variables y auditoría ---
-let quickUser = null;
-let quickPhoto = null;
-let quickLocation = null;
-const auditLog = JSON.parse(localStorage.getItem('auditLog') || '[]');
 
-// --- Funciones de modal ---
+        window.addEventListener('load', () => {
+    // Genera la URL dinámica basada en donde esté alojada la página
+    const urlLlenado = window.location.href.split('#')[0] + "#llenado-rapido";
 
-   window.openQuickFillModal = () => {
-    document.getElementById('quick-fill-modal').style.display = 'flex';
-    startQRScanner();
-};
-window.closeQuickFillModal = () => {
-    document.getElementById('quick-fill-modal').style.display = 'none';
-};
-
-// --- QR Scanner ---
-let html5QrCode = null;
-
-function startQRScanner() {
-    document.getElementById('quick-fill-form').classList.remove('hidden'); // mostrar formulario directamente
-    const qrDiv = document.getElementById('qr-reader');
-    qrDiv.innerHTML = ""; // limpiar si hay algo
-    // Cambia la URL o el texto que quieres codificar
-    new QRCode(qrDiv, {
+    // Genera el código QR
+    new QRCode(document.getElementById("qrcode"), {
         text: "https://sozin0512.github.io/ESTADISTICA-2/HORAS980.HTML",
-        width: 180,
-        height: 180,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
+        width: 150,
+        height: 150,
+        colorDark : "#1e293b", // Slate 800
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
     });
-}
-
-
-// --- Captura de foto y ubicación ---
-document.getElementById('btn-capture').addEventListener('click', async () => {
-    // Foto
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        const track = stream.getVideoTracks()[0];
-        const imageCapture = new ImageCapture(track);
-        const bitmap = await imageCapture.grabFrame();
-        const canvas = document.createElement('canvas');
-        canvas.width = bitmap.width; canvas.height = bitmap.height;
-        const ctx = canvas.getContext('2d'); ctx.drawImage(bitmap,0,0);
-        quickPhoto = canvas.toDataURL('image/jpeg', 0.7);
-        track.stop();
-    } catch(e){ console.error(e); alert('No se pudo capturar la foto'); }
-
-    // Ubicación
-    if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(pos=>{
-            quickLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-            showToast('Foto y ubicación capturadas');
-        }, err=>{ console.error(err); alert('No se pudo obtener la ubicación'); });
-    } else { alert('Geolocalización no soportada'); }
 });
 
-// --- Guardar llenado rápido y auditoría ---
-document.getElementById('btn-save-quick').addEventListener('click', async () => {
-    if(!quickUser){ alert('No hay usuario QR'); return; }
-
-    // Obtener valores
-    const getVal = id => parseFloat(document.getElementById(id).value)||0;
-    const values = {
-        ac_hrs: getVal('quick-ac-hrs'),
-        aterrizajes: getVal('quick-aterrizajes'),
-        rins: getVal('quick-rins'),
-        eng_hrs_1: getVal('quick-eng1-hrs'),
-        eng_starts_1: getVal('quick-eng1-starts'),
-        flights_1: getVal('quick-flights1'),
-        ciclos_1: getVal('quick-ciclos1'),
-        eng_hrs_2: getVal('quick-eng2-hrs'),
-        eng_starts_2: getVal('quick-eng2-starts'),
-        flights_2: getVal('quick-flights2'),
-        ciclos_2: getVal('quick-ciclos2')
-    };
-
-    // Guardar en Firebase
-    try {
-        const updates = {};
-        for(const k in values){
-            const v = values[k];
-            const prev = globalData[`vienen_${k}`] || 0;
-            updates[`vienen_${k}`] = prev + v;
-        }
-        await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), updates);
-        renderMatrix();
-    } catch(e){ console.error(e); showToast('Error al guardar'); return; }
-
-    // Guardar auditoría
-    const logEntry = {
-        user: quickUser,
-        date: new Date().toISOString(),
-        photo: quickPhoto,
-        location: quickLocation,
-        changes: values
-    };
-    auditLog.push(logEntry);
-    localStorage.setItem('auditLog', JSON.stringify(auditLog));
-    showToast('Llenado rápido registrado y auditoría guardada');
-
-    closeQuickFillModal();
+        // Abre el modal de auditoría automáticamente si se accede vía QR
+window.addEventListener('load', () => {
+    if(window.location.hash === '#llenado-rapido') {
+        if(typeof openQRModal === 'function') openQRModal();
+        else document.getElementById('qr-modal').style.display = 'flex';
+    }
 });
-
-// --- Mostrar auditoría en consola o modal opcional ---
-window.showAuditLog = () => {
-    console.table(auditLog);
-    alert('Revisa la consola para el historial de auditoría');
-};
-
     </script>
 </body>
 </html>
