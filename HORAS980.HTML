@@ -1,15 +1,4 @@
 
-1 de 63
-PRUEBAS DEL 980
-
-FAH mantenimiento de helicopteros <manto.helicopteros.fah@gmail.com>
-Archivos adjuntos
-3 feb 2026, 11:26 a.m. (hace 2 días)
-para kepzepeda8923
-
-
- Un archivo adjunto
-  •  Analizado por Gmail
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -510,6 +499,19 @@ let html = `
             }
         });
 
+        // --- DETECTOR DE ESCANEO QR ---
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('mode') === 'qr') {
+    // Esperamos un segundo a que carguen los datos de Firebase
+    setTimeout(() => {
+        if (typeof initAudit === 'function') {
+            initAudit(); 
+        } else {
+            alert("Error: La función de auditoría no se ha cargado correctamente.");
+        }
+    }, 2000);
+}
+
         const initAuth = async () => {
             try { if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token); else await signInAnonymously(auth); } catch (e) {}
         };
@@ -570,43 +572,24 @@ let qrGenerator = null;
 window.generateQRForRow = (id, label) => {
     const container = document.getElementById('qrcode-container');
     const details = document.getElementById('qr-details');
-    container.innerHTML = ''; // Limpiar previo
-    
-    // Obtenemos el valor actual (Total General) de esa fila
-    // Buscamos el input de 'vienen' y sumamos los días
-    const vV = parseFloat(document.querySelector(`input[data-id="${id}"][data-type="vienen"]`)?.value || 0);
-    let daySum = 0;
-    document.querySelectorAll(`input[data-id="${id}"][data-type="day"]`).forEach(input => {
-        daySum += parseFloat(input.value || 0);
-    });
-    
-    const totalValue = (vV + daySum).toFixed(1);
+    container.innerHTML = ''; 
 
-    // Creamos el objeto único para esta página
-    const qrData = {
-        app: "AeroLogMaster",
-        id: id,
-        value: totalValue,
-        ts: new Date().getTime()
-    };
+    // Creamos el link que activa el modo rápido
+    const linkActivador = "https://sozin0512.github.io/ESTADISTICA-2/HORAS980.HTML?mode=qr";
 
-    const qrString = JSON.stringify(qrData);
-    details.innerText = `ID: ${id} | Val: ${totalValue}`;
-    document.getElementById('qr-title').innerText = label;
+    details.innerText = `ESCANEADO PARA: ${label}`;
+    document.getElementById('qr-title').innerText = "ACCESO RÁPIDO";
 
-    // Generar QR
     new QRCode(container, {
-        text: qrString,
+        text: linkActivador,
         width: 200,
         height: 200,
         colorDark : "#1e1b4b",
-        colorLight : "#ffffff",
-        correctLevel : QRCode.CorrectLevel.H
+        colorLight : "#ffffff"
     });
 
     document.getElementById('qr-display-modal').style.display = 'flex';
 };
-
 window.closeQRModal = () => {
     document.getElementById('qr-display-modal').style.display = 'none';
 };
@@ -689,6 +672,63 @@ document.getElementById('btn-save-quick').addEventListener('click', async () => 
     await update(ref(db), updates);
     alert("Sincronización Exitosa");
     window.location.href = window.location.pathname; // Quitar modo QR
+});
+
+// Función para iniciar Cámara y GPS
+// --- FUNCIÓN ÚNICA DE AUDITORÍA Y LLENADO ---
+window.initAudit = async function() {
+    const modal = document.getElementById('audit-modal');
+    if (!modal) {
+        alert("Falta el HTML del modal de auditoría");
+        return;
+    }
+    
+    modal.style.display = 'flex';
+    
+    // GPS
+    navigator.geolocation.getCurrentPosition(
+        p => { window.userCoords = { lat: p.coords.latitude, lng: p.coords.longitude }; },
+        e => { console.warn("GPS no disponible"); }
+    );
+
+    // Cámara
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const video = document.getElementById('webcam');
+        if (video) video.srcObject = stream;
+    } catch (err) {
+        console.error("Error de cámara:", err);
+        alert("Se requiere cámara para el modo QR");
+    }
+};
+
+// Función para guardar los datos rápido (Suma automática)
+document.getElementById('btn-save-quick')?.addEventListener('click', async () => {
+    const day = new Date().getDate();
+    const acHrs = parseFloat(document.getElementById('q_ac_hrs').value) || 0;
+    const aterrizajes = parseFloat(document.getElementById('q_aterrizajes').value) || 0;
+
+    const base = `artifacts/fah-980-master-v1/public/data/MAINTENANCE_LOGS/${currentPeriod}`;
+    const updates = {};
+
+    // AQUÍ ESTÁ EL LLENADO RÁPIDO: Copia AC HRS a Motores y suma vuelos
+    updates[`${base}/ac_hrs/${day}`] = acHrs;
+    updates[`${base}/aterrizajes/${day}`] = aterrizajes;
+    updates[`${base}/eng_hrs_1/${day}`] = acHrs;
+    updates[`${base}/eng_hrs_2/${day}`] = acHrs;
+    updates[`${base}/ciclos_1/${day}`] = aterrizajes;
+    updates[`${base}/ciclos_2/${day}`] = aterrizajes;
+    updates[`${base}/flights_1/${day}`] = 1; // Suma 1 vuelo automáticamente
+    updates[`${base}/flights_2/${day}`] = 1;
+
+  try {
+        await update(ref(db), updates);
+        alert("✅ Datos de vuelo sincronizados en Motores 1 y 2");
+        // Regresa a la página limpia sin el ?mode=qr
+        window.location.href = "https://sozin0512.github.io/ESTADISTICA-2/HORAS980.HTML";
+    } catch (e) {
+        alert("Error al guardar: " + e.message);
+    }
 });
     </script>
 </body>
