@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AeroLog Pro - Gestión de Mantenimiento</title>
+    <title>S.O.Z.I.N</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
@@ -121,30 +121,42 @@ video#webcam { width: 100%; border-radius: 1rem; background: #000; transform: sc
 </div>
 
 <div id="quick-fill-panel" class="modal-overlay">
-    <div class="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl">
-        <h2 class="text-xl font-black mb-4">LLENADO RÁPIDO (MODO QR)</h2>
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label class="text-[10px] font-bold">AC HRS VUELO</label>
-                <input type="number" id="q_ac_hrs" class="quick-input" placeholder="0.0">
+    <div class="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl overflow-y-auto style-scrollbar" style="max-height: 90vh;">
+        <h2 class="text-2xl font-black mb-2 text-slate-800">LLENADO DE VUELO</h2>
+        <p class="text-xs text-slate-500 mb-6 uppercase">Control de Componentes Principales</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <h3 class="font-bold text-indigo-600 text-sm">AERONAVE (AC)</h3>
+                <div><label class="text-[10px] font-bold">AC HRS</label><input type="number" id="q_ac_hrs" class="quick-input" step="0.1"></div>
+                <div><label class="text-[10px] font-bold">ATERRIZAJES</label><input type="number" id="q_aterrizajes" class="quick-input"></div>
+                <div><label class="text-[10px] font-bold">RINS (OPCIONAL)</label><input type="number" id="q_rins" class="quick-input"></div>
             </div>
-            <div>
-                <label class="text-[10px] font-bold">ATERRIZAJES</label>
-                <input type="number" id="q_aterrizajes" class="quick-input" placeholder="0">
+
+            <div class="space-y-4 bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                <h3 class="font-bold text-blue-600 text-sm">MOTOR 1</h3>
+                <div><label class="text-[10px] font-bold">ENGINE HRS 1</label><input type="number" id="q_eng_1" class="quick-input" step="0.1"></div>
+                <div><label class="text-[10px] font-bold">STARTS 1</label><input type="number" id="q_starts_1" class="quick-input"></div>
+                <div><label class="text-[10px] font-bold">FLIGHTS 1</label><input type="number" id="q_flights_1" class="quick-input" value="1"></div>
+                <div><label class="text-[10px] font-bold">CICLOS 1</label><input type="number" id="q_ciclos_1" class="quick-input"></div>
+            </div>
+
+            <div class="space-y-4 bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-emerald-600 text-sm">MOTOR 2</h3>
+                    <button onclick="copyM1toM2()" class="text-[9px] bg-emerald-200 text-emerald-700 px-2 py-1 rounded-lg font-bold">COPIAR M1</button>
+                </div>
+                <div><label class="text-[10px] font-bold">ENGINE HRS 2</label><input type="number" id="q_eng_2" class="quick-input" step="0.1"></div>
+                <div><label class="text-[10px] font-bold">STARTS 2</label><input type="number" id="q_starts_2" class="quick-input"></div>
+                <div><label class="text-[10px] font-bold">FLIGHTS 2</label><input type="number" id="q_flights_2" class="quick-input" value="1"></div>
+                <div><label class="text-[10px] font-bold">CICLOS 2</label><input type="number" id="q_ciclos_2" class="quick-input"></div>
             </div>
         </div>
-        <div class="mt-4 p-4 bg-slate-900 rounded-2xl text-white">
-            <p class="text-[10px] text-indigo-400 font-bold uppercase">Comparación vs Forma 13</p>
-            <div class="flex justify-between mt-2">
-                <span>Total Anterior: <b id="q_prev_val">-</b></span>
-                <span>Nuevo Total: <b id="q_new_val" class="text-indigo-400">-</b></span>
-            </div>
-        </div>
-        <button id="btn-save-quick" class="w-full mt-6 bg-emerald-600 text-white py-4 rounded-2xl font-black">GUARDAR EN LOGS</button>
-        <button onclick="location.reload()" class="w-full mt-2 text-slate-400 text-xs">Cancelar</button>
+
+        <button id="btn-save-quick" class="w-full mt-8 bg-slate-900 text-white py-4 rounded-2xl font-black shadow-lg hover:bg-black transition-all">FINALIZAR Y GUARDAR EN BITÁCORA</button>
+        <button onclick="location.reload()" class="w-full mt-3 text-slate-400 text-xs font-bold">CANCELAR</button>
     </div>
 </div>
-
 
     <div id="loader" class="loading-overlay">
         <div class="flex flex-col items-center gap-4">
