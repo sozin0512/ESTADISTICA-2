@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.O.Z.I.N. - FAH-980</title>
+    <title>AeroLog Pro - Gestión de Mantenimiento</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
@@ -63,6 +64,7 @@
             z-index: 1000;
         }
 
+        /* Modal Styles */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -74,6 +76,7 @@
             z-index: 100;
         }
 
+        /* Dashboard desplegable animation */
         #quick-dashboard {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             max-height: 0;
@@ -90,7 +93,6 @@
 </head>
 <body class="text-slate-900 overflow-x-hidden">
 
-    <!-- Pantalla de Carga -->
     <div id="loader" class="loading-overlay">
         <div class="flex flex-col items-center gap-4">
             <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
@@ -98,87 +100,86 @@
         </div>
     </div>
 
-    <!-- Modales de la Interfaz -->
-    <div id="qr-modal" class="modal-overlay">
-        <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-slate-200 text-center">
-            <h3 class="text-xl font-black text-slate-800 mb-4">Acceso Rápido QR</h3>
-            <div id="qrcode" class="flex justify-center mb-6"></div>
-            <p class="text-xs text-slate-500 mb-6 font-medium">Escanea para ir directo al <b>Llenado Rápido</b> en tu móvil.</p>
-            <button onclick="closeModal('qr-modal')" class="w-full bg-slate-800 text-white py-3 rounded-2xl font-bold">Cerrar</button>
-        </div>
-    </div>
-
-    <div id="fill-modal" class="modal-overlay">
-        <div class="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl border border-slate-200 overflow-y-auto max-h-[90vh]">
-            <div class="flex justify-between items-center mb-4">
-                <div>
-                    <h3 class="text-xl font-black text-slate-800">Asistente de Llenado</h3>
-                    <p class="text-[10px] text-indigo-600 font-bold uppercase">Registro con Auditoría</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-slate-400">DÍA:</span>
-                    <input type="number" id="fill-day-select" min="1" max="31" class="w-16 p-2 border rounded-xl font-bold text-center text-indigo-600">
-                </div>
-            </div>
-
-            <div class="mb-6 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-                <label class="block text-[10px] font-black text-indigo-400 uppercase mb-2">Responsable del Cambio (Firma Digital)</label>
-                <input type="text" id="audit-user" placeholder="Ej: Sgt. Perez / Mecánico" class="w-full bg-white border border-indigo-200 p-3 rounded-xl font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none">
-            </div>
+    <!-- Modal de Espejo Mejorado -->
+    <div id="mirror-modal" class="modal-overlay">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-200">
+            <h3 class="text-xl font-black text-slate-800 mb-2">Sincronizar Datos</h3>
+            <p class="text-sm text-slate-500 mb-6">Selecciona el tipo de espejo que deseas realizar:</p>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="fill-fields-container"></div>
+            <div class="grid gap-3">
+                <button onclick="executeMirror('ac_to_engines')" class="flex items-center justify-between p-4 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-2xl transition-all group">
+                    <div class="text-left">
+                        <div class="font-bold text-emerald-700">AC HRS → Motores 1 y 2</div>
+                        <div class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">Copia AC HRS a ENGINE HRS de ambos</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                </button>
 
-            <div class="mt-8 flex gap-3">
-                <button onclick="closeModal('fill-modal')" class="flex-1 py-3 text-slate-400 font-bold uppercase tracking-widest text-xs">Cancelar</button>
-                <button id="btn-save-fill" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-2xl font-bold shadow-lg shadow-indigo-200">Guardar y Firmar</button>
+                <div class="h-px bg-slate-100 my-1"></div>
+
+                <button onclick="executeMirror('table')" class="flex items-center justify-between p-4 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-2xl transition-all group">
+                    <div class="text-left">
+                        <div class="font-bold text-slate-700 group-hover:text-indigo-700">Motor 1 → Motor 2 (Tabla)</div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Registros diarios (1 al 31)</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-300 group-hover:text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+
+                <button onclick="executeMirror('vienen')" class="flex items-center justify-between p-4 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-2xl transition-all group">
+                    <div class="text-left">
+                        <div class="font-bold text-slate-700 group-hover:text-indigo-700">Motor 1 → Motor 2 (Vienen)</div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Acumulados iniciales</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-300 group-hover:text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+
+                <button onclick="executeMirror('all')" class="flex items-center justify-between p-4 bg-indigo-600 hover:bg-indigo-700 border border-indigo-500 rounded-2xl transition-all group">
+                    <div class="text-left">
+                        <div class="font-bold text-white">Copiar Todo (M1 a M2)</div>
+                        <div class="text-[10px] text-indigo-200 font-bold uppercase tracking-wider">Vienen + Registros Diarios</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                </button>
             </div>
+
+            <button onclick="closeMirrorModal()" class="w-full mt-6 text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600">Cancelar</button>
         </div>
     </div>
+    <!-- Modal de Acceso QR y Llenado Rápido -->
+<div id="quick-fill-modal" class="modal-overlay">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200">
+        <h3 class="text-xl font-black text-slate-800 mb-2">Acceso Rápido</h3>
+        <p class="text-sm text-slate-500 mb-4">Escanea tu QR para acceder y registrar auditoría</p>
 
-   <div id="mirror-modal" class="modal-overlay">
-    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-200">
-        <h3 class="text-xl font-black text-slate-800 mb-2">Sincronizar Datos</h3>
-        <p class="text-sm text-slate-500 mb-6">Selecciona el tipo de espejo que deseas realizar:</p>
-        
-        <div class="grid gap-4">
-            <button onclick="mirrorAcToEngines()" class="flex items-center justify-between p-4 rounded-2xl border-2 border-emerald-100 bg-emerald-50 hover:bg-emerald-100 transition-all group">
-                <div class="text-left">
-                    <p class="text-emerald-700 font-black text-sm uppercase">AC HRS → Motores 1 y 2</p>
-                    <p class="text-[10px] text-emerald-500 font-bold uppercase">Copia AC HRS a Engine HRS de ambos</p>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-            </button>
+    <div id="qr-reader" style="width:100%; display:flex; justify-content:center;"></div>
 
-            <button onclick="mirrorMotor(1, 2, 'table')" class="flex items-center justify-between p-4 rounded-2xl border border-slate-200 hover:border-indigo-200 hover:bg-slate-50 transition-all">
-                <div class="text-left">
-                    <p class="text-slate-700 font-black text-sm uppercase">Motor 1 → Motor 2 (Tabla)</p>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Registros diarios (1 al 31)</p>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-            </button>
+        <div id="quick-fill-form" class="hidden mt-4">
+            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-2">Rellenar rápidamente:</p>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="number" id="quick-ac-hrs" placeholder="AC HRS" class="input-cell">
+                <input type="number" id="quick-aterrizajes" placeholder="ATERRIZAJES" class="input-cell">
+                <input type="number" id="quick-rins" placeholder="RINS" class="input-cell">
+                <input type="number" id="quick-eng1-hrs" placeholder="ENGINE HRS 1" class="input-cell">
+                <input type="number" id="quick-eng1-starts" placeholder="ENGINE STARTS 1" class="input-cell">
+                <input type="number" id="quick-flights1" placeholder="FLIGHTS 1" class="input-cell">
+                <input type="number" id="quick-ciclos1" placeholder="CICLOS 1" class="input-cell">
+                <input type="number" id="quick-eng2-hrs" placeholder="ENGINE HRS 2" class="input-cell">
+                <input type="number" id="quick-eng2-starts" placeholder="ENGINE STARTS 2" class="input-cell">
+                <input type="number" id="quick-flights2" placeholder="FLIGHTS 2" class="input-cell">
+                <input type="number" id="quick-ciclos2" placeholder="CICLOS 2" class="input-cell">
+            </div>
 
-            <button onclick="mirrorMotor(1, 2, 'vienen')" class="flex items-center justify-between p-4 rounded-2xl border border-slate-200 hover:border-indigo-200 hover:bg-slate-50 transition-all">
-                <div class="text-left">
-                    <p class="text-slate-700 font-black text-sm uppercase">Motor 1 → Motor 2 (Vienen)</p>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Acumulados Iniciales</p>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-            </button>
-
-            <button onclick="mirrorMotor(1, 2, 'all')" class="flex items-center justify-between p-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
-                <div class="text-left">
-                    <p class="text-white font-black text-sm uppercase">Copiar Todo (M1 a M2)</p>
-                    <p class="text-[10px] text-indigo-200 font-bold uppercase">Vienen + Registros Diarios</p>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-            </button>
+            <div class="mt-4 flex flex-col gap-2">
+                <button id="btn-capture" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold">Tomar Foto y Ubicación</button>
+                <button id="btn-save-quick" class="bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold">Guardar y Registrar Auditoría</button>
+            </div>
         </div>
 
-        <button onclick="closeModal('mirror-modal')" class="w-full mt-6 text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600">Cancelar</button>
+        <button onclick="closeQuickFillModal()" class="w-full mt-4 text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600">Cancelar</button>
     </div>
 </div>
 
-    <!-- Barra de Navegación -->
+
     <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50 shadow-sm flex flex-wrap justify-between items-center gap-4">
         <div class="flex items-center gap-3">
             <button id="toggle-dashboard" class="p-2 hover:bg-slate-100 rounded-lg transition-colors">
@@ -188,51 +189,56 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             </div>
             <div>
-                <h1 class="text-lg font-black tracking-tight leading-none uppercase">S.O.Z.I.N.</h1>
-                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">FAH-980 BELL-412SP</p>
+                <h1 class="text-lg font-black tracking-tight leading-none uppercase">AEROLOG MASTER</h1>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">FAH-980 Selective Mirror</p>
             </div>
         </div>
 
         <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
             <select id="select-month" class="bg-transparent text-xs font-bold px-3 py-1.5 outline-none cursor-pointer text-slate-700">
-                <!-- Opciones de meses -->
+                <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option><option value="3">Abril</option>
+                <option value="4">Mayo</option><option value="5">Junio</option><option value="6">Julio</option><option value="7">Agosto</option>
+                <option value="8">Septiembre</option><option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
             </select>
             <select id="select-year" class="bg-transparent text-xs font-bold px-3 py-1.5 outline-none cursor-pointer text-slate-700"></select>
         </div>
 
-        <div class="flex gap-2 text-xs flex-wrap">
+        <div class="flex gap-2 text-xs">
             <span id="sync-status" class="flex items-center gap-1 text-amber-600 font-bold bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-100">
                 <span class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span> Conectando...
             </span>
-            <button onclick="openFillModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-indigo-700 transition-all flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" /></svg>
-                Llenado Rápido
-            </button>
-            <button id="btn-mirror-trigger" onclick="document.getElementById('mirror-modal').style.display='flex'" class="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl font-bold border border-indigo-200 hover:bg-indigo-100 transition-all flex items-center gap-2">
+            <button id="btn-mirror-trigger" class="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl font-bold border border-indigo-200 hover:bg-indigo-100 transition-all flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
                 Menú Espejo
             </button>
-            <button onclick="generateQr()" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl font-bold border border-slate-200 hover:bg-slate-200 transition-all flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
-                Acceso Móvil
-            </button>
+            <button id="btn-copy-prev" class="bg-white text-slate-700 px-4 py-2 rounded-xl font-bold border border-slate-200 hover:bg-slate-50 transition-all">Cerrar Mes Anterior</button>
+            <button id="btn-export" class="bg-slate-800 text-white px-4 py-2 rounded-xl font-bold hover:bg-slate-700 transition-all">Exportar JSON</button>
         </div>
     </nav>
 
-    <!-- Dashboard Rápido -->
+    <!-- Dashboard Desplegable de Accesos Rápidos -->
     <div id="quick-dashboard" class="bg-slate-50 border-b border-slate-200 px-6">
         <div class="max-w-7xl mx-auto">
             <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Módulos de Reporte e Inspección</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="p-6 bg-[#3b4454] text-white rounded-xl shadow-lg">Generar Reporte</div>
-                <div class="p-6 bg-[#4e96d9] text-white rounded-xl shadow-lg">Estado Motores</div>
-                <div class="p-6 bg-[#a855f7] text-white rounded-xl shadow-lg">Componentes</div>
-                <div class="p-6 bg-[#14b8a6] text-white rounded-xl shadow-lg">Inspecciones</div>
+                <a href="#" class="flex items-center justify-center text-center p-6 bg-[#3b4454] hover:bg-[#2d3440] text-white rounded-xl shadow-lg transition-all transform hover:-translate-y-1">
+                    <span class="font-bold text-sm">Generar Reporte del Mes</span>
+                </a>
+                <a href="#" class="flex items-center justify-center text-center p-6 bg-[#4e96d9] hover:bg-[#3d85c8] text-white rounded-xl shadow-lg transition-all transform hover:-translate-y-1">
+                    <span class="font-bold text-sm">Estado de Motores</span>
+                </a>
+                <a href="#" class="flex items-center justify-center text-center p-6 bg-[#a855f7] hover:bg-[#9333ea] text-white rounded-xl shadow-lg transition-all transform hover:-translate-y-1">
+                    <span class="font-bold text-sm">Estado de Componentes</span>
+                </a>
+                <a href="#" class="flex items-center justify-center text-center p-6 bg-[#14b8a6] hover:bg-[#0d9488] text-white rounded-xl shadow-lg transition-all transform hover:-translate-y-1">
+                    <span class="font-bold text-sm">Inspecciones</span>
+                </a>
+                <button onclick="openQuickFillModal()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold">Llenado Rápido con QR</button>
+
             </div>
         </div>
     </div>
 
-    <!-- Contenedor Tabla Principal -->
     <div class="p-4 max-w-[100vw]">
         <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
             <div class="overflow-x-auto custom-scrollbar">
@@ -241,81 +247,52 @@
                         <tr class="bg-slate-50 border-b border-slate-200" id="header-row">
                             <th class="table-fixed-column px-4 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest min-w-[200px]">Nomenclatura</th>
                             <th class="px-4 py-2 text-[10px] font-black text-indigo-600 border-r border-slate-200">VIENEN</th>
-                            <!-- Días generados por JS -->
                         </tr>
                     </thead>
-                    <tbody id="master-body"></tbody>
+                    <tbody id="master-body">
+                    </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Historial de Auditoría -->
-    <div class="p-4 max-w-[100vw] mt-8">
-        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 class="text-sm font-black text-slate-700 uppercase tracking-widest flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Historial de Cambios (Auditoría)
-                </h3>
-                <span class="text-[10px] font-bold text-slate-400">MOVIMIENTOS EN TIEMPO REAL</span>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-100/50 text-[10px] font-black text-slate-500 uppercase">
-                            <th class="px-4 py-3">Fecha/Hora</th>
-                            <th class="px-4 py-3">Responsable</th>
-                            <th class="px-4 py-3">Día Mod.</th>
-                            <th class="px-4 py-3">Cambios Realizados</th>
-                            <th class="px-4 py-3">GPS / Mapa</th>
-                        </tr>
-                    </thead>
-                    <tbody id="audit-log-body" class="text-xs font-medium text-slate-600"></tbody>
-                </table>
-            </div>
-            <div class="p-4 bg-slate-50 border-t border-slate-100 text-center">
-                <button id="load-more-logs" class="text-[10px] font-black text-indigo-600 hover:text-indigo-800 uppercase tracking-widest transition-all">
-                    Mostrar movimientos anteriores +
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast de Notificación -->
     <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl transform translate-y-32 transition-all duration-500 flex items-center gap-3 z-[100]">
         <span id="toast-msg" class="font-bold text-sm tracking-tight"></span>
     </div>
+<!-- Librería QR -->
+
+
+
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, get, update, query, limitToLast } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getDatabase, ref, set, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Configuración
-        const firebaseConfig = {
+        let firebaseConfig = {
             apiKey: "AIzaSyC6pUgMRSRCZLZfW0Cy1b00AFN6nkPjsF8", 
             projectId: "fah-980-ceb96",
             authDomain: "fah-980-ceb96.firebaseapp.com",
             databaseURL: "https://fah-980-ceb96-default-rtdb.firebaseio.com",
+            storageBucket: "fah-980-ceb96.appspot.com",
+            messagingSenderId: "820427334707",
             appId: "1:820427334707:web:753198086036814227806d"
         };
+
+        try { if (typeof __firebase_config !== 'undefined' && __firebase_config) firebaseConfig = { ...firebaseConfig, ...JSON.parse(__firebase_config) }; } catch (e) {}
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const auth = getAuth(app);
-        const appId = 'fah-980-master-v1';
-        
-        let currentPeriod = `${new Date().getFullYear()}_${new Date().getMonth() + 1}`;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'fah-980-master-v1';
         const PATH_ROOT = `artifacts/${appId}/public/data/MAINTENANCE_LOGS`;
-        const LOGS_PATH_ROOT = `artifacts/${appId}/public/data/LOGS_MOVIMIENTOS`;
 
+        let currentPeriod = ""; 
         let globalData = {};
-        let logsLimit = 10;
+        let isRendering = false;
+        let unsubscribe = null;
+        let currentUser = null;
 
-        // Estructura de Datos de Aeronave
         const baseMotorFields = [
             { id: 'cont_exc', label: 'CONTINGENCY EXCURSIONS', limit: 0, factor: 1 },
             { id: 'eng_hrs', label: 'ENGINE HRS', limit: 0, factor: 1 },
@@ -341,346 +318,330 @@
             { type: 'separator', label: 'MOTOR #2' },
             ...baseMotorFields.map(f => ({ ...f, id: `${f.id}_2`, label: `${f.label} 2` }))
         ];
-// --- Funciones de Espejo (Mirroring) ---
 
-window.mirrorAcToEngines = async () => {
-    if (!confirm("¿Sincronizar AC HRS con Engine HRS de ambos motores?")) return;
-    
-    const updates = {};
-    const acData = globalData['ac_hrs'] || {};
-    
-    // Copiamos cada día y el 'vienen'
-    Object.keys(acData).forEach(key => {
-        updates[`eng_hrs_1/${key}`] = acData[key];
-        updates[`eng_hrs_2/${key}`] = acData[key];
-    });
+        // Toggle Dashboard Logic
+        document.getElementById('toggle-dashboard').addEventListener('click', () => {
+            document.getElementById('quick-dashboard').classList.toggle('open');
+        });
 
-    try {
-        await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), updates);
-        showToast("✅ AC HRS sincronizado a Motores");
-        closeModal('mirror-modal');
-    } catch (e) {
-        showToast("❌ Error en sincronización");
-    }
-};
+        window.closeMirrorModal = () => document.getElementById('mirror-modal').style.display = 'none';
+        
+        window.executeMirror = async (mode) => {
+            closeMirrorModal();
+            document.getElementById('loader').style.display = 'flex';
+            
+            const mirrorBatch = {};
 
-window.mirrorMotor = async (sourceNum, targetNum, mode) => {
-    const msg = mode === 'all' ? "todo el contenido" : (mode === 'table' ? "los registros diarios" : "los acumulados (vienen)");
-    if (!confirm(`¿Copiar ${msg} del Motor ${sourceNum} al Motor ${targetNum}?`)) return;
-
-    const updates = {};
-    const motorFields = baseMotorFields.map(f => f.id); // IDs base sin el _1 o _2
-
-    motorFields.forEach(baseId => {
-        const sourceId = `${baseId}_${sourceNum}`;
-        const targetId = `${baseId}_${targetNum}`;
-        const sourceData = globalData[sourceId] || {};
-
-        if (mode === 'vienen' || mode === 'all') {
-            if (sourceData['vienen'] !== undefined) {
-                updates[`${targetId}/vienen`] = sourceData['vienen'];
+            if (mode === 'ac_to_engines') {
+                const acData = globalData['ac_hrs'] || {};
+                const acVienen = globalData['vienen_ac_hrs'] || 0;
+                
+                ['eng_hrs_1', 'eng_hrs_2'].forEach(engineKey => {
+                    mirrorBatch[`vienen_${engineKey}`] = acVienen;
+                    mirrorBatch[engineKey] = { ...acData };
+                });
+                showToast("AC HRS sincronizado a Motores 1 y 2");
+            } else {
+                baseMotorFields.forEach(field => {
+                    const m1Key = `${field.id}_1`;
+                    const m2Key = `${field.id}_2`;
+                    
+                    if((mode === 'vienen' || mode === 'all') && globalData[`vienen_${m1Key}`] !== undefined) {
+                        mirrorBatch[`vienen_${m2Key}`] = globalData[`vienen_${m1Key}`];
+                    }
+                    
+                    if((mode === 'table' || mode === 'all') && globalData[m1Key]) {
+                        mirrorBatch[m2Key] = { ...globalData[m1Key] };
+                    }
+                });
+                showToast(`Motor 2 actualizado (${mode})`);
             }
-        }
 
-        if (mode === 'table' || mode === 'all') {
-            for (let d = 1; d <= 31; d++) {
-                if (sourceData[d] !== undefined) {
-                    updates[`${targetId}/${d}`] = sourceData[d];
+            try {
+                const dbRef = ref(db, `${PATH_ROOT}/${currentPeriod}`);
+                await update(dbRef, mirrorBatch);
+            } catch (e) {
+                showToast("Error al sincronizar");
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+                renderMatrix();
+            }
+        };
+
+        const renderMatrix = () => {
+            isRendering = true;
+            const body = document.getElementById('master-body');
+            body.innerHTML = '';
+            config.forEach(row => {
+                if(row.type === 'separator') {
+                    body.innerHTML += `<tr class="bg-slate-100/50 separator-row"><td colspan="45" class="px-4 py-1 text-[9px] font-black text-slate-400 text-center uppercase tracking-[0.3em]">${row.label}</td></tr>`;
+                    return;
                 }
-            }
-        }
-    });
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 border-b border-slate-100 transition-colors data-row";
+                let html = `<td class="table-fixed-column px-4 py-2 text-xs font-bold text-slate-700 border-r border-slate-200">${row.label}</td>`;
+                const vV = globalData[`vienen_${row.id}`] || 0;
+                html += `<td class="bg-indigo-50/30 border-r border-slate-200"><input type="number" step="0.1" value="${vV}" data-type="vienen" data-id="${row.id}" class="input-cell font-bold text-indigo-700"></td>`;
+                let mT = 0;
+                for(let d=1; d<=31; d++) {
+                    const dV = (globalData[row.id] && globalData[row.id][d]) || 0;
+                    mT += parseFloat(dV);
+                    html += `<td class="border-r border-slate-50"><input type="number" step="0.1" value="${dV || ''}" placeholder="-" data-type="day" data-id="${row.id}" data-day="${d}" class="input-cell text-slate-500"></td>`;
+                }
+                html += `<td class="bg-indigo-50 text-center font-bold text-indigo-800 text-xs border-r border-slate-200">${mT.toFixed(1)}</td>`;
+                const gT = parseFloat(vV) + mT;
+                html += `<td class="bg-indigo-600 text-center font-black text-white text-xs border-r border-slate-200">${gT.toFixed(1)}</td>`;
+                const lV = row.limit || 0; const fV = row.factor || 1;
+                const rS = lV > 0 ? (lV - (gT * fV)) : 0;
+                html += `<td class="bg-yellow-50 text-center font-bold text-slate-600 text-xs border-r border-slate-200">${lV || '-'}</td>`;
+                html += `<td class="bg-yellow-50 text-center font-bold text-slate-600 text-xs border-r border-slate-200">${fV || '-'}</td>`;
+                html += `<td class="bg-red-50 text-center font-black ${rS < 500 && lV > 0 ? 'text-red-600 animate-pulse' : 'text-slate-800'} text-xs">${lV > 0 ? rS.toFixed(1) : '-'}</td>`;
+                tr.innerHTML = html; body.appendChild(tr);
+            });
+            isRendering = false;
+        };
 
-    try {
-        await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), updates);
-        showToast(`✅ Motor ${sourceNum} → ${targetNum} completado`);
-        closeModal('mirror-modal');
-    } catch (e) {
-        console.error(e);
-        showToast("❌ Error al copiar datos");
-    }
-};
-        // --- Funciones de Utilidad ---
-        window.showToast = (msg) => {
+        const setupUIHeader = () => {
+            const hR = document.getElementById('header-row');
+            for(let i=1; i<=31; i++) { hR.innerHTML += `<th class="px-2 py-2 text-[10px] font-bold border-r border-slate-100">${i}</th>`; }
+            hR.innerHTML += `<th class="px-4 py-2 text-[10px] font-black text-indigo-600 border-x border-slate-200 bg-indigo-50 uppercase">Mes</th><th class="px-4 py-2 text-[10px] font-black text-white bg-indigo-600 border-r border-slate-200 uppercase">General</th><th class="px-4 py-2 text-[10px] font-black text-slate-600 bg-yellow-100 border-r border-slate-200 uppercase">Límite</th><th class="px-4 py-2 text-[10px] font-black text-slate-600 bg-yellow-100 border-r border-slate-200 uppercase">Factor</th><th class="px-4 py-2 text-[10px] font-black text-white bg-red-500 uppercase">Restante</th>`;
+            const yS = document.getElementById('select-year'); const cY = new Date().getFullYear();
+            for(let y = cY-2; y <= cY+5; y++) { const o = document.createElement('option'); o.value = y; o.innerText = y; if(y === cY) o.selected = true; yS.appendChild(o); }
+        };
+
+        const setupSync = (user) => {
+            if (!user) return;
+            if (unsubscribe) unsubscribe();
+            unsubscribe = onValue(ref(db, `${PATH_ROOT}/${currentPeriod}`), (snap) => {
+                globalData = snap.exists() ? snap.val() : {};
+                if (!document.activeElement || document.activeElement.tagName !== 'INPUT') renderMatrix();
+                document.getElementById('loader').style.display = 'none';
+                updateSyncStatus(true);
+            }, () => updateSyncStatus(false));
+        };
+
+        const updateSyncStatus = (connected) => {
+            const s = document.getElementById('sync-status');
+            s.innerHTML = connected ? '<span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Conectado' : '<span class="w-2 h-2 bg-red-500 rounded-full"></span> Error';
+            s.className = `flex items-center gap-1 font-bold bg-${connected?'emerald':'red'}-50 px-3 py-1.5 rounded-xl border border-${connected?'emerald':'red'}-100 text-${connected?'emerald':'red'}-600`;
+        };
+
+        document.addEventListener('change', async (e) => {
+            if (isRendering || e.target.tagName !== 'INPUT') return;
+            const i = e.target; const { type, id, day } = i.dataset; const v = parseFloat(i.value) || 0;
+            if (type === 'vienen') { await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), { [`vienen_${id}`]: v }); }
+            else if (type === 'day') { await set(ref(db, `${PATH_ROOT}/${currentPeriod}/${id}/${day}`), v); }
+            renderMatrix();
+        });
+
+        const changePeriod = () => {
+            currentPeriod = `${document.getElementById('select-month').value}-${document.getElementById('select-year').value}`;
+            document.getElementById('loader').style.display = 'flex';
+            setupSync(currentUser);
+        };
+
+        const showToast = (msg) => {
             const t = document.getElementById('toast');
             document.getElementById('toast-msg').innerText = msg;
             t.classList.remove('translate-y-32');
             setTimeout(() => t.classList.add('translate-y-32'), 3000);
         };
 
-        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+        setupUIHeader();
+        document.getElementById('select-month').addEventListener('change', changePeriod);
+        document.getElementById('select-year').addEventListener('change', changePeriod);
+        document.getElementById('btn-mirror-trigger').addEventListener('click', () => { document.getElementById('mirror-modal').style.display = 'flex'; });
+        document.getElementById('btn-copy-prev').addEventListener('click', async () => {
+            const m = parseInt(document.getElementById('select-month').value);
+            const y = parseInt(document.getElementById('select-year').value);
+            let pM = m-1, pY = y; if(pM<0){pM=11;pY--;}
+            const pSnap = await get(ref(db, `${PATH_ROOT}/${pM}-${pY}`));
+            if(!pSnap.exists()) return showToast("No hay datos previos");
+            if(confirm(`¿Cerrar mes anterior y pasar totales a VIENEN?`)) {
+                const pD = pSnap.val(); const b = {};
+                config.forEach(r => { if(r.type!=='separator'){ const vV = pD[`vienen_${r.id}`]||0; let vM=0; if(pD[r.id]) Object.values(pD[r.id]).forEach(v=>vM+=parseFloat(v||0)); b[`vienen_${r.id}`] = vV+vM; } });
+                await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), b); renderMatrix();
+            }
+        });
 
-        // --- Auditoría ---
-        async function writeAuditLog(user, day, changes, coords = null) {
-            const logRef = ref(db, `${LOGS_PATH_ROOT}/${currentPeriod}/${Date.now()}`);
-            const geoLink = coords ? `https://www.google.com/maps?q=${coords.latitude},${coords.longitude}` : "GPS OFF";
-
-            await set(logRef, {
-                timestamp: new Date().toLocaleString('es-HN'),
-                usuario: user.toUpperCase(),
-                dia_modificado: day,
-                detalles: changes,
-                geo: geoLink
-            });
-        }
-
-        const listenAuditLogs = () => {
-            const logsRef = query(ref(db, `${LOGS_PATH_ROOT}/${currentPeriod}`), limitToLast(logsLimit));
-            onValue(logsRef, (snapshot) => {
-                const body = document.getElementById('audit-log-body');
-                body.innerHTML = '';
-                if (!snapshot.exists()) return;
-                
-                const logs = [];
-                snapshot.forEach(child => logs.push(child.val()));
-                logs.reverse().forEach(log => {
-                    const tr = document.createElement('tr');
-                    tr.className = "border-b border-slate-50 hover:bg-indigo-50/30 transition-all";
-                    tr.innerHTML = `
-                        <td class="px-4 py-3 font-bold text-slate-400 text-[10px]">${log.timestamp}</td>
-                        <td class="px-4 py-3 font-black text-indigo-700 text-[11px]">${log.usuario}</td>
-                        <td class="px-4 py-3 text-center font-bold text-slate-700">${log.dia_modificado}</td>
-                        <td class="px-4 py-3 text-[10px] text-slate-500">${log.detalles.join(' | ')}</td>
-                        <td class="px-4 py-3">
-                            ${log.geo.includes('http') ? `<a href="${log.geo}" target="_blank" class="text-emerald-500 font-bold hover:underline">📍 Ver Mapa</a>` : '<span class="text-slate-300">N/A</span>'}
-                        </td>
-                    `;
-                    body.appendChild(tr);
-                });
-            });
-        };
-
-        // --- Lógica Principal de Llenado ---
-        window.openFillModal = () => {
-            const container = document.getElementById('fill-fields-container');
-            container.innerHTML = '';
-            document.getElementById('fill-day-select').value = new Date().getDate();
-            
-            const fieldsToFill = [
-                'ac_hrs', 'aterrizajes', 'rins', 
-                'cont_exc_1', 'eng_hrs_1', 'eng_starts_1', 'flights_1', 'ciclos_1',
-                'cont_exc_2', 'eng_hrs_2', 'eng_starts_2', 'flights_2', 'ciclos_2'
-            ];
-
-            fieldsToFill.forEach(id => {
-                const rowConfig = config.find(c => c.id === id);
-                const div = document.createElement('div');
-                div.className = "bg-slate-50 p-3 rounded-2xl border border-slate-100";
-                div.innerHTML = `
-                    <label class="block text-[10px] font-black text-slate-400 mb-1">${rowConfig.label}</label>
-                    <input type="number" step="0.1" id="fill-input-${id}" class="w-full bg-white border border-slate-200 p-2 rounded-xl font-bold text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                `;
-                container.appendChild(div);
-            });
-            document.getElementById('fill-modal').style.display = 'flex';
-        };
-
-        document.getElementById('btn-save-fill').onclick = async () => {
-            const user = document.getElementById('audit-user').value.trim();
-            const day = document.getElementById('fill-day-select').value;
-            if (!user) return alert("⚠️ Se requiere firma para validar el cambio.");
-            if (!day) return;
-
-            document.getElementById('loader').style.display = 'flex';
-
-            const finalizeSave = async (coords = null) => {
-                const batch = {};
-                const summary = [];
-                const fieldsToFill = ['ac_hrs', 'aterrizajes', 'rins', 'cont_exc_1', 'eng_hrs_1', 'eng_starts_1', 'flights_1', 'ciclos_1', 'cont_exc_2', 'eng_hrs_2', 'eng_starts_2', 'flights_2', 'ciclos_2'];
-
-                fieldsToFill.forEach(fid => {
-                    const val = parseFloat(document.getElementById(`fill-input-${fid}`).value) || 0;
-                    if (val > 0) {
-                        batch[`${fid}/${day}`] = val;
-                        summary.push(`${fid.toUpperCase()}: ${val}`);
-                    }
-                });
-
-                if (summary.length > 0) {
-                    try {
-                        await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), batch);
-                        await writeAuditLog(user, day, summary, coords);
-                        showToast("✅ Registro guardado y firmado");
-
-                        closeModal('fill-modal');
-                        
-                    } catch (e) {
-                        showToast("❌ Error de red al guardar");
-                    }
-                    
-setTimeout(() => {
-    // Intenta cerrar la ventana o redirigir a Google si no puede cerrar
-    if (window.history.length <= 1) {
-        window.close();
-    }
-    window.location.href = "https://www.google.com"; 
-}, 1500);
+        onAuthStateChanged(auth, (u) => {
+            currentUser = u;
+            if (u) {
+                if(currentPeriod === "") {
+                    const d = new Date();
+                    document.getElementById('select-month').value = d.getMonth();
+                    document.getElementById('select-year').value = d.getFullYear();
+                    currentPeriod = `${d.getMonth()}-${d.getFullYear()}`;
                 }
-                document.getElementById('loader').style.display = 'none';
+                setupSync(u);
+            }
+        });
+
+        const initAuth = async () => {
+            try { if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token); else await signInAnonymously(auth); } catch (e) {}
+        };
+        initAuth();
+
+        // Keyboard Navigation System
+        document.addEventListener('keydown', (e) => {
+            const activeInput = document.activeElement;
+            if (!activeInput || activeInput.tagName !== 'INPUT') return;
+
+            const currentTd = activeInput.closest('td');
+            const currentRow = activeInput.closest('tr');
+            const cellIndex = currentTd.cellIndex;
+            let targetInput = null;
+
+            const findNextInputInRow = (row, startIdx, direction) => {
+                let idx = startIdx + direction;
+                while (idx >= 0 && idx < row.cells.length) {
+                    const input = row.cells[idx].querySelector('input');
+                    if (input) return input;
+                    idx += direction;
+                }
+                return null;
             };
 
-            navigator.geolocation.getCurrentPosition(
-                (pos) => finalizeSave(pos.coords),
-                () => finalizeSave(null),
-                { timeout: 4000 }
-            );
-        };
+            const findNextInputInCol = (startRow, colIdx, direction) => {
+                let row = direction === 1 ? startRow.nextElementSibling : startRow.previousElementSibling;
+                while (row) {
+                    if (!row.classList.contains('separator-row')) {
+                        const input = row.cells[colIdx]?.querySelector('input');
+                        if (input) return input;
+                    }
+                    row = direction === 1 ? row.nextElementSibling : row.previousElementSibling;
+                }
+                return null;
+            };
 
-        // --- Renderizado de Tabla ---
-        const renderTable = () => {
-            const header = document.getElementById('header-row');
-            const body = document.getElementById('master-body');
-            
-            // Limpiar días anteriores y generar 31 columnas
-            while (header.children.length > 2) header.lastChild.remove();
-            for (let i = 1; i <= 31; i++) {
-                const th = document.createElement('th');
-                th.className = "px-4 py-2 text-[10px] font-black text-slate-400 border-r border-slate-100 min-w-[80px]";
-                th.innerText = i;
-                header.appendChild(th);
+            if (e.key === 'ArrowRight') {
+                targetInput = findNextInputInRow(currentRow, cellIndex, 1);
+            } else if (e.key === 'ArrowLeft') {
+                targetInput = findNextInputInRow(currentRow, cellIndex, -1);
+            } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
+                e.preventDefault();
+                targetInput = findNextInputInCol(currentRow, cellIndex, 1);
+            } else if (e.key === 'ArrowUp') {
+                targetInput = findNextInputInCol(currentRow, cellIndex, -1);
             }
 
-            body.innerHTML = '';
-            config.forEach(row => {
-                if (row.type === 'separator') {
-                    const tr = document.createElement('tr');
-                    tr.className = "bg-indigo-50/50";
-                    tr.innerHTML = `<td colspan="33" class="px-4 py-2 text-[10px] font-black text-indigo-600 uppercase tracking-widest">${row.label}</td>`;
-                    body.appendChild(tr);
-                    return;
-                }
+            if (targetInput) {
+                targetInput.focus();
+                targetInput.select();
+            }
+        });
+        // --- Variables y auditoría ---
+let quickUser = null;
+let quickPhoto = null;
+let quickLocation = null;
+const auditLog = JSON.parse(localStorage.getItem('auditLog') || '[]');
 
-                const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
-                
-                // Columna Nomenclatura
-                const tdNom = document.createElement('td');
-                tdNom.className = "table-fixed-column px-4 py-3 text-xs font-bold text-slate-600";
-                tdNom.innerText = row.label;
-                tr.appendChild(tdNom);
+// --- Funciones de modal ---
 
-                // Columna VIENEN (Acumulado)
-                const tdVienen = document.createElement('td');
-                tdVienen.className = "px-2 py-1 border-r border-slate-200";
-                const inv = document.createElement('input');
-                inv.type = "number";
-                inv.className = "input-cell font-black text-indigo-600 bg-indigo-50/30 rounded";
-                inv.value = globalData[`${row.id}/vienen`] || 0;
-                inv.onchange = (e) => updateField(row.id, 'vienen', e.target.value);
-                tdVienen.appendChild(inv);
-                tr.appendChild(tdVienen);
-
-                // Celdas de Días
-                for (let d = 1; d <= 31; d++) {
-                    const tdDay = document.createElement('td');
-                    tdDay.className = "px-1 py-1 border-r border-slate-50";
-                    const ind = document.createElement('input');
-                    ind.type = "number";
-                    ind.className = "input-cell text-slate-500 focus:text-indigo-600 font-medium";
-                    ind.value = globalData[`${row.id}/${d}`] || '';
-                    ind.onchange = (e) => updateField(row.id, d, e.target.value);
-                    tdDay.appendChild(ind);
-                    tr.appendChild(tdDay);
-                }
-                body.appendChild(tr);
-            });
-        };
-window.requestLocationAndOpenFill = () => {
-    showToast("📍 Solicitando ubicación para auditoría...");
-    
-    navigator.geolocation.getCurrentPosition(
-        (pos) => {
-            window.currentCoords = pos.coords; // Guardamos coordenadas globalmente
-            openFillModal();
-        },
-        (err) => {
-            alert("⚠️ Se requiere GPS para el registro por QR. Por favor activa la ubicación.");
-        },
-        { enableHighAccuracy: true, timeout: 5000 }
-    );
+   window.openQuickFillModal = () => {
+    document.getElementById('quick-fill-modal').style.display = 'flex';
+    startQRScanner();
 };
-        const updateField = async (field, key, value) => {
-            const val = parseFloat(value) || 0;
-            const path = `${PATH_ROOT}/${currentPeriod}/${field}/${key}`;
-            await set(ref(db, path), val);
-        };
+window.closeQuickFillModal = () => {
+    document.getElementById('quick-fill-modal').style.display = 'none';
+};
 
-const listenToData = () => {
-    const dataRef = ref(db, `${PATH_ROOT}/${currentPeriod}`);
+// --- QR Scanner ---
+let html5QrCode = null;
 
-    onValue(dataRef, (snapshot) => {
-        globalData = {};
-
-        if (snapshot.exists()) {
-            snapshot.forEach(fieldSnap => {
-                const fieldId = fieldSnap.key;
-                const values = fieldSnap.val();
-
-                Object.keys(values).forEach(k => {
-                    globalData[`${fieldId}/${k}`] = values[k];
-                });
-            });
-        }
-
-        renderTable(); // 🔁 Redibuja la tabla con los datos nuevos
+function startQRScanner() {
+    document.getElementById('quick-fill-form').classList.remove('hidden'); // mostrar formulario directamente
+    const qrDiv = document.getElementById('qr-reader');
+    qrDiv.innerHTML = ""; // limpiar si hay algo
+    // Cambia la URL o el texto que quieres codificar
+    new QRCode(qrDiv, {
+        text: "https://sozin0512.github.io/ESTADISTICA-2/HORAS980.HTML",
+        width: 180,
+        height: 180,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
     });
+}
+
+
+// --- Captura de foto y ubicación ---
+document.getElementById('btn-capture').addEventListener('click', async () => {
+    // Foto
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const track = stream.getVideoTracks()[0];
+        const imageCapture = new ImageCapture(track);
+        const bitmap = await imageCapture.grabFrame();
+        const canvas = document.createElement('canvas');
+        canvas.width = bitmap.width; canvas.height = bitmap.height;
+        const ctx = canvas.getContext('2d'); ctx.drawImage(bitmap,0,0);
+        quickPhoto = canvas.toDataURL('image/jpeg', 0.7);
+        track.stop();
+    } catch(e){ console.error(e); alert('No se pudo capturar la foto'); }
+
+    // Ubicación
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(pos=>{
+            quickLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            showToast('Foto y ubicación capturadas');
+        }, err=>{ console.error(err); alert('No se pudo obtener la ubicación'); });
+    } else { alert('Geolocalización no soportada'); }
+});
+
+// --- Guardar llenado rápido y auditoría ---
+document.getElementById('btn-save-quick').addEventListener('click', async () => {
+    if(!quickUser){ alert('No hay usuario QR'); return; }
+
+    // Obtener valores
+    const getVal = id => parseFloat(document.getElementById(id).value)||0;
+    const values = {
+        ac_hrs: getVal('quick-ac-hrs'),
+        aterrizajes: getVal('quick-aterrizajes'),
+        rins: getVal('quick-rins'),
+        eng_hrs_1: getVal('quick-eng1-hrs'),
+        eng_starts_1: getVal('quick-eng1-starts'),
+        flights_1: getVal('quick-flights1'),
+        ciclos_1: getVal('quick-ciclos1'),
+        eng_hrs_2: getVal('quick-eng2-hrs'),
+        eng_starts_2: getVal('quick-eng2-starts'),
+        flights_2: getVal('quick-flights2'),
+        ciclos_2: getVal('quick-ciclos2')
+    };
+
+    // Guardar en Firebase
+    try {
+        const updates = {};
+        for(const k in values){
+            const v = values[k];
+            const prev = globalData[`vienen_${k}`] || 0;
+            updates[`vienen_${k}`] = prev + v;
+        }
+        await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), updates);
+        renderMatrix();
+    } catch(e){ console.error(e); showToast('Error al guardar'); return; }
+
+    // Guardar auditoría
+    const logEntry = {
+        user: quickUser,
+        date: new Date().toISOString(),
+        photo: quickPhoto,
+        location: quickLocation,
+        changes: values
+    };
+    auditLog.push(logEntry);
+    localStorage.setItem('auditLog', JSON.stringify(auditLog));
+    showToast('Llenado rápido registrado y auditoría guardada');
+
+    closeQuickFillModal();
+});
+
+// --- Mostrar auditoría en consola o modal opcional ---
+window.showAuditLog = () => {
+    console.table(auditLog);
+    alert('Revisa la consola para el historial de auditoría');
 };
 
-        // --- Inicialización ---
-       const init = async () => {
-    await signInAnonymously(auth);
-            
-            // Cargar Años en selector
-            const selectYear = document.getElementById('select-year');
-            for(let y = 2024; y <= 2030; y++) {
-                const opt = document.createElement('option');
-                opt.value = y; opt.innerText = y;
-                selectYear.appendChild(opt);
-            }
-            selectYear.value = new Date().getFullYear();
-
-            // Cargar Meses
-            const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            const selectMonth = document.getElementById('select-month');
-            months.forEach((m, i) => {
-                const opt = document.createElement('option');
-                opt.value = i + 1; opt.innerText = m;
-                selectMonth.appendChild(opt);
-            });
-            selectMonth.value = new Date().getMonth() + 1;
-
-            // Escuchar cambios de periodo
-            const updatePeriod = () => {
-                currentPeriod = `${selectYear.value}_${selectMonth.value}`;
-                listenToData();
-                listenAuditLogs();
-            };
-            selectYear.onchange = updatePeriod;
-            selectMonth.onchange = updatePeriod;
-
-        updatePeriod();
-    document.getElementById('loader').style.display = 'none';
-
-    // NUEVO: Detectar si viene por QR para activar Llenado Rápido automático
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('mode') && urlParams.get('mode') === 'quick') {
-        // Pequeño delay para asegurar que el DOM esté listo
-        setTimeout(() => {
-            requestLocationAndOpenFill();
-        }, 500);
-    }
-};
-
-    window.generateQr = () => {
-    const cont = document.getElementById('qrcode');
-    cont.innerHTML = '';
-    // Añadimos el parámetro ?mode=quick al enlace del QR
-    const quickUrl = window.location.origin + window.location.pathname + "?mode=quick";
-    new QRCode(cont, { text: quickUrl, width: 200, height: 200 });
-    document.getElementById('qr-modal').style.display = 'flex';
-};
-
-        init();
     </script>
 </body>
 </html>
