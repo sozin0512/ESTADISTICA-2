@@ -605,6 +605,27 @@ window.requestLocationAndOpenFill = () => {
             await set(ref(db, path), val);
         };
 
+const listenToData = () => {
+    const dataRef = ref(db, `${PATH_ROOT}/${currentPeriod}`);
+
+    onValue(dataRef, (snapshot) => {
+        globalData = {};
+
+        if (snapshot.exists()) {
+            snapshot.forEach(fieldSnap => {
+                const fieldId = fieldSnap.key;
+                const values = fieldSnap.val();
+
+                Object.keys(values).forEach(k => {
+                    globalData[`${fieldId}/${k}`] = values[k];
+                });
+            });
+        }
+
+        renderTable(); // 🔁 Redibuja la tabla con los datos nuevos
+    });
+};
+
         // --- Inicialización ---
        const init = async () => {
     await signInAnonymously(auth);
