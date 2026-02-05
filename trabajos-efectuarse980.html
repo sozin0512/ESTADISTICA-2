@@ -3,2455 +3,644 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orden de Trabajo: FAH-980</title>
+    <title>AeroLog Pro - Gestión de Mantenimiento</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #e9ecef;
-        }
-        .paper-container {
-            width: 100%;
-            max-width: 8.5in; /* Tamaño carta */
-            min-height: 11in;
-            margin: 2rem auto;
-            background-color: white;
-            padding: 2rem;
-            border-radius: 0.25rem;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        table, th, td {
-            border: 1px solid #dee2e6;
-        }
-        th {
-            background-color: #f8f9fa;
-        }
-        .editable-cell { cursor: text; }
-        .editable-cell:hover { background-color: #f0f8ff; }
-        .editable-cell:focus {
-            background-color: white;
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
-        }
-        .editable-field {
-             cursor: text;
-             display: block;
-             width: 100%;
-             height: 100%;
-             padding: 0.25rem 0.5rem;
-        }
-        .editable-field:focus {
-            background-color: #e7f1ff;
-            outline: 2px solid #3b82f6;
-            outline-offset: -2px;
-        }
-
-        /* --- INICIO: NUEVA REGLA PARA FILA SELECCIONADA --- */
-        tr.selected-row {
-            background-color: #eff6ff !important; /* bg-blue-50 */
-        }
-        /* --- FIN: NUEVA REGLA --- */
-
-        #signature-canvas {
-            width: 400px;
-            height: 200px;
-            cursor: crosshair;
-        }
-        .signature-cell img, .footer-signature-area img {
-            max-height: 40px;
-            display: block;
-            margin: 0 auto;
-        }
-        /* INICIO: NUEVA REGLA PARA MINI-FIRMA EN LISTA */
-        #missing-items-list img {
-            max-height: 25px;
-            display: block;
-            margin: 0 auto;
-        }
-        /* FIN: NUEVA REGLA */
-        .signature-cell p, .footer-signature-area p {
-            line-height: 1;
-        }
-        .signature-line {
-            border-top: 1px solid #495057;
-            margin-top: 0.5rem;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
-        /* --- INICIO: NUEVO ESTILO PARA BOTONES DE TABLA --- */
-        .table-action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            transition: background-color 0.2s;
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
         }
-        .table-action-btn.edit-btn {
-            color: #2563eb; /* text-blue-600 */
+
+        .table-fixed-column {
+            position: sticky;
+            left: 0;
+            background: white;
+            z-index: 20;
+            border-right: 2px solid #e2e8f0;
         }
-        .table-action-btn.edit-btn:hover {
-            background-color: #dbeafe; /* bg-blue-100 */
-            color: #1d4ed8; /* text-blue-700 */
+
+        .input-cell {
+            width: 80px;
+            text-align: center;
+            font-size: 0.75rem;
+            padding: 4px;
+            border: 1px solid #f1f5f9;
         }
-        .table-action-btn.delete-btn {
-            color: #dc2626; /* text-red-600 */
+
+        .input-cell:focus {
+            background: #eef2ff;
+            outline: 2px solid #6366f1;
+            z-index: 30;
         }
-        .table-action-btn.delete-btn:hover {
-            background-color: #fee2e2; /* bg-red-100 */
-            color: #b91c1c; /* text-red-700 */
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
-        /* --- FIN: NUEVO ESTILO PARA BOTONES DE TABLA --- */
 
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
 
-        @media print {
-            body {
-                background: none;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
 
-            /* --- INICIO: NUEVA REGLA PARA AJUSTAR EL BODY --- */
-            body.printing-missing-list {
-                margin: 0.5in !important; /* Añadir el margen de impresión aquí */
-                padding: 0 !important;
-            }
-            /* --- FIN: NUEVA REGLA --- */
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
 
-            .paper-container {
-                box-shadow: none;
-                margin: 0;
-                padding: 1.5rem;
-                max-width: 100%;
-                border: 1px solid #dee2e6;
-            }
-            
-            /* --- INICIO: NUEVA REGLA PARA AJUSTAR EL CONTENEDOR --- */
-            body.printing-missing-list .paper-container {
-                max-width: 100% !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                border: none !important;
-                box-shadow: none !important;
-            }
-            /* --- FIN: NUEVA REGLA --- */
-            
-            .no-print {
-                display: none !important;
-            }
-            .editable-cell, .editable-field {
-                background-color: white !important;
-                outline: none !important;
-                padding: 2px 0;
-                box-shadow: none;
-            }
-            .print-table-style {
-                border: 1px solid #4a5568 !important;
-                background-color: #1a202c !important; /* Tailwind blue-900 */
-                color: white !important;
-            }
-            
-            /* --- INICIO: REGLAS DE IMPRESIÓN --- */
-            
-            /* Ocultar todo por defecto si la clase .printing-missing-list está activa */
-            /* ESTA SECCIÓN HA SIDO REESCRITA PARA CORREGIR EL ERROR DE PÁGINA EN BLANCO */
-            body.printing-missing-list > *:not(.paper-container) {
-                display: none !important;
-            }
-
-            /* Dentro del paper-container, ocultar todos los hijos directos */
-            body.printing-missing-list .paper-container > * {
-                display: none !important;
-                visibility: hidden !important; /* Más fuerte */
-            }
-            
-            /* Pero, mostrar la sección de la lista y darle estilo de impresión */
-            body.printing-missing-list #missing-items-section {
-                display: block !important;
-                visibility: visible !important;
-                box-shadow: none;
-                border: none;
-                margin: 0; /* Quitar el margen de aquí */
-                padding: 0;
-                max-width: 100%;
-                width: 100%;
-            }
-
-            /* Ocultar el botón de la lista siempre que se imprima (en cualquier modo) */
-            #print-list-btn {
-                display: none !important;
-            }
-            /* --- FIN: REGLAS DE IMPRESIÓN --- */
+        /* Dashboard desplegable animation */
+        #quick-dashboard {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+        }
+        #quick-dashboard.open {
+            max-height: 200px;
+            opacity: 1;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
         }
     </style>
 </head>
-<body>
+<body class="text-slate-900 overflow-x-hidden">
 
-    <div class="paper-container flex flex-col">
-        <header class="mb-8">
-            <div class="flex justify-between items-center border-b-2 border-gray-700 pb-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-800">TRABAJOS A EFECTUARSE</h1>
-                    <p class="text-gray-600">Mantenimiento Correctivo y Preventivo</p>
-                </div>
-                <div class="text-right">
-                    <p class="font-bold">Aeronave: <span class="font-normal">BELL 412 / FAH-980</span></p>
-                    <p class="font-bold">Fecha: <span class="font-normal" id="current-date"></span></p>
-                </div>
-            </div>
-        </header>
+    <div id="loader" class="loading-overlay">
+        <div class="flex flex-col items-center gap-4">
+            <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Sincronizando...</p>
+        </div>
+    </div>
 
-        <section id="work-order-details" class="mb-8">
-            <div class="text-center mb-1">
-                <div class="bg-yellow-300 p-2 font-bold text-black border border-b-0 border-gray-700">
-                    <p>ESCN. HELICÓPTEROS / FUERZA AÉREA HONDUREÑA</p>
-                </div>
-                <div class="bg-white p-2 font-bold text-black border border-gray-700">
-                    <p>BASE HAM</p>
-                </div>
-            </div>
+    <!-- Modal de Espejo Mejorado -->
+    <div id="mirror-modal" class="modal-overlay">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-200">
+            <h3 class="text-xl font-black text-slate-800 mb-2">Sincronizar Datos</h3>
+            <p class="text-sm text-slate-500 mb-6">Selecciona el tipo de espejo que deseas realizar:</p>
             
-            <div class="grid grid-cols-4 border-t border-l border-gray-700 text-sm">
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">FECHA INICIO</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="fecha-inicio" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">FECHA FINALIZACIÓN</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="fecha-finalizacion" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">MODELO</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="modelo" class="editable-field" contenteditable="true">BELL 412</span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 1 TSN/TSO</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="eng1-sn-tsn-tso" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">NÚMERO DE SERIE</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="numero-serie" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 1  CSN/CSO</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="eng1-sn-csn-cso" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">MATRÍCULA</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="matricula" class="editable-field" contenteditable="true">FAH-980</span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 2  TSN/TSO</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="eng2-sn-tsn-tso" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">A/C TT</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="ac-tt" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ENG 2  CSN/CSO</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="eng2-sn-csn-cso" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">TQ EVENTS</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="tq-events" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">C-BOX TSN/TSO</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="cbox-sn-tsn-tso" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">LANDINGS</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="landings" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">S/N C-BOX </div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="cbox-sn-csn-cs" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ELABORADO POR</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="elaborado-por" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">ORDEN DE TRABAJO No.</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="orden-trabajo-no" class="editable-field" contenteditable="true"></span></div>
-                <div class_A="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">N/S MOTOR #1</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="ns-motor-1" class="editable-field" contenteditable="true"></span></div>
-                <div class="bg-blue-900 text-white font-semibold p-2 border-r border-b border-gray-700 print-table-style">N/S MOTOR #2</div>
-                <div class="bg-white p-0 border-r border-b border-gray-700"><span id="ns-motor-2" class="editable-field" contenteditable="true"></span></div>
-            </div>
+            <div class="grid gap-3">
+                <button onclick="executeMirror('ac_to_engines')" class="flex items-center justify-between p-4 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-2xl transition-all group">
+                    <div class="text-left">
+                        <div class="font-bold text-emerald-700">AC HRS → Motores 1 y 2</div>
+                        <div class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">Copia AC HRS a ENGINE HRS de ambos</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                </button>
 
-            <div class="mt-6 text-right no-print">
-                <button id="save-details-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm shadow-md hover:shadow-lg">
-                    Guardar Detalles
+                <div class="h-px bg-slate-100 my-1"></div>
+
+                <button onclick="executeMirror('table')" class="flex items-center justify-between p-4 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-2xl transition-all group">
+                    <div class="text-left">
+                        <div class="font-bold text-slate-700 group-hover:text-indigo-700">Motor 1 → Motor 2 (Tabla)</div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Registros diarios (1 al 31)</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-300 group-hover:text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+
+                <button onclick="executeMirror('vienen')" class="flex items-center justify-between p-4 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-2xl transition-all group">
+                    <div class="text-left">
+                        <div class="font-bold text-slate-700 group-hover:text-indigo-700">Motor 1 → Motor 2 (Vienen)</div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Acumulados iniciales</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-300 group-hover:text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+
+                <button onclick="executeMirror('all')" class="flex items-center justify-between p-4 bg-indigo-600 hover:bg-indigo-700 border border-indigo-500 rounded-2xl transition-all group">
+                    <div class="text-left">
+                        <div class="font-bold text-white">Copiar Todo (M1 a M2)</div>
+                        <div class="text-[10px] text-indigo-200 font-bold uppercase tracking-wider">Vienen + Registros Diarios</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                 </button>
             </div>
-        </section>
 
-        <main class="flex-grow">
-            <!-- INICIO: NUEVO CONTENEDOR PARA TÍTULO Y BOTÓN DE LOTE -->
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-center text-red-700">Listado de Inspecciones Vencidas</h2>
-                <div id="batch-actions-container" class="hidden no-print">
-                    <span id="selection-count" class="text-sm font-medium text-gray-700 mr-4">0 seleccionadas</span>
-                    <button id="batch-sign-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm shadow-md">
-                        Firmar Seleccionadas
-                    </button>
-                </div>
+            <button onclick="closeMirrorModal()" class="w-full mt-6 text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600">Cancelar</button>
+        </div>
+    </div>
+    <!-- Modal de Acceso QR y Llenado Rápido -->
+<div id="quick-fill-modal" class="modal-overlay">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200">
+        <h3 class="text-xl font-black text-slate-800 mb-2">Acceso Rápido</h3>
+        <p class="text-sm text-slate-500 mb-4">Escanea tu QR para acceder y registrar auditoría</p>
+
+    <div id="qr-reader" style="width:100%; display:flex; justify-content:center;"></div>
+
+        <div id="quick-fill-form" class="hidden mt-4">
+            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-2">Rellenar rápidamente:</p>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="number" id="quick-ac-hrs" placeholder="AC HRS" class="input-cell">
+                <input type="number" id="quick-aterrizajes" placeholder="ATERRIZAJES" class="input-cell">
+                <input type="number" id="quick-rins" placeholder="RINS" class="input-cell">
+                <input type="number" id="quick-eng1-hrs" placeholder="ENGINE HRS 1" class="input-cell">
+                <input type="number" id="quick-eng1-starts" placeholder="ENGINE STARTS 1" class="input-cell">
+                <input type="number" id="quick-flights1" placeholder="FLIGHTS 1" class="input-cell">
+                <input type="number" id="quick-ciclos1" placeholder="CICLOS 1" class="input-cell">
+                <input type="number" id="quick-eng2-hrs" placeholder="ENGINE HRS 2" class="input-cell">
+                <input type="number" id="quick-eng2-starts" placeholder="ENGINE STARTS 2" class="input-cell">
+                <input type="number" id="quick-flights2" placeholder="FLIGHTS 2" class="input-cell">
+                <input type="number" id="quick-ciclos2" placeholder="CICLOS 2" class="input-cell">
             </div>
-            <!-- FIN: NUEVO CONTENEDOR -->
-            
-            <div id="loading-message" class="text-center text-gray-500 my-8">Cargando lista de trabajos...</div>
-            
-            <table class="w-full text-sm text-left text-gray-600">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
-                    <tr>
-                        <!-- INICIO: NUEVO ENCABEZADO DE CHECKBOX -->
-                        <th scope="col" class="px-4 py-3 w-10 text-center">
-                            <input type="checkbox" id="select-all-checkbox" class="rounded border-gray-300 shadow-sm focus:ring-blue-500">
-                        </th>
-                        <!-- FIN: NUEVO ENCABEZADO -->
-                        <th scope="col" class="px-4 py-3 w-10 text-center">#</th>
-                        <th scope="col" class="px-4 py-3">Descripción del Trabajo / Inspección</th>
-                        <th scope="col" class="px-4 py-3 w-40">Referencia</th>
-                        <th scope="col" class="px-4 py-3 w-32">Mecánico</th>
-                        <th scope="col" class="px-4 py-3 w-32">ACCION TOMADA</th>
-                    </tr>
-                </thead>
-                <tbody id="vencidas-list">
+
+            <div class="mt-4 flex flex-col gap-2">
+                <button id="btn-capture" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold">Tomar Foto y Ubicación</button>
+                <button id="btn-save-quick" class="bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold">Guardar y Registrar Auditoría</button>
+            </div>
+        </div>
+
+        <button onclick="closeQuickFillModal()" class="w-full mt-4 text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600">Cancelar</button>
+    </div>
+</div>
+
+
+    <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50 shadow-sm flex flex-wrap justify-between items-center gap-4">
+        <div class="flex items-center gap-3">
+            <button id="toggle-dashboard" class="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+            </button>
+            <div class="bg-indigo-600 p-2 rounded-lg text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            </div>
+            <div>
+                <h1 class="text-lg font-black tracking-tight leading-none uppercase">AEROLOG MASTER</h1>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">FAH-980 Selective Mirror</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+            <select id="select-month" class="bg-transparent text-xs font-bold px-3 py-1.5 outline-none cursor-pointer text-slate-700">
+                <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option><option value="3">Abril</option>
+                <option value="4">Mayo</option><option value="5">Junio</option><option value="6">Julio</option><option value="7">Agosto</option>
+                <option value="8">Septiembre</option><option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+            </select>
+            <select id="select-year" class="bg-transparent text-xs font-bold px-3 py-1.5 outline-none cursor-pointer text-slate-700"></select>
+        </div>
+
+        <div class="flex gap-2 text-xs">
+            <span id="sync-status" class="flex items-center gap-1 text-amber-600 font-bold bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-100">
+                <span class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span> Conectando...
+            </span>
+            <button id="btn-mirror-trigger" class="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl font-bold border border-indigo-200 hover:bg-indigo-100 transition-all flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+                Menú Espejo
+            </button>
+            <button id="btn-copy-prev" class="bg-white text-slate-700 px-4 py-2 rounded-xl font-bold border border-slate-200 hover:bg-slate-50 transition-all">Cerrar Mes Anterior</button>
+            <button id="btn-export" class="bg-slate-800 text-white px-4 py-2 rounded-xl font-bold hover:bg-slate-700 transition-all">Exportar JSON</button>
+        </div>
+    </nav>
+
+    <!-- Dashboard Desplegable de Accesos Rápidos -->
+    <div id="quick-dashboard" class="bg-slate-50 border-b border-slate-200 px-6">
+        <div class="max-w-7xl mx-auto">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Módulos de Reporte e Inspección</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <a href="#" class="flex items-center justify-center text-center p-6 bg-[#3b4454] hover:bg-[#2d3440] text-white rounded-xl shadow-lg transition-all transform hover:-translate-y-1">
+                    <span class="font-bold text-sm">Generar Reporte del Mes</span>
+                </a>
+                <a href="#" class="flex items-center justify-center text-center p-6 bg-[#4e96d9] hover:bg-[#3d85c8] text-white rounded-xl shadow-lg transition-all transform hover:-translate-y-1">
+                    <span class="font-bold text-sm">Estado de Motores</span>
+                </a>
+                <a href="#" class="flex items-center justify-center text-center p-6 bg-[#a855f7] hover:bg-[#9333ea] text-white rounded-xl shadow-lg transition-all transform hover:-translate-y-1">
+                    <span class="font-bold text-sm">Estado de Componentes</span>
+                </a>
+                <a href="#" class="flex items-center justify-center text-center p-6 bg-[#14b8a6] hover:bg-[#0d9488] text-white rounded-xl shadow-lg transition-all transform hover:-translate-y-1">
+                    <span class="font-bold text-sm">Inspecciones</span>
+                </a>
+                <button onclick="openQuickFillModal()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold">Llenado Rápido con QR</button>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="p-4 max-w-[100vw]">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200" id="header-row">
+                            <th class="table-fixed-column px-4 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest min-w-[200px]">Nomenclatura</th>
+                            <th class="px-4 py-2 text-[10px] font-black text-indigo-600 border-r border-slate-200">VIENEN</th>
+                        </tr>
+                    </thead>
+                    <tbody id="master-body">
                     </tbody>
-            </table>
-            
-            <div class="mt-8 no-print">
-                <h3 class="text-lg font-semibold text-center text-gray-700">Progreso de Tareas</h3>
-                <div class="w-full bg-gray-200 rounded-full h-6 mt-2 shadow-inner">
-                    <div id="progress-bar" class="bg-blue-600 h-6 rounded-full text-center text-white text-sm leading-6 transition-all duration-500" style="width: 0%;">
-                        <span id="progress-text">0%</span>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- INICIO: Tabla de Items Faltantes -->
-        <section id="missing-items-section" class="mt-16 hidden">
-            <!-- INICIO: CAMBIO DE LAYOUT (CSS FIX) -->
-            <div class="flex justify-between items-center text-center mb-4">
-                <h2 class="text-xl font-semibold text-purple-700 flex-grow">
-                    Lista de Consumibles y Repuestos Faltantes
-                </h2>
-                <button id="print-list-btn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-xs no-print shadow-md ml-4 flex-shrink-0">
-                    Imprimir solo esta lista
-                </button>
-            </div>
-            <!-- FIN: CAMBIO DE LAYOUT (CSS FIX) -->
-            
-            <p class="text-center text-sm text-gray-500 mb-4 no-print">
-                Esta tabla se actualiza automáticamente. Puede editar o borrar items (requiere clave).
-            </p>
-            <table class="w-full text-sm text-left text-gray-600">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
-                    <tr>
-                        <th scope="col" class="px-4 py-3">Trabajo Relacionado</th>
-                        <th scope="col" class="px-4 py-3">Tipo</th>
-                        <th scope="col" class="px-4 py-3">Nombre Item</th>
-                        <th scope="col" class="px-4 py-3">P/N</th>
-                        <th scope="col" class="px-4 py-3 w-20 text-center">Cantidad</th>
-                        <!-- INICIO: NUEVA COLUMNA DE FIRMA -->
-                        <th scope="col" class="px-4 py-3 w-32">Reportado Por</th>
-                        <!-- FIN: NUEVA COLUMNA DE FIRMA -->
-                        <!-- INICIO: NUEVA COLUMNA DE ACCIONES -->
-                        <th scope="col" class="px-4 py-3 w-28 text-center no-print">Acciones</th>
-                        <!-- FIN: NUEVA COLUMNA DE ACCIONES -->
-                    </tr>
-                </thead>
-                <tbody id="missing-items-list">
-                    <!-- Los items se generarán aquí -->
-                </tbody>
-            </table>
-        </section>
-        <!-- FIN: Tabla de Items Faltantes -->
-
-        <footer class="mt-16">
-            <div class="grid grid-cols-2 gap-12">
-                <div class="text-center">
-                    <div class="footer-signature-area cursor-pointer min-h-[70px] flex flex-col justify-end items-center" data-title="Supervisor">
-                        <p class="text-gray-500 text-sm no-print">(Haga clic para firmar)</p>
-                    </div>
-                    <div class="signature-line"></div>
-                    <p class="mt-2 font-semibold">Supervisor</p>
-                    <p class="text-xs text-gray-500">(Nombre y Licencia)</p>
-                </div>
-                <div class="text-center">
-                    <div class="footer-signature-area cursor-pointer min-h-[70px] flex flex-col justify-end items-center" data-title="Inspector">
-                         <p class="text-gray-500 text-sm no-print">(Haga clic para firmar)</p>
-                    </div>
-                    <div class="signature-line"></div>
-                    <p class="mt-2 font-semibold">Inspector</p>
-                    <p class="text-xs text-gray-500">(Nombre y Licencia)</p>
-                </div>
-            </div>
-        </footer>
-        
-        <div class="flex justify-center mt-12 gap-4 no-print">
-            <button onclick="window.location.href=''" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-5 rounded-lg transition-colors">
-                Ir al Control de Talleres
-            </button>
-            <button id="report-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
-                Generar Reporte
-            </button>
-            <button id="load-history-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-5 rounded-lg transition-colors">
-                Cargar Historial
-            </button>
-            <button id="archive-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
-                Archivar Trabajos
-            </button>
-            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg transition-colors">
-                Imprimir / Guardar PDF
-            </button>
-        </div>
-    </div>
-
-    <!-- INICIO: Modales para Consumibles y Repuestos -->
-    <div id="ask-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm">
-            <div class="p-6 text-center">
-                <svg class="mx-auto mb-4 h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.79 4 4 0 1.152-.468 2.19-1.228 2.969M12 18v.01M7.97 16l.006-.004m-.012 0l.006.004m-3.464 0l.006-.004m-.012 0l.006.004m7.442-7.42l.006-.004m-.012 0l.006.004m3.464 0l.006-.004m-.012 0l.006.004m-3.463 3.42l.006-.004m-.012 0l.006.004m-3.464 0l.006-.004m-.012 0l.006.004m7.442 0l.006-.004m-.012 0l.006.004" />
-                </svg>
-                <h3 id="ask-modal-title" class="mb-5 text-lg font-normal text-gray-500">¿Pregunta?</h3>
-                <button id="ask-modal-yes" type="button" class="text-white bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
-                    Sí
-                </button>
-                <button id="ask-modal-no" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
-                    No
-                </button>
+                </table>
             </div>
         </div>
     </div>
 
-    <div id="item-form-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print overflow-y-auto">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg my-8"> <!-- Hecho un poco más ancho (max-w-lg) -->
-            <div class="p-4 border-b">
-                <h3 id="item-form-modal-title" class="text-lg font-bold text-gray-800">Añadir Item Faltante</h3>
-            </div>
-            
-            <!-- INICIO: CONTENEDOR MODIFICADO -->
-            <div class="p-6">
-                <!-- Contenedor 1: Formulario para Lote (Batch) -->
-                <div id="single-item-form-container" class="space-y-4">
-                    <div>
-                        <label for="item-name" class="block text-sm font-medium text-gray-700">Nombre del Item</label>
-                        <input type="text" id="item-name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: Aceite, Tornillo, Filtro...">
-                    </div>
-                    <div>
-                        <label for="item-part-number" class="block text-sm font-medium text-gray-700">Número de Parte (P/N)</label>
-                        <input type="text" id="item-part-number" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: AN5-10A, 101-345...">
-                    </div>
-                    <div>
-                        <label for="item-quantity" class="block text-sm font-medium text-gray-700">Cantidad</label>
-                        <input type="number" id="item-quantity" value="1" min="1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
-                </div>
-                
-                <!-- Contenedor 2: Formulario para Lista (Single Sign) -->
-                <div id="multi-item-form-container" class="hidden">
-                    <!-- Formulario para agregar ítems -->
-                    <div class="mb-4 p-4 border rounded-lg bg-gray-50">
-                        <h4 class="text-lg font-medium mb-3">Agregar Ítem a la Lista</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div class="md:col-span-3">
-                                <label for="multi-item-name" class="block text-sm font-medium text-gray-700">Nombre del Ítem</label>
-                                <input type="text" id="multi-item-name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                            <div>
-                                <label for="multi-item-part-number" class="block text-sm font-medium text-gray-700">P/N</label>
-                                <input type="text" id="multi-item-part-number" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                            <div>
-                                <label for="multi-item-quantity" class="block text-sm font-medium text-gray-700">Cant</label>
-                                <input type="number" id="multi-item-quantity" value="1" min="1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                            <div class="flex items-end">
-                                <button id="addItemToListBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
-                                    <i class="fas fa-plus mr-1"></i> Agregar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Lista de ítems agregados -->
-                    <h4 class="text-lg font-medium mb-2">Lista de Faltantes para esta Tarea</h4>
-                    <div id="temp-item-list-container" class="mb-4 border rounded-lg p-3 min-h-[100px] bg-white max-h-48 overflow-y-auto">
-                        <p classs="text-gray-500 italic">No se han agregado ítems.</p>
-                    </div>
-                </div>
-                
-                <p id="item-form-error" class="text-red-500 text-sm h-4"></p>
-            </div>
-            <!-- FIN: CONTENEDOR MODIFICADO -->
-            
-            <div class="flex justify-end gap-2 p-4 bg-gray-50">
-                <button id="item-form-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
-                <button id="item-form-save" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg">Guardar Item</button>
-            </div>
-        </div>
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl transform translate-y-32 transition-all duration-500 flex items-center gap-3 z-[100]">
+        <span id="toast-msg" class="font-bold text-sm tracking-tight"></span>
     </div>
-    <!-- FIN: Modales -->
-
-    <!-- INICIO: Modales Faltantes (Firma, Clave, Confirmar) -->
-    <div id="signature-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print overflow-y-auto">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg my-8">
-            <div class="p-4 border-b">
-                <h3 id="signature-modal-title" class="text-lg font-bold text-gray-800">Firma del Mecánico</h3>
-            </div>
-            <div class="p-6 flex flex-col items-center">
-                <div class="mb-4">
-                    <label for="signature-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre y Licencia</label>
-                    <input type="text" id="signature-name" class="w-full p-2 border border-gray-300 rounded-md shadow-sm" placeholder="Ej: K. Valladares / H-0123">
-                </div>
-                <div class="mt-4 border-2 border-dashed border-gray-300 rounded-lg">
-                    <canvas id="signature-canvas" class="rounded-lg"></canvas>
-                </div>
-                <p class="text-xs text-gray-500 mt-2">Dibuje su firma en el recuadro de arriba</p>
-            </div>
-            <div class="flex justify-between p-4 bg-gray-50">
-                <button id="signature-clear" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg">Limpiar</button>
-                <div>
-                    <button id="signature-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg mr-2">Cancelar</button>
-                    <button id="signature-save" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg">Guardar Firma</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="password-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm">
-            <div class="p-6">
-                <h3 id="password-modal-title" class="text-lg font-bold text-gray-800 mb-4">Clave Requerida</h3>
-                <p id="password-modal-description" class="text-sm text-gray-600 mb-4">Para esta acción, ingrese la clave de supervisor.</p>
-                <div>
-                    <label for="password-input" class="block text-sm font-medium text-gray-700">Clave</label>
-                    <input type="password" id="password-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
-                    <p id="password-error" class="text-red-500 text-xs h-4 mt-1"></p>
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 p-4 bg-gray-50">
-                <button id="password-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
-                <button id="password-confirm" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm">
-            <div class="p-6 text-center">
-                <svg class="mx-auto mb-4 h-12 w-12 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <h3 id="confirm-modal-title" class="mb-5 text-lg font-normal text-gray-500">¿Está seguro?</h3>
-                <button id="confirm-modal-ok" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
-                    Sí, estoy seguro
-                </button>
-                <button id="confirm-modal-cancel" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
-                    Cancelar
-                </button>
-            </div>
-        </div>
-    </div>
-    <!-- FIN: Modales Faltantes -->
+<!-- Librería QR -->
 
 
-    <!-- INICIO: NUEVO MODAL PARA ASIGNAR ITEMS EN LOTE -->
-    <div id="assign-item-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print overflow-y-auto">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg my-8">
-            <div class="p-4 border-b">
-                <h3 id="assign-item-modal-title" class="text-lg font-bold text-gray-800">Asignar Item a Tareas</h3>
-            </div>
-            <div class="p-6">
-                <p class="text-sm text-gray-600 mb-4">Seleccione las tareas (del lote que firmó) a las que desea añadir este item:</p>
-                <div id="assign-item-list" class="h-64 overflow-y-auto border rounded-md p-2 space-y-1 bg-gray-50">
-                    <!-- La lista de tareas seleccionadas se generará aquí -->
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 p-4 bg-gray-50">
-                <button id="assign-item-cancel" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar Asignación</button>
-                <button id="assign-item-save" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg">Asignar y Continuar</button>
-            </div>
-        </div>
-    </div>
-    <!-- FIN: NUEVO MODAL -->
-
-
-    <!-- INICIO: NUEVO MODAL PARA CARGAR HISTORIAL -->
-    <div id="archive-list-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-gray-900 bg-opacity-50 no-print overflow-y-auto">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl my-8">
-            <div class="p-4 border-b">
-                <h3 class="text-lg font-bold text-gray-800">Historial de Órdenes Archivadas</h3>
-            </div>
-            <div class="p-6">
-                <p id="archive-loading-msg" class="text-gray-600">Cargando historial...</p>
-                <div id="archive-list-container" class="max-h-96 overflow-y-auto space-y-2">
-                    <!-- El historial se cargará aquí -->
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 p-4 bg-gray-50">
-                <button id="archive-list-close" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg">Cancelar</button>
-            </div>
-        </div>
-    </div>
-    <!-- FIN: NUEVO MODAL -->
-
-    <!-- INICIO: NUEVO MODAL DE CONFLICTO DE SESIÓN -->
-    <div id="session-conflict-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-gray-900 bg-opacity-75 no-print">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
-            <div class="p-6 text-center">
-                <svg class="mx-auto mb-4 h-12 w-12 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <h3 class="mb-4 text-lg font-bold text-gray-900">¡Doble Sesión Detectada!</h3>
-                <p class="mb-6 text-sm text-gray-600">
-                    Otra sesión (en su PC o iPad) acaba de guardar cambios.
-                    Para evitar perder su trabajo, debe recargar la página ahora.
-                </p>
-                <button id="conflict-reload-btn" type="button" class="text-white bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
-                    Recargar Página
-                </button>
-            </div>
-        </div>
-    </div>
-    <!-- FIN: NUEVO MODAL DE CONFLICTO DE SESIÓN -->
 
 
     <script type="module">
-        import { initializeApp, setLogLevel } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-        import { getAuth, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
-        import { 
-            getDatabase, 
-            ref, 
-            onValue, 
-            set, 
-            update, 
-            remove, 
-            get,
-            push
-        } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- Configuración de Firebase Hardcodeada ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyC6pUgMRSRCZLZfW0Cy1b00AFN6nkPjsF8",
+        let firebaseConfig = {
+            apiKey: "AIzaSyC6pUgMRSRCZLZfW0Cy1b00AFN6nkPjsF8", 
+            projectId: "fah-980-ceb96",
             authDomain: "fah-980-ceb96.firebaseapp.com",
             databaseURL: "https://fah-980-ceb96-default-rtdb.firebaseio.com",
-            projectId: "fah-980-ceb96",
-            storageBucket: "fah-980-ceb96.firebasestorage.app",
-            messagingSenderId: "57890484294",
-            appId: "1:57890484294:web:8a27759a4da0b262e99a47",
-            measurementId: "G-HSZMRM7ZCS"
+            storageBucket: "fah-980-ceb96.appspot.com",
+            messagingSenderId: "820427334707",
+            appId: "1:820427334707:web:753198086036814227806d"
         };
+
+        try { if (typeof __firebase_config !== 'undefined' && __firebase_config) firebaseConfig = { ...firebaseConfig, ...JSON.parse(__firebase_config) }; } catch (e) {}
 
         const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app); 
-        setLogLevel('debug'); 
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'fah-980-master-v1';
+        const PATH_ROOT = `artifacts/${appId}/public/data/MAINTENANCE_LOGS`;
 
-        const paperContainer = document.querySelector('.paper-container');
-        const expiredListTableBody = document.getElementById('vencidas-list');
-        const loadingMessage = document.getElementById('loading-message');
-        const dateDisplay = document.getElementById('current-date');
-        
-        const signatureModal = document.getElementById('signature-modal');
-        const signatureCanvas = document.getElementById('signature-canvas');
-        const signatureNameInput = document.getElementById('signature-name');
-        const signatureClearBtn = document.getElementById('signature-clear');
-        const signatureCancelBtn = document.getElementById('signature-cancel');
-        const signatureSaveBtn = document.getElementById('signature-save');
-        let signaturePad;
-        let activeSignatureCell = null;
-        let isAuthReady = false; 
-        let currentUserId = null; // <-- NUEVO
+        let currentPeriod = ""; 
+        let globalData = {};
+        let isRendering = false;
+        let unsubscribe = null;
+        let currentUser = null;
 
-        const passwordModal = document.getElementById('password-modal');
-        const passwordModalTitle = document.getElementById('password-modal-title');
-        const passwordModalDescription = document.getElementById('password-modal-description');
-        const passwordInput = document.getElementById('password-input');
-        const passwordError = document.getElementById('password-error');
-        const passwordCancelBtn = document.getElementById('password-cancel');
-        const passwordConfirmBtn = document.getElementById('password-confirm');
-        
-        const confirmModal = document.getElementById('confirm-modal');
-        const confirmModalTitle = document.getElementById('confirm-modal-title');
-        const confirmModalOkBtn = document.getElementById('confirm-modal-ok');
-        const confirmModalCancelBtn = document.getElementById('confirm-modal-cancel');
-        let confirmAction = () => {}; 
-
-        // --- DOM para la tabla de items ---
-        const missingItemsSection = document.getElementById('missing-items-section');
-        const missingItemsList = document.getElementById('missing-items-list');
-
-        // --- Modales para workflow de items ---
-        const askModal = document.getElementById('ask-modal');
-        const askModalTitle = document.getElementById('ask-modal-title');
-        const askModalYesBtn = document.getElementById('ask-modal-yes');
-        const askModalNoBtn = document.getElementById('ask-modal-no');
-
-        const itemFormModal = document.getElementById('item-form-modal');
-        const itemFormModalTitle = document.getElementById('item-form-modal-title');
-        const itemNameInput = document.getElementById('item-name');
-        const itemPartNumberInput = document.getElementById('item-part-number');
-        const itemQuantityInput = document.getElementById('item-quantity');
-        const itemFormError = document.getElementById('item-form-error');
-        const itemFormSaveBtn = document.getElementById('item-form-save');
-        const itemFormCancelBtn = document.getElementById('item-form-cancel');
-
-        // --- INICIO: NUEVO MODAL DE ASIGNACIÓN ---
-        const assignItemModal = document.getElementById('assign-item-modal');
-        const assignItemModalTitle = document.getElementById('assign-item-modal-title');
-        const assignItemList = document.getElementById('assign-item-list');
-        const assignItemCancelBtn = document.getElementById('assign-item-cancel');
-        const assignItemSaveBtn = document.getElementById('assign-item-save');
-        // --- FIN: NUEVO MODAL DE ASIGNACIÓN ---
-
-        // --- INICIO: NUEVO MODAL DE HISTORIAL ---
-        const archiveListModal = document.getElementById('archive-list-modal');
-        const archiveListContainer = document.getElementById('archive-list-container');
-        const archiveLoadingMsg = document.getElementById('archive-loading-msg');
-        const archiveListCloseBtn = document.getElementById('archive-list-close');
-        const loadHistoryBtn = document.getElementById('load-history-btn');
-        // --- FIN: NUEVO MODAL DE HISTORIAL ---
-
-        // --- INICIO: NUEVO MODAL DE CONFLICTO ---
-        const sessionConflictModal = document.getElementById('session-conflict-modal');
-        const conflictReloadBtn = document.getElementById('conflict-reload-btn');
-
-        conflictReloadBtn.addEventListener('click', () => {
-            location.reload();
-        });
-        // --- FIN: NUEVO MODAL DE CONFLICTO ---
-
-
-        // --- INICIO: NUEVAS VARIABLES GLOBALES DE ESTADO ---
-        let activeInspectionDocId = null; // ID de la inspección que se está firmando
-        let currentItemType = null; // 'consumible' o 'repuesto'
-        
-        // Almacena los datos de la última firma para el log de "No"
-        let lastSignatureData = { name: '', dataUrl: '' }; 
-        
-        // Almacena el item a editar/borrar
-        let itemToManage = { inspectionId: null, itemId: null, docId: null }; 
-        let currentPasswordAction = ''; // 'deleteSignature', 'deleteItem', 'editItem'
-        let selectedArchiveKey = null; // Almacena la clave del historial a restaurar
-
-        // --- INICIO: NUEVA VARIABLE PARA LISTA TEMPORAL ---
-        let tempMissingItemsList = []; // Para el constructor de listas (firma única)
-        // --- FIN: NUEVA VARIABLE PARA LISTA TEMPORAL ---
-
-        // --- INICIO: NUEVO ESTADO PARA ASIGNACIÓN EN LOTE ---
-        let itemBeingAssigned = null; // Almacena {name, partNumber, quantity}
-        // --- INICIO: NUEVOS ELEMENTOS DOM PARA FORMULARIO MÚLTIPLE ---
-        const singleItemFormContainer = document.getElementById('single-item-form-container');
-        const multiItemFormContainer = document.getElementById('multi-item-form-container');
-        
-        const multiItemNameInput = document.getElementById('multi-item-name');
-        const multiItemPartNumberInput = document.getElementById('multi-item-part-number');
-        const multiItemQuantityInput = document.getElementById('multi-item-quantity');
-        const addItemToListBtn = document.getElementById('addItemToListBtn');
-        const tempItemListContainer = document.getElementById('temp-item-list-container');
-        // --- FIN: NUEVOS ELEMENTOS DOM ---
-
-
-        // --- INICIO: NUEVAS VARIABLES PARA SELECCIÓN MÚLTIPLE ---
-        let selectedInspections = new Set();
-        let isBatchSigning = false;
-        // --- FIN: NUEVAS VARIABLES PARA SELECCIÓN MÚLTIPLE ---
-
-        // Caché de datos
-        let allLoadedInspections = []; // Almacena todas las inspecciones cargadas
-        let allLoadedMissingItems = []; // Almacena todos los items faltantes
-        // --- FIN: NUEVAS VARIABLES GLOBALES DE ESTADO ---
-
-
-        // --- INICIO: NUEVOS ELEMENTOS DOM PARA SELECCIÓN MÚLTIPLE ---
-        const batchActionsContainer = document.getElementById('batch-actions-container');
-        const selectionCountEl = document.getElementById('selection-count');
-        const batchSignBtn = document.getElementById('batch-sign-btn');
-        const selectAllCheckbox = document.getElementById('select-all-checkbox');
-        // --- FIN: NUEVOS ELEMENTOS DOM ---
-
-
-        const DB_ROOT = "artifacts/FAH-980-DATA";
-        const INSPECTIONS_PATH = `${DB_ROOT}/public_data/trabajos_vencidos`;
-        const DETAILS_PATH = `${DB_ROOT}/public_data/orden_detalles`; 
-        const HISTORY_PATH = `${DB_ROOT}/historial_ordenes`; 
-
-        function getDetailsRef() {
-            return ref(db, DETAILS_PATH);
-        }
-        
-        function getInspectionRef(docId = null) {
-            if (docId) {
-                return ref(db, `${INSPECTIONS_PATH}/${docId}`);
-            }
-            return ref(db, INSPECTIONS_PATH);
-        }
-        
-        // --- INICIO: NUEVA FUNCIÓN STAMP ---
-        /**
-         * Sella la orden con el ID del usuario actual para detectar conflictos de sesión.
-         * Se llama después de CUALQUIER escritura exitosa en la BD.
-         */
-        function stampLastUpdate(actionName = 'update') {
-            if (!currentUserId || !isAuthReady) return;
-            // console.log(`Stamping update from ${currentUserId} for action: ${actionName}`);
-            
-            // Usamos el nodo de 'detalles' como el "sello" maestro
-            const detailsRef = getDetailsRef();
-            update(detailsRef, { 
-                lastUpdatedBy: currentUserId 
-            }).catch(err => console.error("Error stamping update:", err));
-        }
-        // --- FIN: NUEVA FUNCIÓN STAMP ---
-
-        // --- Botón de Imprimir Lista ---
-        const printListBtn = document.getElementById('print-list-btn');
-        if (printListBtn) {
-            printListBtn.addEventListener('click', () => {
-                document.body.classList.add('printing-missing-list');
-                window.print();
-            });
-        }
-        window.addEventListener('afterprint', () => {
-            document.body.classList.remove('printing-missing-list');
-        });
-
-        const saveDetailsBtn = document.getElementById('save-details-btn');
-        const detailFieldIds = [
-            'fecha-inicio', 'fecha-finalizacion', 'modelo', 'eng1-sn-tsn-tso',
-            'numero-serie', 'eng1-sn-csn-cso', 'matricula', 'eng2-sn-tsn-tso',
-            'ac-tt', 'eng2-sn-csn-cso', 'tq-events', 'cbox-sn-tsn-tso',
-            'landings', 'cbox-sn-csn-cs', 'elaborado-por', 'orden-trabajo-no',
-            'ns-motor-1', 'ns-motor-2' 
+        const baseMotorFields = [
+            { id: 'cont_exc', label: 'CONTINGENCY EXCURSIONS', limit: 0, factor: 1 },
+            { id: 'eng_hrs', label: 'ENGINE HRS', limit: 0, factor: 1 },
+            { id: 'eng_starts', label: 'ENGINE STARTS', limit: 0, factor: 1 },
+            { id: 'flights', label: 'FLIGHTS', limit: 0, factor: 1 },
+            { id: 'hub_1', label: 'HUB COMPRESOR 1.1', limit: 110000, factor: 3 },
+            { id: 'hub_2', label: 'HUB COMPRESOR 1.2', limit: 35000, factor: 1 },
+            { id: 'disk_2', label: '2ND STAGE COMPRESOR DISK', limit: 29000, factor: 1 },
+            { id: 'disk_3', label: '3RD STAGE COMPRESOR DISK', limit: 29000, factor: 1 },
+            { id: 'impeller', label: 'IMPELLER', limit: 29000, factor: 1 },
+            { id: 'ct_disk', label: 'COMPRESSOR TURBINE DISK', limit: 7200, factor: 0.9 },
+            { id: 'pt_disk_1', label: 'POWER TURBINE DISK 1.1', limit: 57000, factor: 4 },
+            { id: 'pt_disk_2', label: 'POWER TURBINE DISK 1.2', limit: 15000, factor: 1 },
+            { id: 'ciclos', label: 'CICLOS', limit: 0, factor: 1 }
         ];
 
-        const currentDateStr = new Date().toLocaleString('es-HN');
-        dateDisplay.textContent = currentDateStr;
-        document.getElementById('fecha-inicio').textContent = currentDateStr;
+        const config = [
+            { id: 'ac_hrs', label: 'AC HRS', group: 'GENERAL' },
+            { id: 'aterrizajes', label: 'ATERRIZAJES', group: 'GENERAL' },
+            { id: 'rins', label: 'RINS', group: 'GENERAL' },
+            { type: 'separator', label: 'MOTOR #1' },
+            ...baseMotorFields.map(f => ({ ...f, id: `${f.id}_1`, label: `${f.label} 1` })),
+            { type: 'separator', label: 'MOTOR #2' },
+            ...baseMotorFields.map(f => ({ ...f, id: `${f.id}_2`, label: `${f.label} 2` }))
+        ];
 
-        // --- AUTHENTICATION & DATA LOADING ---
-        async function initializeAppAndData() {
-            let auth;
-            if (!firebaseConfig || !firebaseConfig.projectId || !firebaseConfig.databaseURL) {
-                console.error("Error: Configuración de Firebase incompleta.", firebaseConfig);
-                loadingMessage.textContent = "Error: Configuración de Firebase incompleta.";
-                loadingMessage.classList.remove('hidden');
-                return;
-            }
-            try {
-                auth = getAuth(app); 
-            } catch (authError) {
-                console.error("Error fatal al inicializar 'getAuth(app)'.", authError);
-                loadingMessage.textContent = "Error al conectar con los servicios de autenticación.";
-                loadingMessage.classList.remove('hidden');
-                return;
-            }
+        // Toggle Dashboard Logic
+        document.getElementById('toggle-dashboard').addEventListener('click', () => {
+            document.getElementById('quick-dashboard').classList.toggle('open');
+        });
+
+        window.closeMirrorModal = () => document.getElementById('mirror-modal').style.display = 'none';
+        
+        window.executeMirror = async (mode) => {
+            closeMirrorModal();
+            document.getElementById('loader').style.display = 'flex';
             
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+            const mirrorBatch = {};
+
+            if (mode === 'ac_to_engines') {
+                const acData = globalData['ac_hrs'] || {};
+                const acVienen = globalData['vienen_ac_hrs'] || 0;
                 
-                isAuthReady = true;
-                currentUserId = auth.currentUser ? auth.currentUser.uid : null; // <-- NUEVO
-                console.log(`Autenticación exitosa. UserID: ${currentUserId}`);
-                
-                // --- INICIO: ¡NUEVA LÓGICA DE TOMA DE SESIÓN! ---
-                // Al recargar, esta función toma control de la sesión
-                // y se asegura de que este 'currentUserId' sea el 'lastUpdatedBy'.
-                // Esto rompe el bucle de "doble sesión".
-                if (currentUserId) {
-                    stampLastUpdate('session_takeover');
-                }
-                // --- FIN: NUEVA LÓGICA DE TOMA DE SESIÓN! ---
-                
-                loadOrderDetails();
-                loadExpiredInspections();
-
-            } catch (error) {
-                console.error("Error durante el proceso de signIn:", error);
-                loadingMessage.textContent = "Error al autenticarse. No se pueden cargar los datos.";
-                loadingMessage.classList.remove('hidden');
-            }
-        }
-        initializeAppAndData();
-
-        // --- LOAD AND SAVE ORDER DETAILS ---
-        function loadOrderDetails() {
-            const detailsRef = getDetailsRef();
-            onValue(detailsRef, (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    detailFieldIds.forEach(id => {
-                        const element = document.getElementById(id);
-                        if (element && data[id] !== undefined) {
-                            element.textContent = data[id];
-                        }
-                    });
-
-                    // --- INICIO: NUEVO CHECK DE CONFLICTO ---
-                    if (currentUserId && data.lastUpdatedBy && data.lastUpdatedBy !== currentUserId) {
-                        console.warn(`¡CONFLICTO DE SESIÓN DETECTADO! MyID: ${currentUserId}, TheirID: ${data.lastUpdatedBy}`);
-                        sessionConflictModal.classList.remove('hidden');
-                    }
-                    // --- FIN: NUEVO CHECK DE CONFLICTO ---
-                }
-            }, (error) => {
-                 console.error("Error al cargar detalles de la orden (RTDB):", error);
-            });
-        }
-
-        saveDetailsBtn.addEventListener('click', () => {
-            if (!isAuthReady) {
-                console.warn("Conectando... por favor espere un momento.");
-                return;
-            }
-            const dataToSave = {};
-            detailFieldIds.forEach(id => {
-                const element = document.getElementById(id);
-                dataToSave[id] = element ? element.textContent.trim() : '';
-            });
-            
-            const detailsRef = getDetailsRef();
-            set(detailsRef, dataToSave)
-                .then(() => {
-                    stampLastUpdate('saveDetails'); // <-- NUEVO
-                    saveDetailsBtn.textContent = '¡Guardado!';
-                    saveDetailsBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
-                    saveDetailsBtn.classList.add('bg-green-500');
-                    setTimeout(() => {
-                        saveDetailsBtn.textContent = 'Guardar Detalles';
-                        saveDetailsBtn.classList.remove('bg-green-500');
-                        saveDetailsBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
-                    }, 2000);
-                })
-                .catch((error) => {
-                    console.error("Error guardando detalles (RTDB):", error);
+                ['eng_hrs_1', 'eng_hrs_2'].forEach(engineKey => {
+                    mirrorBatch[`vienen_${engineKey}`] = acVienen;
+                    mirrorBatch[engineKey] = { ...acData };
                 });
-        });
-
-        // --- LOAD EXPIRED INSPECTIONS ---
-        function loadExpiredInspections() {
-            const inspectionsRef = getInspectionRef();
-            console.log(`[RTDB] Intentando cargar datos de la ruta: ${INSPECTIONS_PATH}`);
-
-            onValue(inspectionsRef, (snapshot) => {
-                loadingMessage.classList.add('hidden');
-                
-                const data = snapshot.val();
-                allLoadedInspections = []; // Limpiar caché
-
-                if (data) {
-                    allLoadedInspections = Object.keys(data).map(key => ({
-                        docId: key,
-                        ...data[key]
-                    }));
-                }
-                
-                renderExpiredInspections(allLoadedInspections);
-                renderMissingItemsTable(allLoadedInspections); 
-            }, (error) => {
-                console.error(`[RTDB ERROR] Fallo al leer la ruta ${INSPECTIONS_PATH}:`, error);
-                loadingMessage.textContent = "Error al cargar la lista. Revise la consola (F12).";
-                loadingMessage.classList.remove('hidden');
-            });
-        }
-        
-        function renderExpiredInspections(inspections) {
-            expiredListTableBody.innerHTML = '';
-            let signedCount = 0;
-            let totalCount = 0;
-            
-            const inspectionsWithDocId = inspections.filter(item => item !== null);
-            totalCount = inspectionsWithDocId.length;
-
-            if (totalCount === 0) {
-                expiredListTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="text-center py-8 text-gray-500">
-                            No hay inspecciones vencidas en este momento. ¡Buen trabajo!
-                        </td>
-                    </tr>
-                `;
-                updateProgressBar(0, 0); 
-                return;
-            }
-            
-            const groupedByTheme = inspectionsWithDocId.reduce((acc, item) => {
-                const theme = item.tema || item.name || 'Inspecciones Generales'; 
-                if (!acc[theme]) { acc[theme] = []; }
-                acc[theme].push(item);
-                return acc;
-            }, {});
-            
-            const themeOrder = [
-                'SCHEDULE INSPECTIONS', 'ENGINE 1 INSPECCIONES', 'ENGINE 2 INSPECCIONES', 'SPECIAL INSPECTIONS',
-                'LUBRICACION', 'MISCELLANEOUS', 'DIRECTIVAS DE AERONAVEGABILIDAD Y BOLETINES DE SERVICIO', 'AIRWORTHINESS LIMITATIONS SCHEDULE', 'Inspecciones Generales'
-            ];
-
-            const sortedThemes = Object.keys(groupedByTheme).sort((a, b) => {
-                const indexA = themeOrder.indexOf(a);
-                const indexB = themeOrder.indexOf(b);
-                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-                if (indexA !== -1) return -1;
-                if (indexB !== -1) return 1;
-                return a.localeCompare(b);
-            });
-
-
-            let itemCounter = 1;
-
-            for (const theme of sortedThemes) {
-                const themeRow = document.createElement('tr');
-                themeRow.className = 'bg-blue-100';
-                themeRow.innerHTML = `<th colspan="5" class="px-4 py-2 text-left text-sm font-bold text-blue-800">${theme}</th>`;
-                expiredListTableBody.appendChild(themeRow);
-
-                groupedByTheme[theme].forEach((item) => {
-                    if (item.signature && item.signature.signatureDataUrl) {
-                        signedCount++;
-                    }
-                    const row = document.createElement('tr');
-                    row.className = 'bg-white border-b hover:bg-red-50';
-                    
-                    const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(item.ref)}`;
-
-                    let signatureContent = '';
-                    if (item.signature && item.signature.signatureDataUrl) {
-                        signatureContent = `
-                            <img src="${item.signature.signatureDataUrl}" alt="Firma" />
-                            <p class="text-xs mt-1 font-semibold">${item.signature.signatureName || ''}</p>
-                        `;
-                    }
-                    
-                    const accionTomadaContent = item.accionTomada || '';
-
-                    row.innerHTML = `
-                        <!-- INICIO: NUEVA CELDA DE CHECKBOX -->
-                        <td class="px-4 py-3 text-center">
-                            <input type="checkbox" class="row-checkbox rounded border-gray-300 shadow-sm focus:ring-blue-500" data-doc-id="${item.docId}">
-                        </td>
-                        <!-- FIN: NUEVA CELDA -->
-                        <td class="px-4 py-3 text-center font-medium text-gray-900">${itemCounter++}</td>
-                        <td class="px-4 py-3 font-medium text-gray-900">
-                            ${item.name}
-                            <p class="text-xs text-red-600 font-semibold">(Frecuencia: ${item.freqText} / Última vez: ${item.lastDone || 'N/A'})</p>
-                        </td>
-                        <td class="px-4 py-3">
-                            <a href="${googleSearchUrl}" target="_blank" class="text-blue-600 hover:underline" title="Buscar referencia en Google">
-                                ${item.ref}
-                            </a>
-                        </td>
-                        <td class="px-4 py-3 editable-cell signature-cell text-center align-middle" data-doc-id="${item.docId}">${signatureContent}</td>
-                        <td class="px-4 py-3 editable-cell accion-tomada-cell" contenteditable="true" data-doc-id="${item.docId}">${accionTomadaContent}</td>
-                    `;
-                    expiredListTableBody.appendChild(row);
-                });
-            }
-            
-            updateProgressBar(signedCount, totalCount);
-
-            // --- INICIO: NUEVO ---
-            // Re-vincular listeners para la selección
-            setupSelectionListeners();
-            // Actualizar la UI de selección (en caso de que la lista se recargue)
-            updateSelectionUI();
-            // --- FIN: NUEVO ---
-        }
-
-        // --- Renderizar Tabla de Items Faltantes (con botones de acción) ---
-        function renderMissingItemsTable(inspections) {
-            missingItemsList.innerHTML = '';
-            allLoadedMissingItems = []; // Limpiar caché de items
-
-            inspections.forEach(inspection => {
-                if (inspection.itemsFaltantes) {
-                    // Convertimos el objeto de RTDB a un array, guardando la clave (itemId)
-                    Object.keys(inspection.itemsFaltantes).forEach(key => {
-                        allLoadedMissingItems.push({
-                            ...inspection.itemsFaltantes[key],
-                            itemId: key, // ID del item (push key)
-                            inspectionId: inspection.docId, // ID de la inspección
-                            relatedJobName: inspection.name || 'Tarea desconocida' 
-                        });
-                    });
-                }
-            });
-
-            if (allLoadedMissingItems.length === 0) {
-                missingItemsSection.classList.add('hidden');
-                return;
-            }
-
-            missingItemsSection.classList.remove('hidden'); 
-
-            allLoadedMissingItems.forEach(item => {
-                const row = document.createElement('tr');
-                row.className = 'bg-white border-b hover:bg-purple-50';
-                
-                const typeLabel = item.type === 'consumible' ? 
-                    '<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium text-xs">Consumible</span>' : 
-                    '<span class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium text-xs">Repuesto</span>';
-
-                // --- INICIO: NUEVA LÓGICA PARA CELDA DE FIRMA ---
-                let reportedByContent = '<span class="text-xs text-gray-400">N/A</span>';
-                if (item.reportedBy && (item.reportedBy.name || item.reportedBy.signatureDataUrl)) {
-                    if (item.reportedBy.signatureDataUrl) {
-                        reportedByContent = `
-                            <img src="${item.reportedBy.signatureDataUrl}" alt="Firma" />
-                            <p class="text-xs mt-1 font-semibold">${item.reportedBy.name || ''}</p>
-                        `;
-                    } else {
-                        // Fallback si solo hay nombre
-                         reportedByContent = `<p class="text-xs mt-1 font-semibold">${item.reportedBy.name}</p>`;
-                    }
-                }
-                // --- FIN: NUEVA LÓGICA PARA CELDA DE FIRMA ---
-
-                row.innerHTML = `
-                    <td class="px-4 py-3 text-gray-700">${item.relatedJobName}</td>
-                    <td class="px-4 py-3">${typeLabel}</td>
-                    <td class="px-4 py-3 font-medium text-gray-900">${item.name || 'N/A'}</td>
-                    <td class="px-4 py-3 text-gray-600">${item.partNumber || 'N/A'}</td>
-                    <td class="px-4 py-3 text-center font-medium text-gray-900">${item.quantity || '1'}</td>
-                    <!-- INICIO: NUEVA CELDA -->
-                    <td class="px-4 py-3 text-center align-middle">${reportedByContent}</td>
-                    <!-- FIN: NUEVA CELDA -->
-                    <td class="px-4 py-3 text-center no-print">
-                        <button class="table-action-btn edit-btn edit-item-btn" data-item-id="${item.itemId}" data-inspection-id="${item.inspectionId}" title="Editar Item">Editar</button>
-                        <button class="table-action-btn delete-btn delete-item-btn" data-item-id="${item.itemId}" data-inspection-id="${item.inspectionId}" title="Borrar Item">Borrar</button>
-                    </td>
-                `;
-                missingItemsList.appendChild(row);
-            });
-        }
-
-        function updateProgressBar(signed, total) {
-            const percentage = total > 0 ? Math.round((signed / total) * 100) : 0;
-            const progressBar = document.getElementById('progress-bar');
-            const progressText = document.getElementById('progress-text');
-
-            if (progressBar && progressText) {
-                progressBar.style.width = `${percentage}%`;
-                progressText.textContent = `${percentage}%`;
-                
-                if (percentage === 100) {
-                    progressBar.classList.remove('bg-blue-600');
-                    progressBar.classList.add('bg-green-600');
-                } else {
-                    progressBar.classList.remove('bg-green-600');
-                    progressBar.classList.add('bg-blue-600');
-                }
-            }
-        }
-
-        // --- INICIO: NUEVO EVENT LISTENER PARA ABRIR MODAL DE FIRMA ---
-        
-        /**
-         * Listener delegado para las celdas de firma en la tabla.
-         * Abre el modal para firmar o el modal de clave para borrar.
-         */
-        expiredListTableBody.addEventListener('click', (e) => {
-            const signatureCell = e.target.closest('.signature-cell');
-            if (signatureCell) {
-                // Prevenir que se abra si hay una firma (para borrar, se usará otro método)
-                const hasSignature = signatureCell.querySelector('img');
-                
-                if (!hasSignature) {
-                    // No hay firma, abrir modal para firmar
-                    openSignatureModal(signatureCell);
-                } else {
-                    // Ya hay firma, abrir modal de clave para borrar
-                    itemToManage = { docId: signatureCell.dataset.docId };
-                    currentPasswordAction = 'deleteSignature';
-                    
-                    passwordModalTitle.textContent = 'Borrar Firma';
-                    passwordModalDescription.textContent = 'Para borrar esta firma, ingrese la clave de supervisor.';
-                    passwordConfirmBtn.textContent = 'Confirmar Borrado';
-                    passwordInput.value = '';
-                    passwordError.textContent = '';
-                    passwordModal.classList.remove('hidden');
-                    passwordInput.focus();
-                }
-            }
-        });
-
-        /**
-         * Listeners para las firmas del footer (Supervisor / Inspector).
-         */
-        document.querySelectorAll('.footer-signature-area').forEach(area => {
-            area.addEventListener('click', () => {
-                const hasSignature = area.querySelector('img');
-                if (!hasSignature) {
-                    openSignatureModal(area);
-                }
-                // Nota: No se implementa borrado en firmas de footer,
-                // ya que son solo UI y no están ligadas a un docId.
-                // Se sobreescriben si se vuelve a firmar.
-            });
-        });
-        // --- FIN: NUEVO EVENT LISTENER ---
-
-
-        /*
-            INICIO: CORRECCIÓN DE ERROR DE SINTAXIS
-            El error que me mostraste estaba en esta función.
-            La he reescrito por completo para arreglar el .then() y .catch()
-            que estaban mal colocados.
-        */
-        
-        // --- Guardar "Acción Tomada" en Blur ---
-        expiredListTableBody.addEventListener('blur', (e) => {
-            if (!isAuthReady) return;
-            if (e.target && e.target.classList.contains('accion-tomada-cell')) {
-                const docId = e.target.dataset.docId;
-                const text = e.target.textContent.trim();
-                if (docId) {
-                    const inspectionRef = getInspectionRef(docId);
-                    
-                    // La corrección es encadenar el .then() y .catch()
-                    // DIRECTAMENTE a la función update(), DENTRO del if.
-                    update(inspectionRef, {
-                        accionTomada: text
-                    })
-                    .then(() => stampLastUpdate('accionTomada')) // <-- Así es como va
-                    .catch(error => console.error("Error guardando acción tomada (RTDB):", error));
-                }
-            }
-        }, true);
-        
-        /* --- FIN DE LA CORRECCIÓN --- */
-        
-        // --- Manejo de Firma (Modal) ---
-        function openSignatureModal(cell) {
-            activeSignatureCell = cell;
-            
-            const modalTitle = document.getElementById('signature-modal-title');
-            const nameLabel = document.querySelector('#signature-modal label[for="signature-name"]');
-            const title = cell.dataset.title;
-
-            if (title === 'Inspector') {
-                modalTitle.textContent = 'Firma del Inspector';
-                nameLabel.textContent = 'Nombre del Inspector';
-            } else if (title === 'Supervisor') {
-                 modalTitle.textContent = 'Firma del Supervisor';
-                 nameLabel.textContent = 'Nombre del Supervisor';
-            } else { 
-                modalTitle.textContent = 'Firma del Mecánico';
-                nameLabel.textContent = 'Nombre del Mecánico';
-            }
-
-            signatureModal.classList.remove('hidden');
-            signatureNameInput.value = '';
-            const ratio =  Math.max(window.devicePixelRatio || 1, 1);
-            signatureCanvas.width = signatureCanvas.offsetWidth * ratio;
-            signatureCanvas.height = signatureCanvas.offsetHeight * ratio;
-            signatureCanvas.getContext("2d").scale(ratio, ratio);
-            
-            try {
-                signaturePad = new SignaturePad(signatureCanvas, {
-                    backgroundColor: 'rgb(255, 255, 255)'
-                });
-            } catch (padError) {
-                console.error("Error al inicializar SignaturePad.", padError);
-            }
-        }
-
-        // --- INICIO: Lógica de "No reportó faltantes" ---
-        
-        /**
-         * Registra en la celda "Acción Tomada" que no se reportaron items.
-         */
-        function logNoItemsReported() {
-            if (activeInspectionDocId && lastSignatureData.name) {
-                const cell = document.querySelector(`.accion-tomada-cell[data-doc-id="${activeInspectionDocId}"]`);
-                if (cell) {
-                    let newText = cell.textContent.trim();
-                    const logEntry = `No se reportaron faltantes. Firmado: ${lastSignatureData.name}`;
-                    
-                    if (!newText.includes(logEntry)) {
-                        newText = newText ? `${newText}. ${logEntry}` : logEntry;
-                    }
-                    
-                    cell.textContent = newText;
-                    
-                    const inspectionRef = getInspectionRef(activeInspectionDocId);
-                    update(inspectionRef, {
-                        accionTomada: newText
-                    }).catch(error => console.error("Error guardando 'Acción Tomada' por 'No':", error));
-                }
-            }
-        }
-        
-        /**
-         * Cierra el modal de firma y limpia las variables temporales.
-         */
-        function closeSignatureModal() {
-            signatureModal.classList.add('hidden');
-            if(signaturePad){
-                signaturePad.clear();
-                signaturePad.off();
-            }
-            signatureNameInput.value = '';
-            activeSignatureCell = null;
-            // --- INICIO: MODIFICACIÓN ---
-            // Limpiar solo si NO estamos en modo de firma en lote
-            // (porque en lote, necesitamos los datos de la firma para el reporte de items).
-            
-            // ¡CORRECCIÓN! Se elimina este bloque 'if' completo.
-            // La lógica dentro de este bloque estaba borrando 'activeInspectionDocId'
-            // y 'lastSignatureData' demasiado pronto, causando el error
-            // al guardar la lista de items en modo de firma única.
-            
-            /* ESTAS LÍNEAS SE ELIMINAN:
-            if (!isBatchSigning) {
-                activeInspectionDocId = null; // <-- ¡EL ERROR!
-                currentItemType = null; 
-                lastSignatureData = { name: '', dataUrl: '' }; 
-            }
-            */
-            // --- FIN: MODIFICACIÓN ---
-        }
-        // --- FIN: Lógica de "No reportó faltantes" ---
-        
-        signatureCancelBtn.addEventListener('click', () => {
-            isBatchSigning = false; // <-- AÑADIDO
-            closeSignatureModal();
-        });
-        
-        signatureSaveBtn.addEventListener('click', async () => { // <-- AÑADIDO 'async'
-            if (!isAuthReady) {
-                console.warn("Conectando... por favor espere un momento.");
-                return;
-            }
-            const name = signatureNameInput.value.trim();
-            if (signaturePad && !signaturePad.isEmpty() && name) {
-                
-                const dataURL = signaturePad.toDataURL('image/png');
-                const signatureData = {
-                    signatureDataUrl: dataURL,
-                    signatureName: name
-                };
-
-                // --- INICIO: NUEVA LÓGICA DE FIRMA EN LOTE ---
-                if (isBatchSigning) {
-                    
-                    // 1. Guardar datos de firma temporalmente (para reporte de items en lote)
-                    lastSignatureData.name = name;
-                    lastSignatureData.dataUrl = dataURL;
-                    
-                    // 2. Deshabilitar botones para evitar clics múltiples
-                    signatureSaveBtn.textContent = 'Firmando...';
-                    
-                    const promises = [];
-                    for (const docId of selectedInspections) {
-                        const inspectionRef = getInspectionRef(docId);
-                        promises.push(
-                            update(inspectionRef, { signature: signatureData })
-                        );
-                    }
-                    
-                    try {
-                        await Promise.all(promises);
-                        console.log(`Firmadas ${promises.length} tareas.`);
-                        stampLastUpdate('batchSign'); // <-- NUEVO
-                        
-                        // --- INICIO: MODIFICACIÓN ---
-                        // 3. NO limpiar la selección todavía.
-                        // selectedInspections.clear(); <-- REMOVIDO
-                        // updateSelectionUI(); <-- REMOVIDO
-                        
-                        // 4. Cerrar modal de firma e iniciar reporte de items en lote
-                        closeSignatureModal(); 
-                        openAskModal('consumible', '¿Faltó algún consumible para este LOTE de tareas?');
-                        // --- FIN: MODIFICACIÓN ---
-
-                    } catch (error) {
-                        console.error("Error durante la firma en lote:", error);
-                        // Si falla, limpiar todo
-                        cleanupBatchMode();
-                    } 
-                    // --- INICIO: MODIFICACIÓN ---
-                    // Se ha quitado el bloque 'finally' de aquí, 
-                    // la limpieza se hará con cleanupBatchMode() al final del workflow de items.
-                    // --- FIN: MODIFICACIÓN ---
-
-                // --- FIN: NUEVA LÓGICA DE FIRMA EN LOTE ---
-
-                } else if (activeSignatureCell) { 
-                    // --- INICIO: LÓGICA ANTERIOR (FIRMA ÚNICA) ---
-                    const docId = activeSignatureCell.dataset.docId; 
-
-                    if (docId) {
-                        update(getInspectionRef(docId), {
-                            signature: signatureData
-                        })
-                            .then(() => {
-                                stampLastUpdate('singleSign'); // <-- NUEVO
-                                // --- INICIO: Nuevo Workflow ---
-                                // 1. Guardar datos de firma temporalmente
-                                lastSignatureData.name = name;
-                                lastSignatureData.dataUrl = dataURL;
-                                activeInspectionDocId = docId; 
-                                
-                                // 1. Cerramos el modal de firma AHORA.
-                                closeSignatureModal(); 
-                                
-                                // 2. Abrimos el siguiente modal.
-                                openAskModal('consumible', '¿Faltó algún consumible para esta tarea?');
-                            })
-                            .catch(error => {
-                                console.error("Error guardando firma (RTDB):", error);
-                            });
-                    } else { 
-                        // Fallback for footer signatures (UI only)
-                        activeSignatureCell.innerHTML = '';
-                        const img = document.createElement('img');
-                        img.src = dataURL;
-                        img.alt = 'Firma';
-                        const nameElement = document.createElement('p');
-                        nameElement.className = 'text-xs mt-1 font-semibold';
-                        nameElement.textContent = name;
-                        activeSignatureCell.appendChild(img);
-                        activeSignatureCell.appendChild(nameElement);
-                        closeSignatureModal();
-                    }
-                    // --- FIN: LÓGICA ANTERIOR (FIRMA ÚNICA) ---
-                }
-
+                showToast("AC HRS sincronizado a Motores 1 y 2");
             } else {
-                console.warn("Por favor, dibuje su firma y escriba su nombre antes de guardar.");
-            }
-        });
-
-        // --- Manejo de Modales (Contraseña, Confirmar) ---
-        passwordCancelBtn.addEventListener('click', () => {
-            passwordModal.classList.add('hidden');
-            itemToManage = {};
-            currentPasswordAction = '';
-            selectedArchiveKey = null; // <-- AÑADIDO
-        });
-
-        passwordConfirmBtn.addEventListener('click', async () => { // <-- AÑADIDO ASYNC
-            const password = passwordInput.value;
-            // Resetear estilos del botón de confirmar (por si se cambió a azul)
-            passwordConfirmBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-            passwordConfirmBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-
-            if (password === "Kevin") { // Clave hardcodeada
-                switch (currentPasswordAction) {
-                    case 'deleteSignature':
-                        if (itemToManage.docId) {
-                            const inspectionRef = getInspectionRef(itemToManage.docId);
-                            update(inspectionRef, { signature: null })
-                                .then(() => stampLastUpdate('deleteSign')); // <-- NUEVO
-                        }
-                        break;
+                baseMotorFields.forEach(field => {
+                    const m1Key = `${field.id}_1`;
+                    const m2Key = `${field.id}_2`;
                     
-                    case 'deleteItem':
-                        if (itemToManage.inspectionId && itemToManage.itemId) {
-                            const itemRef = ref(db, `${INSPECTIONS_PATH}/${itemToManage.inspectionId}/itemsFaltantes/${itemToManage.itemId}`);
-                            remove(itemRef)
-                                .then(() => stampLastUpdate('deleteItem')); // <-- NUEVO
-                        }
-                        break;
-                        
-                    case 'editItem':
-                        const item = allLoadedMissingItems.find(i => i.itemId === itemToManage.itemId);
-                        if (item) {
-                            itemFormModalTitle.textContent = "Editar Item Faltante";
-                            itemNameInput.value = item.name;
-                            itemPartNumberInput.value = item.partNumber;
-                            itemQuantityInput.value = item.quantity;
-                            itemFormError.textContent = '';
-                            
-                            // Cambiar comportamiento del botón Guardar
-                            itemFormSaveBtn.textContent = 'Actualizar Item';
-                            itemFormSaveBtn.removeEventListener('click', handleSaveNewItem); 
-                            itemFormSaveBtn.addEventListener('click', handleUpdateItem); 
-                            
-                            // --- INICIO: ¡AQUÍ ESTÁ LA CORRECCIÓN! ---
-                            // Forzar que se muestre el formulario de un solo item
-                            // y se oculte el de multi-item.
-                            singleItemFormContainer.style.display = 'block';
-                            multiItemFormContainer.style.display = 'none';
-                            // --- FIN: ¡AQUÍ ESTÁ LA CORRECCIÓN! ---
-                            
-                            itemFormModal.classList.remove('hidden');
-                        }
-                        break;
+                    if((mode === 'vienen' || mode === 'all') && globalData[`vienen_${m1Key}`] !== undefined) {
+                        mirrorBatch[`vienen_${m2Key}`] = globalData[`vienen_${m1Key}`];
+                    }
                     
-                    case 'restoreArchive': // <-- NUEVO CASE
-                        if (selectedArchiveKey) {
-                            try {
-                                const archiveDataRef = ref(db, `${HISTORY_PATH}/${selectedArchiveKey}`);
-                                const snapshot = await get(archiveDataRef);
-                                const archiveData = snapshot.val();
-
-                                if (archiveData && archiveData.inspections && archiveData.details) {
-                                    // El historial guarda un ARRAY. 
-                                    // La base de datos activa (trabajos_vencidos) espera un OBJETO 
-                                    // donde la clave es el 'docId' (que está en el item).
-                                    const inspectionsToRestore = archiveData.inspections.reduce((acc, item) => {
-                                        if (item && item.docId) {
-                                            acc[item.docId] = item;
-                                        }
-                                        return acc;
-                                    }, {});
-                                    
-                                    const detailsToRestore = archiveData.details;
-
-                                    // Sobreescribir los datos activos
-                                    await set(getInspectionRef(), inspectionsToRestore);
-                                    await set(getDetailsRef(), detailsToRestore);
-                                    
-                                    console.log("¡Orden restaurada con éxito!");
-                                    // Los listeners onValue se encargarán de recargar la UI.
-                                } else {
-                                    console.error("Datos de historial corruptos o incompletos.");
-                                }
-                            } catch (error) {
-                                console.error("Error al restaurar la orden (RTDB):", error);
-                            }
-                            selectedArchiveKey = null; // Limpiar
-                        }
-                        break;
-                }
-                passwordModal.classList.add('hidden');
-            } else {
-                passwordError.textContent = 'Clave incorrecta';
+                    if((mode === 'table' || mode === 'all') && globalData[m1Key]) {
+                        mirrorBatch[m2Key] = { ...globalData[m1Key] };
+                    }
+                });
+                showToast(`Motor 2 actualizado (${mode})`);
             }
-        });
-
-        confirmModalCancelBtn.addEventListener('click', () => {
-            confirmModal.classList.add('hidden');
-            confirmAction = () => {}; // Reset confirm action
-        });
-
-        archiveListCloseBtn.addEventListener('click', () => {
-            archiveListModal.classList.add('hidden');
-        });
-
-        loadHistoryBtn.addEventListener('click', async () => {
-            archiveListModal.classList.remove('hidden');
-            archiveLoadingMsg.classList.remove('hidden');
-            archiveListContainer.innerHTML = '';
 
             try {
-                const historyRef = ref(db, HISTORY_PATH);
-                const snapshot = await get(historyRef);
-                const historyData = snapshot.val();
-
-                if (historyData) {
-                    // Ordenar por clave (timestamp) descendente
-                    const sortedKeys = Object.keys(historyData).sort().reverse();
-                    
-                    if (sortedKeys.length === 0) {
-                        archiveListContainer.innerHTML = '<p class="text-gray-500">No hay órdenes en el historial.</p>';
-                    }
-
-                    sortedKeys.forEach(key => {
-                        const item = historyData[key];
-                        // Formatear la fecha para que sea legible
-                        const date = new Date(item.archivedAt || key.replace(/-/g, ':'));
-                        const formattedDate = date.toLocaleString('es-HN', { 
-                            day: '2-digit', month: '2-digit', year: 'numeric', 
-                            hour: '2-digit', minute: '2-digit' 
-                        });
-                        
-                        const details = item.details;
-                        const summary = `Matrícula: ${details.matricula || 'N/A'}, O.T.: ${details['orden-trabajo-no'] || 'N/A'}`;
-
-                        const btn = document.createElement('button');
-                        btn.className = 'w-full text-left p-4 bg-white border rounded-lg hover:bg-gray-100 shadow-sm transition-all';
-                        btn.innerHTML = `
-                            <p class="font-semibold text-blue-700">Archivado: ${formattedDate}</p>
-                            <p class="text-sm text-gray-600">${summary}</p>
-                        `;
-                        btn.setAttribute('data-archive-key', key);
-                        btn.addEventListener('click', () => {
-                            handleArchiveSelection(key);
-                        });
-                        archiveListContainer.appendChild(btn);
-                    });
-                } else {
-                    archiveListContainer.innerHTML = '<p class="text-gray-500">No hay órdenes en el historial.</p>';
-                }
-            } catch (error) {
-                console.error("Error al cargar el historial (RTDB):", error);
-                archiveListContainer.innerHTML = '<p class="text-red-500">Error al cargar el historial.</p>';
+                const dbRef = ref(db, `${PATH_ROOT}/${currentPeriod}`);
+                await update(dbRef, mirrorBatch);
+            } catch (e) {
+                showToast("Error al sincronizar");
             } finally {
-                archiveLoadingMsg.classList.add('hidden');
+                document.getElementById('loader').style.display = 'none';
+                renderMatrix();
             }
-        });
-
-        function handleArchiveSelection(key) {
-            selectedArchiveKey = key;
-            archiveListModal.classList.add('hidden');
-            
-            currentPasswordAction = 'restoreArchive';
-            passwordModalTitle.textContent = 'Restaurar Orden';
-            passwordModalDescription.textContent = '¡ADVERTENCIA! Esto SOBREESCRIBIRÁ la lista de trabajo actual. Ingrese la clave para confirmar.';
-            passwordConfirmBtn.textContent = 'Confirmar Restauración';
-            passwordConfirmBtn.classList.remove('bg-red-600', 'hover:bg-red-700'); // No es tan "destructivo" como un borrado
-            passwordConfirmBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-            passwordInput.value = '';
-            passwordError.textContent = '';
-            passwordModal.classList.remove('hidden');
-            passwordInput.focus();
-        }
-        // --- FIN: NUEVOS LISTENERS PARA HISTORIAL ---
-
-
-        // --- Generar Reporte ---
-        const reportBtn = document.getElementById('report-btn');
-        reportBtn.addEventListener('click', async () => {
-            if (!isAuthReady) {
-                console.warn("Conectando... por favor espere un momento.");
-                return;
-            }
-            
-            // Usamos el caché global
-            if (!allLoadedInspections || allLoadedInspections.length === 0) {
-                console.warn("No hay inspecciones en la lista para generar un reporte.");
-                return;
-            }
-            
-            generateDiscrepancyReport(allLoadedInspections);
-        });
-
-        function generateDiscrepancyReport(inspections) {
-            const matricula = document.getElementById('matricula').textContent || 'FAH-980'; 
-            const fecha = new Date().toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: '2-digit' }).replace('.', '').toUpperCase();
-            const inspectionsArray = inspections.filter(item => item !== null);
-
-            let reportContent = `
-                <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte - ${matricula}</title>
-                <style>
-                    body { font-family: Arial, sans-serif; font-size: 11px; counter-reset: page-counter; }
-                    .report-container { width: 100%; max-width: 8.5in; margin: auto; display: flex; flex-direction: column; min-height: 10.5in; }
-                    .report-body { flex-grow: 1; }
-                    .header { text-align: center; }
-                    .header h1, .header h2, .header h3 { margin: 1px 0; font-weight: bold; }
-                    .header h1 { font-size: 16px; } .header h2 { font-size: 14px; } .header h3 { font-size: 12px; font-weight: normal; }
-                    .info-table { width: 100%; margin-top: 15px; margin-bottom: 15px; border: none; }
-                    .info-table td { font-size: 12px; font-weight: bold; }
-                    .notification { font-size: 12px; margin-bottom: 10px; }
-                    .data-table { width: 100%; border-collapse: collapse; border: 2px solid black; }
-                    .data-table th { color: white; text-align: left; padding: 6px; font-size: 14px; border: 2px solid black; }
-                    .data-table td { border: 1.5px solid black; padding: 5px; vertical-align: top; }
-                    .data-table .num { font-weight: bold; text-align: center; width: 45px; }
-                    .discrepancy-table th { background-color: #2E75B5; }
-                    .discrepancy-table td { background-color: #FFC000; }
-                    .corrective-table { margin-top: 20px; }
-                    .corrective-table th { background-color: #00B050; }
-                    .corrective-table td { background-color: #E2EFDA; }
-                    .corrective-table .mechanic-sig { text-align: center; width: 150px; }
-                    .corrective-table .mechanic-sig img { max-height: 30px; display: block; margin: 0 auto 2px; }
-                    .corrective-table .mechanic-sig p { font-size: 9px; margin: 0; line-height: 1; }
-                    .signatures-container { margin-top: 30px; font-size: 10px; }
-                    .official-signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 60px; margin-top: 30px; text-align: center; }
-                    .official-signatures div { padding-top: 40px; border-top: 1px solid black; }
-                    @media print {
-                        body { margin: 0.5in; } .no-print { display: none; }
-                        .page-footer { position: fixed; bottom: 0.25in; right: 0.5in; font-size: 10px; }
-                        .page-footer::after { counter-increment: page-counter; content: "Página " counter(page-counter); }
-                    }
-                </style></head><body>
-                <div class="report-container">
-                    <div class="report-body">
-                        <div class="header">
-                            <h1>FUERZAS ARMADAS DE HONDURAS</h1>
-                            <h2>FUERZA AÉREA HONDUREÑA</h2>
-                            <h3>Base Aérea "Coronel Hernán Acosta Mejía"</h3>
-                            <h2>REPORTE DE TRABAJO EFECTUADO</h2>
-                        </div>
-                        <table class="info-table">
-                            <tr><td>AVION No. Bell-412 ${matricula}</td><td style="text-align: right;">FECHA: ${fecha}</td></tr>
-                        </table>
-                        <p class="notification">El Taller / Sección Helicópteros notifica que el trabajo:</p>
-                        <table class="data-table discrepancy-table">
-                            <thead><tr><th colspan="2">Discrepancia:</th></tr></thead>
-                            <tbody>
-            `;
-            
-            const groupedByTheme = inspectionsArray.reduce((acc, item) => {
-                const theme = item.tema || item.name || 'Inspecciones Generales';
-                if (!acc[theme]) { acc[theme] = []; }
-                acc[theme].push(item);
-                return acc;
-            }, {});
-
-            const themeOrder = [
-                'SCHEDULE INSPECTIONS', 'ENGINE 1 INSPECCIONES', 'ENGINE 2 INSPECCIONES', 'SPECIAL INSPECTIONS',
-                'LUBRICACION', 'MISCELLANEOUS', 'DIRECTIVAS DE AERONAVEGABILIDAD Y BOLETINES DE SERVICIO', 'AIRWORTHINESS LIMITATIONS SCHEDULE', 'Inspecciones Generales'
-            ];
-            
-            const sortedThemes = Object.keys(groupedByTheme).sort((a, b) => {
-                const indexA = themeOrder.indexOf(a);
-                const indexB = themeOrder.indexOf(b);
-                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-                if (indexA !== -1) return -1;
-                if (indexB !== -1) return 1;
-                return a.localeCompare(b);
-            });
-
-            const generateDiscrepancyTableRows = () => {
-                let content = ''; let themeCounter = 1;
-                for (const theme of sortedThemes) {
-                    let itemCounter = 1;
-                    content += `<tr><td class="num">${themeCounter}.</td><td><strong>${theme}</strong></td></tr>`;
-                    groupedByTheme[theme].forEach(item => {
-                        content += `<tr><td class="num">${themeCounter}.${itemCounter++}</td><td>Efectuar ${item.name} / ${item.ref}</td></tr>`;
-                    });
-                    themeCounter++;
-                }
-                return content;
-            };
-
-            reportContent += generateDiscrepancyTableRows();
-            reportContent += `</tbody></table><table class="data-table corrective-table"><thead><tr><th colspan="2">Acción Correctiva:</th><th>Técnico Especialista</th></tr></thead><tbody>`;
-
-            const generateCorrectiveTableRows = () => {
-                let content = ''; let themeCounter = 1;
-                for (const theme of sortedThemes) {
-                    let itemCounter = 1;
-                    content += `<tr><td class="num">${themeCounter}.</td><td colspan="2"><strong>${theme}</strong></td></tr>`;
-                    groupedByTheme[theme].forEach(item => {
-                        const signatureCell = (item.signature && item.signature.signatureDataUrl)
-                            ? `<td class="mechanic-sig"><img src="${item.signature.signatureDataUrl}" alt="Firma"><p>${item.signature.signatureName || ''}</p></td>`
-                            : '<td></td>';
-                        content += `<tr><td class="num">${themeCounter}.${itemCounter++}</td><td>Se completó ${item.name} / ${item.ref}</td>${signatureCell}</tr>`;
-                    });
-                    themeCounter++;
-                }
-                return content;
-            };
-            
-            reportContent += generateCorrectiveTableRows();
-            reportContent += `
-                                </tbody></table></div>
-                        <footer class="signatures-container">
-                             <div class="official-signatures">
-                                  <div><p>SUPERVISOR</p></div><div><p>INSPECTOR</p></div>
-                                  <div><p>JEFE TALLER / SECCION</p></div><div><p>JEFE DE LOGISTICA A-4</p></div>
-                             </div>
-                        </footer>
-                    </div><div class="page-footer"></div>
-                    <button class."no-print" onclick="window.print()" style="position: fixed; top: 10px; right: 10px; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 5px;">Imprimir Reporte</button>
-                </body></html>
-            `;
-
-            const reportWindow = window.open('', '_blank');
-            reportWindow.document.open();
-            reportWindow.document.write(reportContent);
-            reportWindow.document.close();
-        }
-
-        // --- Lógica para Items Faltantes (Consumibles / Repuestos) ---
-
-        function openAskModal(type, title) {
-            currentItemType = type; 
-            askModalTitle.textContent = title;
-            askModal.classList.remove('hidden');
-        }
-        function closeAskModal() {
-            askModal.classList.add('hidden');
-        }
-        
-        function openItemFormModal() {
-            const title = currentItemType === 'consumible' ? 'Añadir Consumible Faltante' : 'Añadir Repuesto Faltante';
-            itemFormModalTitle.textContent = title;
-            
-            itemFormError.textContent = '';
-            
-            // Asegurar que el botón de guardar esté en modo "Crear"
-            // (La lógica de "Actualizar" se añade dinámicamente)
-            itemFormSaveBtn.removeEventListener('click', handleUpdateItem);
-            itemFormSaveBtn.addEventListener('click', handleSaveNewItem);
-
-            // --- INICIO: LÓGICA DE UI (MOSTRAR/OCULTAR FORMULARIO) ---
-            if (isBatchSigning) {
-                // MODO LOTE: Usar el formulario simple
-                singleItemFormContainer.style.display = 'block';
-                multiItemFormContainer.style.display = 'none';
-                
-                // Limpiar campos del formulario simple
-                itemNameInput.value = '';
-                itemPartNumberInput.value = '';
-                itemQuantityInput.value = '1';
-                
-                itemFormSaveBtn.textContent = 'Guardar Item';
-                
-            } else {
-                // MODO FIRMA ÚNICA: Usar el constructor de listas
-                singleItemFormContainer.style.display = 'none';
-                multiItemFormContainer.style.display = 'block';
-                
-                // Limpiar lista temporal y campos del constructor
-                tempMissingItemsList = [];
-                renderTempItemsList();
-                multiItemNameInput.value = '';
-                multiItemPartNumberInput.value = '';
-                multiItemQuantityInput.value = '1';
-                
-                itemFormSaveBtn.textContent = 'Guardar Lista de Items';
-            }
-            // --- FIN: LÓGICA DE UI ---
-            
-            itemFormModal.classList.remove('hidden');
-            
-            // Enfocar el campo correspondiente
-            if (isBatchSigning) {
-                itemNameInput.focus();
-            } else {
-                multiItemNameInput.focus();
-            }
-        }
-
-        function closeItemFormModal() {
-            itemFormModal.classList.add('hidden');
-            
-            // --- INICIO: NUEVA LÓGICA DE CIERRE ---
-            // Limpiar lista temporal al cerrar
-            tempMissingItemsList = [];
-            
-            // Resetear el botón de guardar a su estado original (crear)
-            // (La lógica de "Actualizar" se añade dinámicamente)
-            itemFormSaveBtn.removeEventListener('click', handleUpdateItem);
-            itemFormSaveBtn.addEventListener('click', handleSaveNewItem);
-            // --- FIN: NUEVA LÓGICA DE CIERRE ---
-        }
-
-        // --- Event Listeners para Modales de Items ---
-        askModalYesBtn.addEventListener('click', () => {
-            closeAskModal();
-            openItemFormModal(); 
-        });
-
-        askModalNoBtn.addEventListener('click', () => {
-            closeAskModal();
-            
-            // --- INICIO: LÓGICA DE LOTE ---
-            if (isBatchSigning) {
-                if (currentItemType === 'consumible') {
-                    openAskModal('repuesto', '¿Faltó algún repuesto para este LOTE de tareas?');
-                } else {
-                    // Último paso (repuestos)
-                    logNoItemsReportedBatch(); // <-- Nueva función
-                    cleanupBatchMode(); // <-- Nueva función
-                }
-            // --- FIN: LÓGICA DE LOTE ---
-            
-            } else { // --- LÓGICA ORIGINAL (SINGLE) ---
-                if (currentItemType === 'consumible') {
-                    openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
-                } else {
-                    logNoItemsReported();
-                    activeInspectionDocId = null;
-                    currentItemType = null;
-                }
-            }
-        });
-
-        itemFormCancelBtn.addEventListener('click', () => {
-            // --- INICIO: LÓGICA DE CANCELAR FORMULARIO ---
-            closeItemFormModal();
-            
-            if (isBatchSigning) {
-                // Si cancelamos el formulario en modo LOTE, continuamos al siguiente paso
-                continueBatchWorkflow();
-            } else {
-                // Si cancelamos en modo ÚNICO, preguntamos por el siguiente tipo
-                if (currentItemType === 'consumible') {
-                    openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
-                } else {
-                    logNoItemsReported(); // <-- LOG "NO" (al cancelar el último paso)
-                    activeInspectionDocId = null;
-                    currentItemType = null;
-                }
-            }
-            // --- FIN: LÓGICA DE CANCELAR FORMULARIO ---
-        });
-
-        // --- INICIO: Lógica separada para Guardar/Actualizar Items ---
-        
-        /**
-         * Manejador para CREAR un nuevo item faltante.
-         */
-        async function handleSaveNewItem() {
-            
-            // --- INICIO: LÓGICA DE LOTE (SIN CAMBIOS) ---
-            if (isBatchSigning) {
-                const name = itemNameInput.value.trim();
-                const partNumber = itemPartNumberInput.value.trim();
-                const quantity = itemQuantityInput.value.trim();
-
-                if (!name || !quantity) {
-                    itemFormError.textContent = 'El Nombre y la Cantidad son obligatorios.';
-                    setTimeout(() => { itemFormError.textContent = ''; }, 3000);
-                    return;
-                }
-                
-                itemBeingAssigned = { name, partNumber, quantity };
-                closeItemFormModal();
-                openAssignItemModal();
-            
-            // --- FIN: LÓGICA DE LOTE ---
-            
-            // --- INICIO: LÓGICA DE FIRMA ÚNICA (MODIFICADA) ---
-            } else if (activeInspectionDocId) {
-                
-                if (tempMissingItemsList.length === 0) {
-                    itemFormError.textContent = 'Debe agregar al menos un ítem a la lista.';
-                    setTimeout(() => { itemFormError.textContent = ''; }, 3000);
-                    return;
-                }
-                
-                const promises = [];
-                for (const item of tempMissingItemsList) {
-                    // Usamos el TIPO DE MODAL (Consumible o Repuesto)
-                    promises.push(saveMissingItem(activeInspectionDocId, currentItemType, item));
-                }
-                
-                try {
-                    await Promise.all(promises);
-                    console.log(`Guardados ${promises.length} items para la tarea ${activeInspectionDocId}`);
-                    stampLastUpdate('saveMultiItems'); // Nuevo Sello
-                } catch (error) {
-                    console.error("Error guardando lista de items (RTDB):", error);
-                }
-                
-                closeItemFormModal(); // Cierra al guardar la lista
-
-                // Continuar el workflow
-                if (currentItemType === 'consumible') {
-                    openAskModal('repuesto', '¿Faltó algún repuesto para esta tarea?');
-                } else {
-                    activeInspectionDocId = null;
-                    currentItemType = null;
-                    lastSignatureData = { name: '', dataUrl: '' }; // Limpiar firma
-                }
-            
-            // --- FIN: LÓGICA DE FIRMA ÚNICA ---
-                
-            } else {
-                console.error("Error: No se encontró activeInspectionDocId y no está en modo lote.");
-            }
-        }
-        
-        /**
-         * Manejador para ACTUALIZAR un item existente (desde el modal de clave).
-         */
-        async function handleUpdateItem() {
-            const name = itemNameInput.value.trim();
-            const partNumber = itemPartNumberInput.value.trim();
-            const quantity = itemQuantityInput.value.trim();
-
-            if (!name || !quantity) {
-                itemFormError.textContent = 'El Nombre y la Cantidad son obligatorios.';
-                setTimeout(() => { itemFormError.textContent = ''; }, 3000);
-                return;
-            }
-
-            if (!itemToManage.inspectionId || !itemToManage.itemId) {
-                console.error("Error: No se encontró itemToManage.inspectionId o itemId para actualizar.");
-                closeItemFormModal();
-                return;
-            }
-            
-            // --- INICIO: NUEVA LÓGICA DE CONTINUACIÓN ---
-            
-            // 1. Obtener los datos necesarios ANTES de limpiar itemToManage
-            const inspectionId = itemToManage.inspectionId;
-            const itemId = itemToManage.itemId;
-            
-            // 2. Encontrar el tipo de item que acabamos de editar
-            const editedItem = allLoadedMissingItems.find(i => i.itemId === itemId);
-            // 3. Si no lo encontramos, asumimos 'consumible' para no romper el flujo
-            const itemType = editedItem ? editedItem.type : 'consumible'; 
-            // --- FIN: NUEVA LÓGICA DE CONTINUACIÓN ---
-
-
-            // 4. Referencia al item específico
-            const itemRef = ref(db, `${INSPECTIONS_PATH}/${inspectionId}/itemsFaltantes/${itemId}`);
-            
-            try {
-                // 5. Actualizar el item
-                await update(itemRef, {
-                    name: name,
-                    partNumber: partNumber,
-                    quantity: quantity
-                });
-                stampLastUpdate('updateItem'); // <-- NUEVO
-                console.log("Item actualizado con éxito.");
-            } catch (error) {
-                console.error("Error actualizando item (RTDB):", error);
-            }
-            
-            // 6. Limpiar el item en gestión
-            itemToManage = {}; 
-            
-            // 7. Cerrar el modal de edición
-            closeItemFormModal();
-
-            // 8. ¡NUEVO! Reiniciar el workflow para "agregar otro"
-            // Aseguramos que el estado global esté listo para el "ask-modal"
-            activeInspectionDocId = inspectionId; 
-            currentItemType = itemType; 
-            
-            // 9. Preguntar si quiere añadir OTRO item del MISMO tipo
-            openAskModal(itemType, `¿Desea agregar OTRO ${itemType} a esta tarea?`);
-        }
-        
-        // Asignar el manejador de "crear" por defecto
-        itemFormSaveBtn.addEventListener('click', handleSaveNewItem);
-
-
-        /**
-         * Guarda un nuevo item en RTDB usando push.
-         */
-        async function saveMissingItem(docId, type, item) {
-            if (!docId) return;
-            const itemsListRef = ref(db, `${INSPECTIONS_PATH}/${docId}/itemsFaltantes`);
-            const newItem = {
-                type: type,
-                name: item.name,
-                partNumber: item.partNumber,
-                quantity: item.quantity,
-                addedAt: new Date().toISOString(),
-                // --- INICIO: NUEVOS CAMPOS ---
-                reportedBy: {
-                    name: lastSignatureData.name || 'N/A',
-                    signatureDataUrl: lastSignatureData.dataUrl || null
-                }
-                // --- FIN: NUEVOS CAMPOS ---
-            };
-            try {
-                await push(itemsListRef, newItem);
-                stampLastUpdate('newItem'); // <-- NUEVO
-                console.log("Item faltante guardado con éxito.");
-            } catch (error) {
-                console.error("Error guardando item faltante (RTDB):", error);
-            }
-        }
-        
-        // --- FIN: Lógica separada Guardar/Actualizar ---
-
-
-        // --- INICIO: NUEVAS FUNCIONES PARA EL CONSTRUCTOR DE LISTAS ---
-        
-        /**
-         * Agrega un ítem a la lista temporal 'tempMissingItemsList'
-         * (usado en el modo de firma única).
-         */
-        function addItemToList() {
-            const name = multiItemNameInput.value.trim();
-            const partNumber = multiItemPartNumberInput.value.trim();
-            const quantity = multiItemQuantityInput.valueAsNumber;
-
-            if (!name || !quantity || quantity <= 0) {
-                alert("Por favor, complete el nombre y la cantidad (mayor a 0) del ítem.");
-                return;
-            }
-
-            const item = {
-                name: name,
-                partNumber: partNumber || 'N/A',
-                quantity: quantity
-            };
-
-            tempMissingItemsList.push(item);
-            
-            // Re-renderizar la lista en el modal
-            renderTempItemsList();
-
-            // Limpiar campos para el próximo ítem
-            multiItemNameInput.value = '';
-            multiItemPartNumberInput.value = '';
-            multiItemQuantityInput.value = 1;
-            multiItemNameInput.focus();
-        }
-
-        /**
-         * "Dibuja" la lista de ítems temporales en el modal.
-         */
-        function renderTempItemsList() {
-            if (tempMissingItemsList.length === 0) {
-                tempItemListContainer.innerHTML = '<p class="text-gray-500 italic">No se han agregado ítems.</p>';
-                return;
-            }
-
-            tempItemListContainer.innerHTML = ''; // Limpiar
-            const list = document.createElement('ul');
-            list.className = 'divide-y divide-gray-200';
-
-            tempMissingItemsList.forEach((item, index) => {
-                const li = document.createElement('li');
-                li.className = 'py-2 flex justify-between items-center';
-                li.innerHTML = `
-                    <div>
-                        <span class="font-medium">${item.name}</span>
-                        <span class="block text-sm text-gray-600">P/N: ${item.partNumber} (Cant: ${item.quantity})</span>
-                    </div>
-                    <button class="text-red-500 hover:text-red-700 p-1" onclick="removeTempItem(${index})" title="Eliminar ítem">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                `;
-                list.appendChild(li);
-            });
-            tempItemListContainer.appendChild(list);
-        }
-        
-        /**
-         * Elimina un ítem de la lista temporal.
-         * (Debe ser global para que el 'onclick' funcione).
-         */
-        window.removeTempItem = (index) => {
-            tempMissingItemsList.splice(index, 1); // Elimina el ítem del array
-            renderTempItemsList(); // Vuelve a dibujar la lista
         };
-        
-        // Asignar el listener al nuevo botón de agregar
-        addItemToListBtn.addEventListener('click', addItemToList);
-        
-        // --- FIN: NUEVAS FUNCIONES PARA EL CONSTRUCTOR DE LISTAS ---
 
+        const renderMatrix = () => {
+            isRendering = true;
+            const body = document.getElementById('master-body');
+            body.innerHTML = '';
+            config.forEach(row => {
+                if(row.type === 'separator') {
+                    body.innerHTML += `<tr class="bg-slate-100/50 separator-row"><td colspan="45" class="px-4 py-1 text-[9px] font-black text-slate-400 text-center uppercase tracking-[0.3em]">${row.label}</td></tr>`;
+                    return;
+                }
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 border-b border-slate-100 transition-colors data-row";
+                let html = `<td class="table-fixed-column px-4 py-2 text-xs font-bold text-slate-700 border-r border-slate-200">${row.label}</td>`;
+                const vV = globalData[`vienen_${row.id}`] || 0;
+                html += `<td class="bg-indigo-50/30 border-r border-slate-200"><input type="number" step="0.1" value="${vV}" data-type="vienen" data-id="${row.id}" class="input-cell font-bold text-indigo-700"></td>`;
+                let mT = 0;
+                for(let d=1; d<=31; d++) {
+                    const dV = (globalData[row.id] && globalData[row.id][d]) || 0;
+                    mT += parseFloat(dV);
+                    html += `<td class="border-r border-slate-50"><input type="number" step="0.1" value="${dV || ''}" placeholder="-" data-type="day" data-id="${row.id}" data-day="${d}" class="input-cell text-slate-500"></td>`;
+                }
+                html += `<td class="bg-indigo-50 text-center font-bold text-indigo-800 text-xs border-r border-slate-200">${mT.toFixed(1)}</td>`;
+                const gT = parseFloat(vV) + mT;
+                html += `<td class="bg-indigo-600 text-center font-black text-white text-xs border-r border-slate-200">${gT.toFixed(1)}</td>`;
+                const lV = row.limit || 0; const fV = row.factor || 1;
+                const rS = lV > 0 ? (lV - (gT * fV)) : 0;
+                html += `<td class="bg-yellow-50 text-center font-bold text-slate-600 text-xs border-r border-slate-200">${lV || '-'}</td>`;
+                html += `<td class="bg-yellow-50 text-center font-bold text-slate-600 text-xs border-r border-slate-200">${fV || '-'}</td>`;
+                html += `<td class="bg-red-50 text-center font-black ${rS < 500 && lV > 0 ? 'text-red-600 animate-pulse' : 'text-slate-800'} text-xs">${lV > 0 ? rS.toFixed(1) : '-'}</td>`;
+                tr.innerHTML = html; body.appendChild(tr);
+            });
+            isRendering = false;
+        };
 
-        // --- INICIO: Event Listener para botones de Editar/Borrar Item ---
-        
-        missingItemsList.addEventListener('click', (e) => {
-            const target = e.target;
-            
-            // Botón BORRAR
-            if (target.classList.contains('delete-item-btn')) {
-                itemToManage = {
-                    inspectionId: target.dataset.inspectionId,
-                    itemId: target.dataset.itemId
-                };
-                currentPasswordAction = 'deleteItem';
-                
-                passwordModalTitle.textContent = 'Confirmar Borrado';
-                passwordModalDescription.textContent = 'Para borrar este item, ingrese la clave de supervisor.';
-                passwordConfirmBtn.textContent = 'Confirmar Borrado';
-                passwordInput.value = '';
-                passwordError.textContent = '';
-                passwordModal.classList.remove('hidden');
-                passwordInput.focus();
-            }
-            
-            // Botón EDITAR
-            if (target.classList.contains('edit-item-btn')) {
-                itemToManage = {
-                    inspectionId: target.dataset.inspectionId,
-                    itemId: target.dataset.itemId
-                };
-                currentPasswordAction = 'editItem';
-                
-                passwordModalTitle.textContent = 'Confirmar Edición';
-                passwordModalDescription.textContent = 'Para editar este item, ingrese la clave de supervisor.';
-                passwordConfirmBtn.textContent = 'Confirmar';
-                passwordInput.value = '';
-                passwordError.textContent = '';
-                passwordModal.classList.remove('hidden');
-                passwordInput.focus();
+        const setupUIHeader = () => {
+            const hR = document.getElementById('header-row');
+            for(let i=1; i<=31; i++) { hR.innerHTML += `<th class="px-2 py-2 text-[10px] font-bold border-r border-slate-100">${i}</th>`; }
+            hR.innerHTML += `<th class="px-4 py-2 text-[10px] font-black text-indigo-600 border-x border-slate-200 bg-indigo-50 uppercase">Mes</th><th class="px-4 py-2 text-[10px] font-black text-white bg-indigo-600 border-r border-slate-200 uppercase">General</th><th class="px-4 py-2 text-[10px] font-black text-slate-600 bg-yellow-100 border-r border-slate-200 uppercase">Límite</th><th class="px-4 py-2 text-[10px] font-black text-slate-600 bg-yellow-100 border-r border-slate-200 uppercase">Factor</th><th class="px-4 py-2 text-[10px] font-black text-white bg-red-500 uppercase">Restante</th>`;
+            const yS = document.getElementById('select-year'); const cY = new Date().getFullYear();
+            for(let y = cY-2; y <= cY+5; y++) { const o = document.createElement('option'); o.value = y; o.innerText = y; if(y === cY) o.selected = true; yS.appendChild(o); }
+        };
+
+        const setupSync = (user) => {
+            if (!user) return;
+            if (unsubscribe) unsubscribe();
+            unsubscribe = onValue(ref(db, `${PATH_ROOT}/${currentPeriod}`), (snap) => {
+                globalData = snap.exists() ? snap.val() : {};
+                if (!document.activeElement || document.activeElement.tagName !== 'INPUT') renderMatrix();
+                document.getElementById('loader').style.display = 'none';
+                updateSyncStatus(true);
+            }, () => updateSyncStatus(false));
+        };
+
+        const updateSyncStatus = (connected) => {
+            const s = document.getElementById('sync-status');
+            s.innerHTML = connected ? '<span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Conectado' : '<span class="w-2 h-2 bg-red-500 rounded-full"></span> Error';
+            s.className = `flex items-center gap-1 font-bold bg-${connected?'emerald':'red'}-50 px-3 py-1.5 rounded-xl border border-${connected?'emerald':'red'}-100 text-${connected?'emerald':'red'}-600`;
+        };
+
+        document.addEventListener('change', async (e) => {
+            if (isRendering || e.target.tagName !== 'INPUT') return;
+            const i = e.target; const { type, id, day } = i.dataset; const v = parseFloat(i.value) || 0;
+            if (type === 'vienen') { await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), { [`vienen_${id}`]: v }); }
+            else if (type === 'day') { await set(ref(db, `${PATH_ROOT}/${currentPeriod}/${id}/${day}`), v); }
+            renderMatrix();
+        });
+
+        const changePeriod = () => {
+            currentPeriod = `${document.getElementById('select-month').value}-${document.getElementById('select-year').value}`;
+            document.getElementById('loader').style.display = 'flex';
+            setupSync(currentUser);
+        };
+
+        const showToast = (msg) => {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            t.classList.remove('translate-y-32');
+            setTimeout(() => t.classList.add('translate-y-32'), 3000);
+        };
+
+        setupUIHeader();
+        document.getElementById('select-month').addEventListener('change', changePeriod);
+        document.getElementById('select-year').addEventListener('change', changePeriod);
+        document.getElementById('btn-mirror-trigger').addEventListener('click', () => { document.getElementById('mirror-modal').style.display = 'flex'; });
+        document.getElementById('btn-copy-prev').addEventListener('click', async () => {
+            const m = parseInt(document.getElementById('select-month').value);
+            const y = parseInt(document.getElementById('select-year').value);
+            let pM = m-1, pY = y; if(pM<0){pM=11;pY--;}
+            const pSnap = await get(ref(db, `${PATH_ROOT}/${pM}-${pY}`));
+            if(!pSnap.exists()) return showToast("No hay datos previos");
+            if(confirm(`¿Cerrar mes anterior y pasar totales a VIENEN?`)) {
+                const pD = pSnap.val(); const b = {};
+                config.forEach(r => { if(r.type!=='separator'){ const vV = pD[`vienen_${r.id}`]||0; let vM=0; if(pD[r.id]) Object.values(pD[r.id]).forEach(v=>vM+=parseFloat(v||0)); b[`vienen_${r.id}`] = vV+vM; } });
+                await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), b); renderMatrix();
             }
         });
-        
-        // --- FIN: Event Listener para botones de Editar/Borrar Item ---
 
+        onAuthStateChanged(auth, (u) => {
+            currentUser = u;
+            if (u) {
+                if(currentPeriod === "") {
+                    const d = new Date();
+                    document.getElementById('select-month').value = d.getMonth();
+                    document.getElementById('select-year').value = d.getFullYear();
+                    currentPeriod = `${d.getMonth()}-${d.getFullYear()}`;
+                }
+                setupSync(u);
+            }
+        });
 
-        // --- INICIO: NUEVAS FUNCIONES DE LOTE ---
-        
-        /**
-         * Registra "No se reportaron faltantes" en la celda "Acción Tomada"
-         * para TODAS las inspecciones seleccionadas en el lote.
-         */
-        function logNoItemsReportedBatch() {
-            if (!lastSignatureData.name) return; // No hay firma, no se puede loggear
+        const initAuth = async () => {
+            try { if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token); else await signInAnonymously(auth); } catch (e) {}
+        };
+        initAuth();
 
-            const logEntry = `No se reportaron faltantes. Firmado: ${lastSignatureData.name}`;
-            const promises = [];
+        // Keyboard Navigation System
+        document.addEventListener('keydown', (e) => {
+            const activeInput = document.activeElement;
+            if (!activeInput || activeInput.tagName !== 'INPUT') return;
 
-            for (const docId of selectedInspections) {
-                let newText = '';
-                // Intentar actualizar la UI si la celda está visible
-                const cell = document.querySelector(`.accion-tomada-cell[data-doc-id="${docId}"]`);
-                if (cell) {
-                    newText = cell.textContent.trim();
-                } else {
-                    // Si no está visible, buscar en el caché
-                    const inspection = allLoadedInspections.find(insp => insp.docId === docId);
-                    if (inspection) {
-                        newText = inspection.accionTomada || '';
+            const currentTd = activeInput.closest('td');
+            const currentRow = activeInput.closest('tr');
+            const cellIndex = currentTd.cellIndex;
+            let targetInput = null;
+
+            const findNextInputInRow = (row, startIdx, direction) => {
+                let idx = startIdx + direction;
+                while (idx >= 0 && idx < row.cells.length) {
+                    const input = row.cells[idx].querySelector('input');
+                    if (input) return input;
+                    idx += direction;
+                }
+                return null;
+            };
+
+            const findNextInputInCol = (startRow, colIdx, direction) => {
+                let row = direction === 1 ? startRow.nextElementSibling : startRow.previousElementSibling;
+                while (row) {
+                    if (!row.classList.contains('separator-row')) {
+                        const input = row.cells[colIdx]?.querySelector('input');
+                        if (input) return input;
                     }
+                    row = direction === 1 ? row.nextElementSibling : row.previousElementSibling;
                 }
-                
-                if (!newText.includes(logEntry)) {
-                    newText = newText ? `${newText}. ${logEntry}` : logEntry;
-                }
-                
-                if (cell) {
-                    cell.textContent = newText; // Actualizar UI
-                }
-                
-                const inspectionRef = getInspectionRef(docId);
-                promises.push(update(inspectionRef, { accionTomada: newText }));
+                return null;
+            };
+
+            if (e.key === 'ArrowRight') {
+                targetInput = findNextInputInRow(currentRow, cellIndex, 1);
+            } else if (e.key === 'ArrowLeft') {
+                targetInput = findNextInputInRow(currentRow, cellIndex, -1);
+            } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
+                e.preventDefault();
+                targetInput = findNextInputInCol(currentRow, cellIndex, 1);
+            } else if (e.key === 'ArrowUp') {
+                targetInput = findNextInputInCol(currentRow, cellIndex, -1);
             }
 
-            Promise.all(promises)
-                .then(() => console.log(`'No Faltantes' loggeado para ${promises.length} tareas.`))
-                .catch(error => console.error("Error loggeando 'No Faltantes' en lote:", error));
-        }
-
-        /**
-         * Limpia y resetea el estado después de completar un workflow en lote.
-         */
-        function cleanupBatchMode() {
-            console.log("Finalizando modo de firma en lote.");
-            isBatchSigning = false;
-            selectedInspections.clear();
-            updateSelectionUI(); // Esto des-seleccionará todo y ocultará el botón
-            
-            // Limpiar variables globales
-            currentItemType = null;
-            lastSignatureData = { name: '', dataUrl: '' }; // Ahora sí limpiamos
-            itemBeingAssigned = null; // <-- NUEVO
-            
-            // Volver a habilitar botones del modal de firma (que ya está cerrado)
-            signatureSaveBtn.disabled = false;
-            signatureCancelBtn.disabled = false;
-            signatureSaveBtn.textContent = 'Guardar Firma';
-        }
-        
-        /**
-         * Función helper para continuar el workflow de lote 
-         * (ir a repuestos o finalizar).
-         */
-        function continueBatchWorkflow() {
-            if (currentItemType === 'consumible') {
-                openAskModal('repuesto', '¿Faltó algún repuesto para este LOTE de tareas?');
-            } else {
-                // Este era el último paso (repuestos)
-                cleanupBatchMode();
+            if (targetInput) {
+                targetInput.focus();
+                targetInput.select();
             }
+        });
+        // --- Variables y auditoría ---
+let quickUser = null;
+let quickPhoto = null;
+let quickLocation = null;
+const auditLog = JSON.parse(localStorage.getItem('auditLog') || '[]');
+
+// --- Funciones de modal ---
+
+   window.openQuickFillModal = () => {
+    document.getElementById('quick-fill-modal').style.display = 'flex';
+    startQRScanner();
+};
+window.closeQuickFillModal = () => {
+    document.getElementById('quick-fill-modal').style.display = 'none';
+};
+
+// --- QR Scanner ---
+let html5QrCode = null;
+
+function startQRScanner() {
+    document.getElementById('quick-fill-form').classList.remove('hidden'); // mostrar formulario directamente
+    const qrDiv = document.getElementById('qr-reader');
+    qrDiv.innerHTML = ""; // limpiar si hay algo
+    // Cambia la URL o el texto que quieres codificar
+    new QRCode(qrDiv, {
+        text: "https://sozin0512.github.io/ESTADISTICA-2/HORAS980.HTML",
+        width: 180,
+        height: 180,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+}
+
+
+// --- Captura de foto y ubicación ---
+document.getElementById('btn-capture').addEventListener('click', async () => {
+    // Foto
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const track = stream.getVideoTracks()[0];
+        const imageCapture = new ImageCapture(track);
+        const bitmap = await imageCapture.grabFrame();
+        const canvas = document.createElement('canvas');
+        canvas.width = bitmap.width; canvas.height = bitmap.height;
+        const ctx = canvas.getContext('2d'); ctx.drawImage(bitmap,0,0);
+        quickPhoto = canvas.toDataURL('image/jpeg', 0.7);
+        track.stop();
+    } catch(e){ console.error(e); alert('No se pudo capturar la foto'); }
+
+    // Ubicación
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(pos=>{
+            quickLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            showToast('Foto y ubicación capturadas');
+        }, err=>{ console.error(err); alert('No se pudo obtener la ubicación'); });
+    } else { alert('Geolocalización no soportada'); }
+});
+
+// --- Guardar llenado rápido y auditoría ---
+document.getElementById('btn-save-quick').addEventListener('click', async () => {
+    if(!quickUser){ alert('No hay usuario QR'); return; }
+
+    // Obtener valores
+    const getVal = id => parseFloat(document.getElementById(id).value)||0;
+    const values = {
+        ac_hrs: getVal('quick-ac-hrs'),
+        aterrizajes: getVal('quick-aterrizajes'),
+        rins: getVal('quick-rins'),
+        eng_hrs_1: getVal('quick-eng1-hrs'),
+        eng_starts_1: getVal('quick-eng1-starts'),
+        flights_1: getVal('quick-flights1'),
+        ciclos_1: getVal('quick-ciclos1'),
+        eng_hrs_2: getVal('quick-eng2-hrs'),
+        eng_starts_2: getVal('quick-eng2-starts'),
+        flights_2: getVal('quick-flights2'),
+        ciclos_2: getVal('quick-ciclos2')
+    };
+
+    // Guardar en Firebase
+    try {
+        const updates = {};
+        for(const k in values){
+            const v = values[k];
+            const prev = globalData[`vienen_${k}`] || 0;
+            updates[`vienen_${k}`] = prev + v;
         }
+        await update(ref(db, `${PATH_ROOT}/${currentPeriod}`), updates);
+        renderMatrix();
+    } catch(e){ console.error(e); showToast('Error al guardar'); return; }
 
-        // --- FIN: NUEVAS FUNCIONES DE LOTE ---
+    // Guardar auditoría
+    const logEntry = {
+        user: quickUser,
+        date: new Date().toISOString(),
+        photo: quickPhoto,
+        location: quickLocation,
+        changes: values
+    };
+    auditLog.push(logEntry);
+    localStorage.setItem('auditLog', JSON.stringify(auditLog));
+    showToast('Llenado rápido registrado y auditoría guardada');
 
+    closeQuickFillModal();
+});
 
-        // --- INICIO: NUEVAS FUNCIONES PARA ASIGNAR ITEMS EN LOTE ---
-        
-        /**
-         * Abre el modal para seleccionar a qué tareas del lote 
-         * se asignará el item recién creado.
-         */
-        function openAssignItemModal() {
-            if (!itemBeingAssigned) return;
-
-            assignItemModalTitle.textContent = `Asignar: "${itemBeingAssigned.name}" (Cant: ${itemBeingAssigned.quantity})`;
-            assignItemList.innerHTML = ''; // Limpiar lista
-
-            let hasItems = false;
-            for (const docId of selectedInspections) {
-                const inspection = allLoadedInspections.find(insp => insp.docId === docId);
-                if (inspection) {
-                    hasItems = true;
-                    const li = document.createElement('li');
-                    li.className = 'flex items-center p-2 rounded hover:bg-gray-100 cursor-pointer';
-                    li.innerHTML = `
-                        <input type="checkbox" data-doc-id="${docId}" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-3" checked>
-                        <label class="text-sm font-medium text-gray-800 flex-1 cursor-pointer">${inspection.name}</label>
-                    `;
-                    // Permitir clic en toda la fila
-                    li.addEventListener('click', (e) => {
-                        const cb = li.querySelector('input');
-                        if (e.target !== cb) {
-                            cb.checked = !cb.checked;
-                        }
-                    });
-                    assignItemList.appendChild(li);
-                }
-            }
-            
-            // Añadir helpers de "Seleccionar Todo / Ninguno"
-            if (hasItems) {
-                const helperRow = document.createElement('div');
-                helperRow.className = 'flex justify-end gap-4 mt-2 pt-2 border-t';
-                helperRow.innerHTML = `
-                    <button id="assign-select-all" class="text-xs text-blue-600 font-medium hover:underline">Seleccionar Todos</button>
-                    <button id="assign-select-none" class="text-xs text-gray-600 font-medium hover:underline">No Seleccionar Ninguno</button>
-                `;
-                assignItemList.prepend(helperRow);
-                
-                // Asignar listeners a los nuevos botones (solo una vez)
-                helperRow.querySelector('#assign-select-all').addEventListener('click', () => {
-                    assignItemList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
-                });
-                helperRow.querySelector('#assign-select-none').addEventListener('click', () => {
-                    assignItemList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-                });
-            }
-
-            assignItemModal.classList.remove('hidden');
-        }
-        
-        /**
-         * Cierra el modal de asignación y limpia el item temporal.
-         */
-        function closeAssignItemModal() {
-            assignItemModal.classList.add('hidden');
-            itemBeingAssigned = null;
-            assignItemList.innerHTML = ''; // Limpiar para la próxima vez
-        }
-        
-        /**
-         * Manejador para el botón "Asignar y Continuar" del nuevo modal.
-         * Guarda el item solo en las tareas seleccionadas.
-         */
-        async function handleAssignItemSave() {
-            if (!itemBeingAssigned || !isBatchSigning) return;
-
-            const checkedBoxes = assignItemList.querySelectorAll('input[type="checkbox"]:checked');
-            const promises = [];
-
-            for (const cb of checkedBoxes) {
-                const docId = cb.dataset.docId;
-                if (docId) {
-                    promises.push(saveMissingItem(docId, currentItemType, itemBeingAssigned));
-                }
-            }
-
-            if (promises.length > 0) {
-                try {
-                    await Promise.all(promises);
-                    console.log(`Item '${itemBeingAssigned.name}' asignado a ${promises.length} tareas.`);
-                } catch (error) {
-                    console.error("Error asignando item en lote:", error);
-                }
-            }
-
-            closeAssignItemModal();
-            continueBatchWorkflow(); // <-- Continuar a repuestos o finalizar
-        }
-
-        /**
-         * Manejador para el botón "Cancelar" del nuevo modal.
-         * Simplemente continúa al siguiente paso sin guardar el item.
-         */
-        function handleAssignItemCancel() {
-            closeAssignItemModal();
-            continueBatchWorkflow(); // <-- Continuar a repuestos o finalizar
-        }
-        
-        // Asignar los nuevos listeners
-        assignItemSaveBtn.addEventListener('click', handleAssignItemSave);
-        assignItemCancelBtn.addEventListener('click', handleAssignItemCancel);
-        
-        // --- FIN: NUEVAS FUNCIONES PARA ASIGNAR ITEMS EN LOTE ---
-
-
-        // --- INICIO: NUEVAS FUNCIONES PARA SELECCIÓN MÚLTIPLE ---
-
-        /**
-         * Vincula los event listeners para las casillas de selección.
-         * Se llama cada vez que se renderiza la tabla.
-         */
-        function setupSelectionListeners() {
-            // Eliminar listeners antiguos para evitar duplicados
-            selectAllCheckbox.removeEventListener('change', handleSelectAll);
-            expiredListTableBody.removeEventListener('change', handleRowCheckbox);
-            batchSignBtn.removeEventListener('click', handleBatchSign);
-
-            // Añadir nuevos listeners
-            selectAllCheckbox.addEventListener('change', handleSelectAll);
-            expiredListTableBody.addEventListener('change', handleRowCheckbox);
-            batchSignBtn.addEventListener('click', handleBatchSign);
-        }
-
-        /**
-         * Maneja el clic en la casilla "Seleccionar Todo".
-         */
-        function handleSelectAll(e) {
-            const isChecked = e.target.checked;
-            const allCheckboxes = expiredListTableBody.querySelectorAll('.row-checkbox');
-            
-            allCheckboxes.forEach(cb => {
-                cb.checked = isChecked;
-                const docId = cb.dataset.docId;
-                if (isChecked) {
-                    selectedInspections.add(docId);
-                } else {
-                    selectedInspections.delete(docId);
-                }
-            });
-            updateSelectionUI();
-        }
-
-        /**
-         * Maneja el clic en la casilla de una fila individual.
-         */
-        function handleRowCheckbox(e) {
-            if (!e.target.classList.contains('row-checkbox')) return;
-            
-            const cb = e.target;
-            const docId = cb.dataset.docId;
-            
-            if (cb.checked) {
-                selectedInspections.add(docId);
-            } else {
-                selectedInspections.delete(docId);
-            }
-            updateSelectionUI();
-        }
-
-        /**
-         * Actualiza la UI (contador, botón de lote, estado de "Seleccionar Todo" y resaltado de filas).
-         */
-        function updateSelectionUI() {
-            const allCheckboxes = expiredListTableBody.querySelectorAll('.row-checkbox');
-            const totalRows = allCheckboxes.length;
-            const selectedCount = selectedInspections.size;
-
-            // Mostrar/Ocultar el contenedor de acciones en lote
-            if (selectedCount > 0) {
-                batchActionsContainer.classList.remove('hidden');
-                selectionCountEl.textContent = `${selectedCount} seleccionada(s)`;
-            } else {
-                batchActionsContainer.classList.add('hidden');
-            }
-
-            // Actualizar el estado de la casilla "Seleccionar Todo"
-            if (totalRows > 0) {
-                 if (selectedCount === 0) {
-                    selectAllCheckbox.checked = false;
-                    selectAllCheckbox.indeterminate = false;
-                } else if (selectedCount === totalRows) {
-                    selectAllCheckbox.checked = true;
-                    selectAllCheckbox.indeterminate = false;
-                } else {
-                    selectAllCheckbox.checked = false;
-                    selectAllCheckbox.indeterminate = true;
-                }
-            } else {
-                selectAllCheckbox.checked = false;
-                selectAllCheckbox.indeterminate = false;
-            }
-           
-            // Resaltar filas seleccionadas
-            allCheckboxes.forEach(cb => {
-                const row = cb.closest('tr');
-                if (row) {
-                    if (selectedInspections.has(cb.dataset.docId)) {
-                        row.classList.add('selected-row');
-                    } else {
-                        row.classList.remove('selected-row');
-                    }
-                }
-            });
-        }
-        
-        /**
-         * Maneja el clic en el botón "Firmar Seleccionadas".
-         */
-        function handleBatchSign() {
-            if (selectedInspections.size === 0) return;
-            isBatchSigning = true;
-            
-            // "Simulamos" una celda de mecánico para que el modal de firma
-            // sepa qué título poner ("Firma del Mecánico").
-            const mockCell = { 
-                dataset: { 
-                    title: 'Mecánico' 
-                } 
-            }; 
-            openSignatureModal(mockCell);
-        }
-        // --- FIN: NUEVAS FUNCIONES PARA SELECCIÓN MÚLTIPLE ---
+// --- Mostrar auditoría en consola o modal opcional ---
+window.showAuditLog = () => {
+    console.table(auditLog);
+    alert('Revisa la consola para el historial de auditoría');
+};
 
     </script>
 </body>
