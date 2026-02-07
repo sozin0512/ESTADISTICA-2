@@ -1015,6 +1015,35 @@ window.toggleAuditPanel = () => {
     }
 };
 
+window.calcQuick = (fieldId) => {
+    // 1. Obtener el valor inicial (Vienen) desde globalData
+    const vienen = parseFloat(globalData[`vienen_${fieldId}`]) || 0;
+    
+    // 2. Sumar lo que ya existe en la base de datos para el mes actual (Días 1 al 31)
+    let sumaMesActual = 0;
+    if (globalData[fieldId]) {
+        // Recorremos los días guardados en este campo
+        Object.keys(globalData[fieldId]).forEach(day => {
+            sumaMesActual += parseFloat(globalData[fieldId][day]) || 0;
+        });
+    }
+
+    // 3. Obtener lo que el usuario está tecleando en el modal QR
+    const inputActual = document.getElementById(`q_${fieldId}`);
+    const valorNuevo = inputActual ? (parseFloat(inputActual.value) || 0) : 0;
+
+    // 4. CÁLCULO FINAL (Columna General en tiempo real)
+    const totalGeneral = vienen + sumaMesActual + valorNuevo;
+
+    // 5. Mostrar en el HTML (buscamos el span de total)
+    const displayElement = document.getElementById(`t_${fieldId}`);
+    if (displayElement) {
+        // Usamos toFixed(1) para horas y toFixed(0) para contadores enteros
+        const esEntero = ['aterrizajes', 'rins', 'eng_starts_1', 'eng_starts_2', 'flights_1', 'flights_2', 'ciclos_1', 'ciclos_2'].includes(fieldId);
+        displayElement.innerText = esEntero ? Math.round(totalGeneral) : totalGeneral.toFixed(1);
+    }
+};
+
 // 2. Buscador en tiempo real
 window.filterAuditLogs = () => {
     const term = document.getElementById('audit-search').value.toLowerCase();
