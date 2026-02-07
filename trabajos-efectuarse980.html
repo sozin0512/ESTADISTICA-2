@@ -881,9 +881,6 @@ document.getElementById('btn-save-quick')?.addEventListener('click', async () =>
 let vienenSuma = {};
 window.setupQuickCalculator = () => {
 
-    const day = new Date().getDate();
-    document.getElementById('current-day-label').innerText = `DÍA: ${day}`;
-
     const params = [
         'ac_hrs',
         'aterrizajes',
@@ -896,21 +893,51 @@ window.setupQuickCalculator = () => {
         'ciclos_2'
     ];
 
-    params.forEach(p => {
-        const vienen = parseFloat(globalData[`vienen_${p}`] || 0);
+    params.forEach(param => {
+
+        const vienen = parseFloat(globalData[`vienen_${param}`] || 0);
 
         let mes = 0;
-        if (globalData[p]) {
-            Object.values(globalData[p]).forEach(v => {
+        if (globalData[param] && typeof globalData[param] === 'object') {
+            Object.values(globalData[param]).forEach(v => {
                 mes += parseFloat(v || 0);
             });
         }
 
         const total = vienen + mes;
-        const totalSpan = document.getElementById(`t_${p}`);
+        const totalSpan = document.getElementById(`t_${param}`);
         if (totalSpan) totalSpan.innerText = total.toFixed(1);
     });
 };
+
+window.validateQuick = function(param) {
+
+    const input = document.getElementById(`q_${param}`);
+    if (!input) return true;
+
+    const hoy = parseFloat(input.value) || 0;
+
+    const vienen = parseFloat(globalData[`vienen_${param}`] || 0);
+
+    let mes = 0;
+    if (globalData[param] && typeof globalData[param] === 'object') {
+        Object.values(globalData[param]).forEach(v => {
+            mes += parseFloat(v || 0);
+        });
+    }
+
+    const totalActual = vienen + mes;
+    const totalNuevo = totalActual + hoy;
+
+    if (totalNuevo < totalActual) {
+        input.classList.add('border-red-500');
+        return false;
+    } else {
+        input.classList.remove('border-red-500');
+        return true;
+    }
+};
+
 
 // Función para cargar los registros de auditoría desde Firebase
 window.loadAuditLogs = async function() {
@@ -1025,15 +1052,16 @@ window.calcQuick = function(param) {
 
     if (!input || !totalSpan) return;
 
-    // Valor que se está escribiendo
+    // Valor que se está escribiendo hoy
     const hoy = parseFloat(input.value) || 0;
 
-    // VIENEN
-    const vienen = parseFloat(globalData[`vienen_${param}`] || 0);
+    // VIENEN (valor plano)
+    const vienenKey = `vienen_${param}`;
+    const vienen = parseFloat(globalData[vienenKey] || 0);
 
-    // SUMA DEL MES
+    // SUMA DEL MES (objeto por días)
     let mes = 0;
-    if (globalData[param]) {
+    if (globalData[param] && typeof globalData[param] === 'object') {
         Object.values(globalData[param]).forEach(v => {
             mes += parseFloat(v || 0);
         });
