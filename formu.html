@@ -77,7 +77,6 @@
     .error   { background: #fef2f2; color: #991b1b; }
     .loading { text-align: center; padding: 6rem 1rem; font-size: 1.3rem; color: var(--muted); }
 
-    /* Estilos para el listado de evidencias */
     #evidenciasSelect {
       width: 100%;
       max-width: 600px;
@@ -296,7 +295,7 @@
     const db = firebase.database();
 
     const basePath = 'artifacts/fah-980-master-v1/public/data/MAINTENANCE_LOGS';
-    const targetPeriod = '1-2026'; // febrero 2026
+    const targetPeriod = '1-2026';
     const PASSWORD_ACCESO = "Kevin";
 
     let currentPeriod = targetPeriod;
@@ -331,19 +330,18 @@
       });
 
     // ───────────────────────────────────────────────
-    //  Captura de foto + ubicación
+    // Captura evidencia - Cámara FRONTAL
     // ───────────────────────────────────────────────
     async function capturarEvidencia() {
       try {
-        // Cámara
         const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: "environment" } 
+          video: { facingMode: "user" }  // Cámara frontal
         });
         
         const video = document.getElementById('video');
         video.srcObject = stream;
         await new Promise(r => video.onloadedmetadata = r);
-        await new Promise(r => setTimeout(r, 800)); // breve espera para estabilizar
+        await new Promise(r => setTimeout(r, 1500)); // tiempo para estabilizar la imagen
 
         const canvas = document.getElementById('canvas');
         canvas.width = video.videoWidth;
@@ -356,7 +354,6 @@
         stream.getTracks().forEach(track => track.stop());
         video.srcObject = null;
 
-        // Ubicación
         const position = await new Promise((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject, {
             enableHighAccuracy: true,
@@ -367,7 +364,6 @@
 
         const { latitude: lat, longitude: lng } = position.coords;
 
-        // Fecha y hora
         const now = new Date();
         const fecha = now.toLocaleDateString('es-HN');
         const hora = now.toLocaleTimeString('es-HN', { hour12: false });
@@ -394,17 +390,15 @@
     }
 
     // ───────────────────────────────────────────────
-    //  Guardar datos + evidencia
+    // Guardar y salir / recargar página
     // ───────────────────────────────────────────────
     document.getElementById('saveBtn')?.addEventListener('click', async () => {
       const day = document.getElementById('daySelect').value;
 
-      // Intentamos capturar evidencia
       const evidencia = await capturarEvidencia();
 
-      // Si no se obtuvo evidencia, preguntamos si continuar
       if (!evidencia) {
-        if (!confirm("No se pudo capturar foto o ubicación.\n¿Deseas guardar los datos de todos modos?")) {
+        if (!confirm("No se capturó foto o ubicación.\n¿Deseas guardar los datos de todos modos?")) {
           return;
         }
       }
@@ -455,10 +449,18 @@
               loadAndShowTotals(currentTotals);
             });
 
-          // Refrescar listado si está visible
           if (document.getElementById('listadoContent').style.display !== 'none') {
             cargarListadoEvidencias();
           }
+
+          // Salir / recargar la página después de 2 segundos
+          setTimeout(() => {
+            window.location.reload();
+            // Alternativas:
+            // window.location.href = "index.html";           // ir a otra página
+            // window.close();                                // cerrar pestaña (solo si fue abierta por script)
+            // window.location.href = "https://google.com";   // ir a página externa
+          }, 2000);
         })
         .catch(err => {
           showMessage("Error al guardar: " + err.message, "error");
@@ -466,9 +468,12 @@
         });
     });
 
-    // ───────────────────────────────────────────────
-    //  Ver listado con contraseña
-    // ───────────────────────────────────────────────
+    document.getElementById('clearBtn')?.addEventListener('click', () => {
+      document.querySelectorAll('input[type="number"]').forEach(i => i.value = '0');
+      const fields = ['ac_hrs','aterrizajes','rins','eng_hrs_1','eng_starts_1','flights_1','ciclos_1','eng_hrs_2','eng_starts_2','flights_2','ciclos_2'];
+      fields.forEach(f => updatePreview(f));
+    });
+
     document.getElementById('verListadoBtn')?.addEventListener('click', () => {
       const pass = prompt("Ingrese la contraseña para ver el listado:");
       if (pass !== PASSWORD_ACCESO) {
@@ -532,15 +537,6 @@
 
       document.getElementById('evidenciaDetalle').innerHTML = html;
     }
-
-    // ───────────────────────────────────────────────
-    //  Funciones existentes (sin cambios)
-    // ───────────────────────────────────────────────
-    document.getElementById('clearBtn')?.addEventListener('click', () => {
-      document.querySelectorAll('input[type="number"]').forEach(i => i.value = '0');
-      const fields = ['ac_hrs','aterrizajes','rins','eng_hrs_1','eng_starts_1','flights_1','ciclos_1','eng_hrs_2','eng_starts_2','flights_2','ciclos_2'];
-      fields.forEach(f => updatePreview(f));
-    });
 
     function showMessage(text, type = 'success') {
       const msg = document.getElementById('message');
