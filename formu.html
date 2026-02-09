@@ -115,6 +115,13 @@
     <div id="formContent" style="display:none;">
       <div class="card">
         <div class="card-title">Registrando para el día</div>
+        <!-- Agregar esto debajo del <header> o donde prefieras -->
+<div class="day-selector" style="margin: 1.5rem 0; text-align: center;">
+  <label>Período: </label>
+  <select id="periodSelect">
+    <!-- Se llenará automáticamente con JS -->
+  </select>
+</div>
 
         <div class="day-selector">
           Día:
@@ -295,35 +302,47 @@
     const db = firebase.database();
 
     const basePath = 'artifacts/fah-980-master-v1/public/data/MAINTENANCE_LOGS';
-    const targetPeriod = '1-2026';
+    // Obtener fecha actual
+const now = new Date();
+
+// Mes (1 a 12) → lo ajustamos a formato 1-12
+const mes = now.getMonth() + 1;          // getMonth() devuelve 0-11, por eso +1
+const año = now.getFullYear();
+
+// Formato: mes-año (ej: 2-2026, 10-2025, etc.)
+const targetPeriod = `${mes}-${año}`;
+
+// Mostrar en el título qué período se está usando
+document.getElementById('currentPeriod').textContent = 
+  `Registro Diario - ${mes}/${año} (${targetPeriod})`;
+
     const PASSWORD_ACCESO = "Kevin";
 
     let currentPeriod = targetPeriod;
     let currentTotals = {};
 
     document.getElementById('currentPeriod').textContent = `Cargando febrero 2026 (${targetPeriod})...`;
+db.ref(`${basePath}/${targetPeriod}/general`).once('value')
+  .then(snap => {
+    currentTotals = snap.val() || {};
 
-    db.ref(`${basePath}/${targetPeriod}`).once('value')
-      .then(snap => {
-        currentTotals = snap.val() || {};
+    updateCurrentDisplay('ac_hrs', currentTotals.ac_hrs || 0);
+    updateCurrentDisplay('aterrizajes', currentTotals.aterrizajes || 0);
+    updateCurrentDisplay('rins', currentTotals.rins || 0);
+    updateCurrentDisplay('eng_hrs_1', currentTotals.eng_hrs_1 || 0);
+    updateCurrentDisplay('eng_starts_1', currentTotals.eng_starts_1 || 0);
+    updateCurrentDisplay('flights_1', currentTotals.flights_1 || 0);
+    updateCurrentDisplay('ciclos_1', currentTotals.ciclos_1 || 0);     // si existe
+    updateCurrentDisplay('eng_hrs_2', currentTotals.eng_hrs_2 || 0);
+    updateCurrentDisplay('eng_starts_2', currentTotals.eng_starts_2 || 0);
+    updateCurrentDisplay('flights_2', currentTotals.flights_2 || 0);
+    updateCurrentDisplay('ciclos_2', currentTotals.ciclos_2 || 0);     // si existe
 
-        updateCurrentDisplay('ac_hrs', currentTotals.vienen_ac_hrs || 0);
-        updateCurrentDisplay('aterrizajes', currentTotals.vienen_aterrizajes || 0);
-        updateCurrentDisplay('rins', currentTotals.vienen_rins || 0);
-        updateCurrentDisplay('eng_hrs_1', currentTotals.vienen_eng_hrs_1 || 0);
-        updateCurrentDisplay('eng_starts_1', currentTotals.vienen_eng_starts_1 || 0);
-        updateCurrentDisplay('flights_1', currentTotals.vienen_flights_1 || 0);
-        updateCurrentDisplay('ciclos_1', currentTotals.vienen_ciclos_1 || 0);
-        updateCurrentDisplay('eng_hrs_2', currentTotals.vienen_eng_hrs_2 || 0);
-        updateCurrentDisplay('eng_starts_2', currentTotals.vienen_eng_starts_2 || 0);
-        updateCurrentDisplay('flights_2', currentTotals.vienen_flights_2 || 0);
-        updateCurrentDisplay('ciclos_2', currentTotals.vienen_ciclos_2 || 0);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('formContent').style.display = 'block';
 
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('formContent').style.display = 'block';
-
-        initPreview();
-      })
+    initPreview();
+  })
       .catch(err => {
         showMessage(`Error al cargar febrero 2026 (${targetPeriod}): ${err.message}`, "error");
         console.error(err);
@@ -546,22 +565,21 @@
       setTimeout(() => msg.style.display = 'none', 6000);
     }
 
-    function loadAndShowTotals(data) {
-      updateCurrentDisplay('ac_hrs', data.vienen_ac_hrs || 0);
-      updateCurrentDisplay('aterrizajes', data.vienen_aterrizajes || 0);
-      updateCurrentDisplay('rins', data.vienen_rins || 0);
-      updateCurrentDisplay('eng_hrs_1', data.vienen_eng_hrs_1 || 0);
-      updateCurrentDisplay('eng_starts_1', data.vienen_eng_starts_1 || 0);
-      updateCurrentDisplay('flights_1', data.vienen_flights_1 || 0);
-      updateCurrentDisplay('ciclos_1', data.vienen_ciclos_1 || 0);
-      updateCurrentDisplay('eng_hrs_2', data.vienen_eng_hrs_2 || 0);
-      updateCurrentDisplay('eng_starts_2', data.vienen_eng_starts_2 || 0);
-      updateCurrentDisplay('flights_2', data.vienen_flights_2 || 0);
-      updateCurrentDisplay('ciclos_2', data.vienen_ciclos_2 || 0);
+ function loadAndShowTotals(data) {
+  updateCurrentDisplay('ac_hrs', data.ac_hrs || 0);
+  updateCurrentDisplay('aterrizajes', data.aterrizajes || 0);
+  updateCurrentDisplay('rins', data.rins || 0);
+  updateCurrentDisplay('eng_hrs_1', data.eng_hrs_1 || 0);
+  updateCurrentDisplay('eng_starts_1', data.eng_starts_1 || 0);
+  updateCurrentDisplay('flights_1', data.flights_1 || 0);
+  updateCurrentDisplay('ciclos_1', data.ciclos_1 || 0);
+  updateCurrentDisplay('eng_hrs_2', data.eng_hrs_2 || 0);
+  updateCurrentDisplay('eng_starts_2', data.eng_starts_2 || 0);
+  updateCurrentDisplay('flights_2', data.flights_2 || 0);
+  updateCurrentDisplay('ciclos_2', data.ciclos_2 || 0);
 
-      initPreview();
-    }
-
+  initPreview();
+}
     function updateCurrentDisplay(field, value) {
       const el = document.getElementById(`current_${field}`);
       if (el) {
@@ -599,6 +617,67 @@
 
       previewEl.textContent = field.includes('hrs') ? projected.toFixed(1) : Math.round(projected);
     }
+
+    // Generar lista de períodos (ej: últimos 12 meses + próximos 3)
+function generarPeriodos() {
+  const select = document.getElementById('periodSelect');
+  select.innerHTML = '';
+
+  const now = new Date();
+  const meses = [];
+
+  // Últimos 12 meses + el actual + 3 futuros
+  for (let i = -12; i <= 3; i++) {
+    const fecha = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const mes = fecha.getMonth() + 1;
+    const año = fecha.getFullYear();
+    const periodo = `${mes}-${año}`;
+    const nombre = `${mes.toString().padStart(2, '0')}/${año}`;
+    
+    const option = document.createElement('option');
+    option.value = periodo;
+    option.textContent = nombre;
+    
+    // Marcar el mes actual como seleccionado por defecto
+    if (i === 0) {
+      option.selected = true;
+    }
+    
+    select.appendChild(option);
+  }
+}
+
+// Cuando cambia el período
+document.getElementById('periodSelect')?.addEventListener('change', function() {
+  currentPeriod = this.value;
+  document.getElementById('currentPeriod').textContent = 
+    `Cargando ${this.options[this.selectedIndex].text} (${currentPeriod})...`;
+  
+  // Recargar los datos del nuevo período
+  cargarDatosPeriodo(currentPeriod);
+});
+
+// Función para cargar datos (extraída para reutilizar)
+function cargarDatosPeriodo(periodo) {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('formContent').style.display = 'none';
+
+  db.ref(`${basePath}/${periodo}/general`).once('value')
+    .then(snap => {
+      currentTotals = snap.val() || {};
+      loadAndShowTotals(currentTotals);
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('formContent').style.display = 'block';
+    })
+    .catch(err => {
+      showMessage(`Error al cargar ${periodo}: ${err.message}`, "error");
+    });
+}
+
+// Inicialización
+generarPeriodos();
+currentPeriod = document.getElementById('periodSelect').value;
+cargarDatosPeriodo(currentPeriod);
   </script>
 </body>
 </html>
