@@ -52,79 +52,77 @@
         Guardando...
     </div>
 
-    <div class="w-full max-w-2xl bg-white p-4 rounded-lg shadow-md mb-4 navigation-buttons flex justify-around">
-        <button id="newReportBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-            Crear Nuevo Reporte
+    <div class="w-full max-w-4xl bg-white p-4 rounded-lg shadow-md mb-6 navigation-buttons flex justify-between items-center">
+        <button id="newReportBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
+            Nuevo Reporte
         </button>
-        <button id="viewReportsBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+        <button id="viewReportsBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
             Ver Reportes Guardados
         </button>
-        <div id="userIdDisplay" class="text-gray-700 text-sm flex items-center">
-            ID de Usuario: <span id="currentUserId" class="ml-1 font-semibold">Cargando...</span>
+        <div class="text-gray-700 text-sm">
+            Usuario: <span id="currentUserId" class="font-semibold">Cargando...</span>
         </div>
     </div>
 
-    <div id="listView" class="w-full max-w-2xl bg-white p-8 rounded-lg shadow-md hidden">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Reportes Guardados</h2>
-        <div id="reportsList" class="space-y-4">
-            <p class="text-gray-500 text-center">Cargando reportes...</p>
-        </div>
+    <div id="listView" class="w-full max-w-4xl bg-white p-8 rounded-lg shadow-md hidden">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Reportes Guardados</h2>
+        <div id="reportsList" class="space-y-8"></div>
     </div>
 
     <div id="reportFormView" class="w-full max-w-2xl bg-white p-8 rounded-lg shadow-md print-container">
         <div class="text-center mb-8">
-            <p class="font-bold">FUERZAS ARMADAS DE HONDURAS</p>
+            <p class="font-bold text-xl">FUERZAS ARMADAS DE HONDURAS</p>
             <p class="font-bold">FUERZA AÉREA HONDUREÑA</p>
-            <p class="text-xs">Base Aérea "Coronel Hernán Acosta Mejía"</p>
+            <p class="text-sm">Base Aérea "Coronel Hernán Acosta Mejía"</p>
         </div>
         <div class="text-center mb-6">
-            <p class="font-bold text-base">REPORTE DE TRABAJO EFECTUADO</p>
+            <p class="font-bold text-lg">REPORTE DE TRABAJO EFECTUADO</p>
         </div>
 
-        <div class="flex flex-col space-y-2 mb-6">
-            <div class="flex justify-between items-end">
-                <div class="flex-1 mr-4 flex items-baseline">
-                    <p class="inline-block mr-1 whitespace-nowrap">El taller / sub-sección de</p>
+        <div class="flex flex-col space-y-3 mb-6">
+            <div class="flex justify-between items-end gap-4">
+                <div class="flex-1 flex items-baseline">
+                    <p class="inline-block mr-2 whitespace-nowrap">El taller / sub-sección de</p>
                     <input type="text" id="taller" class="input-line flex-grow">
                 </div>
                 <div class="flex-1 flex items-baseline">
-                    <p class="inline-block mr-1 whitespace-nowrap">notifica que el trabajo</p>
+                    <p class="inline-block mr-2 whitespace-nowrap">notifica que el trabajo</p>
                     <input type="text" id="trabajo" class="input-line flex-grow">
                 </div>
             </div>
-            <div class="flex justify-between items-end">
-                <div class="flex-1 mr-4 flex items-baseline">
-                    <p class="inline-block mr-1 whitespace-nowrap">con N° de orden de trabajo</p>
+            <div class="flex justify-between items-end gap-4">
+                <div class="flex-1 flex items-baseline">
+                    <p class="inline-block mr-2 whitespace-nowrap">con N° de orden de trabajo</p>
                     <input type="text" id="ordenTrabajo" class="input-line flex-grow">
                 </div>
                 <div class="flex-1 flex items-baseline">
-                    <p class="inline-block mr-1 whitespace-nowrap">Tiempo Total</p>
+                    <p class="inline-block mr-2 whitespace-nowrap">Tiempo Total</p>
                     <input type="text" id="tiempoTotal" class="input-line flex-grow">
                 </div>
             </div>
-            <div class="flex justify-between items-end">
-                <div class="flex-1 mr-4 flex items-baseline">
-                    <p class="inline-block mr-1 whitespace-nowrap">Matricula de la aeronave</p>
+            <div class="flex justify-between items-end gap-4">
+                <div class="flex-1 flex items-baseline">
+                    <p class="inline-block mr-2 whitespace-nowrap">Matricula de la aeronave</p>
                     <input type="text" id="matriculaAeronave" class="input-line flex-grow">
                 </div>
                 <div class="flex-1 flex items-baseline">
                     <input type="text" id="campoAdicionalMatricula" class="input-line flex-grow">
                 </div>
             </div>
-            <div class="flex justify-between items-end">
-                <div class="flex-1 mr-4 flex items-baseline">
-                    <p class="inline-block mr-1 whitespace-nowrap">Fecha y hora de inicio</p>
+            <div class="flex justify-between items-end gap-4">
+                <div class="flex-1 flex items-baseline">
+                    <p class="inline-block mr-2 whitespace-nowrap">Fecha y hora de inicio</p>
                     <input type="datetime-local" id="fechaHoraInicio" class="input-line flex-grow">
                 </div>
                 <div class="flex-1 flex items-baseline">
-                    <p class="inline-block mr-1 whitespace-nowrap">terminado</p>
+                    <p class="inline-block mr-2 whitespace-nowrap">terminado</p>
                     <input type="datetime-local" id="fechaHoraTerminado" class="input-line flex-grow">
                 </div>
             </div>
         </div>
 
         <div class="mb-6">
-            <p class="mb-1">Discrepancia:</p>
+            <p class="mb-2 font-medium">Discrepancia:</p>
             <input type="text" id="discrepancia1" class="input-line mb-2">
             <input type="text" id="discrepancia2" class="input-line mb-2">
             <input type="text" id="discrepancia3" class="input-line mb-2">
@@ -134,7 +132,7 @@
         </div>
 
         <div class="mb-6">
-            <p class="mb-1">Acción correctiva:</p>
+            <p class="mb-2 font-medium">Acción correctiva:</p>
             <input type="text" id="accionCorrectiva1" class="input-line mb-2">
             <input type="text" id="accionCorrectiva2" class="input-line mb-2">
             <input type="text" id="accionCorrectiva3" class="input-line mb-2">
@@ -142,25 +140,25 @@
             <input type="text" id="accionCorrectiva5" class="input-line mb-2">
         </div>
 
-        <div class="flex flex-col space-y-2 mb-6">
-            <div class="flex justify-between items-end">
-                <div class="flex-1 mr-4 flex items-baseline">
-                    <p class="inline-block mr-1 whitespace-nowrap">Cantidad de horas</p>
+        <div class="flex flex-col space-y-3 mb-6">
+            <div class="flex justify-between items-end gap-4">
+                <div class="flex-1 flex items-baseline">
+                    <p class="inline-block mr-2 whitespace-nowrap">Cantidad de horas</p>
                     <input type="number" id="cantidadHoras" class="input-line flex-grow">
                 </div>
                 <div class="flex-1 flex items-baseline">
-                    <p class="inline-block mr-1 whitespace-nowrap">cantidad de personal</p>
+                    <p class="inline-block mr-2 whitespace-nowrap">cantidad de personal</p>
                     <input type="number" id="cantidadPersonal" class="input-line flex-grow">
                 </div>
             </div>
             <div class="flex flex-col items-start mt-4">
-                <p class="inline-block mr-1 whitespace-nowrap">Material que se utilizó</p>
-                <input type="text" id="materialUtilizado1" class="input-line mt-2">
-                <input type="text" id="materialUtilizado2" class="input-line mt-2">
+                <p class="inline-block mr-1 whitespace-nowrap mb-2">Material que se utilizó</p>
+                <input type="text" id="materialUtilizado1" class="input-line mb-2">
+                <input type="text" id="materialUtilizado2" class="input-line">
             </div>
         </div>
 
-        <!-- SELECCIÓN DE TALLER (nuevo) -->
+        <!-- Selección de taller -->
         <div class="mt-10 border-t pt-6 mb-6">
             <label class="block text-lg font-bold text-gray-800 mb-3">
                 ¿De qué taller eres? <span class="text-red-600">*</span>
@@ -178,78 +176,83 @@
                 <option value="ELECTRICIDAD">ELECTRICIDAD</option>
                 <option value="HELICOPTEROS">HELICOPTEROS</option>
             </select>
-            <p class="mt-2 text-sm text-gray-600">Este campo es obligatorio para guardar el reporte.</p>
+            <p class="mt-2 text-sm text-gray-600">Este campo es obligatorio</p>
         </div>
 
         <!-- Subida de reporte firmado -->
         <div class="mt-8 border-t pt-6">
-            <p class="font-bold mb-3">Reporte firmado o escaneado (opcional - PDF, JPG, PNG)</p>
-            <input type="file" id="reporteFirmadoFile" accept="application/pdf,image/jpeg,image/png" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+            <p class="font-bold mb-3">Reporte firmado o escaneado (opcional)</p>
+            <input type="file" id="reporteFirmadoFile" accept="application/pdf,image/jpeg,image/png" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
             <div id="previewReporteFirmado" class="hidden mt-4 border border-gray-300 rounded-lg p-4 bg-gray-50 min-h-[180px] flex items-center justify-center">
                 <div id="previewContent" class="text-center"></div>
             </div>
             <p id="uploadStatus" class="mt-2 text-sm text-gray-600 min-h-[1.5rem]"></p>
         </div>
 
-        <div class="flex justify-between mt-12 mb-8 text-center">
-            <div class="flex-1 flex flex-col items-center mx-2">
-                <input type="text" id="tecnico1" class="input-line w-full mb-2">
-                <p class="mt-2 font-bold">TÉCNICO(S) ESPECIALISTA(S)</p>
+        <!-- Firmas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-16 mb-10">
+            <div class="flex flex-col items-center">
+                <input type="text" id="tecnico1" class="input-line w-full mb-2 text-center">
+                <p class="font-bold">TÉCNICO(S) ESPECIALISTA(S)</p>
             </div>
-            <div class="flex-1 flex flex-col items-center mx-2">
-                <input type="text" id="tecnico2" class="input-line w-full mb-2">
-                <p class="mt-2 font-bold">TÉCNICO(S) ESPECIALISTA(S)</p>
-            </div>
-        </div>
-
-        <div class="flex justify-between mt-12 text-center">
-            <div class="flex-1 flex flex-col items-center mx-2">
-                <input type="text" id="supervisor" class="input-line w-full mb-2">
-                <p class="mt-2 font-bold">SUPERVISOR</p>
-            </div>
-            <div class="flex-1 flex flex-col items-center mx-2">
-                <input type="text" id="inspector" class="input-line w-full mb-2">
-                <p class="mt-2 font-bold">INSPECTOR</p>
+            <div class="flex flex-col items-center">
+                <input type="text" id="tecnico2" class="input-line w-full mb-2 text-center">
+                <p class="font-bold">TÉCNICO(S) ESPECIALISTA(S)</p>
             </div>
         </div>
 
-        <div class="flex justify-between mt-12 text-center">
-            <div class="flex-1 flex flex-col items-center mx-2">
-                <input type="text" id="jefeTaller" class="input-line w-full mb-2">
-                <p class="mt-2 font-bold">JEFE TALLER / SECCION</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 mb-10">
+            <div class="flex flex-col items-center">
+                <input type="text" id="supervisor" class="input-line w-full mb-2 text-center">
+                <p class="font-bold">SUPERVISOR</p>
             </div>
-            <div class="flex-1 flex flex-col items-center mx-2">
-                <input type="text" id="jefeLogistica" class="input-line w-full mb-2">
-                <p class="mt-2 font-bold">JEFE DE LOGISTICA A-4</p>
+            <div class="flex flex-col items-center">
+                <input type="text" id="inspector" class="input-line w-full mb-2 text-center">
+                <p class="font-bold">INSPECTOR</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+            <div class="flex flex-col items-center">
+                <input type="text" id="jefeTaller" class="input-line w-full mb-2 text-center">
+                <p class="font-bold">JEFE TALLER / SECCION</p>
+            </div>
+            <div class="flex flex-col items-center">
+                <input type="text" id="jefeLogistica" class="input-line w-full mb-2 text-center">
+                <p class="font-bold">JEFE DE LOGISTICA A-4</p>
             </div>
         </div>
     </div>
 
-    <div class="fixed bottom-4 right-4 print-button">
-        <button id="printReportFromFormBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-lg">
+    <div class="fixed bottom-6 right-6 print-button z-50">
+        <button id="printReportFromFormBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl shadow-xl transition-all duration-300 transform hover:scale-105">
             Imprimir y Guardar Reporte
         </button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyCDZtu6SLdKw0IGLWfA1leqwsUXxVwefNg",
-            authDomain: "ordenes-de-trabajo-6d1f7.firebaseapp.com",
-            projectId: "ordenes-de-trabajo-6d1f7",
-            storageBucket: "ordenes-de-trabajo-6d1f7.firebasestorage.app",
-            messagingSenderId: "800797919123",
-            appId: "1:800797919123:web:a0c7c95943f10e1c588a66",
-            measurementId: "G-TS2MJF4QCX"
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrV3s3uuEiWx_u959j70Tt3JhM_G44sck",
+            authDomain: "ubicacion-50569.firebaseapp.com",
+            databaseURL: "https://ubicacion-50569-default-rtdb.firebaseio.com",
+            projectId: "ubicacion-50569",
+            storageBucket: "ubicacion-50569.firebasestorage.app",
+            messagingSenderId: "275356453292",
+            appId: "1:275356453292:web:d049541c92083167659209",
+            measurementId: "G-QSY3PPZQP3"
         };
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        let app, db, auth, storage, userId, currentReportId = null;
+        // Definimos appId de forma fija con el ID real de tu proyecto
+        const appId = "ubicacion-50569";
+
+        let db;
+        let auth;
+        let userId;
+        let currentReportId = null;
 
         const saveStatusDiv = document.getElementById('saveStatus');
         const newReportBtn = document.getElementById('newReportBtn');
@@ -264,24 +267,19 @@
         const reporteFirmadoInput = document.getElementById('reporteFirmadoFile');
         const previewReporteFirmado = document.getElementById('previewReporteFirmado');
         const previewContent = document.getElementById('previewContent');
-        const uploadStatus = document.getElementById('uploadStatus');
 
         function showSaveStatus(message, isError = false) {
             saveStatusDiv.textContent = message;
             saveStatusDiv.classList.remove('hidden', 'bg-blue-500', 'bg-red-500');
             saveStatusDiv.classList.add(isError ? 'bg-red-500' : 'bg-blue-500');
+            setTimeout(() => saveStatusDiv.classList.add('hidden'), 3000);
         }
 
-        function hideSaveStatus() {
-            saveStatusDiv.classList.add('hidden');
-        }
-
-        // Vista previa del reporte firmado
+        // Vista previa del archivo subido
         reporteFirmadoInput.addEventListener('change', (e) => {
             selectedFirmadoFile = e.target.files[0];
             if (!selectedFirmadoFile) {
                 previewReporteFirmado.classList.add('hidden');
-                uploadStatus.textContent = '';
                 return;
             }
 
@@ -309,20 +307,22 @@
             }
         });
 
-        // Función de guardado actualizada con taller obligatorio
         async function handleSaveReport() {
             const tallerSelect = document.getElementById('tallerSeleccionado');
 
             if (!tallerSelect.value) {
-                showSaveStatus('Debes seleccionar tu taller para guardar el reporte', true);
-                setTimeout(hideSaveStatus, 3500);
+                showSaveStatus('Selecciona tu taller antes de guardar', true);
                 tallerSelect.focus();
                 return false;
             }
 
-            showSaveStatus(currentReportId ? 'Actualizando reporte...' : 'Guardando nuevo reporte...');
+            showSaveStatus('Guardando reporte...');
 
-            const reportData = collectFormData();
+            const reportData = {};
+            reportFormView.querySelectorAll('.input-line').forEach(input => {
+                reportData[input.id] = input.value;
+            });
+
             reportData.tallerSeleccionado = tallerSelect.value;
             reportData.lastModified = new Date().toISOString();
             reportData.userId = userId;
@@ -331,7 +331,7 @@
                 let reportRef;
                 let reportId = currentReportId;
 
-                const reportsCollection = collection(db, `artifacts/${appId}/users/${userId}/reports`);
+                const reportsCollection = collection(db, `artifacts/${appId}/reports`);
 
                 if (currentReportId) {
                     reportRef = doc(reportsCollection, currentReportId);
@@ -344,20 +344,21 @@
                 }
 
                 if (selectedFirmadoFile) {
-                    showSaveStatus('Subiendo reporte firmado...');
+                    showSaveStatus('Guardando archivo firmado...');
 
-                    const ext = selectedFirmadoFile.name.split('.').pop().toLowerCase();
-                    const timestamp = new Date().toISOString().replace(/[-:.T]/g, '').slice(0,14);
-                    const fileName = `reporte_firmado_${timestamp}.${ext}`;
-                    const storagePath = `reports/${userId}/${reportId}/${fileName}`;
+                    const base64Promise = new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(selectedFirmadoFile);
+                    });
 
-                    const storageRef = ref(storage, storagePath);
-                    await uploadBytes(storageRef, selectedFirmadoFile);
-                    const downloadURL = await getDownloadURL(storageRef);
+                    const base64Data = await base64Promise;
 
                     await setDoc(reportRef, {
-                        reporteFirmadoUrl: downloadURL,
+                        reporteFirmadoBase64: base64Data,
                         reporteFirmadoFileName: selectedFirmadoFile.name,
+                        reporteFirmadoType: selectedFirmadoFile.type,
                         reporteFirmadoUploadedAt: new Date().toISOString()
                     }, { merge: true });
 
@@ -366,21 +367,18 @@
                     selectedFirmadoFile = null;
                 }
 
-                showSaveStatus('Reporte guardado exitosamente.', false);
+                showSaveStatus('Guardado correctamente', false);
                 return true;
             } catch (error) {
                 console.error("Error al guardar:", error);
-                showSaveStatus('Error al guardar el reporte.', true);
+                showSaveStatus('Error al guardar el reporte', true);
                 return false;
-            } finally {
-                setTimeout(hideSaveStatus, 2000);
             }
         }
 
         function collectFormData() {
             const data = {};
-            const inputs = reportFormView.querySelectorAll('.input-line');
-            inputs.forEach(input => {
+            reportFormView.querySelectorAll('.input-line').forEach(input => {
                 data[input.id] = input.value;
             });
             return data;
@@ -388,21 +386,16 @@
 
         function loadReport(reportData, id) {
             currentReportId = id;
-            const inputs = reportFormView.querySelectorAll('.input-line');
-            inputs.forEach(input => {
+            reportFormView.querySelectorAll('.input-line').forEach(input => {
                 input.value = reportData[input.id] || '';
             });
-            // También cargamos el taller si existe
             document.getElementById('tallerSeleccionado').value = reportData.tallerSeleccionado || '';
             displayView('reportFormView');
         }
 
         function clearForm() {
             currentReportId = null;
-            const inputs = reportFormView.querySelectorAll('.input-line');
-            inputs.forEach(input => {
-                input.value = '';
-            });
+            reportFormView.querySelectorAll('.input-line').forEach(input => input.value = '');
             document.getElementById('tallerSeleccionado').value = '';
             reporteFirmadoInput.value = '';
             previewReporteFirmado.classList.add('hidden');
@@ -424,68 +417,114 @@
         }
 
         async function handleDeleteReport(id) {
-            if (!confirm("¿Estás seguro de eliminar este reporte?")) return;
-            showSaveStatus('Eliminando reporte...');
+            if (!confirm("¿Eliminar este reporte?")) return;
+            showSaveStatus('Eliminando...');
             try {
-                await setDoc(doc(db, `artifacts/${appId}/users/${userId}/reports`, id), {}, { merge: false }); // Nota: mejor usar deleteDoc si lo importas
-                showSaveStatus('Reporte eliminado.', false);
+                await deleteDoc(doc(db, `artifacts/${appId}/reports`, id));
+                showSaveStatus('Eliminado correctamente', false);
             } catch (error) {
-                console.error(error);
-                showSaveStatus('Error al eliminar.', true);
-            } finally {
-                setTimeout(hideSaveStatus, 2000);
+                showSaveStatus('No se pudo eliminar', true);
             }
         }
 
         function renderReportsList(reports) {
             reportsListDiv.innerHTML = '';
+
             if (reports.length === 0) {
-                reportsListDiv.innerHTML = '<p class="text-gray-500 text-center">No hay reportes guardados aún.</p>';
+                reportsListDiv.innerHTML = '<p class="text-gray-500 text-center py-10">Aún no hay reportes guardados</p>';
                 return;
             }
 
-            reports.forEach(report => {
-                const reportItem = document.createElement('div');
-                reportItem.className = 'bg-gray-50 p-4 rounded-lg shadow-sm flex justify-between items-center';
+            // Agrupar por taller
+            const grouped = reports.reduce((acc, r) => {
+                const key = r.tallerSeleccionado || 'Sin taller';
+                acc[key] = acc[key] || [];
+                acc[key].push(r);
+                return acc;
+            }, {});
 
-                const title = report.ordenTrabajo ? `Orden N°: ${report.ordenTrabajo}` : `Reporte (${new Date(report.lastModified).toLocaleDateString()})`;
+            Object.keys(grouped).sort().forEach(taller => {
+                const section = document.createElement('div');
+                section.className = 'mb-10';
 
-                const tallerTag = report.tallerSeleccionado ? 
-                    `<span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">${report.tallerSeleccionado}</span>` : '';
-
-                reportItem.innerHTML = `
-                    <div class="flex-1">
-                        <p class="font-bold text-gray-800">${title}${tallerTag}</p>
-                        <p class="text-xs text-gray-600">Última modificación: ${new Date(report.lastModified).toLocaleString()}</p>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-1 px-3 rounded edit-btn" data-id="${report.id}">Editar</button>
-                        <button class="bg-red-500 hover:bg-red-600 text-white text-sm py-1 px-3 rounded delete-btn" data-id="${report.id}">Eliminar</button>
-                        <button class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-1 px-3 rounded print-list-btn" data-id="${report.id}">Imprimir</button>
-                    </div>
+                section.innerHTML = `
+                    <h3 class="text-xl font-bold text-gray-700 mb-4 bg-gray-100 p-4 rounded-lg shadow-sm flex justify-between items-center">
+                        <span>Taller: ${taller}</span>
+                        <span class="text-sm font-normal text-gray-600">(${grouped[taller].length})</span>
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 `;
-                reportsListDiv.appendChild(reportItem);
+
+                grouped[taller].forEach(report => {
+                    const title = report.ordenTrabajo 
+                        ? `Orden N° ${report.ordenTrabajo}` 
+                        : `Reporte (${new Date(report.lastModified).toLocaleDateString()})`;
+
+                    let card = `
+                        <div class="bg-white rounded-lg shadow p-5 border-t-4 border-blue-500 hover:shadow-lg transition">
+                            <p class="font-bold text-lg mb-1">${title}</p>
+                            <p class="text-sm text-gray-600">
+                                Modificado: ${new Date(report.lastModified).toLocaleString()}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                Por: ${report.userId.substring(0, 8)}...
+                            </p>
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <button class="bg-blue-600 hover:bg-blue-700 text-white text-sm py-1.5 px-4 rounded edit-btn" data-id="${report.id}">Editar</button>
+                                <button class="bg-red-600 hover:bg-red-700 text-white text-sm py-1.5 px-4 rounded delete-btn" data-id="${report.id}">Eliminar</button>
+                                <button class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-1.5 px-4 rounded print-btn" data-id="${report.id}">Imprimir</button>
+                    `;
+
+                    if (report.reporteFirmadoBase64) {
+                        card += `
+                            <button class="bg-green-600 hover:bg-green-700 text-white text-sm py-1.5 px-4 rounded download-btn" data-id="${report.id}">
+                                Descargar Firmado
+                            </button>
+                        `;
+                    }
+
+                    card += '</div></div>';
+
+                    section.innerHTML += card;
+                });
+
+                section.innerHTML += '</div>';
+                reportsListDiv.appendChild(section);
             });
 
-            document.querySelectorAll('.edit-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
+            // Listeners
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', e => {
                     const id = e.target.dataset.id;
-                    const selectedReport = reports.find(r => r.id === id);
-                    if (selectedReport) loadReport(selectedReport, id);
+                    const report = reports.find(r => r.id === id);
+                    if (report) loadReport(report, id);
                 });
             });
 
-            document.querySelectorAll('.delete-btn').forEach(button => {
-                button.addEventListener('click', (e) => handleDeleteReport(e.target.dataset.id));
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', e => handleDeleteReport(e.target.dataset.id));
             });
 
-            document.querySelectorAll('.print-list-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
+            document.querySelectorAll('.print-btn').forEach(btn => {
+                btn.addEventListener('click', e => {
                     const id = e.target.dataset.id;
-                    const selectedReport = reports.find(r => r.id === id);
-                    if (selectedReport) {
-                        loadReport(selectedReport, id);
-                        setTimeout(() => window.print(), 100);
+                    const report = reports.find(r => r.id === id);
+                    if (report) {
+                        loadReport(report, id);
+                        setTimeout(() => window.print(), 200);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.download-btn').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    const id = e.target.dataset.id;
+                    const report = reports.find(r => r.id === id);
+                    if (report && report.reporteFirmadoBase64) {
+                        const link = document.createElement('a');
+                        link.href = report.reporteFirmadoBase64;
+                        link.download = report.reporteFirmadoFileName || 'reporte_firmado';
+                        link.click();
                     }
                 });
             });
@@ -493,45 +532,40 @@
 
         window.onload = async function() {
             try {
-                app = initializeApp(firebaseConfig);
+                const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                storage = getStorage(app);
 
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                await signInAnonymously(auth);
+                console.log("Autenticado de forma anónima");
 
                 userId = auth.currentUser?.uid || crypto.randomUUID();
                 currentUserIdSpan.textContent = userId;
 
-                const userReportsCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/reports`);
+                const reportsRef = collection(db, `artifacts/${appId}/reports`);
 
-                onSnapshot(userReportsCollectionRef, (snapshot) => {
-                    const fetchedReports = [];
+                onSnapshot(reportsRef, snapshot => {
+                    const reports = [];
                     snapshot.forEach(doc => {
-                        fetchedReports.push({ id: doc.id, ...doc.data() });
+                        reports.push({ id: doc.id, ...doc.data() });
                     });
-                    fetchedReports.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
-                    renderReportsList(fetchedReports);
+                    reports.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+                    renderReportsList(reports);
                 });
 
                 newReportBtn.addEventListener('click', clearForm);
                 viewReportsBtn.addEventListener('click', () => displayView('listView'));
 
                 printReportFromFormBtn.addEventListener('click', async () => {
-                    const saved = await handleSaveReport();
-                    if (saved) {
+                    if (await handleSaveReport()) {
                         window.print();
                     }
                 });
 
                 displayView('reportFormView');
             } catch (error) {
-                console.error("Error al inicializar la aplicación:", error);
-                showSaveStatus('Error grave al cargar la aplicación. Por favor, recarga la página.', true);
+                console.error("Error al inicializar:", error);
+                showSaveStatus("Error al conectar con la base de datos", true);
             }
         };
     </script>
