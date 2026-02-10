@@ -82,7 +82,7 @@
             body { background: white; }
             .print-area { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; }
             .signature-pad, .signature-line { background: transparent !important; border: none !important; }
-            .signature-controls, #share-link-section { display: none !important; }
+            .signature-controls, #share-link-section, #edit-telefonos-section { display: none !important; }
         }
     </style>
 </head>
@@ -200,9 +200,60 @@
                         <div id="discrepancia" class="discrepancia-box mt-2 text-sm p-3" contenteditable="true"></div>
                     </div>
 
+                    <!-- Mostrar número telefónico -->
                     <div class="mt-4 text-sm text-gray-700">
                         Número de contacto del taller seleccionado: 
                         <strong id="telefono-taller">-</strong>
+                    </div>
+
+                    <!-- Botón para editar números -->
+                    <div class="mt-4">
+                        <button onclick="mostrarEditorTelefonos()" class="text-blue-600 hover:underline text-sm">
+                            ✎ Editar números telefónicos
+                        </button>
+                    </div>
+
+                    <!-- Editor de números telefónicos (oculto por defecto) -->
+                    <div id="editor-telefonos" class="hidden mt-6 p-6 bg-gray-50 border rounded-lg">
+                        <h3 class="font-bold mb-4">Editar números de contacto</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm">Estructuras</label>
+                                <input type="text" id="edit-ESTRUCTURAS" class="w-full p-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="block text-sm">Radio</label>
+                                <input type="text" id="edit-RADIO" class="w-full p-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="block text-sm">Instrumentos</label>
+                                <input type="text" id="edit-INSTRUMENTOS" class="w-full p-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="block text-sm">Hidráulica</label>
+                                <input type="text" id="edit-HYD" class="w-full p-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="block text-sm">Electricidad y Baterías</label>
+                                <input type="text" id="edit-ELECTRICIDAD" class="w-full p-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="block text-sm">Motores</label>
+                                <input type="text" id="edit-MOTORES" class="w-full p-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="block text-sm">Helicópteros</label>
+                                <input type="text" id="edit-HELICOPTEROS" class="w-full p-2 border rounded">
+                            </div>
+                        </div>
+                        <div class="mt-6 flex gap-4">
+                            <button onclick="guardarTelefonos()" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+                                Guardar cambios
+                            </button>
+                            <button onclick="cancelarEdicion()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+                                Cancelar
+                            </button>
+                        </div>
                     </div>
 
                     <div class="mt-8 grid grid-cols-2 gap-8">
@@ -302,8 +353,8 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Números telefónicos (los que me diste)
-        const telefonosTalleres = {
+        // Números telefónicos iniciales (los que me diste)
+        let telefonosTalleres = {
             "ESTRUCTURAS": "31732466",
             "RADIO": "36481152",
             "INSTRUMENTOS": "95191242",
@@ -313,6 +364,12 @@
             "HELICOPTEROS": "87325369"
         };
 
+        // Cargar números guardados (si existen)
+        if (localStorage.getItem('telefonosTalleres')) {
+            telefonosTalleres = JSON.parse(localStorage.getItem('telefonosTalleres'));
+        }
+
+        // Cambio de pestaña
         function switchTab(tab) {
             document.getElementById('section-stats').classList.toggle('hidden', tab !== 'stats');
             document.getElementById('section-order').classList.toggle('hidden', tab !== 'order');
@@ -333,6 +390,7 @@
             }
         }
 
+        // Generar W.O.
         function generarNumeroWO() {
             const hoy = new Date();
             const año = hoy.getFullYear();
@@ -355,11 +413,11 @@
             }
         }
 
+        // Mostrar teléfono
         function actualizarTelefonoTaller() {
             const taller = document.getElementById('taller_asignado')?.value;
             const telefonoEl = document.getElementById('telefono-taller');
-
-            // ← Protección contra null
+            
             if (!telefonoEl) return;
 
             if (taller && telefonosTalleres[taller]) {
@@ -369,6 +427,44 @@
             }
         }
 
+        // Mostrar editor de números
+        function mostrarEditorTelefonos() {
+            const editor = document.getElementById('editor-telefonos');
+            if (editor) {
+                editor.classList.remove('hidden');
+
+                // Cargar valores actuales en los inputs
+                Object.keys(telefonosTalleres).forEach(taller => {
+                    const input = document.getElementById(`edit-${taller}`);
+                    if (input) input.value = telefonosTalleres[taller];
+                });
+            }
+        }
+
+        // Guardar cambios en los números telefónicos
+        function guardarTelefonos() {
+            const nuevosTelefonos = {};
+
+            Object.keys(telefonosTalleres).forEach(taller => {
+                const input = document.getElementById(`edit-${taller}`);
+                if (input) {
+                    nuevosTelefonos[taller] = input.value.trim() || telefonosTalleres[taller];
+                }
+            });
+
+            telefonosTalleres = nuevosTelefonos;
+            localStorage.setItem('telefonosTalleres', JSON.stringify(nuevosTelefonos));
+
+            alert('Números telefónicos actualizados');
+            document.getElementById('editor-telefonos').classList.add('hidden');
+            actualizarTelefonoTaller();
+        }
+
+        function cancelarEdicion() {
+            document.getElementById('editor-telefonos')?.classList.add('hidden');
+        }
+
+        // Resto del código (firmas, guardar orden, WhatsApp, etc.) sigue igual
         let signatures = { entregado: null, recibido: null };
 
         function initFirmas() {
@@ -503,17 +599,9 @@ Prioridad: ${prioridad}
 Discrepancia: ${discrepancia?.substring(0, 150) || ''}${discrepancia?.length > 150 ? '...' : ''}
 
 Firma como recibido aquí:
-${enlace || 'Enlace no generado'}`;
+${enlace}`;
 
-            const telefonos = {
-                "ESTRUCTURAS": "31732466",
-                "RADIO": "36481152",
-                "INSTRUMENTOS": "95191242",
-                "HYD": "88172885",
-                "ELECTRICIDAD": "88699561",
-                "MOTORES": "32470716",
-                "HELICOPTEROS": "87325369"
-            };
+            const telefonos = telefonosTalleres; // usamos la variable editable
 
             const numero = telefonos[taller] || "";
 
@@ -521,7 +609,7 @@ ${enlace || 'Enlace no generado'}`;
                 const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
                 window.open(url, '_blank');
             } else {
-                alert("No hay número asignado.\n\nMensaje copiado al portapapeles:\n\n" + mensaje);
+                alert("No hay número asignado.\n\nMensaje copiado:\n" + mensaje);
                 navigator.clipboard.writeText(mensaje).catch(() => {});
             }
         }
