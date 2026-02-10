@@ -3,1777 +3,1077 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fuerza Aérea Hondureña - Orden de Trabajo</title>
+    <title>Gestión de Talleres - FAH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f0f0f0;
-            /* Estilos para que los contenedores se muestren horizontalmente en la pantalla */
-            display: flex;
-            flex-wrap: wrap; /* Permite que los elementos se envuelvan si no hay espacio */
-            justify-content: center; /* Centra los elementos horizontalmente */
-            align-items: flex-start; /* Alinea los elementos al inicio verticalmente */
-            gap: 20px; /* Espacio entre los contenedores */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        .fah-table { border-collapse: collapse; width: 100%; }
+        .fah-table th, .fah-table td { border: 1px solid #1e293b; padding: 8px 12px; }
+        .fah-header-blue { background-color: #b9d1ea; color: #000; font-weight: bold; text-align: center; }
+        .fah-cell-label { background-color: #b9d1ea; font-weight: bold; font-size: 0.85rem; text-align: center; }
+        
+        .discrepancia-box {
+            background-color: #f8fafc;
+            background-image: linear-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 100% 1.6rem;
+            line-height: 1.6rem;
+            border: 1px solid #cbd5e1;
+            padding: 8px 12px;
+            min-height: 160px;
+            font-size: 0.95rem;
         }
-        .container {
-            width: 48%; /* Cada contenedor ocupa casi la mitad del ancho disponible */
-            min-width: 380px; /* Ancho mínimo para evitar que se encojan demasiado en escritorio */
-            background-color: #fff;
-            border: 1px solid #ccc;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            box-sizing: border-box; /* Incluye padding y borde en el ancho total */
-            margin-bottom: 20px; /* Espacio entre los contenedores si se envuelven */
-        }
-        table {
+
+        .signature-container {
+            position: relative;
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 10px;
-        }
-        th, td {
-            border: 1px solid #000; /* Cambiado a negro para mejor visibilidad en impresión */
-            padding: 8px;
-            text-align: left;
-            vertical-align: top;
-        }
-        .header-title {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        .header-title div:first-child {
-            font-size: 1.2em;
-        }
-        .header-title div:last-child {
-            font-size: 1.1em;
-            margin-top: 5px;
-        }
-        /* Eliminar el estilo .header-logo ya que el logo se mueve */
-        /* .header-logo {
-            display: block;
-            margin: 0 auto 10px auto;
-            max-width: 100px;
-            height: auto;
-        } */
-        .section-title {
-            background-color: #A9CCE3; /* Color azul medio claro */
-            font-weight: bold;
-            text-align: center;
-        }
-        /* Estilos para las celdas que contienen campos de entrada o datos */
-        .input-cell {
-            background-color: #EBF5FB; /* Azul muy claro */
-            padding: 0; /* Elimina el padding de la celda para que el input lo controle */
-            height: auto; /* Ajusta la altura automáticamente */
-        }
-        .input-cell table td {
-            border: none; /* Elimina los bordes de las celdas de tablas anidadas */
-            padding: 0; /* Elimina el padding de las celdas de tablas anidadas */
+            height: 70px;
+            margin-top: 6px;
+            border: 1px solid #d1d5db;
+            background: white;
         }
 
-        /* Nuevos estilos para los campos de entrada */
-        .text-input {
-            width: calc(100% - 10px); /* Ajuste para el padding/borde */
-            box-sizing: border-box; /* Incluye padding y borde en el tamaño total */
-            border: 1px solid #ccc; /* Borde ligero para los inputs */
-            padding: 5px; /* Aumentado el padding para más espacio */
-            font-size: 0.9em;
-            background-color: #EBF5FB; /* Mismo fondo que la celda */
-            height: 35px; /* Aumentada la altura para más espacio */
-            margin: 5px; /* Añadido margen para que no se pegue a los bordes de la celda */
-        }
-        /* Ajuste de ancho para los inputs dentro de celdas específicas (ya no tan relevantes con un solo input) */
-        .text-input.small,
-        .text-input.extra-small,
-        .text-input.medium {
-            width: calc(100% - 10px); /* Asegura que los inputs ocupen el 100% del espacio disponible menos el margen */
-        }
-
-        /* Estilos para el contenedor del checkbox/radio y el custom-box */
-        .checkbox-col {
-            position: relative; /* Para posicionar el input y el custom-box */
-            width: 25px; /* Ancho fijo para la columna del checkbox */
-            height: 25px; /* Altura fija para la columna del checkbox */
-            padding: 0; /* Elimina el padding de la celda */
-        }
-
-        /* Estilo para el input de checkbox nativo */
-        .checkbox-col input[type="checkbox"] {
-            width: 25px;
-            height: 25px;
-            margin: 0;
-            vertical-align: middle;
-            cursor: pointer;
-            /* Opcional: para que se vea el checkmark nativo */
-            -webkit-appearance: checkbox;
-            -moz-appearance: checkbox;
-            appearance: checkbox;
-            /* Estilo para el color del checkmark */
-            accent-color: #4CAF50; /* Color verde para el checkmark */
-        }
-
-        .empty-row td {
-            height: 25px; /* Altura para filas vacías */
-        }
-        .discrepancy-label {
-            background-color: #A9CCE3; /* Color azul medio claro */
-            font-weight: bold;
-            padding: 5px;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            width: 150px; /* Ancho similar al de la imagen */
-            text-align: center;
-        }
-
-        /* Estilos para el nuevo contenedor de textarea con líneas */
-        .lined-textarea-container {
-            border: 1px solid #ccc; /* Borde general para el contenedor */
-            background-color: #EBF5FB; /* Fondo azul claro */
-            padding: 5px; /* Pequeño padding dentro del contenedor */
-            box-sizing: border-box;
-            height: 150px; /* Altura fija para el área con líneas */
-            overflow-y: hidden; /* ¡Cambiado a hidden para ocultar la barra de desplazamiento del contenedor! */
-
-            /* Renglones usando background-image en el contenedor */
-            background-image: linear-gradient(to bottom, #ccc 1px, transparent 1px);
-            background-size: 100% 1.4em; /* 1.4em por cada línea */
-            background-repeat: repeat-y;
-            background-position: 0 0; /* Asegura que las líneas empiecen desde arriba */
-        }
-
-        .discrepancy-textarea {
-            width: 100%;
-            height: 100%; /* El textarea ocupará toda la altura de su contenedor */
-            box-sizing: border-box;
-            border: none; /* Sin borde para el textarea interno */
-            padding: 0; /* Sin padding para el textarea interno */
-            background-color: transparent; /* Fondo transparente para que se vean las líneas del contenedor */
-            resize: none; /* Evita que el usuario cambie el tamaño del textarea */
-            font-family: monospace; /* Fuente monoespaciada para mejor alineación de caracteres */
-            line-height: 1.4em; /* Asegura que la altura de línea coincida con el background-size */
-            outline: none; /* Elimina el borde de enfoque */
-            overflow-y: hidden; /* Oculta la barra de desplazamiento del textarea */
-        }
-
-        /* Estilos para el área de firma */
-        .signature-area {
-            display: flex;
-            align-items: center;
-            flex-grow: 1; /* Permite que ocupe el espacio disponible */
-            min-width: 250px; /* Asegura un ancho mínimo para el área de firma */
-        }
-        .signature-line-placeholder {
-            border-bottom: 2px solid #000; /* La línea visible inicialmente */
-            width: 250px; /* Mismo ancho que el canvas */
-            height: 50px; /* Mismo alto que el canvas */
-            cursor: pointer; /* Indica que es interactuable */
-            display: inline-block; /* Para que respete el ancho y alto */
-            vertical-align: middle;
-            background-color: #fff; /* Fondo blanco para la línea */
-            box-sizing: border-box;
-        }
-        .signature-canvas {
-            border: 2px solid #000; /* Borde para simular la línea de firma */
-            background-color: #fff; /* Fondo blanco para dibujar */
-            cursor: crosshair; /* Cursor de dibujo */
-            vertical-align: middle;
-            margin-left: 5px; /* Espacio entre el label y el canvas */
-            touch-action: none; /* Previene el desplazamiento táctil en el canvas */
-        }
-        .clear-signature-button {
-            margin-left: 10px;
-            padding: 5px 10px;
-            background-color: #f44336; /* Rojo */
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 0.8em;
-            transition: background-color 0.3s ease;
-        }
-        .clear-signature-button:hover {
-            background-color: #d32f2f;
-        }
-        /* Clase para ocultar elementos */
-        .hidden {
-            display: none !important; /* Usar !important para asegurar que se oculte */
-        }
-
-        .footer-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center; /* Alinea los elementos verticalmente */
-            margin-top: 10px; /* Ajusta el margen superior para más espacio */
-            position: relative; /* Añadido para posicionamiento absoluto del sello */
-            min-height: 100px; /* Asegura espacio para el sello */
-        }
-        .footer-item {
-            display: flex;
-            align-items: center;
-        }
-        .footer-label {
-            font-weight: bold;
-            margin-right: 10px;
-            white-space: nowrap; /* Evita que el texto se rompa */
-        }
-        .footer-checkbox-group {
-            display: flex;
-            flex-direction: column; /* Apila las etiquetas y los checkboxes */
-            align-items: flex-end; /* Alinea los elementos del grupo a la derecha */
-        }
-        .footer-checkbox-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px; /* Espacio entre los elementos del grupo */
-        }
-        .footer-checkbox-item:last-child {
-            margin-bottom: 0;
-        }
-        .footer-checkbox-item .checkbox-label {
-            font-weight: bold;
-            margin-right: 5px; /* Espacio entre el texto y el checkbox */
-        }
-        .footer-checkbox-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Estilos para el nuevo sello de la FAH */
-        .stamp-logo {
+        .signature-line {
             position: absolute;
-            top: 50%; /* Centra verticalmente */
-            left: 10px; /* Ajusta la posición horizontal */
-            transform: translateY(-50%) rotate(-90deg); /* Centra y rota 90 grados a la izquierda */
-            width: 150px; /* Tamaño del sello */
-            height: 150px; /* Tamaño del sello */
-            opacity: 0.5; /* Efecto desvanecido (un poco más negro) */
-            pointer-events: none; /* Permite que los clics pasen a través del sello */
-            z-index: 0; /* Coloca el sello detrás de otro contenido si se superpone */
+            bottom: 12px;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background-color: #000;
         }
 
-
-        /* Estilos para el botón de imprimir y guardar */
-        .action-button {
-            display: block; /* Ocupa todo el ancho */
-            width: 200px; /* Ancho fijo para el botón */
-            margin: 10px auto; /* Centra el botón */
-            padding: 10px 20px;
-            background-color: #4CAF50; /* Color verde por defecto */
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1em;
-            cursor: pointer;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: background-color 0.3s ease;
-        }
-        .action-button:hover {
-            background-color: #45a049;
-        }
-        .save-button {
-            background-color: #007bff; /* Azul para guardar */
-        }
-        .save-button:hover {
-            background-color: #0056b3;
-        }
-        .print-saved-button {
-            background-color: #17a2b8; /* Un color diferente para el botón de imprimir guardadas */
-        }
-        .print-saved-button:hover {
-            background-color: #138496;
-        }
-        .message-box {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #333;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            display: none; /* Oculto por defecto */
-            font-size: 1.1em;
-            text-align: center;
-        }
-        .user-id-display {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: #555;
-        }
-
-        /* Modal para pedir el nombre del usuario */
-        .modal-overlay {
-            position: fixed;
+        .signature-pad {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            touch-action: none;
+            cursor: crosshair;
+        }
+
+        .signature-controls {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1001;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 0.8rem;
         }
-        .modal-content {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            width: 300px;
-        }
-        .modal-content input {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-top: 15px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .modal-content button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
+
+        .signature-btn {
+            padding: 4px 14px;
+            border: 1px solid #6b7280;
+            background: #f3f4f6;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
-        }
-        .modal-content button:hover {
-            background-color: #0056b3;
+            transition: all 0.15s;
         }
 
-        /* Estilos para la sección de órdenes guardadas */
-        .saved-orders-section {
-            width: 98%; /* Ocupa casi todo el ancho */
-            background-color: #e9ecef; /* Un gris claro para el fondo de la sección */
-            border: 1px solid #ced4da;
-            padding: 20px;
-            margin-top: 30px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-        }
-        .saved-orders-section h2 {
-            text-align: center;
-            color: #343a40;
-            margin-bottom: 20px;
-        }
-        .saved-order-card {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .saved-order-card p {
-            margin: 5px 0;
-            font-size: 0.95em;
-        }
-        .saved-order-card strong {
-            color: #495057;
-        }
-        .saved-order-card .signature-display {
-            border: 1px solid #eee;
-            margin-top: 10px;
-            padding: 5px;
-            background-color: #f8f9fa;
-        }
-        .saved-order-card .signature-display img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-            border-bottom: 1px solid #000; /* Línea debajo de la firma */
-        }
-        /* Estilos específicos para la tabla dentro de las órdenes guardadas */
-        .saved-order-card table {
-            border: 1px solid #000; /* Borde para la tabla principal */
-            margin-bottom: 10px;
-        }
-        .saved-order-card table td {
-            border: 1px solid #000; /* Borde para todas las celdas */
-            padding: 8px;
-            vertical-align: top;
-        }
-        .saved-order-card .section-title {
-            background-color: #A9CCE3;
-            font-weight: bold;
-            text-align: center;
-        }
-        .saved-order-card .input-cell {
-            background-color: #EBF5FB;
-            padding: 8px; /* Restaurar padding para la visualización */
-        }
-        .saved-order-card .discrepancy-content {
-            background-color: #EBF5FB;
-            border: 1px solid #ccc;
-            padding: 5px;
-            min-height: 100px; /* Altura mínima para mostrar el contenido */
-            white-space: pre-wrap; /* Para respetar saltos de línea del textarea */
-            word-wrap: break-word; /* Para evitar desbordamiento de palabras largas */
-        }
-        .saved-order-card .signature-display-area {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start; /* Alinea el label a la izquierda */
-            padding: 5px 0;
-        }
-        .saved-order-card .signature-display-area .footer-label {
-            margin-right: 10px;
-            font-weight: bold;
-        }
-        .saved-order-card .signature-image-container {
-            border-bottom: 1px solid #000; /* Línea debajo de la firma */
-            width: 250px; /* Ancho fijo para la firma */
-            height: 50px; /* Altura fija para la firma */
-            display: flex; /* Para centrar la imagen si es más pequeña */
-            justify-content: center;
-            align-items: center;
-            background-color: #fff; /* Fondo blanco para la firma */
-        }
-        .saved-order-card .signature-image-container img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain; /* Asegura que la imagen se ajuste sin distorsión */
-        }
-        .saved-order-card .signature-image-container.empty {
-            border-bottom: 1px solid #000; /* Línea para firmas vacías */
-            height: 25px; /* Altura más pequeña para línea vacía */
+        .signature-btn:hover {
+            background: #e5e7eb;
         }
 
-        /* Estilos para el mensaje de impresión móvil */
-        .mobile-print-tip {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #3498db; /* Azul para un consejo */
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            z-index: 999; /* Menos que el modal, más que otros elementos */
-            display: none; /* Oculto por defecto, JS lo mostrará */
-            font-size: 0.9em;
-            text-align: center;
-            max-width: 90%;
-            box-sizing: border-box;
-        }
-        .mobile-print-tip button {
-            margin-top: 10px;
-            padding: 8px 15px;
-            background-color: #2980b9; /* Un azul más oscuro */
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
-        .mobile-print-tip button:hover {
-            background-color: #2c3e50;
+        .highlight-row {
+            background-color: #dbeafe !important;
+            font-weight: 600;
         }
 
-
-        /* Estilos para impresión */
         @media print {
-            body {
-                margin: 0;
-                background-color: #fff; /* Fondo blanco para impresión */
-                display: block; /* Asegura el flujo normal de bloques */
-            }
-            /* Oculta los contenedores principales y la sección de órdenes guardadas por defecto en impresión */
-            .container, .saved-orders-section {
-                display: none;
-                box-shadow: none; /* Elimina la sombra */
-                border: 1px solid #000; /* Mantiene el borde para cada formulario individual */
-                width: 100%; /* Cada formulario ocupa el 100% del ancho de la página */
-                padding: 10px; /* Mantiene el padding */
-                margin: 10px auto; /* Margen superior/inferior y centrado */
-                page-break-inside: avoid; /* Evita que un formulario se divida entre páginas */
-                border-radius: 0; /* Elimina el redondeo para impresión */
-                box-sizing: border-box; /* Asegura que padding y border se incluyan en el width */
-            }
-
-            /* Muestra solo los formularios activos cuando body tiene la clase print-active-forms */
-            body.print-active-forms #mainFormContainer1,
-            body.print-active-forms #mainFormContainer2 {
-                display: block !important;
-            }
-
-            /* Muestra solo la sección de órdenes guardadas cuando body tiene la clase print-saved-orders-only */
-            body.print-saved-orders-only #savedOrdersSection {
-                display: block !important;
-            }
-
-            /* Asegura que los fondos de color se MANTENGAN al imprimir */
-            .section-title {
-                background-color: #A9CCE3 !important; /* Color azul medio claro - ¡Ahora con !important! */
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .input-cell {
-                background-color: #EBF5FB !important; /* Azul muy claro - ¡Ahora con !important! */
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .discrepancy-label {
-                background-color: #A9CCE3 !important; /* Color azul medio claro - ¡Ahora con !important! */
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            /* Estilos para el contenedor del textarea en impresión */
-            .lined-textarea-container {
-                border-color: #000 !important; /* Borde negro para impresión */
-                background-image: linear-gradient(to bottom, #ccc 1px, transparent 1px) !important;
-                background-size: 100% 1.4em !important;
-                background-repeat: repeat-y !important;
-                background-position: 0 0 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .discrepancy-textarea {
-                background-color: transparent !important; /* Fondo transparente */
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            /* Asegura que los bordes de la tabla sean visibles */
-            table, th, td {
-                border-color: #000 !important;
-            }
-            /* Asegura que los campos de texto se vean como texto plano en la impresión */
-            .text-input {
-                border: none !important;
-                background-color: transparent !important;
+            .no-print { display: none !important; }
+            body { background: white; margin: 0; }
+            .print-area { box-shadow: none; border: none; margin: 0; width: 100%; }
+            .signature-pad, .signature-line { background: transparent !important; border: none !important; }
+            .signature-controls, #share-link-section, aside, #buscador-wrapper { display: none !important; }
+            body { background-color: white; }
+            .print-container { 
+                box-shadow: none !important; 
+                margin: 0 !important; 
                 padding: 0 !important;
-            }
-            .signature-canvas { /* Estilos para impresión de las líneas de firma */
-                border: none !important; /* Elimina todos los bordes */
-                border-bottom: 2px solid #000 !important; /* Solo la línea inferior */
-                background-color: transparent !important; /* Fondo transparente */
-                height: 25px !important; /* Reduce la altura para que parezca más una línea */
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                display: block !important; /* Asegura que el canvas se muestre */
-                width: 250px !important; /* Asegura el ancho del canvas */
-                margin-left: auto; /* Centra el canvas si es necesario */
-                margin-right: auto; /* Centra el canvas si es necesario */
-            }
-            /* Oculta el botón de imprimir al imprimir */
-            .action-button {
-                display: none;
-            }
-            /* Oculta los botones de borrar en la impresión */
-            .clear-signature-button {
-                display: none !important;
-            }
-            /* Asegura que el placeholder de la firma no se muestre en impresión si está oculto */
-            .signature-line-placeholder {
-                display: none !important;
-            }
-            /* Asegura que el signature-area no afecte el layout del canvas en impresión */
-            .signature-area {
-                display: block !important; /* Cambia a bloque para que el canvas se posicione mejor */
-                width: 100%; /* Ocupa todo el ancho disponible */
-                text-align: left; /* Alinea el canvas a la izquierda dentro del área */
-            }
-            .user-id-display {
-                display: none !important; /* Oculta el ID de usuario en la impresión */
-            }
-            /* Oculta el modal de usuario en la impresión */
-            .modal-overlay {
-                display: none !important;
-            }
-            /* Oculta el mensaje de impresión móvil en la impresión */
-            .mobile-print-tip {
-                display: none !important;
-            }
-            /* Estilos para las órdenes guardadas en impresión */
-            .saved-orders-section {
-                box-shadow: none;
-                border: 1px solid #000;
-                margin-top: 10px;
-                page-break-before: always; /* Cada sección de órdenes guardadas en una nueva página */
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .saved-order-card {
-                border: 1px solid #000;
-                box-shadow: none;
-                padding: 10px;
-                margin-bottom: 10px;
-                page-break-inside: avoid; /* Evita que una tarjeta se divida */
-            }
-            .saved-order-card .signature-display img {
-                border-bottom: 1px solid #000; /* Asegura la línea en impresión */
-            }
-            .saved-order-card .signature-image-container {
-                border-bottom: 1px solid #000 !important;
-                background-color: #fff !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .saved-order-card .discrepancy-content {
-                background-color: #EBF5FB !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            /* Sello en órdenes guardadas para impresión */
-            .saved-order-card .stamp-logo {
-                opacity: 0.3 !important;
-                display: block !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                transform: translateY(-50%) rotate(-90deg) !important; /* Rotación para sellos guardados en impresión */
-                width: 80px !important; /* Tamaño original para sellos guardados en impresión */
-                height: 80px !important; /* Tamaño original para sellos guardados en impresión */
-            }
-            /* Nuevos estilos de impresión para el pie de página */
-            .footer-section {
-                flex-direction: row !important; /* Vuelve a la fila para impresión */
-                align-items: center !important; /* Alinea los elementos verticalmente */
-                justify-content: space-between !important; /* Espacio entre los elementos */
-                margin-top: 10px !important; /* Espacio superior */
-                min-height: 80px !important; /* Asegura espacio para el sello en impresión */
-            }
-            .footer-item {
-                display: flex !important;
-                align-items: center !important;
-                margin-bottom: 0 !important; /* No hay margen inferior si están en la misma fila */
-            }
-            .footer-checkbox-group {
-                flex-direction: column !important; /* Apila los checkboxes para impresión */
-                align-items: flex-end !important; /* Alinea el grupo a la derecha */
-                margin-left: auto !important; /* Mantiene el grupo a la derecha */
-            }
-            .footer-checkbox-item {
-                display: flex !important;
-                align-items: center !important;
-                margin-bottom: 5px !important;
+                width: 100% !important;
             }
         }
-
-        /* Media query para pantallas más pequeñas (móviles y tabletas) */
-        @media (max-width: 768px) {
-            .container {
-                width: 95%; /* Ocupa casi todo el ancho en pantallas pequeñas */
-                min-width: unset; /* Permite que el contenedor se encoja más allá de 380px */
-                margin: 10px auto; /* Centra los contenedores individualmente */
-            }
-
-            /* Ajustar elementos con ancho fijo para que sean fluidos */
-            .signature-line-placeholder,
-            .signature-canvas {
-                width: 100%; /* Ocupa el 100% del ancho disponible */
-                max-width: 250px; /* Mantiene un ancho máximo si el contenedor es muy grande */
-                margin-left: 0; /* Elimina el margen izquierdo si se apila */
-            }
-            
-            /* Ajustar el layout del área de firma para apilar elementos */
-            .signature-area {
-                flex-direction: column; /* Apila los elementos verticalmente */
-                align-items: flex-start; /* Alinea los elementos al inicio */
-            }
-
-            /* Ajustar el botón de borrar firma */
-            .clear-signature-button {
-                margin-left: 0; /* Elimina el margen izquierdo */
-                margin-top: 5px; /* Añade un pequeño margen superior */
-            }
-
-            /* Ajustar el layout del pie de página para apilar elementos */
-            .footer-section {
-                flex-direction: column; /* Apila el label y el área de firma */
-                align-items: flex-start;
-                min-height: 100px; /* Asegura espacio para el sello en móviles */
-            }
-            .footer-item {
-                flex-direction: column; /* Apila el label y el área de firma */
-                align-items: flex-start;
-                width: 100%;
-            }
-            .footer-checkbox-group {
-                margin-left: 0; /* Elimina el margen automático */
-                width: 100%; /* Ocupa todo el ancho */
-                align-items: flex-start; /* Alinea los checkboxes al inicio */
-                margin-top: 10px; /* Espacio encima del grupo de checkboxes */
-            }
-            /* Mostrar el mensaje de impresión móvil en pantallas pequeñas */
-            .mobile-print-tip {
-                display: block;
-            }
-            .stamp-logo {
-                position: static; /* En móviles, puede ser mejor que no sea absoluto si el espacio es limitado */
-                margin: 20px auto 0 auto; /* Centrarlo si es estático */
-                transform: rotate(-90deg); /* Mantener la rotación de 90 grados a la izquierda */
-                opacity: 0.3; /* Mantener la opacidad más oscura para móviles */
-            }
+        .dotted-line {
+            border-bottom: 1px solid black;
+            height: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        input[type="text"], input[type="datetime-local"] {
+            border: none;
+            border-bottom: 1px solid black;
+            outline: none;
+            width: 100%;
+            background: transparent;
+        }
+        textarea {
+            border: none;
+            line-height: 2rem;
+            background-image: linear-gradient(transparent, transparent 1.9rem, black 1.9rem);
+            background-size: 100% 2rem;
+            width: 100%;
+            resize: none;
+            outline: none;
         }
     </style>
 </head>
-<body>
-    <div class="container" id="mainFormContainer1">
-        <div class="header-title">
-            <div>FUERZA AEREA HONDUREÑA</div>
-            <div>BASE AEREA "CNEL HERNAN ACOSTA MEJIA"</div>
-        </div>
+<body class="bg-slate-100 min-h-screen">
 
-        <table>
-            <tr>
-                <td class="section-title" colspan="2">LINEA DE VUELO ALA ROTATORIA</td>
-                <td style="width: 20px; text-align: center;"><input type="checkbox" class="sync-checkbox" data-sync-group="linea-vuelo-rotatoria" checked></td>
-                <td class="section-title" colspan="2">LINEA DE VUELO ALA FIJA</td>
-                <td style="width: 20px;"><input type="checkbox" class="sync-checkbox" data-sync-group="linea-vuelo-fija"></td>
-            </tr>
-        </table>
+    <div class="flex h-screen overflow-hidden no-print">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-slate-900 text-white flex-shrink-0 hidden md:flex flex-col">
+            <div class="p-6 text-center border-b border-slate-700">
+                <h1 class="font-bold text-xl tracking-wide">FAH TALLERES</h1>
+                <p class="text-xs text-slate-400 mt-1 uppercase">Base Aérea HAM</p>
+            </div>
+            <nav class="flex-grow p-4 space-y-1.5">
+                <button id="btn-cargar-orden" onclick="switchTab('order')" 
+                        class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">
+                    Cargar Orden de Trabajo
+                </button>
+                <div class="pt-5 pb-2 px-4 text-xs font-bold text-slate-500 uppercase">Administración</div>
+                <button onclick="switchTab('historial')" 
+                        class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">
+                    Historial W.O.
+                </button>
+                <button onclick="switchTab('reporte-trabajo')" 
+                        class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">
+                    Reporte de Trabajo
+                </button>
+            </nav>
+        </aside>
 
-        <table>
-            <tr>
-                <td style="width: 150px;">
-                    <table class="main-table">
-                        <tr>
-                            <td class="section-title left-col">W.O</td>
-                            <td class="input-cell right-col">
-                                <input type="text" value="" class="text-input sync-input" data-sync-group="wo" id="woInput1">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="section-title left-col">FECHA</td>
-                            <td class="input-cell right-col">
-                                <input type="date" value="2025-07-17" class="text-input sync-input" data-sync-group="fecha">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="section-title left-col">HORA</td>
-                            <td class="input-cell right-col">
-                                <input type="text" class="text-input sync-input" data-sync-group="hora" id="horaInput1">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="section-title left-col">AERONAVE</td>
-                            <td class="input-cell right-col">
-                                <input type="text" value="UH-1H FAH-945" class="text-input sync-input" data-sync-group="aeronave">
-                            </td>
-                        </tr>
+        <!-- Contenido principal -->
+        <main class="flex-grow overflow-y-auto p-6 lg:p-10">
+
+            <!-- ==================================================
+                 SECCIÓN CREAR ORDEN
+            ================================================== -->
+            <div id="section-order" class="hidden">
+                <div class="max-w-5xl mx-auto bg-white p-8 shadow-xl border border-slate-200 rounded-xl print-area">
+                    <div class="text-center mb-8">
+                        <h1 class="font-bold text-xl uppercase">Fuerza Aérea Hondureña</h1>
+                        <h2 class="font-bold text-base uppercase mt-1">Base Aérea "Cnel. Hernán Acosta Mejía"</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <table class="fah-table">
+                            <tr>
+                                <td class="fah-cell-label w-32">W.O</td>
+                                <td><input type="text" id="wo" class="w-full px-3 py-1.5 outline-none font-bold" readonly></td>
+                            </tr>
+                            <tr>
+                                <td class="fah-cell-label">FECHA</td>
+                                <td><input type="date" id="fecha" class="w-full px-3 py-1.5 outline-none"></td>
+                            </tr>
+                            <tr>
+                                <td class="fah-cell-label">HORA</td>
+                                <td><input type="time" id="hora" class="w-full px-3 py-1.5 outline-none"></td>
+                            </tr>
+                            <tr>
+                                <td class="fah-cell-label">AERONAVE</td>
+                                <td><input type="text" id="aeronave" class="w-full px-3 py-1.5 outline-none font-bold"></td>
+                            </tr>
+                        </table>
+
+                        <div>
+                            <table class="fah-table w-full">
+                                <thead>
+                                    <tr>
+                                        <th colspan="4" class="fah-header-blue py-2 uppercase text-xs">Orden de Trabajo para el taller de:</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm font-semibold">
+                                    <tr><td>RADIO</td><td class="w-10 text-center"><input type="checkbox" value="RADIO" class="taller-check"></td><td>BATERIA</td><td class="w-10 text-center"><input type="checkbox" value="BATERIA" class="taller-check"></td></tr>
+                                    <tr><td>INSTRUMENTOS</td><td class="w-10 text-center"><input type="checkbox" value="INSTRUMENTOS" class="taller-check"></td><td>MOTORES</td><td class="w-10 text-center"><input type="checkbox" value="MOTORES" class="taller-check"></td></tr>
+                                    <tr><td>HYD</td><td class="w-10 text-center"><input type="checkbox" value="HYD" class="taller-check"></td><td>ESTRUCTURAS</td><td class="w-10 text-center"><input type="checkbox" value="ESTRUCTURAS" class="taller-check"></td></tr>
+                                    <tr><td>HELICES</td><td class="w-10 text-center"><input type="checkbox" value="HELICES" class="taller-check"></td><td>ARMAMENTO</td><td class="w-10 text-center"><input type="checkbox" value="ARMAMENTO" class="taller-check"></td></tr>
+                                    <tr><td>ELECTRICIDAD</td><td class="w-10 text-center"><input type="checkbox" value="ELECTRICIDAD" class="taller-check"></td><td class="bg-blue-50">HELICÓPTEROS</td><td class="w-10 text-center bg-blue-50"><input type="checkbox" value="HELICOPTEROS" class="taller-check" checked></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <div class="fah-header-blue text-left px-3 py-1.5 text-sm inline-block mb-2">Discrepancia:</div>
+                        <div id="discrepancia" class="discrepancia-box" contenteditable="true"></div>
+                    </div>
+
+                    <div class="mt-5 text-sm text-gray-700 flex items-center gap-3">
+                        <span>Número de contacto del taller seleccionado:</span>
+                        <strong id="telefono-taller" class="text-blue-700">-</strong>
+                    </div>
+
+                    <div class="mt-2">
+                        <button onclick="mostrarEditorTelefonos()" class="text-blue-600 hover:underline text-sm no-print">
+                            ✎ Editar números telefónicos
+                        </button>
+                    </div>
+
+                    <div id="editor-telefonos" class="hidden mt-8 p-6 bg-gray-50 border border-gray-200 rounded-xl no-print">
+                        <h3 class="font-bold text-lg mb-5">Editar números de contacto</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div><label class="block text-sm mb-1.5">Estructuras</label><input type="text" id="edit-ESTRUCTURAS" class="w-full p-2.5 border rounded"></div>
+                            <div><label class="block text-sm mb-1.5">Radio</label><input type="text" id="edit-RADIO" class="w-full p-2.5 border rounded"></div>
+                            <div><label class="block text-sm mb-1.5">Instrumentos</label><input type="text" id="edit-INSTRUMENTOS" class="w-full p-2.5 border rounded"></div>
+                            <div><label class="block text-sm mb-1.5">Hidráulica</label><input type="text" id="edit-HYD" class="w-full p-2.5 border rounded"></div>
+                            <div><label class="block text-sm mb-1.5">Electricidad y Baterías</label><input type="text" id="edit-ELECTRICIDAD" class="w-full p-2.5 border rounded"></div>
+                            <div><label class="block text-sm mb-1.5">Motores</label><input type="text" id="edit-MOTORES" class="w-full p-2.5 border rounded"></div>
+                            <div><label class="block text-sm mb-1.5">Helicópteros</label><input type="text" id="edit-HELICOPTEROS" class="w-full p-2.5 border rounded"></div>
+                        </div>
+                        <div class="mt-8 flex gap-4">
+                            <button onclick="guardarTelefonos()" class="bg-green-600 text-white px-8 py-2.5 rounded hover:bg-green-700 transition">Guardar cambios</button>
+                            <button onclick="cancelarEdicion()" class="bg-gray-500 text-white px-8 py-2.5 rounded hover:bg-gray-600 transition">Cancelar</button>
+                        </div>
+                    </div>
+
+                    <div class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-10">
+                        <div class="space-y-10">
+                            <div>
+                                <div class="font-bold text-sm mb-2">ENTREGADO POR:</div>
+                                <div class="signature-container">
+                                    <div class="signature-line"></div>
+                                    <canvas id="signature-entregado" class="signature-pad" width="500" height="70"></canvas>
+                                </div>
+                                <div class="signature-controls no-print">
+                                    <button class="signature-btn" onclick="clearSignature('entregado')">Borrar firma</button>
+                                    <button class="signature-btn" onclick="saveSignature('entregado')">Confirmar firma</button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="font-bold text-sm mb-2">RECIBIDO POR:</div>
+                                <div class="signature-container">
+                                    <div class="signature-line"></div>
+                                    <canvas id="signature-recibido" class="signature-pad" width="500" height="70"></canvas>
+                                </div>
+                                <div class="signature-controls no-print hidden" id="controles-recibido">
+                                    <button class="signature-btn" onclick="clearSignature('recibido')">Borrar</button>
+                                    <button class="signature-btn" onclick="saveSignature('recibido')">Confirmar recibido</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-8 lg:pt-10">
+                            <div>
+                                <label class="block font-bold text-sm mb-2">Asignar esta orden al taller:</label>
+                                <select id="taller_asignado" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">-- Seleccionar taller --</option>
+                                    <option value="ESTRUCTURAS">Estructuras</option>
+                                    <option value="RADIO">Radio</option>
+                                    <option value="INSTRUMENTOS">Instrumentos</option>
+                                    <option value="HYD">Hidráulica</option>
+                                    <option value="ELECTRICIDAD">Electricidad y Baterías</option>
+                                    <option value="MOTORES">Motores</option>
+                                    <option value="HELICOPTEROS">Helicópteros</option>
+                                </select>
+                            </div>
+
+                            <div class="flex flex-col gap-4">
+                                <label class="flex items-center gap-3">
+                                    <input type="checkbox" id="prioridad-rutina" class="w-5 h-5">
+                                    <span class="font-bold">RUTINA</span>
+                                </label>
+                                <label class="flex items-center gap-3">
+                                    <input type="checkbox" id="prioridad-urgente" class="w-5 h-5">
+                                    <span class="font-bold text-red-600">URGENTE</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="share-link-section" class="hidden max-w-5xl mx-auto mt-8 p-5 bg-blue-50 border border-blue-200 rounded-xl no-print">
+                        <label class="block font-bold text-blue-800 text-sm mb-3">Enlace para firma de recibido:</label>
+                        <div class="flex gap-3">
+                            <input type="text" id="enlace-orden" readonly class="flex-1 p-3 border rounded-lg bg-white text-sm">
+                            <button onclick="copiarEnlace()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition">Copiar</button>
+                        </div>
+                    </div>
+
+                    <div class="mt-10 flex flex-wrap justify-center gap-6 no-print">
+                        <button onclick="guardarOrden()" class="bg-blue-600 text-white px-12 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-md">
+                            Guardar Orden
+                        </button>
+
+                        <button onclick="guardarYEnviarWhatsApp()" class="bg-green-600 text-white px-10 py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-md flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+                            </svg>
+                            Guardar y Enviar WhatsApp
+                        </button>
+
+                        <button onclick="window.print()" class="bg-gray-700 text-white px-12 py-3 rounded-xl font-bold hover:bg-gray-800 transition shadow-md">
+                            Imprimir
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================================================
+                 SECCIÓN HISTORIAL
+            ================================================== -->
+            <div id="section-historial">
+                <div class="max-w-6xl mx-auto bg-white p-8 border border-slate-200 rounded-xl shadow-sm">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4" id="buscador-wrapper">
+                        <h2 class="text-2xl font-bold">Historial de Órdenes de Trabajo</h2>
+                        <div class="w-full md:w-96">
+                            <input type="text" id="buscador-historial" placeholder="Buscar por W.O., aeronave o taller..." 
+                                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-4 mb-8">
+                        <select id="filtro-taller" class="border border-gray-300 p-2.5 rounded-lg min-w-[220px]">
+                            <option value="">Todos los talleres</option>
+                            <option value="ESTRUCTURAS">Estructuras</option>
+                            <option value="RADIO">Radio</option>
+                            <option value="INSTRUMENTOS">Instrumentos</option>
+                            <option value="HYD">Hidráulica</option>
+                            <option value="ELECTRICIDAD">Electricidad</option>
+                            <option value="MOTORES">Motores</option>
+                            <option value="HELICOPTEROS">Helicópteros</option>
+                        </select>
+
+                        <select id="filtro-año" class="border border-gray-300 p-2.5 rounded-lg min-w-[160px]">
+                            <option value="">Todos los años</option>
+                        </select>
+
+                        <button onclick="cargarHistorial()" class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition">
+                            Filtrar
+                        </button>
+                    </div>
+
+                    <h3 class="font-bold text-xl mb-4 text-red-700">Pendientes</h3>
+                    <table class="w-full text-sm border mb-10">
+                        <thead class="bg-slate-100">
+                            <tr>
+                                <th class="border p-3 text-left">W.O.</th>
+                                <th class="border p-3 text-left">Aeronave</th>
+                                <th class="border p-3 text-left">Fecha</th>
+                                <th class="border p-3 text-left">Taller</th>
+                                <th class="border p-3 text-left">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-pendientes" class="divide-y"></tbody>
                     </table>
-                </td>
-                <td style="width: 10px;">&nbsp;</td> <td style="width: 300px;">
-                    <table class="order-table">
-                        <tr>
-                            <td class="section-title" colspan="2">ORDEN DE TRABAJO PARA EL TALLER DE:</td>
-                        </tr>
-                        <tr>
-                            <td class="label-col">RADIO</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-radio">
-                            </td>
-                            <td class="label-col">BATERIA</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-bateria">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label-col">INSTRUMENTOS</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-instrumentos">
-                            </td>
-                            <td class="label-col">MOTORES</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-motores">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label-col">HYD</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-hyd">
-                            </td>
-                            <td class="label-col">ESTRUCTURAS</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-estructuras">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label-col">HELICES</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-helices">
-                            </td>
-                            <td class="label-col">ARMAMENTO</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-armamento">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label-col">ELECTRICIDAD</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-electricidad">
-                            </td>
-                            <td class="label-col">HELICOPTEROS</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-helicopteros" checked>
-                            </td>
-                        </tr>
+
+                    <h3 class="font-bold text-xl mb-4 text-green-700">Recibidas</h3>
+                    <table class="w-full text-sm border">
+                        <thead class="bg-slate-100">
+                            <tr>
+                                <th class="border p-3 text-left">W.O.</th>
+                                <th class="border p-3 text-left">Aeronave</th>
+                                <th class="border p-3 text-left">Fecha</th>
+                                <th class="border p-3 text-left">Taller</th>
+                                <th class="border p-3 text-left">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-recibidas" class="divide-y"></tbody>
                     </table>
-                </td>
-            </tr>
-        </table>
-
-        <div class="discrepancy-label">Discrepancia:</div>
-        <div class="lined-textarea-container">
-            <textarea class="discrepancy-textarea sync-input" data-sync-group="discrepancia" placeholder="Escribe aquí tu discrepancia. Cada línea que escribas se alineará con un renglón."></textarea>
-        </div>
-
-        <div class="footer-section">
-            <img src="IMG_5195-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
-            <div class="footer-item">
-                <span class="footer-label">ENTREGADO POR:</span>
-                <div class="signature-area">
-                    <div class="signature-line-placeholder" data-signature-target="firma-entregado"></div>
-                    <canvas class="signature-canvas hidden" width="250" height="50" data-sync-group="firma-entregado"></canvas>
-                    <button type="button" class="clear-signature-button hidden" data-clear-target="firma-entregado">Borrar</button>
                 </div>
             </div>
-            <div class="footer-checkbox-group">
-                <div class="footer-checkbox-item">
-                    <span class="checkbox-label">RUTINA</span>
-                    <input type="checkbox" class="sync-checkbox" data-sync-group="rutina">
-                </div>
-                <div class="footer-checkbox-item">
-                    <span class="checkbox-label">URGENTE</span>
-                    <input type="checkbox" class="sync-checkbox" data-sync-group="urgente">
-                </div>
-            </div>
-        </div>
-        <div class="footer-section">
-           
-            <div class="footer-item">
-                <span class="footer-label">RECIBIDO POR:</span>
-                <div class="signature-area">
-                    <div class="signature-line-placeholder" data-signature-target="firma-recibido"></div>
-                    <canvas class="signature-canvas hidden" width="250" height="50" data-sync-group="firma-recibido"></canvas>
-                    <button type="button" class="clear-signature-button hidden" data-clear-target="firma-recibido">Borrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="container" id="mainFormContainer2">
-        <div class="header-title">
-            <div>FUERZA AEREA HONDUREÑA</div>
-            <div>BASE AEREA "CNEL HERNAN ACOSTA MEJIA"</div>
-        </div>
+            <!-- ==================================================
+                 SECCIÓN REPORTE DE TRABAJO (INTEGRADO EL FORMULARIO)
+            ================================================== -->
+            <div id="section-reporte-trabajo" class="hidden">
+                <div class="max-w-6xl mx-auto bg-white p-8 border border-slate-200 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-6">Reporte de Trabajo Entregado</h2>
 
-        <table>
-            <tr>
-                <td class="section-title" colspan="2">LINEA DE VUELO ALA ROTATORIA</td>
-                <td style="width: 20px; text-align: center;"><input type="checkbox" class="sync-checkbox" data-sync-group="linea-vuelo-rotatoria"></td>
-                <td class="section-title" colspan="2">LINEA DE VUELO ALA FIJA</td>
-                <td style="width: 20px;"><input type="checkbox" class="sync-checkbox" data-sync-group="linea-vuelo-fija"></td>
-            </tr>
-        </table>
+                    <!-- Botón de impresión -->
+                    <div class="mb-6 no-print flex justify-end">
+                        <button onclick="window.print()" class="bg-blue-800 text-white px-6 py-2 rounded shadow-md hover:bg-blue-700 transition">
+                            Imprimir Reporte
+                        </button>
+                    </div>
 
-        <table>
-            <tr>
-                <td style="width: 150px;">
-                    <table class="main-table">
-                        <tr>
-                            <td class="section-title left-col">W.O</td>
-                            <td class="input-cell right-col">
-                                <input type="text" class="text-input sync-input" data-sync-group="wo" id="woInput2">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="section-title left-col">FECHA</td>
-                            <td class="input-cell right-col">
-                                <input type="date" class="text-input sync-input" data-sync-group="fecha">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="section-title left-col">HORA</td>
-                            <td class="input-cell right-col">
-                                <input type="text" class="text-input sync-input" data-sync-group="hora" id="horaInput2">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="section-title left-col">AERONAVE</td>
-                            <td class="input-cell right-col">
-                                <input type="text" class="text-input sync-input" data-sync-group="aeronave">
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-                <td style="width: 10px;">&nbsp;</td> <td style="width: 300px;">
-                    <table class="order-table">
-                        <tr>
-                            <td class="section-title" colspan="2">ORDEN DE TRABAJO PARA EL TALLER DE:</td>
-                        </tr>
-                        <tr>
-                            <td class="label-col">RADIO</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-radio">
-                            </td>
-                            <td class="label-col">BATERIA</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-bateria">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label-col">INSTRUMENTOS</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-instrumentos">
-                            </td>
-                            <td class="label-col">MOTORES</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-motores">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label-col">HYD</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-hyd">
-                            </td>
-                            <td class="label-col">ESTRUCTURAS</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-estructuras">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label-col">HELICES</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-helices">
-                            </td>
-                            <td class="label-col">ARMAMENTO</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-armamento">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label-col">ELECTRICIDAD</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-electricidad">
-                            </td>
-                            <td class="label-col">HELICOPTEROS</td>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="taller-selection" class="sync-checkbox" data-sync-group="taller-helicopteros">
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
+                    <!-- Contenedor del Reporte -->
+                    <div class="print-container max-w-[210mm] min-h-[297mm] mx-auto bg-white shadow-2xl p-12 border border-gray-200">
+                        
+                        <!-- Encabezado -->
+                        <header class="text-center mb-8">
+                            <h1 class="font-bold text-base uppercase">Fuerzas Armadas de Honduras</h1>
+                            <h2 class="font-bold text-base uppercase">Fuerza Aérea Hondureña</h2>
+                            <p class="text-sm">Base Aérea "Coronel Hernán Acosta Mejía"</p>
+                            <h3 class="font-bold text-lg mt-4 underline uppercase">Reporte de Trabajo Efectuado</h3>
+                        </header>
 
-        <div class="discrepancy-label">Discrepancia:</div>
-        <div class="lined-textarea-container">
-            <textarea class="discrepancy-textarea sync-input" data-sync-group="discrepancia" placeholder="Escribe aquí tu discrepancia. Cada línea que escribas se alineará con un renglón."></textarea>
-        </div>
+                        <!-- Sección de Información General -->
+                        <div class="space-y-4">
+                            <div class="flex gap-4 items-end">
+                                <span class="whitespace-nowrap">El taller / sub-sección de</span>
+                                <input type="text" class="flex-grow">
+                                <span class="whitespace-nowrap">notifica que el trabajo</span>
+                                <input type="text" class="flex-grow">
+                            </div>
 
-        <div class="footer-section">
-            <img src="IMG_5195-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
-            <div class="footer-item">
-                <span class="footer-label">ENTREGADO POR:</span>
-                <div class="signature-area">
-                    <div class="signature-line-placeholder" data-signature-target="firma-entregado"></div>
-                    <canvas class="signature-canvas hidden" width="250" height="50" data-sync-group="firma-entregado"></canvas>
-                    <button type="button" class="clear-signature-button hidden" data-clear-target="firma-entregado">Borrar</button>
-                </div>
-            </div>
-            <div class="footer-checkbox-group">
-                <div class="footer-checkbox-item">
-                    <span class="checkbox-label">RUTINA</span>
-                    <input type="checkbox" class="sync-checkbox" data-sync-group="rutina">
-                </div>
-                <div class="footer-checkbox-item">
-                    <span class="checkbox-label">URGENTE</span>
-                    <input type="checkbox" class="sync-checkbox" data-sync-group="urgente">
-                </div>
-            </div>
-        </div>
-        <div class="footer-section">
-            <img src="IMG_5194-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
-            <div class="footer-item">
-                <span class="footer-label">RECIBIDO POR:</span>
-                <div class="signature-area">
-                    <div class="signature-line-placeholder" data-signature-target="firma-recibido"></div>
-                    <canvas class="signature-canvas hidden" width="250" height="50" data-sync-group="firma-recibido"></canvas>
-                    <button type="button" class="clear-signature-button hidden" data-clear-target="firma-recibido">Borrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                            <div class="flex gap-4 items-end">
+                                <span class="whitespace-nowrap">con N° de orden de trabajo</span>
+                                <input type="text" class="w-1/3">
+                                <span class="whitespace-nowrap">Tiempo Total</span>
+                                <input type="text" class="flex-grow">
+                            </div>
 
-    <button class="action-button" id="printActiveFormsButton">Imprimir Orden</button>
-    <button class="action-button print-saved-button" id="printSavedOrdersButton">Imprimir Órdenes Guardadas</button>
+                            <div class="flex gap-4 items-end">
+                                <span class="whitespace-nowrap">Matrícula de la aeronave</span>
+                                <input type="text" class="flex-grow">
+                            </div>
 
-    <div id="messageBox" class="message-box"></div>
-    <div id="userIdDisplay" class="user-id-display"></div>
+                            <div class="flex gap-4 items-end">
+                                <span class="whitespace-nowrap">Fecha y hora de inicio</span>
+                                <input type="text" class="w-1/3" placeholder="09/02/2026 01:12 p. m.">
+                                <span class="whitespace-nowrap">terminado</span>
+                                <input type="text" class="flex-grow" placeholder="09/02/2026 03:13 p. m.">
+                            </div>
+                        </div>
 
-    <div id="userNameModal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h2>¿Quién eres?</h2>
-            <input type="text" id="userNameInput" placeholder="Introduce tu nombre o ID">
-            <button id="confirmUserNameButton">Confirmar</button>
-        </div>
-    </div>
+                        <!-- Discrepancia -->
+                        <div class="mt-8">
+                            <label class="font-semibold">Discrepancia:</label>
+                            <textarea rows="6" class="mt-2"></textarea>
+                        </div>
 
-    <div class="saved-orders-section" id="savedOrdersSection">
-        <h2>Órdenes Guardadas</h2>
-        <input type="text" id="searchOrdersInput" class="text-input" placeholder="Buscar por W.O., Discrepancia o Aeronave..." style="width: calc(100% - 20px); margin-bottom: 15px;">
-        <div id="savedOrdersList">
-            <p style="text-align: center; color: #6c757d;">Cargando órdenes...</p>
-        </div>
-    </div>
+                        <!-- Acción Correctiva -->
+                        <div class="mt-8">
+                            <label class="font-semibold">Acción correctiva:</label>
+                            <textarea rows="6" class="mt-2"></textarea>
+                        </div>
 
-    <div id="mobilePrintTip" class="mobile-print-tip hidden">
-        <p>En dispositivos móviles, si el botón de imprimir no funciona, por favor usa la función de "Compartir" o "Imprimir" de tu navegador.</p>
-        <button id="dismissMobilePrintTip">Entendido</button>
-    </div>
+                        <!-- Metadatos de Horas y Personal -->
+                        <div class="mt-8 flex gap-8">
+                            <div class="flex-1 flex items-end gap-2">
+                                <span class="whitespace-nowrap">Cantidad de horas</span>
+                                <input type="text" class="flex-grow">
+                            </div>
+                            <div class="flex-1 flex items-end gap-2">
+                                <span class="whitespace-nowrap">cantidad de personal</span>
+                                <input type="text" class="flex-grow">
+                            </div>
+                        </div>
 
-    <script type="module">
-        // Importar las funciones necesarias de Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+                        <!-- Material Utilizado -->
+                        <div class="mt-8">
+                            <label class="font-semibold">Material que se utilizó</label>
+                            <textarea rows="4" class="mt-2"></textarea>
+                        </div>
 
-        let db;
-        let auth;
-        let currentUserId = 'anonymous'; // Valor por defecto
-        // Obtener el ID de la aplicación del entorno de Canvas
-        const globalAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        let userName = ''; // Variable para almacenar el nombre del usuario
-
-        // Elementos de UI
-        const messageBox = document.getElementById('messageBox');
-        const userIdDisplay = document.getElementById('userIdDisplay');
-        const userNameModal = document.getElementById('userNameModal');
-        const userNameInput = document.getElementById('userNameInput');
-        const confirmUserNameButton = document.getElementById('confirmUserNameButton');
-        const savedOrdersList = document.getElementById('savedOrdersList');
-        const woInput1 = document.getElementById('woInput1');
-        const woInput2 = document.getElementById('woInput2');
-        const searchInput = document.getElementById('searchOrdersInput');
-        const horaInput1 = document.getElementById('horaInput1'); // Obtener el input de hora del formulario 1
-        const horaInput2 = document.getElementById('horaInput2'); // Obtener el input de hora del formulario 2
-
-        const mainFormContainer1 = document.getElementById('mainFormContainer1');
-        const mainFormContainer2 = document.getElementById('mainFormContainer2');
-        const savedOrdersSection = document.getElementById('savedOrdersSection');
-
-        // Referencias a los botones de impresión
-        const printActiveFormsButton = document.getElementById('printActiveFormsButton');
-        const printSavedOrdersButton = document.getElementById('printSavedOrdersButton');
-
-        // Elementos para el mensaje de impresión móvil
-        const mobilePrintTip = document.getElementById('mobilePrintTip');
-        const dismissMobilePrintTipButton = document.getElementById('dismissMobilePrintTip');
-
-
-        // Función para mostrar mensajes
-        function showMessage(message, type = 'info') {
-            messageBox.textContent = message;
-            messageBox.style.backgroundColor = type === 'error' ? '#dc3545' : '#333';
-            messageBox.style.display = 'block';
-            setTimeout(() => {
-                messageBox.style.display = 'none';
-            }, 3000);
-        }
-
-        // Función para establecer la hora actual en los campos de hora
-        function setCurrentTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const currentTime = `${hours}:${minutes}`;
-            if (horaInput1) {
-                horaInput1.value = currentTime;
-            }
-            if (horaInput2) {
-                horaInput2.value = currentTime;
-            }
-        }
-
-        // Inicializar Firebase y autenticación
-        async function initializeFirebase() {
-            try {
-                // Las variables globales __app_id y __initial_auth_token
-                // son proporcionadas por el entorno de Canvas.
-                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-                // Configuración de Firebase proporcionada por el usuario
-                const firebaseConfig = {
-                    apiKey: "AIzaSyCDZtu6SLdKw0IGLWfA1leqwsUXxVwefNg",
-                    authDomain: "ordenes-de-trabajo-6d1f7.firebaseapp.com",
-                    projectId: "ordenes-de-trabajo-6d1f7", // Corregido a solo el ID del proyecto
-                    storageBucket: "ordenes-de-trabajo-6d1f7.firebasestorage.app",
-                    messagingSenderId: "800797919123",
-                    appId: "1:800797919123:web:a0c7c95943f10e1c588a66",
-                    measurementId: "G-TS2MJF4QCX"
-                };
-
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        currentUserId = user.uid;
-                        userIdDisplay.textContent = `ID de Usuario: ${currentUserId}`;
-                        console.log("Usuario autenticado:", currentUserId);
-                        // Cargar el nombre de usuario de localStorage
-                        userName = localStorage.getItem('currentUserName') || '';
-                        // Cargar órdenes y generar WO una vez que el usuario esté autenticado
-                        loadSavedOrders();
-                        generateAndSetNextWorkOrderNumber();
-                    } else {
-                        // Si no hay token inicial, inicia sesión anónimamente
-                        if (!initialAuthToken) {
-                            await signInAnonymously(auth);
-                            currentUserId = auth.currentUser?.uid || crypto.randomUUID(); // Fallback si anónimo falla
-                            userIdDisplay.textContent = `ID de Usuario (Anónimo): ${currentUserId}`;
-                            console.log("Sesión anónima iniciada:", currentUserId);
-                            userName = localStorage.getItem('currentUserName') || ''; // Cargar para anónimo también
-                            loadSavedOrders(); // Cargar órdenes también para usuarios anónimos
-                            generateAndSetNextWorkOrderNumber();
-                        } else {
-                            // Si hay un token inicial, pero no se ha autenticado, intenta con el token
-                            try {
-                                await signInWithCustomToken(auth, initialAuthToken);
-                                currentUserId = auth.currentUser?.uid;
-                                userIdDisplay.textContent = `ID de Usuario: ${currentUserId}`;
-                                console.log("Sesión iniciada con token personalizado:", currentUserId);
-                                userName = localStorage.getItem('currentUserName') || ''; // Cargar para usuario con token
-                                loadSavedOrders(); // Cargar órdenes
-                                generateAndSetNextWorkOrderNumber();
-                            } catch (error) {
-                                console.error("Error al iniciar sesión con token personalizado:", error);
-                                // Fallback a anónimo si el token falla
-                                await signInAnonymously(auth);
-                                currentUserId = auth.currentUser?.uid || crypto.randomUUID();
-                                userIdDisplay.textContent = `ID de Usuario (Anónimo - Fallo de Token): ${currentUserId}`;
-                                showMessage("Error de autenticación. Sesión anónima iniciada.", "error");
-                                userName = localStorage.getItem('currentUserName') || ''; // Cargar para anónimo también
-                                loadSavedOrders(); // Cargar órdenes
-                                generateAndSetNextWorkOrderNumber();
-                            }
-                        }
-                    }
-                });
-
-            } catch (error) {
-                console.error("Error al inicializar Firebase o autenticar:", error);
-                showMessage("Error al iniciar la aplicación. Consulta la consola.", "error");
-            }
-        }
-
-        // Función para generar el siguiente número de Orden de Trabajo
-        async function generateAndSetNextWorkOrderNumber() {
-            if (!db) {
-                console.error("Firestore DB no inicializado para el contador.");
-                woInput1.value = "H-ERROR";
-                woInput2.value = "H-ERROR";
-                return;
-            }
-
-            const countersDocRef = doc(db, `artifacts/${globalAppId}/public/data/counters/workOrder`);
-            let nextNumber = 1; // Número inicial por defecto
-
-            try {
-                const docSnap = await getDoc(countersDocRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.lastNumber && typeof data.lastNumber === 'number') {
-                        nextNumber = data.lastNumber + 1;
-                    }
-                }
-                // Formatear el número con ceros iniciales (ej. H-00001)
-                const formattedNumber = `H-${String(nextNumber).padStart(5, '0')}`;
-                woInput1.value = formattedNumber;
-                woInput2.value = formattedNumber; // Sincronizar con el segundo formulario
-            } catch (error) {
-                console.error("Error al obtener el siguiente número de orden de trabajo:", error);
-                showMessage("Error al generar número de W.O.", "error");
-                woInput1.value = "H-ERROR";
-                woInput2.value = "H-ERROR";
-            }
-        }
-
-        /**
-         * Obtiene el nombre del usuario. Si no está en localStorage, muestra un modal.
-         * @returns {Promise<string>} El nombre del usuario.
-         */
-        async function getUserName() {
-            if (userName) {
-                return userName; // Ya tenemos el nombre de usuario
-            }
-
-            return new Promise((resolve) => {
-                userNameModal.classList.remove('hidden');
-                userNameInput.focus();
-
-                confirmUserNameButton.onclick = () => {
-                    const inputName = userNameInput.value.trim();
-                    if (inputName === '') {
-                        showMessage("Por favor, introduce tu nombre o ID.", "error");
-                        return;
-                    }
-                    userName = inputName;
-                    localStorage.setItem('currentUserName', userName); // Guardar en localStorage
-                    userNameModal.classList.add('hidden');
-                    resolve(userName);
-                };
-            });
-        }
-
-        /**
-         * Guarda la orden de trabajo actual en Firestore.
-         * @param {string} user El nombre del usuario que guarda la orden.
-         */
-        async function saveCurrentOrder(user) {
-            if (!db || !currentUserId) {
-                showMessage("La base de datos no está lista o el usuario no está autenticado.", "error");
-                return false; // Indicar que el guardado falló
-            }
-
-            showMessage("Guardando orden...", "info");
-
-            try {
-                const formElement = document.getElementById('mainFormContainer1');
-                const orderData = {};
-
-                formElement.querySelectorAll('input[type="text"].sync-input, input[type="date"].sync-input, textarea.sync-input').forEach(input => {
-                    orderData[input.dataset.syncGroup] = input.value;
-                });
-
-                formElement.querySelectorAll('input[type="checkbox"].sync-checkbox, input[type="radio"].sync-checkbox').forEach(input => {
-                    orderData[input.dataset.syncGroup] = input.checked;
-                });
-
-                const signatureCanvases = formElement.querySelectorAll('.signature-canvas');
-                signatureCanvases.forEach(canvas => {
-                    const syncGroup = canvas.dataset.syncGroup;
-                    if (canvas.classList.contains('hidden')) {
-                        orderData[syncGroup] = '';
-                    } else {
-                        orderData[syncGroup] = canvas.toDataURL();
-                    }
-                });
-
-                orderData.savedBy = user; // Usar el nombre de usuario proporcionado
-
-                const woNumberString = orderData.wo;
-                const numericPart = parseInt(woNumberString.substring(2), 10);
-
-                if (!isNaN(numericPart)) {
-                    const countersDocRef = doc(db, `artifacts/${globalAppId}/public/data/counters/workOrder`);
-                    try {
-                        const docSnap = await getDoc(countersDocRef);
-                        let currentLastNumber = 0;
-                        if (docSnap.exists()) {
-                            currentLastNumber = docSnap.data().lastNumber || 0;
-                        }
-
-                        if (numericPart > currentLastNumber) {
-                            await setDoc(countersDocRef, { lastNumber: numericPart });
-                            console.log(`Contador de W.O. actualizado a: ${numericPart}`);
-                        }
-                    } catch (error) {
-                        console.error("Error al actualizar el contador de W.O.:", error);
-                    }
-                }
-
-                const publicOrdersCollectionRef = collection(db, `artifacts/${globalAppId}/public/data/orders`);
-                await addDoc(publicOrdersCollectionRef, {
-                    ...orderData,
-                    timestamp: new Date()
-                });
-
-                showMessage("Orden guardada exitosamente!", "success");
-                console.log("Orden guardada:", orderData);
-                loadSavedOrders();
-                generateAndSetNextWorkOrderNumber();
-                return true; // Indicar que el guardado fue exitoso
-            } catch (error) {
-                console.error("Error al guardar la orden:", error);
-                showMessage(`Error al guardar: ${error.message}`, "error");
-                return false; // Indicar que el guardado falló
-            }
-        }
-
-
-        // Función para cargar y mostrar las órdenes guardadas
-        async function loadSavedOrders() {
-            if (!db || !currentUserId) {
-                savedOrdersList.innerHTML = '<p style="text-align: center; color: #6c757d;">No se pueden cargar las órdenes. Autenticación pendiente o base de datos no inicializada.</p>';
-                return;
-            }
-
-            savedOrdersList.innerHTML = '<p style="text-align: center; color: #6c757d;">Cargando órdenes...</p>';
-
-            try {
-                // Ruta de la colección para datos públicos, visible para todos los usuarios
-                const publicOrdersCollectionRef = collection(db, `artifacts/${globalAppId}/public/data/orders`);
-                // Usamos onSnapshot para escuchar cambios en tiempo real
-                onSnapshot(publicOrdersCollectionRef, (snapshot) => {
-                    // Obtener el valor del campo de búsqueda y convertirlo a minúsculas
-                    const searchQuery = searchInput.value.toLowerCase();
-
-                    if (snapshot.empty) {
-                        savedOrdersList.innerHTML = '<p style="text-align: center; color: #6c757d;">No hay órdenes guardadas aún.</p>';
-                        return;
-                    }
-
-                    savedOrdersList.innerHTML = ''; // Limpiar la lista antes de añadir las nuevas órdenes
-                    let ordersFound = false;
-
-                    snapshot.forEach((doc) => {
-                        const order = doc.data();
-                        const orderId = doc.id;
-
-                        // Convertir los campos relevantes a minúsculas para la búsqueda
-                        const wo = order.wo ? order.wo.toLowerCase() : '';
-                        const discrepancia = order.discrepancia ? order.discrepancia.toLowerCase() : '';
-                        const aeronave = order.aeronave ? order.aeronave.toLowerCase() : ''; // Nuevo campo para búsqueda
-
-                        // Filtrar las órdenes según el campo de búsqueda
-                        if (searchQuery === '' || wo.includes(searchQuery) || discrepancia.includes(searchQuery) || aeronave.includes(searchQuery)) {
-                            ordersFound = true;
+                        <!-- Sección de Firmas -->
+                        <div class="mt-16 grid grid-cols-2 gap-x-12 gap-y-16">
                             
-                            // Construir la lista de talleres enviados (solo uno ahora)
-                            let selectedTaller = 'N/A';
-                            const tallerOptions = ['radio', 'bateria', 'instrumentos', 'motores', 'hyd', 'estructuras', 'helices', 'armamento', 'electricidad', 'helicopteros'];
-                            for (const option of tallerOptions) {
-                                if (order[`taller-${option}`]) {
-                                    selectedTaller = option.toUpperCase();
-                                    break; // Solo uno puede ser seleccionado
-                                }
-                            }
+                            <!-- Fila 1 -->
+                            <div class="text-center">
+                                <div class="border-t border-black mb-1"></div>
+                                <p class="font-bold text-xs uppercase">Técnico(s) Especialista(s)</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="border-t border-black mb-1"></div>
+                                <p class="font-bold text-xs uppercase">Técnico(s) Especialista(s)</p>
+                            </div>
 
-                            const card = document.createElement('div');
-                            card.classList.add('saved-order-card');
+                            <!-- Fila 2 -->
+                            <div class="text-center">
+                                <div class="border-t border-black mb-1"></div>
+                                <p class="font-bold text-xs uppercase">Supervisor</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="border-t border-black mb-1"></div>
+                                <p class="font-bold text-xs uppercase">Inspector</p>
+                            </div>
 
-                            // Construir el HTML de la orden guardada con la estructura de tabla
-                            // Se incluye el sello en la sección del pie de página para las órdenes guardadas también.
-                            card.innerHTML = `
-                                <div class="header-title">
-                                    <div>FUERZA AEREA HONDUREÑA</div>
-                                    <div>BASE AEREA "CNEL HERNAN ACOSTA MEJIA"</div>
-                                </div>
+                            <!-- Fila 3 -->
+                            <div class="text-center">
+                                <div class="border-t border-black mb-1"></div>
+                                <p class="font-bold text-xs uppercase">Jefe Taller / Seccion</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="border-t border-black mb-1"></div>
+                                <p class="font-bold text-xs uppercase">Jefe de Logistica A-4</p>
+                            </div>
 
-                                <table>
-                                    <tr>
-                                        <td class="section-title" colspan="2">LINEA DE VUELO ALA ROTATORIA</td>
-                                        <td style="width: 20px; text-align: center;">${order['linea-vuelo-rotatoria'] ? '&#10003;' : ''}</td>
-                                        <td class="section-title" colspan="2">LINEA DE VUELO ALA FIJA</td>
-                                        <td style="width: 20px;">${order['linea-vuelo-fija'] ? '&#10003;' : ''}</td>
-                                    </tr>
-                                </table>
+                        </div>
 
-                                <table>
-                                    <tr>
-                                        <td style="width: 150px;">
-                                            <table class="main-table">
-                                                <tr>
-                                                    <td class="section-title left-col">W.O</td>
-                                                    <td class="input-cell right-col">${order.wo || 'N/A'}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="section-title left-col">FECHA</td>
-                                                    <td class="input-cell right-col">${order.fecha || 'N/A'}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="section-title left-col">HORA</td>
-                                                    <td class="input-cell right-col">${order.hora || 'N/A'}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="section-title left-col">AERONAVE</td>
-                                                    <td class="input-cell right-col">${order.aeronave || 'N/A'}</td>
-                                                </tr>
-                                            </table>
-                                        </td>
-                                        <td style="width: 10px;">&nbsp;</td>
-                                        <td style="width: 300px;">
-                                            <table class="order-table">
-                                                <tr>
-                                                    <td class="section-title" colspan="2">ORDEN DE TRABAJO PARA EL TALLER DE:</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="label-col">RADIO</td>
-                                                    <td class="checkbox-col">${order['taller-radio'] ? '&#10003;' : ''}</td>
-                                                    <td class="label-col">BATERIA</td>
-                                                    <td class="checkbox-col">${order['taller-bateria'] ? '&#10003;' : ''}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="label-col">INSTRUMENTOS</td>
-                                                    <td class="checkbox-col">${order['taller-instrumentos'] ? '&#10003;' : ''}</td>
-                                                    <td class="label-col">MOTORES</td>
-                                                    <td class="checkbox-col">${order['taller-motores'] ? '&#10003;' : ''}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="label-col">HYD</td>
-                                                    <td class="checkbox-col">${order['taller-hyd'] ? '&#10003;' : ''}</td>
-                                                    <td class="label-col">ESTRUCTURAS</td>
-                                                    <td class="checkbox-col">${order['taller-estructuras'] ? '&#10003;' : ''}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="label-col">HELICES</td>
-                                                    <td class="checkbox-col">${order['taller-helices'] ? '&#10003;' : ''}</td>
-                                                    <td class="label-col">ARMAMENTO</td>
-                                                    <td class="checkbox-col">${order['taller-armamento'] ? '&#10003;' : ''}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="label-col">ELECTRICIDAD</td>
-                                                    <td class="checkbox-col">${order['taller-electricidad'] ? '&#10003;' : ''}</td>
-                                                    <td class="label-col">HELICOPTEROS</td>
-                                                    <td class="checkbox-col">${order['taller-helicopteros'] ? '&#10003;' : ''}</td>
-                                                </tr>
-                                            </table>
-                                        </td>
-                                    </tr>
-                                </table>
+                        <!-- Pie de página (opcional) -->
+                        <footer class="mt-12 text-[10px] text-gray-400 text-right no-print">
+                            Formulario Digital Generado - 2026
+                        </footer>
+                    </div>
+                </div>
+            </div>
 
-                                <div class="discrepancy-label">Discrepancia:</div>
-                                <div class="discrepancy-content">${order.discrepancia || 'N/A'}</div>
+            <!-- ==================================================
+                 MODAL DETALLE ORDEN
+            ================================================== -->
+            <div id="detalle-orden-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 no-print">
+                <div class="bg-white rounded-xl max-w-4xl w-full max-h-[92vh] overflow-y-auto relative shadow-2xl">
+                    <button onclick="cerrarDetalleOrden()" class="absolute top-4 right-5 text-3xl text-gray-600 hover:text-gray-800">×</button>
+                    
+                    <div class="p-8">
+                        <h2 class="text-2xl font-bold mb-6">Orden de Trabajo <span id="detalle-wo" class="text-blue-700"></span></h2>
 
-                                <div class="footer-section" style="position: relative; min-height: 100px;">
-                                    <!-- Si esta orden guardada tiene el sello, se mostrará aquí -->
-                                    <img src="IMG_5195-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
-                                    <div class="footer-item">
-                                        <span class="footer-label">ENTREGADO POR:</span>
-                                        <div class="signature-image-container ${order['firma-entregado'] ? '' : 'empty'}">
-                                            ${order['firma-entregado'] ? `<img src="${order['firma-entregado']}" alt="Firma Entregado">` : ''}
-                                        </div>
-                                    </div>
-                                    <div class="footer-checkbox-group">
-                                        <div class="footer-checkbox-item">
-                                            <span class="checkbox-label">RUTINA</span>
-                                            ${order.rutina ? '&#10003;' : ''}
-                                        </div>
-                                        <div class="footer-checkbox-item">
-                                            <span class="checkbox-label">URGENTE</span>
-                                            ${order.urgente ? '&#10003;' : ''}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="footer-section" style="position: relative; min-height: 100px;">
-                                    <!-- Si esta orden guardada tiene el sello, se mostrará aquí -->
-                          <img src="IMG_5195-removebg-preview.png" alt="Sello FAH" class="stamp-logo">
-                                    <div class="footer-item">
-                                        <span class="footer-label">RECIBIDO POR:</span>
-                                        <div class="signature-image-container ${order['firma-recibido'] ? '' : 'empty'}">
-                                            ${order['firma-recibido'] ? `<img src="${order['firma-recibido']}" alt="Firma Recibido">` : ''}
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr style="margin-top: 15px; border-color: #eee;">
-                                <p style="text-align: center; font-size: 0.8em; color: #6c757d;">Guardado por: ${order.savedBy || 'Desconocido'} el ${order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleString() : 'N/A'}</p>
-                            `;
-                            savedOrdersList.appendChild(card);
-                        }
-                    });
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="space-y-3">
+                                <p><strong>Fecha:</strong> <span id="detalle-fecha"></span></p>
+                                <p><strong>Hora:</strong> <span id="detalle-hora"></span></p>
+                                <p><strong>Aeronave:</strong> <span id="detalle-aeronave"></span></p>
+                                <p><strong>Taller:</strong> <span id="detalle-taller"></span></p>
+                                <p><strong>Prioridad:</strong> <span id="detalle-prioridad"></span></p>
+                                <p><strong>Estado:</strong> <span id="detalle-estado" class="font-semibold"></span></p>
+                            </div>
+                            <div>
+                                <p class="font-semibold mb-2">Discrepancia:</p>
+                                <div id="detalle-discrepancia" class="bg-gray-50 p-4 rounded-lg border"></div>
+                            </div>
+                        </div>
 
-                    if (!ordersFound && searchQuery !== '') {
-                        savedOrdersList.innerHTML = '<p style="text-align: center; color: #6c757d;">No se encontraron órdenes que coincidan con su búsqueda.</p>';
-                    }
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div>
+                                <p class="font-semibold mb-2">Firma Entregado:</p>
+                                <img id="detalle-firma-entregado" class="w-full h-32 object-contain border rounded" alt="Firma entregado">
+                            </div>
+                            <div>
+                                <p class="font-semibold mb-2">Firma Recibido:</p>
+                                <img id="detalle-firma-recibido" class="w-full h-32 object-contain border rounded" alt="Firma recibido">
+                            </div>
+                        </div>
 
-                }, (error) => {
-                    console.error("Error al escuchar órdenes en tiempo real:", error);
-                    savedOrdersList.innerHTML = `<p style="text-align: center; color: #dc3545;">Error al cargar órdenes: ${error.message}</p>`;
-                });
-            } catch (error) {
-                console.error("Error al cargar las órdenes:", error);
-                showMessage(`Error al cargar órdenes: ${error.message}`, "error");
-                savedOrdersList.innerHTML = `<p style="text-align: center; color: #dc3545;">Error al cargar órdenes: ${error.message}</p>`;
+                        <div id="seccion-firma-recibido-modal" class="hidden mt-10 border-t pt-6">
+                            <h3 class="font-bold text-xl mb-4 text-green-700">Firma de Recibido por el Taller</h3>
+                            
+                            <div class="signature-container">
+                                <div class="signature-line"></div>
+                                <canvas id="signature-recibido-modal" class="signature-pad" width="500" height="70"></canvas>
+                            </div>
+                            
+                            <div class="signature-controls mt-5">
+                                <button class="signature-btn" onclick="clearSignatureModal()">Borrar firma</button>
+                                <button class="signature-btn bg-green-600 text-white hover:bg-green-700 px-6" onclick="guardarFirmaRecibidoModal()">
+                                    Confirmar Recibido
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-10">
+                            <h3 class="font-bold text-lg mb-4">Reporte de Trabajo Entregado (PDF)</h3>
+                            <input type="file" id="upload-pdf" accept=".pdf" class="mb-4 block">
+                            <button onclick="subirReportePDF()" class="bg-blue-600 text-white px-6 py-2.5 rounded hover:bg-blue-700">Subir PDF</button>
+                            <div id="detalle-pdf-view" class="mt-5"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // ==================================================
+        //  CONFIGURACIÓN FIREBASE
+        // ==================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrV3s3uuEiWx_u959j70Tt3JhM_G44sck",
+            authDomain: "ubicacion-50569.firebaseapp.com",
+            databaseURL: "https://ubicacion-50569-default-rtdb.firebaseio.com",
+            projectId: "ubicacion-50569",
+            storageBucket: "ubicacion-50569.firebasestorage.app",
+            messagingSenderId: "275356453292",
+            appId: "1:275356453292:web:d049541c92083167659209",
+            measurementId: "G-QSY3PPZQP3"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const storage = firebase.storage();
+
+        // ==================================================
+        //  VARIABLES GLOBALES
+        // ==================================================
+        let telefonosTalleres = {
+            "ESTRUCTURAS": "31732466",
+            "RADIO": "36481152",
+            "INSTRUMENTOS": "95191242",
+            "HYD": "88172885",
+            "ELECTRICIDAD": "88699561",
+            "MOTORES": "32470716",
+            "HELICOPTEROS": "87325369"
+        };
+
+        if (localStorage.getItem('telefonosTalleres')) {
+            telefonosTalleres = JSON.parse(localStorage.getItem('telefonosTalleres'));
+        }
+
+        let signatures = { entregado: null, recibido: null };
+        let signatureModal = null;
+        let currentDetallePath = null;
+
+        // ==================================================
+        //  FUNCIONES AUXILIARES
+        // ==================================================
+        function generarNumeroWO() {
+            const hoy = new Date();
+            const año = hoy.getFullYear();
+            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+            const clave = `contador_wo_${año}_${mes}`;
+            let contador = parseInt(localStorage.getItem(clave) || '0', 10);
+            contador += 1;
+            localStorage.setItem(clave, contador);
+            return `${año}-${mes}-${String(contador).padStart(4, '0')}`;
+        }
+
+        function generarYMostrarWO() {
+            const input = document.getElementById('wo');
+            if (input && !input.value.trim()) {
+                input.value = generarNumeroWO();
             }
         }
 
-        // --- Lógica de Dibujo de Firma en Canvas y Sincronización (EXISTENTE) ---
-        // Objeto para almacenar los contextos de dibujo de los canvas inicializados
-        const initializedCanvases = {};
+        function actualizarTelefonoTaller() {
+            const taller = document.getElementById('taller_asignado')?.value;
+            document.getElementById('telefono-taller').textContent = telefonosTalleres[taller] || '—';
+        }
 
-        // Función para configurar el dibujo en un canvas
-        function setupDrawingCanvas(canvas, targetCanvas) {
-            // Solo inicializar si no se ha hecho antes
-            if (initializedCanvases[canvas.id]) {
-                return;
+        function mostrarEditorTelefonos() {
+            document.getElementById('editor-telefonos').classList.remove('hidden');
+            Object.keys(telefonosTalleres).forEach(t => {
+                const el = document.getElementById(`edit-${t}`);
+                if (el) el.value = telefonosTalleres[t];
+            });
+        }
+
+        function guardarTelefonos() {
+            Object.keys(telefonosTalleres).forEach(t => {
+                const input = document.getElementById(`edit-${t}`);
+                if (input) telefonosTalleres[t] = input.value.trim();
+            });
+            localStorage.setItem('telefonosTalleres', JSON.stringify(telefonosTalleres));
+            alert('Números actualizados');
+            document.getElementById('editor-telefonos').classList.add('hidden');
+            actualizarTelefonoTaller();
+        }
+
+        function cancelarEdicion() {
+            document.getElementById('editor-telefonos').classList.add('hidden');
+        }
+
+        // ==================================================
+        //  FIRMAS - CREACIÓN DE ORDEN
+        // ==================================================
+        function initFirmas() {
+            ['entregado', 'recibido'].forEach(tipo => {
+                const canvas = document.getElementById(`signature-${tipo}`);
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#000';
+
+                let drawing = false;
+
+                const draw = e => {
+                    if (!drawing) return;
+                    const rect = canvas.getBoundingClientRect();
+                    const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+                    const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                };
+
+                canvas.addEventListener('mousedown', () => { drawing = true; ctx.beginPath(); });
+                canvas.addEventListener('mousemove', draw);
+                canvas.addEventListener('mouseup', () => drawing = false);
+                canvas.addEventListener('mouseout', () => drawing = false);
+
+                canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; ctx.beginPath(); });
+                canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e); });
+                canvas.addEventListener('touchend', () => drawing = false);
+            });
+        }
+
+        function clearSignature(tipo) {
+            const canvas = document.getElementById(`signature-${tipo}`);
+            if (canvas) {
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                signatures[tipo] = null;
+            }
+        }
+
+        function saveSignature(tipo) {
+            const canvas = document.getElementById(`signature-${tipo}`);
+            if (canvas) signatures[tipo] = canvas.toDataURL('image/png');
+        }
+
+        // ==================================================
+        //  ENLACE Y WHATSAPP
+        // ==================================================
+        function generarEnlace(wo) {
+            const base = window.location.href.split('?')[0];
+            return `${base}?orden=${encodeURIComponent(wo)}`;
+        }
+
+        function copiarEnlace() {
+            const input = document.getElementById('enlace-orden');
+            input.select();
+            document.execCommand('copy');
+            alert('Enlace copiado');
+        }
+
+        async function guardarOrden(mostrarEnlace = false) {
+            const wo = document.getElementById('wo')?.value?.trim();
+            const taller = document.getElementById('taller_asignado')?.value;
+            const fecha = document.getElementById('fecha')?.value;
+            const hora = document.getElementById('hora')?.value;
+            const aeronave = document.getElementById('aeronave')?.value?.trim();
+            const discrepancia = document.getElementById('discrepancia')?.innerText?.trim();
+            const prioridad_urgente = document.getElementById('prioridad-urgente')?.checked;
+
+            if (!wo || !taller || !discrepancia) {
+                alert('Faltan datos obligatorios');
+                return false;
             }
 
-            const ctx = canvas.getContext('2d');
-            ctx.strokeStyle = '#000'; // Color de la línea de dibujo (negro)
-            ctx.lineWidth = 2;       // Grosor de la línea
-            ctx.lineJoin = 'round';  // Uniones de línea redondeadas
-            ctx.lineCap = 'round';   // Extremos de línea redondeados
+            saveSignature('entregado');
 
-            let isDrawing = false;
-            let lastX = 0;
-            let lastY = 0;
+            const [año, mes] = wo.split('-').slice(0, 2);
+            const path = `ordenes_trabajo/${taller}/${año}/${mes}/${wo}`;
 
-            // Función auxiliar para obtener coordenadas del evento (ratón o táctil)
-            const getCoords = (e) => {
-                const rect = canvas.getBoundingClientRect();
-                if (e.touches && e.touches.length > 0) {
-                    return [e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top];
+            const data = {
+                wo, fecha, hora, aeronave, discrepancia,
+                prioridad: prioridad_urgente ? 'URGENTE' : 'Rutina',
+                estado: 'pendiente',
+                firma_entregado: signatures.entregado,
+                creado: new Date().toISOString()
+            };
+
+            try {
+                await db.ref(path).set(data);
+                alert('Orden guardada correctamente');
+
+                if (mostrarEnlace) {
+                    const enlace = generarEnlace(wo);
+                    document.getElementById('enlace-orden').value = enlace;
+                    document.getElementById('share-link-section').classList.remove('hidden');
                 }
-                return [e.offsetX, e.offsetY];
-            };
-
-            // Función para dibujar una línea en el canvas
-            function drawLine(x1, y1, x2, y2) {
-                ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(x2, y2);
-                ctx.stroke();
-            }
-
-            // Eventos de ratón
-            canvas.addEventListener('mousedown', (e) => {
-                isDrawing = true;
-                [lastX, lastY] = getCoords(e);
-            });
-
-            canvas.addEventListener('mousemove', (e) => {
-                if (!isDrawing) return;
-                drawLine(lastX, lastY, ...getCoords(e));
-                [lastX, lastY] = getCoords(e);
-                syncCanvasContent(canvas, targetCanvas); // Sincroniza el dibujo al otro canvas
-            });
-
-            canvas.addEventListener('mouseup', () => isDrawing = false);
-            canvas.addEventListener('mouseout', () => isDrawing = false);
-
-            // Eventos táctiles
-            canvas.addEventListener('touchstart', (e) => {
-                e.preventDefault(); // Previene el desplazamiento de la página al dibujar
-                isDrawing = true;
-                [lastX, lastY] = getCoords(e);
-            });
-
-            canvas.addEventListener('touchmove', (e) => {
-                if (!isDrawing) return;
-                e.preventDefault(); // Previene el desplazamiento de la página al dibujar
-                drawLine(lastX, lastY, ...getCoords(e));
-                [lastX, lastY] = getCoords(e);
-                syncCanvasContent(canvas, targetCanvas); // Sincroniza el dibujo al otro canvas
-            });
-
-            canvas.addEventListener('touchend', () => isDrawing = false);
-            canvas.addEventListener('touchcancel', () => isDrawing = false);
-
-            initializedCanvases[canvas.id] = true; // Marca el canvas como inicializado
-        }
-
-        // Función para sincronizar el contenido de un canvas a otro
-        function syncCanvasContent(sourceCanvas, destCanvas) {
-            if (!sourceCanvas || !destCanvas) return;
-            const imgData = sourceCanvas.toDataURL(); // Obtiene el contenido del canvas como imagen Base64
-            const destCtx = destCanvas.getContext('2d');
-            const img = new Image();
-            img.onload = function() {
-                destCtx.clearRect(0, 0, destCanvas.width, destCtx.canvas.height); // Limpia el canvas de destino
-                destCtx.drawImage(img, 0, 0, destCtx.canvas.width, destCtx.canvas.height); // Dibuja la imagen en el canvas de destino
-            };
-            img.src = imgData;
-        }
-
-        // Función para borrar el contenido de un canvas
-        function clearCanvasContent(canvas, targetCanvas) {
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height); // Borra el canvas actual
-            if (targetCanvas) {
-                targetCanvas.getContext('2d').clearRect(0, 0, targetCanvas.width, targetCanvas.height); // Borra el canvas de destino
-            }
-            // Después de borrar, ocultar el canvas y mostrar el placeholder
-            const signatureArea = canvas.closest('.signature-area');
-            if (signatureArea) {
-                signatureArea.querySelector('.signature-line-placeholder').classList.remove('hidden');
-                canvas.classList.add('hidden');
-                signatureArea.querySelector('button.clear-signature-button').classList.add('hidden'); // Asegurarse de seleccionar el botón correcto
+                return true;
+            } catch (err) {
+                alert('Error al guardar: ' + err.message);
+                return false;
             }
         }
 
-        // Funciones de impresión específicas
-        async function printActiveForms() {
-            // Primero, asegurarnos de tener el nombre del usuario
-            const user = await getUserName();
-            if (!user) {
-                showMessage("No se puede guardar sin un nombre de usuario.", "error");
-                return;
-            }
+        async function guardarYEnviarWhatsApp() {
+            const guardado = await guardarOrden(true);
+            if (!guardado) return;
 
-            // Luego, guardar la orden actual
-            const savedSuccessfully = await saveCurrentOrder(user);
-            
-            if (savedSuccessfully) {
-                // Solo imprimir si se guardó correctamente
-                document.body.classList.add('print-active-forms');
-                window.print();
-            }
-        }
+            const wo = document.getElementById('wo').value.trim();
+            const taller = document.getElementById('taller_asignado').value;
+            const aeronave = document.getElementById('aeronave').value.trim();
+            const discrepancia = document.getElementById('discrepancia').innerText.trim();
+            const prioridad = document.getElementById('prioridad-urgente').checked ? '*URGENTE*' : 'Rutina';
+            const enlace = document.getElementById('enlace-orden').value;
 
-        function printSavedOrders() {
-            document.body.classList.add('print-saved-orders-only');
-            window.print();
-        }
+            const mensaje = 
+`🛠️ *NUEVA ORDEN DE TRABAJO*
 
-        // Listener para limpiar las clases después de imprimir
-        window.addEventListener('afterprint', () => {
-            document.body.classList.remove('print-active-forms');
-            document.body.classList.remove('print-saved-orders-only');
-        });
+*W.O:* ${wo}
+*Aeronave:* ${aeronave}
+*Taller:* ${taller}
+*Prioridad:* ${prioridad}
+*Discrepancia:* ${discrepancia}
 
-        // Función para verificar y mostrar el mensaje de impresión móvil
-        function checkAndShowMobilePrintTip() {
-            // Check if it's a mobile device (simple check based on screen width)
-            const isMobile = window.innerWidth <= 768; // Consistent with CSS media query
+Por favor firma como recibido aquí: exactamente en Historial W.O.  ahi veran un buscador o puenden filtrarlo por taller 
+${enlace}`;
 
-            // Check if the tip has been dismissed before (using localStorage)
-            const hasDismissedTip = localStorage.getItem('mobilePrintTipDismissed') === 'true';
-
-            if (isMobile && !hasDismissedTip) {
-                mobilePrintTip.classList.remove('hidden');
+            const numero = telefonosTalleres[taller];
+            if (numero) {
+                window.open(`https://wa.me/504${numero}?text=${encodeURIComponent(mensaje)}`, '_blank');
             } else {
-                mobilePrintTip.classList.add('hidden');
+                alert("Orden guardada, pero no hay número registrado para este taller.");
             }
         }
 
-        // Configurar la interacción de las líneas de firma
-        document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar Firebase cuando el DOM esté listo
-            initializeFirebase();
+        // ==================================================
+        //  CONTROL MODO RECEPCIÓN (solo historial)
+        // ==================================================
+        function aplicarRestriccionModoRecepcion() {
+            const params = new URLSearchParams(window.location.search);
+            const esModoRecepcion = params.has('orden');
 
-            // Establecer la hora actual al cargar la página
-            setCurrentTime();
+            if (esModoRecepcion) {
+                // Ocultar botón y sección de crear orden
+                const btn = document.getElementById('btn-cargar-orden');
+                if (btn) btn.remove();
 
-            const form1 = document.getElementById('mainFormContainer1');
-            const form2 = document.getElementById('mainFormContainer2');
+                const section = document.getElementById('section-order');
+                if (section) section.classList.add('hidden');
 
-            // Asignar eventos a los botones de impresión
-            printActiveFormsButton.addEventListener('click', printActiveForms);
-            printSavedOrdersButton.addEventListener('click', printSavedOrders);
+                // Ocultar sidebar
+                document.getElementById('sidebar')?.classList.add('hidden');
 
-            // Event listener para el botón de "Entendido" del mensaje móvil
-            if (dismissMobilePrintTipButton) {
-                dismissMobilePrintTipButton.addEventListener('click', () => {
-                    localStorage.setItem('mobilePrintTipDismissed', 'true'); // Guardar que se ha ocultado
-                    mobilePrintTip.classList.add('hidden');
+                // Mostrar historial
+                document.getElementById('section-historial').classList.remove('hidden');
+            }
+        }
+
+        // ==================================================
+        //  BUSCADOR EN TIEMPO REAL
+        // ==================================================
+        function iniciarBuscador() {
+            const buscador = document.getElementById('buscador-historial');
+            if (!buscador) return;
+
+            buscador.addEventListener('input', () => {
+                const termino = buscador.value.toLowerCase().trim();
+                document.querySelectorAll('#tabla-pendientes tr, #tabla-recibidas tr').forEach(row => {
+                    const texto = row.textContent.toLowerCase();
+                    row.style.display = texto.includes(termino) ? '' : 'none';
                 });
+            });
+        }
+
+        // ==================================================
+        //  RESALTAR ORDEN DEL ENLACE
+        // ==================================================
+        function resaltarOrdenEnlace() {
+            const params = new URLSearchParams(window.location.search);
+            const wo = params.get('orden');
+            if (!wo) return;
+
+            setTimeout(() => {
+                document.querySelectorAll('#tabla-pendientes tr, #tabla-recibidas tr').forEach(row => {
+                    if (row.textContent.includes(wo)) {
+                        row.classList.add('highlight-row');
+                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+            }, 1000);
+        }
+
+        // ==================================================
+        //  INICIO
+        // ==================================================
+        window.addEventListener('load', async () => {
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha') && (document.getElementById('fecha').value = hoy);
+
+            // 1. Aplicar restricción si venimos desde WhatsApp
+            aplicarRestriccionModoRecepcion();
+
+            // 2. Cargar historial (siempre, es la vista segura en modo recepción)
+            await cargarHistorial();
+
+            // 3. Iniciar buscador
+            iniciarBuscador();
+
+            // 4. Resaltar orden si venimos de enlace
+            resaltarOrdenEnlace();
+
+            // 5. Solo si NO venimos de enlace → inicializamos crear orden
+            if (!new URLSearchParams(window.location.search).has('orden')) {
+                switchTab('order');
+                generarYMostrarWO();
+                actualizarTelefonoTaller();
+                document.getElementById('taller_asignado')?.addEventListener('change', actualizarTelefonoTaller);
+            }
+        });
+
+        // ==================================================
+        //  NAVEGACIÓN (con protección)
+        // ==================================================
+        function switchTab(tab) {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('orden') && tab === 'order') {
+                return; // Bloqueamos acceso a crear orden en modo recepción
             }
 
-            // Llamar a la función para verificar y mostrar el mensaje móvil al cargar y al redimensionar
-            checkAndShowMobilePrintTip();
-            window.addEventListener('resize', checkAndShowMobilePrintTip);
+            document.querySelectorAll('#section-order, #section-historial, #section-reporte-trabajo').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`section-${tab}`);
+            if (target) target.classList.remove('hidden');
 
+            if (tab === 'order') {
+                initFirmas();
+                generarYMostrarWO();
+                actualizarTelefonoTaller();
+            }
 
-            // --- Sincronización de campos de texto y checkboxes existentes ---
-            const inputs1 = form1.querySelectorAll('input[type="text"], input[type="date"], textarea');
-            // Modificado para seleccionar tanto checkboxes como radio buttons
-            const form1CheckboxesAndRadios = form1.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+            if (tab === 'historial') {
+                cargarHistorial();
+            }
 
-            inputs1.forEach(input1 => {
-                const syncGroup = input1.dataset.syncGroup;
-                if (syncGroup) {
-                    input1.addEventListener('input', function() {
-                        const input2 = form2.querySelector(`.sync-input[data-sync-group="${syncGroup}"]`);
-                        if (input2) {
-                            input2.value = this.value;
-                        }
+            if (tab === 'reporte-trabajo') {
+                // No necesita carga especial, el formulario está estático
+            }
+        }
+
+        // ==================================================
+        //  CARGA HISTORIAL
+        // ==================================================
+        async function cargarHistorial() {
+            const pendientes = document.getElementById('tabla-pendientes');
+            const recibidas = document.getElementById('tabla-recibidas');
+            if (!pendientes || !recibidas) return;
+
+            pendientes.innerHTML = '';
+            recibidas.innerHTML = '';
+
+            const filtroTaller = document.getElementById('filtro-taller')?.value || '';
+            const filtroAño = document.getElementById('filtro-año')?.value || '';
+
+            const snap = await db.ref('ordenes_trabajo').once('value');
+            if (!snap.exists()) return;
+
+            snap.forEach(tallerSnap => {
+                const taller = tallerSnap.key;
+                if (filtroTaller && taller !== filtroTaller) return;
+
+                tallerSnap.forEach(añoSnap => {
+                    const año = añoSnap.key;
+                    if (filtroAño && año !== filtroAño) return;
+
+                    añoSnap.forEach(mesSnap => {
+                        mesSnap.forEach(woSnap => {
+                            const data = woSnap.val();
+                            const tr = document.createElement('tr');
+                            tr.className = 'hover:bg-slate-50 cursor-pointer';
+                            tr.onclick = () => mostrarDetalleOrden(taller, año, mesSnap.key, woSnap.key, data);
+                            tr.innerHTML = `
+                                <td class="border px-4 py-3">${data.wo || '—'}</td>
+                                <td class="border px-4 py-3">${data.aeronave || '—'}</td>
+                                <td class="border px-4 py-3">${data.fecha || '—'}</td>
+                                <td class="border px-4 py-3">${taller}</td>
+                                <td class="border px-4 py-3 font-medium ${data.estado === 'recibido' ? 'text-green-600' : 'text-red-600'}">
+                                    ${data.estado === 'recibido' ? 'Recibida' : 'Pendiente'}
+                                </td>
+                            `;
+                            (data.estado === 'recibido' ? recibidas : pendientes).appendChild(tr);
+                        });
                     });
-                }
-            });
-
-            form1CheckboxesAndRadios.forEach(input1 => {
-                const syncGroup = input1.dataset.syncGroup;
-                if (syncGroup) {
-                    input1.addEventListener('change', function() {
-                        // Si es un checkbox, deseleccionar los otros checkboxes en el mismo grupo de nombre
-                        if (this.type === 'checkbox' && this.name === 'taller-selection') {
-                            form1.querySelectorAll(`input[type="checkbox"][name="taller-selection"]`).forEach(checkbox1 => {
-                                if (checkbox1 !== this) {
-                                    checkbox1.checked = false;
-                                }
-                            });
-                            form2.querySelectorAll(`input[type="checkbox"][name="taller-selection"]`).forEach(checkbox2 => {
-                                checkbox2.checked = false;
-                            });
-                        }
-                        // Luego, sincronizar el estado del input actual
-                        const input2 = form2.querySelector(`input[data-sync-group="${syncGroup}"]`);
-                        if (input2) {
-                            input2.checked = this.checked;
-                        }
-                    });
-                }
-            });
-
-            // Inicializar la segunda forma con los valores de la primera forma al cargar
-            inputs1.forEach(input1 => {
-                const syncGroup = input1.dataset.syncGroup;
-                if (syncGroup) {
-                    const input2 = form2.querySelector(`.sync-input[data-sync-group="${syncGroup}"]`);
-                    if (input2) {
-                        input2.value = input1.value;
-                    }
-                }
-            });
-
-            form1CheckboxesAndRadios.forEach(input1 => {
-                const syncGroup = input1.dataset.syncGroup;
-                if (syncGroup) {
-                    const input2 = form2.querySelector(`input[data-sync-group="${syncGroup}"]`);
-                    if (input2) {
-                        input2.checked = input1.checked;
-                    }
-                }
-            });
-
-            const allSignatureAreas = document.querySelectorAll('.signature-area');
-
-            allSignatureAreas.forEach(area => {
-                const placeholder = area.querySelector('.signature-line-placeholder');
-                const canvas = area.querySelector('.signature-canvas');
-                const clearButton = area.querySelector('.clear-signature-button');
-
-                // Asignar IDs únicos a los canvas para el seguimiento de inicialización
-                canvas.id = 'canvas-' + canvas.dataset.syncGroup + '-' + (area.closest('#mainFormContainer1') ? '1' : '2');
-
-                placeholder.addEventListener('click', () => {
-                    placeholder.classList.add('hidden');
-                    canvas.classList.remove('hidden');
-                    clearButton.classList.remove('hidden');
-                    // Asegúrate de que el canvas esté correctamente dimensionado antes de dibujar
-                    canvas.width = canvas.offsetWidth;
-                    canvas.height = canvas.offsetHeight;
-                    
-                    // Encontrar el canvas de sincronización correspondiente
-                    const syncGroup = canvas.dataset.syncGroup;
-                    let targetCanvas = null;
-                    if (area.closest('#mainFormContainer1')) {
-                        targetCanvas = form2.querySelector(`.signature-canvas[data-sync-group="${syncGroup}"]`);
-                    } else {
-                        targetCanvas = form1.querySelector(`.signature-canvas[data-sync-group="${syncGroup}"]`);
-                    }
-                    
-                    setupDrawingCanvas(canvas, targetCanvas);
-                });
-
-                clearButton.addEventListener('click', () => {
-                    // Encontrar el canvas de sincronización correspondiente
-                    const syncGroup = canvas.dataset.syncGroup;
-                    let targetCanvas = null;
-                    if (area.closest('#mainFormContainer1')) {
-                        targetCanvas = form2.querySelector(`.signature-canvas[data-sync-group="${syncGroup}"]`);
-                    } else {
-                        targetCanvas = form1.querySelector(`.signature-canvas[data-sync-group="${syncGroup}"]`);
-                    }
-                    clearCanvasContent(canvas, targetCanvas);
                 });
             });
+        }
 
-            // Añadir el listener para el campo de búsqueda
-            searchInput.addEventListener('input', loadSavedOrders);
-        });
+        // ==================================================
+        //  MODAL - DETALLE ORDEN
+        // ==================================================
+        async function mostrarDetalleOrden(taller, año, mes, wo, data) {
+            currentDetallePath = `ordenes_trabajo/${taller}/${año}/${mes}/${wo}`;
+
+            document.getElementById('detalle-wo').textContent = data.wo || '—';
+            document.getElementById('detalle-fecha').textContent = data.fecha || '—';
+            document.getElementById('detalle-hora').textContent = data.hora || '—';
+            document.getElementById('detalle-aeronave').textContent = data.aeronave || '—';
+            document.getElementById('detalle-taller').textContent = taller;
+            document.getElementById('detalle-prioridad').textContent = data.prioridad || '—';
+            document.getElementById('detalle-estado').textContent = data.estado === 'recibido' ? 'Recibida' : 'Pendiente';
+            document.getElementById('detalle-estado').className = data.estado === 'recibido' ? 'text-green-600 font-bold' : 'text-red-600 font-bold';
+            document.getElementById('detalle-discrepancia').textContent = data.discrepancia || 'Sin descripción';
+
+            document.getElementById('detalle-firma-entregado').src = data.firma_entregado || '';
+            document.getElementById('detalle-firma-recibido').src = data.firma_recibido || '';
+
+            const seccionFirma = document.getElementById('seccion-firma-recibido-modal');
+            if (!data.firma_recibido) {
+                seccionFirma.style.display = 'block';
+                initFirmaModal();
+            } else {
+                seccionFirma.style.display = 'none';
+            }
+
+            const pdfView = document.getElementById('detalle-pdf-view');
+            pdfView.innerHTML = data.reporte_pdf 
+                ? `<a href="${data.reporte_pdf}" target="_blank" class="text-blue-600 hover:underline">Ver Reporte PDF</a>`
+                : '<p class="text-gray-500 italic">Aún no hay reporte PDF cargado.</p>';
+
+            document.getElementById('detalle-orden-modal').classList.remove('hidden');
+        }
+
+        function cerrarDetalleOrden() {
+            document.getElementById('detalle-orden-modal').classList.add('hidden');
+            currentDetallePath = null;
+            document.getElementById('upload-pdf').value = '';
+        }
+
+        function initFirmaModal() {
+            const canvas = document.getElementById('signature-recibido-modal');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
+
+            let drawing = false;
+
+            const draw = e => {
+                if (!drawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+                const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            };
+
+            canvas.addEventListener('mousedown', () => { drawing = true; ctx.beginPath(); });
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', () => drawing = false);
+            canvas.addEventListener('mouseout', () => drawing = false);
+            canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; ctx.beginPath(); });
+            canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e); });
+            canvas.addEventListener('touchend', () => drawing = false);
+        }
+
+        function clearSignatureModal() {
+            const canvas = document.getElementById('signature-recibido-modal');
+            if (canvas) {
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                signatureModal = null;
+            }
+        }
+
+        async function guardarFirmaRecibidoModal() {
+            const canvas = document.getElementById('signature-recibido-modal');
+            if (!canvas || !currentDetallePath) return alert('No se puede guardar la firma');
+
+            signatureModal = canvas.toDataURL('image/png');
+
+            try {
+                await db.ref(currentDetallePath).update({
+                    firma_recibido: signatureModal,
+                    estado: 'recibido',
+                    recibido_en: new Date().toISOString()
+                });
+                alert('¡Orden recibida correctamente!');
+                cerrarDetalleOrden();
+                cargarHistorial();
+            } catch (err) {
+                alert('Error al guardar firma: ' + err.message);
+            }
+        }
+
+        async function subirReportePDF() {
+            const file = document.getElementById('upload-pdf').files[0];
+            if (!file || !currentDetallePath) return alert('Selecciona un PDF primero');
+
+            if (file.type !== 'application/pdf') return alert('Solo archivos PDF');
+
+            try {
+                const ref = storage.ref(`${currentDetallePath}/reporte.pdf`);
+                await ref.put(file);
+                const url = await ref.getDownloadURL();
+                await db.ref(currentDetallePath).update({ reporte_pdf: url });
+                alert('PDF subido correctamente');
+
+                const snap = await db.ref(currentDetallePath).once('value');
+                document.getElementById('detalle-pdf-view').innerHTML = 
+                    `<a href="${snap.val().reporte_pdf}" target="_blank" class="text-blue-600 hover:underline">Ver Reporte PDF</a>`;
+            } catch (err) {
+                alert('Error al subir PDF: ' + err.message);
+            }
+        }
     </script>
 </body>
 </html>
