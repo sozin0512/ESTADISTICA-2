@@ -372,20 +372,17 @@
                         </div>
                     </div>
 
-   <div id="share-link-section" class="hidden mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg no-print mb-4">
-    <label class="block font-bold text-blue-800 text-sm mb-2">Enlace para firma de recibido:</label>
+  <div id="share-link-section" class="hidden mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg no-print mb-4">
+    <label class="block font-bold text-blue-800 text-sm mb-2">Enlace de la Orden para firma:</label>
     <div class="flex gap-2">
         <input type="text" id="enlace-orden" readonly class="w-full p-2 border rounded bg-white text-sm">
-        <button onclick="copiarEnlace()" class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold">Copiar</button>
-    </div>
-</div>
+        <button onclick="copiarEnlace()" class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-blue-700">
             Copiar
         </button>
     </div>
 </div>
 
 <div class="mt-12 flex flex-wrap justify-center gap-6 no-print">
-    
     <button onclick="guardarOrden()" class="bg-blue-600 text-white px-10 py-3 rounded-lg font-bold hover:bg-blue-700 transition">
         Guardar Orden
     </button>
@@ -396,6 +393,16 @@
         </svg>
         Guardar y Enviar por WhatsApp
     </button>
+
+    <button onclick="window.print()" class="bg-gray-600 text-white px-10 py-3 rounded-lg font-bold hover:bg-gray-700 transition">
+        Imprimir
+    </button>
+</div>
+            Copiar
+        </button>
+    </div>
+</div>
+
 
     <button onclick="window.print()" class="bg-gray-600 text-white px-10 py-3 rounded-lg font-bold hover:bg-gray-700 transition">
         Imprimir
