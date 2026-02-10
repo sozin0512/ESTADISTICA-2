@@ -7,41 +7,45 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (compatibilidad v9/v10) -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
         
         .fah-table { border-collapse: collapse; width: 100%; }
-        .fah-table th, .fah-table td { border: 1px solid #1e293b; padding: 4px 8px; }
-        .fah-header-blue { background-color: #b9d1ea; color: #000; font-weight: bold; text-align: center; border: 1px solid #1e293b; }
-        .fah-cell-label { background-color: #b9d1ea; font-weight: bold; font-size: 0.8rem; text-align: center; }
+        .fah-table th, .fah-table td { border: 1px solid #1e293b; padding: 6px 10px; }
+        .fah-header-blue { background-color: #b9d1ea; color: #000; font-weight: bold; text-align: center; }
+        .fah-cell-label { background-color: #b9d1ea; font-weight: bold; font-size: 0.85rem; text-align: center; }
         
         .discrepancia-box {
-            background-color: #f1f5f9;
+            background-color: #f8fafc;
             background-image: linear-gradient(#e2e8f0 1px, transparent 1px);
-            background-size: 100% 1.5rem;
-            line-height: 1.5rem;
+            background-size: 100% 1.6rem;
+            line-height: 1.6rem;
             border: 1px solid #cbd5e1;
-            padding: 0 8px;
-            min-height: 150px;
+            padding: 8px 12px;
+            min-height: 160px;
+            font-size: 0.95rem;
         }
 
         .signature-container {
             position: relative;
             width: 100%;
-            height: 60px;
-            margin-top: 4px;
+            height: 70px;
+            margin-top: 6px;
+            border: 1px solid #d1d5db;
+            background: white;
         }
 
         .signature-line {
             position: absolute;
-            bottom: 8px;
-            left: 0;
-            right: 0;
+            bottom: 12px;
+            left: 10%;
+            right: 10%;
             height: 1px;
             background-color: #000;
         }
@@ -52,8 +56,6 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: transparent !important;
-            border: none !important;
             touch-action: none;
             cursor: crosshair;
         }
@@ -62,15 +64,16 @@
             display: flex;
             gap: 12px;
             margin-top: 8px;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
         }
 
         .signature-btn {
-            padding: 4px 12px;
+            padding: 4px 14px;
             border: 1px solid #6b7280;
             background: #f3f4f6;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
+            transition: all 0.15s;
         }
 
         .signature-btn:hover {
@@ -79,35 +82,35 @@
 
         @media print {
             .no-print { display: none !important; }
-            body { background: white; }
-            .print-area { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; }
+            body { background: white; margin: 0; }
+            .print-area { box-shadow: none; border: none; margin: 0; width: 100%; }
             .signature-pad, .signature-line { background: transparent !important; border: none !important; }
-            .signature-controls, #share-link-section { display: none !important; }
+            .signature-controls, #share-link-section, aside { display: none !important; }
         }
     </style>
 </head>
-<body class="bg-slate-200">
+<body class="bg-slate-100 min-h-screen">
 
     <div class="flex h-screen overflow-hidden no-print">
+        <!-- Sidebar -->
         <aside class="w-64 bg-slate-900 text-white flex-shrink-0 hidden md:flex flex-col">
-            <div class="p-6 text-center border-b border-slate-800">
-                <h1 class="font-bold text-lg tracking-wider">FAH TALLERES</h1>
-                <p class="text-[10px] text-slate-400 mt-1 uppercase">Base Aérea HAM</p>
+            <div class="p-6 text-center border-b border-slate-700">
+                <h1 class="font-bold text-xl tracking-wide">FAH TALLERES</h1>
+                <p class="text-xs text-slate-400 mt-1 uppercase">Base Aérea HAM</p>
             </div>
-            <nav class="flex-grow p-4 space-y-2">
-                <button onclick="switchTab('stats')" id="btn-stats" class="w-full text-left px-4 py-2 bg-blue-600 rounded-lg text-sm font-semibold transition">Dashboard Estadístico</button>
-                <button onclick="switchTab('order')" id="btn-order" class="w-full text-left px-4 py-2 hover:bg-slate-800 rounded-lg text-sm transition text-slate-300">Cargar Orden de Trabajo</button>
-                <div class="pt-4 pb-2 px-4 text-[10px] font-bold text-slate-500 uppercase">Administración</div>
-           <button onclick="switchTab('historial')" class="block w-full text-left px-4 py-2 hover:bg-slate-800">
-    Historial W.O.
-</button>
-
-                <a href="#" class="block px-4 py-2 hover:bg-slate-800 rounded-lg text-sm transition text-slate-300">Personal</a>
+            <nav class="flex-grow p-4 space-y-1.5">
+                <button onclick="switchTab('stats')" id="btn-stats" class="w-full text-left px-4 py-2.5 bg-blue-700 rounded-lg text-sm font-medium transition">Dashboard Estadístico</button>
+                <button onclick="switchTab('order')" id="btn-order" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">Cargar Orden de Trabajo</button>
+                <div class="pt-5 pb-2 px-4 text-xs font-bold text-slate-500 uppercase">Administración</div>
+                <button onclick="switchTab('historial')" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">Historial W.O.</button>
+                <a href="#" class="block px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">Personal</a>
             </nav>
         </aside>
 
+        <!-- Contenido principal -->
         <main class="flex-grow overflow-y-auto p-6 lg:p-10">
-            
+
+            <!-- Dashboard Estadístico -->
             <div id="section-stats">
                 <header class="flex justify-between items-center mb-8">
                     <div>
@@ -116,214 +119,134 @@
                     </div>
                 </header>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-300">
-                        <p class="text-xs font-bold text-slate-400 uppercase">W.O. Pendientes</p>
-                        <p class="text-3xl font-bold text-slate-800">28</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <p class="text-xs font-bold text-slate-500 uppercase">W.O. Pendientes</p>
+                        <p class="text-3xl font-bold text-slate-800 mt-1">28</p>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-300">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Ala Rotatoria</p>
-                        <p class="text-3xl font-bold text-blue-600">14</p>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Ala Rotatoria</p>
+                        <p class="text-3xl font-bold text-blue-600 mt-1">14</p>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-300">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Ala Fija</p>
-                        <p class="text-3xl font-bold text-blue-800">14</p>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Ala Fija</p>
+                        <p class="text-3xl font-bold text-indigo-700 mt-1">14</p>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-300">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Eficiencia</p>
-                        <p class="text-3xl font-bold text-green-600">92%</p>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Eficiencia</p>
+                        <p class="text-3xl font-bold text-green-600 mt-1">92%</p>
                     </div>
                 </div>
 
-                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-300">
-                    <h3 class="font-bold text-slate-800 mb-6 uppercase text-sm">Carga de Trabajo por Especialidad</h3>
-                    <div class="h-[300px]"><canvas id="chartTalleres"></canvas></div>
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-800 mb-6 uppercase text-sm tracking-wide">Carga de Trabajo por Especialidad</h3>
+                    <div class="h-[320px]"><canvas id="chartTalleres"></canvas></div>
                 </div>
             </div>
 
-          <!-- SECCIÓN ORDEN -->
-<div id="section-order" class="hidden">
-    <div class="max-w-5xl mx-auto bg-white p-8 shadow-2xl border border-slate-300 print-area">
-        <!-- CONTENIDO DE LA ORDEN -->
-    </div>
-</div>
-
-<!-- SECCIÓN HISTORIAL -->
-<div id="section-historial" class="hidden">
-    <div class="max-w-6xl mx-auto bg-white p-6 border rounded-xl">
-        <h2 class="text-xl font-bold mb-4">
-            Historial de Órdenes de Trabajo
-        </h2>
-
-        <div class="flex gap-4 mb-6">
-            <select id="filtro-taller" class="border p-2">
-                <option value="">Todos los talleres</option>
-                <option value="ESTRUCTURAS">Estructuras</option>
-                <option value="RADIO">Radio</option>
-                <option value="INSTRUMENTOS">Instrumentos</option>
-                <option value="HYD">Hidráulica</option>
-                <option value="ELECTRICIDAD">Electricidad</option>
-                <option value="MOTORES">Motores</option>
-                <option value="HELICOPTEROS">Helicópteros</option>
-            </select>
-
-    <select id="filtro-año" class="border p-2">
-        <option value="">Todos los años</option>
-    </select>
-
-    <button onclick="cargarHistorial()" class="bg-blue-600 text-white px-4 rounded">
-        
-        Filtrar
-        
-    </button>
-</div>
-
-
-        <table class="w-full text-sm border">
-            <thead class="bg-slate-200">
-                <tr>
-                    <th class="border p-2">W.O.</th>
-                    <th class="border p-2">Aeronave</th>
-                    <th class="border p-2">Fecha</th>
-                    <th class="border p-2">Taller</th>
-                    <th class="border p-2">Estado</th>
-                </tr>
-            </thead>
-            <tbody id="tabla-historial"></tbody>
-            <h3 class="font-bold mt-6 mb-2 text-red-600">Pendientes</h3>
-<table class="w-full border mb-6">
-    <tbody id="tabla-pendientes"></tbody>
-</table>
-
-<h3 class="font-bold mb-2 text-green-600">Recibidas</h3>
-<table class="w-full border">
-    <tbody id="tabla-recibidas"></tbody>
-</table>
-
-        </table>
-    </div>
-</div>
-
-                    
-                    <div class="text-center mb-6">
-                        <h1 class="font-bold text-lg uppercase">Fuerza Aérea Hondureña</h1>
-                        <h2 class="font-bold text-base uppercase">Base Aérea "Cnel. Hernán Acosta Mejía"</h2>
+            <!-- Sección Orden de Trabajo -->
+            <div id="section-order" class="hidden">
+                <div class="max-w-5xl mx-auto bg-white p-8 shadow-xl border border-slate-200 rounded-xl print-area">
+                    <div class="text-center mb-8">
+                        <h1 class="font-bold text-xl uppercase">Fuerza Aérea Hondureña</h1>
+                        <h2 class="font-bold text-base uppercase mt-1">Base Aérea "Cnel. Hernán Acosta Mejía"</h2>
                     </div>
 
-                    <div class="grid grid-cols-2 fah-table border border-black mb-6">
-                        <div class="fah-header-blue p-2 flex justify-between items-center">
-                            <span>LINEA DE VUELO ALA ROTATORIA</span>
-                            <input type="checkbox" checked class="w-4 h-4">
-                        </div>
-                        <div class="fah-header-blue p-2 flex justify-between items-center" style="background-color: #cbd5e1;">
-                            <span>LINEA DE VUELO ALA FIJA</span>
-                            <input type="checkbox" class="w-4 h-4">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-6 items-start">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <table class="fah-table">
                             <tr>
-                                <td class="fah-cell-label w-1/3">W.O</td>
-                                <td class="p-0">
-                                    <input type="text" id="wo" class="w-full px-2 py-1 outline-none font-bold">
-                                </td>
+                                <td class="fah-cell-label w-32">W.O</td>
+                                <td><input type="text" id="wo" class="w-full px-3 py-1.5 outline-none font-bold" readonly></td>
                             </tr>
                             <tr>
                                 <td class="fah-cell-label">FECHA</td>
-                                <td class="p-0"><input type="date" id="fecha" class="w-full px-2 py-1 outline-none"></td>
+                                <td><input type="date" id="fecha" class="w-full px-3 py-1.5 outline-none"></td>
                             </tr>
                             <tr>
                                 <td class="fah-cell-label">HORA</td>
-                                <td class="p-0"><input type="time" id="hora" class="w-full px-2 py-1 outline-none"></td>
+                                <td><input type="time" id="hora" class="w-full px-3 py-1.5 outline-none"></td>
                             </tr>
                             <tr>
                                 <td class="fah-cell-label">AERONAVE</td>
-                                <td class="p-0"><input type="text" id="aeronave" class="w-full px-2 py-1 outline-none font-bold"></td>
+                                <td><input type="text" id="aeronave" class="w-full px-3 py-1.5 outline-none font-bold"></td>
                             </tr>
                         </table>
 
-                        <table class="fah-table">
-                            <thead>
-                                <tr>
-                                    <th colspan="4" class="fah-header-blue py-1 uppercase text-xs">Orden de Trabajo para el taller de:</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-[11px] font-bold">
-                                <tr><td>RADIO</td><td class="w-8 text-center"><input type="checkbox" value="RADIO" class="taller-check"></td><td>BATERIA</td><td class="w-8 text-center"><input type="checkbox" value="BATERIA" class="taller-check"></td></tr>
-                                <tr><td>INSTRUMENTOS</td><td class="w-8 text-center"><input type="checkbox" value="INSTRUMENTOS" class="taller-check"></td><td>MOTORES</td><td class="w-8 text-center"><input type="checkbox" value="MOTORES" class="taller-check"></td></tr>
-                                <tr><td>HYD</td><td class="w-8 text-center"><input type="checkbox" value="HYD" class="taller-check"></td><td>ESTRUCTURAS</td><td class="w-8 text-center"><input type="checkbox" value="ESTRUCTURAS" class="taller-check"></td></tr>
-                                <tr><td>HELICES</td><td class="w-8 text-center"><input type="checkbox" value="HELICES" class="taller-check"></td><td>ARMAMENTO</td><td class="w-8 text-center"><input type="checkbox" value="ARMAMENTO" class="taller-check"></td></tr>
-                                <tr><td>ELECTRICIDAD</td><td class="w-8 text-center"><input type="checkbox" value="ELECTRICIDAD" class="taller-check"></td><td class="bg-blue-50">HELICOPTEROS</td><td class="w-8 text-center bg-blue-50"><input type="checkbox" value="HELICOPTEROS" class="taller-check" checked></td></tr>
-                            </tbody>
-                        </table>
+                        <div>
+                            <table class="fah-table w-full">
+                                <thead>
+                                    <tr>
+                                        <th colspan="4" class="fah-header-blue py-2 uppercase text-xs">Orden de Trabajo para el taller de:</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm font-semibold">
+                                    <tr>
+                                        <td>RADIO</td><td class="w-10 text-center"><input type="checkbox" value="RADIO" class="taller-check"></td>
+                                        <td>BATERIA</td><td class="w-10 text-center"><input type="checkbox" value="BATERIA" class="taller-check"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>INSTRUMENTOS</td><td class="w-10 text-center"><input type="checkbox" value="INSTRUMENTOS" class="taller-check"></td>
+                                        <td>MOTORES</td><td class="w-10 text-center"><input type="checkbox" value="MOTORES" class="taller-check"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>HYD</td><td class="w-10 text-center"><input type="checkbox" value="HYD" class="taller-check"></td>
+                                        <td>ESTRUCTURAS</td><td class="w-10 text-center"><input type="checkbox" value="ESTRUCTURAS" class="taller-check"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>HELICES</td><td class="w-10 text-center"><input type="checkbox" value="HELICES" class="taller-check"></td>
+                                        <td>ARMAMENTO</td><td class="w-10 text-center"><input type="checkbox" value="ARMAMENTO" class="taller-check"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>ELECTRICIDAD</td><td class="w-10 text-center"><input type="checkbox" value="ELECTRICIDAD" class="taller-check"></td>
+                                        <td class="bg-blue-50">HELICÓPTEROS</td><td class="w-10 text-center bg-blue-50"><input type="checkbox" value="HELICOPTEROS" class="taller-check" checked></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <div class="mt-6">
-                        <div class="fah-header-blue text-left px-2 py-1 text-sm inline-block">Discrepancia:</div>
-                        <div id="discrepancia" class="discrepancia-box mt-2 text-sm p-3" contenteditable="true"></div>
+                        <div class="fah-header-blue text-left px-3 py-1.5 text-sm inline-block mb-2">Discrepancia:</div>
+                        <div id="discrepancia" class="discrepancia-box" contenteditable="true"></div>
                     </div>
 
-                    <div class="mt-4 text-sm text-gray-700">
-                        Número de contacto del taller seleccionado: 
-                        <strong id="telefono-taller">-</strong>
+                    <div class="mt-5 text-sm text-gray-700 flex items-center gap-3">
+                        <span>Número de contacto del taller seleccionado:</span>
+                        <strong id="telefono-taller" class="text-blue-700">-</strong>
                     </div>
 
                     <div class="mt-2">
-                        <button onclick="mostrarEditorTelefonos()" class="text-blue-600 hover:underline text-sm">
+                        <button onclick="mostrarEditorTelefonos()" class="text-blue-600 hover:underline text-sm no-print">
                             ✎ Editar números telefónicos
                         </button>
                     </div>
 
-                    <div id="editor-telefonos" class="hidden mt-6 p-6 bg-gray-50 border rounded-lg">
-                        <h3 class="font-bold mb-4">Editar números de contacto</h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm">Estructuras</label>
-                                <input type="text" id="edit-ESTRUCTURAS" class="w-full p-2 border rounded">
-                            </div>
-                            <div>
-                                <label class="block text-sm">Radio</label>
-                                <input type="text" id="edit-RADIO" class="w-full p-2 border rounded">
-                            </div>
-                            <div>
-                                <label class="block text-sm">Instrumentos</label>
-                                <input type="text" id="edit-INSTRUMENTOS" class="w-full p-2 border rounded">
-                            </div>
-                            <div>
-                                <label class="block text-sm">Hidráulica</label>
-                                <input type="text" id="edit-HYD" class="w-full p-2 border rounded">
-                            </div>
-                            <div>
-                                <label class="block text-sm">Electricidad y Baterías</label>
-                                <input type="text" id="edit-ELECTRICIDAD" class="w-full p-2 border rounded">
-                            </div>
-                            <div>
-                                <label class="block text-sm">Motores</label>
-                                <input type="text" id="edit-MOTORES" class="w-full p-2 border rounded">
-                            </div>
-                            <div>
-                                <label class="block text-sm">Helicópteros</label>
-                                <input type="text" id="edit-HELICOPTEROS" class="w-full p-2 border rounded">
-                            </div>
+                    <!-- Editor de teléfonos -->
+                    <div id="editor-telefonos" class="hidden mt-8 p-6 bg-gray-50 border border-gray-200 rounded-xl no-print">
+                        <h3 class="font-bold text-lg mb-5">Editar números de contacto</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div><label class="block text-sm mb-1.5">Estructuras</label><input type="text" id="edit-ESTRUCTURAS" class="w-full p-2.5 border rounded"></div>
+                            <div><label class="block text-sm mb-1.5">Radio</label><input type="text" id="edit-RADIO" class="w-full p-2.5 border rounded"></div>
+                            <div><label class="block text-sm mb-1.5">Instrumentos</label><input type="text" id="edit-INSTRUMENTOS" class="w-full p-2.5 border rounded"></div>
+                            <div><label class="block text-sm mb-1.5">Hidráulica</label><input type="text" id="edit-HYD" class="w-full p-2.5 border rounded"></div>
+                            <div><label class="block text-sm mb-1.5">Electricidad y Baterías</label><input type="text" id="edit-ELECTRICIDAD" class="w-full p-2.5 border rounded"></div>
+                            <div><label class="block text-sm mb-1.5">Motores</label><input type="text" id="edit-MOTORES" class="w-full p-2.5 border rounded"></div>
+                            <div><label class="block text-sm mb-1.5">Helicópteros</label><input type="text" id="edit-HELICOPTEROS" class="w-full p-2.5 border rounded"></div>
                         </div>
-                        <div class="mt-6 flex gap-4">
-                            <button onclick="guardarTelefonos()" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
-                                Guardar cambios
-                            </button>
-                            <button onclick="cancelarEdicion()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
-                                Cancelar
-                            </button>
+                        <div class="mt-8 flex gap-4">
+                            <button onclick="guardarTelefonos()" class="bg-green-600 text-white px-8 py-2.5 rounded hover:bg-green-700 transition">Guardar cambios</button>
+                            <button onclick="cancelarEdicion()" class="bg-gray-500 text-white px-8 py-2.5 rounded hover:bg-gray-600 transition">Cancelar</button>
                         </div>
                     </div>
 
-                    <div class="mt-8 grid grid-cols-2 gap-8">
+                    <!-- Firmas y asignación -->
+                    <div class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-10">
                         <div class="space-y-10">
                             <div>
-                                <div class="font-bold text-xs mb-1">ENTREGADO POR:</div>
+                                <div class="font-bold text-sm mb-2">ENTREGADO POR:</div>
                                 <div class="signature-container">
                                     <div class="signature-line"></div>
-                                    <canvas id="signature-entregado" class="signature-pad" width="420" height="60"></canvas>
+                                    <canvas id="signature-entregado" class="signature-pad" width="500" height="70"></canvas>
                                 </div>
                                 <div class="signature-controls no-print">
                                     <button class="signature-btn" onclick="clearSignature('entregado')">Borrar firma</button>
@@ -332,10 +255,10 @@
                             </div>
 
                             <div>
-                                <div class="font-bold text-xs mb-1">RECIBIDO POR:</div>
+                                <div class="font-bold text-sm mb-2">RECIBIDO POR:</div>
                                 <div class="signature-container">
                                     <div class="signature-line"></div>
-                                    <canvas id="signature-recibido" class="signature-pad" width="420" height="60"></canvas>
+                                    <canvas id="signature-recibido" class="signature-pad" width="500" height="70"></canvas>
                                 </div>
                                 <div class="signature-controls no-print hidden" id="controles-recibido">
                                     <button class="signature-btn" onclick="clearSignature('recibido')">Borrar</button>
@@ -344,10 +267,10 @@
                             </div>
                         </div>
 
-                        <div class="space-y-6">
+                        <div class="space-y-8 lg:pt-10">
                             <div>
                                 <label class="block font-bold text-sm mb-2">Asignar esta orden al taller:</label>
-                                <select id="taller_asignado" class="w-full p-2 border border-gray-400 rounded">
+                                <select id="taller_asignado" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">-- Seleccionar taller --</option>
                                     <option value="ESTRUCTURAS">Estructuras</option>
                                     <option value="RADIO">Radio</option>
@@ -359,61 +282,154 @@
                                 </select>
                             </div>
 
-                            <div class="flex flex-col gap-4 pt-4">
-                                <div class="flex items-center gap-3">
-                                    <input type="checkbox" id="prioridad-rutina" class="w-5 h-5 border-black">
-                                    <span class="font-bold text-sm">RUTINA</span>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <input type="checkbox" id="prioridad-urgente" class="w-5 h-5 border-black">
-                                    <span class="font-bold text-sm">URGENTE</span>
-                                </div>
+                            <div class="flex flex-col gap-4">
+                                <label class="flex items-center gap-3">
+                                    <input type="checkbox" id="prioridad-rutina" class="w-5 h-5">
+                                    <span class="font-bold">RUTINA</span>
+                                </label>
+                                <label class="flex items-center gap-3">
+                                    <input type="checkbox" id="prioridad-urgente" class="w-5 h-5">
+                                    <span class="font-bold text-red-600">URGENTE</span>
+                                </label>
                             </div>
                         </div>
                     </div>
+                </div>
 
-  <div id="share-link-section" class="hidden mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg no-print mb-4">
-    <label class="block font-bold text-blue-800 text-sm mb-2">Enlace de la Orden para firma:</label>
-    <div class="flex gap-2">
-        <input type="text" id="enlace-orden" readonly class="w-full p-2 border rounded bg-white text-sm">
-        <button onclick="copiarEnlace()" class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-blue-700">
-            Copiar
-        </button>
-    </div>
-</div>
+                <!-- Sección de enlace para firma -->
+                <div id="share-link-section" class="hidden max-w-5xl mx-auto mt-8 p-5 bg-blue-50 border border-blue-200 rounded-xl no-print">
+                    <label class="block font-bold text-blue-800 text-sm mb-3">Enlace para firma de recibido:</label>
+                    <div class="flex gap-3">
+                        <input type="text" id="enlace-orden" readonly class="flex-1 p-3 border rounded-lg bg-white text-sm">
+                        <button onclick="copiarEnlace()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition">Copiar</button>
+                    </div>
+                </div>
 
-<div class="mt-12 flex flex-wrap justify-center gap-6 no-print">
-    <button onclick="guardarOrden()" class="bg-blue-600 text-white px-10 py-3 rounded-lg font-bold hover:bg-blue-700 transition">
-        Guardar Orden
-    </button>
+                <!-- Botones de acción -->
+                <div class="mt-10 flex flex-wrap justify-center gap-6 no-print">
+                    <button onclick="guardarOrden()" class="bg-blue-600 text-white px-12 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-md">
+                        Guardar Orden
+                    </button>
 
-    <button onclick="guardarYEnviarWhatsApp()" class="bg-green-600 text-white px-10 py-3 rounded-lg font-bold hover:bg-green-700 transition flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
-        </svg>
-        Guardar y Enviar por WhatsApp
-    </button>
+                    <button onclick="guardarYEnviarWhatsApp()" class="bg-green-600 text-white px-10 py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-md flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+                        </svg>
+                        Guardar y Enviar WhatsApp
+                    </button>
 
-    <button onclick="window.print()" class="bg-gray-600 text-white px-10 py-3 rounded-lg font-bold hover:bg-gray-700 transition">
-        Imprimir
-    </button>
-</div>
-            Copiar
-        </button>
-    </div>
-</div>
+                    <button onclick="window.print()" class="bg-gray-700 text-white px-12 py-3 rounded-xl font-bold hover:bg-gray-800 transition shadow-md">
+                        Imprimir
+                    </button>
+                </div>
+            </div>
 
+            <!-- Sección Historial -->
+            <div id="section-historial" class="hidden">
+                <div class="max-w-6xl mx-auto bg-white p-8 border border-slate-200 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-6">Historial de Órdenes de Trabajo</h2>
 
-    <button onclick="window.print()" class="bg-gray-600 text-white px-10 py-3 rounded-lg font-bold hover:bg-gray-700 transition">
-        Imprimir
-    </button>
-</div>
+                    <div class="flex flex-wrap gap-4 mb-8">
+                        <select id="filtro-taller" class="border border-gray-300 p-2.5 rounded-lg min-w-[220px]">
+                            <option value="">Todos los talleres</option>
+                            <option value="ESTRUCTURAS">Estructuras</option>
+                            <option value="RADIO">Radio</option>
+                            <option value="INSTRUMENTOS">Instrumentos</option>
+                            <option value="HYD">Hidráulica</option>
+                            <option value="ELECTRICIDAD">Electricidad</option>
+                            <option value="MOTORES">Motores</option>
+                            <option value="HELICOPTEROS">Helicópteros</option>
+                        </select>
+
+                        <select id="filtro-año" class="border border-gray-300 p-2.5 rounded-lg min-w-[160px]">
+                            <option value="">Todos los años</option>
+                        </select>
+
+                        <button onclick="cargarHistorial()" class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition">
+                            Filtrar
+                        </button>
+                    </div>
+
+                    <h3 class="font-bold text-xl mb-4 text-red-700">Pendientes</h3>
+                    <table class="w-full text-sm border mb-10">
+                        <thead class="bg-slate-100">
+                            <tr>
+                                <th class="border p-3 text-left">W.O.</th>
+                                <th class="border p-3 text-left">Aeronave</th>
+                                <th class="border p-3 text-left">Fecha</th>
+                                <th class="border p-3 text-left">Taller</th>
+                                <th class="border p-3 text-left">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-pendientes" class="divide-y"></tbody>
+                    </table>
+
+                    <h3 class="font-bold text-xl mb-4 text-green-700">Recibidas</h3>
+                    <table class="w-full text-sm border">
+                        <thead class="bg-slate-100">
+                            <tr>
+                                <th class="border p-3 text-left">W.O.</th>
+                                <th class="border p-3 text-left">Aeronave</th>
+                                <th class="border p-3 text-left">Fecha</th>
+                                <th class="border p-3 text-left">Taller</th>
+                                <th class="border p-3 text-left">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-recibidas" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modal para detalles de orden -->
+            <div id="detalle-orden-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 no-print">
+                <div class="bg-white p-8 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
+                    <button onclick="cerrarDetalleOrden()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                    <h2 class="text-2xl font-bold mb-6">Detalles de la Orden <span id="detalle-wo"></span></h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <p><strong>Fecha:</strong> <span id="detalle-fecha"></span></p>
+                            <p><strong>Hora:</strong> <span id="detalle-hora"></span></p>
+                            <p><strong>Aeronave:</strong> <span id="detalle-aeronave"></span></p>
+                            <p><strong>Taller:</strong> <span id="detalle-taller"></span></p>
+                            <p><strong>Prioridad:</strong> <span id="detalle-prioridad"></span></p>
+                            <p><strong>Estado:</strong> <span id="detalle-estado"></span></p>
+                        </div>
+                        <div>
+                            <p><strong>Discrepancia:</strong></p>
+                            <p id="detalle-discrepancia" class="bg-gray-50 p-4 rounded"></p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <p><strong>Firma Entregado:</strong></p>
+                            <img id="detalle-firma-entregado" class="w-full h-24 border" alt="Firma entregado">
+                        </div>
+                        <div>
+                            <p><strong>Firma Recibido:</strong></p>
+                            <img id="detalle-firma-recibido" class="w-full h-24 border" alt="Firma recibido">
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <h3 class="font-bold text-lg mb-4">Reporte de Trabajo Entregado (PDF)</h3>
+                        <div id="detalle-pdf-section">
+                            <input type="file" id="upload-pdf" accept=".pdf" class="mb-4">
+                            <button onclick="subirReportePDF()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Subir PDF</button>
+                            <div id="detalle-pdf-view" class="mt-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </main>
     </div>
 
     <script>
-        // Firebase Config
+        // ────────────────────────────────────────────────
+        //  Firebase Config
+        // ────────────────────────────────────────────────
         const firebaseConfig = {
             apiKey: "AIzaSyCrV3s3uuEiWx_u959j70Tt3JhM_G44sck",
             authDomain: "ubicacion-50569.firebaseapp.com",
@@ -427,8 +443,11 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const storage = firebase.storage();
 
-        // Números telefónicos iniciales (los que me diste)
+        // ────────────────────────────────────────────────
+        //  Datos iniciales y almacenamiento local
+        // ────────────────────────────────────────────────
         let telefonosTalleres = {
             "ESTRUCTURAS": "31732466",
             "RADIO": "36481152",
@@ -439,66 +458,57 @@
             "HELICOPTEROS": "87325369"
         };
 
-        // Cargar números guardados si existen
         if (localStorage.getItem('telefonosTalleres')) {
             telefonosTalleres = JSON.parse(localStorage.getItem('telefonosTalleres'));
         }
 
-          
-        // Generar W.O.
+        let signatures = { entregado: null, recibido: null };
+        let currentDetallePath = null;
+
+        // ────────────────────────────────────────────────
+        //  Funciones auxiliares
+        // ────────────────────────────────────────────────
         function generarNumeroWO() {
             const hoy = new Date();
             const año = hoy.getFullYear();
             const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-            
             const clave = `contador_wo_${año}_${mes}`;
 
             let contador = parseInt(localStorage.getItem(clave) || '0', 10);
             contador += 1;
             localStorage.setItem(clave, contador);
 
-            const secuencial = String(contador).padStart(4, '0');
-            return `${año}-${mes}-${secuencial}`;
+            return `${año}-${mes}-${String(contador).padStart(4, '0')}`;
         }
 
         function generarYMostrarWO() {
-            const inputWO = document.getElementById('wo');
-            if (inputWO && !inputWO.value.trim()) {
-                inputWO.value = generarNumeroWO();
+            const input = document.getElementById('wo');
+            if (input && !input.value.trim()) {
+                input.value = generarNumeroWO();
             }
         }
 
-        // Mostrar teléfono del taller
         function actualizarTelefonoTaller() {
             const taller = document.getElementById('taller_asignado')?.value;
-            const numeroContacto = document.getElementById('numero-contacto');
-
-            if (numeroContacto) {
-                numeroContacto.textContent = telefonosTalleres[taller] || '-';
-            }
+            document.getElementById('telefono-taller').textContent = telefonosTalleres[taller] || '—';
         }
 
-        // Mostrar formulario de edición
         function mostrarEditorTelefonos() {
             const editor = document.getElementById('editor-telefonos');
             editor.classList.remove('hidden');
-
-            // Cargar valores actuales
-            Object.keys(telefonosTalleres).forEach(taller => {
-                const input = document.getElementById(`edit-${taller}`);
-                if (input) input.value = telefonosTalleres[taller];
+            Object.keys(telefonosTalleres).forEach(t => {
+                const el = document.getElementById(`edit-${t}`);
+                if (el) el.value = telefonosTalleres[t];
             });
         }
 
-        // Guardar cambios de números
         function guardarTelefonos() {
-            Object.keys(telefonosTalleres).forEach(taller => {
-                const input = document.getElementById(`edit-${taller}`);
-                if (input) telefonosTalleres[taller] = input.value.trim();
+            Object.keys(telefonosTalleres).forEach(t => {
+                const input = document.getElementById(`edit-${t}`);
+                if (input) telefonosTalleres[t] = input.value.trim();
             });
-
             localStorage.setItem('telefonosTalleres', JSON.stringify(telefonosTalleres));
-            alert('Números actualizados');
+            alert('Números actualizados correctamente');
             document.getElementById('editor-telefonos').classList.add('hidden');
             actualizarTelefonoTaller();
         }
@@ -507,55 +517,64 @@
             document.getElementById('editor-telefonos').classList.add('hidden');
         }
 
-        // Resto del código (firmas, guardar, WhatsApp, enlace, etc.)
-        let signatures = { entregado: null, recibido: null };
-
+        // ────────────────────────────────────────────────
+        //  Firmas
+        // ────────────────────────────────────────────────
         function initFirmas() {
             ['entregado', 'recibido'].forEach(tipo => {
                 const canvas = document.getElementById(`signature-${tipo}`);
-                const ctx = canvas?.getContext('2d');
-                if (ctx) {
-                    ctx.lineWidth = 1.8;
-                    ctx.lineCap = 'round';
-                    ctx.strokeStyle = '#000';
-                    let drawing = false;
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#000';
 
-                    const draw = e => {
-                        if (!drawing) return;
-                        const rect = canvas.getBoundingClientRect();
-                        const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
-                        const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
-                        ctx.lineTo(x, y);
-                        ctx.stroke();
-                        ctx.beginPath();
-                        ctx.moveTo(x, y);
-                    };
+                let drawing = false;
 
-                    canvas.addEventListener('mousedown', () => drawing = true);
-                    canvas.addEventListener('mousemove', draw);
-                    canvas.addEventListener('mouseup', () => drawing = false);
-                    canvas.addEventListener('mouseout', () => drawing = false);
-                    canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; });
-                    canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e); });
-                    canvas.addEventListener('touchend', () => drawing = false);
-                }
+                const draw = e => {
+                    if (!drawing) return;
+                    const rect = canvas.getBoundingClientRect();
+                    const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+                    const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                };
+
+                const start = () => { drawing = true; ctx.beginPath(); };
+                const stop = () => { drawing = false; };
+
+                canvas.addEventListener('mousedown', start);
+                canvas.addEventListener('mousemove', draw);
+                canvas.addEventListener('mouseup', stop);
+                canvas.addEventListener('mouseout', stop);
+
+                canvas.addEventListener('touchstart', e => { e.preventDefault(); start(); });
+                canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e); });
+                canvas.addEventListener('touchend', stop);
             });
         }
 
         function clearSignature(tipo) {
             const canvas = document.getElementById(`signature-${tipo}`);
-            canvas?.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
-            signatures[tipo] = null;
+            if (canvas) {
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                signatures[tipo] = null;
+            }
         }
 
         function saveSignature(tipo) {
             const canvas = document.getElementById(`signature-${tipo}`);
-            signatures[tipo] = canvas?.toDataURL('image/png');
+            if (canvas) signatures[tipo] = canvas.toDataURL('image/png');
         }
 
+        // ────────────────────────────────────────────────
+        //  Generar y copiar enlace
+        // ────────────────────────────────────────────────
         function generarEnlace(wo) {
-            const baseUrl = window.location.href.split('?')[0];
-            return `${baseUrl}?orden=${encodeURIComponent(wo)}`;
+            const base = window.location.href.split('?')[0];
+            return `${base}?orden=${encodeURIComponent(wo)}`;
         }
 
         function copiarEnlace() {
@@ -565,85 +584,82 @@
             alert('Enlace copiado al portapapeles');
         }
 
-        
-   async function guardarOrden(mostrarEnlace = false) {
-    const modoRecepcion = new URLSearchParams(window.location.search).has('orden');
-    const wo = document.getElementById('wo')?.value?.trim();
-    const taller = document.getElementById('taller_asignado')?.value;
-    const fecha = document.getElementById('fecha')?.value;
-    const hora = document.getElementById('hora')?.value;
-    const aeronave = document.getElementById('aeronave')?.value?.trim();
-    const discrepancia = document.getElementById('discrepancia')?.innerText?.trim();
-    const prioridad_urgente = document.getElementById('prioridad-urgente')?.checked;
+        // ────────────────────────────────────────────────
+        //  Guardar orden
+        // ────────────────────────────────────────────────
+        async function guardarOrden(mostrarEnlace = false) {
+            const esModoRecepcion = new URLSearchParams(window.location.search).has('orden');
+            const wo = document.getElementById('wo')?.value?.trim();
+            const taller = document.getElementById('taller_asignado')?.value;
+            const fecha = document.getElementById('fecha')?.value;
+            const hora = document.getElementById('hora')?.value;
+            const aeronave = document.getElementById('aeronave')?.value?.trim();
+            const discrepancia = document.getElementById('discrepancia')?.innerText?.trim();
+            const prioridad_urgente = document.getElementById('prioridad-urgente')?.checked;
 
-    if (!wo) return alert('Falta número de orden');
-    
-    // Validaciones según el modo
-    if (!modoRecepcion) {
-        if (!taller) return alert('Selecciona el taller');
-        if (!discrepancia) return alert('Escribe la discrepancia');
-        saveSignature('entregado');
-    } else {
-        saveSignature('recibido');
-    }
+            if (!wo) return alert('Falta número de orden'), false;
+            if (!esModoRecepcion) {
+                if (!taller) return alert('Selecciona el taller'), false;
+                if (!discrepancia) return alert('Escribe la discrepancia'), false;
+                saveSignature('entregado');
+            } else {
+                saveSignature('recibido');
+            }
 
-    const [año, mes] = wo.split('-').slice(0, 2);
-    const path = `ordenes_trabajo/${taller}/${año}/${mes}/${wo}`;
+            const [año, mes] = wo.split('-').slice(0, 2);
+            const path = `ordenes_trabajo/${taller}/${año}/${mes}/${wo}`;
 
-    const data = {
-        wo,
-        fecha,
-        hora,
-        aeronave,
-        discrepancia,
-        prioridad: prioridad_urgente ? 'URGENTE' : 'Rutina',
-        estado: modoRecepcion ? 'recibido' : 'pendiente',
-        creado: new Date().toISOString()
-    };
+            const data = {
+                wo,
+                fecha,
+                hora,
+                aeronave,
+                discrepancia,
+                prioridad: prioridad_urgente ? 'URGENTE' : 'Rutina',
+                estado: esModoRecepcion ? 'recibido' : 'pendiente',
+                creado: new Date().toISOString()
+            };
 
-    if (modoRecepcion) {
-        data.firma_recibido = signatures.recibido || null;
-        data.recibido_en = new Date().toISOString();
-    } else {
-        data.firma_entregado = signatures.entregado || null;
-    }
+            if (esModoRecepcion) {
+                data.firma_recibido = signatures.recibido;
+                data.recibido_en = new Date().toISOString();
+            } else {
+                data.firma_entregado = signatures.entregado;
+            }
 
-    try {
-        // Usamos update para no borrar la firma de quien entregó al recibir
-        await db.ref(path).update(data);
-
-        if (mostrarEnlace) {
-            const enlace = generarEnlace(wo);
-            const inputEnlace = document.getElementById('enlace-orden');
-            const seccionEnlace = document.getElementById('share-link-section');
-
-            if (inputEnlace && seccionEnlace) {
-                inputEnlace.value = enlace;
-                seccionEnlace.classList.remove('hidden');
+            try {
+                await db.ref(path).update(data);
+                if (mostrarEnlace) {
+                    const enlace = generarEnlace(wo);
+                    document.getElementById('enlace-orden').value = enlace;
+                    document.getElementById('share-link-section').classList.remove('hidden');
+                }
+                alert(esModoRecepcion ? 'Orden recibida correctamente' : 'Orden guardada correctamente');
+                if (esModoRecepcion) {
+                    // Recargar historial si está en modo recepción (aunque probablemente no esté visible)
+                    if (document.getElementById('section-historial').classList.contains('hidden') === false) {
+                        cargarHistorial();
+                    }
+                }
+                return true;
+            } catch (err) {
+                alert('Error al guardar: ' + err.message);
+                return false;
             }
         }
-        return true;
-    } catch (error) {
-        alert('Error al guardar: ' + error.message);
-        return false;
-    }
-}
 
-     async function guardarYEnviarWhatsApp() {
-    // 1. Guardamos primero (esto genera el link en pantalla)
-    const guardado = await guardarOrden(true);
-    if (!guardado) return;
+        async function guardarYEnviarWhatsApp() {
+            const guardado = await guardarOrden(true);
+            if (!guardado) return;
 
-    // 2. Capturamos los datos para el mensaje
-    const wo = document.getElementById('wo')?.value?.trim();
-    const taller = document.getElementById('taller_asignado')?.value;
-    const aeronave = document.getElementById('aeronave')?.value?.trim();
-    const discrepancia = document.getElementById('discrepancia')?.innerText?.trim();
-    const prioridad = document.getElementById('prioridad-urgente')?.checked ? '*URGENTE*' : 'Rutina';
-    const enlace = document.getElementById('enlace-orden')?.value;
+            const wo = document.getElementById('wo').value.trim();
+            const taller = document.getElementById('taller_asignado').value;
+            const aeronave = document.getElementById('aeronave').value.trim();
+            const discrepancia = document.getElementById('discrepancia').innerText.trim();
+            const prioridad = document.getElementById('prioridad-urgente').checked ? '*URGENTE*' : 'Rutina';
+            const enlace = document.getElementById('enlace-orden').value;
 
-    // 3. Formateamos el mensaje para WhatsApp
-    const mensaje = 
+            const mensaje = 
 `🛠️ *NUEVA ORDEN DE TRABAJO*
 
 *W.O:* ${wo}
@@ -652,170 +668,237 @@
 *Prioridad:* ${prioridad}
 *Discrepancia:* ${discrepancia}
 
-*Por favor, firme de recibido aquí:*
+*Firma de recibido →*  
 ${enlace}`;
 
-    // 4. Obtenemos el número del taller (agregamos 504 de Honduras)
-    const numero = telefonosTalleres[taller];
+            const numero = telefonosTalleres[taller];
+            if (numero) {
+                const url = `https://wa.me/504${numero}?text=${encodeURIComponent(mensaje)}`;
+                window.open(url, '_blank');
+            } else {
+                alert("Orden guardada, pero no hay número registrado para " + taller);
+            }
+        }
 
-    if (numero) {
-        const url = `https://wa.me/504${numero}?text=${encodeURIComponent(mensaje)}`;
-        window.open(url, '_blank');
-    } else {
-        alert("Orden guardada. No se encontró número para el taller: " + taller);
-    }
-}
+        // ────────────────────────────────────────────────
+        //  Modo recepción (firma recibido)
+        // ────────────────────────────────────────────────
         function detectarModoRecepcion() {
             const params = new URLSearchParams(window.location.search);
             const wo = params.get('orden');
-            if (wo) {
-                document.querySelectorAll('input:not(#signature-recibido), select, button:not(.signature-btn), [contenteditable]').forEach(el => {
-                    el.disabled = true;
-                    el.readOnly = true;
-                    if (el.contentEditable) el.contentEditable = false;
+            if (!wo) return;
+
+            // Deshabilitar edición
+            document.querySelectorAll('input:not(#signature-recibido), select, textarea, [contenteditable], button:not(.signature-btn)').forEach(el => {
+                el.disabled = true;
+                if (el.contentEditable) el.contentEditable = false;
+            });
+
+            document.getElementById('controles-recibido').classList.remove('hidden');
+            document.getElementById('share-link-section')?.classList.add('hidden');
+
+            cargarOrdenDesdeFirebase(wo);
+        }
+
+        async function cargarOrdenDesdeFirebase(wo) {
+            const [año, mes] = wo.split('-').slice(0, 2);
+
+            for (const taller of Object.keys(telefonosTalleres)) {
+                const ref = db.ref(`ordenes_trabajo/${taller}/${año}/${mes}/${wo}`);
+                const snap = await ref.once('value');
+                if (snap.exists()) {
+                    const data = snap.val();
+                    document.getElementById('wo').value = data.wo || '';
+                    document.getElementById('fecha').value = data.fecha || '';
+                    document.getElementById('hora').value = data.hora || '';
+                    document.getElementById('aeronave').value = data.aeronave || '';
+                    document.getElementById('discrepancia').innerText = data.discrepancia || '';
+                    document.getElementById('taller_asignado').value = taller;
+
+                    if (data.firma_entregado) {
+                        const img = new Image();
+                        img.onload = () => {
+                            document.getElementById('signature-entregado').getContext('2d').drawImage(img, 0, 0);
+                        };
+                        img.src = data.firma_entregado;
+                        signatures.entregado = data.firma_entregado;
+                    }
+                    return;
+                }
+            }
+            alert('No se encontró la orden ' + wo);
+        }
+
+        // ────────────────────────────────────────────────
+        //  Historial
+        // ────────────────────────────────────────────────
+        async function cargarAñosDisponibles() {
+            const select = document.getElementById('filtro-año');
+            select.innerHTML = '<option value="">Todos los años</option>';
+
+            const snap = await db.ref('ordenes_trabajo').once('value');
+            if (!snap.exists()) return;
+
+            const años = new Set();
+            snap.forEach(tallerSnap => {
+                tallerSnap.forEach(añoSnap => años.add(añoSnap.key));
+            });
+
+            [...años].sort().reverse().forEach(año => {
+                const opt = document.createElement('option');
+                opt.value = año;
+                opt.textContent = año;
+                select.appendChild(opt);
+            });
+        }
+
+        async function cargarHistorial() {
+            const pendientesBody = document.getElementById('tabla-pendientes');
+            const recibidasBody = document.getElementById('tabla-recibidas');
+            pendientesBody.innerHTML = '';
+            recibidasBody.innerHTML = '';
+
+            const filtroTaller = document.getElementById('filtro-taller').value;
+            const filtroAño = document.getElementById('filtro-año').value;
+
+            const snap = await db.ref('ordenes_trabajo').once('value');
+            if (!snap.exists()) return;
+
+            snap.forEach(tallerSnap => {
+                const taller = tallerSnap.key;
+                if (filtroTaller && taller !== filtroTaller) return;
+
+                tallerSnap.forEach(añoSnap => {
+                    const año = añoSnap.key;
+                    if (filtroAño && año !== filtroAño) return;
+
+                    añoSnap.forEach(mesSnap => {
+                        mesSnap.forEach(woSnap => {
+                            const woKey = woSnap.key;
+                            const data = woSnap.val();
+                            const tr = document.createElement('tr');
+                            tr.className = 'hover:bg-slate-50 cursor-pointer';
+                            tr.onclick = () => mostrarDetalleOrden(taller, año, mesSnap.key, woKey, data);
+                            tr.innerHTML = `
+                                <td class="border px-4 py-3">${data.wo}</td>
+                                <td class="border px-4 py-3">${data.aeronave || '—'}</td>
+                                <td class="border px-4 py-3">${data.fecha || '—'}</td>
+                                <td class="border px-4 py-3">${taller}</td>
+                                <td class="border px-4 py-3 font-medium ${data.estado === 'recibido' ? 'text-green-600' : 'text-red-600'}">
+                                    ${data.estado === 'recibido' ? 'Recibida' : 'Pendiente'}
+                                </td>
+                            `;
+
+                            if (data.estado === 'recibido') {
+                                recibidasBody.appendChild(tr);
+                            } else {
+                                pendientesBody.appendChild(tr);
+                            }
+                        });
+                    });
                 });
+            });
+        }
 
-                if (wo) {
-    cargarOrdenDesdeFirebase(wo);
-}
+        // ────────────────────────────────────────────────
+        //  Detalle de orden
+        // ────────────────────────────────────────────────
+        function mostrarDetalleOrden(taller, año, mes, wo, data) {
+            document.getElementById('detalle-wo').textContent = data.wo;
+            document.getElementById('detalle-fecha').textContent = data.fecha || '—';
+            document.getElementById('detalle-hora').textContent = data.hora || '—';
+            document.getElementById('detalle-aeronave').textContent = data.aeronave || '—';
+            document.getElementById('detalle-taller').textContent = taller;
+            document.getElementById('detalle-prioridad').textContent = data.prioridad || '—';
+            document.getElementById('detalle-estado').textContent = data.estado === 'recibido' ? 'Recibida' : 'Pendiente';
+            document.getElementById('detalle-discrepancia').textContent = data.discrepancia || '—';
 
+            document.getElementById('detalle-firma-entregado').src = data.firma_entregado || '';
+            document.getElementById('detalle-firma-recibido').src = data.firma_recibido || '';
 
-                const controles = document.getElementById('controles-recibido');
-                if (controles) controles.classList.remove('hidden');
+            currentDetallePath = `ordenes_trabajo/${taller}/${año}/${mes}/${wo}`;
 
-                const shareSection = document.getElementById('share-link-section');
-                if (shareSection) shareSection.classList.add('hidden');
+            cargarReportePDF();
+
+            document.getElementById('detalle-orden-modal').classList.remove('hidden');
+        }
+
+        function cerrarDetalleOrden() {
+            document.getElementById('detalle-orden-modal').classList.add('hidden');
+            currentDetallePath = null;
+            document.getElementById('upload-pdf').value = '';
+        }
+
+        async function subirReportePDF() {
+            const fileInput = document.getElementById('upload-pdf');
+            const file = fileInput.files[0];
+            if (!file || !currentDetallePath) return alert('Selecciona un PDF primero');
+
+            if (file.type !== 'application/pdf') return alert('Solo archivos PDF');
+
+            try {
+                const storageRef = storage.ref(`${currentDetallePath}/reporte.pdf`);
+                await storageRef.put(file);
+                const url = await storageRef.getDownloadURL();
+
+                await db.ref(currentDetallePath).update({ reporte_pdf: url });
+                alert('Reporte PDF subido correctamente');
+                cargarReportePDF();
+            } catch (err) {
+                alert('Error al subir PDF: ' + err.message);
             }
         }
 
+        async function cargarReportePDF() {
+            if (!currentDetallePath) return;
+
+            const snap = await db.ref(currentDetallePath).once('value');
+            const data = snap.val();
+            const view = document.getElementById('detalle-pdf-view');
+
+            if (data.reporte_pdf) {
+                view.innerHTML = `<a href="${data.reporte_pdf}" target="_blank" class="text-blue-600 hover:underline">Ver Reporte PDF</a>`;
+            } else {
+                view.innerHTML = '<p class="text-gray-500">No hay reporte PDF cargado aún.</p>';
+            }
+        }
+
+        // ────────────────────────────────────────────────
+        //  Navegación entre pestañas
+        // ────────────────────────────────────────────────
+        function switchTab(tab) {
+            document.querySelectorAll('#section-stats, #section-order, #section-historial')
+                .forEach(el => el.classList.add('hidden'));
+
+            document.getElementById(`section-${tab}`)?.classList.remove('hidden');
+
+            if (tab === 'order') {
+                initFirmas();
+                generarYMostrarWO();
+                actualizarTelefonoTaller();
+            }
+
+            if (tab === 'historial') {
+                cargarAñosDisponibles();
+                cargarHistorial();
+            }
+        }
+
+        // ────────────────────────────────────────────────
+        //  Inicio
+        // ────────────────────────────────────────────────
         window.addEventListener('load', () => {
             const hoy = new Date().toISOString().split('T')[0];
             document.getElementById('fecha').value = hoy;
+
+            // Seleccionar pestaña por defecto
             switchTab('order');
+
             detectarModoRecepcion();
+
+            // Listener para actualizar teléfono al cambiar taller
+            document.getElementById('taller_asignado')?.addEventListener('change', actualizarTelefonoTaller);
         });
-
-        async function cargarOrdenDesdeFirebase(wo) {
-    const año = wo.split('-')[0];
-    const mes = wo.split('-')[1];
-
-    for (const taller of Object.keys(telefonosTalleres)) {
-        const ref = db.ref(`ordenes_trabajo/${taller}/${año}/${mes}/${wo}`);
-        const snapshot = await ref.get();
-
-        if (snapshot.exists()) {
-            const data = snapshot.val();
-
-            document.getElementById('wo').value = data.wo;
-            document.getElementById('fecha').value = data.fecha;
-            document.getElementById('hora').value = data.hora;
-            document.getElementById('aeronave').value = data.aeronave;
-            document.getElementById('discrepancia').innerText = data.discrepancia;
-            document.getElementById('taller_asignado').value = taller;
-
-            // Cargar firma entregado
-            if (data.firma_entregado) {
-                const img = new Image();
-                img.onload = () => {
-                    const ctx = document.getElementById('signature-entregado').getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                };
-                img.src = data.firma_entregado;
-                signatures.entregado = data.firma_entregado;
-            }
-
-            return;
-        }
-    }
-
-    alert('Orden no encontrada');
-}
-async function cargarHistorial() {
-    document.getElementById('tabla-pendientes').innerHTML = '';
-    document.getElementById('tabla-recibidas').innerHTML = '';
-
-    const snapshot = await db.ref('ordenes_trabajo').get();
-    if (!snapshot.exists()) return;
-
-    const data = snapshot.val();
-    const filtroTaller = document.getElementById('filtro-taller').value;
-const filtroAño = document.getElementById('filtro-año').value;
-
-
-    Object.keys(data).forEach(taller => {
-        Object.keys(data[taller]).forEach(año => {
-            Object.keys(data[taller][año]).forEach(mes => {
-                Object.keys(data[taller][año][mes]).forEach(wo => {
-                    const o = data[taller][año][mes][wo];
-
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="border p-2">${o.wo}</td>
-                        <td class="border p-2">${o.aeronave || '-'}</td>
-                        <td class="border p-2">${o.fecha || '-'}</td>
-                        <td class="border p-2">${taller}</td>
-                    `;
-
-                    if (o.estado === 'recibido') {
-                         if (filtroTaller && taller !== filtroTaller) return;
-                        document.getElementById('tabla-recibidas').appendChild(tr);
-                    } else {
-                        document.getElementById('tabla-pendientes').appendChild(tr);
-                      
-if (filtroAño && año !== filtroAño) return;
-
-                    }
-                });
-            });
-        });
-    });
-}
-
-async function cargarAñosDisponibles() {
-    const select = document.getElementById('filtro-año');
-    select.innerHTML = '<option value="">Todos los años</option>';
-
-    const snapshot = await db.ref('ordenes_trabajo').get();
-    if (!snapshot.exists()) return;
-
-    const años = new Set();
-
-    Object.values(snapshot.val()).forEach(taller =>
-        Object.keys(taller).forEach(año => años.add(año))
-    );
-
-    [...años].sort().forEach(año => {
-        const opt = document.createElement('option');
-        opt.value = año;
-        opt.textContent = año;
-        select.appendChild(opt);
-    });
-}
-
-function switchTab(tab) {
-    document.getElementById('section-stats')?.classList.add('hidden');
-    document.getElementById('section-order')?.classList.add('hidden');
-    document.getElementById('section-historial')?.classList.add('hidden');
-
-    if (tab === 'stats') {
-        document.getElementById('section-stats').classList.remove('hidden');
-    }
-
-    if (tab === 'order') {
-        document.getElementById('section-order').classList.remove('hidden');
-        initFirmas();
-        generarYMostrarWO();
-        actualizarTelefonoTaller();
-    }
-
-    if (tab === 'historial') {
-        document.getElementById('section-historial').classList.remove('hidden');
-        cargarAñosDisponibles();
-        cargarHistorial();
-    }
-}
-
-
     </script>
 </body>
 </html>
