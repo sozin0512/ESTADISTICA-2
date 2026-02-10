@@ -15,35 +15,41 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        
-        .fah-table { border-collapse: collapse; width: 100%; }
-        .fah-table th, .fah-table td { border: 1px solid #1e293b; padding: 8px 12px; }
+
+        .fah-table { border-collapse: collapse; width: 100%; min-width: 640px; }
+        .fah-table th, .fah-table td { border: 1px solid #1e293b; padding: 10px 14px; }
         .fah-header-blue { background-color: #b9d1ea; color: #000; font-weight: bold; text-align: center; }
-        .fah-cell-label { background-color: #b9d1ea; font-weight: bold; font-size: 0.85rem; text-align: center; }
-        
+        .fah-cell-label { background-color: #b9d1ea; font-weight: bold; font-size: 0.9rem; text-align: center; }
+
         .discrepancia-box {
             background-color: #f8fafc;
             background-image: linear-gradient(#e2e8f0 1px, transparent 1px);
-            background-size: 100% 1.6rem;
-            line-height: 1.6rem;
+            background-size: 100% 2rem;
+            line-height: 2rem;
             border: 1px solid #cbd5e1;
-            padding: 8px 12px;
-            min-height: 160px;
-            font-size: 0.95rem;
+            padding: 12px 16px;
+            min-height: 200px;
+            font-size: 1rem;
         }
 
         .signature-container {
             position: relative;
             width: 100%;
-            height: 70px;
-            margin-top: 6px;
+            height: 120px;
+            margin-top: 8px;
             border: 1px solid #d1d5db;
             background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        @media (max-width: 640px) {
+            .signature-container { height: 160px; }
         }
 
         .signature-line {
             position: absolute;
-            bottom: 12px;
+            bottom: 16px;
             left: 10%;
             right: 10%;
             height: 1px;
@@ -63,85 +69,87 @@
         .signature-controls {
             display: flex;
             gap: 12px;
-            margin-top: 8px;
-            font-size: 0.8rem;
+            margin-top: 10px;
+            font-size: 0.9rem;
         }
 
-        .signature-btn {
-            padding: 4px 14px;
-            border: 1px solid #6b7280;
-            background: #f3f4f6;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-
-        .signature-btn:hover {
-            background: #e5e7eb;
-        }
-
-        .highlight-row {
-            background-color: #dbeafe !important;
-            font-weight: 600;
-        }
+        .highlight-row { background-color: #dbeafe !important; font-weight: 600; }
 
         @media print {
             .no-print { display: none !important; }
             body { background: white; margin: 0; }
-            .print-area { box-shadow: none; border: none; margin: 0; width: 100%; }
+            .print-area, .print-container { box-shadow: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
             .signature-pad, .signature-line { background: transparent !important; border: none !important; }
-            .signature-controls, #share-link-section, aside, #buscador-wrapper { display: none !important; }
-            body { background-color: white; }
-            .print-container { 
-                box-shadow: none !important; 
-                margin: 0 !important; 
-                padding: 0 !important;
-                width: 100% !important;
-            }
+            aside, #buscador-wrapper, .signature-controls, .no-print { display: none !important; }
         }
-        .dotted-line {
-            border-bottom: 1px solid black;
-            height: 1.5rem;
-            margin-bottom: 0.5rem;
+
+        .print-container {
+            max-width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
         }
-        input[type="text"], input[type="datetime-local"] {
-            border: none;
-            border-bottom: 1px solid black;
-            outline: none;
-            width: 100%;
-            background: transparent;
-        }
-        textarea {
-            border: none;
-            line-height: 2rem;
-            background-image: linear-gradient(transparent, transparent 1.9rem, black 1.9rem);
-            background-size: 100% 2rem;
-            width: 100%;
-            resize: none;
-            outline: none;
+
+        @media (max-width: 640px) {
+            .print-container { padding: 20px; font-size: 0.95rem; }
         }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
 
-    <div class="flex h-screen overflow-hidden no-print">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="w-64 bg-slate-900 text-white flex-shrink-0 hidden md:flex flex-col">
+    <!-- Menú hamburguesa solo en móvil -->
+    <div class="md:hidden fixed top-4 left-4 z-50 no-print">
+        <button id="btn-menu-movil" class="bg-slate-800 text-white p-3 rounded-full shadow-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Panel lateral móvil -->
+    <div id="sidebar-movil" class="md:hidden fixed inset-0 bg-black bg-opacity-60 z-40 hidden">
+        <div class="bg-slate-900 text-white w-72 h-full transform -translate-x-full transition-transform duration-300">
+            <div class="p-6 flex justify-between items-center border-b border-slate-700">
+                <h1 class="font-bold text-xl">FAH TALLERES</h1>
+                <button id="btn-cerrar-movil" class="text-white text-3xl">×</button>
+            </div>
+            <nav class="p-4 space-y-2">
+                <button onclick="switchTab('order'); cerrarMenuMovil()" 
+                        class="w-full text-left px-4 py-3 hover:bg-slate-800 rounded-lg text-base transition text-slate-200">
+                    Cargar Orden de Trabajo
+                </button>
+                <div class="pt-6 pb-3 px-4 text-sm font-bold text-slate-500 uppercase">Administración</div>
+                <button onclick="switchTab('historial'); cerrarMenuMovil()" 
+                        class="w-full text-left px-4 py-3 hover:bg-slate-800 rounded-lg text-base transition text-slate-200">
+                    Historial W.O.
+                </button>
+                <button onclick="switchTab('reporte-trabajo'); cerrarMenuMovil()" 
+                        class="w-full text-left px-4 py-3 hover:bg-slate-800 rounded-lg text-base transition text-slate-200">
+                    Reporte de Trabajo
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar normal (escritorio) -->
+        <aside id="sidebar" class="hidden md:flex w-64 bg-slate-900 text-white flex-shrink-0 flex-col">
             <div class="p-6 text-center border-b border-slate-700">
                 <h1 class="font-bold text-xl tracking-wide">FAH TALLERES</h1>
                 <p class="text-xs text-slate-400 mt-1 uppercase">Base Aérea HAM</p>
             </div>
             <nav class="flex-grow p-4 space-y-1.5">
-                <button id="btn-cargar-orden" onclick="switchTab('order')" 
+                <button onclick="switchTab('order')"
                         class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">
                     Cargar Orden de Trabajo
                 </button>
                 <div class="pt-5 pb-2 px-4 text-xs font-bold text-slate-500 uppercase">Administración</div>
-                <button onclick="switchTab('historial')" 
+                <button onclick="switchTab('historial')"
                         class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">
                     Historial W.O.
                 </button>
-                <button onclick="switchTab('reporte-trabajo')" 
+                <button onclick="switchTab('reporte-trabajo')"
                         class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">
                     Reporte de Trabajo
                 </button>
@@ -149,13 +157,11 @@
         </aside>
 
         <!-- Contenido principal -->
-        <main class="flex-grow overflow-y-auto p-6 lg:p-10">
+        <main class="flex-grow overflow-y-auto p-4 sm:p-6 lg:p-10">
 
-            <!-- ==================================================
-                 SECCIÓN CREAR ORDEN
-            ================================================== -->
+            <!-- SECCIÓN CREAR ORDEN -->
             <div id="section-order" class="hidden">
-                <div class="max-w-5xl mx-auto bg-white p-8 shadow-xl border border-slate-200 rounded-xl print-area">
+                <div class="max-w-5xl mx-auto bg-white p-6 sm:p-8 shadow-xl border border-slate-200 rounded-xl print-area">
                     <div class="text-center mb-8">
                         <h1 class="font-bold text-xl uppercase">Fuerza Aérea Hondureña</h1>
                         <h2 class="font-bold text-base uppercase mt-1">Base Aérea "Cnel. Hernán Acosta Mejía"</h2>
@@ -238,7 +244,7 @@
                                 <div class="font-bold text-sm mb-2">ENTREGADO POR:</div>
                                 <div class="signature-container">
                                     <div class="signature-line"></div>
-                                    <canvas id="signature-entregado" class="signature-pad" width="500" height="70"></canvas>
+                                    <canvas id="signature-entregado" class="signature-pad" width="500" height="120"></canvas>
                                 </div>
                                 <div class="signature-controls no-print">
                                     <button class="signature-btn" onclick="clearSignature('entregado')">Borrar firma</button>
@@ -250,7 +256,7 @@
                                 <div class="font-bold text-sm mb-2">RECIBIDO POR:</div>
                                 <div class="signature-container">
                                     <div class="signature-line"></div>
-                                    <canvas id="signature-recibido" class="signature-pad" width="500" height="70"></canvas>
+                                    <canvas id="signature-recibido" class="signature-pad" width="500" height="120"></canvas>
                                 </div>
                                 <div class="signature-controls no-print hidden" id="controles-recibido">
                                     <button class="signature-btn" onclick="clearSignature('recibido')">Borrar</button>
@@ -314,11 +320,9 @@
                 </div>
             </div>
 
-            <!-- ==================================================
-                 SECCIÓN HISTORIAL
-            ================================================== -->
+            <!-- SECCIÓN HISTORIAL -->
             <div id="section-historial">
-                <div class="max-w-6xl mx-auto bg-white p-8 border border-slate-200 rounded-xl shadow-sm">
+                <div class="max-w-6xl mx-auto bg-white p-6 sm:p-8 border border-slate-200 rounded-xl shadow-sm">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4" id="buscador-wrapper">
                         <h2 class="text-2xl font-bold">Historial de Órdenes de Trabajo</h2>
                         <div class="w-full md:w-96">
@@ -349,165 +353,149 @@
                     </div>
 
                     <h3 class="font-bold text-xl mb-4 text-red-700">Pendientes</h3>
-                    <table class="w-full text-sm border mb-10">
-                        <thead class="bg-slate-100">
-                            <tr>
-                                <th class="border p-3 text-left">W.O.</th>
-                                <th class="border p-3 text-left">Aeronave</th>
-                                <th class="border p-3 text-left">Fecha</th>
-                                <th class="border p-3 text-left">Taller</th>
-                                <th class="border p-3 text-left">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-pendientes" class="divide-y"></tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm border mb-10">
+                            <thead class="bg-slate-100">
+                                <tr>
+                                    <th class="border p-3 text-left">W.O.</th>
+                                    <th class="border p-3 text-left">Aeronave</th>
+                                    <th class="border p-3 text-left">Fecha</th>
+                                    <th class="border p-3 text-left">Taller</th>
+                                    <th class="border p-3 text-left">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-pendientes" class="divide-y"></tbody>
+                        </table>
+                    </div>
 
                     <h3 class="font-bold text-xl mb-4 text-green-700">Recibidas</h3>
-                    <table class="w-full text-sm border">
-                        <thead class="bg-slate-100">
-                            <tr>
-                                <th class="border p-3 text-left">W.O.</th>
-                                <th class="border p-3 text-left">Aeronave</th>
-                                <th class="border p-3 text-left">Fecha</th>
-                                <th class="border p-3 text-left">Taller</th>
-                                <th class="border p-3 text-left">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-recibidas" class="divide-y"></tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm border">
+                            <thead class="bg-slate-100">
+                                <tr>
+                                    <th class="border p-3 text-left">W.O.</th>
+                                    <th class="border p-3 text-left">Aeronave</th>
+                                    <th class="border p-3 text-left">Fecha</th>
+                                    <th class="border p-3 text-left">Taller</th>
+                                    <th class="border p-3 text-left">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-recibidas" class="divide-y"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <!-- ==================================================
-                 SECCIÓN REPORTE DE TRABAJO (INTEGRADO EL FORMULARIO)
-            ================================================== -->
+            <!-- SECCIÓN REPORTE DE TRABAJO -->
             <div id="section-reporte-trabajo" class="hidden">
-                <div class="max-w-6xl mx-auto bg-white p-8 border border-slate-200 rounded-xl shadow-sm">
-                    <h2 class="text-2xl font-bold mb-6">Reporte de Trabajo Entregado</h2>
+                <div class="max-w-6xl mx-auto bg-white p-6 sm:p-8 border border-slate-200 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-6">Reporte de Trabajo Efectuado</h2>
 
-                    <!-- Botón de impresión -->
                     <div class="mb-6 no-print flex justify-end">
-                        <button onclick="window.print()" class="bg-blue-800 text-white px-6 py-2 rounded shadow-md hover:bg-blue-700 transition">
+                        <button onclick="window.print()" class="bg-blue-800 text-white px-6 py-2.5 rounded shadow-md hover:bg-blue-700 transition">
                             Imprimir Reporte
                         </button>
                     </div>
 
-                    <!-- Contenedor del Reporte -->
-                    <div class="print-container max-w-[210mm] min-h-[297mm] mx-auto bg-white shadow-2xl p-12 border border-gray-200">
-                        
-                        <!-- Encabezado -->
-                        <header class="text-center mb-8">
-                            <h1 class="font-bold text-base uppercase">Fuerzas Armadas de Honduras</h1>
+                    <div class="print-container mx-auto bg-white shadow-xl p-8 sm:p-12 border border-gray-200">
+                        <header class="text-center mb-10">
+                            <h1 class="font-bold text-lg uppercase">Fuerzas Armadas de Honduras</h1>
                             <h2 class="font-bold text-base uppercase">Fuerza Aérea Hondureña</h2>
                             <p class="text-sm">Base Aérea "Coronel Hernán Acosta Mejía"</p>
-                            <h3 class="font-bold text-lg mt-4 underline uppercase">Reporte de Trabajo Efectuado</h3>
+                            <h3 class="font-bold text-xl mt-6 underline uppercase">Reporte de Trabajo Efectuado</h3>
                         </header>
 
-                        <!-- Sección de Información General -->
-                        <div class="space-y-4">
-                            <div class="flex gap-4 items-end">
-                                <span class="whitespace-nowrap">El taller / sub-sección de</span>
-                                <input type="text" class="flex-grow">
-                                <span class="whitespace-nowrap">notifica que el trabajo</span>
-                                <input type="text" class="flex-grow">
+                        <div class="space-y-6 text-base">
+                            <div class="flex flex-col sm:flex-row gap-3 items-baseline">
+                                <span>El taller / sub-sección de</span>
+                                <input type="text" class="flex-grow border-b border-black">
+                                <span>notifica que el trabajo</span>
+                                <input type="text" class="flex-grow border-b border-black">
                             </div>
 
-                            <div class="flex gap-4 items-end">
-                                <span class="whitespace-nowrap">con N° de orden de trabajo</span>
-                                <input type="text" class="w-1/3">
-                                <span class="whitespace-nowrap">Tiempo Total</span>
-                                <input type="text" class="flex-grow">
+                            <div class="flex flex-col sm:flex-row gap-3 items-baseline">
+                                <span>con N° de orden de trabajo</span>
+                                <input type="text" class="w-full sm:w-48 border-b border-black">
+                                <span>Tiempo Total</span>
+                                <input type="text" class="flex-grow border-b border-black">
                             </div>
 
-                            <div class="flex gap-4 items-end">
-                                <span class="whitespace-nowrap">Matrícula de la aeronave</span>
-                                <input type="text" class="flex-grow">
+                            <div class="flex flex-col sm:flex-row gap-3 items-baseline">
+                                <span>Matrícula de la aeronave</span>
+                                <input type="text" class="flex-grow border-b border-black">
                             </div>
 
-                            <div class="flex gap-4 items-end">
-                                <span class="whitespace-nowrap">Fecha y hora de inicio</span>
-                                <input type="text" class="w-1/3" placeholder="09/02/2026 01:12 p. m.">
-                                <span class="whitespace-nowrap">terminado</span>
-                                <input type="text" class="flex-grow" placeholder="09/02/2026 03:13 p. m.">
-                            </div>
-                        </div>
-
-                        <!-- Discrepancia -->
-                        <div class="mt-8">
-                            <label class="font-semibold">Discrepancia:</label>
-                            <textarea rows="6" class="mt-2"></textarea>
-                        </div>
-
-                        <!-- Acción Correctiva -->
-                        <div class="mt-8">
-                            <label class="font-semibold">Acción correctiva:</label>
-                            <textarea rows="6" class="mt-2"></textarea>
-                        </div>
-
-                        <!-- Metadatos de Horas y Personal -->
-                        <div class="mt-8 flex gap-8">
-                            <div class="flex-1 flex items-end gap-2">
-                                <span class="whitespace-nowrap">Cantidad de horas</span>
-                                <input type="text" class="flex-grow">
-                            </div>
-                            <div class="flex-1 flex items-end gap-2">
-                                <span class="whitespace-nowrap">cantidad de personal</span>
-                                <input type="text" class="flex-grow">
+                            <div class="flex flex-col sm:flex-row gap-3 items-baseline">
+                                <span>Fecha y hora de inicio</span>
+                                <input type="text" class="w-full sm:w-64 border-b border-black" placeholder="DD/MM/AAAA HH:MM">
+                                <span>terminado</span>
+                                <input type="text" class="flex-grow border-b border-black" placeholder="DD/MM/AAAA HH:MM">
                             </div>
                         </div>
 
-                        <!-- Material Utilizado -->
-                        <div class="mt-8">
-                            <label class="font-semibold">Material que se utilizó</label>
-                            <textarea rows="4" class="mt-2"></textarea>
+                        <div class="mt-10">
+                            <label class="font-semibold block mb-2">Discrepancia:</label>
+                            <textarea rows="7" class="w-full"></textarea>
                         </div>
 
-                        <!-- Sección de Firmas -->
-                        <div class="mt-16 grid grid-cols-2 gap-x-12 gap-y-16">
-                            
-                            <!-- Fila 1 -->
-                            <div class="text-center">
-                                <div class="border-t border-black mb-1"></div>
-                                <p class="font-bold text-xs uppercase">Técnico(s) Especialista(s)</p>
-                            </div>
-                            <div class="text-center">
-                                <div class="border-t border-black mb-1"></div>
-                                <p class="font-bold text-xs uppercase">Técnico(s) Especialista(s)</p>
-                            </div>
-
-                            <!-- Fila 2 -->
-                            <div class="text-center">
-                                <div class="border-t border-black mb-1"></div>
-                                <p class="font-bold text-xs uppercase">Supervisor</p>
-                            </div>
-                            <div class="text-center">
-                                <div class="border-t border-black mb-1"></div>
-                                <p class="font-bold text-xs uppercase">Inspector</p>
-                            </div>
-
-                            <!-- Fila 3 -->
-                            <div class="text-center">
-                                <div class="border-t border-black mb-1"></div>
-                                <p class="font-bold text-xs uppercase">Jefe Taller / Seccion</p>
-                            </div>
-                            <div class="text-center">
-                                <div class="border-t border-black mb-1"></div>
-                                <p class="font-bold text-xs uppercase">Jefe de Logistica A-4</p>
-                            </div>
-
+                        <div class="mt-10">
+                            <label class="font-semibold block mb-2">Acción correctiva:</label>
+                            <textarea rows="7" class="w-full"></textarea>
                         </div>
 
-                        <!-- Pie de página (opcional) -->
-                        <footer class="mt-12 text-[10px] text-gray-400 text-right no-print">
+                        <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="flex items-baseline gap-3">
+                                <span>Cantidad de horas</span>
+                                <input type="text" class="flex-grow border-b border-black">
+                            </div>
+                            <div class="flex items-baseline gap-3">
+                                <span>Cantidad de personal</span>
+                                <input type="text" class="flex-grow border-b border-black">
+                            </div>
+                        </div>
+
+                        <div class="mt-10">
+                            <label class="font-semibold block mb-2">Material que se utilizó</label>
+                            <textarea rows="5" class="w-full"></textarea>
+                        </div>
+
+                        <div class="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-12 gap-y-20">
+                            <div class="text-center">
+                                <div class="border-t border-black w-3/4 mx-auto mb-2"></div>
+                                <p class="font-bold text-sm uppercase">Técnico(s) Especialista(s)</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="border-t border-black w-3/4 mx-auto mb-2"></div>
+                                <p class="font-bold text-sm uppercase">Técnico(s) Especialista(s)</p>
+                            </div>
+
+                            <div class="text-center">
+                                <div class="border-t border-black w-3/4 mx-auto mb-2"></div>
+                                <p class="font-bold text-sm uppercase">Supervisor</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="border-t border-black w-3/4 mx-auto mb-2"></div>
+                                <p class="font-bold text-sm uppercase">Inspector</p>
+                            </div>
+
+                            <div class="text-center">
+                                <div class="border-t border-black w-3/4 mx-auto mb-2"></div>
+                                <p class="font-bold text-sm uppercase">Jefe Taller / Sección</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="border-t border-black w-3/4 mx-auto mb-2"></div>
+                                <p class="font-bold text-sm uppercase">Jefe de Logística A-4</p>
+                            </div>
+                        </div>
+
+                        <footer class="mt-16 text-xs text-gray-400 text-right no-print">
                             Formulario Digital Generado - 2026
                         </footer>
                     </div>
                 </div>
             </div>
 
-            <!-- ==================================================
-                 MODAL DETALLE ORDEN
-            ================================================== -->
+            <!-- MODAL DETALLE ORDEN -->
             <div id="detalle-orden-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 no-print">
                 <div class="bg-white rounded-xl max-w-4xl w-full max-h-[92vh] overflow-y-auto relative shadow-2xl">
                     <button onclick="cerrarDetalleOrden()" class="absolute top-4 right-5 text-3xl text-gray-600 hover:text-gray-800">×</button>
@@ -546,7 +534,7 @@
                             
                             <div class="signature-container">
                                 <div class="signature-line"></div>
-                                <canvas id="signature-recibido-modal" class="signature-pad" width="500" height="70"></canvas>
+                                <canvas id="signature-recibido-modal" class="signature-pad" width="500" height="120"></canvas>
                             </div>
                             
                             <div class="signature-controls mt-5">
@@ -611,7 +599,31 @@
         let currentDetallePath = null;
 
         // ==================================================
-        //  FUNCIONES AUXILIARES
+        //  MENÚ MÓVIL
+        // ==================================================
+        const btnMenuMovil = document.getElementById('btn-menu-movil');
+        const sidebarMovil = document.getElementById('sidebar-movil');
+        const btnCerrarMovil = document.getElementById('btn-cerrar-movil');
+
+        btnMenuMovil?.addEventListener('click', () => {
+            sidebarMovil.classList.remove('hidden');
+            sidebarMovil.querySelector('div').classList.remove('-translate-x-full');
+        });
+
+        function cerrarMenuMovil() {
+            if (sidebarMovil) {
+                sidebarMovil.querySelector('div').classList.add('-translate-x-full');
+                setTimeout(() => sidebarMovil.classList.add('hidden'), 300);
+            }
+        }
+
+        btnCerrarMovil?.addEventListener('click', cerrarMenuMovil);
+        sidebarMovil?.addEventListener('click', e => {
+            if (e.target === sidebarMovil) cerrarMenuMovil();
+        });
+
+        // ==================================================
+        //  FUNCIONES AUXILIARES (tus funciones originales)
         // ==================================================
         function generarNumeroWO() {
             const hoy = new Date();
@@ -660,7 +672,7 @@
         }
 
         // ==================================================
-        //  FIRMAS - CREACIÓN DE ORDEN
+        //  FIRMAS
         // ==================================================
         function initFirmas() {
             ['entregado', 'recibido'].forEach(tipo => {
@@ -706,6 +718,42 @@
         function saveSignature(tipo) {
             const canvas = document.getElementById(`signature-${tipo}`);
             if (canvas) signatures[tipo] = canvas.toDataURL('image/png');
+        }
+
+        function initFirmaModal() {
+            const canvas = document.getElementById('signature-recibido-modal');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
+
+            let drawing = false;
+
+            const draw = e => {
+                if (!drawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+                const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            };
+
+            canvas.addEventListener('mousedown', () => { drawing = true; ctx.beginPath(); });
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', () => drawing = false);
+            canvas.addEventListener('mouseout', () => drawing = false);
+            canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; ctx.beginPath(); });
+            canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e); });
+            canvas.addEventListener('touchend', () => drawing = false);
+        }
+
+        function clearSignatureModal() {
+            const canvas = document.getElementById('signature-recibido-modal');
+            if (canvas) {
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                signatureModal = null;
+            }
         }
 
         // ==================================================
@@ -786,7 +834,7 @@
 *Prioridad:* ${prioridad}
 *Discrepancia:* ${discrepancia}
 
-Por favor firma como recibido aquí: exactamente en Historial W.O.  ahi veran un buscador o puenden filtrarlo por taller 
+Por favor firma como recibido aquí: exactamente en Historial W.O. ahi veran un buscador o pueden filtrarlo por taller 
 ${enlace}`;
 
             const numero = telefonosTalleres[taller];
@@ -798,30 +846,27 @@ ${enlace}`;
         }
 
         // ==================================================
-        //  CONTROL MODO RECEPCIÓN (solo historial)
+        //  MODO RECEPCIÓN
         // ==================================================
         function aplicarRestriccionModoRecepcion() {
             const params = new URLSearchParams(window.location.search);
             const esModoRecepcion = params.has('orden');
 
             if (esModoRecepcion) {
-                // Ocultar botón y sección de crear orden
                 const btn = document.getElementById('btn-cargar-orden');
                 if (btn) btn.remove();
 
                 const section = document.getElementById('section-order');
                 if (section) section.classList.add('hidden');
 
-                // Ocultar sidebar
                 document.getElementById('sidebar')?.classList.add('hidden');
 
-                // Mostrar historial
                 document.getElementById('section-historial').classList.remove('hidden');
             }
         }
 
         // ==================================================
-        //  BUSCADOR EN TIEMPO REAL
+        //  BUSCADOR
         // ==================================================
         function iniciarBuscador() {
             const buscador = document.getElementById('buscador-historial');
@@ -855,45 +900,19 @@ ${enlace}`;
         }
 
         // ==================================================
-        //  INICIO
-        // ==================================================
-        window.addEventListener('load', async () => {
-            const hoy = new Date().toISOString().split('T')[0];
-            document.getElementById('fecha') && (document.getElementById('fecha').value = hoy);
-
-            // 1. Aplicar restricción si venimos desde WhatsApp
-            aplicarRestriccionModoRecepcion();
-
-            // 2. Cargar historial (siempre, es la vista segura en modo recepción)
-            await cargarHistorial();
-
-            // 3. Iniciar buscador
-            iniciarBuscador();
-
-            // 4. Resaltar orden si venimos de enlace
-            resaltarOrdenEnlace();
-
-            // 5. Solo si NO venimos de enlace → inicializamos crear orden
-            if (!new URLSearchParams(window.location.search).has('orden')) {
-                switchTab('order');
-                generarYMostrarWO();
-                actualizarTelefonoTaller();
-                document.getElementById('taller_asignado')?.addEventListener('change', actualizarTelefonoTaller);
-            }
-        });
-
-        // ==================================================
-        //  NAVEGACIÓN (con protección)
+        //  NAVEGACIÓN
         // ==================================================
         function switchTab(tab) {
             const params = new URLSearchParams(window.location.search);
-            if (params.has('orden') && tab === 'order') {
-                return; // Bloqueamos acceso a crear orden en modo recepción
-            }
+            if (params.has('orden') && tab === 'order') return;
 
-            document.querySelectorAll('#section-order, #section-historial, #section-reporte-trabajo').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('#section-order, #section-historial, #section-reporte-trabajo')
+                .forEach(el => el.classList.add('hidden'));
+
             const target = document.getElementById(`section-${tab}`);
             if (target) target.classList.remove('hidden');
+
+            cerrarMenuMovil();
 
             if (tab === 'order') {
                 initFirmas();
@@ -903,10 +922,6 @@ ${enlace}`;
 
             if (tab === 'historial') {
                 cargarHistorial();
-            }
-
-            if (tab === 'reporte-trabajo') {
-                // No necesita carga especial, el formulario está estático
             }
         }
 
@@ -958,7 +973,7 @@ ${enlace}`;
         }
 
         // ==================================================
-        //  MODAL - DETALLE ORDEN
+        //  MODAL DETALLE ORDEN
         // ==================================================
         async function mostrarDetalleOrden(taller, año, mes, wo, data) {
             currentDetallePath = `ordenes_trabajo/${taller}/${año}/${mes}/${wo}`;
@@ -996,42 +1011,6 @@ ${enlace}`;
             document.getElementById('detalle-orden-modal').classList.add('hidden');
             currentDetallePath = null;
             document.getElementById('upload-pdf').value = '';
-        }
-
-        function initFirmaModal() {
-            const canvas = document.getElementById('signature-recibido-modal');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
-
-            let drawing = false;
-
-            const draw = e => {
-                if (!drawing) return;
-                const rect = canvas.getBoundingClientRect();
-                const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-                const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
-                ctx.lineTo(x, y);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(x, y);
-            };
-
-            canvas.addEventListener('mousedown', () => { drawing = true; ctx.beginPath(); });
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', () => drawing = false);
-            canvas.addEventListener('mouseout', () => drawing = false);
-            canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; ctx.beginPath(); });
-            canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e); });
-            canvas.addEventListener('touchend', () => drawing = false);
-        }
-
-        function clearSignatureModal() {
-            const canvas = document.getElementById('signature-recibido-modal');
-            if (canvas) {
-                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-                signatureModal = null;
-            }
         }
 
         async function guardarFirmaRecibidoModal() {
@@ -1074,6 +1053,26 @@ ${enlace}`;
                 alert('Error al subir PDF: ' + err.message);
             }
         }
+
+        // ==================================================
+        //  INICIO
+        // ==================================================
+        window.addEventListener('load', async () => {
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha') && (document.getElementById('fecha').value = hoy);
+
+            aplicarRestriccionModoRecepcion();
+            await cargarHistorial();
+            iniciarBuscador();
+            resaltarOrdenEnlace();
+
+            if (!new URLSearchParams(window.location.search).has('orden')) {
+                switchTab('order');
+                generarYMostrarWO();
+                actualizarTelefonoTaller();
+                document.getElementById('taller_asignado')?.addEventListener('change', actualizarTelefonoTaller);
+            }
+        });
     </script>
 </body>
 </html>
