@@ -91,6 +91,34 @@
             .print-area { box-shadow: none; border: none; margin: 0; width: 100%; }
             .signature-pad, .signature-line { background: transparent !important; border: none !important; }
             .signature-controls, #share-link-section, aside, #buscador-wrapper { display: none !important; }
+            body { background-color: white; }
+            .print-container { 
+                box-shadow: none !important; 
+                margin: 0 !important; 
+                padding: 0 !important;
+                width: 100% !important;
+            }
+        }
+        .dotted-line {
+            border-bottom: 1px solid black;
+            height: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        input[type="text"], input[type="datetime-local"] {
+            border: none;
+            border-bottom: 1px solid black;
+            outline: none;
+            width: 100%;
+            background: transparent;
+        }
+        textarea {
+            border: none;
+            line-height: 2rem;
+            background-image: linear-gradient(transparent, transparent 1.9rem, black 1.9rem);
+            background-size: 100% 2rem;
+            width: 100%;
+            resize: none;
+            outline: none;
         }
     </style>
 </head>
@@ -112,6 +140,10 @@
                 <button onclick="switchTab('historial')" 
                         class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">
                     Historial W.O.
+                </button>
+                <button onclick="switchTab('reporte-trabajo')" 
+                        class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">
+                    Reporte de Trabajo
                 </button>
             </nav>
         </aside>
@@ -343,6 +375,133 @@
                         </thead>
                         <tbody id="tabla-recibidas" class="divide-y"></tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- ==================================================
+                 SECCIÓN REPORTE DE TRABAJO (INTEGRADO EL FORMULARIO)
+            ================================================== -->
+            <div id="section-reporte-trabajo" class="hidden">
+                <div class="max-w-6xl mx-auto bg-white p-8 border border-slate-200 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-6">Reporte de Trabajo Entregado</h2>
+
+                    <!-- Botón de impresión -->
+                    <div class="mb-6 no-print flex justify-end">
+                        <button onclick="window.print()" class="bg-blue-800 text-white px-6 py-2 rounded shadow-md hover:bg-blue-700 transition">
+                            Imprimir Reporte
+                        </button>
+                    </div>
+
+                    <!-- Contenedor del Reporte -->
+                    <div class="print-container max-w-[210mm] min-h-[297mm] mx-auto bg-white shadow-2xl p-12 border border-gray-200">
+                        
+                        <!-- Encabezado -->
+                        <header class="text-center mb-8">
+                            <h1 class="font-bold text-base uppercase">Fuerzas Armadas de Honduras</h1>
+                            <h2 class="font-bold text-base uppercase">Fuerza Aérea Hondureña</h2>
+                            <p class="text-sm">Base Aérea "Coronel Hernán Acosta Mejía"</p>
+                            <h3 class="font-bold text-lg mt-4 underline uppercase">Reporte de Trabajo Efectuado</h3>
+                        </header>
+
+                        <!-- Sección de Información General -->
+                        <div class="space-y-4">
+                            <div class="flex gap-4 items-end">
+                                <span class="whitespace-nowrap">El taller / sub-sección de</span>
+                                <input type="text" class="flex-grow">
+                                <span class="whitespace-nowrap">notifica que el trabajo</span>
+                                <input type="text" class="flex-grow">
+                            </div>
+
+                            <div class="flex gap-4 items-end">
+                                <span class="whitespace-nowrap">con N° de orden de trabajo</span>
+                                <input type="text" class="w-1/3">
+                                <span class="whitespace-nowrap">Tiempo Total</span>
+                                <input type="text" class="flex-grow">
+                            </div>
+
+                            <div class="flex gap-4 items-end">
+                                <span class="whitespace-nowrap">Matrícula de la aeronave</span>
+                                <input type="text" class="flex-grow">
+                            </div>
+
+                            <div class="flex gap-4 items-end">
+                                <span class="whitespace-nowrap">Fecha y hora de inicio</span>
+                                <input type="text" class="w-1/3" placeholder="09/02/2026 01:12 p. m.">
+                                <span class="whitespace-nowrap">terminado</span>
+                                <input type="text" class="flex-grow" placeholder="09/02/2026 03:13 p. m.">
+                            </div>
+                        </div>
+
+                        <!-- Discrepancia -->
+                        <div class="mt-8">
+                            <label class="font-semibold">Discrepancia:</label>
+                            <textarea rows="6" class="mt-2"></textarea>
+                        </div>
+
+                        <!-- Acción Correctiva -->
+                        <div class="mt-8">
+                            <label class="font-semibold">Acción correctiva:</label>
+                            <textarea rows="6" class="mt-2"></textarea>
+                        </div>
+
+                        <!-- Metadatos de Horas y Personal -->
+                        <div class="mt-8 flex gap-8">
+                            <div class="flex-1 flex items-end gap-2">
+                                <span class="whitespace-nowrap">Cantidad de horas</span>
+                                <input type="text" class="flex-grow">
+                            </div>
+                            <div class="flex-1 flex items-end gap-2">
+                                <span class="whitespace-nowrap">cantidad de personal</span>
+                                <input type="text" class="flex-grow">
+                            </div>
+                        </div>
+
+                        <!-- Material Utilizado -->
+                        <div class="mt-8">
+                            <label class="font-semibold">Material que se utilizó</label>
+                            <textarea rows="4" class="mt-2"></textarea>
+                        </div>
+
+                        <!-- Sección de Firmas -->
+                        <div class="mt-16 grid grid-cols-2 gap-x-12 gap-y-16">
+                            
+                            <!-- Fila 1 -->
+                            <div class="text-center">
+                                <div class="border-t border-black mb-1"></div>
+                                <p class="font-bold text-xs uppercase">Técnico(s) Especialista(s)</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="border-t border-black mb-1"></div>
+                                <p class="font-bold text-xs uppercase">Técnico(s) Especialista(s)</p>
+                            </div>
+
+                            <!-- Fila 2 -->
+                            <div class="text-center">
+                                <div class="border-t border-black mb-1"></div>
+                                <p class="font-bold text-xs uppercase">Supervisor</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="border-t border-black mb-1"></div>
+                                <p class="font-bold text-xs uppercase">Inspector</p>
+                            </div>
+
+                            <!-- Fila 3 -->
+                            <div class="text-center">
+                                <div class="border-t border-black mb-1"></div>
+                                <p class="font-bold text-xs uppercase">Jefe Taller / Seccion</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="border-t border-black mb-1"></div>
+                                <p class="font-bold text-xs uppercase">Jefe de Logistica A-4</p>
+                            </div>
+
+                        </div>
+
+                        <!-- Pie de página (opcional) -->
+                        <footer class="mt-12 text-[10px] text-gray-400 text-right no-print">
+                            Formulario Digital Generado - 2026
+                        </footer>
+                    </div>
                 </div>
             </div>
 
@@ -732,7 +891,7 @@ ${enlace}`;
                 return; // Bloqueamos acceso a crear orden en modo recepción
             }
 
-            document.querySelectorAll('#section-order, #section-historial').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('#section-order, #section-historial, #section-reporte-trabajo').forEach(el => el.classList.add('hidden'));
             const target = document.getElementById(`section-${tab}`);
             if (target) target.classList.remove('hidden');
 
@@ -744,6 +903,10 @@ ${enlace}`;
 
             if (tab === 'historial') {
                 cargarHistorial();
+            }
+
+            if (tab === 'reporte-trabajo') {
+                // No necesita carga especial, el formulario está estático
             }
         }
 
