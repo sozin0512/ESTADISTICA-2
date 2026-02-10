@@ -17,7 +17,7 @@
         body { font-family: 'Inter', sans-serif; }
         
         .fah-table { border-collapse: collapse; width: 100%; }
-        .fah-table th, .fah-table td { border: 1px solid #1e293b; padding: 6px 10px; }
+        .fah-table th, .fah-table td { border: 1px solid #1e293b; padding: 8px 12px; }
         .fah-header-blue { background-color: #b9d1ea; color: #000; font-weight: bold; text-align: center; }
         .fah-cell-label { background-color: #b9d1ea; font-weight: bold; font-size: 0.85rem; text-align: center; }
         
@@ -80,12 +80,17 @@
             background: #e5e7eb;
         }
 
+        .highlight-row {
+            background-color: #dbeafe !important;
+            font-weight: 600;
+        }
+
         @media print {
             .no-print { display: none !important; }
             body { background: white; margin: 0; }
             .print-area { box-shadow: none; border: none; margin: 0; width: 100%; }
             .signature-pad, .signature-line { background: transparent !important; border: none !important; }
-            .signature-controls, #share-link-section, aside { display: none !important; }
+            .signature-controls, #share-link-section, aside, #buscador-wrapper { display: none !important; }
         }
     </style>
 </head>
@@ -99,53 +104,16 @@
                 <p class="text-xs text-slate-400 mt-1 uppercase">Base Aérea HAM</p>
             </div>
             <nav class="flex-grow p-4 space-y-1.5">
-                <button onclick="switchTab('stats')" id="btn-stats" class="w-full text-left px-4 py-2.5 bg-blue-700 rounded-lg text-sm font-medium transition">Dashboard Estadístico</button>
                 <button onclick="switchTab('order')" id="btn-order" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">Cargar Orden de Trabajo</button>
                 <div class="pt-5 pb-2 px-4 text-xs font-bold text-slate-500 uppercase">Administración</div>
                 <button onclick="switchTab('historial')" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">Historial W.O.</button>
-                <a href="#" class="block px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">Personal</a>
             </nav>
         </aside>
 
-        <!-- Contenido principal -->
         <main class="flex-grow overflow-y-auto p-6 lg:p-10">
 
-            <!-- Dashboard Estadístico -->
-            <div id="section-stats" class="hidden">
-                <header class="flex justify-between items-center mb-8">
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-800">Panel Operativo</h2>
-                        <p class="text-slate-600">Estado de los talleres y flota</p>
-                    </div>
-                </header>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                        <p class="text-xs font-bold text-slate-500 uppercase">W.O. Pendientes</p>
-                        <p class="text-3xl font-bold text-slate-800 mt-1">28</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                        <p class="text-xs font-bold text-slate-500 uppercase">Ala Rotatoria</p>
-                        <p class="text-3xl font-bold text-blue-600 mt-1">14</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                        <p class="text-xs font-bold text-slate-500 uppercase">Ala Fija</p>
-                        <p class="text-3xl font-bold text-indigo-700 mt-1">14</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                        <p class="text-xs font-bold text-slate-500 uppercase">Eficiencia</p>
-                        <p class="text-3xl font-bold text-green-600 mt-1">92%</p>
-                    </div>
-                </div>
-
-                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="font-bold text-slate-800 mb-6 uppercase text-sm tracking-wide">Carga de Trabajo por Especialidad</h3>
-                    <div class="h-[320px]"><canvas id="chartTalleres"></canvas></div>
-                </div>
-            </div>
-
             <!-- Sección Orden de Trabajo -->
-            <div id="section-order">
+            <div id="section-order" class="hidden">
                 <div class="max-w-5xl mx-auto bg-white p-8 shadow-xl border border-slate-200 rounded-xl print-area">
                     <div class="text-center mb-8">
                         <h1 class="font-bold text-xl uppercase">Fuerza Aérea Hondureña</h1>
@@ -277,38 +245,44 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div id="share-link-section" class="hidden max-w-5xl mx-auto mt-8 p-5 bg-blue-50 border border-blue-200 rounded-xl no-print">
-                    <label class="block font-bold text-blue-800 text-sm mb-3">Enlace para firma de recibido:</label>
-                    <div class="flex gap-3">
-                        <input type="text" id="enlace-orden" readonly class="flex-1 p-3 border rounded-lg bg-white text-sm">
-                        <button onclick="copiarEnlace()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition">Copiar</button>
+                    <div id="share-link-section" class="hidden max-w-5xl mx-auto mt-8 p-5 bg-blue-50 border border-blue-200 rounded-xl no-print">
+                        <label class="block font-bold text-blue-800 text-sm mb-3">Enlace para firma de recibido:</label>
+                        <div class="flex gap-3">
+                            <input type="text" id="enlace-orden" readonly class="flex-1 p-3 border rounded-lg bg-white text-sm">
+                            <button onclick="copiarEnlace()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition">Copiar</button>
+                        </div>
                     </div>
-                </div>
 
-                <div class="mt-10 flex flex-wrap justify-center gap-6 no-print">
-                    <button onclick="guardarOrden()" class="bg-blue-600 text-white px-12 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-md">
-                        Guardar Orden
-                    </button>
+                    <div class="mt-10 flex flex-wrap justify-center gap-6 no-print">
+                        <button onclick="guardarOrden()" class="bg-blue-600 text-white px-12 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-md">
+                            Guardar Orden
+                        </button>
 
-                    <button onclick="guardarYEnviarWhatsApp()" class="bg-green-600 text-white px-10 py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-md flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
-                        </svg>
-                        Guardar y Enviar WhatsApp
-                    </button>
+                        <button onclick="guardarYEnviarWhatsApp()" class="bg-green-600 text-white px-10 py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-md flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+                            </svg>
+                            Guardar y Enviar WhatsApp
+                        </button>
 
-                    <button onclick="window.print()" class="bg-gray-700 text-white px-12 py-3 rounded-xl font-bold hover:bg-gray-800 transition shadow-md">
-                        Imprimir
-                    </button>
+                        <button onclick="window.print()" class="bg-gray-700 text-white px-12 py-3 rounded-xl font-bold hover:bg-gray-800 transition shadow-md">
+                            Imprimir
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Sección Historial -->
-            <div id="section-historial" class="hidden">
+            <div id="section-historial">
                 <div class="max-w-6xl mx-auto bg-white p-8 border border-slate-200 rounded-xl shadow-sm">
-                    <h2 class="text-2xl font-bold mb-6">Historial de Órdenes de Trabajo</h2>
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4" id="buscador-wrapper">
+                        <h2 class="text-2xl font-bold">Historial de Órdenes de Trabajo</h2>
+                        <div class="w-full md:w-96">
+                            <input type="text" id="buscador-historial" placeholder="Buscar por W.O., aeronave o taller..." 
+                                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
 
                     <div class="flex flex-wrap gap-4 mb-8">
                         <select id="filtro-taller" class="border border-gray-300 p-2.5 rounded-lg min-w-[220px]">
@@ -361,10 +335,10 @@
                 </div>
             </div>
 
-            <!-- Modal Detalle Orden -->
+            <!-- Modal Detalle -->
             <div id="detalle-orden-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 no-print">
                 <div class="bg-white rounded-xl max-w-4xl w-full max-h-[92vh] overflow-y-auto relative shadow-2xl">
-                    <button onclick="cerrarDetalleOrden()" class="absolute top-4 right-5 text-3xl text-gray-600 hover:text-gray-800">&times;</button>
+                    <button onclick="cerrarDetalleOrden()" class="absolute top-4 right-5 text-3xl text-gray-600 hover:text-gray-800">×</button>
                     
                     <div class="p-8">
                         <h2 class="text-2xl font-bold mb-6">Orden de Trabajo <span id="detalle-wo" class="text-blue-700"></span></h2>
@@ -395,7 +369,6 @@
                             </div>
                         </div>
 
-                        <!-- Área para firmar recibido si aún no está firmada -->
                         <div id="seccion-firma-recibido-modal" class="hidden mt-10 border-t pt-6">
                             <h3 class="font-bold text-xl mb-4 text-green-700">Firma de Recibido por el Taller</h3>
                             
@@ -412,14 +385,11 @@
                             </div>
                         </div>
 
-                        <!-- Área para subir PDF (puedes mantenerla o quitarla según necesites) -->
                         <div class="mt-10">
                             <h3 class="font-bold text-lg mb-4">Reporte de Trabajo Entregado (PDF)</h3>
-                            <div id="detalle-pdf-section">
-                                <input type="file" id="upload-pdf" accept=".pdf" class="mb-4 block">
-                                <button onclick="subirReportePDF()" class="bg-blue-600 text-white px-6 py-2.5 rounded hover:bg-blue-700">Subir PDF</button>
-                                <div id="detalle-pdf-view" class="mt-5"></div>
-                            </div>
+                            <input type="file" id="upload-pdf" accept=".pdf" class="mb-4 block">
+                            <button onclick="subirReportePDF()" class="bg-blue-600 text-white px-6 py-2.5 rounded hover:bg-blue-700">Subir PDF</button>
+                            <div id="detalle-pdf-view" class="mt-5"></div>
                         </div>
                     </div>
                 </div>
@@ -479,9 +449,7 @@
 
         function generarYMostrarWO() {
             const input = document.getElementById('wo');
-            if (input && !input.value.trim()) {
-                input.value = generarNumeroWO();
-            }
+            if (input && !input.value.trim()) input.value = generarNumeroWO();
         }
 
         function actualizarTelefonoTaller() {
@@ -490,8 +458,7 @@
         }
 
         function mostrarEditorTelefonos() {
-            const editor = document.getElementById('editor-telefonos');
-            editor.classList.remove('hidden');
+            document.getElementById('editor-telefonos').classList.remove('hidden');
             Object.keys(telefonosTalleres).forEach(t => {
                 const el = document.getElementById(`edit-${t}`);
                 if (el) el.value = telefonosTalleres[t];
@@ -513,29 +480,21 @@
             document.getElementById('editor-telefonos').classList.add('hidden');
         }
 
-        // ────────────────────────────────────────────────
-        // Firmas en creación de orden
-        // ────────────────────────────────────────────────
+        // Firmas en creación
         function initFirmas() {
             ['entregado', 'recibido'].forEach(tipo => {
                 const canvas = document.getElementById(`signature-${tipo}`);
                 if (!canvas) return;
                 const ctx = canvas.getContext('2d');
-                ctx.lineWidth = 2;
-                ctx.lineCap = 'round';
-                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
 
                 let drawing = false;
-
                 const draw = e => {
                     if (!drawing) return;
                     const rect = canvas.getBoundingClientRect();
-                    const x = (e.clientX || (e.touches?.[0]?.clientX)) - rect.left;
-                    const y = (e.clientY || (e.touches?.[0]?.clientY)) - rect.top;
-                    ctx.lineTo(x, y);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.moveTo(x, y);
+                    const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+                    const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+                    ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
                 };
 
                 canvas.addEventListener('mousedown', () => { drawing = true; ctx.beginPath(); });
@@ -561,17 +520,14 @@
             if (canvas) signatures[tipo] = canvas.toDataURL('image/png');
         }
 
-        // ────────────────────────────────────────────────
-        // Enlace y WhatsApp
-        // ────────────────────────────────────────────────
+        // Enlace WhatsApp
         function generarEnlace(wo) {
             const base = window.location.href.split('?')[0];
             return `${base}?orden=${encodeURIComponent(wo)}`;
         }
 
         function copiarEnlace() {
-            const input = document.getElementById('enlace-orden');
-            input.select();
+            document.getElementById('enlace-orden').select();
             document.execCommand('copy');
             alert('Enlace copiado');
         }
@@ -585,9 +541,10 @@
             const discrepancia = document.getElementById('discrepancia')?.innerText?.trim();
             const prioridad_urgente = document.getElementById('prioridad-urgente')?.checked;
 
-            if (!wo) return alert('Falta número de orden'), false;
-            if (!taller) return alert('Selecciona el taller'), false;
-            if (!discrepancia) return alert('Escribe la discrepancia'), false;
+            if (!wo || !taller || !discrepancia) {
+                alert('Faltan datos obligatorios');
+                return false;
+            }
 
             saveSignature('entregado');
 
@@ -595,11 +552,7 @@
             const path = `ordenes_trabajo/${taller}/${año}/${mes}/${wo}`;
 
             const data = {
-                wo,
-                fecha,
-                hora,
-                aeronave,
-                discrepancia,
+                wo, fecha, hora, aeronave, discrepancia,
                 prioridad: prioridad_urgente ? 'URGENTE' : 'Rutina',
                 estado: 'pendiente',
                 firma_entregado: signatures.entregado,
@@ -642,54 +595,76 @@
 *Prioridad:* ${prioridad}
 *Discrepancia:* ${discrepancia}
 
-Por favor, abre este enlace para firmar como recibido:
+Por favor firma como recibido aquí:
 ${enlace}`;
 
             const numero = telefonosTalleres[taller];
             if (numero) {
                 window.open(`https://wa.me/504${numero}?text=${encodeURIComponent(mensaje)}`, '_blank');
             } else {
-                alert("Orden guardada, pero no hay número para este taller");
+                alert("Orden guardada, pero no hay número registrado");
             }
         }
 
         // ────────────────────────────────────────────────
-        // Detección de enlace de recepción
+        // Solo mostrar historial cuando viene por enlace
         // ────────────────────────────────────────────────
-        function detectarModoRecepcion() {
+        function restringirSoloHistorial() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('orden')) {
+                // Ocultamos creación de orden y dashboard
+                document.getElementById('section-order').classList.add('hidden');
+                document.getElementById('section-stats')?.classList.add('hidden');
+                
+                // Mostramos solo historial
+                document.getElementById('section-historial').classList.remove('hidden');
+                
+                // Ocultamos sidebar para simular vista externa
+                document.querySelector('aside')?.classList.add('hidden');
+            }
+        }
+
+        // ────────────────────────────────────────────────
+        // Buscador en tiempo real
+        // ────────────────────────────────────────────────
+        function iniciarBuscador() {
+            const buscador = document.getElementById('buscador-historial');
+            if (!buscador) return;
+
+            buscador.addEventListener('input', () => {
+                const termino = buscador.value.toLowerCase().trim();
+                document.querySelectorAll('#tabla-pendientes tr, #tabla-recibidas tr').forEach(row => {
+                    const texto = row.textContent.toLowerCase();
+                    row.style.display = texto.includes(termino) ? '' : 'none';
+                });
+            });
+        }
+
+        // ────────────────────────────────────────────────
+        // Resaltar orden del enlace
+        // ────────────────────────────────────────────────
+        async function resaltarOrdenDelEnlace() {
             const params = new URLSearchParams(window.location.search);
             const wo = params.get('orden');
             if (!wo) return;
 
-            // Ir directamente al historial
-            switchTab('historial');
-
-            // Esperamos un poco para que el historial se cargue
-            setTimeout(() => {
-                buscarYMostrarOrdenEnHistorial(wo);
-            }, 800);
-        }
-
-        async function buscarYMostrarOrdenEnHistorial(woBuscado) {
             const snap = await db.ref('ordenes_trabajo').once('value');
-            if (!snap.exists()) {
-                alert('No hay órdenes registradas aún.');
-                return;
-            }
+            if (!snap.exists()) return;
 
             let encontrada = false;
 
             snap.forEach(tallerSnap => {
-                const taller = tallerSnap.key;
                 tallerSnap.forEach(añoSnap => {
-                    const año = añoSnap.key;
                     añoSnap.forEach(mesSnap => {
-                        const mes = mesSnap.key;
                         mesSnap.forEach(woSnap => {
-                            if (woSnap.key === woBuscado) {
+                            if (woSnap.key === wo) {
                                 encontrada = true;
-                                const data = woSnap.val();
-                                mostrarDetalleOrden(taller, año, mes, woBuscado, data);
+                                document.querySelectorAll('#tabla-pendientes tr, #tabla-recibidas tr').forEach(row => {
+                                    if (row.textContent.includes(wo)) {
+                                        row.classList.add('highlight-row');
+                                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    }
+                                });
                             }
                         });
                     });
@@ -697,39 +672,48 @@ ${enlace}`;
             });
 
             if (!encontrada) {
-                alert(`No se encontró la orden ${woBuscado}`);
+                console.warn(`Orden ${wo} no encontrada`);
             }
         }
 
         // ────────────────────────────────────────────────
-        // Historial
+        // Inicio
         // ────────────────────────────────────────────────
-        async function cargarAñosDisponibles() {
-            const select = document.getElementById('filtro-año');
-            select.innerHTML = '<option value="">Todos los años</option>';
+        window.addEventListener('load', async () => {
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha') && (document.getElementById('fecha').value = hoy);
 
-            const snap = await db.ref('ordenes_trabajo').once('value');
-            if (!snap.exists()) return;
+            // 1. Restringir vista si viene por enlace
+            restringirSoloHistorial();
 
-            const años = new Set();
-            snap.forEach(taller => taller.forEach(año => años.add(año.key)));
+            // 2. Cargar historial siempre (es la vista principal cuando viene por enlace)
+            await cargarHistorial();
 
-            [...años].sort().reverse().forEach(año => {
-                const opt = document.createElement('option');
-                opt.value = año;
-                opt.textContent = año;
-                select.appendChild(opt);
-            });
-        }
+            // 3. Iniciar buscador
+            iniciarBuscador();
 
+            // 4. Resaltar la orden si viene por enlace
+            resaltarOrdenDelEnlace();
+
+            // Para creación normal (cuando no viene por enlace)
+            if (!new URLSearchParams(window.location.search).has('orden')) {
+                switchTab('order');
+                generarYMostrarWO();
+                actualizarTelefonoTaller();
+                document.getElementById('taller_asignado')?.addEventListener('change', actualizarTelefonoTaller);
+            }
+        });
+
+        // ────────────────────────────────────────────────
+        // Funciones que se mantienen (no se eliminaron)
+        // ────────────────────────────────────────────────
         async function cargarHistorial() {
             const pendientes = document.getElementById('tabla-pendientes');
             const recibidas = document.getElementById('tabla-recibidas');
-            pendientes.innerHTML = '';
-            recibidas.innerHTML = '';
+            pendientes.innerHTML = recibidas.innerHTML = '';
 
-            const filtroTaller = document.getElementById('filtro-taller').value;
-            const filtroAño = document.getElementById('filtro-año').value;
+            const filtroTaller = document.getElementById('filtro-taller')?.value || '';
+            const filtroAño = document.getElementById('filtro-año')?.value || '';
 
             const snap = await db.ref('ordenes_trabajo').once('value');
             if (!snap.exists()) return;
@@ -757,20 +741,13 @@ ${enlace}`;
                                     ${data.estado === 'recibido' ? 'Recibida' : 'Pendiente'}
                                 </td>
                             `;
-                            if (data.estado === 'recibido') {
-                                recibidas.appendChild(tr);
-                            } else {
-                                pendientes.appendChild(tr);
-                            }
+                            (data.estado === 'recibido' ? recibidas : pendientes).appendChild(tr);
                         });
                     });
                 });
             });
         }
 
-        // ────────────────────────────────────────────────
-        // Modal Detalle
-        // ────────────────────────────────────────────────
         async function mostrarDetalleOrden(taller, año, mes, wo, data) {
             currentDetallePath = `ordenes_trabajo/${taller}/${año}/${mes}/${wo}`;
 
@@ -787,7 +764,6 @@ ${enlace}`;
             document.getElementById('detalle-firma-entregado').src = data.firma_entregado || '';
             document.getElementById('detalle-firma-recibido').src = data.firma_recibido || '';
 
-            // Mostrar canvas de firma recibido SOLO si no existe
             const seccionFirma = document.getElementById('seccion-firma-recibido-modal');
             if (!data.firma_recibido) {
                 seccionFirma.style.display = 'block';
@@ -796,13 +772,10 @@ ${enlace}`;
                 seccionFirma.style.display = 'none';
             }
 
-            // PDF (si existe)
             const pdfView = document.getElementById('detalle-pdf-view');
-            if (data.reporte_pdf) {
-                pdfView.innerHTML = `<a href="${data.reporte_pdf}" target="_blank" class="text-blue-600 hover:underline">Ver Reporte PDF</a>`;
-            } else {
-                pdfView.innerHTML = '<p class="text-gray-500 italic">Aún no hay reporte PDF cargado.</p>';
-            }
+            pdfView.innerHTML = data.reporte_pdf 
+                ? `<a href="${data.reporte_pdf}" target="_blank" class="text-blue-600 hover:underline">Ver Reporte PDF</a>`
+                : '<p class="text-gray-500 italic">Aún no hay reporte PDF cargado.</p>';
 
             document.getElementById('detalle-orden-modal').classList.remove('hidden');
         }
@@ -813,28 +786,19 @@ ${enlace}`;
             document.getElementById('upload-pdf').value = '';
         }
 
-        // ────────────────────────────────────────────────
-        // Firma recibido desde modal
-        // ────────────────────────────────────────────────
         function initFirmaModal() {
             const canvas = document.getElementById('signature-recibido-modal');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
 
             let drawing = false;
-
             const draw = e => {
                 if (!drawing) return;
                 const rect = canvas.getBoundingClientRect();
-                const x = (e.clientX || (e.touches?.[0]?.clientX)) - rect.left;
-                const y = (e.clientY || (e.touches?.[0]?.clientY)) - rect.top;
-                ctx.lineTo(x, y);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(x, y);
+                const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+                const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+                ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
             };
 
             canvas.addEventListener('mousedown', () => { drawing = true; ctx.beginPath(); });
@@ -856,7 +820,7 @@ ${enlace}`;
 
         async function guardarFirmaRecibidoModal() {
             const canvas = document.getElementById('signature-recibido-modal');
-            if (!canvas || !currentDetallePath) return alert('Error: no se puede guardar la firma');
+            if (!canvas || !currentDetallePath) return alert('No se puede guardar la firma');
 
             signatureModal = canvas.toDataURL('image/png');
 
@@ -868,20 +832,17 @@ ${enlace}`;
                 });
                 alert('¡Orden recibida correctamente!');
                 cerrarDetalleOrden();
-                cargarHistorial();  // Actualizamos la lista
+                cargarHistorial();
             } catch (err) {
-                alert('Error al guardar firma: ' + err.message);
+                alert('Error al guardar: ' + err.message);
             }
         }
 
-        // ────────────────────────────────────────────────
-        // Subir PDF (opcional - puedes comentarlo si no lo necesitas ahora)
-        // ────────────────────────────────────────────────
         async function subirReportePDF() {
             const file = document.getElementById('upload-pdf').files[0];
-            if (!file || !currentDetallePath) return alert('Selecciona un archivo PDF primero');
+            if (!file || !currentDetallePath) return alert('Selecciona un PDF primero');
 
-            if (file.type !== 'application/pdf') return alert('Solo se permiten archivos PDF');
+            if (file.type !== 'application/pdf') return alert('Solo archivos PDF');
 
             try {
                 const ref = storage.ref(`${currentDetallePath}/reporte.pdf`);
@@ -889,25 +850,18 @@ ${enlace}`;
                 const url = await ref.getDownloadURL();
                 await db.ref(currentDetallePath).update({ reporte_pdf: url });
                 alert('PDF subido correctamente');
-                // Refrescar vista
+
                 const snap = await db.ref(currentDetallePath).once('value');
-                const data = snap.val();
                 document.getElementById('detalle-pdf-view').innerHTML = 
-                    `<a href="${data.reporte_pdf}" target="_blank" class="text-blue-600 hover:underline">Ver Reporte PDF</a>`;
+                    `<a href="${snap.val().reporte_pdf}" target="_blank" class="text-blue-600 hover:underline">Ver Reporte PDF</a>`;
             } catch (err) {
                 alert('Error al subir PDF: ' + err.message);
             }
         }
 
-        // ────────────────────────────────────────────────
-        // Navegación
-        // ────────────────────────────────────────────────
         function switchTab(tab) {
-            document.querySelectorAll('#section-stats, #section-order, #section-historial')
-                .forEach(s => s.classList.add('hidden'));
-
-            const section = document.getElementById(`section-${tab}`);
-            if (section) section.classList.remove('hidden');
+            document.querySelectorAll('#section-order, #section-historial').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`section-${tab}`)?.classList.remove('hidden');
 
             if (tab === 'order') {
                 initFirmas();
@@ -916,26 +870,9 @@ ${enlace}`;
             }
 
             if (tab === 'historial') {
-                cargarAñosDisponibles();
                 cargarHistorial();
             }
         }
-
-        // Inicio
-        window.addEventListener('load', () => {
-            const hoy = new Date().toISOString().split('T')[0];
-            if (document.getElementById('fecha')) {
-                document.getElementById('fecha').value = hoy;
-            }
-
-            // Por defecto mostramos la creación de orden
-            switchTab('order');
-
-            // Verificamos si venimos de un enlace de recepción
-            detectarModoRecepcion();
-
-            document.getElementById('taller_asignado')?.addEventListener('change', actualizarTelefonoTaller);
-        });
     </script>
 </body>
 </html>
