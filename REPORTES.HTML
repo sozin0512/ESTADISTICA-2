@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Firebase SDK (compatibilidad v9/v10) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
@@ -111,7 +111,7 @@
         <main class="flex-grow overflow-y-auto p-6 lg:p-10">
 
             <!-- Dashboard Estadístico -->
-            <div id="section-stats">
+            <div id="section-stats" class="hidden">
                 <header class="flex justify-between items-center mb-8">
                     <div>
                         <h2 class="text-2xl font-bold text-slate-800">Panel Operativo</h2>
@@ -145,7 +145,7 @@
             </div>
 
             <!-- Sección Orden de Trabajo -->
-            <div id="section-order" class="hidden">
+            <div id="section-order">
                 <div class="max-w-5xl mx-auto bg-white p-8 shadow-xl border border-slate-200 rounded-xl print-area">
                     <div class="text-center mb-8">
                         <h1 class="font-bold text-xl uppercase">Fuerza Aérea Hondureña</h1>
@@ -180,26 +180,11 @@
                                     </tr>
                                 </thead>
                                 <tbody class="text-sm font-semibold">
-                                    <tr>
-                                        <td>RADIO</td><td class="w-10 text-center"><input type="checkbox" value="RADIO" class="taller-check"></td>
-                                        <td>BATERIA</td><td class="w-10 text-center"><input type="checkbox" value="BATERIA" class="taller-check"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>INSTRUMENTOS</td><td class="w-10 text-center"><input type="checkbox" value="INSTRUMENTOS" class="taller-check"></td>
-                                        <td>MOTORES</td><td class="w-10 text-center"><input type="checkbox" value="MOTORES" class="taller-check"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>HYD</td><td class="w-10 text-center"><input type="checkbox" value="HYD" class="taller-check"></td>
-                                        <td>ESTRUCTURAS</td><td class="w-10 text-center"><input type="checkbox" value="ESTRUCTURAS" class="taller-check"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>HELICES</td><td class="w-10 text-center"><input type="checkbox" value="HELICES" class="taller-check"></td>
-                                        <td>ARMAMENTO</td><td class="w-10 text-center"><input type="checkbox" value="ARMAMENTO" class="taller-check"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>ELECTRICIDAD</td><td class="w-10 text-center"><input type="checkbox" value="ELECTRICIDAD" class="taller-check"></td>
-                                        <td class="bg-blue-50">HELICÓPTEROS</td><td class="w-10 text-center bg-blue-50"><input type="checkbox" value="HELICOPTEROS" class="taller-check" checked></td>
-                                    </tr>
+                                    <tr><td>RADIO</td><td class="w-10 text-center"><input type="checkbox" value="RADIO" class="taller-check"></td><td>BATERIA</td><td class="w-10 text-center"><input type="checkbox" value="BATERIA" class="taller-check"></td></tr>
+                                    <tr><td>INSTRUMENTOS</td><td class="w-10 text-center"><input type="checkbox" value="INSTRUMENTOS" class="taller-check"></td><td>MOTORES</td><td class="w-10 text-center"><input type="checkbox" value="MOTORES" class="taller-check"></td></tr>
+                                    <tr><td>HYD</td><td class="w-10 text-center"><input type="checkbox" value="HYD" class="taller-check"></td><td>ESTRUCTURAS</td><td class="w-10 text-center"><input type="checkbox" value="ESTRUCTURAS" class="taller-check"></td></tr>
+                                    <tr><td>HELICES</td><td class="w-10 text-center"><input type="checkbox" value="HELICES" class="taller-check"></td><td>ARMAMENTO</td><td class="w-10 text-center"><input type="checkbox" value="ARMAMENTO" class="taller-check"></td></tr>
+                                    <tr><td>ELECTRICIDAD</td><td class="w-10 text-center"><input type="checkbox" value="ELECTRICIDAD" class="taller-check"></td><td class="bg-blue-50">HELICÓPTEROS</td><td class="w-10 text-center bg-blue-50"><input type="checkbox" value="HELICOPTEROS" class="taller-check" checked></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -221,7 +206,6 @@
                         </button>
                     </div>
 
-                    <!-- Editor de teléfonos -->
                     <div id="editor-telefonos" class="hidden mt-8 p-6 bg-gray-50 border border-gray-200 rounded-xl no-print">
                         <h3 class="font-bold text-lg mb-5">Editar números de contacto</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -239,7 +223,6 @@
                         </div>
                     </div>
 
-                    <!-- Firmas y asignación -->
                     <div class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-10">
                         <div class="space-y-10">
                             <div>
@@ -296,7 +279,6 @@
                     </div>
                 </div>
 
-                <!-- Sección de enlace para firma -->
                 <div id="share-link-section" class="hidden max-w-5xl mx-auto mt-8 p-5 bg-blue-50 border border-blue-200 rounded-xl no-print">
                     <label class="block font-bold text-blue-800 text-sm mb-3">Enlace para firma de recibido:</label>
                     <div class="flex gap-3">
@@ -305,7 +287,6 @@
                     </div>
                 </div>
 
-                <!-- Botones de acción -->
                 <div class="mt-10 flex flex-wrap justify-center gap-6 no-print">
                     <button onclick="guardarOrden()" class="bg-blue-600 text-white px-12 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-md">
                         Guardar Orden
@@ -380,44 +361,65 @@
                 </div>
             </div>
 
-            <!-- Modal para detalles de orden -->
-            <div id="detalle-orden-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 no-print">
-                <div class="bg-white p-8 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
-                    <button onclick="cerrarDetalleOrden()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
-                    <h2 class="text-2xl font-bold mb-6">Detalles de la Orden <span id="detalle-wo"></span></h2>
+            <!-- Modal Detalle Orden -->
+            <div id="detalle-orden-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 no-print">
+                <div class="bg-white rounded-xl max-w-4xl w-full max-h-[92vh] overflow-y-auto relative shadow-2xl">
+                    <button onclick="cerrarDetalleOrden()" class="absolute top-4 right-5 text-3xl text-gray-600 hover:text-gray-800">&times;</button>
+                    
+                    <div class="p-8">
+                        <h2 class="text-2xl font-bold mb-6">Orden de Trabajo <span id="detalle-wo" class="text-blue-700"></span></h2>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div>
-                            <p><strong>Fecha:</strong> <span id="detalle-fecha"></span></p>
-                            <p><strong>Hora:</strong> <span id="detalle-hora"></span></p>
-                            <p><strong>Aeronave:</strong> <span id="detalle-aeronave"></span></p>
-                            <p><strong>Taller:</strong> <span id="detalle-taller"></span></p>
-                            <p><strong>Prioridad:</strong> <span id="detalle-prioridad"></span></p>
-                            <p><strong>Estado:</strong> <span id="detalle-estado"></span></p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="space-y-3">
+                                <p><strong>Fecha:</strong> <span id="detalle-fecha"></span></p>
+                                <p><strong>Hora:</strong> <span id="detalle-hora"></span></p>
+                                <p><strong>Aeronave:</strong> <span id="detalle-aeronave"></span></p>
+                                <p><strong>Taller:</strong> <span id="detalle-taller"></span></p>
+                                <p><strong>Prioridad:</strong> <span id="detalle-prioridad"></span></p>
+                                <p><strong>Estado:</strong> <span id="detalle-estado" class="font-semibold"></span></p>
+                            </div>
+                            <div>
+                                <p class="font-semibold mb-2">Discrepancia:</p>
+                                <div id="detalle-discrepancia" class="bg-gray-50 p-4 rounded-lg border"></div>
+                            </div>
                         </div>
-                        <div>
-                            <p><strong>Discrepancia:</strong></p>
-                            <p id="detalle-discrepancia" class="bg-gray-50 p-4 rounded"></p>
-                        </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div>
-                            <p><strong>Firma Entregado:</strong></p>
-                            <img id="detalle-firma-entregado" class="w-full h-24 border" alt="Firma entregado">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div>
+                                <p class="font-semibold mb-2">Firma Entregado:</p>
+                                <img id="detalle-firma-entregado" class="w-full h-32 object-contain border rounded" alt="Firma entregado">
+                            </div>
+                            <div>
+                                <p class="font-semibold mb-2">Firma Recibido:</p>
+                                <img id="detalle-firma-recibido" class="w-full h-32 object-contain border rounded" alt="Firma recibido">
+                            </div>
                         </div>
-                        <div>
-                            <p><strong>Firma Recibido:</strong></p>
-                            <img id="detalle-firma-recibido" class="w-full h-24 border" alt="Firma recibido">
-                        </div>
-                    </div>
 
-                    <div class="mt-8">
-                        <h3 class="font-bold text-lg mb-4">Reporte de Trabajo Entregado (PDF)</h3>
-                        <div id="detalle-pdf-section">
-                            <input type="file" id="upload-pdf" accept=".pdf" class="mb-4">
-                            <button onclick="subirReportePDF()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Subir PDF</button>
-                            <div id="detalle-pdf-view" class="mt-4"></div>
+                        <!-- Área para firmar recibido si aún no está firmada -->
+                        <div id="seccion-firma-recibido-modal" class="hidden mt-10 border-t pt-6">
+                            <h3 class="font-bold text-xl mb-4 text-green-700">Firma de Recibido por el Taller</h3>
+                            
+                            <div class="signature-container">
+                                <div class="signature-line"></div>
+                                <canvas id="signature-recibido-modal" class="signature-pad" width="500" height="70"></canvas>
+                            </div>
+                            
+                            <div class="signature-controls mt-5">
+                                <button class="signature-btn" onclick="clearSignatureModal()">Borrar firma</button>
+                                <button class="signature-btn bg-green-600 text-white hover:bg-green-700 px-6" onclick="guardarFirmaRecibidoModal()">
+                                    Confirmar Recibido
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Área para subir PDF (puedes mantenerla o quitarla según necesites) -->
+                        <div class="mt-10">
+                            <h3 class="font-bold text-lg mb-4">Reporte de Trabajo Entregado (PDF)</h3>
+                            <div id="detalle-pdf-section">
+                                <input type="file" id="upload-pdf" accept=".pdf" class="mb-4 block">
+                                <button onclick="subirReportePDF()" class="bg-blue-600 text-white px-6 py-2.5 rounded hover:bg-blue-700">Subir PDF</button>
+                                <div id="detalle-pdf-view" class="mt-5"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -427,9 +429,7 @@
     </div>
 
     <script>
-        // ────────────────────────────────────────────────
-        //  Firebase Config
-        // ────────────────────────────────────────────────
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCrV3s3uuEiWx_u959j70Tt3JhM_G44sck",
             authDomain: "ubicacion-50569.firebaseapp.com",
@@ -445,9 +445,6 @@
         const db = firebase.database();
         const storage = firebase.storage();
 
-        // ────────────────────────────────────────────────
-        //  Datos iniciales y almacenamiento local
-        // ────────────────────────────────────────────────
         let telefonosTalleres = {
             "ESTRUCTURAS": "31732466",
             "RADIO": "36481152",
@@ -463,21 +460,20 @@
         }
 
         let signatures = { entregado: null, recibido: null };
+        let signatureModal = null;
         let currentDetallePath = null;
 
         // ────────────────────────────────────────────────
-        //  Funciones auxiliares
+        // Funciones generales
         // ────────────────────────────────────────────────
         function generarNumeroWO() {
             const hoy = new Date();
             const año = hoy.getFullYear();
             const mes = String(hoy.getMonth() + 1).padStart(2, '0');
             const clave = `contador_wo_${año}_${mes}`;
-
             let contador = parseInt(localStorage.getItem(clave) || '0', 10);
             contador += 1;
             localStorage.setItem(clave, contador);
-
             return `${año}-${mes}-${String(contador).padStart(4, '0')}`;
         }
 
@@ -508,7 +504,7 @@
                 if (input) telefonosTalleres[t] = input.value.trim();
             });
             localStorage.setItem('telefonosTalleres', JSON.stringify(telefonosTalleres));
-            alert('Números actualizados correctamente');
+            alert('Números actualizados');
             document.getElementById('editor-telefonos').classList.add('hidden');
             actualizarTelefonoTaller();
         }
@@ -518,7 +514,7 @@
         }
 
         // ────────────────────────────────────────────────
-        //  Firmas
+        // Firmas en creación de orden
         // ────────────────────────────────────────────────
         function initFirmas() {
             ['entregado', 'recibido'].forEach(tipo => {
@@ -534,25 +530,21 @@
                 const draw = e => {
                     if (!drawing) return;
                     const rect = canvas.getBoundingClientRect();
-                    const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-                    const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+                    const x = (e.clientX || (e.touches?.[0]?.clientX)) - rect.left;
+                    const y = (e.clientY || (e.touches?.[0]?.clientY)) - rect.top;
                     ctx.lineTo(x, y);
                     ctx.stroke();
                     ctx.beginPath();
                     ctx.moveTo(x, y);
                 };
 
-                const start = () => { drawing = true; ctx.beginPath(); };
-                const stop = () => { drawing = false; };
-
-                canvas.addEventListener('mousedown', start);
+                canvas.addEventListener('mousedown', () => { drawing = true; ctx.beginPath(); });
                 canvas.addEventListener('mousemove', draw);
-                canvas.addEventListener('mouseup', stop);
-                canvas.addEventListener('mouseout', stop);
-
-                canvas.addEventListener('touchstart', e => { e.preventDefault(); start(); });
+                canvas.addEventListener('mouseup', () => drawing = false);
+                canvas.addEventListener('mouseout', () => drawing = false);
+                canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; ctx.beginPath(); });
                 canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e); });
-                canvas.addEventListener('touchend', stop);
+                canvas.addEventListener('touchend', () => drawing = false);
             });
         }
 
@@ -570,7 +562,7 @@
         }
 
         // ────────────────────────────────────────────────
-        //  Generar y copiar enlace
+        // Enlace y WhatsApp
         // ────────────────────────────────────────────────
         function generarEnlace(wo) {
             const base = window.location.href.split('?')[0];
@@ -581,14 +573,10 @@
             const input = document.getElementById('enlace-orden');
             input.select();
             document.execCommand('copy');
-            alert('Enlace copiado al portapapeles');
+            alert('Enlace copiado');
         }
 
-        // ────────────────────────────────────────────────
-        //  Guardar orden
-        // ────────────────────────────────────────────────
         async function guardarOrden(mostrarEnlace = false) {
-            const esModoRecepcion = new URLSearchParams(window.location.search).has('orden');
             const wo = document.getElementById('wo')?.value?.trim();
             const taller = document.getElementById('taller_asignado')?.value;
             const fecha = document.getElementById('fecha')?.value;
@@ -598,13 +586,10 @@
             const prioridad_urgente = document.getElementById('prioridad-urgente')?.checked;
 
             if (!wo) return alert('Falta número de orden'), false;
-            if (!esModoRecepcion) {
-                if (!taller) return alert('Selecciona el taller'), false;
-                if (!discrepancia) return alert('Escribe la discrepancia'), false;
-                saveSignature('entregado');
-            } else {
-                saveSignature('recibido');
-            }
+            if (!taller) return alert('Selecciona el taller'), false;
+            if (!discrepancia) return alert('Escribe la discrepancia'), false;
+
+            saveSignature('entregado');
 
             const [año, mes] = wo.split('-').slice(0, 2);
             const path = `ordenes_trabajo/${taller}/${año}/${mes}/${wo}`;
@@ -616,30 +601,19 @@
                 aeronave,
                 discrepancia,
                 prioridad: prioridad_urgente ? 'URGENTE' : 'Rutina',
-                estado: esModoRecepcion ? 'recibido' : 'pendiente',
+                estado: 'pendiente',
+                firma_entregado: signatures.entregado,
                 creado: new Date().toISOString()
             };
 
-            if (esModoRecepcion) {
-                data.firma_recibido = signatures.recibido;
-                data.recibido_en = new Date().toISOString();
-            } else {
-                data.firma_entregado = signatures.entregado;
-            }
-
             try {
-                await db.ref(path).update(data);
+                await db.ref(path).set(data);
+                alert('Orden guardada correctamente');
+
                 if (mostrarEnlace) {
                     const enlace = generarEnlace(wo);
                     document.getElementById('enlace-orden').value = enlace;
                     document.getElementById('share-link-section').classList.remove('hidden');
-                }
-                alert(esModoRecepcion ? 'Orden recibida correctamente' : 'Orden guardada correctamente');
-                if (esModoRecepcion) {
-                    // Recargar historial si está en modo recepción (aunque probablemente no esté visible)
-                    if (document.getElementById('section-historial').classList.contains('hidden') === false) {
-                        cargarHistorial();
-                    }
                 }
                 return true;
             } catch (err) {
@@ -668,69 +642,67 @@
 *Prioridad:* ${prioridad}
 *Discrepancia:* ${discrepancia}
 
-*Firma de recibido →*  
+Por favor, abre este enlace para firmar como recibido:
 ${enlace}`;
 
             const numero = telefonosTalleres[taller];
             if (numero) {
-                const url = `https://wa.me/504${numero}?text=${encodeURIComponent(mensaje)}`;
-                window.open(url, '_blank');
+                window.open(`https://wa.me/504${numero}?text=${encodeURIComponent(mensaje)}`, '_blank');
             } else {
-                alert("Orden guardada, pero no hay número registrado para " + taller);
+                alert("Orden guardada, pero no hay número para este taller");
             }
         }
 
         // ────────────────────────────────────────────────
-        //  Modo recepción (firma recibido)
+        // Detección de enlace de recepción
         // ────────────────────────────────────────────────
         function detectarModoRecepcion() {
             const params = new URLSearchParams(window.location.search);
             const wo = params.get('orden');
             if (!wo) return;
 
-            // Deshabilitar edición
-            document.querySelectorAll('input:not(#signature-recibido), select, textarea, [contenteditable], button:not(.signature-btn)').forEach(el => {
-                el.disabled = true;
-                if (el.contentEditable) el.contentEditable = false;
-            });
+            // Ir directamente al historial
+            switchTab('historial');
 
-            document.getElementById('controles-recibido').classList.remove('hidden');
-            document.getElementById('share-link-section')?.classList.add('hidden');
-
-            cargarOrdenDesdeFirebase(wo);
+            // Esperamos un poco para que el historial se cargue
+            setTimeout(() => {
+                buscarYMostrarOrdenEnHistorial(wo);
+            }, 800);
         }
 
-        async function cargarOrdenDesdeFirebase(wo) {
-            const [año, mes] = wo.split('-').slice(0, 2);
-
-            for (const taller of Object.keys(telefonosTalleres)) {
-                const ref = db.ref(`ordenes_trabajo/${taller}/${año}/${mes}/${wo}`);
-                const snap = await ref.once('value');
-                if (snap.exists()) {
-                    const data = snap.val();
-                    document.getElementById('wo').value = data.wo || '';
-                    document.getElementById('fecha').value = data.fecha || '';
-                    document.getElementById('hora').value = data.hora || '';
-                    document.getElementById('aeronave').value = data.aeronave || '';
-                    document.getElementById('discrepancia').innerText = data.discrepancia || '';
-                    document.getElementById('taller_asignado').value = taller;
-
-                    if (data.firma_entregado) {
-                        const img = new Image();
-                        img.onload = () => {
-                            document.getElementById('signature-entregado').getContext('2d').drawImage(img, 0, 0);
-                        };
-                        img.src = data.firma_entregado;
-                        signatures.entregado = data.firma_entregado;
-                    }
-                    return;
-                }
+        async function buscarYMostrarOrdenEnHistorial(woBuscado) {
+            const snap = await db.ref('ordenes_trabajo').once('value');
+            if (!snap.exists()) {
+                alert('No hay órdenes registradas aún.');
+                return;
             }
-            alert('No se encontró la orden ' + wo);
+
+            let encontrada = false;
+
+            snap.forEach(tallerSnap => {
+                const taller = tallerSnap.key;
+                tallerSnap.forEach(añoSnap => {
+                    const año = añoSnap.key;
+                    añoSnap.forEach(mesSnap => {
+                        const mes = mesSnap.key;
+                        mesSnap.forEach(woSnap => {
+                            if (woSnap.key === woBuscado) {
+                                encontrada = true;
+                                const data = woSnap.val();
+                                mostrarDetalleOrden(taller, año, mes, woBuscado, data);
+                            }
+                        });
+                    });
+                });
+            });
+
+            if (!encontrada) {
+                alert(`No se encontró la orden ${woBuscado}`);
+            }
         }
 
         // ────────────────────────────────────────────────
-        //  Historial
+        // Historial
         // ────────────────────────────────────────────────
         async function cargarAñosDisponibles() {
             const select = document.getElementById('filtro-año');
@@ -740,9 +712,7 @@ ${enlace}`;
             if (!snap.exists()) return;
 
             const años = new Set();
-            snap.forEach(tallerSnap => {
-                tallerSnap.forEach(añoSnap => años.add(añoSnap.key));
-            });
+            snap.forEach(taller => taller.forEach(año => años.add(año.key)));
 
             [...años].sort().reverse().forEach(año => {
                 const opt = document.createElement('option');
@@ -753,10 +723,10 @@ ${enlace}`;
         }
 
         async function cargarHistorial() {
-            const pendientesBody = document.getElementById('tabla-pendientes');
-            const recibidasBody = document.getElementById('tabla-recibidas');
-            pendientesBody.innerHTML = '';
-            recibidasBody.innerHTML = '';
+            const pendientes = document.getElementById('tabla-pendientes');
+            const recibidas = document.getElementById('tabla-recibidas');
+            pendientes.innerHTML = '';
+            recibidas.innerHTML = '';
 
             const filtroTaller = document.getElementById('filtro-taller').value;
             const filtroAño = document.getElementById('filtro-año').value;
@@ -774,11 +744,10 @@ ${enlace}`;
 
                     añoSnap.forEach(mesSnap => {
                         mesSnap.forEach(woSnap => {
-                            const woKey = woSnap.key;
                             const data = woSnap.val();
                             const tr = document.createElement('tr');
                             tr.className = 'hover:bg-slate-50 cursor-pointer';
-                            tr.onclick = () => mostrarDetalleOrden(taller, año, mesSnap.key, woKey, data);
+                            tr.onclick = () => mostrarDetalleOrden(taller, año, mesSnap.key, woSnap.key, data);
                             tr.innerHTML = `
                                 <td class="border px-4 py-3">${data.wo}</td>
                                 <td class="border px-4 py-3">${data.aeronave || '—'}</td>
@@ -788,11 +757,10 @@ ${enlace}`;
                                     ${data.estado === 'recibido' ? 'Recibida' : 'Pendiente'}
                                 </td>
                             `;
-
                             if (data.estado === 'recibido') {
-                                recibidasBody.appendChild(tr);
+                                recibidas.appendChild(tr);
                             } else {
-                                pendientesBody.appendChild(tr);
+                                pendientes.appendChild(tr);
                             }
                         });
                     });
@@ -801,9 +769,11 @@ ${enlace}`;
         }
 
         // ────────────────────────────────────────────────
-        //  Detalle de orden
+        // Modal Detalle
         // ────────────────────────────────────────────────
-        function mostrarDetalleOrden(taller, año, mes, wo, data) {
+        async function mostrarDetalleOrden(taller, año, mes, wo, data) {
+            currentDetallePath = `ordenes_trabajo/${taller}/${año}/${mes}/${wo}`;
+
             document.getElementById('detalle-wo').textContent = data.wo;
             document.getElementById('detalle-fecha').textContent = data.fecha || '—';
             document.getElementById('detalle-hora').textContent = data.hora || '—';
@@ -811,14 +781,28 @@ ${enlace}`;
             document.getElementById('detalle-taller').textContent = taller;
             document.getElementById('detalle-prioridad').textContent = data.prioridad || '—';
             document.getElementById('detalle-estado').textContent = data.estado === 'recibido' ? 'Recibida' : 'Pendiente';
-            document.getElementById('detalle-discrepancia').textContent = data.discrepancia || '—';
+            document.getElementById('detalle-estado').className = data.estado === 'recibido' ? 'text-green-600 font-bold' : 'text-red-600 font-bold';
+            document.getElementById('detalle-discrepancia').textContent = data.discrepancia || 'Sin descripción';
 
             document.getElementById('detalle-firma-entregado').src = data.firma_entregado || '';
             document.getElementById('detalle-firma-recibido').src = data.firma_recibido || '';
 
-            currentDetallePath = `ordenes_trabajo/${taller}/${año}/${mes}/${wo}`;
+            // Mostrar canvas de firma recibido SOLO si no existe
+            const seccionFirma = document.getElementById('seccion-firma-recibido-modal');
+            if (!data.firma_recibido) {
+                seccionFirma.style.display = 'block';
+                initFirmaModal();
+            } else {
+                seccionFirma.style.display = 'none';
+            }
 
-            cargarReportePDF();
+            // PDF (si existe)
+            const pdfView = document.getElementById('detalle-pdf-view');
+            if (data.reporte_pdf) {
+                pdfView.innerHTML = `<a href="${data.reporte_pdf}" target="_blank" class="text-blue-600 hover:underline">Ver Reporte PDF</a>`;
+            } else {
+                pdfView.innerHTML = '<p class="text-gray-500 italic">Aún no hay reporte PDF cargado.</p>';
+            }
 
             document.getElementById('detalle-orden-modal').classList.remove('hidden');
         }
@@ -829,48 +813,101 @@ ${enlace}`;
             document.getElementById('upload-pdf').value = '';
         }
 
-        async function subirReportePDF() {
-            const fileInput = document.getElementById('upload-pdf');
-            const file = fileInput.files[0];
-            if (!file || !currentDetallePath) return alert('Selecciona un PDF primero');
+        // ────────────────────────────────────────────────
+        // Firma recibido desde modal
+        // ────────────────────────────────────────────────
+        function initFirmaModal() {
+            const canvas = document.getElementById('signature-recibido-modal');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000';
 
-            if (file.type !== 'application/pdf') return alert('Solo archivos PDF');
+            let drawing = false;
+
+            const draw = e => {
+                if (!drawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || (e.touches?.[0]?.clientX)) - rect.left;
+                const y = (e.clientY || (e.touches?.[0]?.clientY)) - rect.top;
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            };
+
+            canvas.addEventListener('mousedown', () => { drawing = true; ctx.beginPath(); });
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', () => drawing = false);
+            canvas.addEventListener('mouseout', () => drawing = false);
+            canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; ctx.beginPath(); });
+            canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e); });
+            canvas.addEventListener('touchend', () => drawing = false);
+        }
+
+        function clearSignatureModal() {
+            const canvas = document.getElementById('signature-recibido-modal');
+            if (canvas) {
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                signatureModal = null;
+            }
+        }
+
+        async function guardarFirmaRecibidoModal() {
+            const canvas = document.getElementById('signature-recibido-modal');
+            if (!canvas || !currentDetallePath) return alert('Error: no se puede guardar la firma');
+
+            signatureModal = canvas.toDataURL('image/png');
 
             try {
-                const storageRef = storage.ref(`${currentDetallePath}/reporte.pdf`);
-                await storageRef.put(file);
-                const url = await storageRef.getDownloadURL();
+                await db.ref(currentDetallePath).update({
+                    firma_recibido: signatureModal,
+                    estado: 'recibido',
+                    recibido_en: new Date().toISOString()
+                });
+                alert('¡Orden recibida correctamente!');
+                cerrarDetalleOrden();
+                cargarHistorial();  // Actualizamos la lista
+            } catch (err) {
+                alert('Error al guardar firma: ' + err.message);
+            }
+        }
 
+        // ────────────────────────────────────────────────
+        // Subir PDF (opcional - puedes comentarlo si no lo necesitas ahora)
+        // ────────────────────────────────────────────────
+        async function subirReportePDF() {
+            const file = document.getElementById('upload-pdf').files[0];
+            if (!file || !currentDetallePath) return alert('Selecciona un archivo PDF primero');
+
+            if (file.type !== 'application/pdf') return alert('Solo se permiten archivos PDF');
+
+            try {
+                const ref = storage.ref(`${currentDetallePath}/reporte.pdf`);
+                await ref.put(file);
+                const url = await ref.getDownloadURL();
                 await db.ref(currentDetallePath).update({ reporte_pdf: url });
-                alert('Reporte PDF subido correctamente');
-                cargarReportePDF();
+                alert('PDF subido correctamente');
+                // Refrescar vista
+                const snap = await db.ref(currentDetallePath).once('value');
+                const data = snap.val();
+                document.getElementById('detalle-pdf-view').innerHTML = 
+                    `<a href="${data.reporte_pdf}" target="_blank" class="text-blue-600 hover:underline">Ver Reporte PDF</a>`;
             } catch (err) {
                 alert('Error al subir PDF: ' + err.message);
             }
         }
 
-        async function cargarReportePDF() {
-            if (!currentDetallePath) return;
-
-            const snap = await db.ref(currentDetallePath).once('value');
-            const data = snap.val();
-            const view = document.getElementById('detalle-pdf-view');
-
-            if (data.reporte_pdf) {
-                view.innerHTML = `<a href="${data.reporte_pdf}" target="_blank" class="text-blue-600 hover:underline">Ver Reporte PDF</a>`;
-            } else {
-                view.innerHTML = '<p class="text-gray-500">No hay reporte PDF cargado aún.</p>';
-            }
-        }
-
         // ────────────────────────────────────────────────
-        //  Navegación entre pestañas
+        // Navegación
         // ────────────────────────────────────────────────
         function switchTab(tab) {
             document.querySelectorAll('#section-stats, #section-order, #section-historial')
-                .forEach(el => el.classList.add('hidden'));
+                .forEach(s => s.classList.add('hidden'));
 
-            document.getElementById(`section-${tab}`)?.classList.remove('hidden');
+            const section = document.getElementById(`section-${tab}`);
+            if (section) section.classList.remove('hidden');
 
             if (tab === 'order') {
                 initFirmas();
@@ -884,19 +921,19 @@ ${enlace}`;
             }
         }
 
-        // ────────────────────────────────────────────────
-        //  Inicio
-        // ────────────────────────────────────────────────
+        // Inicio
         window.addEventListener('load', () => {
             const hoy = new Date().toISOString().split('T')[0];
-            document.getElementById('fecha').value = hoy;
+            if (document.getElementById('fecha')) {
+                document.getElementById('fecha').value = hoy;
+            }
 
-            // Seleccionar pestaña por defecto
+            // Por defecto mostramos la creación de orden
             switchTab('order');
 
+            // Verificamos si venimos de un enlace de recepción
             detectarModoRecepcion();
 
-            // Listener para actualizar teléfono al cambiar taller
             document.getElementById('taller_asignado')?.addEventListener('change', actualizarTelefonoTaller);
         });
     </script>
