@@ -98,21 +98,30 @@
 
     <div class="flex h-screen overflow-hidden no-print">
         <!-- Sidebar -->
-        <aside class="w-64 bg-slate-900 text-white flex-shrink-0 hidden md:flex flex-col">
+        <aside id="sidebar" class="w-64 bg-slate-900 text-white flex-shrink-0 hidden md:flex flex-col">
             <div class="p-6 text-center border-b border-slate-700">
                 <h1 class="font-bold text-xl tracking-wide">FAH TALLERES</h1>
                 <p class="text-xs text-slate-400 mt-1 uppercase">Base Aérea HAM</p>
             </div>
             <nav class="flex-grow p-4 space-y-1.5">
-                <button onclick="switchTab('order')" id="btn-order" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">Cargar Orden de Trabajo</button>
+                <button id="btn-cargar-orden" onclick="switchTab('order')" 
+                        class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">
+                    Cargar Orden de Trabajo
+                </button>
                 <div class="pt-5 pb-2 px-4 text-xs font-bold text-slate-500 uppercase">Administración</div>
-                <button onclick="switchTab('historial')" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">Historial W.O.</button>
+                <button onclick="switchTab('historial')" 
+                        class="w-full text-left px-4 py-2.5 hover:bg-slate-800 rounded-lg text-sm transition text-slate-200">
+                    Historial W.O.
+                </button>
             </nav>
         </aside>
 
+        <!-- Contenido principal -->
         <main class="flex-grow overflow-y-auto p-6 lg:p-10">
 
-            <!-- Sección Orden de Trabajo -->
+            <!-- ==================================================
+                 SECCIÓN CREAR ORDEN
+            ================================================== -->
             <div id="section-order" class="hidden">
                 <div class="max-w-5xl mx-auto bg-white p-8 shadow-xl border border-slate-200 rounded-xl print-area">
                     <div class="text-center mb-8">
@@ -273,7 +282,9 @@
                 </div>
             </div>
 
-            <!-- Sección Historial -->
+            <!-- ==================================================
+                 SECCIÓN HISTORIAL
+            ================================================== -->
             <div id="section-historial">
                 <div class="max-w-6xl mx-auto bg-white p-8 border border-slate-200 rounded-xl shadow-sm">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4" id="buscador-wrapper">
@@ -335,7 +346,9 @@
                 </div>
             </div>
 
-            <!-- Modal Detalle -->
+            <!-- ==================================================
+                 MODAL DETALLE ORDEN
+            ================================================== -->
             <div id="detalle-orden-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 no-print">
                 <div class="bg-white rounded-xl max-w-4xl w-full max-h-[92vh] overflow-y-auto relative shadow-2xl">
                     <button onclick="cerrarDetalleOrden()" class="absolute top-4 right-5 text-3xl text-gray-600 hover:text-gray-800">×</button>
@@ -399,7 +412,9 @@
     </div>
 
     <script>
-        // Firebase Config
+        // ==================================================
+        //  CONFIGURACIÓN FIREBASE
+        // ==================================================
         const firebaseConfig = {
             apiKey: "AIzaSyCrV3s3uuEiWx_u959j70Tt3JhM_G44sck",
             authDomain: "ubicacion-50569.firebaseapp.com",
@@ -415,6 +430,9 @@
         const db = firebase.database();
         const storage = firebase.storage();
 
+        // ==================================================
+        //  VARIABLES GLOBALES
+        // ==================================================
         let telefonosTalleres = {
             "ESTRUCTURAS": "31732466",
             "RADIO": "36481152",
@@ -433,9 +451,9 @@
         let signatureModal = null;
         let currentDetallePath = null;
 
-        // ────────────────────────────────────────────────
-        // Funciones generales
-        // ────────────────────────────────────────────────
+        // ==================================================
+        //  FUNCIONES AUXILIARES
+        // ==================================================
         function generarNumeroWO() {
             const hoy = new Date();
             const año = hoy.getFullYear();
@@ -449,7 +467,9 @@
 
         function generarYMostrarWO() {
             const input = document.getElementById('wo');
-            if (input && !input.value.trim()) input.value = generarNumeroWO();
+            if (input && !input.value.trim()) {
+                input.value = generarNumeroWO();
+            }
         }
 
         function actualizarTelefonoTaller() {
@@ -480,27 +500,36 @@
             document.getElementById('editor-telefonos').classList.add('hidden');
         }
 
-        // Firmas en creación
+        // ==================================================
+        //  FIRMAS - CREACIÓN DE ORDEN
+        // ==================================================
         function initFirmas() {
             ['entregado', 'recibido'].forEach(tipo => {
                 const canvas = document.getElementById(`signature-${tipo}`);
                 if (!canvas) return;
                 const ctx = canvas.getContext('2d');
-                ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#000';
 
                 let drawing = false;
+
                 const draw = e => {
                     if (!drawing) return;
                     const rect = canvas.getBoundingClientRect();
-                    const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
-                    const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
-                    ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
+                    const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+                    const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
                 };
 
                 canvas.addEventListener('mousedown', () => { drawing = true; ctx.beginPath(); });
                 canvas.addEventListener('mousemove', draw);
                 canvas.addEventListener('mouseup', () => drawing = false);
                 canvas.addEventListener('mouseout', () => drawing = false);
+
                 canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; ctx.beginPath(); });
                 canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e); });
                 canvas.addEventListener('touchend', () => drawing = false);
@@ -520,14 +549,17 @@
             if (canvas) signatures[tipo] = canvas.toDataURL('image/png');
         }
 
-        // Enlace WhatsApp
+        // ==================================================
+        //  ENLACE Y WHATSAPP
+        // ==================================================
         function generarEnlace(wo) {
             const base = window.location.href.split('?')[0];
             return `${base}?orden=${encodeURIComponent(wo)}`;
         }
 
         function copiarEnlace() {
-            document.getElementById('enlace-orden').select();
+            const input = document.getElementById('enlace-orden');
+            input.select();
             document.execCommand('copy');
             alert('Enlace copiado');
         }
@@ -602,31 +634,36 @@ ${enlace}`;
             if (numero) {
                 window.open(`https://wa.me/504${numero}?text=${encodeURIComponent(mensaje)}`, '_blank');
             } else {
-                alert("Orden guardada, pero no hay número registrado");
+                alert("Orden guardada, pero no hay número registrado para este taller.");
             }
         }
 
-        // ────────────────────────────────────────────────
-        // Solo mostrar historial cuando viene por enlace
-        // ────────────────────────────────────────────────
-        function restringirSoloHistorial() {
+        // ==================================================
+        //  CONTROL MODO RECEPCIÓN (solo historial)
+        // ==================================================
+        function aplicarRestriccionModoRecepcion() {
             const params = new URLSearchParams(window.location.search);
-            if (params.has('orden')) {
-                // Ocultamos creación de orden y dashboard
-                document.getElementById('section-order').classList.add('hidden');
-                document.getElementById('section-stats')?.classList.add('hidden');
-                
-                // Mostramos solo historial
+            const esModoRecepcion = params.has('orden');
+
+            if (esModoRecepcion) {
+                // Ocultar botón y sección de crear orden
+                const btn = document.getElementById('btn-cargar-orden');
+                if (btn) btn.remove();
+
+                const section = document.getElementById('section-order');
+                if (section) section.classList.add('hidden');
+
+                // Ocultar sidebar
+                document.getElementById('sidebar')?.classList.add('hidden');
+
+                // Mostrar historial
                 document.getElementById('section-historial').classList.remove('hidden');
-                
-                // Ocultamos sidebar para simular vista externa
-                document.querySelector('aside')?.classList.add('hidden');
             }
         }
 
-        // ────────────────────────────────────────────────
-        // Buscador en tiempo real
-        // ────────────────────────────────────────────────
+        // ==================================================
+        //  BUSCADOR EN TIEMPO REAL
+        // ==================================================
         function iniciarBuscador() {
             const buscador = document.getElementById('buscador-historial');
             if (!buscador) return;
@@ -640,62 +677,44 @@ ${enlace}`;
             });
         }
 
-        // ────────────────────────────────────────────────
-        // Resaltar orden del enlace
-        // ────────────────────────────────────────────────
-        async function resaltarOrdenDelEnlace() {
+        // ==================================================
+        //  RESALTAR ORDEN DEL ENLACE
+        // ==================================================
+        function resaltarOrdenEnlace() {
             const params = new URLSearchParams(window.location.search);
             const wo = params.get('orden');
             if (!wo) return;
 
-            const snap = await db.ref('ordenes_trabajo').once('value');
-            if (!snap.exists()) return;
-
-            let encontrada = false;
-
-            snap.forEach(tallerSnap => {
-                tallerSnap.forEach(añoSnap => {
-                    añoSnap.forEach(mesSnap => {
-                        mesSnap.forEach(woSnap => {
-                            if (woSnap.key === wo) {
-                                encontrada = true;
-                                document.querySelectorAll('#tabla-pendientes tr, #tabla-recibidas tr').forEach(row => {
-                                    if (row.textContent.includes(wo)) {
-                                        row.classList.add('highlight-row');
-                                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                    }
-                                });
-                            }
-                        });
-                    });
+            setTimeout(() => {
+                document.querySelectorAll('#tabla-pendientes tr, #tabla-recibidas tr').forEach(row => {
+                    if (row.textContent.includes(wo)) {
+                        row.classList.add('highlight-row');
+                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                 });
-            });
-
-            if (!encontrada) {
-                console.warn(`Orden ${wo} no encontrada`);
-            }
+            }, 1000);
         }
 
-        // ────────────────────────────────────────────────
-        // Inicio
-        // ────────────────────────────────────────────────
+        // ==================================================
+        //  INICIO
+        // ==================================================
         window.addEventListener('load', async () => {
             const hoy = new Date().toISOString().split('T')[0];
             document.getElementById('fecha') && (document.getElementById('fecha').value = hoy);
 
-            // 1. Restringir vista si viene por enlace
-            restringirSoloHistorial();
+            // 1. Aplicar restricción si venimos desde WhatsApp
+            aplicarRestriccionModoRecepcion();
 
-            // 2. Cargar historial siempre (es la vista principal cuando viene por enlace)
+            // 2. Cargar historial (siempre, es la vista segura en modo recepción)
             await cargarHistorial();
 
             // 3. Iniciar buscador
             iniciarBuscador();
 
-            // 4. Resaltar la orden si viene por enlace
-            resaltarOrdenDelEnlace();
+            // 4. Resaltar orden si venimos de enlace
+            resaltarOrdenEnlace();
 
-            // Para creación normal (cuando no viene por enlace)
+            // 5. Solo si NO venimos de enlace → inicializamos crear orden
             if (!new URLSearchParams(window.location.search).has('orden')) {
                 switchTab('order');
                 generarYMostrarWO();
@@ -704,13 +723,40 @@ ${enlace}`;
             }
         });
 
-        // ────────────────────────────────────────────────
-        // Funciones que se mantienen (no se eliminaron)
-        // ────────────────────────────────────────────────
+        // ==================================================
+        //  NAVEGACIÓN (con protección)
+        // ==================================================
+        function switchTab(tab) {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('orden') && tab === 'order') {
+                return; // Bloqueamos acceso a crear orden en modo recepción
+            }
+
+            document.querySelectorAll('#section-order, #section-historial').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`section-${tab}`);
+            if (target) target.classList.remove('hidden');
+
+            if (tab === 'order') {
+                initFirmas();
+                generarYMostrarWO();
+                actualizarTelefonoTaller();
+            }
+
+            if (tab === 'historial') {
+                cargarHistorial();
+            }
+        }
+
+        // ==================================================
+        //  CARGA HISTORIAL
+        // ==================================================
         async function cargarHistorial() {
             const pendientes = document.getElementById('tabla-pendientes');
             const recibidas = document.getElementById('tabla-recibidas');
-            pendientes.innerHTML = recibidas.innerHTML = '';
+            if (!pendientes || !recibidas) return;
+
+            pendientes.innerHTML = '';
+            recibidas.innerHTML = '';
 
             const filtroTaller = document.getElementById('filtro-taller')?.value || '';
             const filtroAño = document.getElementById('filtro-año')?.value || '';
@@ -733,7 +779,7 @@ ${enlace}`;
                             tr.className = 'hover:bg-slate-50 cursor-pointer';
                             tr.onclick = () => mostrarDetalleOrden(taller, año, mesSnap.key, woSnap.key, data);
                             tr.innerHTML = `
-                                <td class="border px-4 py-3">${data.wo}</td>
+                                <td class="border px-4 py-3">${data.wo || '—'}</td>
                                 <td class="border px-4 py-3">${data.aeronave || '—'}</td>
                                 <td class="border px-4 py-3">${data.fecha || '—'}</td>
                                 <td class="border px-4 py-3">${taller}</td>
@@ -748,10 +794,13 @@ ${enlace}`;
             });
         }
 
+        // ==================================================
+        //  MODAL - DETALLE ORDEN
+        // ==================================================
         async function mostrarDetalleOrden(taller, año, mes, wo, data) {
             currentDetallePath = `ordenes_trabajo/${taller}/${año}/${mes}/${wo}`;
 
-            document.getElementById('detalle-wo').textContent = data.wo;
+            document.getElementById('detalle-wo').textContent = data.wo || '—';
             document.getElementById('detalle-fecha').textContent = data.fecha || '—';
             document.getElementById('detalle-hora').textContent = data.hora || '—';
             document.getElementById('detalle-aeronave').textContent = data.aeronave || '—';
@@ -793,12 +842,16 @@ ${enlace}`;
             ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
 
             let drawing = false;
+
             const draw = e => {
                 if (!drawing) return;
                 const rect = canvas.getBoundingClientRect();
-                const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
-                const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
-                ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
+                const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+                const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
             };
 
             canvas.addEventListener('mousedown', () => { drawing = true; ctx.beginPath(); });
@@ -834,7 +887,7 @@ ${enlace}`;
                 cerrarDetalleOrden();
                 cargarHistorial();
             } catch (err) {
-                alert('Error al guardar: ' + err.message);
+                alert('Error al guardar firma: ' + err.message);
             }
         }
 
@@ -856,21 +909,6 @@ ${enlace}`;
                     `<a href="${snap.val().reporte_pdf}" target="_blank" class="text-blue-600 hover:underline">Ver Reporte PDF</a>`;
             } catch (err) {
                 alert('Error al subir PDF: ' + err.message);
-            }
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('#section-order, #section-historial').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`section-${tab}`)?.classList.remove('hidden');
-
-            if (tab === 'order') {
-                initFirmas();
-                generarYMostrarWO();
-                actualizarTelefonoTaller();
-            }
-
-            if (tab === 'historial') {
-                cargarHistorial();
             }
         }
     </script>
