@@ -3,238 +3,291 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Reportes de Trabajo</title>
+    <title>Gestión de Talleres - FAH</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .input-line {
-            outline: none;
-            border: none;
-            border-bottom: 1px solid black;
-            width: 100%;
-            padding: 2px 4px;
-            background-color: white;
-            box-sizing: border-box;
+        
+        .fah-table { border-collapse: collapse; width: 100%; }
+        .fah-table th, .fah-table td { border: 1px solid #1e293b; padding: 4px 8px; }
+        .fah-header-blue { background-color: #b9d1ea; color: #000; font-weight: bold; text-align: center; border: 1px solid #1e293b; }
+        .fah-cell-label { background-color: #b9d1ea; font-weight: bold; font-size: 0.8rem; text-align: center; }
+        
+        .discrepancia-box {
+            background-color: #f1f5f9;
+            background-image: linear-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 100% 1.5rem;
+            line-height: 1.5rem;
+            border: 1px solid #cbd5e1;
+            padding: 0 8px;
+            min-height: 150px;
         }
-        .items-baseline p { padding-bottom: 2px; }
+
+        .signature-container {
+            position: relative;
+            width: 100%;
+            height: 60px;
+            margin-top: 4px;
+        }
+
+        .signature-line {
+            position: absolute;
+            bottom: 8px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: #000;
+        }
+
+        .signature-pad {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent !important;
+            border: none !important;
+            touch-action: none;
+            cursor: crosshair;
+        }
+
+        .signature-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 0.75rem;
+        }
+
+        .signature-btn {
+            padding: 4px 12px;
+            border: 1px solid #6b7280;
+            background: #f3f4f6;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .signature-btn:hover {
+            background: #e5e7eb;
+        }
 
         @media print {
-            @page { size: letter; margin: 0.5in 0.75in; }
-            body { margin: 0; padding: 0; }
-            .print-container {
-                width: 7in;
-                border: none;
-                box-shadow: none;
-                margin: 0 auto;
-                padding: 0.35in !important;
-                font-size: 0.7rem;
-            }
-            .print-container .text-sm { font-size: 0.7rem !important; line-height: 1.15 !important; }
-            .print-container .text-xs { font-size: 0.6rem !important; line-height: 1.1 !important; }
-            .print-container .text-base { font-size: 0.85rem !important; }
-            .print-container div { margin-bottom: 0.25rem !important; }
-            .print-container .mb-8 { margin-bottom: 0.6rem !important; }
-            .print-container .mb-6 { margin-bottom: 0.4rem !important; }
-            .print-container .mb-2 { margin-bottom: 0.15rem !important; }
-            .print-container .mt-12 { margin-top: 1.8rem !important; }
-            .print-container .space-y-2 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.15rem !important; }
-            .input-line { padding: 0.5px 2px !important; }
-            .items-baseline p { padding-bottom: 0.5px !important; }
-            .print-container .flex-col { gap: 0.15rem !important; }
-            .print-button, .navigation-buttons, .save-status { display: none !important; }
-            body > *:not(.print-container) { display: none !important; }
+            .no-print { display: none !important; }
+            body { background: white; }
+            .print-area { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; }
+            .signature-pad, .signature-line { background: transparent !important; border: none !important; }
+            .signature-controls, #share-link-section { display: none !important; }
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-start p-4">
+<body class="bg-slate-200">
 
-    <div id="saveStatus" class="fixed top-4 left-1/2 -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hidden z-50 save-status">
-        Guardando...
+    <div class="flex h-screen overflow-hidden no-print">
+        <aside class="w-64 bg-slate-900 text-white flex-shrink-0 hidden md:flex flex-col">
+            <div class="p-6 text-center border-b border-slate-800">
+                <h1 class="font-bold text-lg tracking-wider">FAH TALLERES</h1>
+                <p class="text-[10px] text-slate-400 mt-1 uppercase">Base Aérea HAM</p>
+            </div>
+            <nav class="flex-grow p-4 space-y-2">
+                <button onclick="switchTab('stats')" id="btn-stats" class="w-full text-left px-4 py-2 bg-blue-600 rounded-lg text-sm font-semibold transition">Dashboard Estadístico</button>
+                <button onclick="switchTab('order')" id="btn-order" class="w-full text-left px-4 py-2 hover:bg-slate-800 rounded-lg text-sm transition text-slate-300">Cargar Orden de Trabajo</button>
+                <div class="pt-4 pb-2 px-4 text-[10px] font-bold text-slate-500 uppercase">Administración</div>
+                <a href="#" class="block px-4 py-2 hover:bg-slate-800 rounded-lg text-sm transition text-slate-300">Historial W.O.</a>
+                <a href="#" class="block px-4 py-2 hover:bg-slate-800 rounded-lg text-sm transition text-slate-300">Personal</a>
+            </nav>
+        </aside>
+
+        <main class="flex-grow overflow-y-auto p-6 lg:p-10">
+            
+            <div id="section-stats">
+                <header class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">Panel Operativo</h2>
+                        <p class="text-slate-600">Estado de los talleres y flota</p>
+                    </div>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-300">
+                        <p class="text-xs font-bold text-slate-400 uppercase">W.O. Pendientes</p>
+                        <p class="text-3xl font-bold text-slate-800">28</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-300">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Ala Rotatoria</p>
+                        <p class="text-3xl font-bold text-blue-600">14</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-300">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Ala Fija</p>
+                        <p class="text-3xl font-bold text-blue-800">14</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-300">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Eficiencia</p>
+                        <p class="text-3xl font-bold text-green-600">92%</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-300">
+                    <h3 class="font-bold text-slate-800 mb-6 uppercase text-sm">Carga de Trabajo por Especialidad</h3>
+                    <div class="h-[300px]"><canvas id="chartTalleres"></canvas></div>
+                </div>
+            </div>
+
+            <div id="section-order" class="hidden">
+                <div class="max-w-5xl mx-auto bg-white p-8 shadow-2xl border border-slate-300 print-area">
+                    
+                    <div class="text-center mb-6">
+                        <h1 class="font-bold text-lg uppercase">Fuerza Aérea Hondureña</h1>
+                        <h2 class="font-bold text-base uppercase">Base Aérea "Cnel. Hernán Acosta Mejía"</h2>
+                    </div>
+
+                    <div class="grid grid-cols-2 fah-table border border-black mb-6">
+                        <div class="fah-header-blue p-2 flex justify-between items-center">
+                            <span>LINEA DE VUELO ALA ROTATORIA</span>
+                            <input type="checkbox" checked class="w-4 h-4">
+                        </div>
+                        <div class="fah-header-blue p-2 flex justify-between items-center" style="background-color: #cbd5e1;">
+                            <span>LINEA DE VUELO ALA FIJA</span>
+                            <input type="checkbox" class="w-4 h-4">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6 items-start">
+                        <table class="fah-table">
+                            <tr>
+                                <td class="fah-cell-label w-1/3">W.O</td>
+                                <td class="p-0">
+                                    <input type="text" id="wo" class="w-full px-2 py-1 outline-none font-bold">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fah-cell-label">FECHA</td>
+                                <td class="p-0"><input type="date" id="fecha" class="w-full px-2 py-1 outline-none"></td>
+                            </tr>
+                            <tr>
+                                <td class="fah-cell-label">HORA</td>
+                                <td class="p-0"><input type="time" id="hora" class="w-full px-2 py-1 outline-none"></td>
+                            </tr>
+                            <tr>
+                                <td class="fah-cell-label">AERONAVE</td>
+                                <td class="p-0"><input type="text" id="aeronave" class="w-full px-2 py-1 outline-none font-bold"></td>
+                            </tr>
+                        </table>
+
+                        <table class="fah-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="4" class="fah-header-blue py-1 uppercase text-xs">Orden de Trabajo para el taller de:</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-[11px] font-bold">
+                                <tr><td>RADIO</td><td class="w-8 text-center"><input type="checkbox" value="RADIO" class="taller-check"></td><td>BATERIA</td><td class="w-8 text-center"><input type="checkbox" value="BATERIA" class="taller-check"></td></tr>
+                                <tr><td>INSTRUMENTOS</td><td class="w-8 text-center"><input type="checkbox" value="INSTRUMENTOS" class="taller-check"></td><td>MOTORES</td><td class="w-8 text-center"><input type="checkbox" value="MOTORES" class="taller-check"></td></tr>
+                                <tr><td>HYD</td><td class="w-8 text-center"><input type="checkbox" value="HYD" class="taller-check"></td><td>ESTRUCTURAS</td><td class="w-8 text-center"><input type="checkbox" value="ESTRUCTURAS" class="taller-check"></td></tr>
+                                <tr><td>HELICES</td><td class="w-8 text-center"><input type="checkbox" value="HELICES" class="taller-check"></td><td>ARMAMENTO</td><td class="w-8 text-center"><input type="checkbox" value="ARMAMENTO" class="taller-check"></td></tr>
+                                <tr><td>ELECTRICIDAD</td><td class="w-8 text-center"><input type="checkbox" value="ELECTRICIDAD" class="taller-check"></td><td class="bg-blue-50">HELICOPTEROS</td><td class="w-8 text-center bg-blue-50"><input type="checkbox" value="HELICOPTEROS" class="taller-check" checked></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-6">
+                        <div class="fah-header-blue text-left px-2 py-1 text-sm inline-block">Discrepancia:</div>
+                        <div id="discrepancia" class="discrepancia-box mt-2 text-sm p-3" contenteditable="true"></div>
+                    </div>
+
+                    <div class="mt-4 text-sm text-gray-700">
+                        Número de contacto del taller seleccionado: 
+                        <strong id="telefono-taller">-</strong>
+                    </div>
+
+                    <div class="mt-8 grid grid-cols-2 gap-8">
+                        <div class="space-y-10">
+                            <div>
+                                <div class="font-bold text-xs mb-1">ENTREGADO POR:</div>
+                                <div class="signature-container">
+                                    <div class="signature-line"></div>
+                                    <canvas id="signature-entregado" class="signature-pad" width="420" height="60"></canvas>
+                                </div>
+                                <div class="signature-controls no-print">
+                                    <button class="signature-btn" onclick="clearSignature('entregado')">Borrar firma</button>
+                                    <button class="signature-btn" onclick="saveSignature('entregado')">Confirmar firma</button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="font-bold text-xs mb-1">RECIBIDO POR:</div>
+                                <div class="signature-container">
+                                    <div class="signature-line"></div>
+                                    <canvas id="signature-recibido" class="signature-pad" width="420" height="60"></canvas>
+                                </div>
+                                <div class="signature-controls no-print hidden" id="controles-recibido">
+                                    <button class="signature-btn" onclick="clearSignature('recibido')">Borrar</button>
+                                    <button class="signature-btn" onclick="saveSignature('recibido')">Confirmar recibido</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block font-bold text-sm mb-2">Asignar esta orden al taller:</label>
+                                <select id="taller_asignado" class="w-full p-2 border border-gray-400 rounded">
+                                    <option value="">-- Seleccionar taller --</option>
+                                    <option value="ESTRUCTURAS">Estructuras</option>
+                                    <option value="RADIO">Radio</option>
+                                    <option value="INSTRUMENTOS">Instrumentos</option>
+                                    <option value="HYD">Hidráulica</option>
+                                    <option value="ELECTRICIDAD">Electricidad y Baterías</option>
+                                    <option value="MOTORES">Motores</option>
+                                    <option value="HELICOPTEROS">Helicópteros</option>
+                                </select>
+                            </div>
+
+                            <div class="flex flex-col gap-4 pt-4">
+                                <div class="flex items-center gap-3">
+                                    <input type="checkbox" id="prioridad-rutina" class="w-5 h-5 border-black">
+                                    <span class="font-bold text-sm">RUTINA</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <input type="checkbox" id="prioridad-urgente" class="w-5 h-5 border-black">
+                                    <span class="font-bold text-sm">URGENTE</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="share-link-section" class="mt-10 p-4 bg-green-50 border border-green-200 rounded hidden">
+                        <p class="font-medium mb-2">Enlace para que el taller firme como recibido e imprima:</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="enlace-orden" class="flex-1 p-2 border rounded bg-white" readonly>
+                            <button onclick="copiarEnlace()" class="bg-gray-600 text-white px-4 rounded hover:bg-gray-700 text-sm">Copiar</button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Comparte este enlace con el taller correspondiente.</p>
+                    </div>
+
+                    <div class="mt-12 flex justify-center gap-6 no-print">
+                        <button onclick="guardarOrden()" class="bg-blue-600 text-white px-10 py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+                            Guardar Orden
+                        </button>
+                        <button onclick="guardarYEnviarWhatsApp()" class="bg-green-600 text-white px-10 py-3 rounded-lg font-bold hover:bg-green-700 transition">
+                            Guardar y Enviar por WhatsApp
+                        </button>
+                        <button onclick="window.print()" class="bg-gray-600 text-white px-10 py-3 rounded-lg font-bold hover:bg-gray-700 transition">
+                            Imprimir
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
 
-    <div class="w-full max-w-4xl bg-white p-4 rounded-lg shadow-md mb-6 navigation-buttons flex justify-between items-center">
-        <button id="newReportBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
-            Nuevo Reporte
-        </button>
-        <button id="viewReportsBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
-            Ver Reportes Guardados
-        </button>
-        <div class="text-gray-700 text-sm">
-            Usuario: <span id="currentUserId" class="font-semibold">Cargando...</span>
-        </div>
-    </div>
-
-    <div id="listView" class="w-full max-w-4xl bg-white p-8 rounded-lg shadow-md hidden">
-        <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Reportes Guardados</h2>
-        <div id="reportsList" class="space-y-8"></div>
-    </div>
-
-    <div id="reportFormView" class="w-full max-w-2xl bg-white p-8 rounded-lg shadow-md print-container">
-        <div class="text-center mb-8">
-            <p class="font-bold text-xl">FUERZAS ARMADAS DE HONDURAS</p>
-            <p class="font-bold">FUERZA AÉREA HONDUREÑA</p>
-            <p class="text-sm">Base Aérea "Coronel Hernán Acosta Mejía"</p>
-        </div>
-        <div class="text-center mb-6">
-            <p class="font-bold text-lg">REPORTE DE TRABAJO EFECTUADO</p>
-        </div>
-
-        <div class="flex flex-col space-y-3 mb-6">
-            <div class="flex justify-between items-end gap-4">
-                <div class="flex-1 flex items-baseline">
-                    <p class="inline-block mr-2 whitespace-nowrap">El taller / sub-sección de</p>
-                    <input type="text" id="taller" class="input-line flex-grow">
-                </div>
-                <div class="flex-1 flex items-baseline">
-                    <p class="inline-block mr-2 whitespace-nowrap">notifica que el trabajo</p>
-                    <input type="text" id="trabajo" class="input-line flex-grow">
-                </div>
-            </div>
-            <div class="flex justify-between items-end gap-4">
-                <div class="flex-1 flex items-baseline">
-                    <p class="inline-block mr-2 whitespace-nowrap">con N° de orden de trabajo</p>
-                    <input type="text" id="ordenTrabajo" class="input-line flex-grow">
-                </div>
-                <div class="flex-1 flex items-baseline">
-                    <p class="inline-block mr-2 whitespace-nowrap">Tiempo Total</p>
-                    <input type="text" id="tiempoTotal" class="input-line flex-grow">
-                </div>
-            </div>
-            <div class="flex justify-between items-end gap-4">
-                <div class="flex-1 flex items-baseline">
-                    <p class="inline-block mr-2 whitespace-nowrap">Matricula de la aeronave</p>
-                    <input type="text" id="matriculaAeronave" class="input-line flex-grow">
-                </div>
-                <div class="flex-1 flex items-baseline">
-                    <input type="text" id="campoAdicionalMatricula" class="input-line flex-grow">
-                </div>
-            </div>
-            <div class="flex justify-between items-end gap-4">
-                <div class="flex-1 flex items-baseline">
-                    <p class="inline-block mr-2 whitespace-nowrap">Fecha y hora de inicio</p>
-                    <input type="datetime-local" id="fechaHoraInicio" class="input-line flex-grow">
-                </div>
-                <div class="flex-1 flex items-baseline">
-                    <p class="inline-block mr-2 whitespace-nowrap">terminado</p>
-                    <input type="datetime-local" id="fechaHoraTerminado" class="input-line flex-grow">
-                </div>
-            </div>
-        </div>
-
-        <div class="mb-6">
-            <p class="mb-2 font-medium">Discrepancia:</p>
-            <input type="text" id="discrepancia1" class="input-line mb-2">
-            <input type="text" id="discrepancia2" class="input-line mb-2">
-            <input type="text" id="discrepancia3" class="input-line mb-2">
-            <input type="text" id="discrepancia4" class="input-line mb-2">
-            <input type="text" id="discrepancia5" class="input-line mb-2">
-            <input type="text" id="discrepancia6" class="input-line mb-2">
-        </div>
-
-        <div class="mb-6">
-            <p class="mb-2 font-medium">Acción correctiva:</p>
-            <input type="text" id="accionCorrectiva1" class="input-line mb-2">
-            <input type="text" id="accionCorrectiva2" class="input-line mb-2">
-            <input type="text" id="accionCorrectiva3" class="input-line mb-2">
-            <input type="text" id="accionCorrectiva4" class="input-line mb-2">
-            <input type="text" id="accionCorrectiva5" class="input-line mb-2">
-        </div>
-
-        <div class="flex flex-col space-y-3 mb-6">
-            <div class="flex justify-between items-end gap-4">
-                <div class="flex-1 flex items-baseline">
-                    <p class="inline-block mr-2 whitespace-nowrap">Cantidad de horas</p>
-                    <input type="number" id="cantidadHoras" class="input-line flex-grow">
-                </div>
-                <div class="flex-1 flex items-baseline">
-                    <p class="inline-block mr-2 whitespace-nowrap">cantidad de personal</p>
-                    <input type="number" id="cantidadPersonal" class="input-line flex-grow">
-                </div>
-            </div>
-            <div class="flex flex-col items-start mt-4">
-                <p class="inline-block mr-1 whitespace-nowrap mb-2">Material que se utilizó</p>
-                <input type="text" id="materialUtilizado1" class="input-line mb-2">
-                <input type="text" id="materialUtilizado2" class="input-line">
-            </div>
-        </div>
-
-        <!-- Selección de taller -->
-        <div class="mt-10 border-t pt-6 mb-6">
-            <label class="block text-lg font-bold text-gray-800 mb-3">
-                ¿De qué taller eres? <span class="text-red-600">*</span>
-            </label>
-            <select id="tallerSeleccionado" required class="w-full p-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-green-500">
-                <option value="">-- Selecciona tu taller --</option>
-                <option value="RADIO">RADIO</option>
-                <option value="BATERIA">BATERIA</option>
-                <option value="INSTRUMENTOS">INSTRUMENTOS</option>
-                <option value="MOTORES">MOTORES</option>
-                <option value="HYD">HYD</option>
-                <option value="ESTRUCTURAS">ESTRUCTURAS</option>
-                <option value="HELICES">HELICES</option>
-                <option value="ARMAMENTO">ARMAMENTO</option>
-                <option value="ELECTRICIDAD">ELECTRICIDAD</option>
-                <option value="HELICOPTEROS">HELICOPTEROS</option>
-            </select>
-            <p class="mt-2 text-sm text-gray-600">Este campo es obligatorio</p>
-        </div>
-
-        <!-- Subida de reporte firmado -->
-        <div class="mt-8 border-t pt-6">
-            <p class="font-bold mb-3">Reporte firmado o escaneado (opcional)</p>
-            <input type="file" id="reporteFirmadoFile" accept="application/pdf,image/jpeg,image/png" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
-            <div id="previewReporteFirmado" class="hidden mt-4 border border-gray-300 rounded-lg p-4 bg-gray-50 min-h-[180px] flex items-center justify-center">
-                <div id="previewContent" class="text-center"></div>
-            </div>
-            <p id="uploadStatus" class="mt-2 text-sm text-gray-600 min-h-[1.5rem]"></p>
-        </div>
-
-        <!-- Firmas -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-16 mb-10">
-            <div class="flex flex-col items-center">
-                <input type="text" id="tecnico1" class="input-line w-full mb-2 text-center">
-                <p class="font-bold">TÉCNICO(S) ESPECIALISTA(S)</p>
-            </div>
-            <div class="flex flex-col items-center">
-                <input type="text" id="tecnico2" class="input-line w-full mb-2 text-center">
-                <p class="font-bold">TÉCNICO(S) ESPECIALISTA(S)</p>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 mb-10">
-            <div class="flex flex-col items-center">
-                <input type="text" id="supervisor" class="input-line w-full mb-2 text-center">
-                <p class="font-bold">SUPERVISOR</p>
-            </div>
-            <div class="flex flex-col items-center">
-                <input type="text" id="inspector" class="input-line w-full mb-2 text-center">
-                <p class="font-bold">INSPECTOR</p>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
-            <div class="flex flex-col items-center">
-                <input type="text" id="jefeTaller" class="input-line w-full mb-2 text-center">
-                <p class="font-bold">JEFE TALLER / SECCION</p>
-            </div>
-            <div class="flex flex-col items-center">
-                <input type="text" id="jefeLogistica" class="input-line w-full mb-2 text-center">
-                <p class="font-bold">JEFE DE LOGISTICA A-4</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="fixed bottom-6 right-6 print-button z-50">
-        <button id="printReportFromFormBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl shadow-xl transition-all duration-300 transform hover:scale-105">
-            Imprimir y Guardar Reporte
-        </button>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+    <script>
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCrV3s3uuEiWx_u959j70Tt3JhM_G44sck",
             authDomain: "ubicacion-50569.firebaseapp.com",
@@ -246,328 +299,257 @@
             measurementId: "G-QSY3PPZQP3"
         };
 
-        // Definimos appId de forma fija con el ID real de tu proyecto
-        const appId = "ubicacion-50569";
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        let db;
-        let auth;
-        let userId;
-        let currentReportId = null;
+        // Números telefónicos (los que me diste)
+        const telefonosTalleres = {
+            "ESTRUCTURAS": "31732466",
+            "RADIO": "36481152",
+            "INSTRUMENTOS": "95191242",
+            "HYD": "88172885",
+            "ELECTRICIDAD": "88699561",
+            "MOTORES": "32470716",
+            "HELICOPTEROS": "87325369"
+        };
 
-        const saveStatusDiv = document.getElementById('saveStatus');
-        const newReportBtn = document.getElementById('newReportBtn');
-        const viewReportsBtn = document.getElementById('viewReportsBtn');
-        const printReportFromFormBtn = document.getElementById('printReportFromFormBtn');
-        const reportFormView = document.getElementById('reportFormView');
-        const listView = document.getElementById('listView');
-        const reportsListDiv = document.getElementById('reportsList');
-        const currentUserIdSpan = document.getElementById('currentUserId');
+        function switchTab(tab) {
+            document.getElementById('section-stats').classList.toggle('hidden', tab !== 'stats');
+            document.getElementById('section-order').classList.toggle('hidden', tab !== 'order');
 
-        let selectedFirmadoFile = null;
-        const reporteFirmadoInput = document.getElementById('reporteFirmadoFile');
-        const previewReporteFirmado = document.getElementById('previewReporteFirmado');
-        const previewContent = document.getElementById('previewContent');
+            const btnStats = document.getElementById('btn-stats');
+            const btnOrder = document.getElementById('btn-order');
 
-        function showSaveStatus(message, isError = false) {
-            saveStatusDiv.textContent = message;
-            saveStatusDiv.classList.remove('hidden', 'bg-blue-500', 'bg-red-500');
-            saveStatusDiv.classList.add(isError ? 'bg-red-500' : 'bg-blue-500');
-            setTimeout(() => saveStatusDiv.classList.add('hidden'), 3000);
+            if (tab === 'stats') {
+                btnStats.className = "w-full text-left px-4 py-2 bg-blue-600 rounded-lg text-sm font-semibold transition";
+                btnOrder.className = "w-full text-left px-4 py-2 hover:bg-slate-800 rounded-lg text-sm transition text-slate-300";
+            } else {
+                btnOrder.className = "w-full text-left px-4 py-2 bg-blue-600 rounded-lg text-sm font-semibold transition";
+                btnStats.className = "w-full text-left px-4 py-2 hover:bg-slate-800 rounded-lg text-sm transition text-slate-300";
+                
+                initFirmas();
+                generarYMostrarWO();
+                actualizarTelefonoTaller();
+            }
         }
 
-        // Vista previa del archivo subido
-        reporteFirmadoInput.addEventListener('change', (e) => {
-            selectedFirmadoFile = e.target.files[0];
-            if (!selectedFirmadoFile) {
-                previewReporteFirmado.classList.add('hidden');
-                return;
+        function generarNumeroWO() {
+            const hoy = new Date();
+            const año = hoy.getFullYear();
+            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+            
+            const clave = `contador_wo_${año}_${mes}`;
+
+            let contador = parseInt(localStorage.getItem(clave) || '0', 10);
+            contador += 1;
+            localStorage.setItem(clave, contador);
+
+            const secuencial = String(contador).padStart(4, '0');
+            return `${año}-${mes}-${secuencial}`;
+        }
+
+        function generarYMostrarWO() {
+            const inputWO = document.getElementById('wo');
+            if (inputWO && !inputWO.value.trim()) {
+                inputWO.value = generarNumeroWO();
             }
+        }
 
-            previewContent.innerHTML = '';
-            previewReporteFirmado.classList.remove('hidden');
+        function actualizarTelefonoTaller() {
+            const taller = document.getElementById('taller_asignado')?.value;
+            const telefonoEl = document.getElementById('telefono-taller');
 
-            if (selectedFirmadoFile.type.startsWith('image/')) {
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(selectedFirmadoFile);
-                img.className = 'max-h-48 object-contain mx-auto';
-                previewContent.appendChild(img);
-            } else if (selectedFirmadoFile.type === 'application/pdf') {
-                previewContent.innerHTML = `
-                    <div class="text-center">
-                        <svg class="w-16 h-16 mx-auto text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0113 2.586L15.414 5A2 2 0 0116 6.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/>
-                        </svg>
-                        <p class="mt-2 font-medium text-gray-800">${selectedFirmadoFile.name}</p>
-                        <p class="text-sm text-gray-500">${(selectedFirmadoFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                    </div>
-                `;
+            // ← Protección contra null
+            if (!telefonoEl) return;
+
+            if (taller && telefonosTalleres[taller]) {
+                telefonoEl.textContent = telefonosTalleres[taller];
             } else {
-                previewContent.innerHTML = '<p class="text-red-600">Solo PDF, JPG y PNG permitidos</p>';
-                selectedFirmadoFile = null;
+                telefonoEl.textContent = "-";
             }
-        });
+        }
 
-        async function handleSaveReport() {
-            const tallerSelect = document.getElementById('tallerSeleccionado');
+        let signatures = { entregado: null, recibido: null };
 
-            if (!tallerSelect.value) {
-                showSaveStatus('Selecciona tu taller antes de guardar', true);
-                tallerSelect.focus();
-                return false;
-            }
+        function initFirmas() {
+            ['entregado', 'recibido'].forEach(tipo => {
+                const canvas = document.getElementById(`signature-${tipo}`);
+                const ctx = canvas?.getContext('2d');
+                if (ctx) {
+                    ctx.lineWidth = 1.8;
+                    ctx.lineCap = 'round';
+                    ctx.strokeStyle = '#000';
+                    let drawing = false;
 
-            showSaveStatus('Guardando reporte...');
+                    const draw = e => {
+                        if (!drawing) return;
+                        const rect = canvas.getBoundingClientRect();
+                        const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+                        const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+                        ctx.lineTo(x, y);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                    };
 
-            const reportData = {};
-            reportFormView.querySelectorAll('.input-line').forEach(input => {
-                reportData[input.id] = input.value;
+                    canvas.addEventListener('mousedown', () => drawing = true);
+                    canvas.addEventListener('mousemove', draw);
+                    canvas.addEventListener('mouseup', () => drawing = false);
+                    canvas.addEventListener('mouseout', () => drawing = false);
+                    canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; });
+                    canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e); });
+                    canvas.addEventListener('touchend', () => drawing = false);
+                }
             });
+        }
 
-            reportData.tallerSeleccionado = tallerSelect.value;
-            reportData.lastModified = new Date().toISOString();
-            reportData.userId = userId;
+        function clearSignature(tipo) {
+            const canvas = document.getElementById(`signature-${tipo}`);
+            canvas?.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
+            signatures[tipo] = null;
+        }
+
+        function saveSignature(tipo) {
+            const canvas = document.getElementById(`signature-${tipo}`);
+            signatures[tipo] = canvas?.toDataURL('image/png');
+        }
+
+        function generarEnlace(wo) {
+            const baseUrl = window.location.href.split('?')[0];
+            return `${baseUrl}?orden=${encodeURIComponent(wo)}`;
+        }
+
+        function copiarEnlace() {
+            const input = document.getElementById('enlace-orden');
+            if (input) {
+                input.select();
+                document.execCommand('copy');
+                alert('Enlace copiado');
+            }
+        }
+
+        async function guardarOrden(mostrarEnlace = false) {
+            const wo = document.getElementById('wo')?.value?.trim();
+            const taller = document.getElementById('taller_asignado')?.value;
+            const fecha = document.getElementById('fecha')?.value;
+            const hora = document.getElementById('hora')?.value;
+            const aeronave = document.getElementById('aeronave')?.value?.trim();
+            const discrepancia = document.getElementById('discrepancia')?.innerText?.trim();
+            const prioridad_urgente = document.getElementById('prioridad-urgente')?.checked;
+
+            if (!wo) return alert('Falta número de orden');
+            if (!taller) return alert('Selecciona el taller');
+            if (!discrepancia) return alert('Escribe la discrepancia');
+
+            saveSignature('entregado');
+
+            const [año, mes] = wo.split('-').slice(0, 2);
+
+            const data = {
+                wo,
+                fecha,
+                hora,
+                aeronave,
+                discrepancia,
+                prioridad: prioridad_urgente ? 'URGENTE' : 'Rutina',
+                firma_entregado: signatures.entregado || null,
+                talleres: Array.from(document.querySelectorAll('.taller-check:checked')).map(el => el.value),
+                estado: 'pendiente',
+                creado: new Date().toISOString()
+            };
+
+            const path = `ordenes_trabajo/${taller}/${año}/${mes}/${wo}`;
 
             try {
-                let reportRef;
-                let reportId = currentReportId;
+                await db.ref(path).set(data);
 
-                const reportsCollection = collection(db, `artifacts/${appId}/reports`);
+                if (mostrarEnlace) {
+                    const enlace = generarEnlace(wo);
+                    const enlaceInput = document.getElementById('enlace-orden');
+                    const section = document.getElementById('share-link-section');
 
-                if (currentReportId) {
-                    reportRef = doc(reportsCollection, currentReportId);
-                    await setDoc(reportRef, reportData, { merge: true });
-                } else {
-                    const newDocRef = await addDoc(reportsCollection, reportData);
-                    reportId = newDocRef.id;
-                    currentReportId = reportId;
-                    reportRef = doc(reportsCollection, reportId);
+                    if (enlaceInput && section) {
+                        enlaceInput.value = enlace;
+                        section.classList.remove('hidden');
+                    }
                 }
 
-                if (selectedFirmadoFile) {
-                    showSaveStatus('Guardando archivo firmado...');
-
-                    const base64Promise = new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = () => resolve(reader.result);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(selectedFirmadoFile);
-                    });
-
-                    const base64Data = await base64Promise;
-
-                    await setDoc(reportRef, {
-                        reporteFirmadoBase64: base64Data,
-                        reporteFirmadoFileName: selectedFirmadoFile.name,
-                        reporteFirmadoType: selectedFirmadoFile.type,
-                        reporteFirmadoUploadedAt: new Date().toISOString()
-                    }, { merge: true });
-
-                    reporteFirmadoInput.value = '';
-                    previewReporteFirmado.classList.add('hidden');
-                    selectedFirmadoFile = null;
-                }
-
-                showSaveStatus('Guardado correctamente', false);
                 return true;
             } catch (error) {
-                console.error("Error al guardar:", error);
-                showSaveStatus('Error al guardar el reporte', true);
+                alert('Error al guardar: ' + error.message);
+                console.error(error);
                 return false;
             }
         }
 
-        function collectFormData() {
-            const data = {};
-            reportFormView.querySelectorAll('.input-line').forEach(input => {
-                data[input.id] = input.value;
-            });
-            return data;
-        }
+        async function guardarYEnviarWhatsApp() {
+            const guardado = await guardarOrden(true);
+            if (!guardado) return;
 
-        function loadReport(reportData, id) {
-            currentReportId = id;
-            reportFormView.querySelectorAll('.input-line').forEach(input => {
-                input.value = reportData[input.id] || '';
-            });
-            document.getElementById('tallerSeleccionado').value = reportData.tallerSeleccionado || '';
-            displayView('reportFormView');
-        }
+            const wo = document.getElementById('wo')?.value?.trim();
+            const taller = document.getElementById('taller_asignado')?.value;
+            const aeronave = document.getElementById('aeronave')?.value?.trim();
+            const discrepancia = document.getElementById('discrepancia')?.innerText?.trim();
+            const prioridad = document.getElementById('prioridad-urgente')?.checked ? 'URGENTE' : 'Rutina';
+            const enlace = document.getElementById('enlace-orden')?.value;
 
-        function clearForm() {
-            currentReportId = null;
-            reportFormView.querySelectorAll('.input-line').forEach(input => input.value = '');
-            document.getElementById('tallerSeleccionado').value = '';
-            reporteFirmadoInput.value = '';
-            previewReporteFirmado.classList.add('hidden');
-            selectedFirmadoFile = null;
-            displayView('reportFormView');
-        }
+            const mensaje = 
+`🛠️ *Nueva Orden de Trabajo*
 
-        function displayView(viewId) {
-            reportFormView.classList.add('hidden');
-            listView.classList.add('hidden');
-            printReportFromFormBtn.classList.add('hidden');
+W.O: ${wo}
+Aeronave: ${aeronave}
+Taller: ${taller}
+Prioridad: ${prioridad}
+Discrepancia: ${discrepancia?.substring(0, 150) || ''}${discrepancia?.length > 150 ? '...' : ''}
 
-            if (viewId === 'reportFormView') {
-                reportFormView.classList.remove('hidden');
-                printReportFromFormBtn.classList.remove('hidden');
-            } else if (viewId === 'listView') {
-                listView.classList.remove('hidden');
+Firma como recibido aquí:
+${enlace || 'Enlace no generado'}`;
+
+            const telefonos = {
+                "ESTRUCTURAS": "31732466",
+                "RADIO": "36481152",
+                "INSTRUMENTOS": "95191242",
+                "HYD": "88172885",
+                "ELECTRICIDAD": "88699561",
+                "MOTORES": "32470716",
+                "HELICOPTEROS": "87325369"
+            };
+
+            const numero = telefonos[taller] || "";
+
+            if (numero) {
+                const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
+                window.open(url, '_blank');
+            } else {
+                alert("No hay número asignado.\n\nMensaje copiado al portapapeles:\n\n" + mensaje);
+                navigator.clipboard.writeText(mensaje).catch(() => {});
             }
         }
 
-        async function handleDeleteReport(id) {
-            if (!confirm("¿Eliminar este reporte?")) return;
-            showSaveStatus('Eliminando...');
-            try {
-                await deleteDoc(doc(db, `artifacts/${appId}/reports`, id));
-                showSaveStatus('Eliminado correctamente', false);
-            } catch (error) {
-                showSaveStatus('No se pudo eliminar', true);
+        function detectarModoRecepcion() {
+            const params = new URLSearchParams(window.location.search);
+            const wo = params.get('orden');
+            if (wo) {
+                document.querySelectorAll('input:not(#signature-recibido), select, button:not(.signature-btn), [contenteditable]').forEach(el => {
+                    el.disabled = true;
+                    el.readOnly = true;
+                    if (el.contentEditable) el.contentEditable = false;
+                });
+
+                const controles = document.getElementById('controles-recibido');
+                if (controles) controles.classList.remove('hidden');
+
+                const shareSection = document.getElementById('share-link-section');
+                if (shareSection) shareSection.classList.add('hidden');
             }
         }
 
-        function renderReportsList(reports) {
-            reportsListDiv.innerHTML = '';
-
-            if (reports.length === 0) {
-                reportsListDiv.innerHTML = '<p class="text-gray-500 text-center py-10">Aún no hay reportes guardados</p>';
-                return;
-            }
-
-            // Agrupar por taller
-            const grouped = reports.reduce((acc, r) => {
-                const key = r.tallerSeleccionado || 'Sin taller';
-                acc[key] = acc[key] || [];
-                acc[key].push(r);
-                return acc;
-            }, {});
-
-            Object.keys(grouped).sort().forEach(taller => {
-                const section = document.createElement('div');
-                section.className = 'mb-10';
-
-                section.innerHTML = `
-                    <h3 class="text-xl font-bold text-gray-700 mb-4 bg-gray-100 p-4 rounded-lg shadow-sm flex justify-between items-center">
-                        <span>Taller: ${taller}</span>
-                        <span class="text-sm font-normal text-gray-600">(${grouped[taller].length})</span>
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                `;
-
-                grouped[taller].forEach(report => {
-                    const title = report.ordenTrabajo 
-                        ? `Orden N° ${report.ordenTrabajo}` 
-                        : `Reporte (${new Date(report.lastModified).toLocaleDateString()})`;
-
-                    let card = `
-                        <div class="bg-white rounded-lg shadow p-5 border-t-4 border-blue-500 hover:shadow-lg transition">
-                            <p class="font-bold text-lg mb-1">${title}</p>
-                            <p class="text-sm text-gray-600">
-                                Modificado: ${new Date(report.lastModified).toLocaleString()}
-                            </p>
-                            <p class="text-xs text-gray-500 mt-1">
-                                Por: ${report.userId.substring(0, 8)}...
-                            </p>
-                            <div class="flex flex-wrap gap-2 mt-4">
-                                <button class="bg-blue-600 hover:bg-blue-700 text-white text-sm py-1.5 px-4 rounded edit-btn" data-id="${report.id}">Editar</button>
-                                <button class="bg-red-600 hover:bg-red-700 text-white text-sm py-1.5 px-4 rounded delete-btn" data-id="${report.id}">Eliminar</button>
-                                <button class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-1.5 px-4 rounded print-btn" data-id="${report.id}">Imprimir</button>
-                    `;
-
-                    if (report.reporteFirmadoBase64) {
-                        card += `
-                            <button class="bg-green-600 hover:bg-green-700 text-white text-sm py-1.5 px-4 rounded download-btn" data-id="${report.id}">
-                                Descargar Firmado
-                            </button>
-                        `;
-                    }
-
-                    card += '</div></div>';
-
-                    section.innerHTML += card;
-                });
-
-                section.innerHTML += '</div>';
-                reportsListDiv.appendChild(section);
-            });
-
-            // Listeners
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', e => {
-                    const id = e.target.dataset.id;
-                    const report = reports.find(r => r.id === id);
-                    if (report) loadReport(report, id);
-                });
-            });
-
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', e => handleDeleteReport(e.target.dataset.id));
-            });
-
-            document.querySelectorAll('.print-btn').forEach(btn => {
-                btn.addEventListener('click', e => {
-                    const id = e.target.dataset.id;
-                    const report = reports.find(r => r.id === id);
-                    if (report) {
-                        loadReport(report, id);
-                        setTimeout(() => window.print(), 200);
-                    }
-                });
-            });
-
-            document.querySelectorAll('.download-btn').forEach(btn => {
-                btn.addEventListener('click', e => {
-                    const id = e.target.dataset.id;
-                    const report = reports.find(r => r.id === id);
-                    if (report && report.reporteFirmadoBase64) {
-                        const link = document.createElement('a');
-                        link.href = report.reporteFirmadoBase64;
-                        link.download = report.reporteFirmadoFileName || 'reporte_firmado';
-                        link.click();
-                    }
-                });
-            });
-        }
-
-        window.onload = async function() {
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                await signInAnonymously(auth);
-                console.log("Autenticado de forma anónima");
-
-                userId = auth.currentUser?.uid || crypto.randomUUID();
-                currentUserIdSpan.textContent = userId;
-
-                const reportsRef = collection(db, `artifacts/${appId}/reports`);
-
-                onSnapshot(reportsRef, snapshot => {
-                    const reports = [];
-                    snapshot.forEach(doc => {
-                        reports.push({ id: doc.id, ...doc.data() });
-                    });
-                    reports.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
-                    renderReportsList(reports);
-                });
-
-                newReportBtn.addEventListener('click', clearForm);
-                viewReportsBtn.addEventListener('click', () => displayView('listView'));
-
-                printReportFromFormBtn.addEventListener('click', async () => {
-                    if (await handleSaveReport()) {
-                        window.print();
-                    }
-                });
-
-                displayView('reportFormView');
-            } catch (error) {
-                console.error("Error al inicializar:", error);
-                showSaveStatus("Error al conectar con la base de datos", true);
-            }
-        };
+        window.addEventListener('load', () => {
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha').value = hoy;
+            switchTab('order');
+            detectarModoRecepcion();
+        });
     </script>
 </body>
 </html>
