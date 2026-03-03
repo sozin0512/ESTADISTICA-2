@@ -77,11 +77,6 @@
         .lamp-red.active { background: var(--danger-red); color: #000; box-shadow: 0 0 15px var(--danger-red); }
         .lamp-yellow.active { background: var(--caution-yellow); color: #000; box-shadow: 0 0 15px var(--caution-yellow); }
 
-        .checklist-item input:checked + div {
-            text-decoration: line-through;
-            color: #666;
-        }
-
         .quiz-option {
             transition: all 0.2s;
             border: 1px solid transparent;
@@ -107,9 +102,7 @@
             100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
 
-        .shake {
-            animation: shake 0.5s infinite;
-        }
+        .shake { animation: shake 0.5s infinite; }
 
         .crack {
             position: absolute;
@@ -151,22 +144,14 @@
             animation: drip 2s ease-in forwards;
         }
 
-        .blood:nth-child(2) {
-            left: 60%;
-            animation-delay: 0.5s;
-        }
+        .blood:nth-child(2) { left: 60%; animation-delay: 0.5s; }
 
-        @keyframes drip {
-            to {
-                height: 250px;
-            }
-        }
+        @keyframes drip { to { height: 250px; } }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4 md:p-8 min-h-screen">
 
     <div class="max-w-6xl mx-auto">
-        <!-- Encabezado -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 border-b border-zinc-700 pb-6">
             <div>
                 <h1 class="text-4xl font-bold text-white tracking-tight">UH-1H <span class="text-orange-500">CREW CHIEF</span></h1>
@@ -178,19 +163,14 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            <!-- SECCIÓN IZQUIERDA: INSTRUMENTOS Y TEST -->
+            <!-- Izquierda: Instrumentos + Examen -->
             <div class="lg:col-span-8 space-y-8">
-                
-                <!-- El Triángulo de Potencia -->
                 <section class="bg-zinc-800/50 p-6 rounded-2xl border border-zinc-700">
                     <h2 class="text-lg font-semibold mb-6 flex items-center gap-2">
                         <span class="w-2 h-6 bg-orange-500 rounded-full"></span>
                         EL TRIÁNGULO DE POTENCIA Y ROTOR
                     </h2>
-                    
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                        <!-- Torque -->
                         <div>
                             <div class="gauge mx-auto mb-3">
                                 <div id="needle-torque" class="needle" style="transform: rotate(-120deg)"></div>
@@ -198,8 +178,6 @@
                             </div>
                             <div class="panel-font text-xl text-white" id="val-torque">0</div>
                         </div>
-
-                        <!-- EGT -->
                         <div>
                             <div class="gauge mx-auto mb-3">
                                 <div id="needle-egt" class="needle" style="transform: rotate(-120deg); background: #ff7676;"></div>
@@ -207,8 +185,6 @@
                             </div>
                             <div class="panel-font text-xl text-red-400" id="val-egt">0</div>
                         </div>
-
-                        <!-- N1 -->
                         <div>
                             <div class="gauge mx-auto mb-3">
                                 <div id="needle-n1" class="needle" style="transform: rotate(-120deg); background: #4db6ac;"></div>
@@ -216,8 +192,6 @@
                             </div>
                             <div class="panel-font text-xl text-teal-400" id="val-n1">0</div>
                         </div>
-
-                        <!-- Rotor -->
                         <div>
                             <div class="gauge mx-auto mb-3">
                                 <div id="needle-rotor" class="needle" style="transform: rotate(-120deg); background: #81c784;"></div>
@@ -226,8 +200,6 @@
                             <div class="panel-font text-xl text-green-400" id="val-rotor">0</div>
                         </div>
                     </div>
-
-                    <!-- Controles de Simulación -->
                     <div class="mt-8 flex flex-wrap gap-3 justify-center border-t border-zinc-700 pt-6">
                         <button onclick="setSim('cold')" class="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded text-xs font-bold uppercase transition">Motor Apagado</button>
                         <button onclick="setSim('normal')" class="px-4 py-2 bg-green-700 hover:bg-green-600 rounded text-xs font-bold uppercase transition">Vuelo Crucero</button>
@@ -236,34 +208,30 @@
                     </div>
                 </section>
 
-                <!-- EXAMEN TÉCNICO TIPO TEST AVANZADO -->
-                <section class="bg-zinc-900 p-8 rounded-2xl border border-orange-500/30">
-                    <div class="flex justify-between items-center mb-6">
+                <section class="bg-zinc-900 p-6 md:p-8 rounded-2xl border border-orange-500/30">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                         <h2 class="text-xl font-bold text-orange-500 flex items-center gap-2">
                             <span>🚀</span> EXAMEN DE CERTIFICACIÓN AVANZADO
                         </h2>
-                        <div class="text-right">
+                        <div class="flex gap-3">
                             <span id="score" class="bg-zinc-800 px-3 py-1 rounded text-sm font-mono">ACIERTOS: 0</span>
-                            <span id="skulls" class="bg-zinc-800 px-3 py-1 rounded text-sm font-mono ml-2">CALAVERAS: 0</span>
+                            <span id="skulls" class="bg-zinc-800 px-3 py-1 rounded text-sm font-mono">CALAVERAS: 0</span>
                         </div>
                     </div>
 
                     <div id="quiz-container">
-                        <div class="mb-2 text-xs text-zinc-500 font-mono" id="quiz-progress">Pregunta 1 de 100</div>
+                        <div class="mb-2 text-xs text-zinc-500 font-mono" id="quiz-progress">Pregunta 1 de --</div>
                         <div id="timer" class="mb-2 text-xs text-zinc-500 font-mono">Tiempo: 40s</div>
                         <p id="quiz-question" class="text-lg font-semibold mb-6">Cargando pregunta...</p>
-                        <div id="quiz-options" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Opciones inyectadas por JS -->
-                        </div>
+                        <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
                         <div id="quiz-feedback" class="mt-6 p-4 rounded-lg text-sm hidden"></div>
                         <button id="next-btn" onclick="nextQuestion()" class="mt-6 w-full py-3 bg-orange-600 hover:bg-orange-500 rounded-lg font-bold uppercase hidden shadow-lg shadow-orange-900/20">Continuar Evaluación</button>
                     </div>
                 </section>
             </div>
 
-            <!-- SECCIÓN DERECHA: CHECKLISTS -->
+            <!-- Derecha -->
             <div class="lg:col-span-4 space-y-6">
-                <!-- Panel de Avisos -->
                 <section class="bg-black p-6 rounded-2xl border-4 border-zinc-800 shadow-2xl">
                     <h2 class="text-zinc-500 text-xs font-bold mb-4 tracking-tighter uppercase">Caution Panel</h2>
                     <div class="grid grid-cols-2 gap-2">
@@ -273,30 +241,7 @@
                         <div id="lamp-hyd" class="caution-lamp lamp-yellow">HYD PRESSURE</div>
                     </div>
                 </section>
-                
-                <div class="bg-zinc-100 text-zinc-900 p-6 rounded-2xl shadow-xl">
-                    <h2 class="text-xl font-bold mb-6 border-b border-zinc-300 pb-2 italic text-zinc-700">Inspección Pre-Vuelo</h2>
-                    <div class="space-y-4">
-                        <label class="checklist-item flex items-start gap-3 cursor-pointer">
-                            <input type="checkbox" class="mt-1">
-                            <div class="text-sm">Safety Wires en pernos de cabeza de rotor</div>
-                        </label>
-                        <label class="checklist-item flex items-start gap-3 cursor-pointer">
-                            <input type="checkbox" class="mt-1">
-                            <div class="text-sm">Drenaje de sedimentos y agua en tanques</div>
-                        </label>
-                        <label class="checklist-item flex items-start gap-3 cursor-pointer">
-                            <input type="checkbox" class="mt-1">
-                            <div class="text-sm">Estado de las correas del generador</div>
-                        </label>
-                        <label class="checklist-item flex items-start gap-3 cursor-pointer">
-                            <input type="checkbox" class="mt-1">
-                            <div class="text-sm">Nivel de líquido hidráulico y fugas</div>
-                        </label>
-                    </div>
-                </div>
 
-                <!-- Comunicación Táctica -->
                 <div class="bg-blue-900/40 p-6 rounded-2xl border border-blue-500/30">
                     <h2 class="text-sm font-bold text-blue-400 mb-2 tracking-widest uppercase italic">The Crew Chief Eyes</h2>
                     <p class="text-xs italic leading-relaxed text-blue-100">
@@ -304,13 +249,12 @@
                     </p>
                 </div>
 
-                <!-- Leaderboard -->
                 <section class="bg-zinc-800/50 p-6 rounded-2xl border border-zinc-700">
                     <h2 class="text-lg font-semibold mb-6 flex items-center gap-2">
                         <span class="w-2 h-6 bg-orange-500 rounded-full"></span>
                         LISTADO DE MECÁNICOS
                     </h2>
-                    <select id="leaderboard" class="w-full bg-zinc-700 p-2 rounded text-white">
+                    <select id="leaderboard" class="w-full bg-zinc-700 p-2 rounded text-white text-sm">
                         <option>Cargando...</option>
                     </select>
                 </section>
@@ -322,10 +266,10 @@
         </footer>
     </div>
 
-    <!-- Death Overlay -->
-    <div id="death-overlay" class="hidden fixed inset-0 bg-black/80 flex flex-col items-center justify-center z-50 text-center">
-        <h1 class="text-6xl text-red-600 font-bold mb-4">TE MORISTE</h1>
-        <p class="text-2xl text-white">Vete a estudiar, te hace falta</p>
+    <!-- Overlay de muerte -->
+    <div id="death-overlay" class="hidden fixed inset-0 bg-black/80 flex flex-col items-center justify-center z-50 text-center px-4">
+        <h1 class="text-5xl sm:text-6xl text-red-600 font-bold mb-4">TE MORISTE</h1>
+        <p class="text-xl sm:text-2xl text-white">Vete a estudiar, te hace falta</p>
         <div class="crack"></div>
         <div class="blood"></div>
         <div class="blood"></div>
@@ -342,7 +286,221 @@
             measurementId: "G-C56989L229"
         };
 
-        // --- SIMULADOR DE INSTRUMENTOS ---
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let questions = [];
+        let currentQ = 0;
+        let score = 0;
+        let skulls = 0;
+        let attempts = 1;
+        let timerInterval;
+        let timeLeft;
+        let userName;
+
+        async function initApp() {
+            questions = await loadQuestions();
+
+            userName = await getUserNameWithSimilarityCheck();
+
+            const userRef = db.collection('mechanics').doc(userName.toLowerCase());
+            const doc = await userRef.get();
+
+            if (!doc.exists) {
+                await userRef.set({ name: userName, min_attempts: null });
+            } else {
+                const minAttempts = doc.data().min_attempts;
+                if (minAttempts !== null) {
+                    alert(`Ya lograste el 100% en ${minAttempts} intentos! Puedes intentar mejorar tu récord.`);
+                }
+            }
+
+            await loadLeaderboard();
+            setSim('cold');
+            loadQuestion();
+        }
+
+        async function loadQuestions() {
+            const snapshot = await db.collection('questions').get();
+            let extraQuestions = [];
+            snapshot.forEach(doc => {
+                extraQuestions.push(doc.data());
+            });
+
+            // Las 100 originales siempre se cargan primero
+            let allQuestions = defaultQuestions();
+
+            // Luego se agregan las extras de Firestore (sin duplicar por pregunta idéntica)
+            extraQuestions.forEach(extra => {
+                if (!allQuestions.some(q => q.q === extra.q)) {
+                    allQuestions.push(extra);
+                }
+            });
+
+            document.getElementById('quiz-progress').innerText = `Pregunta 1 de ${allQuestions.length}`;
+            return allQuestions;
+        }
+
+        function defaultQuestions() {
+            return [
+                { q: "Durante el arranque, la temperatura EGT sube rápidamente hacia los 800°C sin estabilizarse. ¿Qué debe hacer el mecánico?", a: ["Esperar a que el motor acelere", "Gritar 'HOT START' y cerrar combustible", "Aumentar N1 manualmente", "Abrir la válvula de purga"], correct: 1, feedback: "Un Hot Start puede destruir las etapas de la turbina en segundos. La acción inmediata es cortar el flujo de combustible." },
+                { q: "Se observa una separación de las agujas del tacómetro dual (E y R) en vuelo de crucero. ¿Cuál es el diagnóstico más probable?", a: ["Falla del generador", "Falla de N1", "Falla total de motor o desacople", "Exceso de Torque"], correct: 2, feedback: "Cuando el motor deja de entregar potencia, el rotor se desacopla por el embrague de rueda libre para permitir autorrotación." },
+                { q: "Aparece la luz 'TRANS CHIP'. El piloto decide continuar el vuelo por 10 minutos. Como mecánico, ¿qué vigilarías?", a: ["Temperatura y presión de aceite de transmisión", "Nivel de combustible", "Altitud de densidad", "Presión hidráulica"], correct: 0, feedback: "Un 'Chip' indica fricción metálica; si sube la temperatura o baja la presión del aceite de transmisión, la falla catastrófica es inminente." },
+                { q: "¿Qué fenómeno ocurre si se excede el límite de Torque de 50 PSI durante un despegue en zona alta?", a: ["Aumento de sustentación", "Fatiga estructural en el mástil y engranajes", "Mejor rendimiento del motor", "Aumento de la velocidad N2"], correct: 1, feedback: "El torque mide la fuerza de torsión; excederlo estresa los metales de la transmisión, pudiendo causar una fractura del mástil." },
+                { q: "La luz 'FUEL LOW' se enciende. ¿Cuántas libras de combustible quedan aproximadamente?", a: ["20-30 lbs", "75-100 lbs", "200 lbs", "500 lbs"], correct: 1, feedback: "En el UH-1H, la luz está calibrada para encenderse cuando quedan entre 75 y 100 lbs, lo que equivale a unos 20 minutos de vuelo." },
+                { q: "En un aterrizaje en zona confinada, el mecánico informa: 'Libre cola'. ¿Qué está confirmando?", a: ["Que no hay pasajeros atrás", "Que el rotor de cola tiene espacio libre de obstáculos", "Que el motor está frío", "Que el combustible está balanceado"], correct: 1, feedback: "El Crew Chief es 'los ojos' del piloto atrás; asegurar que el rotor de cola no toque ramas es vital para evitar la pérdida de control total." },
+                { q: "El indicador de N1 marca 102% de forma continua. ¿Qué indica esto?", a: ["Rendimiento óptimo", "Sobre-velocidad del generador de gases", "Falla en el tacómetro", "Falla de presión de aceite"], correct: 1, feedback: "Cualquier valor por encima del 100% de N1 de forma sostenida es una condición de sobre-velocidad que requiere inspección técnica inmediata." },
+                { q: "¿Cuál es el propósito del 'Drenaje de Combustible' antes del primer vuelo?", a: ["Medir el octanaje", "Eliminar agua y sedimentos del fondo del tanque", "Comprobar la presión de la bomba", "Limpiar las mangueras de llenado"], correct: 1, feedback: "El agua es más pesada que el combustible y se asienta al fondo; si llega al motor puede causar un 'flameout' (apagado) en vuelo." },
+                { q: "Se enciende 'HYD PRESSURE'. ¿Qué cambio sentirá la tripulación inmediatamente?", a: ["El motor se apaga", "Los controles se vuelven extremadamente duros y pesados", "El helicóptero gira a la derecha", "Se apaga el tacómetro"], correct: 1, feedback: "Sin asistencia hidráulica, mover el cíclico y el colectivo requiere una fuerza física inmensa, dificultando maniobras de precisión." },
+                { q: "Durante la inspección de las palas, encuentras una grieta en el 'Borde de Ataque'. ¿Cuál es el procedimiento?", a: ["Limpiar con aceite", "Informar y dejar la aeronave en tierra (AOG)", "Poner cinta de alta velocidad", "Ignorar si es menor a 1 cm"], correct: 1, feedback: "Las palas giran a altas velocidades; cualquier grieta en el borde de ataque puede expandirse por fuerza centrífuga y causar la desintegración de la pala." },
+                { q: "Como Crew Chief en vuelo, ¿qué significa reportar 'Libre derecha' al piloto?", a: ["Combustible balanceado", "Lado derecho libre de obstáculos para el rotor de cola", "Luces de navegación encendidas", "Puerta derecha cerrada"], correct: 1, feedback: "El Crew Chief reporta clearance del rotor de cola en ambos lados para maniobras cercanas a obstáculos." },
+                { q: "En hover, el piloto pide 'bajar cable'. ¿Qué debe verificar el Crew Chief antes?", a: ["Que el cable esté libre de enredos y el gancho seguro", "Que el tanque esté lleno", "Que el motor esté en verde", "Que los pasajeros estén sentados"], correct: 0, feedback: "Verificar que el cable y gancho estén listos evita accidentes en operaciones de rappel o sling." },
+                { q: "Durante autorrotación, ¿qué observa el Crew Chief desde atrás?", a: ["RPM del rotor cayendo rápidamente", "Luces de advertencia en panel", "Posición del colectivo abajo", "Todo lo anterior"], correct: 3, feedback: "El Crew Chief monitorea rotor RPM, colective y panel de caution desde su posición." },
+                { q: "Si ves chispas o humo en la zona de transmisión en vuelo, ¿qué haces?", a: ["Ignorar si es leve", "Reportar inmediatamente 'TRANS CHIP o SMOKE' al piloto", "Ajustar el torque", "Abrir puertas"], correct: 1, feedback: "Cualquier indicio de chip o fuego en transmisión es emergencia crítica." },
+                { q: "El piloto pide 'carga externa lista'. ¿Qué confirma el Crew Chief?", a: ["Carga asegurada con eslinga correcta y apex listo", "Pasajeros listos", "Combustible suficiente", "Luces anti-colisión ON"], correct: 0, feedback: "Verificar rigging de sling load es responsabilidad del Crew Chief." },
+                { q: "¿Cuál es la posición correcta del Crew Chief durante despegue?", a: ["Sentado mirando atrás", "De pie vigilando rotor de cola", "Asistiendo piloto", "Cualquiera es válida"], correct: 1, feedback: "El Crew Chief vigila el área trasera y rotor de cola durante despegue/aterrizaje." },
+                { q: "En caso de 'engine chip', ¿qué acción inmediata toma el Crew Chief?", a: ["Monitorear temperatura y presión de aceite", "Cerrar combustible", "Aterrizar inmediatamente", "Reportar y monitorear"], correct: 3, feedback: "Reportar al piloto y monitorear parámetros; no siempre requiere aterrizaje inmediato." },
+                { q: "¿Qué equipo debe llevar el Crew Chief siempre en vuelo?", a: ["Audífonos, arma asegurada, gafas, guantes", "Solo audífonos", "Botiquín completo", "Extintor portátil"], correct: 0, feedback: "Equipo básico incluye protección auditiva y personal de seguridad." },
+                { q: "Durante sling load, si el cable se engancha, ¿qué reporta?", a: ["'Cable enganchado, abortar'", "Nada", "'Todo libre'", "'Subir más'"], correct: 0, feedback: "Reportar inmediatamente para evitar accidente." },
+                { q: "¿Cuál es el límite aproximado de peso externo en UH-1H?", a: ["5000 lbs", "8000 lbs", "3000 lbs", "10000 lbs"], correct: 0, feedback: "Capacidad típica de gancho externo ~5000 lbs." },
+                { q: "En emergencia de 'low rotor RPM', ¿qué hace el Crew Chief?", a: ["Bajar colectivo si es necesario y reportar", "Subir colectivo", "Cerrar throttle", "Saltar"], correct: 0, feedback: "Ayudar a piloto bajando colectivo si es seguro y reportar." },
+                { q: "Durante vuelo nocturno, ¿qué reporta el Crew Chief sobre luces?", a: ["'Luces anti-colisión visibles'", "Nada", "'Luces de navegación off'", "Solo si falla"], correct: 0, feedback: "Verificar visibilidad de luces para seguridad." },
+                { q: "Si el helicóptero vibra en vuelo, ¿qué podría indicar?", a: ["Desbalance de rotor", "Todo normal", "Bajo combustible", "Alta altitud"], correct: 0, feedback: "Vibración puede indicar desbalance o daño en palas." },
+                { q: "El Crew Chief es responsable de:", a: ["Pasajeros y carga en cabina", "Solo mantenimiento", "Pilotar", "Comunicación radio"], correct: 0, feedback: "Asegurar pasajeros y carga." },
+                { q: "En operación de hoist, ¿qué vigila?", a: ["Posición del cable y carga", "Altitud", "Velocidad", "Dirección viento"], correct: 0, feedback: "Guiar al piloto para posicionar el hoist." },
+                { q: "Si se detecta olor a combustible en cabina, ¿qué hace?", a: ["Reportar 'Fuel leak suspected'", "Ignorar", "Abrir ventanas", "Aumentar velocidad"], correct: 0, feedback: "Posible fuga requiere acción inmediata." },
+                { q: "El comando 'Clear tail' significa:", a: ["Rotor de cola libre", "Cola sucia", "Tail rotor falla", "Clear para aterrizar"], correct: 0, feedback: "Confirmar clearance del tail rotor." },
+                { q: "Durante inserción rápida, el Crew Chief:", a: ["Guía el descenso y confirma suelo seguro", "Solo observa", "Cierra puertas", "Enciende luces"], correct: 0, feedback: "Asegurar zona de aterrizaje segura." },
+                { q: "Si el piloto pierde visibilidad, el Crew Chief:", a: ["Proporciona direcciones", "Toma controles", "Salta", "Apaga motor"], correct: 0, feedback: "Actúa como ojos adicionales." },
+                { q: "En vuelo sobre agua, ¿qué equipo verifica?", a: ["Chalecos salvavidas y balsa", "Solo combustible", "Armas", "Luces"], correct: 0, feedback: "Preparar para posible ditching." },
+                { q: "El Crew Chief reporta 'Dust ball' en:", a: ["Despegue en desierto", "Vuelo normal", "Aterrizaje normal", "Autorrotación"], correct: 0, feedback: "Nube de polvo en hover o despegue." },
+                { q: "Si hay fuego en cabina, el Crew Chief:", a: ["Usa extintor y reporta", "Salta", "Ignora", "Aumenta altitud"], correct: 0, feedback: "Acción inmediata con extintor." },
+                { q: "Durante MEDEVAC, el Crew Chief:", a: ["Asegura paciente y equipo médico", "Pilota", "Solo observa", "Cierra radio"], correct: 0, feedback: "Maneja carga médica." },
+                { q: "El comando 'Up 2' significa:", a: ["Subir 2 pies", "Bajar 2 pies", "Izquierda 2", "Derecha 2"], correct: 0, feedback: "Guía precisa para hover." },
+                { q: "Si el tail rotor falla, el Crew Chief:", a: ["Reporta y prepara para running landing", "Salta", "Apaga motor", "Ignora"], correct: 0, feedback: "Tail rotor failure requiere running landing." },
+                { q: "El Crew Chief verifica safety belts de:", a: ["Pasajeros", "Piloto", "Copiloto", "Todos"], correct: 3, feedback: "Asegurar todos en cabina." },
+                { q: "En operación de rappel, el Crew Chief:", a: ["Asegura cuerdas y guía troops", "Solo observa", "Pilota", "Cierra puertas"], correct: 0, feedback: "Maneja rappel setup." },
+                { q: "Si hay overtorque, el Crew Chief:", a: ["Reporta y monitorea daños", "Ignora", "Baja colectivo", "Apaga"], correct: 0, feedback: "Overtorque puede dañar transmisión." },
+                { q: "El Crew Chief es entrenado en:", a: ["Primeros auxilios y firefighting", "Solo mecánica", "Pilotaje", "Nada"], correct: 0, feedback: "Multi-rol en emergencias." },
+                { q: "Durante hoist rescue, el Crew Chief:", a: ["Opera hoist y guía", "Pilota", "Solo observa", "Cierra radio"], correct: 0, feedback: "Opera el hoist." },
+                { q: "Antes de primer vuelo, ¿cuánto tiempo debe drenar el sumidero de combustible?", a: ["Hasta que salga combustible limpio", "5 segundos", "1 minuto", "Hasta vaciar tanque"], correct: 0, feedback: "Drenar hasta eliminar agua y sedimentos completamente." },
+                { q: "El chip detector de transmisión enciende en tierra. ¿Qué haces?", a: ["Inspeccionar y limpiar detector, verificar partículas metálicas", "Ignorar", "Cambiar aceite", "Volar igual"], correct: 0, feedback: "Inspeccionar partículas; si son ferrosas, posible falla inminente." },
+                { q: "Presión hidráulica normal en UH-1H es aproximadamente:", a: ["1000-1500 psi", "3000 psi", "500 psi", "2000-2500 psi"], correct: 0, feedback: "Sistema hidráulico opera ~1000-1500 psi." },
+                { q: "RPM rotor normal en vuelo:", a: ["324 RPM", "400 RPM", "280 RPM", "360 RPM"], correct: 0, feedback: "Rango verde 320-340 RPM, nominal 324." },
+                { q: "Límite de torque continuo en UH-1H:", a: ["35-42 PSI", "50 PSI", "60 PSI", "25 PSI"], correct: 0, feedback: "Límite continuo ~42 PSI, máximo 50 PSI." },
+                { q: "Nivel de aceite de transmisión se verifica:", a: ["Con motor apagado", "En vuelo", "Con motor encendido", "Solo en overhaul"], correct: 0, feedback: "Verificar nivel en cold check." },
+                { q: "Inspección de palas incluye:", a: ["Chequeo de erosión y grietas", "Solo pintura", "Nada", "Solo peso"], correct: 0, feedback: "Buscar daños en leading edge." },
+                { q: "El grease de tail rotor se aplica cada:", a: ["100 horas", "50 horas", "25 horas", "300 horas"], correct: 2, feedback: "Lubricación regular evita falla." },
+                { q: "Fuga hidráulica se detecta por:", a: ["Manchas rojas (Skydrol)", "Olor a aceite", "Baja presión", "Todo"], correct: 3, feedback: "Skydrol es rojo." },
+                { q: "El battery se verifica para:", a: ["Voltaje >24V", "12V", "28V", "18V"], correct: 0, feedback: "Batería NiCd 24V nominal." },
+                { q: "Inspección de main rotor hub incluye:", a: ["Safety wires y cotter pins", "Solo pintura", "Nada", "Solo limpieza"], correct: 0, feedback: "Asegurar fasteners." },
+                { q: "El fuel filter se cambia cada:", a: ["300 horas o contaminado", "100 horas", "50 horas", "500 horas"], correct: 0, feedback: "Prevenir clogging." },
+                { q: "Presión de neumáticos del UH-1H:", a: ["20-30 psi", "40-50 psi", "60-70 psi", "10-15 psi"], correct: 1, feedback: "Típico 40-50 psi." },
+                { q: "El engine oil se cambia cada:", a: ["100 horas", "50 horas", "25 horas", "300 horas"], correct: 0, feedback: "Mantenimiento programado." },
+                { q: "Chequeo de vibration absorber:", a: ["Inspeccionar mounts y weights", "Ignorar", "Solo en vuelo", "Cambiar siempre"], correct: 0, feedback: "Reduce vibración." },
+                { q: "El tail rotor pitch links se ajustan para:", a: ["Tracking", "Balance", "Torque", "RPM"], correct: 0, feedback: "Asegurar proper pitch." },
+                { q: "Inspección de skids incluye:", a: ["Daños y corrosión", "Solo pintura", "Nada", "Peso"], correct: 0, feedback: "Buscar cracks." },
+                { q: "El hydraulic filter se inspecciona cada:", a: ["50 horas", "100 horas", "25 horas", "300 horas"], correct: 1, feedback: "Prevenir contaminación." },
+                { q: "Chequeo de engine compressor:", a: ["Lavado regular", "Ignorar", "Solo overhaul", "Cambiar"], correct: 0, feedback: "Lavar para remover dirt." },
+                { q: "El main gearbox oil se verifica:", a: ["Nivel y color", "Solo nivel", "Solo color", "Nada"], correct: 0, feedback: "Buscar metal o quemado." },
+                { q: "Inspección de doors y latches:", a: ["Funcionamiento suave", "Ignorar", "Solo pintura", "Cambiar"], correct: 0, feedback: "Asegurar secure." },
+                { q: "El fuel boost pumps se testean:", a: ["En startup", "En vuelo", "Nunca", "Solo si falla"], correct: 0, feedback: "Asegurar flujo." },
+                { q: "Chequeo de avionics:", a: ["Testear radios y nav", "Ignorar", "Solo luces", "Cambiar"], correct: 0, feedback: "Verificar comunicación." },
+                { q: "El tail boom se inspecciona para:", a: ["Corrosión y daños", "Solo pintura", "Nada", "Peso"], correct: 0, feedback: "Buscar cracks." },
+                { q: "Lubricación de swashplate cada:", a: ["25 horas", "50 horas", "100 horas", "300 horas"], correct: 0, feedback: "Mantener smooth operation." },
+                { q: "Chequeo de engine mounts:", a: ["Torques y cracks", "Ignorar", "Solo pintura", "Cambiar"], correct: 0, feedback: "Asegurar integridad." },
+                { q: "El pitot tube se limpia:", a: ["Antes de vuelo", "Nunca", "En overhaul", "Solo si bloqueado"], correct: 0, feedback: "Prevenir errores en airspeed." },
+                { q: "Inspección de fuel lines:", a: ["Fugas y chafing", "Solo nivel", "Nada", "Cambiar"], correct: 0, feedback: "Prevenir fires." },
+                { q: "El starter generator se verifica para:", a: ["Brush wear", "Ignorar", "Solo voltaje", "Cambiar"], correct: 0, feedback: "Mantenimiento eléctrico." },
+                { q: "Chequeo de anti-ice system:", a: ["Test en ground", "Ignorar", "En vuelo", "Nunca"], correct: 0, feedback: "Para operaciones frías." },
+                { q: "Motor del UH-1H es:", a: ["Lycoming T53-L-13B", "Allison 250", "Pratt & Whitney PT6", "General Electric T700"], correct: 0, feedback: "Turboshaft Lycoming T53-L-13B de ~1400 shp." },
+                { q: "Diámetro del rotor principal:", a: ["48 pies", "53 pies 8 pulgadas", "44 pies", "58 pies"], correct: 0, feedback: "Rotor principal: 48 ft." },
+                { q: "Sistema hidráulico del UH-1H es:", a: ["Simple", "Dual", "Triplo", "Ninguno"], correct: 0, feedback: "Sistema hidráulico único." },
+                { q: "Peso máximo bruto UH-1H:", a: ["9500 lbs", "11000 lbs", "8000 lbs", "12000 lbs"], correct: 0, feedback: "9500 lbs máximo." },
+                { q: "Enlace de rueda libre permite:", a: ["Autorrotación", "Aumento RPM", "Reducción torque", "Nada"], correct: 0, feedback: "Desacopla motor para autorrotación." },
+                { q: "Velocidad máxima VNE:", a: ["124 knots", "150 knots", "100 knots", "180 knots"], correct: 0, feedback: "VNE 124 KIAS." },
+                { q: "Capacidad de combustible:", a: ["209 galones", "300 galones", "150 galones", "400 galones"], correct: 0, feedback: "Tanque interno 209 US gal." },
+                { q: "Número de palas en main rotor:", a: ["2", "4", "3", "5"], correct: 0, feedback: "Dos palas semi-rígidas." },
+                { q: "Tail rotor diameter:", a: ["8.5 pies", "10 pies", "7 pies", "12 pies"], correct: 0, feedback: "8 ft 6 in." },
+                { q: "Potencia del motor:", a: ["1400 shp", "1000 shp", "1800 shp", "800 shp"], correct: 0, feedback: "1400 shaft horsepower." },
+                { q: "Altitud máxima de operación:", a: ["14000 ft", "20000 ft", "10000 ft", "25000 ft"], correct: 0, feedback: "Service ceiling ~14,000 ft." },
+                { q: "Rango típico:", a: ["318 millas", "500 millas", "200 millas", "400 millas"], correct: 0, feedback: "Rango ferry ~318 nm." },
+                { q: "Número de asientos:", a: ["14", "10", "8", "20"], correct: 0, feedback: "Hasta 14 tropas." },
+                { q: "Año de introducción:", a: ["1967", "1950", "1980", "1975"], correct: 0, feedback: "UH-1H entró en servicio en 1967." },
+                { q: "Fabricante:", a: ["Bell Helicopter", "Sikorsky", "Boeing", "Hughes"], correct: 0, feedback: "Bell Helicopter Textron." },
+                { q: "Tipo de combustible:", a: ["JP-4/JP-5", "Avgas", "Diesel", "Kerosene"], correct: 0, feedback: "Jet fuel JP-4 o JP-5." },
+                { q: "Sistema de control:", a: ["Hidráulico asistido", "Manual", "Fly-by-wire", "Eléctrico"], correct: 0, feedback: "Controles hidráulicos." },
+                { q: "Longitud total:", a: ["57 pies", "50 pies", "60 pies", "45 pies"], correct: 0, feedback: "57 ft 1 in." },
+                { q: "Altura:", a: ["14.5 pies", "12 pies", "16 pies", "10 pies"], correct: 0, feedback: "14 ft 5 in." },
+                { q: "Peso vacío:", a: ["5200 lbs", "6000 lbs", "4000 lbs", "7000 lbs"], correct: 0, feedback: "Empty weight ~5,215 lbs." },
+                { q: "Velocidad de crucero:", a: ["110 knots", "130 knots", "90 knots", "150 knots"], correct: 0, feedback: "Cruise ~110 KIAS." },
+                { q: "Número de motores:", a: ["1", "2", "3", "4"], correct: 0, feedback: "Un solo turboshaft." },
+                { q: "Tipo de rotor:", a: ["Semi-rígido", "Rígido", "Articulado", "Teetering"], correct: 0, feedback: "Semi-rígido two-blade." },
+                { q: "Armamento típico:", a: ["M60 machine guns", "Ninguno", "Missiles", "Cannons"], correct: 0, feedback: "Door-mounted M60." },
+                { q: "Rol principal:", a: ["Transporte de tropas", "Ataque", "Recon", "Cargo"], correct: 0, feedback: "Utility/transport." },
+                { q: "Variante famosa:", a: ["Huey", "Blackhawk", "Apache", "Chinook"], correct: 0, feedback: "Apodado Huey." },
+                { q: "País de origen:", a: ["EE.UU.", "Rusia", "Francia", "Alemania"], correct: 0, feedback: "United States." },
+                { q: "Número producido:", a: ["Más de 16000", "5000", "10000", "2000"], correct: 0, feedback: "Over 16,000 built." },
+                { q: "Guerra famosa:", a: ["Vietnam", "WWII", "Korea", "Gulf"], correct: 0, feedback: "Icono de Vietnam War." },
+                { q: "Retirado en US Army:", a: ["2016", "2000", "1990", "2020"], correct: 0, feedback: "Último en 2016." }
+            ];
+        }
+
+        // ────────────────────────────────────────────────
+        // Resto del código (funciones que ya tenías y funcionaban)
+        // ────────────────────────────────────────────────
+
+        async function getUserNameWithSimilarityCheck() {
+            let inputName = prompt("Ingresa tu nombre para el leaderboard:").trim().toUpperCase();
+            while (!inputName) {
+                inputName = prompt("Nombre requerido. Ingresa tu nombre:").trim().toUpperCase();
+            }
+
+            const snapshot = await db.collection('mechanics').get();
+            let similarNames = [];
+            snapshot.forEach(doc => {
+                const existing = doc.data().name;
+                if (levenshteinDistance(inputName, existing) <= 2) {
+                    similarNames.push(existing);
+                }
+            });
+
+            if (similarNames.length > 0) {
+                const confirm = prompt(`Nombres similares encontrados: ${similarNames.join(', ')}. ¿Quieres usar uno de ellos? Ingresa el nombre exacto o presiona cancel para nuevo.`);
+                if (confirm) return confirm.toUpperCase();
+            }
+            return inputName;
+        }
+
+        function levenshteinDistance(s1, s2) {
+            const matrix = Array.from({length: s1.length + 1}, () => Array(s2.length + 1).fill(0));
+            for (let i = 0; i <= s1.length; i++) matrix[i][0] = i;
+            for (let j = 0; j <= s2.length; j++) matrix[0][j] = j;
+            for (let i = 1; i <= s1.length; i++) {
+                for (let j = 1; j <= s2.length; j++) {
+                    const cost = s1[i - 1] === s2[j - 1] ? 0 : 1;
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j] + 1,
+                        matrix[i][j - 1] + 1,
+                        matrix[i - 1][j - 1] + cost
+                    );
+                }
+            }
+            return matrix[s1.length][s2.length];
+        }
+
+        async function loadLeaderboard() {
+            const snapshot = await db.collection('mechanics').get();
+            const select = document.getElementById('leaderboard');
+            select.innerHTML = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const opt = document.createElement('option');
+                opt.text = `${data.name} - ${data.min_attempts !== null ? data.min_attempts + ' intentos' : 'No logrado aún'}`;
+                select.add(opt);
+            });
+        }
+
         function setSim(mode) {
             const needles = {
                 torque: document.getElementById('needle-torque'),
@@ -399,218 +557,6 @@
 
         function updateGauge(element, degrees) {
             element.style.transform = `rotate(${degrees}deg)`;
-        }
-
-        // --- SISTEMA DE TEST (EXAMEN AVANZADO) ---
-        let questions = [];
-        let currentQ = 0;
-        let score = 0;
-        let skulls = 0;
-        let attempts = 1;
-        let timerInterval;
-        let timeLeft;
-        let userName;
-        let db;
-
-        async function initApp() {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-
-            // Cargar preguntas desde Firebase
-            questions = await loadQuestions();
-
-            // Prompt para nombre, con chequeo de similitud
-            userName = await getUserNameWithSimilarityCheck();
-
-            const userRef = db.collection('mechanics').doc(userName.toLowerCase());
-            const doc = await userRef.get();
-
-            if (!doc.exists) {
-                await userRef.set({ name: userName, min_attempts: null });
-            } else {
-                const minAttempts = doc.data().min_attempts;
-                if (minAttempts !== null) {
-                    alert(`Ya lograste el 100% en ${minAttempts} intentos! Puedes intentar mejorar tu récord.`);
-                }
-            }
-
-            await loadLeaderboard();
-            setSim('cold');
-            loadQuestion();
-        }
-
-        async function loadQuestions() {
-            const snapshot = await db.collection('questions').get();
-            let qList = [];
-            snapshot.forEach(doc => {
-                qList.push(doc.data());
-            });
-            if (qList.length === 0) {
-                qList = defaultQuestions(); // Función con 100 preguntas default si no hay en DB
-            }
-            return qList;
-        }
-
-        function defaultQuestions() {
-            return [
-                { q: "Durante el arranque, la temperatura EGT sube rápidamente hacia los 800°C sin estabilizarse. ¿Qué debe hacer el mecánico?", a: ["Esperar a que el motor acelere", "Gritar 'HOT START' y cerrar combustible", "Aumentar N1 manualmente", "Abrir la válvula de purga"], correct: 1, feedback: "Un Hot Start puede destruir las etapas de la turbina en segundos. La acción inmediata es cortar el flujo de combustible." },
-                { q: "Se observa una separación de las agujas del tacómetro dual (E y R) en vuelo de crucero. ¿Cuál es el diagnóstico más probable?", a: ["Falla del generador", "Falla de N1", "Falla total de motor o desacople", "Exceso de Torque"], correct: 2, feedback: "Cuando el motor deja de entregar potencia, el rotor se desacopla por el embrague de rueda libre para permitir autorrotación." },
-                { q: "Aparece la luz 'TRANS CHIP'. El piloto decide continuar el vuelo por 10 minutos. Como mecánico, ¿qué vigilarías?", a: ["Temperatura y presión de aceite de transmisión", "Nivel de combustible", "Altitud de densidad", "Presión hidráulica"], correct: 0, feedback: "Un 'Chip' indica fricción metálica; si sube la temperatura o baja la presión del aceite de transmisión, la falla catastrófica es inminente." },
-                { q: "¿Qué fenómeno ocurre si se excede el límite de Torque de 50 PSI durante un despegue en zona alta?", a: ["Aumento de sustentación", "Fatiga estructural en el mástil y engranajes", "Mejor rendimiento del motor", "Aumento de la velocidad N2"], correct: 1, feedback: "El torque mide la fuerza de torsión; excederlo estresa los metales de la transmisión, pudiendo causar una fractura del mástil." },
-                { q: "La luz 'FUEL LOW' se enciende. ¿Cuántas libras de combustible quedan aproximadamente?", a: ["20-30 lbs", "75-100 lbs", "200 lbs", "500 lbs"], correct: 1, feedback: "En el UH-1H, la luz está calibrada para encenderse cuando quedan entre 75 y 100 lbs, lo que equivale a unos 20 minutos de vuelo." },
-                { q: "En un aterrizaje en zona confinada, el mecánico informa: 'Libre cola'. ¿Qué está confirmando?", a: ["Que no hay pasajeros atrás", "Que el rotor de cola tiene espacio libre de obstáculos", "Que el motor está frío", "Que el combustible está balanceado"], correct: 1, feedback: "El Crew Chief es 'los ojos' del piloto atrás; asegurar que el rotor de cola no toque ramas es vital para evitar la pérdida de control total." },
-                { q: "El indicador de N1 marca 102% de forma continua. ¿Qué indica esto?", a: ["Rendimiento óptimo", "Sobre-velocidad del generador de gases", "Falla en el tacómetro", "Falla de presión de aceite"], correct: 1, feedback: "Cualquier valor por encima del 100% de N1 de forma sostenida es una condición de sobre-velocidad que requiere inspección técnica inmediata." },
-                { q: "¿Cuál es el propósito del 'Drenaje de Combustible' antes del primer vuelo?", a: ["Medir el octanaje", "Eliminar agua y sedimentos del fondo del tanque", "Comprobar la presión de la bomba", "Limpiar las mangueras de llenado"], correct: 1, feedback: "El agua es más pesada que el combustible y se asienta al fondo; si llega al motor puede causar un 'flameout' (apagado) en vuelo." },
-                { q: "Se enciende 'HYD PRESSURE'. ¿Qué cambio sentirá la tripulación inmediatamente?", a: ["El motor se apaga", "Los controles se vuelven extremadamente duros y pesados", "El helicóptero gira a la derecha", "Se apaga el tacómetro"], correct: 1, feedback: "Sin asistencia hidráulica, mover el cíclico y el colectivo requiere una fuerza física inmensa, dificultando maniobras de precisión." },
-                { q: "Durante la inspección de las palas, encuentras una grieta en el 'Borde de Ataque'. ¿Cuál es el procedimiento?", a: ["Limpiar con aceite", "Informar y dejar la aeronave en tierra (AOG)", "Poner cinta de alta velocidad", "Ignorar si es menor a 1 cm"], correct: 1, feedback: "Las palas giran a altas velocidades; cualquier grieta en el borde de ataque puede expandirse por fuerza centrífuga y causar la desintegración de la pala." },
-                { q: "Como Crew Chief en vuelo, ¿qué significa reportar 'Libre derecha' al piloto?", a: ["Combustible balanceado", "Lado derecho libre de obstáculos para el rotor de cola", "Luces de navegación encendidas", "Puerta derecha cerrada"], correct: 1, feedback: "El Crew Chief reporta clearance del rotor de cola en ambos lados para maniobras cercanas a obstáculos." },
-                { q: "En hover, el piloto pide 'bajar cable'. ¿Qué debe verificar el Crew Chief antes?", a: ["Que el cable esté libre de enredos y el gancho seguro", "Que el tanque esté lleno", "Que el motor esté en verde", "Que los pasajeros estén sentados"], correct: 0, feedback: "Verificar que el cable y gancho estén listos evita accidentes en operaciones de rappel o sling." },
-                { q: "Durante autorrotación, ¿qué observa el Crew Chief desde atrás?", a: ["RPM del rotor cayendo rápidamente", "Luces de advertencia en panel", "Posición del colectivo abajo", "Todo lo anterior"], correct: 3, feedback: "El Crew Chief monitorea rotor RPM, colective y panel de caution desde su posición." },
-                { q: "Si ves chispas o humo en la zona de transmisión en vuelo, ¿qué haces?", a: ["Ignorar si es leve", "Reportar inmediatamente 'TRANS CHIP o SMOKE' al piloto", "Ajustar el torque", "Abrir puertas"], correct: 1, feedback: "Cualquier indicio de chip o fuego en transmisión es emergencia crítica." },
-                { q: "El piloto pide 'carga externa lista'. ¿Qué confirma el Crew Chief?", a: ["Carga asegurada con eslinga correcta y apex listo", "Pasajeros listos", "Combustible suficiente", "Luces anti-colisión ON"], correct: 0, feedback: "Verificar rigging de sling load es responsabilidad del Crew Chief." },
-                { q: "¿Cuál es la posición correcta del Crew Chief durante despegue?", a: ["Sentado mirando atrás", "De pie vigilando rotor de cola", "Asistiendo piloto", "Cualquiera es válida"], correct: 1, feedback: "El Crew Chief vigila el área trasera y rotor de cola durante despegue/aterrizaje." },
-                { q: "En caso de 'engine chip', ¿qué acción inmediata toma el Crew Chief?", a: ["Monitorear temperatura y presión de aceite", "Cerrar combustible", "Aterrizar inmediatamente", "Reportar y monitorear"], correct: 3, feedback: "Reportar al piloto y monitorear parámetros; no siempre requiere aterrizaje inmediato." },
-                { q: "¿Qué equipo debe llevar el Crew Chief siempre en vuelo?", a: ["Audífonos, arma asegurada, gafas, guantes", "Solo audífonos", "Botiquín completo", "Extintor portátil"], correct: 0, feedback: "Equipo básico incluye protección auditiva y personal de seguridad." },
-                { q: "Durante sling load, si el cable se engancha, ¿qué reporta?", a: ["'Cable enganchado, abortar'", "Nada", "'Todo libre'", "'Subir más'"], correct: 0, feedback: "Reportar inmediatamente para evitar accidente." },
-                { q: "¿Cuál es el límite aproximado de peso externo en UH-1H?", a: ["5000 lbs", "8000 lbs", "3000 lbs", "10000 lbs"], correct: 0, feedback: "Capacidad típica de gancho externo ~5000 lbs." },
-                { q: "En emergencia de 'low rotor RPM', ¿qué hace el Crew Chief?", a: ["Bajar colectivo si es necesario y reportar", "Subir colectivo", "Cerrar throttle", "Saltar"], correct: 0, feedback: "Ayudar a piloto bajando colectivo si es seguro y reportar." },
-                { q: "Durante vuelo nocturno, ¿qué reporta el Crew Chief sobre luces?", a: ["'Luces anti-colisión visibles'", "Nada", "'Luces de navegación off'", "Solo si falla"], correct: 0, feedback: "Verificar visibilidad de luces para seguridad." },
-                { q: "Si el helicóptero vibra en vuelo, ¿qué podría indicar?", a: ["Desbalance de rotor", "Todo normal", "Bajo combustible", "Alta altitud"], correct: 0, feedback: "Vibración puede indicar desbalance o daño en palas." },
-                { q: "El Crew Chief es responsable de:", a: ["Pasajeros y carga en cabina", "Solo mantenimiento", "Pilotar", "Comunicación radio"], correct: 0, feedback: "Asegurar pasajeros y carga." },
-                { q: "En operación de hoist, ¿qué vigila?", a: ["Posición del cable y carga", "Altitud", "Velocidad", "Dirección viento"], correct: 0, feedback: "Guiar al piloto para posicionar el hoist." },
-                { q: "Si se detecta olor a combustible en cabina, ¿qué hace?", a: ["Reportar 'Fuel leak suspected'", "Ignorar", "Abrir ventanas", "Aumentar velocidad"], correct: 0, feedback: "Posible fuga requiere acción inmediata." },
-                { q: "El comando 'Clear tail' significa:", a: ["Rotor de cola libre", "Cola sucia", "Tail rotor falla", "Clear para aterrizar"], correct: 0, feedback: "Confirmar clearance del tail rotor." },
-                { q: "Durante inserción rápida, el Crew Chief:", a: ["Guía el descenso y confirma suelo seguro", "Solo observa", "Cierra puertas", "Enciende luces"], correct: 0, feedback: "Asegurar zona de aterrizaje segura." },
-                { q: "Si el piloto pierde visibilidad, el Crew Chief:", a: ["Proporciona direcciones", "Toma controles", "Salta", "Apaga motor"], correct: 0, feedback: "Actúa como ojos adicionales." },
-                { q: "En vuelo sobre agua, ¿qué equipo verifica?", a: ["Chalecos salvavidas y balsa", "Solo combustible", "Armas", "Luces"], correct: 0, feedback: "Preparar para posible ditching." },
-                { q: "El Crew Chief reporta 'Dust ball' en:", a: ["Despegue en desierto", "Vuelo normal", "Aterrizaje normal", "Autorrotación"], correct: 0, feedback: "Nube de polvo en hover o despegue." },
-                { q: "Si hay fuego en cabina, el Crew Chief:", a: ["Usa extintor y reporta", "Salta", "Ignora", "Aumenta altitud"], correct: 0, feedback: "Acción inmediata con extintor." },
-                { q: "Durante MEDEVAC, el Crew Chief:", a: ["Asegura paciente y equipo médico", "Pilota", "Solo observa", "Cierra radio"], correct: 0, feedback: "Maneja carga médica." },
-                { q: "El comando 'Up 2' significa:", a: ["Subir 2 pies", "Bajar 2 pies", "Izquierda 2", "Derecha 2"], correct: 0, feedback: "Guía precisa para hover." },
-                { q: "Si el tail rotor falla, el Crew Chief:", a: ["Reporta y prepara para running landing", "Salta", "Apaga motor", "Ignora"], correct: 0, feedback: "Tail rotor failure requiere running landing." },
-                { q: "El Crew Chief verifica safety belts de:", a: ["Pasajeros", "Piloto", "Copiloto", "Todos"], correct: 3, feedback: "Asegurar todos en cabina." },
-                { q: "En operación de rappel, el Crew Chief:", a: ["Asegura cuerdas y guía troops", "Solo observa", "Pilota", "Cierra puertas"], correct: 0, feedback: "Maneja rappel setup." },
-                { q: "Si hay overtorque, el Crew Chief:", a: ["Reporta y monitorea daños", "Ignora", "Baja colectivo", "Apaga"], correct: 0, feedback: "Overtorque puede dañar transmisión." },
-                { q: "El Crew Chief es entrenado en:", a: ["Primeros auxilios y firefighting", "Solo mecánica", "Pilotaje", "Nada"], correct: 0, feedback: "Multi-rol en emergencias." },
-                { q: "Durante hoist rescue, el Crew Chief:", a: ["Opera hoist y guía", "Pilota", "Solo observa", "Cierra radio"], correct: 0, feedback: "Opera el hoist." },
-                // Mecánico en tierra (41-70)
-                { q: "Antes de primer vuelo, ¿cuánto tiempo debe drenar el sumidero de combustible?", a: ["Hasta que salga combustible limpio", "5 segundos", "1 minuto", "Hasta vaciar tanque"], correct: 0, feedback: "Drenar hasta eliminar agua y sedimentos completamente." },
-                { q: "El chip detector de transmisión enciende en tierra. ¿Qué haces?", a: ["Inspeccionar y limpiar detector, verificar partículas metálicas", "Ignorar", "Cambiar aceite", "Volar igual"], correct: 0, feedback: "Inspeccionar partículas; si son ferrosas, posible falla inminente." },
-                { q: "Presión hidráulica normal en UH-1H es aproximadamente:", a: ["1000-1500 psi", "3000 psi", "500 psi", "2000-2500 psi"], correct: 0, feedback: "Sistema hidráulico opera ~1000-1500 psi." },
-                { q: "RPM rotor normal en vuelo:", a: ["324 RPM", "400 RPM", "280 RPM", "360 RPM"], correct: 0, feedback: "Rango verde 320-340 RPM, nominal 324." },
-                { q: "Límite de torque continuo en UH-1H:", a: ["35-42 PSI", "50 PSI", "60 PSI", "25 PSI"], correct: 0, feedback: "Límite continuo ~42 PSI, máximo 50 PSI." },
-                { q: "Nivel de aceite de transmisión se verifica:", a: ["Con motor apagado", "En vuelo", "Con motor encendido", "Solo en overhaul"], correct: 0, feedback: "Verificar nivel en cold check." },
-                { q: "Inspección de palas incluye:", a: ["Chequeo de erosión y grietas", "Solo pintura", "Nada", "Solo peso"], correct: 0, feedback: "Buscar daños en leading edge." },
-                { q: "El grease de tail rotor se aplica cada:", a: ["100 horas", "50 horas", "25 horas", "300 horas"], correct: 2, feedback: "Lubricación regular evita falla." },
-                { q: "Fuga hidráulica se detecta por:", a: ["Manchas rojas (Skydrol)", "Olor a aceite", "Baja presión", "Todo"], correct: 3, feedback: "Skydrol es rojo." },
-                { q: "El battery se verifica para:", a: ["Voltaje >24V", "12V", "28V", "18V"], correct: 0, feedback: "Batería NiCd 24V nominal." },
-                { q: "Inspección de main rotor hub incluye:", a: ["Safety wires y cotter pins", "Solo pintura", "Nada", "Solo limpieza"], correct: 0, feedback: "Asegurar fasteners." },
-                { q: "El fuel filter se cambia cada:", a: ["300 horas o contaminado", "100 horas", "50 horas", "500 horas"], correct: 0, feedback: "Prevenir clogging." },
-                { q: "Presión de neumáticos del UH-1H:", a: ["20-30 psi", "40-50 psi", "60-70 psi", "10-15 psi"], correct: 1, feedback: "Típico 40-50 psi." },
-                { q: "El engine oil se cambia cada:", a: ["100 horas", "50 horas", "25 horas", "300 horas"], correct: 0, feedback: "Mantenimiento programado." },
-                { q: "Chequeo de vibration absorber:", a: ["Inspeccionar mounts y weights", "Ignorar", "Solo en vuelo", "Cambiar siempre"], correct: 0, feedback: "Reduce vibración." },
-                { q: "El tail rotor pitch links se ajustan para:", a: ["Tracking", "Balance", "Torque", "RPM"], correct: 0, feedback: "Asegurar proper pitch." },
-                { q: "Inspección de skids incluye:", a: ["Daños y corrosión", "Solo pintura", "Nada", "Peso"], correct: 0, feedback: "Buscar cracks." },
-                { q: "El hydraulic filter se inspecciona cada:", a: ["50 horas", "100 horas", "25 horas", "300 horas"], correct: 1, feedback: "Prevenir contaminación." },
-                { q: "Chequeo de engine compressor:", a: ["Lavado regular", "Ignorar", "Solo overhaul", "Cambiar"], correct: 0, feedback: "Lavar para remover dirt." },
-                { q: "El main gearbox oil se verifica:", a: ["Nivel y color", "Solo nivel", "Solo color", "Nada"], correct: 0, feedback: "Buscar metal o quemado." },
-                { q: "Inspección de doors y latches:", a: ["Funcionamiento suave", "Ignorar", "Solo pintura", "Cambiar"], correct: 0, feedback: "Asegurar secure." },
-                { q: "El fuel boost pumps se testean:", a: ["En startup", "En vuelo", "Nunca", "Solo si falla"], correct: 0, feedback: "Asegurar flujo." },
-                { q: "Chequeo de avionics:", a: ["Testear radios y nav", "Ignorar", "Solo luces", "Cambiar"], correct: 0, feedback: "Verificar comunicación." },
-                { q: "El tail boom se inspecciona para:", a: ["Corrosión y daños", "Solo pintura", "Nada", "Peso"], correct: 0, feedback: "Buscar cracks." },
-                { q: "Lubricación de swashplate cada:", a: ["25 horas", "50 horas", "100 horas", "300 horas"], correct: 0, feedback: "Mantener smooth operation." },
-                { q: "Chequeo de engine mounts:", a: ["Torques y cracks", "Ignorar", "Solo pintura", "Cambiar"], correct: 0, feedback: "Asegurar integridad." },
-                { q: "El pitot tube se limpia:", a: ["Antes de vuelo", "Nunca", "En overhaul", "Solo si bloqueado"], correct: 0, feedback: "Prevenir errores en airspeed." },
-                { q: "Inspección de fuel lines:", a: ["Fugas y chafing", "Solo nivel", "Nada", "Cambiar"], correct: 0, feedback: "Prevenir fires." },
-                { q: "El starter generator se verifica para:", a: ["Brush wear", "Ignorar", "Solo voltaje", "Cambiar"], correct: 0, feedback: "Mantenimiento eléctrico." },
-                { q: "Chequeo de anti-ice system:", a: ["Test en ground", "Ignorar", "En vuelo", "Nunca"], correct: 0, feedback: "Para operaciones frías." },
-                // Generalidades (71-100)
-                { q: "Motor del UH-1H es:", a: ["Lycoming T53-L-13B", "Allison 250", "Pratt & Whitney PT6", "General Electric T700"], correct: 0, feedback: "Turboshaft Lycoming T53-L-13B de ~1400 shp." },
-                { q: "Diámetro del rotor principal:", a: ["48 pies", "53 pies 8 pulgadas", "44 pies", "58 pies"], correct: 0, feedback: "Rotor principal: 48 ft." },
-                { q: "Sistema hidráulico del UH-1H es:", a: ["Simple", "Dual", "Triplo", "Ninguno"], correct: 0, feedback: "Sistema hidráulico único." },
-                { q: "Peso máximo bruto UH-1H:", a: ["9500 lbs", "11000 lbs", "8000 lbs", "12000 lbs"], correct: 0, feedback: "9500 lbs máximo." },
-                { q: "Enlace de rueda libre permite:", a: ["Autorrotación", "Aumento RPM", "Reducción torque", "Nada"], correct: 0, feedback: "Desacopla motor para autorrotación." },
-                { q: "Velocidad máxima VNE:", a: ["124 knots", "150 knots", "100 knots", "180 knots"], correct: 0, feedback: "VNE 124 KIAS." },
-                { q: "Capacidad de combustible:", a: ["209 galones", "300 galones", "150 galones", "400 galones"], correct: 0, feedback: "Tanque interno 209 US gal." },
-                { q: "Número de palas en main rotor:", a: ["2", "4", "3", "5"], correct: 0, feedback: "Dos palas semi-rígidas." },
-                { q: "Tail rotor diameter:", a: ["8.5 pies", "10 pies", "7 pies", "12 pies"], correct: 0, feedback: "8 ft 6 in." },
-                { q: "Potencia del motor:", a: ["1400 shp", "1000 shp", "1800 shp", "800 shp"], correct: 0, feedback: "1400 shaft horsepower." },
-                { q: "Altitud máxima de operación:", a: ["14000 ft", "20000 ft", "10000 ft", "25000 ft"], correct: 0, feedback: "Service ceiling ~14,000 ft." },
-                { q: "Rango típico:", a: ["318 millas", "500 millas", "200 millas", "400 millas"], correct: 0, feedback: "Rango ferry ~318 nm." },
-                { q: "Número de asientos:", a: ["14", "10", "8", "20"], correct: 0, feedback: "Hasta 14 tropas." },
-                { q: "Año de introducción:", a: ["1967", "1950", "1980", "1975"], correct: 0, feedback: "UH-1H entró en servicio en 1967." },
-                { q: "Fabricante:", a: ["Bell Helicopter", "Sikorsky", "Boeing", "Hughes"], correct: 0, feedback: "Bell Helicopter Textron." },
-                { q: "Tipo de combustible:", a: ["JP-4/JP-5", "Avgas", "Diesel", "Kerosene"], correct: 0, feedback: "Jet fuel JP-4 o JP-5." },
-                { q: "Sistema de control:", a: ["Hidráulico asistido", "Manual", "Fly-by-wire", "Eléctrico"], correct: 0, feedback: "Controles hidráulicos." },
-                { q: "Longitud total:", a: ["57 pies", "50 pies", "60 pies", "45 pies"], correct: 0, feedback: "57 ft 1 in." },
-                { q: "Altura:", a: ["14.5 pies", "12 pies", "16 pies", "10 pies"], correct: 0, feedback: "14 ft 5 in." },
-                { q: "Peso vacío:", a: ["5200 lbs", "6000 lbs", "4000 lbs", "7000 lbs"], correct: 0, feedback: "Empty weight ~5,215 lbs." },
-                { q: "Velocidad de crucero:", a: ["110 knots", "130 knots", "90 knots", "150 knots"], correct: 0, feedback: "Cruise ~110 KIAS." },
-                { q: "Número de motores:", a: ["1", "2", "3", "4"], correct: 0, feedback: "Un solo turboshaft." },
-                { q: "Tipo de rotor:", a: ["Semi-rígido", "Rígido", "Articulado", "Teetering"], correct: 0, feedback: "Semi-rígido two-blade." },
-                { q: "Armamento típico:", a: ["M60 machine guns", "Ninguno", "Missiles", "Cannons"], correct: 0, feedback: "Door-mounted M60." },
-                { q: "Rol principal:", a: ["Transporte de tropas", "Ataque", "Recon", "Cargo"], correct: 0, feedback: "Utility/transport." },
-                { q: "Variante famosa:", a: ["Huey", "Blackhawk", "Apache", "Chinook"], correct: 0, feedback: "Apodado Huey." },
-                { q: "País de origen:", a: ["EE.UU.", "Rusia", "Francia", "Alemania"], correct: 0, feedback: "United States." },
-                { q: "Número producido:", a: ["Más de 16000", "5000", "10000", "2000"], correct: 0, feedback: "Over 16,000 built." },
-                { q: "Guerra famosa:", a: ["Vietnam", "WWII", "Korea", "Gulf"], correct: 0, feedback: "Icono de Vietnam War." },
-                { q: "Retirado en US Army:", a: ["2016", "2000", "1990", "2020"], correct: 0, feedback: "Último en 2016." }
-            ];
-        }
-
-        async function getUserNameWithSimilarityCheck() {
-            let inputName = prompt("Ingresa tu nombre para el leaderboard:").trim().toUpperCase();
-            while (!inputName) {
-                inputName = prompt("Nombre requerido. Ingresa tu nombre:").trim().toUpperCase();
-            }
-
-            const snapshot = await db.collection('mechanics').get();
-            let similarNames = [];
-            snapshot.forEach(doc => {
-                const existing = doc.data().name;
-                if (levenshteinDistance(inputName, existing) <= 2) { // Umbral de 2 para errores tipográficos
-                    similarNames.push(existing);
-                }
-            });
-
-            if (similarNames.length > 0) {
-                const confirm = prompt(`Nombres similares encontrados: ${similarNames.join(', ')}. ¿Quieres usar uno de ellos? Ingresa el nombre exacto o presiona cancel para nuevo.`);
-                if (confirm) {
-                    return confirm.toUpperCase();
-                }
-            }
-
-            return inputName;
-        }
-
-        // Función Levenshtein para similitud
-        function levenshteinDistance(s1, s2) {
-            const matrix = Array.from({length: s1.length + 1}, () => Array(s2.length + 1).fill(0));
-            for (let i = 0; i <= s1.length; i++) matrix[i][0] = i;
-            for (let j = 0; j <= s2.length; j++) matrix[0][j] = j;
-            for (let i = 1; i <= s1.length; i++) {
-                for (let j = 1; j <= s2.length; j++) {
-                    const cost = s1[i - 1] === s2[j - 1] ? 0 : 1;
-                    matrix[i][j] = Math.min(
-                        matrix[i - 1][j] + 1,
-                        matrix[i][j - 1] + 1,
-                        matrix[i - 1][j - 1] + cost
-                    );
-                }
-            }
-            return matrix[s1.length][s2.length];
-        }
-
-        async function loadLeaderboard() {
-            const snapshot = await db.collection('mechanics').get();
-            const select = document.getElementById('leaderboard');
-            select.innerHTML = '';
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const opt = document.createElement('option');
-                opt.text = `${data.name} - ${data.min_attempts !== null ? data.min_attempts + ' intentos' : 'No logrado aún'}`;
-                select.add(opt);
-            });
         }
 
         function loadQuestion() {
@@ -692,7 +638,7 @@
             if (currentQ < questions.length) {
                 loadQuestion();
             } else {
-                let rank = score > 8 ? "INSTRUCTOR" : (score > 5 ? "CREW CHIEF" : "APRENDIZ");
+                let rank = score > 90 ? "INSTRUCTOR" : (score > 70 ? "CREW CHIEF EXPERTO" : (score > 50 ? "CREW CHIEF" : "APRENDIZ"));
                 let html = `
                     <div class="text-center py-10">
                         <div class="text-5xl mb-4">🎖️</div>
@@ -702,13 +648,14 @@
                 `;
 
                 if (score === questions.length) {
-                    html += `<p class="text-green-400 text-lg mb-4">¡Felicidades! Lograste el 100% en ${attempts} intentos. Puedes agregar una nueva pregunta.</p>`;
+                    html += `<p class="text-green-400 text-lg mb-4">¡Felicidades! Lograste el 100% en ${attempts} intentos.</p>`;
+                    html += `<p class="text-zinc-300 mb-4">Puedes agregar una nueva pregunta (será la ${questions.length + 1}):</p>`;
                     html += addNewQuestionForm();
                     saveAchievement(attempts);
                 }
 
                 html += `
-                        <button onclick="location.reload()" class="px-8 py-3 bg-zinc-700 hover:bg-zinc-600 rounded-full text-xs font-bold uppercase transition">Reintentar Certificación</button>
+                        <button onclick="location.reload()" class="mt-6 px-8 py-3 bg-zinc-700 hover:bg-zinc-600 rounded-full text-xs font-bold uppercase transition">Reintentar Certificación</button>
                     </div>
                 `;
 
@@ -718,52 +665,60 @@
 
         function addNewQuestionForm() {
             return `
-                <div class="mt-4 p-4 bg-zinc-800 rounded-lg">
-                    <h4 class="text-lg font-bold mb-2">Agregar Nueva Pregunta</h4>
-                    <input id="new-q" class="w-full p-2 mb-2 bg-zinc-700 rounded text-white" placeholder="Pregunta">
-                    <input id="new-a0" class="w-full p-2 mb-2 bg-zinc-700 rounded text-white" placeholder="Opción A">
-                    <input id="new-a1" class="w-full p-2 mb-2 bg-zinc-700 rounded text-white" placeholder="Opción B">
-                    <input id="new-a2" class="w-full p-2 mb-2 bg-zinc-700 rounded text-white" placeholder="Opción C">
-                    <input id="new-a3" class="w-full p-2 mb-2 bg-zinc-700 rounded text-white" placeholder="Opción D">
-                    <select id="new-correct" class="w-full p-2 mb-2 bg-zinc-700 rounded text-white">
-                        <option value="0">A correcta</option>
-                        <option value="1">B correcta</option>
-                        <option value="2">C correcta</option>
-                        <option value="3">D correcta</option>
+                <div class="mt-6 p-6 bg-zinc-800 rounded-xl border border-zinc-700">
+                    <h4 class="text-lg font-bold mb-4 text-orange-400">Agregar Nueva Pregunta</h4>
+                    <input id="new-q" class="w-full p-3 mb-3 bg-zinc-900 border border-zinc-600 rounded text-white placeholder-zinc-500" placeholder="Escribe la pregunta aquí...">
+                    <input id="new-a0" class="w-full p-3 mb-3 bg-zinc-900 border border-zinc-600 rounded text-white placeholder-zinc-500" placeholder="Opción A">
+                    <input id="new-a1" class="w-full p-3 mb-3 bg-zinc-900 border border-zinc-600 rounded text-white placeholder-zinc-500" placeholder="Opción B">
+                    <input id="new-a2" class="w-full p-3 mb-3 bg-zinc-900 border border-zinc-600 rounded text-white placeholder-zinc-500" placeholder="Opción C">
+                    <input id="new-a3" class="w-full p-3 mb-3 bg-zinc-900 border border-zinc-600 rounded text-white placeholder-zinc-500" placeholder="Opción D">
+                    <select id="new-correct" class="w-full p-3 mb-3 bg-zinc-900 border border-zinc-600 rounded text-white">
+                        <option value="0">A es la correcta</option>
+                        <option value="1">B es la correcta</option>
+                        <option value="2">C es la correcta</option>
+                        <option value="3">D es la correcta</option>
                     </select>
-                    <input id="new-feedback" class="w-full p-2 mb-2 bg-zinc-700 rounded text-white" placeholder="Feedback">
-                    <button onclick="submitNewQuestion()" class="w-full py-2 bg-green-600 hover:bg-green-500 rounded font-bold">Agregar Pregunta</button>
+                    <input id="new-feedback" class="w-full p-3 mb-3 bg-zinc-900 border border-zinc-600 rounded text-white placeholder-zinc-500" placeholder="Feedback / explicación">
+                    <button onclick="submitNewQuestion()" class="w-full py-3 bg-green-700 hover:bg-green-600 rounded-lg font-bold uppercase text-white shadow-lg shadow-green-900/30">Agregar Pregunta al Banco</button>
                 </div>
             `;
         }
 
         async function submitNewQuestion() {
-            const q = document.getElementById('new-q').value;
-            const a = [
-                document.getElementById('new-a0').value,
-                document.getElementById('new-a1').value,
-                document.getElementById('new-a2').value,
-                document.getElementById('new-a3').value
-            ];
+            const q = document.getElementById('new-q').value.trim();
+            const a0 = document.getElementById('new-a0').value.trim();
+            const a1 = document.getElementById('new-a1').value.trim();
+            const a2 = document.getElementById('new-a2').value.trim();
+            const a3 = document.getElementById('new-a3').value.trim();
             const correct = parseInt(document.getElementById('new-correct').value);
-            const feedback = document.getElementById('new-feedback').value;
+            const feedback = document.getElementById('new-feedback').value.trim();
 
-            if (q && a.every(opt => opt) && !isNaN(correct) && feedback) {
-                await db.collection('questions').add({ q, a, correct, feedback });
-                alert('Pregunta agregada exitosamente!');
-            } else {
-                alert('Completa todos los campos!');
+            if (!q || !a0 || !a1 || !a2 || !a3 || isNaN(correct) || !feedback) {
+                alert('Por favor completa TODOS los campos.');
+                return;
+            }
+
+            try {
+                await db.collection('questions').add({
+                    q: q,
+                    a: [a0, a1, a2, a3],
+                    correct: correct,
+                    feedback: feedback
+                });
+                alert('¡Pregunta agregada exitosamente! Ahora hay ' + (questions.length + 1) + ' preguntas en total.\nRecarga la página para ver la nueva pregunta en el examen.');
+            } catch (error) {
+                alert('Error al guardar: ' + error.message);
             }
         }
 
         async function saveAchievement(atts) {
             const userRef = db.collection('mechanics').doc(userName.toLowerCase());
             const doc = await userRef.get();
-            let currentMin = doc.data().min_attempts;
+            let currentMin = doc.data()?.min_attempts;
             if (currentMin === null || atts < currentMin) {
                 await userRef.update({ min_attempts: atts });
+                await loadLeaderboard();
             }
-            await loadLeaderboard();
         }
 
         function updateSkulls() {
@@ -792,7 +747,7 @@
             loadQuestion();
         }
 
-        // Init
+        // Iniciar la aplicación
         initApp();
     </script>
 </body>
